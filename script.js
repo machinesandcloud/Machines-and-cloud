@@ -661,104 +661,110 @@
   // Trusted Advisor - Strategic insights and real expertise
   const contextualPrompts = {
     hero: {
-      greeting: "Advisor insight",
+      greeting: "Welcome",
       messages: [
-        "Most enterprise AI fails at the 'last mile' — connecting to real systems. That's exactly what we solve.",
-        "The difference between a demo and production? Governance, audit trails, and human-in-loop controls.",
-        "In my experience, the best AI ROI comes from high-volume, rule-based workflows like KYC, claims, or ticket triage."
+        "If you're scanning for fit, focus on how workflows connect to real systems and approvals.",
+        "The jump from pilot to production usually hinges on governance, audit trails, and human review.",
+        "A good starting point is a single high-volume workflow with clear owners and measurable outcomes."
       ],
       followUps: [
-        { delay: 8000, message: "Pro tip: Start with one workflow that has clear KPIs. Prove value before scaling horizontally." },
-        { delay: 15000, message: "Common mistake I see: teams try to automate 'everything' instead of nailing one use case first." }
+        { delay: 8000, message: "If this feels like a lot, that's normal. We can walk one workflow end-to-end and make it concrete." },
+        { delay: 15000, message: "It's okay to start narrow. Depth on one workflow builds confidence for the next." }
       ],
       insights: {
-        returning: "Welcome back. Last time you were exploring industries — want to continue there?",
-        fastScroller: "Quick executive summary: Production AI in 4-6 weeks, full governance, 67% avg time savings.",
-        slowReader: "Good instinct to read carefully. The details here explain why 70% of AI pilots fail — and how we avoid that."
+        returning: "Welcome back. Want to continue with industries or jump to the workflow library?",
+        fastScroller: "Quick overview: scoped workflow, clear controls, measured targets.",
+        slowReader: "You're reading carefully. This page is meant to make the production path feel understandable."
       },
-      status: "Strategic analysis",
+      status: "Overview",
       actions: [
         { label: "See ROI data", target: "stats", icon: "📊" },
         { label: "How it works", target: "solution", icon: "⚡" }
       ]
     },
     problem: {
-      greeting: "Root cause",
+      greeting: "Common blockers",
       messages: [
-        "The real blocker isn't the AI model — it's integration. CRM APIs, ITSM webhooks, approval workflows. That's the work.",
-        "I've seen enterprises spend 18 months on AI 'strategy' while competitors ship in 6 weeks. Speed matters.",
-        "Security teams kill 40% of AI projects. Build governance in from day one, not as an afterthought."
+        "Most friction comes from integration, approvals, and clarity on ownership — not the model itself.",
+        "It's common to feel stuck between a pilot and production. That gap is mostly governance and operational readiness.",
+        "Security and risk teams need evidence, not promises. This section highlights the typical blockers."
       ],
       followUps: [
-        { delay: 6000, message: "Key insight: The 70% failure rate isn't about technology. It's about missing production requirements like audit trails." },
-        { delay: 12000, message: "What separates successful deployments? Defined KPIs before building, not 'we'll figure out success later'." }
+        { delay: 6000, message: "If a workflow feels risky, that's a signal to add approval gates and audit coverage." },
+        { delay: 12000, message: "Clear KPIs upfront reduce anxiety later. It creates a shared definition of success." }
       ],
       insights: {
-        lingering: "This probably resonates because you've experienced it. The good news: it's a solved problem with the right approach.",
-        fastScroller: "Bottom line: AI projects fail because they're treated as experiments, not production software."
+        lingering: "If this feels familiar, you're not alone. The good news is there are reliable ways to address it.",
+        fastScroller: "Summary: production readiness is governance + ownership + evidence."
       },
-      status: "Diagnosing challenges",
+      status: "Context",
       actions: [
         { label: "See the solution", target: "solution", icon: "→" },
-        { label: "Real results", target: "testimonials", icon: "✓" }
+        { label: "Proof artifacts", target: "testimonials", icon: "✓" }
       ]
     },
     solution: {
-      greeting: "Architecture deep-dive",
+      greeting: "Architecture walkthrough",
       messages: [
-        "The orchestration layer is critical — it handles retries, state management, and failure recovery. Most DIY solutions skip this.",
-        "The Controls layer includes OWASP LLM Top 10 mitigations. This is what gets security sign-off.",
-        "Knowledge layer with RAG isn't just 'connect a vector DB' — it's citation tracking, freshness detection, and confidence scoring."
+        "The orchestration layer is the safety net: retries, state, and controlled fallbacks.",
+        "The controls layer is where trust is built — approvals, audit logs, and policy checks.",
+        "Knowledge retrieval is only useful when citations and freshness are visible."
       ],
       followUps: [
-        { delay: 7000, message: "The tools layer is where 60% of implementation time goes. Salesforce, ServiceNow, SAP integrations require careful API work." },
-        { delay: 14000, message: "Most teams underestimate evaluation harnesses. Without them, you can't prove the agent is actually improving." }
+        { delay: 7000, message: "If integrations feel intimidating, that's normal. The tools layer is where most of the real work lives." },
+        { delay: 14000, message: "Evaluation harnesses keep you honest. They make performance measurable, not subjective." }
       ],
       insights: {
-        technical: "You're studying the architecture carefully. Want to dive into a specific layer? The Controls layer is usually what CTOs ask about most.",
-        quickScan: "Key architectural principle: Every AI action is logged, every decision is explainable, every change is versioned."
+        technical: "Want to go deeper? The controls layer is usually where security teams focus.",
+        quickScan: "Summary: logged actions, explicit approvals, explainable decisions."
       },
-      status: "Technical analysis",
+      status: "Technical overview",
       actions: [
         { label: "See our process", target: "process", icon: "📋" },
-        { label: "Industry examples", target: "industries", icon: "🏢" }
+        { label: "Industry patterns", target: "industries", icon: "🏢" }
       ]
     },
     stats: {
-      greeting: "Market intelligence",
+      greeting: "Metrics context",
       messages: [
-        "The 67% cycle time reduction is the median across our deployments. KYC cases went from 45min to 15min average.",
-        "AI spending in financial services is $8B/year and growing 35% annually. Early movers are building competitive moats.",
-        "The 70% pilot failure rate comes from Gartner research. Our approach addresses the top 3 failure modes directly."
+        "This section frames the PoV target metrics we use to define acceptance gates.",
+        "We anchor on one workflow and one KPI so the value is measurable from week one.",
+        "Targets are set against your current baseline and validated with a reproducible test set.",
+        "Audit coverage, approval gates, and evaluation results are treated as first-class deliverables.",
+        "If the targets don’t hold under real data access, we pause and re-scope before production."
       ],
       followUps: [
-        { delay: 6000, message: "Real example: A claims processing agent we deployed handles 1,200 intakes daily with 98.2% accuracy. Human reviewers focus only on edge cases." },
-        { delay: 12000, message: "ROI calculation tip: Don't just count time saved. Count error reduction, compliance risk mitigation, and employee satisfaction." }
+        { delay: 6000, message: "Helpful framing: KPI target + evidence artifact + owner = production readiness." },
+        { delay: 12000, message: "We document what is measured, how it is measured, and who signs off." },
+        { delay: 18000, message: "Cost envelopes matter. We track usage and set caps during the PoV." }
       ],
       insights: {
-        analytical: "The numbers that matter most: time-to-production (4-6 weeks), accuracy (98%+), and audit coverage (100%).",
-        quickScan: "Executive summary: 3-5x first-year ROI is typical. Break-even usually happens in month 2-3."
+        analytical: "Focus on time-to-production, audit coverage, and KPI lift with documented baselines.",
+        quickScan: "Summary: scoped PoV, measurable targets, and evidence artifacts."
       },
-      status: "Market analysis",
+      status: "Metrics",
       actions: [
         { label: "Calculate your ROI", target: "roi", icon: "💰" },
         { label: "Case studies", href: "case-studies.html", icon: "📁" }
       ]
     },
     services: {
-      greeting: "Engagement strategy",
+      greeting: "Engagement overview",
       messages: [
-        "My recommendation: Start with an Opportunity Sprint to validate your use case. $15-25K investment, 7-10 days, clear go/no-go.",
-        "Proof of Value is a working agent on real data. Not a demo — actual production-ready code with governance.",
-        "Enterprise License makes sense when you have 3+ workflows ready to automate and need ongoing optimization."
+        "Start with an Opportunity Sprint to validate scope, data access, and KPI ownership.",
+        "Proof of Value delivers a working workflow with approvals, audit trails, and evaluation harnesses.",
+        "Production Launch is gated: security review, rollback plan, and acceptance criteria sign-off.",
+        "Operate & Expand focuses on drift detection, regression testing, and incremental workflow rollout.",
+        "Each phase has explicit entry and exit gates so risk stays controlled."
       ],
       followUps: [
-        { delay: 7000, message: "Pattern I see: Companies that start with PoV and prove value get executive buy-in for full rollout much faster." },
-        { delay: 14000, message: "Budget tip: The PoV cost is often recouped in the first month of production through time savings alone." }
+        { delay: 7000, message: "If you already have a workflow in mind, it helps to note the owner and current KPI." },
+        { delay: 14000, message: "Keeping scope narrow is a kindness to your team — it makes success visible." },
+        { delay: 20000, message: "Governance artifacts arrive with the workflow, so security can review early." }
       ],
       insights: {
-        comparing: "For most mid-market companies, Proof of Value is the sweet spot. It's enough to prove ROI without massive upfront investment.",
-        decisive: "If you already have a specific workflow in mind, we can scope a PoV in the discovery call."
+        comparing: "PoV is the sweet spot for most teams: enough evidence to proceed, limited risk.",
+        decisive: "Bring one workflow and one KPI. We’ll map it to gates and deliverables."
       },
       status: "Engagement planning",
       actions: [
@@ -767,82 +773,93 @@
       ]
     },
     testimonials: {
-      greeting: "Real outcomes",
+      greeting: "Evidence review",
       messages: [
-        "The 67% faster case research? That's KYC analysts at a regional bank. They went from 45 minutes per case to 15 minutes.",
-        "Insurance claims automation at 40% isn't cherry-picked — it's their steady-state after 3 months of optimization.",
-        "The 4-hour to 1-hour email response time? That's a logistics company handling 500+ daily messages."
+        "This section highlights the artifacts you can review before production.",
+        "We provide audit trail artifacts, approval gate maps, and evaluation harness outputs.",
+        "Risk controls are mapped to OWASP LLM Top 10 and NIST AI RMF.",
+        "Every workflow includes an acceptance checklist tied to KPIs.",
+        "If you're curious, you can request the evidence pack for deeper review."
       ],
       followUps: [
-        { delay: 6000, message: "What these results have in common: clear baseline metrics before we started, so the improvement is measurable." },
-        { delay: 12000, message: "Notice these aren't 'AI accuracy' metrics. They're business outcomes: time saved, cases handled, response times." }
+        { delay: 6000, message: "Baseline measurement happens before build; targets are documented and owned." },
+        { delay: 12000, message: "Artifacts include data access maps, cost envelopes, and rollback steps." },
+        { delay: 18000, message: "If a risk control isn’t in place, it’s called out explicitly." }
       ],
       insights: {
-        skeptical: "Fair to be skeptical. Every result here is documented with before/after data. We can share full case studies on a call.",
-        interested: "If any of these industries match yours, the patterns are highly transferable. The Claims example applies to any document-heavy intake."
+        skeptical: "Skepticism is healthy. Evidence beats claims.",
+        interested: "If your workflow is similar, we can adapt the blueprint quickly."
       },
-      status: "Outcome analysis",
+      status: "Evidence",
       actions: [
-        { label: "Full case studies", href: "case-studies.html", icon: "📁" },
+        { label: "Workflow library", href: "case-studies.html", icon: "📁" },
         { label: "Calculate your impact", target: "roi", icon: "💰" }
       ]
     },
     process: {
-      greeting: "Methodology insight",
+      greeting: "Process map",
       messages: [
-        "Stage gates prevent 'cool demo' trap. Each phase has explicit acceptance criteria signed by business owners.",
-        "The Opportunity Sprint includes a risk assessment: data access, security constraints, integration complexity. No surprises later.",
-        "We document rollback plans before launch. Production AI needs the same operational rigor as any critical system."
+        "Stage gates prevent the cool pilot trap. Each phase has explicit acceptance criteria.",
+        "The Opportunity Sprint includes risk assessment: data access, security constraints, integration complexity.",
+        "We document rollback plans before launch. Production AI needs operational rigor.",
+        "PoV success is defined before build, not after.",
+        "Operate & Expand is where drift detection and regression testing live."
       ],
       followUps: [
-        { delay: 7000, message: "Key principle: We don't move to build until success metrics are agreed. 'Make it better' isn't a KPI." },
-        { delay: 14000, message: "The operate phase is where real value compounds. Drift detection, continuous evaluation, and systematic expansion." }
+        { delay: 7000, message: "We don’t move forward without signed acceptance criteria." },
+        { delay: 14000, message: "Ownership is explicit: who approves, who monitors, who maintains." },
+        { delay: 20000, message: "Every gate produces a tangible artifact you can review." }
       ],
       insights: {
-        methodical: "The gate system exists because I've seen too many projects fail after 'successful' demos. Business sign-off at each stage prevents that.",
+        methodical: "The gate system keeps the work calm and predictable. It prevents the confusion that follows a successful pilot with no handoff plan.",
         scanning: "Quick version: Qualify → Sprint (define KPIs) → PoV (prove value) → Launch (production) → Operate (optimize). Clear gates."
       },
-      status: "Process analysis",
+      status: "Process",
       actions: [
         { label: "Industry applications", target: "industries", icon: "🏢" },
         { label: "Schedule a call", href: "contact.html", icon: "📞" }
       ]
     },
     industries: {
-      greeting: "Vertical expertise",
+      greeting: "Industry mapping",
       messages: [
-        "Financial Services: KYC research agents save 67% time. The ROI case is strongest here because compliance costs are so high.",
-        "Insurance: Claims intake automation hits 40% because documents follow predictable patterns. Extraction + routing + escalation.",
-        "SaaS/IT: Helpdesk automation deflects 35% of tickets. Password resets, access requests, known-issue resolution."
+        "We focus on workflows with high volume, clear KPIs, and strong audit needs.",
+        "Financial services often prioritize KYC/AML research and compliance lookup.",
+        "Insurance teams look for claims intake triage and document extraction.",
+        "SaaS/IT teams target helpdesk automation and ticket routing.",
+        "Retail and B2B focus on service queues, exceptions, and document routing."
       ],
       followUps: [
-        { delay: 6000, message: "Each industry has 2-3 'slam dunk' use cases. These are high-volume, rule-based workflows with clear success metrics." },
-        { delay: 12000, message: "Manufacturing and B2B have lower deployment counts but often faster ROI because their workflows are more standardized." }
+        { delay: 6000, message: "Choose one workflow where approval boundaries are obvious and data access is clean." },
+        { delay: 12000, message: "We can translate a workflow from one industry to another if the structure is similar." }
       ],
       insights: {
         exploring: "If your industry isn't listed, the patterns often transfer. Document processing, triage, and research workflows exist everywhere.",
-        focused: "Click into any industry page for specific use cases, architecture patterns, and case study details."
+        focused: "Click into any industry page for specific use cases, architecture patterns, and workflow details."
       },
-      status: "Industry mapping",
+      status: "Industry map",
       actions: [
         { label: "Industry deep-dives", href: "industries.html", icon: "→" },
         { label: "Calculate ROI", target: "roi", icon: "💰" }
       ]
     },
     roi: {
-      greeting: "Value calculation",
+      greeting: "Value framing",
       messages: [
-        "Conservative estimate: 25-40% time savings on targeted workflows. Most clients see 3-5x first-year ROI.",
-        "Hidden ROI: compliance risk reduction, employee satisfaction (less tedious work), and faster customer response.",
-        "Break-even typically happens month 2-3 post-launch. After that, savings compound monthly."
+        "We model ROI as a hypothesis tied to baseline metrics and target improvements.",
+        "Primary drivers: volume, time per case, error rate, and approval latency.",
+        "Cost envelopes and token usage are tracked from day one.",
+        "You’ll get a model with assumptions called out explicitly.",
+        "The goal is clarity, not promises."
       ],
       followUps: [
-        { delay: 8000, message: "Pro tip: Calculate fully-loaded employee cost, not just salary. Benefits, overhead, and opportunity cost matter." },
-        { delay: 15000, message: "The biggest ROI drivers: case volume, current process time, and error rate. Higher volume = faster payback." }
+        { delay: 8000, message: "Use fully-loaded cost, not just salary. It keeps the model honest." },
+        { delay: 15000, message: "Higher volume workflows usually show impact faster." },
+        { delay: 21000, message: "We can stress-test the model with conservative assumptions." }
       ],
       insights: {
-        calculating: "Most underestimate volume. A 30-minute process done 100x/day = 50 hours/week. Automating 60% saves 30 hours.",
-        ready: "Ready to run real numbers? Book a discovery call and we'll build a custom ROI model with your actual data."
+        calculating: "A 30-minute process done 100x/day = 50 hours/week. Small gains compound quickly.",
+        ready: "Want a custom model? Book a discovery call and we’ll use your real numbers."
       },
       status: "Value analysis",
       actions: [
@@ -851,42 +868,46 @@
       ]
     },
     faq: {
-      greeting: "Common concerns",
+      greeting: "Common questions",
       messages: [
-        "Timeline question? Opportunity Sprint is 7-10 days. PoV is 4-6 weeks. Production launch is 8-12 weeks.",
-        "Security concern? Every engagement includes OWASP LLM Top 10 mitigations, NIST AI RMF alignment, and full audit trails.",
-        "Integration worry? We've built connectors for Salesforce, ServiceNow, SAP, Jira, and 20+ other enterprise systems."
+        "Timeline: Sprint 7–10 days, PoV 4–6 weeks, Launch 8–12 weeks.",
+        "Security: OWASP LLM Top 10 checklist, NIST AI RMF mapping, and full audit trails.",
+        "Integrations: We support common enterprise systems and document permissions upfront.",
+        "Governance: Approval gates, rollback plans, and ownership are defined before launch."
       ],
       followUps: [
-        { delay: 8000, message: "The question I get most: 'What if the AI makes mistakes?' Answer: Human-in-loop gates and confidence thresholds." },
-        { delay: 15000, message: "Second most common: 'What about hallucinations?' Answer: Grounded responses with citation tracking and evaluation harnesses." }
+        { delay: 8000, message: "Most common: 'What if the AI makes mistakes?' Answer: human gates + confidence thresholds." },
+        { delay: 15000, message: "Second: 'What about hallucinations?' Answer: citations + evaluations + tool constraints." },
+        { delay: 21000, message: "We can align documentation to your procurement and security questionnaires." }
       ],
       insights: {
-        reading: "If your question isn't here, it's probably addressed in the discovery call. Most concerns are highly solvable.",
-        scanning: "Quick answers: Yes GDPR compliant, yes works with your cloud, no long-term lock-in, yes you own the code."
+        reading: "If your question isn't here, we’ll cover it in discovery.",
+        scanning: "Quick answers: cloud-agnostic, no lock-in, you own the code."
       },
-      status: "Q&A ready",
+      status: "Q&A",
       actions: [
         { label: "Talk to a human", href: "contact.html", icon: "📞" },
         { label: "Back to top", target: "hero", icon: "↑" }
       ]
     },
     cta: {
-      greeting: "Next step",
+      greeting: "Next steps",
       messages: [
-        "Discovery calls are 30 minutes, no pitch. We assess fit, discuss your workflow, and give you a preliminary ROI estimate.",
-        "What we cover: your target workflow, current pain points, data access, integration requirements, and timeline.",
-        "Even if we're not the right fit, you'll leave with a clearer AI automation strategy for your team."
+        "Discovery calls are 30 minutes, no pitch. We assess fit and scope one workflow.",
+        "We cover: target workflow, KPIs, data access, approval boundaries, and timeline.",
+        "You’ll leave with a clear PoV scope and an evidence plan.",
+        "If we’re not the right fit, we’ll say so quickly."
       ],
       followUps: [
         { delay: 5000, message: "Preparation tip: Come with a specific workflow in mind. 'Automate everything' is too broad; 'automate claims intake' is actionable." },
-        { delay: 10000, message: "We typically book 2-3 weeks out. If you have an urgent timeline, mention it in the booking notes." }
+        { delay: 10000, message: "We typically book 2-3 weeks out. If you have an urgent timeline, mention it in the booking notes." },
+        { delay: 16000, message: "If you already have baseline metrics, bring them to speed up scoping." }
       ],
       insights: {
         ready: "Based on your exploration, you're well-informed. A conversation is the logical next step to see if there's fit.",
-        hesitant: "Not ready for a call? The case studies and industry pages have more detail to help you evaluate."
+        hesitant: "Not ready for a call? The workflow library and industry pages have more detail to help you evaluate."
       },
-      status: "Ready to connect",
+      status: "Next steps",
       actions: [
         { label: "Book discovery call", href: "contact.html", icon: "📞" },
         { label: "More case studies", href: "case-studies.html", icon: "📁" }
