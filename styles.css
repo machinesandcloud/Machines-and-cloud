@@ -34,6 +34,23 @@ a {
   text-decoration: none;
 }
 
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.button-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(10, 15, 29, 0.16);
+}
+
 button {
   font-family: inherit;
   border: 1px solid var(--border);
@@ -61,6 +78,20 @@ button.primary:hover {
 }
 
 button.ghost {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.primary {
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+}
+
+.primary:hover {
+  background: var(--accent-dark);
+}
+
+.ghost {
   background: rgba(255, 255, 255, 0.8);
 }
 
@@ -301,6 +332,33 @@ section {
   padding: 24px;
 }
 
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.case-grid article {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 18px 40px rgba(10, 15, 29, 0.1);
+}
+
+.case-metrics {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.case-actions {
+  margin-top: 20px;
+}
+
 .section-title {
   max-width: 720px;
 }
@@ -524,6 +582,100 @@ section {
   font-weight: 600;
 }
 
+.finder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.finder-steps {
+  display: grid;
+  gap: 20px;
+}
+
+.finder-step {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.option-group {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.option {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(10, 15, 29, 0.15);
+  padding: 12px 16px;
+  border-radius: 16px;
+  text-align: left;
+}
+
+.option.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 10px 24px rgba(255, 107, 53, 0.2);
+}
+
+.finder-result {
+  background: rgba(10, 15, 29, 0.92);
+  color: #f9f4ec;
+  border-radius: 24px;
+  padding: 26px;
+}
+
+.finder-result p,
+.finder-result li {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.finder-result ul {
+  padding-left: 18px;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.controls-grid article {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.controls-grid span {
+  display: inline-flex;
+  margin-top: 12px;
+  font-weight: 600;
+  color: var(--accent-dark);
+}
+
+.system-map .map-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.map-node {
+  background: rgba(10, 15, 29, 0.88);
+  color: #f9f4ec;
+  border-radius: 22px;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.map-node p {
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .signals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -640,6 +792,43 @@ section {
   margin: 0;
 }
 
+.proof-band {
+  display: grid;
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.proof-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.proof-logos span {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 15, 29, 0.15);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.proof-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.proof-metrics .stat {
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.proof-metrics .label {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
 @media (max-width: 1100px) {
   .hero {
     grid-template-columns: 1fr;
@@ -683,6 +872,26 @@ section {
 
   .governance-process .timeline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .proof-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .case-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .controls-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .system-map .map-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finder-grid {
+    grid-template-columns: 1fr;
   }
 
   .cta {
@@ -731,7 +940,12 @@ section {
   .trust-bar,
   .summary-grid,
   .contact-grid,
-  .governance-process .timeline {
+  .governance-process .timeline,
+  .proof-metrics,
+  .case-grid,
+  .controls-grid,
+  .system-map .map-grid,
+  .finder-grid {
     grid-template-columns: 1fr;
   }
 
