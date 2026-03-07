@@ -516,590 +516,6 @@
     document.body.classList.add('agent-mode');
 
     // ============================================
-    // AGENT STATUS BAR
-    // ============================================
-    const statusBarHTML = `
-      <div class="agent-status-bar" id="agentStatusBar">
-        <div class="agent-status-left">
-          <div class="agent-status-indicator">
-            <span class="agent-status-dot"></span>
-            <span>AGENT ONLINE</span>
-          </div>
-          <div class="agent-status-task">
-            <span class="task-label">CURRENT:</span>
-            <span id="agentCurrentTask">Analyzing visitor intent...</span>
-          </div>
-        </div>
-        <div class="agent-status-right">
-          <div class="agent-metric">
-            <span>LATENCY:</span>
-            <span class="agent-metric-value" id="agentLatency">42ms</span>
-          </div>
-          <div class="agent-metric">
-            <span>CONTEXT:</span>
-            <span class="agent-metric-value" id="agentContext">Homepage</span>
-          </div>
-          <div class="agent-metric">
-            <span>SCROLL:</span>
-            <span class="agent-metric-value" id="agentScroll">0%</span>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('afterbegin', statusBarHTML);
-
-    // Update scroll percentage
-    const agentScrollEl = document.getElementById('agentScroll');
-    const agentContextEl = document.getElementById('agentContext');
-    const agentTaskEl = document.getElementById('agentCurrentTask');
-
-    // ============================================
-    // AGENT COMMENTARY SIDEBAR
-    // ============================================
-    const commentaryHTML = `
-      <div class="agent-commentary" id="agentCommentary">
-        <div class="agent-thought" id="agentThought">
-          <div class="agent-thought-header">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-            </svg>
-            Agent Insight
-          </div>
-          <div class="agent-thought-content" id="agentThoughtText">
-            <span class="agent-thought-typing"><span></span><span></span><span></span></span>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', commentaryHTML);
-
-    const agentThought = document.getElementById('agentThought');
-    const agentThoughtText = document.getElementById('agentThoughtText');
-
-    // Agent thoughts for different sections
-    const sectionThoughts = {
-      'hero': 'Visitor landed. Presenting core value proposition: production AI agents with governance.',
-      'problem': 'Highlighting pain points. 70% of AI pilots fail - this resonates with enterprise buyers.',
-      'solution': 'Showing our differentiation: engineering discipline, not just experimentation.',
-      'stats': 'Displaying market data. $588B market validates the opportunity.',
-      'services': 'Presenting service packages. Clear pricing reduces friction.',
-      'testimonials': 'Social proof activated. Real metrics build trust.',
-      'process': 'Explaining methodology. Stage gates prevent scope creep.',
-      'industries': 'Targeting high-value verticals with measurable outcomes.',
-      'cta': 'Conversion opportunity detected. Ready to capture lead.',
-      'faq': 'Addressing objections. Removing barriers to engagement.'
-    };
-
-    // ============================================
-    // SCROLL PROGRESS TRACKER
-    // ============================================
-    const scrollProgressHTML = `
-      <div class="agent-scroll-progress" id="agentScrollProgress">
-        <div class="scroll-section-marker active" data-section="hero">
-          <span class="scroll-marker-dot"></span>
-          <span class="scroll-marker-label">INIT</span>
-        </div>
-        <div class="scroll-connector"></div>
-        <div class="scroll-section-marker" data-section="problem">
-          <span class="scroll-marker-dot"></span>
-          <span class="scroll-marker-label">PROBLEM</span>
-        </div>
-        <div class="scroll-connector"></div>
-        <div class="scroll-section-marker" data-section="solution">
-          <span class="scroll-marker-dot"></span>
-          <span class="scroll-marker-label">SOLUTION</span>
-        </div>
-        <div class="scroll-connector"></div>
-        <div class="scroll-section-marker" data-section="services">
-          <span class="scroll-marker-dot"></span>
-          <span class="scroll-marker-label">SERVICES</span>
-        </div>
-        <div class="scroll-connector"></div>
-        <div class="scroll-section-marker" data-section="proof">
-          <span class="scroll-marker-dot"></span>
-          <span class="scroll-marker-label">PROOF</span>
-        </div>
-        <div class="scroll-connector"></div>
-        <div class="scroll-section-marker" data-section="convert">
-          <span class="scroll-marker-dot"></span>
-          <span class="scroll-marker-label">CONVERT</span>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', scrollProgressHTML);
-
-    // ============================================
-    // DATA STREAM EFFECT
-    // ============================================
-    const dataStreamHTML = `<div class="data-stream" id="dataStream"></div>`;
-    document.body.insertAdjacentHTML('afterbegin', dataStreamHTML);
-    const dataStream = document.getElementById('dataStream');
-
-    // Create data particles
-    for (let i = 0; i < 15; i++) {
-      const particle = document.createElement('div');
-      particle.className = 'data-particle';
-      particle.style.left = `${Math.random() * 100}%`;
-      particle.style.animationDelay = `${Math.random() * 3}s`;
-      particle.style.animationDuration = `${2 + Math.random() * 2}s`;
-      dataStream.appendChild(particle);
-    }
-
-    // ============================================
-    // SCROLL-BASED AGENT BEHAVIOR
-    // ============================================
-    let lastScrollY = 0;
-    let currentSection = 'hero';
-    let thoughtTimeout;
-
-    const sections = document.querySelectorAll('.section, .hero');
-    const scrollMarkers = document.querySelectorAll('.scroll-section-marker');
-
-    function updateAgentState() {
-      const scrollY = window.scrollY;
-      const scrollPercent = Math.round((scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
-
-      // Update scroll percentage
-      if (agentScrollEl) {
-        agentScrollEl.textContent = `${scrollPercent}%`;
-      }
-
-      // Determine current section
-      let newSection = 'hero';
-      let sectionIndex = 0;
-
-      sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= window.innerHeight * 0.4) {
-          newSection = section.dataset.agentSection || `section-${index}`;
-          sectionIndex = index;
-        }
-      });
-
-      // Update scroll markers
-      scrollMarkers.forEach((marker, index) => {
-        marker.classList.remove('active');
-        if (index < sectionIndex) {
-          marker.classList.add('completed');
-        } else if (index === sectionIndex) {
-          marker.classList.add('active');
-          marker.classList.remove('completed');
-        } else {
-          marker.classList.remove('completed');
-        }
-      });
-
-      // Update agent thought when section changes
-      if (newSection !== currentSection) {
-        currentSection = newSection;
-        updateAgentThought(newSection);
-        updateAgentTask(newSection);
-      }
-
-      // Update context based on scroll direction
-      const scrollDirection = scrollY > lastScrollY ? 'Scrolling down' : scrollY < lastScrollY ? 'Scrolling up' : 'Idle';
-      lastScrollY = scrollY;
-    }
-
-    function updateAgentThought(section) {
-      const thought = sectionThoughts[section] || 'Processing section content...';
-
-      // Show typing first
-      agentThought.classList.add('visible');
-      agentThoughtText.innerHTML = '<span class="agent-thought-typing"><span></span><span></span><span></span></span>';
-
-      // Clear previous timeout
-      clearTimeout(thoughtTimeout);
-
-      // Then show the thought
-      thoughtTimeout = setTimeout(() => {
-        agentThoughtText.textContent = thought;
-      }, 800);
-
-      // Hide after a while
-      setTimeout(() => {
-        agentThought.classList.remove('visible');
-      }, 5000);
-    }
-
-    function updateAgentTask(section) {
-      const tasks = {
-        'hero': 'Presenting value proposition...',
-        'problem': 'Highlighting market pain points...',
-        'solution': 'Demonstrating approach...',
-        'stats': 'Loading market intelligence...',
-        'services': 'Displaying service offerings...',
-        'testimonials': 'Fetching social proof...',
-        'process': 'Explaining methodology...',
-        'industries': 'Analyzing target verticals...',
-        'cta': 'Preparing conversion flow...',
-        'faq': 'Loading FAQ responses...'
-      };
-
-      if (agentTaskEl) {
-        agentTaskEl.textContent = tasks[section] || 'Analyzing content...';
-      }
-
-      if (agentContextEl) {
-        const contextMap = {
-          'hero': 'Homepage',
-          'problem': 'Problem',
-          'solution': 'Solution',
-          'stats': 'Market Data',
-          'services': 'Services',
-          'testimonials': 'Results',
-          'process': 'Process',
-          'industries': 'Industries',
-          'cta': 'CTA',
-          'faq': 'FAQ'
-        };
-        agentContextEl.textContent = contextMap[section] || 'Content';
-      }
-    }
-
-    // Add data attributes to sections
-    const sectionMapping = [
-      { selector: '.hero', id: 'hero' },
-      { selector: '.section:nth-of-type(1)', id: 'problem' },
-      { selector: '.section.bg-dark:nth-of-type(1)', id: 'solution' },
-      { selector: '.stats-grid', id: 'stats', parent: true },
-      { selector: '.section:has(.grid-4)', id: 'services' },
-      { selector: '.testimonials-section', id: 'testimonials' },
-      { selector: '.process-list', id: 'process', parent: true },
-      { selector: '.section:has(.grid-3)', id: 'industries' },
-      { selector: '.cta-section', id: 'cta' },
-      { selector: '.faq-list', id: 'faq', parent: true }
-    ];
-
-    sectionMapping.forEach(({ selector, id, parent }) => {
-      const el = document.querySelector(selector);
-      if (el) {
-        const target = parent ? el.closest('.section') : el;
-        if (target) {
-          target.dataset.agentSection = id;
-        }
-      }
-    });
-
-    // Throttled scroll handler
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          updateAgentState();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
-
-    // Initial update
-    updateAgentState();
-
-    // Simulate latency updates
-    setInterval(() => {
-      const latency = 30 + Math.floor(Math.random() * 30);
-      if (document.getElementById('agentLatency')) {
-        document.getElementById('agentLatency').textContent = `${latency}ms`;
-      }
-    }, 2000);
-
-    // ============================================
-    // AI AGENT CHAT WIDGET
-    // ============================================
-    const aiWidgetHTML = `
-      <div class="ai-agent-widget" id="aiAgentWidget">
-        <div class="ai-agent-bubble" id="aiAgentBubble">
-          <span class="ai-agent-pulse"></span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-            <path d="M9 14v2"/>
-            <path d="M15 14v2"/>
-          </svg>
-          <span class="ai-agent-status"></span>
-        </div>
-        <div class="ai-agent-panel" id="aiAgentPanel">
-          <div class="ai-panel-header">
-            <div class="ai-panel-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-                <path d="M9 14v2"/>
-                <path d="M15 14v2"/>
-              </svg>
-            </div>
-            <div class="ai-panel-info">
-              <div class="ai-panel-name">
-                M&C Agent
-                <span class="live-dot"></span>
-              </div>
-              <div class="ai-panel-status-text">Ready to assist</div>
-            </div>
-            <button class="ai-panel-close" id="aiPanelClose">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-          <div class="ai-panel-messages" id="aiMessages">
-            <div class="ai-message">
-              <div class="ai-message-avatar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-                  <path d="M9 14v2"/>
-                  <path d="M15 14v2"/>
-                </svg>
-              </div>
-              <div class="ai-message-content">
-                <p class="ai-message-text">Hi! I'm a demo of what an agentic AI can do. Try asking me to automate a workflow!</p>
-              </div>
-            </div>
-          </div>
-          <div class="ai-panel-input">
-            <input type="text" class="ai-input-field" id="aiInput" placeholder="Ask about AI automation...">
-            <button class="ai-send-btn" id="aiSendBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Insert AI widget
-    document.body.insertAdjacentHTML('beforeend', aiWidgetHTML);
-
-    const aiWidget = document.getElementById('aiAgentWidget');
-    const aiBubble = document.getElementById('aiAgentBubble');
-    const aiPanel = document.getElementById('aiAgentPanel');
-    const aiClose = document.getElementById('aiPanelClose');
-    const aiInput = document.getElementById('aiInput');
-    const aiSendBtn = document.getElementById('aiSendBtn');
-    const aiMessages = document.getElementById('aiMessages');
-
-    // Toggle panel
-    aiBubble.addEventListener('click', () => {
-      aiWidget.classList.toggle('active');
-      if (aiWidget.classList.contains('active')) {
-        aiInput.focus();
-      }
-    });
-
-    aiClose.addEventListener('click', () => {
-      aiWidget.classList.remove('active');
-    });
-
-    // Agent responses simulation
-    const agentResponses = [
-      {
-        trigger: ['claims', 'insurance', 'intake'],
-        response: "I can automate claims intake! Here's what I'd do:",
-        action: {
-          title: "Claims Processing Workflow",
-          detail: "Extract data → Validate coverage → Check fraud signals → Route to adjuster"
-        }
-      },
-      {
-        trigger: ['email', 'triage', 'inbox'],
-        response: "Email triage is a great use case. Let me show you:",
-        action: {
-          title: "Email Automation",
-          detail: "Classify intent → Extract key info → Draft response → Queue for review"
-        }
-      },
-      {
-        trigger: ['kyc', 'compliance', 'onboarding'],
-        response: "KYC automation can save hours per case:",
-        action: {
-          title: "KYC Research Agent",
-          detail: "Gather docs → Cross-reference databases → Flag discrepancies → Generate report"
-        }
-      },
-      {
-        trigger: ['ticket', 'support', 'helpdesk'],
-        response: "IT ticket resolution is perfect for agents:",
-        action: {
-          title: "Helpdesk Agent",
-          detail: "Parse request → Check KB → Execute fix → Verify resolution → Close ticket"
-        }
-      }
-    ];
-
-    const defaultResponse = {
-      response: "That's an interesting workflow! We typically see 40-67% efficiency gains. Book a call to discuss your specific use case.",
-      action: null
-    };
-
-    function sendMessage() {
-      const message = aiInput.value.trim();
-      if (!message) return;
-
-      // Add user message
-      const userMsgHTML = `
-        <div class="ai-message" style="flex-direction: row-reverse;">
-          <div class="ai-message-content" style="background: rgba(139, 92, 246, 0.2); border-color: rgba(139, 92, 246, 0.3);">
-            <p class="ai-message-text">${message}</p>
-          </div>
-        </div>
-      `;
-      aiMessages.insertAdjacentHTML('beforeend', userMsgHTML);
-      aiInput.value = '';
-
-      // Show thinking
-      const thinkingHTML = `
-        <div class="ai-message" id="aiThinking">
-          <div class="ai-message-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-              <path d="M9 14v2"/>
-              <path d="M15 14v2"/>
-            </svg>
-          </div>
-          <div class="ai-message-content">
-            <div class="ai-thinking">
-              <span class="ai-thinking-dot"></span>
-              <span class="ai-thinking-dot"></span>
-              <span class="ai-thinking-dot"></span>
-            </div>
-          </div>
-        </div>
-      `;
-      aiMessages.insertAdjacentHTML('beforeend', thinkingHTML);
-      aiMessages.scrollTop = aiMessages.scrollHeight;
-
-      // Find matching response
-      const lowerMsg = message.toLowerCase();
-      let response = defaultResponse;
-      for (const r of agentResponses) {
-        if (r.trigger.some(t => lowerMsg.includes(t))) {
-          response = r;
-          break;
-        }
-      }
-
-      // Simulate agent thinking and respond
-      setTimeout(() => {
-        const thinking = document.getElementById('aiThinking');
-        if (thinking) thinking.remove();
-
-        let actionHTML = '';
-        if (response.action) {
-          actionHTML = `
-            <div class="ai-action">
-              <div class="ai-action-header">
-                <div class="ai-action-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 11 12 14 22 4"/>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                  </svg>
-                </div>
-                <span class="ai-action-title">${response.action.title}</span>
-              </div>
-              <p class="ai-action-detail">${response.action.detail}</p>
-            </div>
-          `;
-        }
-
-        const responseHTML = `
-          <div class="ai-message">
-            <div class="ai-message-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-                <path d="M9 14v2"/>
-                <path d="M15 14v2"/>
-              </svg>
-            </div>
-            <div class="ai-message-content">
-              <p class="ai-message-text">${response.response}</p>
-              ${actionHTML}
-            </div>
-          </div>
-        `;
-        aiMessages.insertAdjacentHTML('beforeend', responseHTML);
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-      }, 1500);
-    }
-
-    aiSendBtn.addEventListener('click', sendMessage);
-    aiInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-
-    // ============================================
-    // AGENT TOAST NOTIFICATION
-    // ============================================
-    function showAgentToast(title, message) {
-      const existingToast = document.querySelector('.agent-toast');
-      if (existingToast) existingToast.remove();
-
-      const toastHTML = `
-        <div class="agent-toast" id="agentToast">
-          <div class="agent-toast-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-              <path d="M9 14v2"/>
-              <path d="M15 14v2"/>
-            </svg>
-          </div>
-          <div class="agent-toast-content">
-            <div class="agent-toast-title">${title}</div>
-            <div class="agent-toast-message">${message}</div>
-          </div>
-          <button class="agent-toast-close">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      `;
-
-      document.body.insertAdjacentHTML('beforeend', toastHTML);
-      const toast = document.getElementById('agentToast');
-
-      setTimeout(() => toast.classList.add('visible'), 100);
-
-      toast.querySelector('.agent-toast-close').addEventListener('click', () => {
-        toast.classList.remove('visible');
-        setTimeout(() => toast.remove(), 400);
-      });
-
-      // Auto-hide after 6 seconds
-      setTimeout(() => {
-        if (toast) {
-          toast.classList.remove('visible');
-          setTimeout(() => toast.remove(), 400);
-        }
-      }, 6000);
-    }
-
-    // Show welcome toast after delay
-    setTimeout(() => {
-      showAgentToast('AI Agent Active', 'Click the agent icon to see a live demo of agentic automation.');
-    }, 3000);
-
-    // ============================================
-    // SCROLL-TRIGGERED AGENT ACTIONS
-    // ============================================
-    const scrollAgentElements = document.querySelectorAll('.card, .stat-card, .process-item');
-
-    const scrollAgentObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('scroll-agent-trigger', 'agent-visible');
-            scrollAgentObserver.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
-    );
-
-    scrollAgentElements.forEach((el, index) => {
-      el.style.transitionDelay = `${index * 0.1}s`;
-      scrollAgentObserver.observe(el);
-    });
-
-    // ============================================
     // ENHANCED TERMINAL INTERACTIVITY
     // ============================================
     const terminalBody = document.querySelector('.terminal-body');
@@ -1197,128 +613,215 @@
   } // End reduced motion check
 
   // ============================================
-  // AI COMPANION
-  // The site feels like an intelligent guide
+  // IMMERSIVE AI COMPANION
+  // Full-page experience with contextual intelligence
   // ============================================
 
   const contextualPrompts = {
     hero: {
+      greeting: "Welcome",
       message: "I help businesses ship AI that actually works. What brings you here today?",
+      status: "Ready to assist",
+      workflow: ["Analyzing", "visitor intent", "..."],
       actions: [
-        { label: "Explore what we build", target: "solution" },
-        { label: "See real results", target: "stats" }
+        { label: "Explore what we build", target: "solution", icon: "→" },
+        { label: "See real results", target: "stats", icon: "📊" }
       ]
     },
     problem: {
-      message: "You're looking at why most AI projects fail. Want to see how we solve this?",
+      greeting: "Understanding your challenge",
+      message: "70% of AI projects stall. Not because the AI doesn't work — but because they lack governance. Let me show you how we solve this.",
+      status: "Analyzing pain points",
+      workflow: ["Identifying", "blockers", "..."],
       actions: [
-        { label: "Show me the solution", target: "solution" },
-        { label: "Skip to results", target: "testimonials" }
+        { label: "Show me the solution", target: "solution", icon: "→" },
+        { label: "Skip to proof", target: "testimonials", icon: "✓" }
       ]
     },
     solution: {
-      message: "This is our engineering approach. Each layer matters. Interested in a specific part?",
+      greeting: "Our approach",
+      message: "Five layers. Each one matters. This is how production AI actually gets built.",
+      status: "Presenting architecture",
+      workflow: ["Loading", "system design", "..."],
       actions: [
-        { label: "How does this work in practice?", target: "process" },
-        { label: "Show me real examples", target: "testimonials" }
+        { label: "See it in action", target: "process", icon: "⚡" },
+        { label: "View examples", target: "testimonials", icon: "📋" }
       ]
     },
     stats: {
-      message: "These numbers come from real deployments. Want to see the case studies behind them?",
+      greeting: "Market intelligence",
+      message: "These aren't projections — they're results from live deployments.",
+      status: "Loading metrics",
+      workflow: ["Fetching", "real data", "..."],
       actions: [
-        { label: "See case studies", href: "case-studies.html" },
-        { label: "Calculate my ROI", target: "roi" }
+        { label: "See case studies", href: "case-studies.html", icon: "📁" },
+        { label: "Calculate ROI", target: "roi", icon: "💰" }
       ]
     },
     services: {
-      message: "Most clients start with Proof of Value — a working agent in 4 weeks. Want details?",
+      greeting: "Engagement options",
+      message: "Most clients start with Proof of Value — a working agent in 4 weeks. Clear scope. Clear outcomes.",
+      status: "Displaying packages",
+      workflow: ["Rendering", "options", "..."],
       actions: [
-        { label: "Tell me more", href: "services.html" },
-        { label: "See the process", target: "process" }
+        { label: "Learn more", href: "services.html", icon: "→" },
+        { label: "See process", target: "process", icon: "📋" }
       ]
     },
     testimonials: {
-      message: "Real results from real deployments. Notice the specific metrics — we measure everything.",
+      greeting: "Social proof",
+      message: "Real results. Specific metrics. Every claim is auditable.",
+      status: "Fetching testimonials",
+      workflow: ["Loading", "case data", "..."],
       actions: [
-        { label: "See full case studies", href: "case-studies.html" },
-        { label: "What could this mean for me?", target: "roi" }
+        { label: "Full case studies", href: "case-studies.html", icon: "📁" },
+        { label: "Calculate impact", target: "roi", icon: "💰" }
       ]
     },
     process: {
-      message: "This is how we work. Structured, predictable, no surprises. Questions about any phase?",
+      greeting: "How we work",
+      message: "Structured. Predictable. No surprises. Each phase has clear gates.",
+      status: "Explaining methodology",
+      workflow: ["Mapping", "workflow", "..."],
       actions: [
-        { label: "What industries?", target: "industries" },
-        { label: "Let's talk", href: "contact.html" }
+        { label: "Which industries?", target: "industries", icon: "🏢" },
+        { label: "Let's talk", href: "contact.html", icon: "📞" }
       ]
     },
     industries: {
-      message: "We go deep in these verticals. The patterns transfer but the details matter.",
+      greeting: "Target verticals",
+      message: "We go deep where the patterns are proven. Finance. Insurance. SaaS. Manufacturing.",
+      status: "Analyzing sectors",
+      workflow: ["Targeting", "verticals", "..."],
       actions: [
-        { label: "See industry examples", href: "industries.html" },
-        { label: "Calculate my savings", target: "roi" }
+        { label: "Industry details", href: "industries.html", icon: "→" },
+        { label: "My savings?", target: "roi", icon: "💰" }
       ]
     },
     roi: {
-      message: "Try the calculator. Most clients see 3-5x ROI in year one.",
+      greeting: "Value calculator",
+      message: "Try the numbers. Most clients see 3-5x ROI in year one.",
+      status: "Calculating potential",
+      workflow: ["Computing", "savings", "..."],
       actions: [
-        { label: "Book a discovery call", href: "contact.html" },
-        { label: "See pricing options", target: "services" }
+        { label: "Book discovery call", href: "contact.html", icon: "📞" },
+        { label: "See pricing", target: "services", icon: "💳" }
       ]
     },
     faq: {
-      message: "Common questions. If yours isn't here, I'm happy to help.",
+      greeting: "Common questions",
+      message: "If yours isn't here, I'm ready to help.",
+      status: "Loading responses",
+      workflow: ["Indexing", "FAQ", "..."],
       actions: [
-        { label: "Talk to our team", href: "contact.html" },
-        { label: "Back to top", target: "hero" }
+        { label: "Talk to us", href: "contact.html", icon: "📞" },
+        { label: "Start over", target: "hero", icon: "↑" }
       ]
     },
     cta: {
-      message: "Ready to explore? A discovery call takes 30 minutes. No pressure, just clarity.",
+      greeting: "Ready?",
+      message: "A discovery call takes 30 minutes. No pitch. Just clarity on your next step.",
+      status: "Conversion ready",
+      workflow: ["Preparing", "call link", "..."],
       actions: [
-        { label: "Book a call", href: "contact.html" },
-        { label: "See case studies first", href: "case-studies.html" }
+        { label: "Book a call", href: "contact.html", icon: "📞" },
+        { label: "Case studies", href: "case-studies.html", icon: "📁" }
       ]
     }
   };
 
-  // Create companion UI
+  // Create immersive companion
   const companion = document.createElement('div');
   companion.className = 'ai-companion';
   companion.innerHTML = `
-    <div class="ai-companion-indicator"></div>
-    <div class="ai-companion-content">
+    <div class="ai-companion-header">
+      <div class="ai-companion-avatar">
+        <div class="avatar-ring"></div>
+        <div class="avatar-core">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ai-companion-meta">
+        <div class="ai-companion-name">M&C Agent</div>
+        <div class="ai-companion-status">
+          <span class="status-dot"></span>
+          <span class="status-text">Ready to assist</span>
+        </div>
+      </div>
+      <button class="ai-companion-minimize" aria-label="Minimize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 15l-6-6-6 6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="ai-companion-body">
+      <div class="ai-companion-workflow">
+        <span class="workflow-step"></span>
+        <span class="workflow-step"></span>
+        <span class="workflow-step"></span>
+      </div>
+      <div class="ai-companion-greeting"></div>
       <div class="ai-companion-message"></div>
       <div class="ai-companion-actions"></div>
     </div>
-    <button class="ai-companion-toggle" aria-label="Toggle AI companion">
-      <span class="toggle-icon">›</span>
-    </button>
+    <div class="ai-companion-collapsed">
+      <div class="collapsed-indicator"></div>
+      <span>AI Guide</span>
+    </div>
   `;
   document.body.appendChild(companion);
 
+  const greetingEl = companion.querySelector('.ai-companion-greeting');
   const messageEl = companion.querySelector('.ai-companion-message');
   const actionsEl = companion.querySelector('.ai-companion-actions');
-  const toggleBtn = companion.querySelector('.ai-companion-toggle');
-  const toggleIcon = companion.querySelector('.toggle-icon');
+  const statusEl = companion.querySelector('.status-text');
+  const workflowSteps = companion.querySelectorAll('.workflow-step');
+  const minimizeBtn = companion.querySelector('.ai-companion-minimize');
+  const collapsedEl = companion.querySelector('.ai-companion-collapsed');
 
-  let isExpanded = true;
+  let isMinimized = false;
   let currentSection = null;
   let isTyping = false;
 
-  // Toggle companion
-  toggleBtn.addEventListener('click', () => {
-    isExpanded = !isExpanded;
-    companion.classList.toggle('collapsed', !isExpanded);
-    toggleIcon.textContent = isExpanded ? '›' : '‹';
+  // Toggle minimize
+  minimizeBtn.addEventListener('click', () => {
+    isMinimized = true;
+    companion.classList.add('minimized');
   });
+
+  collapsedEl.addEventListener('click', () => {
+    isMinimized = false;
+    companion.classList.remove('minimized');
+  });
+
+  // Workflow animation
+  function animateWorkflow(steps) {
+    workflowSteps.forEach((el, i) => {
+      el.textContent = steps[i] || '';
+      el.classList.remove('active');
+    });
+    let step = 0;
+    const interval = setInterval(() => {
+      workflowSteps.forEach(el => el.classList.remove('active'));
+      if (step < workflowSteps.length) {
+        workflowSteps[step].classList.add('active');
+        step++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 300);
+  }
 
   // Typing effect
   function typeMessage(text, callback) {
     if (isTyping) return;
     isTyping = true;
     messageEl.textContent = '';
+    messageEl.classList.add('typing');
     let i = 0;
-    const speed = 20;
+    const speed = 15;
 
     function type() {
       if (i < text.length) {
@@ -1327,6 +830,7 @@
         setTimeout(type, speed);
       } else {
         isTyping = false;
+        messageEl.classList.remove('typing');
         if (callback) callback();
       }
     }
@@ -1337,12 +841,11 @@
   function updateActions(actions) {
     actionsEl.innerHTML = actions.map(action => {
       if (action.href) {
-        return `<a href="${action.href}" class="ai-companion-action">${action.label}</a>`;
+        return `<a href="${action.href}" class="ai-companion-action"><span class="action-icon">${action.icon}</span>${action.label}</a>`;
       }
-      return `<button class="ai-companion-action" data-target="${action.target}">${action.label}</button>`;
+      return `<button class="ai-companion-action" data-target="${action.target}"><span class="action-icon">${action.icon}</span>${action.label}</button>`;
     }).join('');
 
-    // Add click handlers for scroll targets
     actionsEl.querySelectorAll('[data-target]').forEach(btn => {
       btn.addEventListener('click', () => {
         const target = document.querySelector(`[data-agent-section="${btn.dataset.target}"]`);
@@ -1353,7 +856,7 @@
     });
   }
 
-  // Update companion based on visible section
+  // Update companion
   function updateCompanion(sectionName) {
     if (sectionName === currentSection || isTyping) return;
     currentSection = sectionName;
@@ -1361,14 +864,21 @@
     const prompt = contextualPrompts[sectionName];
     if (!prompt) return;
 
-    // Brief pause before new message
-    companion.classList.add('thinking');
+    companion.classList.add('transitioning');
+
+    // Update status
+    statusEl.textContent = prompt.status;
+
+    // Animate workflow
+    animateWorkflow(prompt.workflow);
+
     setTimeout(() => {
-      companion.classList.remove('thinking');
+      companion.classList.remove('transitioning');
+      greetingEl.textContent = prompt.greeting;
       typeMessage(prompt.message, () => {
         updateActions(prompt.actions);
       });
-    }, 400);
+    }, 600);
   }
 
   // Observe sections
@@ -1387,9 +897,62 @@
 
   sections.forEach(section => observer.observe(section));
 
-  // Initialize with first section
-  setTimeout(() => {
-    updateCompanion('hero');
-  }, 500);
+  // Initialize
+  setTimeout(() => updateCompanion('hero'), 800);
+
+  // ============================================
+  // STICKY PROGRESS INDICATOR
+  // ============================================
+  const progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress-bar';
+  progressBar.innerHTML = '<div class="scroll-progress-fill"></div>';
+  document.body.appendChild(progressBar);
+
+  const progressFill = progressBar.querySelector('.scroll-progress-fill');
+
+  window.addEventListener('scroll', () => {
+    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    progressFill.style.width = `${scrollPercent}%`;
+  }, { passive: true });
+
+  // ============================================
+  // SECTION VISUALIZATIONS
+  // Add mini-terminals to key sections
+  // ============================================
+  const sectionVisuals = {
+    stats: `
+      <div class="section-visual stats-visual">
+        <div class="visual-line"><span class="v-prompt">▸</span> Loading market data...</div>
+        <div class="visual-line success"><span class="v-prompt">✓</span> $588B market indexed</div>
+        <div class="visual-line"><span class="v-prompt">▸</span> Calculating growth rate...</div>
+        <div class="visual-line success"><span class="v-prompt">✓</span> 44.8% CAGR confirmed</div>
+      </div>
+    `,
+    testimonials: `
+      <div class="section-visual testimonials-visual">
+        <div class="visual-line"><span class="v-prompt">▸</span> Fetching verified results...</div>
+        <div class="visual-line success"><span class="v-prompt">✓</span> 67% faster processing</div>
+        <div class="visual-line success"><span class="v-prompt">✓</span> 100% audit compliance</div>
+      </div>
+    `,
+    roi: `
+      <div class="section-visual roi-visual">
+        <div class="visual-line"><span class="v-prompt">▸</span> Initializing calculator...</div>
+        <div class="visual-line"><span class="v-prompt">⚡</span> Input your metrics below</div>
+        <div class="visual-line success"><span class="v-prompt">✓</span> Real-time computation ready</div>
+      </div>
+    `
+  };
+
+  // Inject visuals into sections
+  Object.entries(sectionVisuals).forEach(([sectionId, html]) => {
+    const section = document.querySelector(`[data-agent-section="${sectionId}"]`);
+    if (section) {
+      const container = section.querySelector('.container');
+      if (container) {
+        container.insertAdjacentHTML('afterbegin', html);
+      }
+    }
+  });
 
 })();
