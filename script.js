@@ -1147,6 +1147,74 @@
   // Initialize with welcome
   setTimeout(() => updateCompanion('hero'), 1200);
 
+  // Session-aware proactive engagement
+  let sessionCheckInterval;
+  let lastProactiveTime = Date.now();
+
+  // Proactive session messages
+  const sessionMessages = [
+    { time: 60000, message: "You've been exploring for a minute. Found what you're looking for? Let me know if I can help navigate." },
+    { time: 180000, message: "Three minutes in — you're clearly interested. The case studies page has the deepest details if you want to go further." },
+    { time: 300000, message: "Still here? That's a good sign. Ready to have a conversation? The discovery call is where things get real." }
+  ];
+
+  // Check session engagement periodically
+  sessionCheckInterval = setInterval(() => {
+    if (isMinimized || isTyping) return;
+
+    const sessionTime = Date.now() - userBehavior.sessionStart;
+    const timeSinceProactive = Date.now() - lastProactiveTime;
+
+    // Only show proactive message if user hasn't scrolled recently
+    if (timeSinceProactive < 45000) return;
+
+    // Find appropriate session message
+    const eligibleMessage = sessionMessages.find(m =>
+      sessionTime > m.time && sessionTime < m.time + 60000
+    );
+
+    if (eligibleMessage && !userBehavior.hasInteracted) {
+      showInsight(eligibleMessage.message);
+      lastProactiveTime = Date.now();
+    }
+
+    // Engagement scoring
+    const sectionsExplored = userBehavior.sectionsVisited.size;
+    if (sectionsExplored >= 5) {
+      userBehavior.engagementLevel = 'engaged';
+    } else if (sectionsExplored >= 3) {
+      userBehavior.engagementLevel = 'interested';
+    }
+
+  }, 30000);
+
+  // Scroll-back detection - welcome back to sections
+  let previousSection = null;
+  const scrollBackObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && userBehavior.scrollDirection === 'up') {
+          const sectionName = entry.target.getAttribute('data-agent-section');
+          if (userBehavior.sectionsVisited.has(sectionName) && sectionName !== currentSection) {
+            // User is scrolling back to a section they've seen
+            const timeSpent = userBehavior.timePerSection[sectionName];
+            if (timeSpent && timeSpent > 5000) {
+              // They spent time here before, acknowledge it
+              setTimeout(() => {
+                if (!isTyping && !isMinimized) {
+                  showInsight("Coming back to this section? Take another look — sometimes the details click on the second pass.");
+                }
+              }, 2000);
+            }
+          }
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  sections.forEach(section => scrollBackObserver.observe(section));
+
   // ============================================
   // IMMERSIVE SECTION ANIMATIONS
   // Each section reveals with presence

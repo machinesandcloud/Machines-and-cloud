@@ -451,29 +451,97 @@
         </p>
       </div>
 
-      <div class="grid grid-2 reveal">
-        <div class="card">
-          <h3 class="card-title text-gradient">Five-Layer Architecture</h3>
-          <p class="card-description mb-6">Every production agent we build has explicit layers for interaction, orchestration, tools, knowledge, and controls.</p>
-          <ul class="service-card-features">
-            <li>Interaction Layer — Chat UI, task queues, review workflows</li>
-            <li>Orchestration — State management, retries, multi-step coordination</li>
-            <li>Tools — Real integrations to CRM, ITSM, ERP, email systems</li>
-            <li>Knowledge — RAG with permissions, citations, freshness tracking</li>
-            <li>Controls — Approvals, audit logs, evaluation harnesses</li>
-          </ul>
+      <div class="solution-showcase reveal">
+        <!-- Animated Architecture Diagram -->
+        <div class="architecture-visual">
+          <div class="arch-layer" data-layer="1">
+            <div class="arch-layer-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            </div>
+            <div class="arch-layer-content">
+              <span class="arch-layer-name">Interaction Layer</span>
+              <span class="arch-layer-desc">Chat, queues, workflows</span>
+            </div>
+            <div class="arch-layer-pulse"></div>
+          </div>
+          <div class="arch-connector"></div>
+          <div class="arch-layer" data-layer="2">
+            <div class="arch-layer-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </div>
+            <div class="arch-layer-content">
+              <span class="arch-layer-name">Orchestration</span>
+              <span class="arch-layer-desc">State, retries, coordination</span>
+            </div>
+            <div class="arch-layer-pulse"></div>
+          </div>
+          <div class="arch-connector"></div>
+          <div class="arch-layer" data-layer="3">
+            <div class="arch-layer-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+            </div>
+            <div class="arch-layer-content">
+              <span class="arch-layer-name">Tools Layer</span>
+              <span class="arch-layer-desc">CRM, ITSM, ERP integrations</span>
+            </div>
+            <div class="arch-layer-pulse"></div>
+          </div>
+          <div class="arch-connector"></div>
+          <div class="arch-layer" data-layer="4">
+            <div class="arch-layer-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+            </div>
+            <div class="arch-layer-content">
+              <span class="arch-layer-name">Knowledge</span>
+              <span class="arch-layer-desc">RAG, citations, freshness</span>
+            </div>
+            <div class="arch-layer-pulse"></div>
+          </div>
+          <div class="arch-connector"></div>
+          <div class="arch-layer" data-layer="5">
+            <div class="arch-layer-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <div class="arch-layer-content">
+              <span class="arch-layer-name">Controls</span>
+              <span class="arch-layer-desc">Approvals, audit, evaluation</span>
+            </div>
+            <div class="arch-layer-pulse"></div>
+          </div>
         </div>
 
-        <div class="card">
-          <h3 class="card-title text-gradient">Governance Built-In</h3>
-          <p class="card-description mb-6">Every launch includes security testing and governance mapping—not as an afterthought, but as core deliverables.</p>
-          <ul class="service-card-features">
-            <li>OWASP LLM Top 10 risk mitigations documented</li>
-            <li>NIST AI RMF alignment for enterprise buyers</li>
-            <li>Human-in-the-loop at configurable risk points</li>
-            <li>Full audit trail: inputs, context, outputs, decisions</li>
-            <li>Evaluation harnesses for ongoing accuracy monitoring</li>
-          </ul>
+        <!-- Governance Card -->
+        <div class="governance-visual">
+          <div class="gov-header">
+            <span class="gov-badge">Governance Built-In</span>
+            <span class="gov-status"><span class="status-dot"></span> Active</span>
+          </div>
+          <div class="gov-checks">
+            <div class="gov-check" data-check="1">
+              <span class="gov-check-icon">✓</span>
+              <span class="gov-check-text">OWASP LLM Top 10 mitigations</span>
+            </div>
+            <div class="gov-check" data-check="2">
+              <span class="gov-check-icon">✓</span>
+              <span class="gov-check-text">NIST AI RMF alignment</span>
+            </div>
+            <div class="gov-check" data-check="3">
+              <span class="gov-check-icon">✓</span>
+              <span class="gov-check-text">Human-in-the-loop gates</span>
+            </div>
+            <div class="gov-check" data-check="4">
+              <span class="gov-check-icon">✓</span>
+              <span class="gov-check-text">Full audit trail</span>
+            </div>
+            <div class="gov-check" data-check="5">
+              <span class="gov-check-icon">✓</span>
+              <span class="gov-check-text">Evaluation harnesses</span>
+            </div>
+          </div>
+          <div class="gov-footer">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=32&h=32&fit=crop&crop=face" alt="Security Lead" class="gov-avatar">
+            <span class="gov-footer-text">Reviewed by Security Team</span>
+          </div>
         </div>
       </div>
     </div>
@@ -673,9 +741,9 @@
   </section>
 
   <!-- Process Section -->
-  <section class="section" data-agent-section="process" data-agent-label="// explaining_methodology">
+  <section class="section section-immersive" data-agent-section="process" data-agent-label="// explaining_methodology">
     <div class="container">
-      <div class="section-header reveal">
+      <div class="section-header sticky-header reveal">
         <span class="section-eyebrow">How We Work</span>
         <h2 class="section-title">Stage gates that prevent "cool demo" trap</h2>
         <p class="section-description">
@@ -683,49 +751,146 @@
         </p>
       </div>
 
-      <div class="process-list reveal">
-        <div class="process-item">
-          <div class="process-number">1</div>
-          <div class="process-content">
-            <h3 class="process-title">Qualification</h3>
-            <p class="process-description">15-minute fit check followed by a qualification call. We assess workflow complexity, KPI availability, data access, and risk posture before committing.</p>
-            <span class="process-tag">Free • 30 minutes</span>
+      <div class="process-showcase">
+        <!-- Process Timeline with Visual -->
+        <div class="process-timeline">
+          <div class="process-item" data-step="1">
+            <div class="process-marker">
+              <div class="process-number">1</div>
+              <div class="process-line"></div>
+            </div>
+            <div class="process-content">
+              <div class="process-header">
+                <h3 class="process-title">Qualification</h3>
+                <span class="process-tag">Free • 30 minutes</span>
+              </div>
+              <p class="process-description">15-minute fit check followed by a qualification call. We assess workflow complexity, KPI availability, data access, and risk posture before committing.</p>
+              <div class="process-people">
+                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=32&h=32&fit=crop&crop=face" alt="Consultant" loading="lazy">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=32&h=32&fit=crop&crop=face" alt="Client" loading="lazy">
+              </div>
+            </div>
+          </div>
+
+          <div class="process-item" data-step="2">
+            <div class="process-marker">
+              <div class="process-number">2</div>
+              <div class="process-line"></div>
+            </div>
+            <div class="process-content">
+              <div class="process-header">
+                <h3 class="process-title">Opportunity Sprint</h3>
+                <span class="process-tag">7-10 days • Fixed fee</span>
+              </div>
+              <p class="process-description"><strong>Gate:</strong> KPI definition signed by business owner. We don't build until success metrics are agreed and baseline measurements are captured.</p>
+              <div class="process-gate">
+                <span class="gate-icon">🚦</span>
+                <span class="gate-text">Sign-off Required</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="process-item" data-step="3">
+            <div class="process-marker">
+              <div class="process-number">3</div>
+              <div class="process-line"></div>
+            </div>
+            <div class="process-content">
+              <div class="process-header">
+                <h3 class="process-title">Proof of Value</h3>
+                <span class="process-tag">4-6 weeks • Fixed fee</span>
+              </div>
+              <p class="process-description"><strong>Gate:</strong> Security review against OWASP LLM Top 10 and operational readiness checklist. Demo on real cases with benchmark vs baseline.</p>
+              <div class="process-gate">
+                <span class="gate-icon">🛡️</span>
+                <span class="gate-text">Security Review</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="process-item" data-step="4">
+            <div class="process-marker">
+              <div class="process-number">4</div>
+              <div class="process-line"></div>
+            </div>
+            <div class="process-content">
+              <div class="process-header">
+                <h3 class="process-title">Production Launch</h3>
+                <span class="process-tag">8-12 weeks • Milestone-based</span>
+              </div>
+              <p class="process-description"><strong>Gate:</strong> Governance mapping (NIST AI RMF + ISO 42001 style controls). SLOs met, rollback plan ready, incident playbook documented.</p>
+              <div class="process-gate">
+                <span class="gate-icon">📋</span>
+                <span class="gate-text">Governance Mapping</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="process-item" data-step="5">
+            <div class="process-marker">
+              <div class="process-number">5</div>
+            </div>
+            <div class="process-content">
+              <div class="process-header">
+                <h3 class="process-title">Operate & Expand</h3>
+                <span class="process-tag success">Ongoing • Monthly retainer</span>
+              </div>
+              <p class="process-description">Monthly KPI reporting, drift detection, change log maintenance, and backlog burn-down. Continuous improvement, not one-time delivery.</p>
+              <div class="process-people">
+                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=32&h=32&fit=crop&crop=face" alt="Team member" loading="lazy">
+                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=32&h=32&fit=crop&crop=face" alt="Team member" loading="lazy">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face" alt="Team member" loading="lazy">
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="process-item">
-          <div class="process-number">2</div>
-          <div class="process-content">
-            <h3 class="process-title">Opportunity Sprint</h3>
-            <p class="process-description"><strong>Gate:</strong> KPI definition signed by business owner. We don't build until success metrics are agreed and baseline measurements are captured.</p>
-            <span class="process-tag">7-10 days • Fixed fee</span>
+        <!-- Live Process Visual -->
+        <div class="process-visual">
+          <div class="process-visual-header">
+            <span class="process-visual-title">Current Engagement</span>
+            <span class="process-visual-badge"><span class="status-dot"></span> Active</span>
           </div>
-        </div>
-
-        <div class="process-item">
-          <div class="process-number">3</div>
-          <div class="process-content">
-            <h3 class="process-title">Proof of Value</h3>
-            <p class="process-description"><strong>Gate:</strong> Security review against OWASP LLM Top 10 and operational readiness checklist. Demo on real cases with benchmark vs baseline.</p>
-            <span class="process-tag">4-6 weeks • Fixed fee</span>
-          </div>
-        </div>
-
-        <div class="process-item">
-          <div class="process-number">4</div>
-          <div class="process-content">
-            <h3 class="process-title">Production Launch</h3>
-            <p class="process-description"><strong>Gate:</strong> Governance mapping (NIST AI RMF + ISO 42001 style controls). SLOs met, rollback plan ready, incident playbook documented.</p>
-            <span class="process-tag">8-12 weeks • Milestone-based</span>
-          </div>
-        </div>
-
-        <div class="process-item">
-          <div class="process-number">5</div>
-          <div class="process-content">
-            <h3 class="process-title">Operate & Expand</h3>
-            <p class="process-description">Monthly KPI reporting, drift detection, change log maintenance, and backlog burn-down. Continuous improvement, not one-time delivery.</p>
-            <span class="process-tag">Ongoing • Monthly retainer</span>
+          <div class="process-visual-body">
+            <div class="pv-progress">
+              <div class="pv-progress-bar" style="width: 65%;"></div>
+            </div>
+            <div class="pv-stages">
+              <div class="pv-stage completed">
+                <span class="pv-stage-dot"></span>
+                <span class="pv-stage-label">Qualification</span>
+              </div>
+              <div class="pv-stage completed">
+                <span class="pv-stage-dot"></span>
+                <span class="pv-stage-label">Sprint</span>
+              </div>
+              <div class="pv-stage active">
+                <span class="pv-stage-dot"></span>
+                <span class="pv-stage-label">PoV</span>
+              </div>
+              <div class="pv-stage">
+                <span class="pv-stage-dot"></span>
+                <span class="pv-stage-label">Launch</span>
+              </div>
+              <div class="pv-stage">
+                <span class="pv-stage-dot"></span>
+                <span class="pv-stage-label">Operate</span>
+              </div>
+            </div>
+            <div class="pv-metrics">
+              <div class="pv-metric">
+                <span class="pv-metric-value">Week 4</span>
+                <span class="pv-metric-label">Current</span>
+              </div>
+              <div class="pv-metric">
+                <span class="pv-metric-value">67%</span>
+                <span class="pv-metric-label">Efficiency Gain</span>
+              </div>
+              <div class="pv-metric">
+                <span class="pv-metric-value">3</span>
+                <span class="pv-metric-label">Gates Passed</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -744,40 +909,82 @@
       </div>
 
       <div class="grid grid-3 reveal-stagger">
-        <div class="card">
+        <div class="card card-with-image">
+          <div class="card-industry-header">
+            <img src="https://images.unsplash.com/photo-1560472355-536de3962603?w=120&h=80&fit=crop" alt="Financial Services" class="card-industry-img" loading="lazy">
+          </div>
           <span class="badge badge-primary">Largest AI Spend</span>
           <h3 class="card-title mt-4">Financial Services</h3>
           <p class="card-description">KYC/AML case research, customer correspondence, compliance lookup, fraud operations triage.</p>
+          <div class="card-people">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
+            <span>12 deployments</span>
+          </div>
         </div>
 
-        <div class="card">
+        <div class="card card-with-image">
+          <div class="card-industry-header">
+            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=120&h=80&fit=crop" alt="Insurance" class="card-industry-img" loading="lazy">
+          </div>
           <span class="badge badge-primary">High Doc Volume</span>
           <h3 class="card-title mt-4">Insurance</h3>
           <p class="card-description">Claims intake and triage, document extraction, subrogation research, customer service automation.</p>
+          <div class="card-people">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
+            <span>8 deployments</span>
+          </div>
         </div>
 
-        <div class="card">
+        <div class="card card-with-image">
+          <div class="card-industry-header">
+            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=120&h=80&fit=crop" alt="SaaS" class="card-industry-img" loading="lazy">
+          </div>
           <span class="badge badge-success">Fast Adoption</span>
           <h3 class="card-title mt-4">SaaS & IT</h3>
           <p class="card-description">IT helpdesk automation, ticket triage, SDLC workflows, internal knowledge copilots.</p>
+          <div class="card-people">
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
+            <span>15 deployments</span>
+          </div>
         </div>
 
-        <div class="card">
+        <div class="card card-with-image">
+          <div class="card-industry-header">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=120&h=80&fit=crop" alt="Retail" class="card-industry-img" loading="lazy">
+          </div>
           <span class="badge badge-primary">Clear CX Metrics</span>
           <h3 class="card-title mt-4">Retail & E-commerce</h3>
           <p class="card-description">Customer service automation, order exception handling, merchandising content, supplier comms.</p>
+          <div class="card-people">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
+            <span>6 deployments</span>
+          </div>
         </div>
 
-        <div class="card">
+        <div class="card card-with-image">
+          <div class="card-industry-header">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=120&h=80&fit=crop" alt="Manufacturing" class="card-industry-img" loading="lazy">
+          </div>
           <span class="badge badge-primary">Clear Productivity</span>
           <h3 class="card-title mt-4">Manufacturing</h3>
           <p class="card-description">Work order triage, maintenance planning, parts lookup, QA documentation assistants.</p>
+          <div class="card-people">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
+            <span>4 deployments</span>
+          </div>
         </div>
 
-        <div class="card">
+        <div class="card card-with-image">
+          <div class="card-industry-header">
+            <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=120&h=80&fit=crop" alt="B2B Services" class="card-industry-img" loading="lazy">
+          </div>
           <span class="badge badge-success">Fast Time-to-Value</span>
           <h3 class="card-title mt-4">B2B Services</h3>
           <p class="card-description">Email and ticket triage, document routing, CRM enrichment, customer communication workflows.</p>
+          <div class="card-people">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
+            <span>10 deployments</span>
+          </div>
         </div>
       </div>
 
