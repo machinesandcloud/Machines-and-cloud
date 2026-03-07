@@ -1197,34 +1197,199 @@
   } // End reduced motion check
 
   // ============================================
-  // AGENTIC PRESENCE
-  // One thing, done invisibly well: The AI is here with you.
-  // No gimmicks. Just presence.
+  // AI COMPANION
+  // The site feels like an intelligent guide
   // ============================================
 
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-
-    // The presence - a gentle awareness that follows your journey
-    const presence = document.createElement('div');
-    presence.className = 'ai-presence';
-    document.body.appendChild(presence);
-
-    // Track scroll journey - the AI accompanies you
-    let currentY = 0;
-    let targetY = 0;
-
-    function updatePresence() {
-      currentY += (targetY - currentY) * 0.03; // Very slow, contemplative follow
-      presence.style.transform = `translateY(${currentY}px)`;
-      requestAnimationFrame(updatePresence);
+  const contextualPrompts = {
+    hero: {
+      message: "I help businesses ship AI that actually works. What brings you here today?",
+      actions: [
+        { label: "Explore what we build", target: "solution" },
+        { label: "See real results", target: "stats" }
+      ]
+    },
+    problem: {
+      message: "You're looking at why most AI projects fail. Want to see how we solve this?",
+      actions: [
+        { label: "Show me the solution", target: "solution" },
+        { label: "Skip to results", target: "testimonials" }
+      ]
+    },
+    solution: {
+      message: "This is our engineering approach. Each layer matters. Interested in a specific part?",
+      actions: [
+        { label: "How does this work in practice?", target: "process" },
+        { label: "Show me real examples", target: "testimonials" }
+      ]
+    },
+    stats: {
+      message: "These numbers come from real deployments. Want to see the case studies behind them?",
+      actions: [
+        { label: "See case studies", href: "case-studies.html" },
+        { label: "Calculate my ROI", target: "roi" }
+      ]
+    },
+    services: {
+      message: "Most clients start with Proof of Value — a working agent in 4 weeks. Want details?",
+      actions: [
+        { label: "Tell me more", href: "services.html" },
+        { label: "See the process", target: "process" }
+      ]
+    },
+    testimonials: {
+      message: "Real results from real deployments. Notice the specific metrics — we measure everything.",
+      actions: [
+        { label: "See full case studies", href: "case-studies.html" },
+        { label: "What could this mean for me?", target: "roi" }
+      ]
+    },
+    process: {
+      message: "This is how we work. Structured, predictable, no surprises. Questions about any phase?",
+      actions: [
+        { label: "What industries?", target: "industries" },
+        { label: "Let's talk", href: "contact.html" }
+      ]
+    },
+    industries: {
+      message: "We go deep in these verticals. The patterns transfer but the details matter.",
+      actions: [
+        { label: "See industry examples", href: "industries.html" },
+        { label: "Calculate my savings", target: "roi" }
+      ]
+    },
+    roi: {
+      message: "Try the calculator. Most clients see 3-5x ROI in year one.",
+      actions: [
+        { label: "Book a discovery call", href: "contact.html" },
+        { label: "See pricing options", target: "services" }
+      ]
+    },
+    faq: {
+      message: "Common questions. If yours isn't here, I'm happy to help.",
+      actions: [
+        { label: "Talk to our team", href: "contact.html" },
+        { label: "Back to top", target: "hero" }
+      ]
+    },
+    cta: {
+      message: "Ready to explore? A discovery call takes 30 minutes. No pressure, just clarity.",
+      actions: [
+        { label: "Book a call", href: "contact.html" },
+        { label: "See case studies first", href: "case-studies.html" }
+      ]
     }
+  };
 
-    window.addEventListener('scroll', () => {
-      targetY = window.scrollY * 0.5; // Moves at half your speed - it's with you, not chasing you
-    }, { passive: true });
+  // Create companion UI
+  const companion = document.createElement('div');
+  companion.className = 'ai-companion';
+  companion.innerHTML = `
+    <div class="ai-companion-indicator"></div>
+    <div class="ai-companion-content">
+      <div class="ai-companion-message"></div>
+      <div class="ai-companion-actions"></div>
+    </div>
+    <button class="ai-companion-toggle" aria-label="Toggle AI companion">
+      <span class="toggle-icon">›</span>
+    </button>
+  `;
+  document.body.appendChild(companion);
 
-    updatePresence();
+  const messageEl = companion.querySelector('.ai-companion-message');
+  const actionsEl = companion.querySelector('.ai-companion-actions');
+  const toggleBtn = companion.querySelector('.ai-companion-toggle');
+  const toggleIcon = companion.querySelector('.toggle-icon');
 
+  let isExpanded = true;
+  let currentSection = null;
+  let isTyping = false;
+
+  // Toggle companion
+  toggleBtn.addEventListener('click', () => {
+    isExpanded = !isExpanded;
+    companion.classList.toggle('collapsed', !isExpanded);
+    toggleIcon.textContent = isExpanded ? '›' : '‹';
+  });
+
+  // Typing effect
+  function typeMessage(text, callback) {
+    if (isTyping) return;
+    isTyping = true;
+    messageEl.textContent = '';
+    let i = 0;
+    const speed = 20;
+
+    function type() {
+      if (i < text.length) {
+        messageEl.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        isTyping = false;
+        if (callback) callback();
+      }
+    }
+    type();
   }
+
+  // Update actions
+  function updateActions(actions) {
+    actionsEl.innerHTML = actions.map(action => {
+      if (action.href) {
+        return `<a href="${action.href}" class="ai-companion-action">${action.label}</a>`;
+      }
+      return `<button class="ai-companion-action" data-target="${action.target}">${action.label}</button>`;
+    }).join('');
+
+    // Add click handlers for scroll targets
+    actionsEl.querySelectorAll('[data-target]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.querySelector(`[data-agent-section="${btn.dataset.target}"]`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
+
+  // Update companion based on visible section
+  function updateCompanion(sectionName) {
+    if (sectionName === currentSection || isTyping) return;
+    currentSection = sectionName;
+
+    const prompt = contextualPrompts[sectionName];
+    if (!prompt) return;
+
+    // Brief pause before new message
+    companion.classList.add('thinking');
+    setTimeout(() => {
+      companion.classList.remove('thinking');
+      typeMessage(prompt.message, () => {
+        updateActions(prompt.actions);
+      });
+    }, 400);
+  }
+
+  // Observe sections
+  const sections = document.querySelectorAll('[data-agent-section]');
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+          const sectionName = entry.target.getAttribute('data-agent-section');
+          updateCompanion(sectionName);
+        }
+      });
+    },
+    { threshold: [0.3, 0.5], rootMargin: '-10% 0px -10% 0px' }
+  );
+
+  sections.forEach(section => observer.observe(section));
+
+  // Initialize with first section
+  setTimeout(() => {
+    updateCompanion('hero');
+  }, 500);
 
 })();
