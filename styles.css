@@ -5237,92 +5237,34 @@ body.agent-mode .navbar {
 }
 
 /* ============================================
-   MINIMAL AI AGENT PRESENCE
-   Tesla-like: Clean, elegant, purposeful
+   AGENTIC PRESENCE
+   The AI is here. You feel it. You don't see it.
    ============================================ */
 
-/* Subtle Cursor Glow - AI follows your movement */
-.cursor-glow {
+.ai-presence {
   position: fixed;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
   background: radial-gradient(
-    circle at center,
-    rgba(59, 130, 246, 0.08) 0%,
-    rgba(59, 130, 246, 0.03) 40%,
-    transparent 70%
+    ellipse 80% 50% at 50% 0%,
+    rgba(59, 130, 246, 0.04) 0%,
+    transparent 50%
   );
   pointer-events: none;
-  z-index: 1;
-  transform: translate(-150px, -150px);
+  z-index: 0;
   will-change: transform;
-  filter: blur(40px);
+  animation: presence 8s ease-in-out infinite;
 }
 
-/* Click Feedback - Subtle acknowledgment */
-.click-feedback {
-  position: fixed;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%) scale(0);
-  animation: clickPulse 0.6s ease-out forwards;
-}
-
-@keyframes clickPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(2);
-    opacity: 0;
-  }
-}
-
-/* Section Agent Awareness - Subtle glow when reading */
-[data-agent-section].agent-active {
-  position: relative;
-}
-
-[data-agent-section].agent-active::before {
-  content: '';
-  position: absolute;
-  inset: -20px;
-  border-radius: 20px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(59, 130, 246, 0.02) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: -1;
-  animation: sectionGlow 3s ease-in-out infinite;
-}
-
-@keyframes sectionGlow {
-  0%, 100% { opacity: 0.5; }
+@keyframes presence {
+  0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
 
-/* Responsive - Disable on mobile/reduced motion */
-@media (max-width: 768px) {
-  .cursor-glow {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .cursor-glow,
-  .click-feedback {
-    display: none !important;
-  }
-
-  [data-agent-section].agent-active::before {
-    animation: none;
+  .ai-presence {
+    display: none;
   }
 }

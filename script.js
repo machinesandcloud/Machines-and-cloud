@@ -1197,104 +1197,34 @@
   } // End reduced motion check
 
   // ============================================
-  // REFINED AI AGENT EXPERIENCE
-  // Tesla-like minimalism: Clean, elegant, responsive
+  // AGENTIC PRESENCE
+  // One thing, done invisibly well: The AI is here with you.
+  // No gimmicks. Just presence.
   // ============================================
 
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.innerWidth > 768) {
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 
-    // ============================================
-    // SUBTLE CURSOR GLOW - Minimal AI presence
-    // ============================================
-    const cursorGlow = document.createElement('div');
-    cursorGlow.className = 'cursor-glow';
-    cursorGlow.id = 'cursorGlow';
-    document.body.appendChild(cursorGlow);
+    // The presence - a gentle awareness that follows your journey
+    const presence = document.createElement('div');
+    presence.className = 'ai-presence';
+    document.body.appendChild(presence);
 
-    let glowX = window.innerWidth / 2;
-    let glowY = window.innerHeight / 2;
-    let targetGlowX = glowX;
-    let targetGlowY = glowY;
+    // Track scroll journey - the AI accompanies you
+    let currentY = 0;
+    let targetY = 0;
 
-    function updateGlow() {
-      // Smooth follow with lag
-      glowX += (targetGlowX - glowX) * 0.06;
-      glowY += (targetGlowY - glowY) * 0.06;
-      cursorGlow.style.transform = `translate(${glowX}px, ${glowY}px)`;
-      requestAnimationFrame(updateGlow);
+    function updatePresence() {
+      currentY += (targetY - currentY) * 0.03; // Very slow, contemplative follow
+      presence.style.transform = `translateY(${currentY}px)`;
+      requestAnimationFrame(updatePresence);
     }
 
-    document.addEventListener('mousemove', (e) => {
-      targetGlowX = e.clientX;
-      targetGlowY = e.clientY;
-    });
+    window.addEventListener('scroll', () => {
+      targetY = window.scrollY * 0.5; // Moves at half your speed - it's with you, not chasing you
+    }, { passive: true });
 
-    updateGlow();
+    updatePresence();
 
-    // ============================================
-    // SECTION AWARENESS - Agent "reads" content
-    // ============================================
-    const sections = document.querySelectorAll('[data-agent-section]');
-
-    const sectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('agent-active');
-          } else {
-            entry.target.classList.remove('agent-active');
-          }
-        });
-      },
-      { threshold: 0.3, rootMargin: '-50px' }
-    );
-
-    sections.forEach((section) => sectionObserver.observe(section));
-
-    // ============================================
-    // SUBTLE CLICK FEEDBACK
-    // ============================================
-    document.addEventListener('click', (e) => {
-      // Skip if clicking on interactive elements
-      if (e.target.closest('a, button, input, .ai-agent-widget')) return;
-
-      const feedback = document.createElement('div');
-      feedback.className = 'click-feedback';
-      feedback.style.left = e.clientX + 'px';
-      feedback.style.top = e.clientY + 'px';
-      document.body.appendChild(feedback);
-      setTimeout(() => feedback.remove(), 600);
-    });
-
-    // ============================================
-    // SMOOTH CARD INTERACTIONS
-    // ============================================
-    const cards = document.querySelectorAll('.card, .stat-card');
-
-    cards.forEach((card) => {
-      card.addEventListener('mouseenter', function() {
-        this.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-      });
-
-      card.addEventListener('mousemove', function(e) {
-        const rect = this.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        // Very subtle 3D tilt
-        const rotateX = (y - centerY) / 40;
-        const rotateY = (centerX - x) / 40;
-
-        this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
-      });
-
-      card.addEventListener('mouseleave', function() {
-        this.style.transform = '';
-      });
-    });
-
-  } // End refined experience
+  }
 
 })();
