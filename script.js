@@ -505,12 +505,304 @@
   console.log('%c https://machinesandcloud.com', 'color: #718096; font-size: 12px;');
 
   // ============================================
-  // AGENTIC AI EXPERIENCE
-  // Interactive AI Agent Visualization System
+  // IMMERSIVE AGENTIC AI EXPERIENCE
+  // Full-page AI Agent Interface System
   // ============================================
 
   // Only initialize on larger screens and if motion is allowed
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.innerWidth > 768) {
+
+    // Enable agent mode on body
+    document.body.classList.add('agent-mode');
+
+    // ============================================
+    // AGENT STATUS BAR
+    // ============================================
+    const statusBarHTML = `
+      <div class="agent-status-bar" id="agentStatusBar">
+        <div class="agent-status-left">
+          <div class="agent-status-indicator">
+            <span class="agent-status-dot"></span>
+            <span>AGENT ONLINE</span>
+          </div>
+          <div class="agent-status-task">
+            <span class="task-label">CURRENT:</span>
+            <span id="agentCurrentTask">Analyzing visitor intent...</span>
+          </div>
+        </div>
+        <div class="agent-status-right">
+          <div class="agent-metric">
+            <span>LATENCY:</span>
+            <span class="agent-metric-value" id="agentLatency">42ms</span>
+          </div>
+          <div class="agent-metric">
+            <span>CONTEXT:</span>
+            <span class="agent-metric-value" id="agentContext">Homepage</span>
+          </div>
+          <div class="agent-metric">
+            <span>SCROLL:</span>
+            <span class="agent-metric-value" id="agentScroll">0%</span>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('afterbegin', statusBarHTML);
+
+    // Update scroll percentage
+    const agentScrollEl = document.getElementById('agentScroll');
+    const agentContextEl = document.getElementById('agentContext');
+    const agentTaskEl = document.getElementById('agentCurrentTask');
+
+    // ============================================
+    // AGENT COMMENTARY SIDEBAR
+    // ============================================
+    const commentaryHTML = `
+      <div class="agent-commentary" id="agentCommentary">
+        <div class="agent-thought" id="agentThought">
+          <div class="agent-thought-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+            </svg>
+            Agent Insight
+          </div>
+          <div class="agent-thought-content" id="agentThoughtText">
+            <span class="agent-thought-typing"><span></span><span></span><span></span></span>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', commentaryHTML);
+
+    const agentThought = document.getElementById('agentThought');
+    const agentThoughtText = document.getElementById('agentThoughtText');
+
+    // Agent thoughts for different sections
+    const sectionThoughts = {
+      'hero': 'Visitor landed. Presenting core value proposition: production AI agents with governance.',
+      'problem': 'Highlighting pain points. 70% of AI pilots fail - this resonates with enterprise buyers.',
+      'solution': 'Showing our differentiation: engineering discipline, not just experimentation.',
+      'stats': 'Displaying market data. $588B market validates the opportunity.',
+      'services': 'Presenting service packages. Clear pricing reduces friction.',
+      'testimonials': 'Social proof activated. Real metrics build trust.',
+      'process': 'Explaining methodology. Stage gates prevent scope creep.',
+      'industries': 'Targeting high-value verticals with measurable outcomes.',
+      'cta': 'Conversion opportunity detected. Ready to capture lead.',
+      'faq': 'Addressing objections. Removing barriers to engagement.'
+    };
+
+    // ============================================
+    // SCROLL PROGRESS TRACKER
+    // ============================================
+    const scrollProgressHTML = `
+      <div class="agent-scroll-progress" id="agentScrollProgress">
+        <div class="scroll-section-marker active" data-section="hero">
+          <span class="scroll-marker-dot"></span>
+          <span class="scroll-marker-label">INIT</span>
+        </div>
+        <div class="scroll-connector"></div>
+        <div class="scroll-section-marker" data-section="problem">
+          <span class="scroll-marker-dot"></span>
+          <span class="scroll-marker-label">PROBLEM</span>
+        </div>
+        <div class="scroll-connector"></div>
+        <div class="scroll-section-marker" data-section="solution">
+          <span class="scroll-marker-dot"></span>
+          <span class="scroll-marker-label">SOLUTION</span>
+        </div>
+        <div class="scroll-connector"></div>
+        <div class="scroll-section-marker" data-section="services">
+          <span class="scroll-marker-dot"></span>
+          <span class="scroll-marker-label">SERVICES</span>
+        </div>
+        <div class="scroll-connector"></div>
+        <div class="scroll-section-marker" data-section="proof">
+          <span class="scroll-marker-dot"></span>
+          <span class="scroll-marker-label">PROOF</span>
+        </div>
+        <div class="scroll-connector"></div>
+        <div class="scroll-section-marker" data-section="convert">
+          <span class="scroll-marker-dot"></span>
+          <span class="scroll-marker-label">CONVERT</span>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', scrollProgressHTML);
+
+    // ============================================
+    // DATA STREAM EFFECT
+    // ============================================
+    const dataStreamHTML = `<div class="data-stream" id="dataStream"></div>`;
+    document.body.insertAdjacentHTML('afterbegin', dataStreamHTML);
+    const dataStream = document.getElementById('dataStream');
+
+    // Create data particles
+    for (let i = 0; i < 15; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'data-particle';
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${Math.random() * 3}s`;
+      particle.style.animationDuration = `${2 + Math.random() * 2}s`;
+      dataStream.appendChild(particle);
+    }
+
+    // ============================================
+    // SCROLL-BASED AGENT BEHAVIOR
+    // ============================================
+    let lastScrollY = 0;
+    let currentSection = 'hero';
+    let thoughtTimeout;
+
+    const sections = document.querySelectorAll('.section, .hero');
+    const scrollMarkers = document.querySelectorAll('.scroll-section-marker');
+
+    function updateAgentState() {
+      const scrollY = window.scrollY;
+      const scrollPercent = Math.round((scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+
+      // Update scroll percentage
+      if (agentScrollEl) {
+        agentScrollEl.textContent = `${scrollPercent}%`;
+      }
+
+      // Determine current section
+      let newSection = 'hero';
+      let sectionIndex = 0;
+
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.4) {
+          newSection = section.dataset.agentSection || `section-${index}`;
+          sectionIndex = index;
+        }
+      });
+
+      // Update scroll markers
+      scrollMarkers.forEach((marker, index) => {
+        marker.classList.remove('active');
+        if (index < sectionIndex) {
+          marker.classList.add('completed');
+        } else if (index === sectionIndex) {
+          marker.classList.add('active');
+          marker.classList.remove('completed');
+        } else {
+          marker.classList.remove('completed');
+        }
+      });
+
+      // Update agent thought when section changes
+      if (newSection !== currentSection) {
+        currentSection = newSection;
+        updateAgentThought(newSection);
+        updateAgentTask(newSection);
+      }
+
+      // Update context based on scroll direction
+      const scrollDirection = scrollY > lastScrollY ? 'Scrolling down' : scrollY < lastScrollY ? 'Scrolling up' : 'Idle';
+      lastScrollY = scrollY;
+    }
+
+    function updateAgentThought(section) {
+      const thought = sectionThoughts[section] || 'Processing section content...';
+
+      // Show typing first
+      agentThought.classList.add('visible');
+      agentThoughtText.innerHTML = '<span class="agent-thought-typing"><span></span><span></span><span></span></span>';
+
+      // Clear previous timeout
+      clearTimeout(thoughtTimeout);
+
+      // Then show the thought
+      thoughtTimeout = setTimeout(() => {
+        agentThoughtText.textContent = thought;
+      }, 800);
+
+      // Hide after a while
+      setTimeout(() => {
+        agentThought.classList.remove('visible');
+      }, 5000);
+    }
+
+    function updateAgentTask(section) {
+      const tasks = {
+        'hero': 'Presenting value proposition...',
+        'problem': 'Highlighting market pain points...',
+        'solution': 'Demonstrating approach...',
+        'stats': 'Loading market intelligence...',
+        'services': 'Displaying service offerings...',
+        'testimonials': 'Fetching social proof...',
+        'process': 'Explaining methodology...',
+        'industries': 'Analyzing target verticals...',
+        'cta': 'Preparing conversion flow...',
+        'faq': 'Loading FAQ responses...'
+      };
+
+      if (agentTaskEl) {
+        agentTaskEl.textContent = tasks[section] || 'Analyzing content...';
+      }
+
+      if (agentContextEl) {
+        const contextMap = {
+          'hero': 'Homepage',
+          'problem': 'Problem',
+          'solution': 'Solution',
+          'stats': 'Market Data',
+          'services': 'Services',
+          'testimonials': 'Results',
+          'process': 'Process',
+          'industries': 'Industries',
+          'cta': 'CTA',
+          'faq': 'FAQ'
+        };
+        agentContextEl.textContent = contextMap[section] || 'Content';
+      }
+    }
+
+    // Add data attributes to sections
+    const sectionMapping = [
+      { selector: '.hero', id: 'hero' },
+      { selector: '.section:nth-of-type(1)', id: 'problem' },
+      { selector: '.section.bg-dark:nth-of-type(1)', id: 'solution' },
+      { selector: '.stats-grid', id: 'stats', parent: true },
+      { selector: '.section:has(.grid-4)', id: 'services' },
+      { selector: '.testimonials-section', id: 'testimonials' },
+      { selector: '.process-list', id: 'process', parent: true },
+      { selector: '.section:has(.grid-3)', id: 'industries' },
+      { selector: '.cta-section', id: 'cta' },
+      { selector: '.faq-list', id: 'faq', parent: true }
+    ];
+
+    sectionMapping.forEach(({ selector, id, parent }) => {
+      const el = document.querySelector(selector);
+      if (el) {
+        const target = parent ? el.closest('.section') : el;
+        if (target) {
+          target.dataset.agentSection = id;
+        }
+      }
+    });
+
+    // Throttled scroll handler
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateAgentState();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Initial update
+    updateAgentState();
+
+    // Simulate latency updates
+    setInterval(() => {
+      const latency = 30 + Math.floor(Math.random() * 30);
+      if (document.getElementById('agentLatency')) {
+        document.getElementById('agentLatency').textContent = `${latency}ms`;
+      }
+    }, 2000);
 
     // ============================================
     // AI AGENT CHAT WIDGET
