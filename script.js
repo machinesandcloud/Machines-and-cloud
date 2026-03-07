@@ -512,8 +512,11 @@
   // Only initialize on larger screens and if motion is allowed
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.innerWidth > 768) {
 
-    // Enable agent mode on body
-    document.body.classList.add('agent-mode');
+    // Enable agent mode only when the status bar is present
+    const statusBar = document.querySelector('.agent-status-bar');
+    if (statusBar) {
+      document.body.classList.add('agent-mode');
+    }
 
     // ============================================
     // ENHANCED TERMINAL INTERACTIVITY

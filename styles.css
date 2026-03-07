@@ -915,10 +915,12 @@ img {
   padding-top: var(--space-10);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   animation: fadeInUp 0.6s ease-out 0.4s both;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .hero-stat {
-  text-align: left;
+  text-align: center;
 }
 
 .hero-stat-value {
@@ -1408,13 +1410,18 @@ img {
 }
 
 .trusted-face {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
 }
 
 .trusted-face:hover {
@@ -1424,9 +1431,9 @@ img {
 }
 
 .trusted-face img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
 }
 
 .trusted-more {
@@ -1438,8 +1445,8 @@ img {
 
 @media (max-width: 768px) {
   .trusted-face {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -2153,12 +2160,14 @@ img {
 }
 
 .process-people img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--color-bg-primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   margin-left: -8px;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .process-people img:first-child {
