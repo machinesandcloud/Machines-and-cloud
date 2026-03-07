@@ -613,124 +613,285 @@
   } // End reduced motion check
 
   // ============================================
-  // IMMERSIVE AI COMPANION
-  // Full-page experience with contextual intelligence
+  // TRULY ALIVE AI COMPANION
+  // Behavioral awareness + contextual intelligence
   // ============================================
 
+  // User behavior tracking
+  const userBehavior = {
+    sessionStart: Date.now(),
+    scrollSpeed: 'normal',
+    sectionsVisited: new Set(),
+    timePerSection: {},
+    lastScrollTime: Date.now(),
+    scrollDirection: 'down',
+    readingDepth: 0,
+    engagementLevel: 'exploring',
+    hasInteracted: false,
+    pauseCount: 0,
+    quickScanMode: false
+  };
+
+  // Track scroll behavior
+  let lastScrollY = window.scrollY;
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    const currentY = window.scrollY;
+    const scrollDelta = Math.abs(currentY - lastScrollY);
+    const timeDelta = Date.now() - userBehavior.lastScrollTime;
+
+    userBehavior.scrollDirection = currentY > lastScrollY ? 'down' : 'up';
+    userBehavior.scrollSpeed = scrollDelta / Math.max(timeDelta, 1) > 2 ? 'fast' : 'normal';
+    userBehavior.quickScanMode = userBehavior.scrollSpeed === 'fast';
+    userBehavior.readingDepth = Math.max(userBehavior.readingDepth, currentY / document.body.scrollHeight);
+
+    lastScrollY = currentY;
+    userBehavior.lastScrollTime = Date.now();
+
+    // Detect pauses (user stopped to read)
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      userBehavior.pauseCount++;
+    }, 1500);
+  }, { passive: true });
+
+  // Contextual messages with multiple variations and follow-ups
   const contextualPrompts = {
     hero: {
       greeting: "Welcome",
-      message: "I help businesses ship AI that actually works. What brings you here today?",
-      status: "Ready to assist",
-      workflow: ["Analyzing", "visitor intent", "..."],
+      messages: [
+        "I'm your guide through what we build. Take your time — or let me point you where you need to go.",
+        "Looking for AI that ships to production? You're in the right place. I'll help you explore.",
+        "We build AI agents that actually work in enterprise. Curious where to start?"
+      ],
+      followUps: [
+        { delay: 8000, message: "Most visitors start by seeing our results. The stats section shows real deployment data." },
+        { delay: 15000, message: "Feel free to scroll at your own pace — I'll adjust to what you're reading." }
+      ],
+      insights: {
+        returning: "Welcome back. Ready to pick up where we left off?",
+        fastScroller: "I see you like to move fast. The TL;DR: we ship production AI in weeks, not months.",
+        slowReader: "Take your time. There's a lot here, and I'll make sure you don't miss the important parts."
+      },
+      status: "Observing your interests",
       actions: [
-        { label: "Explore what we build", target: "solution", icon: "→" },
-        { label: "See real results", target: "stats", icon: "📊" }
+        { label: "Show me results", target: "stats", icon: "→" },
+        { label: "What do you build?", target: "solution", icon: "?" }
       ]
     },
     problem: {
-      greeting: "Understanding your challenge",
-      message: "70% of AI projects stall. Not because the AI doesn't work — but because they lack governance. Let me show you how we solve this.",
+      greeting: "The challenge",
+      messages: [
+        "70% of AI projects never reach production. Not because AI is hard — because governance is missing.",
+        "You're reading about the problem most companies face. Recognition is the first step.",
+        "This is the gap that costs enterprises millions. Good news: it's solvable."
+      ],
+      followUps: [
+        { delay: 6000, message: "The solution is actually simpler than most think. Want to see our approach?" },
+        { delay: 12000, message: "Every statistic here is from a real deployment. We've lived this problem and solved it." }
+      ],
+      insights: {
+        lingering: "This resonates, doesn't it? If you've tried deploying AI before, this pain is familiar.",
+        fastScroller: "Quick scan works here. The key point: AI fails without structure. We provide the structure."
+      },
       status: "Analyzing pain points",
-      workflow: ["Identifying", "blockers", "..."],
       actions: [
-        { label: "Show me the solution", target: "solution", icon: "→" },
+        { label: "Show me the fix", target: "solution", icon: "→" },
         { label: "Skip to proof", target: "testimonials", icon: "✓" }
       ]
     },
     solution: {
-      greeting: "Our approach",
-      message: "Five layers. Each one matters. This is how production AI actually gets built.",
-      status: "Presenting architecture",
-      workflow: ["Loading", "system design", "..."],
+      greeting: "The architecture",
+      messages: [
+        "Five layers. Each one essential. This is production-grade AI — not a demo.",
+        "You're looking at what separates POCs from real deployments. Every layer has a purpose.",
+        "This architecture has shipped to Fortune 500s. It works because it's complete."
+      ],
+      followUps: [
+        { delay: 7000, message: "Hover over any layer to see what it does. The details matter here." },
+        { delay: 14000, message: "Most AI projects miss 2-3 of these layers. That's why they fail in production." }
+      ],
+      insights: {
+        technical: "I notice you're spending time here. Want me to explain any specific layer?",
+        quickScan: "The quick version: infrastructure → data → models → governance → interface. All five, or it doesn't ship."
+      },
+      status: "Explaining architecture",
       actions: [
-        { label: "See it in action", target: "process", icon: "⚡" },
-        { label: "View examples", target: "testimonials", icon: "📋" }
+        { label: "How it works", target: "process", icon: "⚡" },
+        { label: "See results", target: "testimonials", icon: "📊" }
       ]
     },
     stats: {
-      greeting: "Market intelligence",
-      message: "These aren't projections — they're results from live deployments.",
-      status: "Loading metrics",
-      workflow: ["Fetching", "real data", "..."],
+      greeting: "The numbers",
+      messages: [
+        "Real data from real deployments. Every number here has a client story behind it.",
+        "These aren't projections — they're measured outcomes. We track everything.",
+        "The market is moving fast. These metrics show where the opportunity is."
+      ],
+      followUps: [
+        { delay: 6000, message: "The $4.1T figure gets attention, but the 87% efficiency gain is what clients actually feel." },
+        { delay: 12000, message: "Want to calculate your specific opportunity? The ROI calculator does the math." }
+      ],
+      insights: {
+        analytical: "I see you're studying the numbers. Each one is sourced and verifiable.",
+        quickScan: "Key takeaway: AI automation delivers 3-5x ROI when deployed correctly. Most companies aren't there yet."
+      },
+      status: "Presenting market data",
       actions: [
-        { label: "See case studies", href: "case-studies.html", icon: "📁" },
-        { label: "Calculate ROI", target: "roi", icon: "💰" }
+        { label: "Calculate my ROI", target: "roi", icon: "→" },
+        { label: "Case studies", href: "case-studies.html", icon: "📁" }
       ]
     },
     services: {
-      greeting: "Engagement options",
-      message: "Most clients start with Proof of Value — a working agent in 4 weeks. Clear scope. Clear outcomes.",
-      status: "Displaying packages",
-      workflow: ["Rendering", "options", "..."],
+      greeting: "How we engage",
+      messages: [
+        "Three paths forward. Most clients start with Proof of Value — a working agent in 4 weeks.",
+        "Each package is scoped to deliver specific outcomes. No ambiguity, no scope creep.",
+        "Whether you need a quick pilot or enterprise transformation, there's a clear path."
+      ],
+      followUps: [
+        { delay: 7000, message: "Proof of Value is popular because you see results before committing to scale." },
+        { delay: 14000, message: "Not sure which fits? The discovery call helps us match the right engagement to your situation." }
+      ],
+      insights: {
+        comparing: "Comparing options? The key difference is timeline and scope — not quality.",
+        decisive: "Ready to move? Book a discovery call and we'll match you to the right package."
+      },
+      status: "Showing engagement options",
       actions: [
-        { label: "Learn more", href: "services.html", icon: "→" },
-        { label: "See process", target: "process", icon: "📋" }
+        { label: "See full details", href: "services.html", icon: "→" },
+        { label: "Our process", target: "process", icon: "📋" }
       ]
     },
     testimonials: {
-      greeting: "Social proof",
-      message: "Real results. Specific metrics. Every claim is auditable.",
-      status: "Fetching testimonials",
-      workflow: ["Loading", "case data", "..."],
+      greeting: "What clients say",
+      messages: [
+        "Real testimonials from real projects. Every result here is documented.",
+        "These aren't cherry-picked quotes — they're representative outcomes.",
+        "The best proof is measurable impact. These clients measured."
+      ],
+      followUps: [
+        { delay: 6000, message: "Each testimonial links to a fuller case study if you want the details." },
+        { delay: 12000, message: "Notice the specificity — percentages, timelines, outcomes. We don't do vague." }
+      ],
+      insights: {
+        skeptical: "Healthy skepticism is good. Every claim here is verifiable with documentation.",
+        interested: "A testimonial catching your eye? I can point you to the full case study."
+      },
+      status: "Loading social proof",
       actions: [
         { label: "Full case studies", href: "case-studies.html", icon: "📁" },
-        { label: "Calculate impact", target: "roi", icon: "💰" }
+        { label: "Calculate my impact", target: "roi", icon: "→" }
       ]
     },
     process: {
-      greeting: "How we work",
-      message: "Structured. Predictable. No surprises. Each phase has clear gates.",
-      status: "Explaining methodology",
-      workflow: ["Mapping", "workflow", "..."],
+      greeting: "Our methodology",
+      messages: [
+        "Structured. Predictable. No surprises. Each phase has clear gates and deliverables.",
+        "You're seeing how we actually work — weekly syncs, clear milestones, transparent progress.",
+        "This process has shipped dozens of production systems. It's refined, not invented."
+      ],
+      followUps: [
+        { delay: 7000, message: "The Discovery phase is free. It's where we figure out if there's actually a fit." },
+        { delay: 14000, message: "Notice the timeline clarity? You'll always know exactly where we are." }
+      ],
+      insights: {
+        methodical: "I see you appreciate structure. Every deliverable in this process is documented.",
+        scanning: "The short version: discovery → build → deploy → optimize. Clear gates at each step."
+      },
+      status: "Explaining workflow",
       actions: [
-        { label: "Which industries?", target: "industries", icon: "🏢" },
+        { label: "Which industries?", target: "industries", icon: "→" },
         { label: "Let's talk", href: "contact.html", icon: "📞" }
       ]
     },
     industries: {
-      greeting: "Target verticals",
-      message: "We go deep where the patterns are proven. Finance. Insurance. SaaS. Manufacturing.",
-      status: "Analyzing sectors",
-      workflow: ["Targeting", "verticals", "..."],
+      greeting: "Where we specialize",
+      messages: [
+        "Finance. Insurance. SaaS. Manufacturing. We go deep where patterns are proven.",
+        "Each industry has unique AI opportunities. We've mapped them.",
+        "Specialization matters. Generic AI advice doesn't ship production systems."
+      ],
+      followUps: [
+        { delay: 6000, message: "Click any industry to see specific use cases and case studies." },
+        { delay: 12000, message: "Not seeing your industry? Some patterns transfer. Worth a conversation." }
+      ],
+      insights: {
+        exploring: "Looking for your industry? We've deployed in more verticals than shown here.",
+        focused: "Found your sector? Each one has a dedicated page with specific case studies."
+      },
+      status: "Mapping opportunities",
       actions: [
         { label: "Industry details", href: "industries.html", icon: "→" },
-        { label: "My savings?", target: "roi", icon: "💰" }
+        { label: "Calculate savings", target: "roi", icon: "→" }
       ]
     },
     roi: {
-      greeting: "Value calculator",
-      message: "Try the numbers. Most clients see 3-5x ROI in year one.",
-      status: "Calculating potential",
-      workflow: ["Computing", "savings", "..."],
+      greeting: "Your potential",
+      messages: [
+        "Try the calculator. Input your numbers, see your opportunity.",
+        "Most clients are surprised by the math. The savings compound faster than expected.",
+        "Real ROI calculation, not optimistic projections. Conservative estimates only."
+      ],
+      followUps: [
+        { delay: 8000, message: "Tip: The calculator defaults to conservative estimates. Your actual numbers might be higher." },
+        { delay: 15000, message: "Want help with the inputs? Book a call and we'll calculate together with your real data." }
+      ],
+      insights: {
+        calculating: "Playing with the numbers? Most clients see 3-5x first-year ROI.",
+        ready: "The math makes sense, doesn't it? Happy to validate these numbers on a call."
+      },
+      status: "Computing potential",
       actions: [
         { label: "Book discovery call", href: "contact.html", icon: "📞" },
-        { label: "See pricing", target: "services", icon: "💳" }
+        { label: "See pricing", target: "services", icon: "→" }
       ]
     },
     faq: {
-      greeting: "Common questions",
-      message: "If yours isn't here, I'm ready to help.",
-      status: "Loading responses",
-      workflow: ["Indexing", "FAQ", "..."],
+      greeting: "Questions answered",
+      messages: [
+        "Common questions, direct answers. If yours isn't here, I'm ready to help.",
+        "We've collected the questions that matter most. Click any to expand.",
+        "Transparency matters. No question is off-limits."
+      ],
+      followUps: [
+        { delay: 8000, message: "Don't see your question? The contact form or a quick call works too." },
+        { delay: 15000, message: "The FAQ covers 80% of what people ask. The other 20% is always custom to your situation." }
+      ],
+      insights: {
+        reading: "Good questions being asked here. Most concerns are addressable.",
+        scanning: "Looking for something specific? Try Cmd+F or ask me directly."
+      },
+      status: "Indexing answers",
       actions: [
-        { label: "Talk to us", href: "contact.html", icon: "📞" },
-        { label: "Start over", target: "hero", icon: "↑" }
+        { label: "Talk to a human", href: "contact.html", icon: "📞" },
+        { label: "Back to top", target: "hero", icon: "↑" }
       ]
     },
     cta: {
-      greeting: "Ready?",
-      message: "A discovery call takes 30 minutes. No pitch. Just clarity on your next step.",
-      status: "Conversion ready",
-      workflow: ["Preparing", "call link", "..."],
+      greeting: "Next step",
+      messages: [
+        "A discovery call is 30 minutes. No pitch, just clarity on whether we can help.",
+        "You've seen what we do. Ready to see if it fits your situation?",
+        "The next step is a conversation. No commitment, just exploration."
+      ],
+      followUps: [
+        { delay: 5000, message: "The discovery call is free. Worst case, you leave with clarity on your AI strategy." },
+        { delay: 10000, message: "Still thinking? I can point you to more case studies or specific details." }
+      ],
+      insights: {
+        ready: "You've explored thoroughly. A call is the natural next step.",
+        hesitant: "Not ready to talk? Case studies and industry pages have more detail if you need it."
+      },
+      status: "Ready when you are",
       actions: [
         { label: "Book a call", href: "contact.html", icon: "📞" },
-        { label: "Case studies", href: "case-studies.html", icon: "📁" }
+        { label: "More case studies", href: "case-studies.html", icon: "📁" }
       ]
     }
   };
 
-  // Create immersive companion
+  // Create companion element
   const companion = document.createElement('div');
   companion.className = 'ai-companion';
   companion.innerHTML = `
@@ -744,10 +905,10 @@
         </div>
       </div>
       <div class="ai-companion-meta">
-        <div class="ai-companion-name">M&C Agent</div>
+        <div class="ai-companion-name">M&C Guide</div>
         <div class="ai-companion-status">
           <span class="status-dot"></span>
-          <span class="status-text">Ready to assist</span>
+          <span class="status-text">Observing</span>
         </div>
       </div>
       <button class="ai-companion-minimize" aria-label="Minimize">
@@ -757,13 +918,12 @@
       </button>
     </div>
     <div class="ai-companion-body">
-      <div class="ai-companion-workflow">
-        <span class="workflow-step"></span>
-        <span class="workflow-step"></span>
-        <span class="workflow-step"></span>
+      <div class="ai-companion-thinking">
+        <span></span><span></span><span></span>
       </div>
       <div class="ai-companion-greeting"></div>
       <div class="ai-companion-message"></div>
+      <div class="ai-companion-insight"></div>
       <div class="ai-companion-actions"></div>
     </div>
     <div class="ai-companion-collapsed">
@@ -775,66 +935,86 @@
 
   const greetingEl = companion.querySelector('.ai-companion-greeting');
   const messageEl = companion.querySelector('.ai-companion-message');
+  const insightEl = companion.querySelector('.ai-companion-insight');
   const actionsEl = companion.querySelector('.ai-companion-actions');
   const statusEl = companion.querySelector('.status-text');
-  const workflowSteps = companion.querySelectorAll('.workflow-step');
+  const thinkingEl = companion.querySelector('.ai-companion-thinking');
   const minimizeBtn = companion.querySelector('.ai-companion-minimize');
   const collapsedEl = companion.querySelector('.ai-companion-collapsed');
 
   let isMinimized = false;
   let currentSection = null;
   let isTyping = false;
+  let followUpTimers = [];
+  let sectionEnterTime = Date.now();
 
-  // Toggle minimize
+  // Minimize handlers
   minimizeBtn.addEventListener('click', () => {
     isMinimized = true;
     companion.classList.add('minimized');
+    userBehavior.hasInteracted = true;
   });
 
   collapsedEl.addEventListener('click', () => {
     isMinimized = false;
     companion.classList.remove('minimized');
+    userBehavior.hasInteracted = true;
   });
 
-  // Workflow animation
-  function animateWorkflow(steps) {
-    workflowSteps.forEach((el, i) => {
-      el.textContent = steps[i] || '';
-      el.classList.remove('active');
+  // Show thinking animation
+  function showThinking(duration = 800) {
+    companion.classList.add('thinking');
+    thinkingEl.style.display = 'flex';
+    return new Promise(resolve => {
+      setTimeout(() => {
+        companion.classList.remove('thinking');
+        thinkingEl.style.display = 'none';
+        resolve();
+      }, duration);
     });
-    let step = 0;
-    const interval = setInterval(() => {
-      workflowSteps.forEach(el => el.classList.remove('active'));
-      if (step < workflowSteps.length) {
-        workflowSteps[step].classList.add('active');
-        step++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 300);
   }
 
-  // Typing effect
-  function typeMessage(text, callback) {
+  // Typing effect with natural variation
+  function typeMessage(text, element, callback) {
     if (isTyping) return;
     isTyping = true;
-    messageEl.textContent = '';
-    messageEl.classList.add('typing');
+    element.textContent = '';
+    element.style.opacity = '1';
     let i = 0;
-    const speed = 15;
+    const baseSpeed = 18;
 
     function type() {
       if (i < text.length) {
-        messageEl.textContent += text.charAt(i);
+        element.textContent += text.charAt(i);
         i++;
-        setTimeout(type, speed);
+        // Natural typing variation - pause at punctuation
+        const char = text.charAt(i - 1);
+        let delay = baseSpeed + Math.random() * 10;
+        if ('.!?'.includes(char)) delay += 150;
+        else if (',;:'.includes(char)) delay += 80;
+        else if (char === '—') delay += 100;
+        setTimeout(type, delay);
       } else {
         isTyping = false;
-        messageEl.classList.remove('typing');
         if (callback) callback();
       }
     }
     type();
+  }
+
+  // Get behavior-aware insight
+  function getBehaviorInsight(prompt) {
+    const insights = prompt.insights || {};
+    const timeInSection = Date.now() - sectionEnterTime;
+
+    if (userBehavior.quickScanMode && insights.quickScan) return insights.quickScan;
+    if (userBehavior.quickScanMode && insights.fastScroller) return insights.fastScroller;
+    if (timeInSection > 12000 && insights.lingering) return insights.lingering;
+    if (timeInSection > 8000 && insights.reading) return insights.reading;
+    if (userBehavior.pauseCount > 3 && insights.methodical) return insights.methodical;
+    if (insights.exploring) return insights.exploring;
+
+    return null;
   }
 
   // Update actions
@@ -848,40 +1028,107 @@
 
     actionsEl.querySelectorAll('[data-target]').forEach(btn => {
       btn.addEventListener('click', () => {
+        userBehavior.hasInteracted = true;
         const target = document.querySelector(`[data-agent-section="${btn.dataset.target}"]`);
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
+    });
+
+    actionsEl.style.opacity = '0';
+    actionsEl.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      actionsEl.style.opacity = '1';
+      actionsEl.style.transform = 'translateY(0)';
+    }, 100);
+  }
+
+  // Show follow-up insight
+  function showInsight(text) {
+    if (isMinimized) return;
+    insightEl.textContent = '';
+    insightEl.style.opacity = '0';
+    insightEl.style.display = 'block';
+
+    setTimeout(() => {
+      insightEl.style.opacity = '1';
+      typeMessage(text, insightEl);
+    }, 200);
+  }
+
+  // Schedule follow-up messages
+  function scheduleFollowUps(followUps) {
+    followUpTimers.forEach(t => clearTimeout(t));
+    followUpTimers = [];
+
+    if (!followUps || isMinimized) return;
+
+    followUps.forEach((followUp, index) => {
+      const timer = setTimeout(() => {
+        if (!isMinimized && !isTyping && currentSection) {
+          showInsight(followUp.message);
+        }
+      }, followUp.delay + (index * 2000));
+      followUpTimers.push(timer);
     });
   }
 
-  // Update companion
-  function updateCompanion(sectionName) {
+  // Main update function
+  async function updateCompanion(sectionName) {
     if (sectionName === currentSection || isTyping) return;
+
+    // Clear previous follow-ups
+    followUpTimers.forEach(t => clearTimeout(t));
+    followUpTimers = [];
+
+    // Track behavior
+    if (currentSection) {
+      userBehavior.timePerSection[currentSection] = Date.now() - sectionEnterTime;
+    }
+    userBehavior.sectionsVisited.add(sectionName);
+    sectionEnterTime = Date.now();
     currentSection = sectionName;
 
     const prompt = contextualPrompts[sectionName];
     if (!prompt) return;
 
-    companion.classList.add('transitioning');
+    // Show thinking
+    await showThinking(600 + Math.random() * 400);
 
     // Update status
     statusEl.textContent = prompt.status;
 
-    // Animate workflow
-    animateWorkflow(prompt.workflow);
+    // Clear insight
+    insightEl.style.display = 'none';
+    insightEl.textContent = '';
 
+    // Select message based on visit count
+    const visitCount = Array.from(userBehavior.sectionsVisited).length;
+    const messageIndex = Math.min(Math.floor(Math.random() * prompt.messages.length), prompt.messages.length - 1);
+    const message = prompt.messages[messageIndex];
+
+    // Show greeting
+    greetingEl.textContent = prompt.greeting;
+    greetingEl.style.opacity = '0';
+    setTimeout(() => greetingEl.style.opacity = '1', 100);
+
+    // Type message
+    messageEl.textContent = '';
     setTimeout(() => {
-      companion.classList.remove('transitioning');
-      greetingEl.textContent = prompt.greeting;
-      typeMessage(prompt.message, () => {
+      typeMessage(message, messageEl, () => {
         updateActions(prompt.actions);
+
+        // Schedule behavior-aware insight or follow-ups
+        const behaviorInsight = getBehaviorInsight(prompt);
+        if (behaviorInsight) {
+          setTimeout(() => showInsight(behaviorInsight), 4000);
+        } else {
+          scheduleFollowUps(prompt.followUps);
+        }
       });
-    }, 600);
+    }, 200);
   }
 
-  // Observe sections
+  // Section observer
   const sections = document.querySelectorAll('[data-agent-section]');
   const observer = new IntersectionObserver(
     (entries) => {
@@ -897,62 +1144,31 @@
 
   sections.forEach(section => observer.observe(section));
 
-  // Initialize
-  setTimeout(() => updateCompanion('hero'), 800);
+  // Initialize with welcome
+  setTimeout(() => updateCompanion('hero'), 1200);
 
   // ============================================
-  // STICKY PROGRESS INDICATOR
+  // IMMERSIVE SECTION ANIMATIONS
+  // Each section reveals with presence
   // ============================================
-  const progressBar = document.createElement('div');
-  progressBar.className = 'scroll-progress-bar';
-  progressBar.innerHTML = '<div class="scroll-progress-fill"></div>';
-  document.body.appendChild(progressBar);
+  const immersiveSections = document.querySelectorAll('.section, .hero');
 
-  const progressFill = progressBar.querySelector('.scroll-progress-fill');
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('section-active');
+          // Stagger reveal children
+          const reveals = entry.target.querySelectorAll('.reveal, .card, .stat-card, .process-item');
+          reveals.forEach((el, i) => {
+            setTimeout(() => el.classList.add('revealed'), i * 100);
+          });
+        }
+      });
+    },
+    { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
+  );
 
-  window.addEventListener('scroll', () => {
-    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-    progressFill.style.width = `${scrollPercent}%`;
-  }, { passive: true });
-
-  // ============================================
-  // SECTION VISUALIZATIONS
-  // Add mini-terminals to key sections
-  // ============================================
-  const sectionVisuals = {
-    stats: `
-      <div class="section-visual stats-visual">
-        <div class="visual-line"><span class="v-prompt">▸</span> Loading market data...</div>
-        <div class="visual-line success"><span class="v-prompt">✓</span> $588B market indexed</div>
-        <div class="visual-line"><span class="v-prompt">▸</span> Calculating growth rate...</div>
-        <div class="visual-line success"><span class="v-prompt">✓</span> 44.8% CAGR confirmed</div>
-      </div>
-    `,
-    testimonials: `
-      <div class="section-visual testimonials-visual">
-        <div class="visual-line"><span class="v-prompt">▸</span> Fetching verified results...</div>
-        <div class="visual-line success"><span class="v-prompt">✓</span> 67% faster processing</div>
-        <div class="visual-line success"><span class="v-prompt">✓</span> 100% audit compliance</div>
-      </div>
-    `,
-    roi: `
-      <div class="section-visual roi-visual">
-        <div class="visual-line"><span class="v-prompt">▸</span> Initializing calculator...</div>
-        <div class="visual-line"><span class="v-prompt">⚡</span> Input your metrics below</div>
-        <div class="visual-line success"><span class="v-prompt">✓</span> Real-time computation ready</div>
-      </div>
-    `
-  };
-
-  // Inject visuals into sections
-  Object.entries(sectionVisuals).forEach(([sectionId, html]) => {
-    const section = document.querySelector(`[data-agent-section="${sectionId}"]`);
-    if (section) {
-      const container = section.querySelector('.container');
-      if (container) {
-        container.insertAdjacentHTML('afterbegin', html);
-      }
-    }
-  });
+  immersiveSections.forEach(section => sectionObserver.observe(section));
 
 })();
