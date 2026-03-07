@@ -54,10 +54,45 @@
           <ul class="navbar-links">
             <li><a href="index.html" class="active">Home</a></li>
             <li><a href="services.html">Services</a></li>
-            <li><a href="industries.html">Industries</a></li>
+            <li class="navbar-dropdown">
+              <a href="industries.html">
+                Industries
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </a>
+              <div class="dropdown-menu">
+                <a href="industry-financial.html">
+                  <span class="dropdown-icon">$</span>
+                  <span class="dropdown-label"><span>Financial Services</span><span>KYC, AML, Compliance</span></span>
+                </a>
+                <a href="industry-insurance.html">
+                  <span class="dropdown-icon">+</span>
+                  <span class="dropdown-label"><span>Insurance</span><span>Claims, Underwriting</span></span>
+                </a>
+                <a href="industry-saas.html">
+                  <span class="dropdown-icon">@</span>
+                  <span class="dropdown-label"><span>SaaS & IT</span><span>Helpdesk, DevOps</span></span>
+                </a>
+                <a href="industry-retail.html">
+                  <span class="dropdown-icon">*</span>
+                  <span class="dropdown-label"><span>Retail & E-commerce</span><span>CX, Operations</span></span>
+                </a>
+                <a href="industry-manufacturing.html">
+                  <span class="dropdown-icon">#</span>
+                  <span class="dropdown-label"><span>Manufacturing</span><span>Maintenance, QA</span></span>
+                </a>
+                <a href="industry-b2b.html">
+                  <span class="dropdown-icon">></span>
+                  <span class="dropdown-label"><span>B2B Services</span><span>Email, Document Ops</span></span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="industries.html">
+                  <span class="dropdown-icon">~</span>
+                  <span class="dropdown-label"><span>All Industries</span><span>Complete overview</span></span>
+                </a>
+              </div>
+            </li>
             <li><a href="approach.html">Approach</a></li>
-            <li><a href="case-studies.html">Case Studies</a></li>
-            <li><a href="insights.html">Insights</a></li>
+            <li><a href="case-studies.html">Results</a></li>
             <li><a href="about.html">About</a></li>
           </ul>
           <div class="navbar-cta">
@@ -909,81 +944,153 @@
       </div>
 
       <div class="grid grid-3 reveal-stagger">
+        <!-- Financial Services -->
         <a href="industry-financial.html" class="card card-with-image card-link">
-          <div class="card-industry-header">
-            <img src="https://images.unsplash.com/photo-1560472355-536de3962603?w=600&h=400&fit=crop&q=80" alt="Financial Services" class="card-industry-img" loading="lazy">
+          <div class="card-industry-visual">
+            <div class="mini-terminal">
+              <div class="mini-terminal-header">
+                <span class="mini-terminal-dot"></span>
+                <span class="mini-terminal-dot"></span>
+                <span class="mini-terminal-dot"></span>
+              </div>
+              <div class="mini-terminal-body">
+                <div class="mini-terminal-line"><span class="mini-prompt">$</span><span class="mini-text">Running KYC check...</span></div>
+                <div class="mini-terminal-line"><span class="mini-prompt">+</span><span class="mini-text success">Risk: LOW (0.12)</span></div>
+                <div class="mini-terminal-line"><span class="mini-prompt">+</span><span class="mini-text processing">Compliance verified</span></div>
+              </div>
+            </div>
           </div>
           <span class="badge badge-primary">Largest AI Spend</span>
           <h3 class="card-title mt-4">Financial Services</h3>
           <p class="card-description">KYC/AML case research, customer correspondence, compliance lookup, fraud operations triage.</p>
-          <div class="card-people">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
-            <span>12 deployments</span>
+          <div class="card-stats">
+            <span class="card-stat">12 deployments</span>
+            <span class="card-stat">67% faster</span>
           </div>
         </a>
 
+        <!-- Insurance -->
         <a href="industry-insurance.html" class="card card-with-image card-link">
-          <div class="card-industry-header">
-            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop&q=80" alt="Insurance" class="card-industry-img" loading="lazy">
+          <div class="card-industry-visual">
+            <div class="industry-flow">
+              <div class="flow-node active">Claim In</div>
+              <span class="flow-arrow">-></span>
+              <div class="flow-node">Extract</div>
+              <span class="flow-arrow">-></span>
+              <div class="flow-node">Triage</div>
+            </div>
+            <div class="data-stream">
+              <div class="data-particle"></div>
+              <div class="data-particle"></div>
+              <div class="data-particle"></div>
+            </div>
           </div>
           <span class="badge badge-primary">High Doc Volume</span>
           <h3 class="card-title mt-4">Insurance</h3>
           <p class="card-description">Claims intake and triage, document extraction, subrogation research, customer service automation.</p>
-          <div class="card-people">
-            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
-            <span>8 deployments</span>
+          <div class="card-stats">
+            <span class="card-stat">8 deployments</span>
+            <span class="card-stat">40% automated</span>
           </div>
         </a>
 
+        <!-- SaaS & IT -->
         <a href="industry-saas.html" class="card card-with-image card-link">
-          <div class="card-industry-header">
-            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop&q=80" alt="SaaS" class="card-industry-img" loading="lazy">
+          <div class="card-industry-visual">
+            <div class="mini-terminal">
+              <div class="mini-terminal-header">
+                <span class="mini-terminal-dot"></span>
+                <span class="mini-terminal-dot"></span>
+                <span class="mini-terminal-dot"></span>
+              </div>
+              <div class="mini-terminal-body">
+                <div class="mini-terminal-line"><span class="mini-prompt">@</span><span class="mini-text">Ticket #4521 received</span></div>
+                <div class="mini-terminal-line"><span class="mini-prompt">+</span><span class="mini-text processing">Auto-routing to L2...</span></div>
+                <div class="mini-terminal-line"><span class="mini-prompt">+</span><span class="mini-text success">Resolution drafted</span></div>
+              </div>
+            </div>
           </div>
           <span class="badge badge-success">Fast Adoption</span>
           <h3 class="card-title mt-4">SaaS & IT</h3>
           <p class="card-description">IT helpdesk automation, ticket triage, SDLC workflows, internal knowledge copilots.</p>
-          <div class="card-people">
-            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
-            <span>15 deployments</span>
+          <div class="card-stats">
+            <span class="card-stat">15 deployments</span>
+            <span class="card-stat">35% deflection</span>
           </div>
         </a>
 
+        <!-- Retail -->
         <a href="industry-retail.html" class="card card-with-image card-link">
-          <div class="card-industry-header">
-            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop&q=80" alt="Retail" class="card-industry-img" loading="lazy">
+          <div class="card-industry-visual">
+            <div class="industry-flow">
+              <div class="flow-node">Customer</div>
+              <span class="flow-arrow">-></span>
+              <div class="flow-node active">AI Agent</div>
+              <span class="flow-arrow">-></span>
+              <div class="flow-node">Resolved</div>
+            </div>
+            <div class="data-stream">
+              <div class="data-particle"></div>
+              <div class="data-particle"></div>
+              <div class="data-particle"></div>
+            </div>
           </div>
           <span class="badge badge-primary">Clear CX Metrics</span>
           <h3 class="card-title mt-4">Retail & E-commerce</h3>
           <p class="card-description">Customer service automation, order exception handling, merchandising content, supplier comms.</p>
-          <div class="card-people">
-            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
-            <span>6 deployments</span>
+          <div class="card-stats">
+            <span class="card-stat">6 deployments</span>
+            <span class="card-stat">50% faster CX</span>
           </div>
         </a>
 
+        <!-- Manufacturing -->
         <a href="industry-manufacturing.html" class="card card-with-image card-link">
-          <div class="card-industry-header">
-            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=400&fit=crop&q=80" alt="Manufacturing" class="card-industry-img" loading="lazy">
+          <div class="card-industry-visual">
+            <div class="mini-terminal">
+              <div class="mini-terminal-header">
+                <span class="mini-terminal-dot"></span>
+                <span class="mini-terminal-dot"></span>
+                <span class="mini-terminal-dot"></span>
+              </div>
+              <div class="mini-terminal-body">
+                <div class="mini-terminal-line"><span class="mini-prompt">!</span><span class="mini-text">WO #892 - Priority: HIGH</span></div>
+                <div class="mini-terminal-line"><span class="mini-prompt">+</span><span class="mini-text processing">Parts lookup...</span></div>
+                <div class="mini-terminal-line"><span class="mini-prompt">+</span><span class="mini-text success">Scheduled for AM</span></div>
+              </div>
+            </div>
           </div>
           <span class="badge badge-primary">Clear Productivity</span>
           <h3 class="card-title mt-4">Manufacturing</h3>
           <p class="card-description">Work order triage, maintenance planning, parts lookup, QA documentation assistants.</p>
-          <div class="card-people">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
-            <span>4 deployments</span>
+          <div class="card-stats">
+            <span class="card-stat">4 deployments</span>
+            <span class="card-stat">45% faster triage</span>
           </div>
         </a>
 
+        <!-- B2B Services -->
         <a href="industry-b2b.html" class="card card-with-image card-link">
-          <div class="card-industry-header">
-            <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&h=400&fit=crop&q=80" alt="B2B Services" class="card-industry-img" loading="lazy">
+          <div class="card-industry-visual">
+            <div class="industry-flow">
+              <div class="flow-node">Email</div>
+              <span class="flow-arrow">-></span>
+              <div class="flow-node active">Classify</div>
+              <span class="flow-arrow">-></span>
+              <div class="flow-node">Route</div>
+            </div>
+            <div class="data-stream">
+              <div class="data-particle"></div>
+              <div class="data-particle"></div>
+              <div class="data-particle"></div>
+            </div>
           </div>
           <span class="badge badge-success">Fast Time-to-Value</span>
           <h3 class="card-title mt-4">B2B Services</h3>
           <p class="card-description">Email and ticket triage, document routing, CRM enrichment, customer communication workflows.</p>
-          <div class="card-people">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=28&h=28&fit=crop&crop=face" alt="Client" loading="lazy">
-            <span>10 deployments</span>
+          <div class="card-stats">
+            <span class="card-stat">10 deployments</span>
+            <span class="card-stat">4hr to 1hr</span>
           </div>
         </a>
       </div>
@@ -1153,10 +1260,10 @@
         <div class="footer-column">
           <h4>Industries</h4>
           <ul class="footer-links">
-            <li><a href="industries.html">Financial Services</a></li>
-            <li><a href="industries.html">Insurance</a></li>
-            <li><a href="industries.html">SaaS & IT</a></li>
-            <li><a href="industries.html">Manufacturing</a></li>
+            <li><a href="industry-financial.html">Financial Services</a></li>
+            <li><a href="industry-insurance.html">Insurance</a></li>
+            <li><a href="industry-saas.html">SaaS & IT</a></li>
+            <li><a href="industry-manufacturing.html">Manufacturing</a></li>
           </ul>
         </div>
       </div>
