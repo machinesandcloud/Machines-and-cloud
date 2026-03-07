@@ -1410,8 +1410,8 @@ img {
 }
 
 .trusted-face {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 52px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -1422,6 +1422,7 @@ img {
   justify-content: center;
   background: rgba(255, 255, 255, 0.06);
   box-sizing: border-box;
+  color: rgba(226, 232, 240, 0.9);
 }
 
 .trusted-face:hover {
@@ -1430,7 +1431,8 @@ img {
   z-index: 10;
 }
 
-.trusted-face img {
+.trusted-face img,
+.trusted-face svg {
   width: 72%;
   height: 72%;
   object-fit: contain;
@@ -1443,9 +1445,15 @@ img {
   margin-left: var(--space-3);
 }
 
+.trusted-note {
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-neutral-500);
+}
+
 @media (max-width: 768px) {
   .trusted-face {
-    width: 44px;
+    width: 60px;
     height: 44px;
   }
 }
@@ -6367,15 +6375,16 @@ body.agent-mode .navbar {
 
 /* Reveal animation for child elements */
 .reveal,
+.reveal-stagger,
+.reveal-stagger > *,
 .card,
 .stat-card,
 .process-item,
 .service-card,
 .pricing-card {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 
 /* FAQ items need to be visible by default since they're interactive */
@@ -6394,6 +6403,10 @@ body.agent-mode .navbar {
 .revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+.reveal-stagger.is-visible > * {
+  animation: none;
 }
 
 /* Stagger delay utilities */
