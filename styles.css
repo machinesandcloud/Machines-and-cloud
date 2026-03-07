@@ -560,6 +560,64 @@ section {
   font-family: inherit;
 }
 
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.resource-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 24px;
+}
+
+.resource-card ul {
+  padding-left: 18px;
+  color: var(--ink-muted);
+}
+
+.download-callout {
+  background: rgba(10, 15, 29, 0.92);
+  color: #f9f4ec;
+  border-radius: 28px;
+  padding: 32px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.download-callout p {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.download-form {
+  display: grid;
+  gap: 12px;
+  min-width: 260px;
+}
+
+.download-form input {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  font-family: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
 .contact-card {
   background: rgba(10, 15, 29, 0.9);
   color: #f9f4ec;
@@ -892,6 +950,15 @@ section {
 
   .finder-grid {
     grid-template-columns: 1fr;
+  }
+
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .download-callout {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .cta {
