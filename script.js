@@ -1196,4 +1196,404 @@
 
   } // End reduced motion check
 
+  // ============================================
+  // BREAKTHROUGH IMMERSIVE AI EXPERIENCE
+  // First-of-its-kind agentic immersion
+  // ============================================
+
+  // Initialize immersive features
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.innerWidth > 768) {
+
+    // ============================================
+    // NEURAL NETWORK CANVAS
+    // ============================================
+    const neuralCanvas = document.createElement('canvas');
+    neuralCanvas.className = 'neural-canvas';
+    neuralCanvas.id = 'neuralCanvas';
+    document.body.insertBefore(neuralCanvas, document.body.firstChild);
+
+    const ctx = neuralCanvas.getContext('2d');
+    let nodes = [];
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let animationFrame;
+
+    function resizeCanvas() {
+      neuralCanvas.width = window.innerWidth;
+      neuralCanvas.height = window.innerHeight;
+      initNodes();
+    }
+
+    function initNodes() {
+      nodes = [];
+      const nodeCount = Math.floor((window.innerWidth * window.innerHeight) / 25000);
+      for (let i = 0; i < nodeCount; i++) {
+        nodes.push({
+          x: Math.random() * neuralCanvas.width,
+          y: Math.random() * neuralCanvas.height,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          radius: Math.random() * 2 + 1,
+          baseX: Math.random() * neuralCanvas.width,
+          baseY: Math.random() * neuralCanvas.height
+        });
+      }
+    }
+
+    function drawNeural() {
+      ctx.clearRect(0, 0, neuralCanvas.width, neuralCanvas.height);
+
+      // Draw connections
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.08)';
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 150) {
+            const opacity = (1 - dist / 150) * 0.15;
+            ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes
+      for (const node of nodes) {
+        // Move towards mouse slightly
+        const dxMouse = mouseX - node.x;
+        const dyMouse = mouseY - node.y;
+        const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+
+        if (distMouse < 200) {
+          node.x += dxMouse * 0.002;
+          node.y += dyMouse * 0.002;
+        }
+
+        // Drift slowly
+        node.x += node.vx;
+        node.y += node.vy;
+
+        // Return to base
+        node.x += (node.baseX - node.x) * 0.001;
+        node.y += (node.baseY - node.y) * 0.001;
+
+        // Wrap around
+        if (node.x < 0) node.x = neuralCanvas.width;
+        if (node.x > neuralCanvas.width) node.x = 0;
+        if (node.y < 0) node.y = neuralCanvas.height;
+        if (node.y > neuralCanvas.height) node.y = 0;
+
+        // Draw node
+        const glowSize = distMouse < 200 ? 4 + (1 - distMouse / 200) * 3 : 4;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(59, 130, 246, ${distMouse < 200 ? 0.5 : 0.25})`;
+        ctx.fill();
+
+        // Glow effect for nodes near cursor
+        if (distMouse < 150) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, glowSize, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(59, 130, 246, ${(1 - distMouse / 150) * 0.3})`;
+          ctx.fill();
+        }
+      }
+
+      animationFrame = requestAnimationFrame(drawNeural);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    resizeCanvas();
+    drawNeural();
+
+    // ============================================
+    // AI CONSCIOUSNESS CURSOR FOLLOWER
+    // ============================================
+    const aiCursor = document.createElement('div');
+    aiCursor.className = 'ai-cursor';
+    aiCursor.innerHTML = `
+      <div class="ai-cursor-core"></div>
+      <div class="ai-cursor-ring"></div>
+      <div class="ai-cursor-ring ai-cursor-ring-2"></div>
+    `;
+    document.body.appendChild(aiCursor);
+
+    let cursorX = window.innerWidth / 2;
+    let cursorY = window.innerHeight / 2;
+    let targetX = cursorX;
+    let targetY = cursorY;
+    let trailTimeout;
+
+    function updateCursor() {
+      cursorX += (targetX - cursorX) * 0.08;
+      cursorY += (targetY - cursorY) * 0.08;
+      aiCursor.style.left = cursorX + 'px';
+      aiCursor.style.top = cursorY + 'px';
+      requestAnimationFrame(updateCursor);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+
+      // Create trail particles occasionally
+      clearTimeout(trailTimeout);
+      trailTimeout = setTimeout(() => {
+        const trail = document.createElement('div');
+        trail.className = 'ai-cursor-trail';
+        trail.style.left = cursorX + 'px';
+        trail.style.top = cursorY + 'px';
+        document.body.appendChild(trail);
+        setTimeout(() => trail.remove(), 600);
+      }, 50);
+    });
+
+    updateCursor();
+
+    // ============================================
+    // AI AWARENESS BREATHING EFFECT
+    // ============================================
+    const aiAwareness = document.createElement('div');
+    aiAwareness.className = 'ai-awareness';
+    document.body.insertBefore(aiAwareness, document.body.firstChild);
+
+    // ============================================
+    // DATA MATRIX RAIN EFFECT
+    // ============================================
+    const dataMatrix = document.createElement('div');
+    dataMatrix.className = 'data-matrix';
+    dataMatrix.id = 'dataMatrix';
+    document.body.insertBefore(dataMatrix, document.body.firstChild);
+
+    const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+    const columnCount = Math.floor(window.innerWidth / 30);
+
+    for (let i = 0; i < columnCount; i++) {
+      const column = document.createElement('div');
+      column.className = 'matrix-column';
+      column.style.left = (i * 30 + Math.random() * 15) + 'px';
+      column.style.animationDuration = (8 + Math.random() * 12) + 's';
+      column.style.animationDelay = (Math.random() * 10) + 's';
+
+      // Generate random string
+      let str = '';
+      const length = 10 + Math.floor(Math.random() * 20);
+      for (let j = 0; j < length; j++) {
+        str += matrixChars[Math.floor(Math.random() * matrixChars.length)];
+      }
+      column.textContent = str;
+      dataMatrix.appendChild(column);
+    }
+
+    // ============================================
+    // AI EYE - WATCHING EFFECT
+    // ============================================
+    const aiEye = document.createElement('div');
+    aiEye.className = 'ai-eye';
+    aiEye.innerHTML = `
+      <div class="ai-eye-outer"></div>
+      <div class="ai-eye-iris">
+        <div class="ai-eye-pupil"></div>
+      </div>
+    `;
+    document.body.appendChild(aiEye);
+
+    const eyeIris = aiEye.querySelector('.ai-eye-iris');
+
+    document.addEventListener('mousemove', (e) => {
+      const eyeRect = aiEye.getBoundingClientRect();
+      const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+      const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+
+      const angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+      const distance = Math.min(10, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) * 0.02);
+
+      const moveX = Math.cos(angle) * distance;
+      const moveY = Math.sin(angle) * distance;
+
+      eyeIris.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+    });
+
+    // ============================================
+    // SOUND WAVE VISUALIZATION
+    // ============================================
+    const soundWave = document.createElement('div');
+    soundWave.className = 'sound-wave';
+    for (let i = 0; i < 5; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'sound-bar';
+      soundWave.appendChild(bar);
+    }
+    document.body.appendChild(soundWave);
+
+    // ============================================
+    // SCAN LINE EFFECT
+    // ============================================
+    const scanLine = document.createElement('div');
+    scanLine.className = 'scan-line';
+    document.body.appendChild(scanLine);
+
+    // ============================================
+    // SECTION IN-VIEW DETECTION
+    // ============================================
+    const immersiveSections = document.querySelectorAll('.section, .hero');
+
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+          } else {
+            entry.target.classList.remove('in-view');
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    immersiveSections.forEach((section) => {
+      sectionObserver.observe(section);
+    });
+
+    // ============================================
+    // REACTIVE PARTICLES ON CLICK
+    // ============================================
+    document.addEventListener('click', (e) => {
+      // Create ripple effect
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple-effect';
+      ripple.style.left = e.clientX + 'px';
+      ripple.style.top = e.clientY + 'px';
+      ripple.style.width = '50px';
+      ripple.style.height = '50px';
+      ripple.style.marginLeft = '-25px';
+      ripple.style.marginTop = '-25px';
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 800);
+
+      // Create burst of particles
+      for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'reactive-particle active';
+        particle.style.left = e.clientX + 'px';
+        particle.style.top = e.clientY + 'px';
+
+        const angle = (Math.PI * 2 / 8) * i;
+        const distance = 50 + Math.random() * 50;
+        particle.style.setProperty('--targetX', Math.cos(angle) * distance + 'px');
+        particle.style.setProperty('--targetY', Math.sin(angle) * distance + 'px');
+
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 2000);
+      }
+    });
+
+    // ============================================
+    // ENHANCED CARD INTERACTIONS
+    // ============================================
+    const immersiveCards = document.querySelectorAll('.card, .stat-card, .testimonial-card');
+
+    immersiveCards.forEach((card) => {
+      card.addEventListener('mouseenter', () => {
+        // Add glitch class briefly
+        card.classList.add('glitch-hover');
+        setTimeout(() => card.classList.remove('glitch-hover'), 300);
+      });
+    });
+
+    // ============================================
+    // DEPTH PARALLAX ON SCROLL
+    // ============================================
+    let scrollTicking = false;
+
+    window.addEventListener('scroll', () => {
+      if (!scrollTicking) {
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+
+          // Move neural canvas slightly
+          if (neuralCanvas) {
+            neuralCanvas.style.transform = `translateY(${scrollY * 0.1}px)`;
+          }
+
+          // Move orbs at different speeds
+          document.querySelectorAll('.orb').forEach((orb, index) => {
+            const speed = 0.02 + (index * 0.01);
+            orb.style.transform = `translateY(${scrollY * speed}px)`;
+          });
+
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    }, { passive: true });
+
+    // ============================================
+    // HOLOGRAPHIC HERO TITLE
+    // ============================================
+    const heroTitleGradient = document.querySelector('.hero-title-gradient');
+    if (heroTitleGradient) {
+      heroTitleGradient.classList.add('holo-text');
+    }
+
+    // ============================================
+    // INTERACTIVE TERMINAL COMMANDS
+    // ============================================
+    const terminalBody = document.querySelector('.terminal-body');
+    if (terminalBody && !terminalBody.querySelector('.terminal-input-line')) {
+      const inputLine = document.createElement('div');
+      inputLine.className = 'terminal-input-line';
+      inputLine.innerHTML = `
+        <span class="terminal-input-prompt">$</span>
+        <input type="text" class="terminal-input" placeholder="Try: analyze, optimize, deploy..." id="immersiveTerminalInput">
+        <span class="terminal-cursor"></span>
+      `;
+      terminalBody.appendChild(inputLine);
+
+      const terminalInput = document.getElementById('immersiveTerminalInput');
+      if (terminalInput) {
+        terminalInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const cmd = terminalInput.value.trim().toLowerCase();
+            terminalInput.value = '';
+
+            const responses = {
+              'analyze': '→ Analyzing visitor patterns... Complete.',
+              'optimize': '→ Optimizing workflow efficiency... +67% improvement.',
+              'deploy': '→ Deploying AI agent to production... Success.',
+              'help': '→ Available: analyze, optimize, deploy, status',
+              'status': '→ All systems operational. Agent ready.'
+            };
+
+            const response = responses[cmd] || `→ Unknown command: ${cmd}`;
+
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = `
+              <span class="terminal-prompt">✓</span>
+              <span class="terminal-text success">${response}</span>
+            `;
+            line.style.animation = 'fadeSlideIn 0.3s ease forwards';
+            terminalBody.insertBefore(line, inputLine);
+          }
+        });
+      }
+    }
+
+    console.log('%c IMMERSIVE MODE ACTIVE ', 'background: linear-gradient(135deg, #1E40AF, #8B5CF6); color: white; font-size: 14px; padding: 8px 16px; border-radius: 4px;');
+
+  } // End immersive features check
+
 })();
