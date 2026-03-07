@@ -459,6 +459,42 @@
   }
 
   // ============================================
+  // AGENT TERMINAL ANIMATION
+  // ============================================
+  const terminalBody = document.querySelector('.terminal-body');
+
+  if (terminalBody) {
+    const terminalLines = terminalBody.querySelectorAll('.terminal-line');
+    const totalDuration = 12000; // 12 seconds for full animation
+    const restartDelay = 3000; // 3 second pause before restart
+
+    function restartTerminalAnimation() {
+      // Reset all lines
+      terminalLines.forEach((line) => {
+        line.style.animation = 'none';
+        line.offsetHeight; // Trigger reflow
+        line.style.animation = '';
+      });
+    }
+
+    // Restart animation periodically
+    setInterval(() => {
+      restartTerminalAnimation();
+    }, totalDuration + restartDelay);
+  }
+
+  // ============================================
+  // DYNAMIC WORKFLOW ANIMATIONS
+  // ============================================
+  const workflowCards = document.querySelectorAll('.workflow-demo-card');
+
+  if (workflowCards.length > 0) {
+    workflowCards.forEach((card, index) => {
+      card.style.animationDelay = `${index * 0.2}s`;
+    });
+  }
+
+  // ============================================
   // CONSOLE BRANDING
   // ============================================
   console.log(
