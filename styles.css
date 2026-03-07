@@ -246,6 +246,61 @@ section {
   padding: 70px 0;
 }
 
+.page-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 32px;
+  align-items: center;
+  padding: 70px 0 40px;
+}
+
+.page-hero p {
+  color: var(--ink-muted);
+  max-width: 640px;
+}
+
+.page-hero-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 26px;
+  box-shadow: var(--shadow);
+}
+
+.highlight-band {
+  background: rgba(10, 15, 29, 0.9);
+  color: #f9f4ec;
+  border-radius: 32px;
+  padding: 36px 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.highlight-band p {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.highlight-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.summary-grid article {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 24px;
+}
+
 .section-title {
   max-width: 720px;
 }
@@ -372,6 +427,103 @@ section {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.package-table .table {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.6fr;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-row.header {
+  background: rgba(10, 15, 29, 0.08);
+  font-weight: 600;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.governance-process .timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.timeline div {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.timeline span {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.contact-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 28px;
+  display: grid;
+  gap: 16px;
+  box-shadow: var(--shadow);
+}
+
+.contact-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 15, 29, 0.15);
+  font-family: inherit;
+}
+
+.contact-card {
+  background: rgba(10, 15, 29, 0.9);
+  color: #f9f4ec;
+  border-radius: 24px;
+  padding: 28px;
+}
+
+.contact-card p {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.contact-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.contact-list span {
+  display: block;
+  font-weight: 600;
+}
+
 .signals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -388,6 +540,11 @@ section {
 .signals .label {
   color: var(--ink-muted);
   font-size: 0.9rem;
+}
+
+.nav-links .active {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .cta {
@@ -488,6 +645,10 @@ section {
     grid-template-columns: 1fr;
   }
 
+  .page-hero {
+    grid-template-columns: 1fr;
+  }
+
   .delivery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -509,6 +670,18 @@ section {
   }
 
   .signals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .governance-process .timeline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -539,6 +712,11 @@ section {
     align-items: stretch;
   }
 
+  .highlight-band {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .hero-stats {
     grid-template-columns: 1fr;
   }
@@ -550,8 +728,16 @@ section {
   .pricing-grid,
   .persona-grid,
   .signals,
-  .trust-bar {
+  .trust-bar,
+  .summary-grid,
+  .contact-grid,
+  .governance-process .timeline {
     grid-template-columns: 1fr;
+  }
+
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .footer-inner {
