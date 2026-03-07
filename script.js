@@ -969,6 +969,7 @@
   let isMinimized = false;
   let currentSection = null;
   let isTyping = false;
+  let typingToken = 0;
   let followUpTimers = [];
   let sectionEnterTime = Date.now();
 
@@ -1000,7 +1001,8 @@
 
   // Typing effect with natural variation
   function typeMessage(text, element, callback) {
-    if (isTyping) return;
+    typingToken += 1;
+    const currentToken = typingToken;
     isTyping = true;
     element.textContent = '';
     element.style.opacity = '1';
@@ -1008,6 +1010,7 @@
     const baseSpeed = 18;
 
     function type() {
+      if (currentToken !== typingToken) return;
       if (i < text.length) {
         element.textContent += text.charAt(i);
         i++;
@@ -1098,7 +1101,7 @@
 
   // Main update function
   async function updateCompanion(sectionName) {
-    if (sectionName === currentSection || isTyping) return;
+    if (sectionName === currentSection) return;
 
     // Clear previous follow-ups
     followUpTimers.forEach(t => clearTimeout(t));

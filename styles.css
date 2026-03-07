@@ -3103,6 +3103,11 @@ img {
   transition: all var(--transition-fast);
 }
 
+.footer-text {
+  font-size: var(--text-sm);
+  color: var(--color-neutral-500);
+}
+
 .footer-links a:hover {
   color: var(--color-neutral-200);
   padding-left: var(--space-2);
@@ -3636,6 +3641,7 @@ img {
   font-size: var(--text-xs);
   color: var(--color-neutral-500);
   margin-top: var(--space-1);
+  line-height: 1.5;
 }
 
 .founder-cta {
@@ -3661,6 +3667,50 @@ img {
 
   .experience-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-visual {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    max-width: 360px;
+    margin: var(--space-10) auto 0;
+    animation: none;
+  }
+
+  .hero-industry .hero-visual {
+    max-width: 360px;
+  }
+
+  .industry-terminal,
+  .terminal,
+  .agent-terminal {
+    transform: none;
+  }
+
+  .terminal-header,
+  .terminal-body {
+    padding: var(--space-4);
+  }
+
+  .terminal-body {
+    font-size: var(--text-xs);
+  }
+
+  .floating-badge {
+    position: static;
+    margin: var(--space-4) auto 0;
+    justify-content: center;
+    width: fit-content;
+  }
+
+  .hero-insight-panel {
+    margin-top: var(--space-5);
+    padding: var(--space-4);
   }
 }
 
