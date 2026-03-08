@@ -164,6 +164,8 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -184,6 +186,7 @@ body {
   background-color: var(--color-neutral-950);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 100%;
   overflow-x: hidden;
   position: relative;
 }
@@ -8392,4 +8395,51 @@ body.agent-mode .navbar {
   .testimonial-quote blockquote {
     font-size: var(--text-lg);
   }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-4);
+  }
+
+  .section {
+    padding: var(--space-16) 0;
+  }
+
+  .section-lg {
+    padding: var(--space-20) 0;
+  }
+
+  .hero-visual,
+  .hero-demo,
+  .hero-insight-panel,
+  .industry-terminal,
+  .agent-terminal,
+  .terminal,
+  .terminal-interactive,
+  .hero-industry .hero-visual {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .terminal-line,
+  .mini-terminal-line {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .terminal-text,
+  .terminal-input,
+  .mini-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .floating-badge {
+    max-width: calc(100% - 24px);
+  }
+
+  .floating-badge-1 { right: 0; }
+  .floating-badge-2 { left: 0; }
 }
