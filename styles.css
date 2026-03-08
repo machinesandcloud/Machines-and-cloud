@@ -461,6 +461,15 @@ img {
 
 .navbar-links li { margin: 0; }
 
+.nav-group-label {
+  display: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-neutral-500);
+  margin-top: var(--space-6);
+}
+
 .navbar-links a {
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
@@ -656,12 +665,19 @@ img {
 
   .navbar-links {
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-4);
     width: 100%;
   }
 
   .navbar-links a {
     font-size: var(--text-lg);
+  }
+
+  .nav-group-label {
+    display: block;
+    padding: var(--space-3) 0 var(--space-2);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    width: 100%;
   }
 
   .navbar-cta {
