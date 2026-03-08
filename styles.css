@@ -665,9 +665,13 @@ img {
     transition: transform var(--transition-base);
     border-left: 1px solid rgba(59, 130, 246, 0.1);
     height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-bottom: calc(var(--space-10) + env(safe-area-inset-bottom));
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   body.nav-open .navbar-menu {
@@ -8477,17 +8481,18 @@ body.agent-mode .navbar {
   }
 
   .roi-calculator .btn-xl {
-    width: 100%;
-    max-width: 300px;
+    width: min(100%, 280px);
     margin: 0 auto;
-    padding: var(--space-4) var(--space-6);
-    font-size: var(--text-base);
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-sm);
+    white-space: normal;
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
   .roi-calculator .btn-xl {
-    max-width: 260px;
-    font-size: var(--text-sm);
+    width: min(100%, 240px);
+    font-size: var(--text-xs);
   }
 }
