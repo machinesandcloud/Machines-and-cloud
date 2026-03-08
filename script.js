@@ -35,7 +35,7 @@
       const isOpen = navMenu.classList.contains('is-open');
       navMenu.classList.toggle('is-open');
       navToggle.classList.toggle('is-active');
-      document.body.style.overflow = isOpen ? '' : 'hidden';
+      document.body.classList.toggle('nav-open', !isOpen);
     });
 
     // Close on link click
@@ -43,7 +43,7 @@
       link.addEventListener('click', () => {
         navMenu.classList.remove('is-open');
         navToggle.classList.remove('is-active');
-        document.body.style.overflow = '';
+        document.body.classList.remove('nav-open');
       });
     });
 
@@ -52,7 +52,7 @@
       if (e.key === 'Escape' && navMenu.classList.contains('is-open')) {
         navMenu.classList.remove('is-open');
         navToggle.classList.remove('is-active');
-        document.body.style.overflow = '';
+        document.body.classList.remove('nav-open');
       }
     });
   }
