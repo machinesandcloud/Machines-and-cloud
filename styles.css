@@ -193,6 +193,7 @@ body {
 
 body.nav-open {
   overflow: hidden;
+  height: 100%;
 }
 
 /* Noise Texture Overlay */
@@ -418,6 +419,17 @@ img {
   transition: all var(--transition-base);
 }
 
+.navbar::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 12, 24, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+  z-index: 0;
+}
+
 .navbar.scrolled {
   background: rgba(10, 22, 40, 0.85);
   backdrop-filter: blur(20px) saturate(180%);
@@ -430,6 +442,8 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  z-index: 1;
 }
 
 .navbar-logo {
@@ -672,6 +686,8 @@ img {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+    align-items: stretch;
+    z-index: 2;
   }
 
   body.nav-open .navbar-menu {
@@ -688,8 +704,15 @@ img {
     width: 100%;
   }
 
+  .navbar-links li {
+    width: 100%;
+  }
+
   .navbar-links a {
     font-size: var(--text-lg);
+    width: 100%;
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-md);
   }
 
   .nav-group-label {
@@ -719,12 +742,12 @@ img {
     box-shadow: none;
     background: transparent;
     border: none;
-    padding: var(--space-2) 0 0 var(--space-4);
+    padding: var(--space-2) 0 0;
     min-width: unset;
   }
 
   .dropdown-menu a {
-    padding: var(--space-2) 0;
+    padding: var(--space-2) var(--space-2);
     gap: var(--space-2);
   }
 
@@ -746,6 +769,8 @@ img {
   .navbar-menu {
     max-width: 100%;
     width: 100%;
+    left: 0;
+    right: 0;
     padding-left: var(--space-6);
     padding-right: var(--space-6);
   }
@@ -757,6 +782,11 @@ img {
   .navbar-links a {
     font-size: var(--text-base);
   }
+}
+
+body.nav-open .navbar::after {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* ============================================
