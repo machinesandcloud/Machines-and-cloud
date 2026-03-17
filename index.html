@@ -12,12 +12,38 @@
       "@graph": [
         {
           "@type": "Organization",
+          "@id": "https://www.machinesandcloud.com/#organization",
           "name": "Machines & Cloud",
           "url": "https://www.machinesandcloud.com/",
+          "logo": "https://www.machinesandcloud.com/assets/logo.png",
+          "image": "https://www.machinesandcloud.com/assets/og-image.png",
           "description": "Agentic AI automation engineering for production workflows with governance, security, and measurable outcomes.",
           "sameAs": [
             "https://www.linkedin.com/in/steve-j-ngoumnai/"
+          ],
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+1-346-248-8359",
+              "contactType": "sales",
+              "email": "support@machinesandcloud.com",
+              "areaServed": "US"
+            }
           ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.machinesandcloud.com/#website",
+          "url": "https://www.machinesandcloud.com/",
+          "name": "Machines & Cloud",
+          "publisher": {
+            "@id": "https://www.machinesandcloud.com/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.machinesandcloud.com/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
         },
         {
           "@type": "SiteNavigationElement",
@@ -42,10 +68,16 @@
         },
         {
           "@type": "LocalBusiness",
+          "@id": "https://www.machinesandcloud.com/#localbusiness",
           "name": "Machines & Cloud",
           "url": "https://www.machinesandcloud.com/",
+          "image": "https://www.machinesandcloud.com/assets/og-image.png",
           "telephone": "+1-346-248-8359",
           "email": "support@machinesandcloud.com",
+          "priceRange": "$$",
+          "parentOrganization": {
+            "@id": "https://www.machinesandcloud.com/#organization"
+          },
           "address": {
             "@type": "PostalAddress",
             "streetAddress": "5718 Westheimer Rd Suite 1000",
