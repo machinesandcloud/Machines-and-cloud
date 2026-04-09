@@ -4,32 +4,97 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Governance & Controls Playbook | Machines & Cloud</title>
-  <meta name="description" content="Governance-first guidance for agentic AI: approval gates, audit trails, OWASP mitigations, and NIST AI RMF mapping.">
+  <meta name="description" content="A governance-first playbook for production AI agents covering approval gates, audit trails, allowlists, policy enforcement, OWASP-informed controls, and NIST AI RMF mapping.">
   <link rel="canonical" href="https://www.machinesandcloud.com/guide-ai-governance.html">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="article">
   <meta property="og:site_name" content="Machines & Cloud">
   <meta property="og:title" content="AI Governance & Controls Playbook | Machines & Cloud">
-  <meta property="og:description" content="Governance-first guidance for agentic AI: approval gates, audit trails, OWASP mitigations, and NIST AI RMF mapping.">
+  <meta property="og:description" content="A governance-first playbook for production AI agents covering approval gates, audit trails, allowlists, policy enforcement, OWASP-informed controls, and NIST AI RMF mapping.">
   <meta property="og:url" content="https://www.machinesandcloud.com/guide-ai-governance.html">
+  <meta property="og:image" content="https://www.machinesandcloud.com/assets/logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AI Governance & Controls Playbook | Machines & Cloud">
-  <meta name="twitter:description" content="Governance-first guidance for agentic AI: approval gates, audit trails, OWASP mitigations, and NIST AI RMF mapping.">
-
+  <meta name="twitter:description" content="A governance-first playbook for production AI agents covering approval gates, audit trails, allowlists, policy enforcement, OWASP-informed controls, and NIST AI RMF mapping.">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "AI Governance & Controls Playbook | Machines & Cloud",
-      "description": "Governance-first guidance for agentic AI: approval gates, audit trails, OWASP mitigations, and NIST AI RMF mapping.",
-      "author": {
-        "@type": "Organization",
-        "name": "Machines & Cloud"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Machines & Cloud"
-      },
-      "mainEntityOfPage": "https://www.machinesandcloud.com/guide-ai-governance.html"
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://www.machinesandcloud.com/guide-ai-governance.html#article",
+          "headline": "AI Governance and Controls Playbook",
+          "description": "A governance-first playbook for production AI agents covering approval gates, audit trails, allowlists, policy enforcement, OWASP-informed controls, and NIST AI RMF mapping.",
+          "author": {
+            "@type": "Organization",
+            "name": "Machines & Cloud"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Machines & Cloud",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.machinesandcloud.com/assets/logo.png"
+            }
+          },
+          "datePublished": "2026-04-09",
+          "dateModified": "2026-04-09",
+          "mainEntityOfPage": "https://www.machinesandcloud.com/guide-ai-governance.html"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://www.machinesandcloud.com/guide-ai-governance.html#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What are the core controls for enterprise AI agents?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The core controls are least-privilege access, policy and allowlist checks, human approval gates at risk points, complete audit trails, and evaluation gates tied to release management."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Where should human approval gates be placed?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Approval gates should sit before actions with financial, legal, customer-impacting, or irreversible consequences and before any action that exceeds the confidence threshold for autonomous handling."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How should teams use NIST AI RMF with agentic systems?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use the NIST AI RMF as a control-mapping framework to identify accountability, measurement, risk treatment, and operating oversight responsibilities rather than as a simple compliance badge."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://www.machinesandcloud.com/guide-ai-governance.html#breadcrumbs",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.machinesandcloud.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Guides",
+              "item": "https://www.machinesandcloud.com/guides.html"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "AI Governance & Controls Playbook",
+              "item": "https://www.machinesandcloud.com/guide-ai-governance.html"
+            }
+          ]
+        }
+      ]
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,13 +114,11 @@
         <a href="index.html" class="navbar-logo">
           <img src="assets/logo.png" alt="Machines & Cloud">
         </a>
-
         <button class="navbar-toggle" id="navToggle" aria-label="Toggle menu">
           <span></span>
           <span></span>
           <span></span>
         </button>
-
         <div class="navbar-menu" id="navMenu">
           <ul class="navbar-links">
             <li><a href="index.html">Home</a></li>
@@ -65,18 +128,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
               </a>
               <div class="dropdown-menu">
-                <a href="services.html">
-                  <span class="dropdown-icon">S</span>
-                  <span class="dropdown-label"><span>Services</span><span>Packages & delivery</span></span>
-                </a>
-                <a href="industries.html">
-                  <span class="dropdown-icon">I</span>
-                  <span class="dropdown-label"><span>Industries</span><span>Vertical workflows</span></span>
-                </a>
-                <a href="approach.html">
-                  <span class="dropdown-icon">A</span>
-                  <span class="dropdown-label"><span>Approach</span><span>Controls & governance</span></span>
-                </a>
+                <a href="services.html"><span class="dropdown-icon">S</span><span class="dropdown-label"><span>Services</span><span>Packages & delivery</span></span></a>
+                <a href="industries.html"><span class="dropdown-icon">I</span><span class="dropdown-label"><span>Industries</span><span>Vertical workflows</span></span></a>
+                <a href="approach.html"><span class="dropdown-icon">A</span><span class="dropdown-label"><span>Approach</span><span>Controls & governance</span></span></a>
               </div>
             </li>
             <li class="navbar-dropdown">
@@ -85,18 +139,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
               </a>
               <div class="dropdown-menu">
-                <a href="workflow-library.html">
-                  <span class="dropdown-icon">W</span>
-                  <span class="dropdown-label"><span>Workflow Library</span><span>Blueprints & proof</span></span>
-                </a>
-                <a href="guides.html">
-                  <span class="dropdown-icon">G</span>
-                  <span class="dropdown-label"><span>Guides</span><span>Playbooks & checklists</span></span>
-                </a>
-                <a href="insights.html">
-                  <span class="dropdown-icon">N</span>
-                  <span class="dropdown-label"><span>Insights</span><span>Perspectives & research</span></span>
-                </a>
+                <a href="workflow-library.html"><span class="dropdown-icon">W</span><span class="dropdown-label"><span>Workflow Library</span><span>Blueprints & proof</span></span></a>
+                <a href="guides.html"><span class="dropdown-icon">G</span><span class="dropdown-label"><span>Guides</span><span>Playbooks & checklists</span></span></a>
+                <a href="insights.html"><span class="dropdown-icon">N</span><span class="dropdown-label"><span>Insights</span><span>Perspectives & research</span></span></a>
               </div>
             </li>
             <li><a href="about.html">About</a></li>
@@ -115,10 +160,10 @@
         <div class="page-hero-content reveal">
           <span class="section-eyebrow">Playbook</span>
           <h1 class="page-hero-title">AI governance and controls playbook</h1>
-          <p class="page-hero-description">Governance-first guidance for agentic AI: approval gates, audit trails, OWASP mitigations, and NIST AI RMF mapping.</p>
+          <p class="page-hero-description">Enterprise AI does not fail because teams care too much about controls. It fails because controls are added late, mapped poorly, or disconnected from how the workflow actually operates.</p>
           <div class="hero-actions">
-            <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary btn-xl">Book a Discovery Call</a>
-            <a href="services.html" class="btn btn-secondary btn-xl">View Services</a>
+            <a href="templates-checklists.html" class="btn btn-primary btn-xl">Get the Control Templates</a>
+            <a href="guide-agentic-ai.html" class="btn btn-secondary btn-xl">Read the Production Guide</a>
           </div>
         </div>
         <div class="hero-demo reveal">
@@ -126,69 +171,66 @@
             <div class="dashboard-header">
               <div class="dashboard-title">
                 <span class="dashboard-dot live"></span>
-                <span>Production Signals</span>
+                <span>Governance map</span>
               </div>
-              <span class="dashboard-time">Reference only</span>
+              <span class="dashboard-time">Control stack</span>
             </div>
             <div class="dashboard-body">
               <div class="dashboard-metric dashboard-metric-1">
                 <div class="metric-chart">
-                  <div class="metric-bar" style="--bar-height: 82%"></div>
-                  <div class="metric-bar" style="--bar-height: 68%"></div>
-                  <div class="metric-bar" style="--bar-height: 90%"></div>
-                  <div class="metric-bar" style="--bar-height: 70%"></div>
-                  <div class="metric-bar active" style="--bar-height: 95%"></div>
+                  <div class="metric-bar" style="--bar-height: 54%"></div>
+                  <div class="metric-bar" style="--bar-height: 66%"></div>
+                  <div class="metric-bar" style="--bar-height: 78%"></div>
+                  <div class="metric-bar" style="--bar-height: 83%"></div>
+                  <div class="metric-bar active" style="--bar-height: 92%"></div>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-value">67%</span>
-                  <span class="metric-name">Cycle Time Reduction (target)</span>
+                  <span class="metric-value">5</span>
+                  <span class="metric-name">Required control families</span>
                 </div>
               </div>
               <div class="dashboard-metric dashboard-metric-2">
                 <div class="metric-ring">
                   <svg viewBox="0 0 36 36">
                     <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    <path class="ring-progress" stroke-dasharray="94, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="ring-progress" stroke-dasharray="96, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                   </svg>
-                  <span class="ring-value">94%</span>
+                  <span class="ring-value">96%</span>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-name">Accuracy Rate (target)</span>
+                  <span class="metric-name">Target evidence coverage</span>
                 </div>
               </div>
               <div class="dashboard-metric dashboard-metric-3">
                 <div class="metric-counter">
-                  <span class="counter-prefix">$</span>
-                  <span class="counter-value">1.2</span>
-                  <span class="counter-suffix">M</span>
+                  <span class="counter-value">3</span>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-name">Annual Savings (target)</span>
+                  <span class="metric-name">Risk-based gate types</span>
                 </div>
               </div>
               <div class="dashboard-metric dashboard-metric-4">
                 <div class="metric-line-chart">
                   <svg viewBox="0 0 100 40">
-                    <polyline class="line-chart-path" points="0,35 15,28 30,32 45,18 60,22 75,12 90,8 100,5"/>
+                    <polyline class="line-chart-path" points="0,33 14,28 28,26 42,20 56,18 70,14 84,8 100,7"/>
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-value">4-6 wks</span>
-                  <span class="metric-name">Target to production</span>
+                  <span class="metric-value">24 hrs</span>
+                  <span class="metric-name">Incident review target</span>
                 </div>
               </div>
             </div>
             <div class="dashboard-footer">
               <div class="dashboard-stat">
-                <span class="stat-number">3</span>
-                <span class="stat-text">Approval gates</span>
+                <span class="stat-number">100%</span>
+                <span class="stat-text">Action logging</span>
               </div>
               <div class="dashboard-stat">
-                <span class="stat-number">100%</span>
-                <span class="stat-text">Audit traceability</span>
+                <span class="stat-number">Least</span>
+                <span class="stat-text">Privilege default</span>
               </div>
             </div>
-            <p class="text-muted text-sm mt-4">Reference data shown for format only. Results vary by workflow, data access, and approvals.</p>
           </div>
         </div>
       </div>
@@ -198,11 +240,49 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Governance goals</span>
-        <h2 class="section-title">Governance goals</h2>
+        <span class="section-eyebrow">Direct answer</span>
+        <h2 class="section-title">The core controls every production AI workflow needs</h2>
+        <p class="section-description">The minimum set is consistent across most enterprise workflows: access control, policy enforcement, approval design, audit evidence, and release evaluation. If any one of these is missing, the operating risk shifts to humans improvising outside the system.</p>
       </div>
-      <div class="card reveal" style="margin-top: var(--space-6);">
-        <ul class="service-card-features"><li>Make every AI action explainable and reviewable.</li><li>Ensure security teams can verify controls before launch.</li><li>Define ownership and escalation paths upfront.</li></ul>
+      <div class="grid grid-3 reveal">
+        <div class="card">
+          <h3 class="card-title">Least privilege</h3>
+          <p class="card-description">Limit every tool and identity to the smallest useful action scope. Separate read, draft, and execute permissions so unsafe autonomy is impossible by default.</p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Policy and allowlists</h3>
+          <p class="card-description">Define what the agent can access, which actions are permitted, and what content or destinations are blocked before the agent can call tools.</p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Evidence and review</h3>
+          <p class="card-description">Capture prompts, retrieved context, tool actions, confidence signals, overrides, and final outcomes so reviewers can reconstruct a decision path.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-dark">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">Control system</span>
+        <h2 class="section-title">How to place approval gates without stalling operations</h2>
+      </div>
+      <div class="grid grid-3 reveal">
+        <div class="card">
+          <span class="badge badge-secondary">Gate 1</span>
+          <h3 class="card-title mt-4">Pre-action review</h3>
+          <p class="card-description">Use before a payment, message send, policy exception, or system update. The reviewer sees the recommendation, rationale, source evidence, and intended action.</p>
+        </div>
+        <div class="card">
+          <span class="badge badge-secondary">Gate 2</span>
+          <h3 class="card-title mt-4">Threshold review</h3>
+          <p class="card-description">Use when confidence scores, retrieval quality, or classification certainty fall below the release threshold. The agent routes to manual handling instead of guessing.</p>
+        </div>
+        <div class="card">
+          <span class="badge badge-secondary">Gate 3</span>
+          <h3 class="card-title mt-4">Exception review</h3>
+          <p class="card-description">Use when the workflow encounters a novel case, policy conflict, or missing data pattern. This gate prevents silent drift from becoming a production habit.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -210,11 +290,27 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Core controls</span>
-        <h2 class="section-title">Core controls</h2>
+        <span class="section-eyebrow">Framework mapping</span>
+        <h2 class="section-title">Map controls to recognizable frameworks without turning the page into a compliance claim</h2>
       </div>
-      <div class="card reveal" style="margin-top: var(--space-6);">
-        <ul class="service-card-features"><li>Approval gates at risk points</li><li>Action allowlists + policy rules</li><li>Audit logs for inputs, tools, outputs</li><li>Access reviews + least privilege</li><li>Evaluation harness tied to KPIs</li></ul>
+      <div class="grid grid-2 reveal">
+        <div class="card">
+          <h3 class="card-title">Use OWASP-informed control language</h3>
+          <ul class="service-card-features">
+            <li>Prompt and tool abuse risk belongs in pre-execution policy checks.</li>
+            <li>Data leakage risk belongs in retrieval boundaries, redaction, and role-based access.</li>
+            <li>Excessive agency risk belongs in approval design, action scopes, and rollback planning.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Use NIST AI RMF as an operating map</h3>
+          <ul class="service-card-features">
+            <li>Govern: name accountability, ownership, and risk review cadence.</li>
+            <li>Map: document workflow boundaries, actors, and action surfaces.</li>
+            <li>Measure: define evidence, thresholds, and monitoring signals.</li>
+            <li>Manage: specify mitigations, approvals, and remediation steps.</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -222,11 +318,67 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">How we deliver</span>
-        <h2 class="section-title">How we deliver</h2>
+        <span class="section-eyebrow">Evidence package</span>
+        <h2 class="section-title">What security and risk reviewers need to inspect before launch</h2>
       </div>
-      <div class="card reveal" style="margin-top: var(--space-6);">
-        <ul class="service-card-features"><li>We ship governance artifacts alongside the workflow, not after.</li><li>Evidence packs include audit exports, runbooks, and acceptance gates.</li></ul>
+      <div class="card reveal">
+        <ul class="service-card-features">
+          <li>Workflow architecture summary with data sources, tools, identities, and operators</li>
+          <li>Control matrix that maps risk points to gates, policies, and evidence</li>
+          <li>Audit log examples showing input, context, action, reviewer, and final state</li>
+          <li>Evaluation results for happy path, edge cases, and prohibited actions</li>
+          <li>Incident and rollback procedure for failed tool calls or unsafe outputs</li>
+        </ul>
+      </div>
+      <div class="grid grid-2 reveal mt-8">
+        <a href="templates-checklists.html" class="card card-link">
+          <span class="badge badge-secondary">Templates</span>
+          <h3 class="card-title mt-4">Control matrix and approval artifacts</h3>
+          <p class="card-description">Use the templates page for reusable control categories, gate logic, and review prompts.</p>
+        </a>
+        <a href="insight-approval-gates.html" class="card card-link">
+          <span class="badge badge-secondary">Insight</span>
+          <h3 class="card-title mt-4">Human-in-the-loop approval gates</h3>
+          <p class="card-description">Read the operational pattern for placing approval boundaries without creating a queue disaster.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">FAQs</span>
+        <h2 class="section-title">Common governance design questions</h2>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item active">
+          <button class="faq-trigger">
+            <span>What are the core controls for enterprise AI agents?</span>
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <div class="faq-content">
+            <div class="faq-answer">The minimum set is least-privilege access, policy and allowlist checks, risk-based approvals, complete audit evidence, and evaluation gates tied to release management.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>Where should human approval gates be placed?</span>
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <div class="faq-content">
+            <div class="faq-answer">Place them before financial, legal, customer-impacting, or irreversible actions, and whenever confidence or retrieval quality drops below the release threshold.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>How should teams use NIST AI RMF with agentic systems?</span>
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <div class="faq-content">
+            <div class="faq-answer">Use it to structure accountability, measurement, and risk treatment decisions. It is most useful as an operating map for reviewers and builders, not as a one-line badge claim.</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -234,60 +386,53 @@
   <section class="section cta-section">
     <div class="container">
       <div class="cta-content reveal">
-        <h2 class="cta-title">Ready to scope a workflow?</h2>
-        <p class="cta-description">Book a 30-minute discovery call. We’ll map your workflow, define KPIs, and outline the path to production.</p>
+        <h2 class="cta-title">Need controls your security team can actually inspect?</h2>
+        <p class="cta-description">We design approval gates, action boundaries, and evidence packs around the workflow itself, so governance is visible before production pressure hits.</p>
         <div class="cta-actions">
           <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary btn-lg">Book a Discovery Call</a>
-          <a href="workflow-library.html" class="btn btn-secondary btn-lg">See Workflow Library</a>
+          <a href="approach.html" class="btn btn-secondary btn-lg">See Our Approach</a>
         </div>
       </div>
     </div>
   </section>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="footer-logo">
-            <img src="assets/logo.png" alt="Machines & Cloud">
-          </div>
+          <div class="footer-logo"><img src="assets/logo.png" alt="Machines & Cloud"></div>
           <p class="footer-description">Agentic automation engineering for serious operators. Production-grade AI workflows with governance, security, and measurable outcomes.</p>
         </div>
         <div class="footer-column">
-          <h4>Services</h4>
+          <h4>Resources</h4>
           <ul class="footer-links">
-            <li><a href="services.html">AI Opportunity Sprint</a></li>
-            <li><a href="services.html">Agent Proof-of-Value</a></li>
-            <li><a href="services.html">Production Launch</a></li>
-            <li><a href="services.html">AI Operations Retainer</a></li>
+            <li><a href="guides.html">Guides</a></li>
+            <li><a href="insights.html">Insights</a></li>
+            <li><a href="templates-checklists.html">Templates & Checklists</a></li>
           </ul>
         </div>
         <div class="footer-column">
-          <h4>Company</h4>
+          <h4>Library</h4>
           <ul class="footer-links">
-            <li class="nav-group-label">Company</li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="approach.html">Approach</a></li>
-            <li class="nav-group-label">Library</li>
             <li><a href="workflow-library.html">Workflow Library</a></li>
-            <li><a href="guides.html">Guides</a></li>
-            <li><a href="insights.html">Insights</a></li>
+            <li><a href="industry-financial.html">Financial Services</a></li>
+            <li><a href="industry-insurance.html">Insurance</a></li>
           </ul>
         </div>
         <div class="footer-column">
           <h4>Contact</h4>
           <ul class="footer-links">
             <li><a href="contact.html">Contact</a></li>
+            <li><a href="about.html">About</a></li>
             <li><a href="https://calendly.com/ngoumnaisteve/30">Book a Call</a></li>
-            <li><a href="services.html">Services</a></li>
           </ul>
         </div>
       </div>
-
       <div class="footer-bottom">
         <p class="footer-copyright">&copy; 2026 Machines & Cloud. All rights reserved.</p>
         <div class="footer-legal">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+          <a href="privacy-policy.html">Privacy Policy</a>
+          <a href="terms-of-service.html">Terms of Service</a>
         </div>
       </div>
     </div>

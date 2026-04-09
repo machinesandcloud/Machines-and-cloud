@@ -4,32 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LLM Evaluation Harness Guide | Machines & Cloud</title>
-  <meta name="description" content="How to build evaluation harnesses for agentic AI workflows: golden sets, regression checks, and confidence thresholds.">
+  <meta name="description" content="A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.">
   <link rel="canonical" href="https://www.machinesandcloud.com/guide-evaluation-harness.html">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="article">
   <meta property="og:site_name" content="Machines & Cloud">
   <meta property="og:title" content="LLM Evaluation Harness Guide | Machines & Cloud">
-  <meta property="og:description" content="How to build evaluation harnesses for agentic AI workflows: golden sets, regression checks, and confidence thresholds.">
+  <meta property="og:description" content="A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.">
   <meta property="og:url" content="https://www.machinesandcloud.com/guide-evaluation-harness.html">
+  <meta property="og:image" content="https://www.machinesandcloud.com/assets/logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="LLM Evaluation Harness Guide | Machines & Cloud">
-  <meta name="twitter:description" content="How to build evaluation harnesses for agentic AI workflows: golden sets, regression checks, and confidence thresholds.">
-
+  <meta name="twitter:description" content="A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "LLM Evaluation Harness Guide | Machines & Cloud",
-      "description": "How to build evaluation harnesses for agentic AI workflows: golden sets, regression checks, and confidence thresholds.",
-      "author": {
-        "@type": "Organization",
-        "name": "Machines & Cloud"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Machines & Cloud"
-      },
-      "mainEntityOfPage": "https://www.machinesandcloud.com/guide-evaluation-harness.html"
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://www.machinesandcloud.com/guide-evaluation-harness.html#article",
+          "headline": "LLM Evaluation Harness Guide",
+          "description": "A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.",
+          "author": {
+            "@type": "Organization",
+            "name": "Machines & Cloud"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Machines & Cloud",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.machinesandcloud.com/assets/logo.png"
+            }
+          },
+          "datePublished": "2026-04-09",
+          "dateModified": "2026-04-09",
+          "mainEntityOfPage": "https://www.machinesandcloud.com/guide-evaluation-harness.html"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://www.machinesandcloud.com/guide-evaluation-harness.html#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is an evaluation harness for an AI agent?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "An evaluation harness is the release and monitoring system that tests an agent against representative cases, edge cases, and failure modes before and after changes go live."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What should be included in a golden set?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A golden set should include normal cases, edge cases, prohibited actions, ambiguous cases, and known regressions that matter to the workflow's business outcome."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How often should agent regressions be tested?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Regression tests should run on every material change to prompts, tools, models, routing logic, or policy rules, and teams should review production drift on a fixed operating cadence."
+              }
+            }
+          ]
+        }
+      ]
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,64 +87,34 @@
   <nav class="navbar" id="navbar">
     <div class="container">
       <div class="navbar-inner">
-        <a href="index.html" class="navbar-logo">
-          <img src="assets/logo.png" alt="Machines & Cloud">
-        </a>
-
+        <a href="index.html" class="navbar-logo"><img src="assets/logo.png" alt="Machines & Cloud"></a>
         <button class="navbar-toggle" id="navToggle" aria-label="Toggle menu">
           <span></span>
           <span></span>
           <span></span>
         </button>
-
         <div class="navbar-menu" id="navMenu">
           <ul class="navbar-links">
             <li><a href="index.html">Home</a></li>
             <li class="navbar-dropdown">
-              <a href="services.html">
-                Solutions
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-              </a>
+              <a href="services.html">Solutions<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
               <div class="dropdown-menu">
-                <a href="services.html">
-                  <span class="dropdown-icon">S</span>
-                  <span class="dropdown-label"><span>Services</span><span>Packages & delivery</span></span>
-                </a>
-                <a href="industries.html">
-                  <span class="dropdown-icon">I</span>
-                  <span class="dropdown-label"><span>Industries</span><span>Vertical workflows</span></span>
-                </a>
-                <a href="approach.html">
-                  <span class="dropdown-icon">A</span>
-                  <span class="dropdown-label"><span>Approach</span><span>Controls & governance</span></span>
-                </a>
+                <a href="services.html"><span class="dropdown-icon">S</span><span class="dropdown-label"><span>Services</span><span>Packages & delivery</span></span></a>
+                <a href="industries.html"><span class="dropdown-icon">I</span><span class="dropdown-label"><span>Industries</span><span>Vertical workflows</span></span></a>
+                <a href="approach.html"><span class="dropdown-icon">A</span><span class="dropdown-label"><span>Approach</span><span>Controls & governance</span></span></a>
               </div>
             </li>
             <li class="navbar-dropdown">
-              <a href="workflow-library.html">
-                Resources
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-              </a>
+              <a href="workflow-library.html">Resources<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
               <div class="dropdown-menu">
-                <a href="workflow-library.html">
-                  <span class="dropdown-icon">W</span>
-                  <span class="dropdown-label"><span>Workflow Library</span><span>Blueprints & proof</span></span>
-                </a>
-                <a href="guides.html">
-                  <span class="dropdown-icon">G</span>
-                  <span class="dropdown-label"><span>Guides</span><span>Playbooks & checklists</span></span>
-                </a>
-                <a href="insights.html">
-                  <span class="dropdown-icon">N</span>
-                  <span class="dropdown-label"><span>Insights</span><span>Perspectives & research</span></span>
-                </a>
+                <a href="workflow-library.html"><span class="dropdown-icon">W</span><span class="dropdown-label"><span>Workflow Library</span><span>Blueprints & proof</span></span></a>
+                <a href="guides.html"><span class="dropdown-icon">G</span><span class="dropdown-label"><span>Guides</span><span>Playbooks & checklists</span></span></a>
+                <a href="insights.html"><span class="dropdown-icon">N</span><span class="dropdown-label"><span>Insights</span><span>Perspectives & research</span></span></a>
               </div>
             </li>
             <li><a href="about.html">About</a></li>
           </ul>
-          <div class="navbar-cta">
-            <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary">Book a Call</a>
-          </div>
+          <div class="navbar-cta"><a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary">Book a Call</a></div>
         </div>
       </div>
     </div>
@@ -115,80 +126,56 @@
         <div class="page-hero-content reveal">
           <span class="section-eyebrow">Guide</span>
           <h1 class="page-hero-title">Evaluation harness guide for agentic AI</h1>
-          <p class="page-hero-description">How to build evaluation harnesses for agentic AI workflows: golden sets, regression checks, and confidence thresholds.</p>
+          <p class="page-hero-description">If you cannot measure normal cases, edge cases, and prohibited actions before launch, you do not have a production AI workflow. You have an experiment.</p>
           <div class="hero-actions">
-            <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary btn-xl">Book a Discovery Call</a>
-            <a href="services.html" class="btn btn-secondary btn-xl">View Services</a>
+            <a href="templates-checklists.html" class="btn btn-primary btn-xl">Use the Evaluation Template</a>
+            <a href="workflow-library.html" class="btn btn-secondary btn-xl">See Workflow Examples</a>
           </div>
         </div>
         <div class="hero-demo reveal">
           <div class="results-dashboard">
             <div class="dashboard-header">
-              <div class="dashboard-title">
-                <span class="dashboard-dot live"></span>
-                <span>Production Signals</span>
-              </div>
-              <span class="dashboard-time">Reference only</span>
+              <div class="dashboard-title"><span class="dashboard-dot live"></span><span>Evaluation stack</span></div>
+              <span class="dashboard-time">Release model</span>
             </div>
             <div class="dashboard-body">
               <div class="dashboard-metric dashboard-metric-1">
                 <div class="metric-chart">
-                  <div class="metric-bar" style="--bar-height: 82%"></div>
-                  <div class="metric-bar" style="--bar-height: 68%"></div>
-                  <div class="metric-bar" style="--bar-height: 90%"></div>
-                  <div class="metric-bar" style="--bar-height: 70%"></div>
-                  <div class="metric-bar active" style="--bar-height: 95%"></div>
+                  <div class="metric-bar" style="--bar-height: 52%"></div>
+                  <div class="metric-bar" style="--bar-height: 67%"></div>
+                  <div class="metric-bar" style="--bar-height: 74%"></div>
+                  <div class="metric-bar" style="--bar-height: 83%"></div>
+                  <div class="metric-bar active" style="--bar-height: 93%"></div>
                 </div>
-                <div class="metric-info">
-                  <span class="metric-value">67%</span>
-                  <span class="metric-name">Cycle Time Reduction (target)</span>
-                </div>
+                <div class="metric-info"><span class="metric-value">4</span><span class="metric-name">Core test layers</span></div>
               </div>
               <div class="dashboard-metric dashboard-metric-2">
                 <div class="metric-ring">
                   <svg viewBox="0 0 36 36">
                     <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    <path class="ring-progress" stroke-dasharray="94, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="ring-progress" stroke-dasharray="91, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                   </svg>
-                  <span class="ring-value">94%</span>
+                  <span class="ring-value">91%</span>
                 </div>
-                <div class="metric-info">
-                  <span class="metric-name">Accuracy Rate (target)</span>
-                </div>
+                <div class="metric-info"><span class="metric-name">Target golden-set pass rate</span></div>
               </div>
               <div class="dashboard-metric dashboard-metric-3">
-                <div class="metric-counter">
-                  <span class="counter-prefix">$</span>
-                  <span class="counter-value">1.2</span>
-                  <span class="counter-suffix">M</span>
-                </div>
-                <div class="metric-info">
-                  <span class="metric-name">Annual Savings (target)</span>
-                </div>
+                <div class="metric-counter"><span class="counter-value">0</span></div>
+                <div class="metric-info"><span class="metric-name">Unsafe action tolerance</span></div>
               </div>
               <div class="dashboard-metric dashboard-metric-4">
                 <div class="metric-line-chart">
                   <svg viewBox="0 0 100 40">
-                    <polyline class="line-chart-path" points="0,35 15,28 30,32 45,18 60,22 75,12 90,8 100,5"/>
+                    <polyline class="line-chart-path" points="0,34 14,29 28,25 42,20 56,16 70,12 84,10 100,8"/>
                   </svg>
                 </div>
-                <div class="metric-info">
-                  <span class="metric-value">4-6 wks</span>
-                  <span class="metric-name">Target to production</span>
-                </div>
+                <div class="metric-info"><span class="metric-value">Weekly</span><span class="metric-name">Drift review cadence</span></div>
               </div>
             </div>
             <div class="dashboard-footer">
-              <div class="dashboard-stat">
-                <span class="stat-number">3</span>
-                <span class="stat-text">Approval gates</span>
-              </div>
-              <div class="dashboard-stat">
-                <span class="stat-number">100%</span>
-                <span class="stat-text">Audit traceability</span>
-              </div>
+              <div class="dashboard-stat"><span class="stat-number">100%</span><span class="stat-text">Release coverage target</span></div>
+              <div class="dashboard-stat"><span class="stat-number">Fast</span><span class="stat-text">Rollback decision</span></div>
             </div>
-            <p class="text-muted text-sm mt-4">Reference data shown for format only. Results vary by workflow, data access, and approvals.</p>
           </div>
         </div>
       </div>
@@ -198,11 +185,66 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Why evaluation matters</span>
-        <h2 class="section-title">Why evaluation matters</h2>
+        <span class="section-eyebrow">Direct answer</span>
+        <h2 class="section-title">What an evaluation harness actually does</h2>
+        <p class="section-description">An evaluation harness is the release discipline for an agent. It tests expected behavior, catches regressions after changes, measures unsafe outcomes, and gives operators a repeatable way to decide whether the workflow can stay autonomous.</p>
       </div>
-      <div class="card reveal" style="margin-top: var(--space-6);">
-        <ul class="service-card-features"><li>Without regression tests, you cannot prove improvement.</li><li>Golden sets keep behavior stable as models change.</li><li>Confidence thresholds reduce unsafe automation.</li></ul>
+      <div class="grid grid-3 reveal">
+        <div class="card">
+          <h3 class="card-title">Golden set</h3>
+          <p class="card-description">Representative cases with expected outcomes, including both high-frequency work and known edge conditions.</p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Release gate</h3>
+          <p class="card-description">Thresholds that block deployment when accuracy, latency, or unsafe behavior exceed what the workflow can tolerate.</p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Operating loop</h3>
+          <p class="card-description">A fixed cadence for reviewing drift, failures, and rule changes after launch so the harness stays current.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-dark">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">Test design</span>
+        <h2 class="section-title">The four layers of agent evaluation</h2>
+      </div>
+      <div class="grid grid-2 reveal">
+        <div class="card">
+          <h3 class="card-title">1. Happy path</h3>
+          <ul class="service-card-features">
+            <li>Common case success rate</li>
+            <li>Correct action or recommendation</li>
+            <li>Expected time and cost envelope</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="card-title">2. Edge cases</h3>
+          <ul class="service-card-features">
+            <li>Missing fields and partial context</li>
+            <li>Ambiguous instructions or conflicting evidence</li>
+            <li>Rare but operationally meaningful exceptions</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="card-title">3. Prohibited behavior</h3>
+          <ul class="service-card-features">
+            <li>Blocked actions without approval</li>
+            <li>Data handling outside policy</li>
+            <li>Improper routing, hallucinated tools, or invented facts</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="card-title">4. Human review sampling</h3>
+          <ul class="service-card-features">
+            <li>Blind review of borderline cases</li>
+            <li>Reviewer disagreement tracking</li>
+            <li>Escalation reasons folded back into the golden set</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -210,11 +252,38 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">What to include</span>
-        <h2 class="section-title">What to include</h2>
+        <span class="section-eyebrow">Golden set design</span>
+        <h2 class="section-title">What to include in a production-ready golden set</h2>
       </div>
-      <div class="card reveal" style="margin-top: var(--space-6);">
-        <ul class="service-card-features"><li>Golden test sets</li><li>Edge case coverage</li><li>Human review sampling</li><li>Quality metrics aligned to KPIs</li><li>Weekly regression cadence</li></ul>
+      <div class="card reveal">
+        <ul class="service-card-features">
+          <li>Normal cases that reflect the highest-volume work the workflow will actually see</li>
+          <li>Borderline cases where confidence, routing, or retrieval quality might drop</li>
+          <li>Prohibited actions that should always trigger a stop, gate, or escalation</li>
+          <li>Historical failures and postmortem examples so known regressions stay visible</li>
+          <li>Reviewer labels that tie the expected result back to business policy, not taste</li>
+        </ul>
+      </div>
+      <div class="grid grid-2 reveal mt-8">
+        <div class="card">
+          <h3 class="card-title">Release metrics that matter</h3>
+          <ul class="service-card-features">
+            <li>Task success rate</li>
+            <li>Unsafe action rate</li>
+            <li>Escalation rate</li>
+            <li>Reviewer agreement rate</li>
+            <li>Latency and cost envelope</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Signals that trigger rollback</h3>
+          <ul class="service-card-features">
+            <li>Spike in critical errors or policy violations</li>
+            <li>Drop in golden-set performance after a model or prompt change</li>
+            <li>Material increase in reviewer overrides</li>
+            <li>Unexpected tool misuse or route drift</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -222,11 +291,60 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Operational use</span>
-        <h2 class="section-title">Operational use</h2>
+        <span class="section-eyebrow">Operating cadence</span>
+        <h2 class="section-title">How to keep the harness alive after launch</h2>
       </div>
-      <div class="card reveal" style="margin-top: var(--space-6);">
-        <ul class="service-card-features"><li>Tie evaluation output to approval gates.</li><li>Stop changes that fail acceptance thresholds.</li></ul>
+      <div class="grid grid-3 reveal">
+        <div class="card">
+          <h3 class="card-title">Per change</h3>
+          <p class="card-description">Run regressions whenever prompts, tools, policies, routing logic, or model versions change.</p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Weekly</h3>
+          <p class="card-description">Review drift signals, sampled cases, operator complaints, and threshold misses with the workflow owner.</p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Monthly</h3>
+          <p class="card-description">Refresh the golden set, retire stale cases, add new failure modes, and decide whether the workflow can expand in autonomy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">FAQs</span>
+        <h2 class="section-title">Evaluation questions teams ask most</h2>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item active">
+          <button class="faq-trigger">
+            <span>What is an evaluation harness for an AI agent?</span>
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <div class="faq-content">
+            <div class="faq-answer">It is the release and monitoring system that tests an agent against representative cases, edge cases, and failure modes before and after changes go live.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>What should be included in a golden set?</span>
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <div class="faq-content">
+            <div class="faq-answer">Include normal cases, edge cases, prohibited actions, ambiguous cases, and historical failures that matter to the business outcome of the workflow.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>How often should agent regressions be tested?</span>
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <div class="faq-content">
+            <div class="faq-answer">Run them on every material change to prompts, tools, models, routing logic, or policy rules, and pair that with a fixed weekly drift review after launch.</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -234,65 +352,56 @@
   <section class="section cta-section">
     <div class="container">
       <div class="cta-content reveal">
-        <h2 class="cta-title">Ready to scope a workflow?</h2>
-        <p class="cta-description">Book a 30-minute discovery call. We’ll map your workflow, define KPIs, and outline the path to production.</p>
+        <h2 class="cta-title">Need an evaluation stack before launch pressure hits?</h2>
+        <p class="cta-description">We build the release criteria, golden sets, and review cadence around the actual workflow so production readiness is measurable instead of implied.</p>
         <div class="cta-actions">
           <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary btn-lg">Book a Discovery Call</a>
-          <a href="workflow-library.html" class="btn btn-secondary btn-lg">See Workflow Library</a>
+          <a href="guide-ai-governance.html" class="btn btn-secondary btn-lg">See Governance Playbook</a>
         </div>
       </div>
     </div>
   </section>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="footer-logo">
-            <img src="assets/logo.png" alt="Machines & Cloud">
-          </div>
+          <div class="footer-logo"><img src="assets/logo.png" alt="Machines & Cloud"></div>
           <p class="footer-description">Agentic automation engineering for serious operators. Production-grade AI workflows with governance, security, and measurable outcomes.</p>
         </div>
         <div class="footer-column">
-          <h4>Services</h4>
+          <h4>Resources</h4>
           <ul class="footer-links">
-            <li><a href="services.html">AI Opportunity Sprint</a></li>
-            <li><a href="services.html">Agent Proof-of-Value</a></li>
-            <li><a href="services.html">Production Launch</a></li>
-            <li><a href="services.html">AI Operations Retainer</a></li>
+            <li><a href="guides.html">Guides</a></li>
+            <li><a href="templates-checklists.html">Templates & Checklists</a></li>
+            <li><a href="insights.html">Insights</a></li>
           </ul>
         </div>
         <div class="footer-column">
-          <h4>Company</h4>
+          <h4>Related</h4>
           <ul class="footer-links">
-            <li class="nav-group-label">Company</li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="approach.html">Approach</a></li>
-            <li class="nav-group-label">Library</li>
+            <li><a href="guide-agentic-ai.html">Production Guide</a></li>
+            <li><a href="guide-ai-governance.html">Governance Playbook</a></li>
             <li><a href="workflow-library.html">Workflow Library</a></li>
-            <li><a href="guides.html">Guides</a></li>
-            <li><a href="insights.html">Insights</a></li>
           </ul>
         </div>
         <div class="footer-column">
           <h4>Contact</h4>
           <ul class="footer-links">
             <li><a href="contact.html">Contact</a></li>
-            <li><a href="https://calendly.com/ngoumnaisteve/30">Book a Call</a></li>
-            <li><a href="services.html">Services</a></li>
+            <li><a href="about.html">About</a></li>
           </ul>
         </div>
       </div>
-
       <div class="footer-bottom">
         <p class="footer-copyright">&copy; 2026 Machines & Cloud. All rights reserved.</p>
         <div class="footer-legal">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+          <a href="privacy-policy.html">Privacy Policy</a>
+          <a href="terms-of-service.html">Terms of Service</a>
         </div>
       </div>
     </div>
   </footer>
-
   <script src="script.js"></script>
 </body>
 </html>
