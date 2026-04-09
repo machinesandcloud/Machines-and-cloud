@@ -61,14 +61,25 @@
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      "name": "Guides & Playbooks",
-      "url": "https://www.machinesandcloud.com/guides.html",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "Machines & Cloud",
-        "url": "https://www.machinesandcloud.com/"
-      }
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "name": "Guides & Playbooks",
+          "url": "https://www.machinesandcloud.com/guides.html",
+          "isPartOf": {
+            "@type": "WebSite",
+            "name": "Machines & Cloud",
+            "url": "https://www.machinesandcloud.com/"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.machinesandcloud.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Guides", "item": "https://www.machinesandcloud.com/guides.html" }
+          ]
+        }
+      ]
     }
   </script>
 
