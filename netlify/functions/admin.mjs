@@ -73,6 +73,8 @@ export default async (req) => {
     await del("clients", c.slug);
     return json({ ok: true, deleted: c.slug, released });
   }
+  if (b.action === "clear_optout") { const n = e164(b.phone || ""); if (!n) return json({ error: "missing_phone" }, 400); await del("optouts", n); return json({ ok: true, cleared: n }); }
+  if (b.action) return json({ error: "unknown_action", action: String(b.action) }, 400);
   if (b.phone) {
     if (c.phone?.twilioNumber && b.phone.twilioNumber !== undefined && e164(b.phone.twilioNumber) !== c.phone.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
     c.phone = { ...c.phone, ...(b.phone.twilioNumber !== undefined ? { twilioNumber: e164(b.phone.twilioNumber) } : {}), ...(b.phone.twilioNumberSid !== undefined ? { twilioNumberSid: String(b.phone.twilioNumberSid) } : {}), ...(b.phone.voiceForwardTo !== undefined ? { voiceForwardTo: String(b.phone.voiceForwardTo).trim() } : {}), ...(b.phone.tenDlc ? { tenDlc: String(b.phone.tenDlc) } : {}), ...(b.phone.textBack !== undefined ? { textBack: !!b.phone.textBack } : {}) };
