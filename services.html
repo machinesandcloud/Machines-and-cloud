@@ -148,7 +148,7 @@
           <span class="section-eyebrow">Services</span>
           <h1 class="page-hero-title">Packages built for speed, clarity, and repeatability</h1>
           <p class="page-hero-description">
-            A small menu that ladders from discovery to production to ongoing operations. Each engagement has defined triggers, deliverables, and acceptance criteria.
+            Six packages, each with a published price, a timeline, who it is not for, and what you own at the end. Start with a $950 Sprint, a Front Desk Agent live in 7 days, or a Triage Build in 2 to 4 weeks.
           </p>
         </div>
 
@@ -163,9 +163,6 @@
                 <span class="workflow-step-label">Sprint</span>
                 <span class="workflow-step-time">7-10 days</span>
               </div>
-              <div class="workflow-step-status">
-                <span class="status-complete">Complete</span>
-              </div>
             </div>
             <div class="workflow-connector active"></div>
             <div class="workflow-step active" data-step="2">
@@ -175,9 +172,6 @@
               <div class="workflow-step-content">
                 <span class="workflow-step-label">Proof of Value</span>
                 <span class="workflow-step-time">4-6 weeks</span>
-              </div>
-              <div class="workflow-step-status">
-                <span class="status-complete">Complete</span>
               </div>
             </div>
             <div class="workflow-connector in-progress"></div>
@@ -189,10 +183,6 @@
                 <span class="workflow-step-label">Production Launch</span>
                 <span class="workflow-step-time">8-12 weeks</span>
               </div>
-              <div class="workflow-step-status">
-                <span class="status-progress">In Progress</span>
-                <div class="progress-bar-mini"><span style="width: 65%;"></span></div>
-              </div>
             </div>
             <div class="workflow-connector"></div>
             <div class="workflow-step" data-step="4">
@@ -202,9 +192,6 @@
               <div class="workflow-step-content">
                 <span class="workflow-step-label">AI Operations</span>
                 <span class="workflow-step-time">Ongoing</span>
-              </div>
-              <div class="workflow-step-status">
-                <span class="status-pending">Upcoming</span>
               </div>
             </div>
           </div>
@@ -238,30 +225,75 @@
   </section>
 
   <!-- Packages Grid -->
-  <section class="section">
+  <section class="section" id="packages">
     <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">Packages and Prices</span>
+        <h2 class="section-title">Every price on this page is the price</h2>
+        <p class="section-description">
+          Start small and paid, or start with a plan. Each package lists its price, who it is not for, and what you own when it ends. The Sprint fee is credited in full toward any build started within 30 days.
+        </p>
+      </div>
+
       <div class="grid grid-2 reveal">
-        <!-- Package 1 -->
-        <div class="card package-card">
+        <div class="card package-card" id="sprint">
           <span class="badge badge-primary">7-10 Days</span>
-          <h3 class="package-card-title mt-4">AI Workflow Opportunity Sprint</h3>
-          <p class="package-card-description">When leadership wants a short, decision-grade plan to identify the best automation candidate.</p>
+          <h3 class="package-card-title mt-4">AI Opportunity Sprint</h3>
+          <p class="package-card-price"><strong>$950</strong><span>flat fee, credited in full toward any build started within 30 days</span></p>
+          <p class="package-card-description">When you want a short, decision-grade plan that names the best workflow to automate first and what it will cost to build.</p>
           <p class="package-card-timeline">Ideal trigger: "We want AI automation but don't know where to start"</p>
           <ul class="package-card-features">
-            <li>Process inventory and workflow mapping</li>
+            <li>Workflow map of your current process</li>
             <li>Top 3 automation candidates ranked by value</li>
-            <li>KPI baselines and ROI hypothesis model</li>
-            <li>Data/integration feasibility assessment</li>
-            <li>Risk screen and governance requirements</li>
+            <li>KPI baseline for the chosen workflow</li>
+            <li>Fixed-price build quote</li>
+            <li>Controls checklist: approvals, audit trail, data access</li>
           </ul>
+          <p class="package-card-notfor"><strong>Not for:</strong> teams that already know the workflow and want to start building this week. Go straight to the Triage Build or the Front Desk Agent.</p>
           <p class="text-muted text-sm">Acceptance: Signed 1-page value hypothesis + chosen workflow + success metrics</p>
-          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary mt-4">Start Sprint</a>
+          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary mt-4">Start the $950 Sprint</a>
         </div>
 
-        <!-- Package 2 -->
-        <div class="card package-card">
+        <div class="card package-card package-card-featured" id="front-desk">
+          <span class="badge badge-success">Live in 7 Days</span>
+          <h3 class="package-card-title mt-4">Front Desk Agent</h3>
+          <p class="package-card-price"><strong>from $1,497</strong><span>build, plus $397 per month</span></p>
+          <p class="package-card-description">A website agent trained on your pages and documents that answers customer questions, captures quote requests after hours, and books the next step. A human approves anything risky.</p>
+          <p class="package-card-timeline">Ideal trigger: "We miss calls and web leads after hours"</p>
+          <ul class="package-card-features">
+            <li>Agent trained on your site, FAQs, and documents</li>
+            <li>Lead capture and booking requests</li>
+            <li>Instant owner summary of every conversation</li>
+            <li>Human handoff for anything the agent should not answer</li>
+            <li>Monthly fee covers hosting, monitoring, updates, and a performance report</li>
+          </ul>
+          <p class="package-card-notfor"><strong>Not for:</strong> teams that need the agent to take actions inside internal systems. That is a Triage Build or a Proof of Value.</p>
+          <p class="text-muted text-sm">Acceptance: Agent live on your site, answering from your content, with lead summaries arriving in your inbox</p>
+          <a href="contact.html" class="btn btn-primary mt-4">Get a Front Desk Agent</a>
+        </div>
+
+        <div class="card package-card" id="triage">
+          <span class="badge badge-primary">2-4 Weeks</span>
+          <h3 class="package-card-title mt-4">Inbox and Workflow Triage Build</h3>
+          <p class="package-card-price"><strong>$3,500 to $5,000</strong><span>fixed, set in the quote before work starts</span></p>
+          <p class="package-card-description">For one inbox, queue, or intake channel: classify, route, draft replies for human approval, and update your CRM with a full audit log.</p>
+          <p class="package-card-timeline">Ideal trigger: "One inbox is eating a person's week"</p>
+          <ul class="package-card-features">
+            <li>Classification and routing rules you can read</li>
+            <li>Draft replies, sent only after a human approves</li>
+            <li>CRM or ticket updates on approval</li>
+            <li>Full audit log of every action</li>
+            <li>Runbook and handover session</li>
+          </ul>
+          <p class="package-card-notfor"><strong>Not for:</strong> workflows where no human can approve outbound actions. Approval is built in, not optional.</p>
+          <p class="text-muted text-sm">Acceptance: Runs on real items for two weeks with agreed accuracy and zero unapproved sends</p>
+          <a href="contact.html" class="btn btn-secondary mt-4">Scope a Triage Build</a>
+        </div>
+
+        <div class="card package-card" id="readiness-kit">
           <span class="badge badge-primary">2-3 Weeks</span>
           <h3 class="package-card-title mt-4">Data + Knowledge Readiness Kit</h3>
+          <p class="package-card-price"><strong>Fixed fee</strong><span>quoted in the Sprint. What moves the price: number of sources and permission models</span></p>
           <p class="package-card-description">When messy data or complex permissions are blocking progress on agent deployment.</p>
           <p class="package-card-timeline">Ideal trigger: "Our knowledge is messy / permissions are complex"</p>
           <ul class="package-card-features">
@@ -271,15 +303,16 @@
             <li>Evaluation dataset creation</li>
             <li>Red-team test plan for edge cases</li>
           </ul>
+          <p class="package-card-notfor"><strong>Not for:</strong> teams with clean, well-permissioned knowledge. Skip to the Proof of Value.</p>
           <p class="text-muted text-sm">Acceptance: Retrieval quality targets + access controls validated with target users</p>
-          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-secondary mt-4">Learn More</a>
+          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-secondary mt-4">Discuss the Readiness Kit</a>
         </div>
 
-        <!-- Package 3 (Featured) -->
-        <div class="card package-card package-card-featured">
-          <span class="badge badge-success mt-4">4-6 Weeks</span>
+        <div class="card package-card" id="pov">
+          <span class="badge badge-success">4-6 Weeks</span>
           <h3 class="package-card-title mt-4">Agentic Proof-of-Value Build</h3>
-          <p class="package-card-description">When you need a working tied to one workflow with real integrations and controls.</p>
+          <p class="package-card-price"><strong>Fixed fee</strong><span>priced from the Sprint. Typical range stated on your quote, Sprint fee credited</span></p>
+          <p class="package-card-description">When you need a working agent tied to one workflow with real integrations and controls.</p>
           <p class="package-card-timeline">Ideal trigger: "Show it working on one workflow"</p>
           <ul class="package-card-features">
             <li>Working PoV agent in sandbox environment</li>
@@ -289,14 +322,15 @@
             <li>Evaluation harness v1 with baseline metrics</li>
             <li>Team training session</li>
           </ul>
+          <p class="package-card-notfor"><strong>Not for:</strong> teams that have not agreed a KPI baseline yet. Start with the Sprint.</p>
           <p class="text-muted text-sm">Acceptance: Run on real cases + benchmark vs baseline (time/cycle)</p>
-          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary mt-4">Start PoV</a>
+          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary mt-4">Start a Proof of Value</a>
         </div>
 
-        <!-- Package 4 -->
-        <div class="card package-card">
+        <div class="card package-card" id="launch">
           <span class="badge badge-primary">8-12 Weeks</span>
           <h3 class="package-card-title mt-4">Production Agent Launch</h3>
+          <p class="package-card-price"><strong>Milestone based</strong><span>range stated after the Proof of Value, payments tied to acceptance gates</span></p>
           <p class="package-card-description">When you're ready to ship the agent into live operations with full enterprise controls.</p>
           <p class="package-card-timeline">Ideal trigger: "Ship this into operations"</p>
           <ul class="package-card-features">
@@ -308,25 +342,28 @@
             <li>OWASP LLM risk mitigation checklist</li>
             <li>Operational runbooks and incident playbook</li>
           </ul>
+          <p class="package-card-notfor"><strong>Not for:</strong> a first engagement. We launch what a Proof of Value has already proven.</p>
           <p class="text-muted text-sm">Acceptance: SLOs met; rollback plan; security review passed</p>
-          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-secondary mt-4">Plan Launch</a>
+          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-secondary mt-4">Plan a Launch</a>
         </div>
       </div>
 
       <!-- Retainer Package -->
-      <div class="card mt-8 reveal">
+      <div class="card mt-8 reveal" id="operations">
         <div class="grid grid-2 gap-8" style="align-items: center;">
           <div>
             <span class="badge badge-warning">Monthly</span>
             <h3 class="card-title mt-4">AI Operations Retainer</h3>
+            <p class="package-card-price"><strong>Monthly retainer</strong><span>priced per workflow in production, stated before the first month</span></p>
             <p class="card-description">
               Keep your agents reliable, compliant, and continuously improving. We handle monitoring, optimization, and incremental workflow rollouts so you can focus on business outcomes.
             </p>
             <p class="package-card-timeline">Ideal trigger: "Keep it reliable + expand workflows"</p>
+            <p class="package-card-notfor"><strong>Not for:</strong> workflows that are not in production yet.</p>
           </div>
           <div>
             <ul class="package-card-features">
-              <li>24/7 monitoring and alerting</li>
+              <li>Automated monitoring and alerting around the clock, with human response during business hours and a defined escalation path</li>
               <li>Evaluation regression testing</li>
               <li>Prompt and tool change control</li>
               <li>Cost optimization and FinOps</li>
@@ -342,38 +379,46 @@
   </section>
 
   <!-- Pricing Philosophy -->
-  <section class="section bg-dark">
+  <section class="section bg-dark" id="pricing">
     <div class="container">
       <div class="section-header reveal">
         <span class="section-eyebrow">Pricing</span>
-        <h2 class="section-title">Predictable fees, transparent consumption</h2>
+        <h2 class="section-title">Published prices, no markup on model costs</h2>
         <p class="section-description">
-          Our pricing reflects two realities: buyers want predictable fees when outcomes are uncertain, and underlying providers price on consumption (tokens/credits).
+          Buyers want a known number before a call, and providers price on consumption. So we publish our prices and pass consumption through at cost.
         </p>
       </div>
 
       <div class="grid grid-3 reveal">
         <div class="card">
-          <h4 class="card-title">Fixed-Fee Packages</h4>
+          <h4 class="card-title">Fixed prices</h4>
+          <ul class="package-card-features">
+            <li>AI Opportunity Sprint: $950 flat, 7 to 10 days</li>
+            <li>Front Desk Agent: from $1,497 build, plus $397 per month</li>
+            <li>Inbox and Workflow Triage Build: $3,500 to $5,000, 2 to 4 weeks</li>
+            <li>Readiness Kit and Proof of Value: fixed fee, quoted from the Sprint with the Sprint fee credited</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Milestone-based launch</h4>
           <p class="card-description">
-            Sprint, Readiness Kit, and PoV builds are fixed-fee. This reduces sales friction and forces scope discipline for both sides.
+            Production Launch is milestone based with a range stated after the Proof of Value. Payments are tied to acceptance gates. You pay for agreed deliverables, not hours.
+          </p>
+          <p class="card-description mt-4">
+            AI Operations is a monthly retainer, priced per workflow in production.
           </p>
         </div>
 
         <div class="card">
-          <h4 class="card-title">Milestone-Based Launch</h4>
+          <h4 class="card-title">Pass-through at cost</h4>
           <p class="card-description">
-            Production Launch is milestone-based with payments tied to acceptance gates. You pay for agreed deliverables, not hours.
-          </p>
-        </div>
-
-        <div class="card">
-          <h4 class="card-title">Transparent Pass-Through</h4>
-          <p class="card-description">
-            Model and provider consumption is passed through with pre-agreed caps and alerts. No hidden markups on API costs.
+            Model and provider consumption is passed through at cost with a cap you approve in advance and alerts before you reach it. No hidden markups on API costs.
           </p>
         </div>
       </div>
+
+      <p class="pricing-closing reveal">Every price above is the price. Model and API costs are passed through at cost with a cap you approve in advance.</p>
     </div>
   </section>
 
@@ -382,9 +427,9 @@
     <div class="container">
       <div class="section-header-left reveal">
         <span class="section-eyebrow">Accountability</span>
-        <h2 class="section-title">Every package has clear entry and exit gates</h2>
+        <h2 class="section-title">Every package has clear entry and exit gates, and you keep the work</h2>
         <p class="section-description">
-          We don't deliver PowerPoint decks. Each package ends with concrete deliverables and acceptance criteria that you sign off on.
+          We don't deliver PowerPoint decks. Each package ends with concrete deliverables and acceptance criteria that you sign off on. Code, documents, runbooks, and access are yours, so you are never locked in to us.
         </p>
       </div>
 
@@ -395,6 +440,7 @@
               <th style="text-align: left; padding: var(--space-4); color: var(--color-neutral-50);">Package</th>
               <th style="text-align: left; padding: var(--space-4); color: var(--color-neutral-50);">Trigger</th>
               <th style="text-align: left; padding: var(--space-4); color: var(--color-neutral-50);">Acceptance Criteria</th>
+              <th style="text-align: left; padding: var(--space-4); color: var(--color-neutral-50);">What you own at the end</th>
             </tr>
           </thead>
           <tbody>
@@ -402,26 +448,43 @@
               <td style="padding: var(--space-4); color: var(--color-primary-400);">Opportunity Sprint</td>
               <td style="padding: var(--space-4);">Need to identify the best workflow</td>
               <td style="padding: var(--space-4);">Signed 1-page value hypothesis + KPI success metrics</td>
+              <td style="padding: var(--space-4);">Workflow map, ranked candidates, KPI baseline, fixed-price quote, controls checklist</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+              <td style="padding: var(--space-4); color: var(--color-primary-400);">Front Desk Agent</td>
+              <td style="padding: var(--space-4);">Missed leads and questions after hours</td>
+              <td style="padding: var(--space-4);">Agent live on your site, answering from your content</td>
+              <td style="padding: var(--space-4);">Agent configuration, your knowledge base, conversation logs, lead records. Cancel any month and we hand over exports</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+              <td style="padding: var(--space-4); color: var(--color-primary-400);">Triage Build</td>
+              <td style="padding: var(--space-4);">One inbox or queue consuming a person's week</td>
+              <td style="padding: var(--space-4);">Two weeks on real items, agreed accuracy, zero unapproved sends</td>
+              <td style="padding: var(--space-4);">Source code in your repository, prompts, routing rules, audit log, runbook</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
               <td style="padding: var(--space-4); color: var(--color-primary-400);">Readiness Kit</td>
               <td style="padding: var(--space-4);">Knowledge messy / permissions complex</td>
               <td style="padding: var(--space-4);">Retrieval quality targets + access controls validated</td>
+              <td style="padding: var(--space-4);">Corpus map, retrieval design, access map, evaluation dataset</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
               <td style="padding: var(--space-4); color: var(--color-primary-400);">Proof-of-Value</td>
               <td style="padding: var(--space-4);">Need to validate agent feasibility</td>
               <td style="padding: var(--space-4);">Workflow agent hitting KPI baseline + eval thresholds</td>
+              <td style="padding: var(--space-4);">Agent code in your repo, connectors, evaluation harness v1, execution logs, training recording</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
               <td style="padding: var(--space-4); color: var(--color-primary-400);">Production Launch</td>
               <td style="padding: var(--space-4);">Ready to deploy to core systems</td>
               <td style="padding: var(--space-4);">Operational handoff + monitored production run</td>
+              <td style="padding: var(--space-4);">Hardened runtime in your cloud, RBAC and secrets configuration, audit trail, runbooks, security review packet</td>
             </tr>
             <tr>
               <td style="padding: var(--space-4); color: var(--color-primary-400);">AI Ops Retainer</td>
               <td style="padding: var(--space-4);">Need ongoing optimization</td>
               <td style="padding: var(--space-4);">Monthly KPI improvements + quarterly risk reviews</td>
+              <td style="padding: var(--space-4);">Monthly reports, change log, evaluation results. Everything above stays yours if you stop</td>
             </tr>
           </tbody>
         </table>
@@ -482,7 +545,7 @@
       <div class="grid grid-3 reveal mt-8">
         <a href="locations.html" class="card card-link">
           <h3 class="card-title">Locations</h3>
-          <p class="card-description">Review Houston plus the broader set of major US business markets where we now have canonical service-area pages.</p>
+          <p class="card-description">Houston headquarters plus the major US business markets we deliver to remotely.</p>
         </a>
         <a href="houston.html" class="card card-link">
           <h3 class="card-title">Houston Hub</h3>
@@ -529,6 +592,7 @@
           <h4>Services</h4>
           <ul class="footer-links">
             <li><a href="services.html">AI Opportunity Sprint</a></li>
+            <li><a href="services.html#front-desk">Front Desk Agent</a></li>
             <li><a href="services.html">Agent Proof-of-Value</a></li>
             <li><a href="services.html">Production Launch</a></li>
             <li><a href="services.html">AI Operations Retainer</a></li>
@@ -568,6 +632,7 @@
         </div>
       </div>
 
+      <p class="footer-trust">Houston based. Founder led. No client logos on this site because we are new, and we would rather show you a fixed price and a named founder than borrow credibility we have not earned yet. Email <a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a> or call <a href="tel:+13462488359">(346) 248-8359</a>.</p>
       <div class="footer-bottom">
         <p class="footer-copyright">&copy; 2026 Machines & Cloud. All rights reserved.</p>
         <div class="footer-legal">

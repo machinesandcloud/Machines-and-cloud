@@ -246,7 +246,7 @@
         </div>
 
         <!-- Connection Process Visualization -->
-        <div class="hero- reveal">
+        <div class="hero-visual reveal">
           <div class="connect-visual">
             <div class="connect-flow">
               <div class="connect-step connect-step-1 active">
@@ -402,7 +402,9 @@
             Tell us about your workflow automation goals. We'll respond within one business day with next steps.
           </p>
 
-          <form class="contact-form" action="#" method="POST">
+          <form class="contact-form" name="contact" method="POST" action="/thank-you.html" data-netlify="true" netlify-honeypot="bot-field">
+            <input type="hidden" name="form-name" value="contact">
+            <p class="hidden-field" hidden><label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
             <div class="form-group">
               <label for="name" class="form-label">Full Name</label>
               <input type="text" id="name" name="name" class="form-input" placeholder="Jane Smith" required>
@@ -422,6 +424,8 @@
               <label for="role" class="form-label">Your Role</label>
               <select id="role" name="role" class="form-select" required>
                 <option value="">Select your role</option>
+                <option value="owner">Owner / Founder / Partner</option>
+                <option value="office-manager">Office or Practice Manager</option>
                 <option value="coo">COO / VP Operations</option>
                 <option value="cio">CIO / CTO</option>
                 <option value="vp-eng">VP Engineering</option>
@@ -440,7 +444,9 @@
               <label for="interest" class="form-label">What are you looking for?</label>
               <select id="interest" name="interest" class="form-select" required>
                 <option value="">Select an option</option>
-                <option value="sprint">AI Opportunity Sprint - identify the best workflow</option>
+                <option value="sprint">AI Opportunity Sprint ($950) - identify the best workflow</option>
+                <option value="front-desk">Front Desk Agent (from $1,497 + $397/mo) - website agent live in 7 days</option>
+                <option value="triage">Triage Build ($3,500 to $5,000) - one inbox or queue</option>
                 <option value="pov">Proof-of-Value - validate agent feasibility</option>
                 <option value="production">Production Launch - deploy to operations</option>
                 <option value="retainer">AI Operations Retainer - ongoing optimization</option>
@@ -449,6 +455,8 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Send Message</button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+            <p class="text-muted text-sm mt-4">Prefer email? Write to <a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a>. Two lines is enough.</p>
           </form>
         </div>
 
@@ -491,7 +499,7 @@
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                   <polyline points="22,6 12,13 2,6"/>
                 </svg>
-                <span>support@machinesandcloud.com</span>
+                <a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a>
               </div>
               <div class="contact-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="contact-icon">
@@ -534,14 +542,14 @@
         <div class="card">
           <h4 class="card-title text-primary">Company Size</h4>
           <p class="card-description">
-            Mid-market to early enterprise (200-10,000 employees). Fast enough to decide, complex enough to need real automation.
+            Two doors. Owners and managers at 10 to 200 person companies who want one thing working this month, and operations leaders at 200 to 10,000 person organizations who need a workflow proven and governed before launch.
           </p>
         </div>
 
         <div class="card">
           <h4 class="card-title text-primary">Decision Makers</h4>
           <p class="card-description">
-            COO, CIO, VP Operations, VP Engineering, IT Directors. People who own KPIs and can approve production deployments.
+            Owners and founders, office and practice managers, COOs, CIOs, VPs of Operations and Engineering, IT Directors. People who own the outcome and can say yes.
           </p>
         </div>
 
@@ -626,6 +634,7 @@
           <h4>Services</h4>
           <ul class="footer-links">
             <li><a href="services.html">AI Opportunity Sprint</a></li>
+            <li><a href="services.html#front-desk">Front Desk Agent</a></li>
             <li><a href="services.html">Agent Proof-of-Value</a></li>
             <li><a href="services.html">Production Launch</a></li>
             <li><a href="services.html">AI Operations Retainer</a></li>
@@ -668,6 +677,7 @@
         </div>
       </div>
 
+      <p class="footer-trust">Houston based. Founder led. No client logos on this site because we are new, and we would rather show you a fixed price and a named founder than borrow credibility we have not earned yet. Email <a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a> or call <a href="tel:+13462488359">(346) 248-8359</a>.</p>
       <div class="footer-bottom">
         <p class="footer-copyright">&copy; 2026 Machines & Cloud. All rights reserved.</p>
         <div class="footer-legal">

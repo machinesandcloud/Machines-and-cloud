@@ -293,21 +293,40 @@
 
       if (!isValid) return;
 
-      // Simulate submission
+      // Submit (Netlify Forms when data-netlify is set, otherwise native)
+      const statusEl = form.querySelector('.form-status');
+      const setStatus = (msg, isError) => {
+        if (!statusEl) return;
+        statusEl.textContent = msg;
+        statusEl.classList.toggle('is-error', !!isError);
+      };
+
+      if (!form.hasAttribute('data-netlify')) {
+        form.submit();
+        return;
+      }
+
       submitBtn.textContent = 'Sending...';
       submitBtn.disabled = true;
+      setStatus('', false);
 
-      setTimeout(() => {
-        submitBtn.textContent = 'Message Sent!';
-        submitBtn.classList.add('success');
-
-        setTimeout(() => {
-          form.reset();
+      const body = new URLSearchParams(new FormData(form)).toString();
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Form submit failed: ' + res.status);
+          submitBtn.textContent = 'Message Sent!';
+          submitBtn.classList.add('success');
+          window.location.href = form.getAttribute('action') || 'thank-you.html';
+        })
+        .catch(() => {
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;
-          submitBtn.classList.remove('success');
-        }, 3000);
-      }, 1000);
+          setStatus('Something went wrong sending this. Email support@machinesandcloud.com and we will reply within one business day.', true);
+        });
     });
 
     // Remove error on input
