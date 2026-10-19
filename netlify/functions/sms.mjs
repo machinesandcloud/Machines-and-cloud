@@ -45,14 +45,28 @@ export default async (req) => {
     return twiml(`Did not catch that. ${HELP}`);
   }
 
+  // Numbers on the owner's always-ring-through list: relay the text, never answer it.
+  if ((c.rules?.bypass || []).includes(from)) {
+    await notifyOwner(c, `VIP text from ${from}: ${body.slice(0, 600)}`, { type: "owner_note" });
+    await logEvent(c.slug, "vip_text", { from });
+    return twiml("");
+  }
+
   // Opt-out and opt-in come before anything else (FCC: any reasonable means).
   if (STOP_RE.test(body) || STOP_PHRASE.test(body)) {
     await recordOptOut(from, c.slug, body.slice(0, 80));
     const n = await cancelTasksForNumber(from);
     await logEvent(c.slug, "opt_out", { from, cancelled: n, viaTwilio: !!params.OptOutType });
     await notifyOwner(c, `${name} front desk: ${from} opted out of texts. Nothing more will be sent to them.`, { type: "owner_note" });
+    // "cancel" from someone with a visit on the books is also a cancellation request: the owner decides.
+    let told = "";
+    if (/^\s*cancel\b/i.test(body) && ACTIVE.includes(c.status)) {
+      const visits = await upcomingBookings(c, from);
+      for (const b of visits) await cancelRequest(c, b);
+      if (visits.length) told = ` We've told ${c.owner?.name || "the owner"} about your visit.`;
+    }
     if (params.OptOutType) return twiml(""); // Twilio already sent the carrier-standard confirmation
-    return twiml(`${name}: you're unsubscribed and will get no more texts from this number. Reply START to resume.`);
+    return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
   }
   if (await optedOut(from)) {
     if (START_RE.test(body)) { await clearOptOut(from); await logEvent(c.slug, "opt_in", { from }); return twiml(`${name}: you're subscribed again. Reply STOP any time.`); }

@@ -3,10 +3,10 @@
 import { getStore } from "@netlify/blobs";
 import { randomBytes } from "node:crypto";
 
-const stores = {};
+// Opened per call, never cached at module level: a warm function instance that outlives the Blobs
+// token would otherwise fail every write with "Token expired".
 function store(name) {
-  if (!stores[name]) stores[name] = getStore({ name, consistency: "strong" });
-  return stores[name];
+  return getStore({ name, consistency: "strong" });
 }
 
 export const id = (n = 6) => randomBytes(n).toString("hex");

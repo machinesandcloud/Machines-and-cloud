@@ -3,7 +3,7 @@
 // "client" runs a customer's front desk from their stored config (website chat, owner test line);
 // the named personas are the homepage example companies.
 import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
-import { getClient, getConversation, saveConversation } from "./lib/store.mjs";
+import { getClient, getConversation, saveConversation, get, put } from "./lib/store.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER } from "./lib/config.mjs";
 import { bookVisit, flagLead } from "./lib/desk.mjs";
 
@@ -105,7 +105,18 @@ async function captureLead(input, page) {
   return { ok: res.ok };
 }
 
-export default async (req) => {
+// 60 messages per IP per 10 minutes across every mode. Keys carry the bucket, so old ones are simply
+// never read again. The owner's test line (valid key) and the admin key are exempt.
+const RATE_LIMIT = 60;
+async function rateLimited(ip) {
+  if (!ip) return false;
+  const key = `${ip}/${Math.floor(Date.now() / 600000)}`;
+  const n = (Number(await get("ratelimit", key)) || 0) + 1;
+  await put("ratelimit", key, n);
+  return n > RATE_LIMIT;
+}
+
+export default async (req, context) => {
   const origin = req.headers.get("origin") || "";
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -115,6 +126,11 @@ export default async (req) => {
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
   const page = typeof body?.page === "string" ? body.page.slice(0, 120) : "";
   const wantStream = body?.stream === true;
+  const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "";
+  const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
+  let ownerExempt = false;
+  if (typeof body?.client === "string" && body.client && typeof body.key === "string") { const c0 = await getClient(body.client.slice(0, 40)); ownerExempt = !!c0 && body.key === c0.ownerKey; }
+  if (!adminOk && !ownerExempt && (await rateLimited(ip))) return json({ error: "busy" }, 429, cors(origin));
 
   // ---- Client mode: a real shop's front desk ----
   if (typeof body?.client === "string" && body.client) {
@@ -147,7 +163,9 @@ export default async (req) => {
       conv.messages.push({ role: "assistant", content: done ? out.reply + "\n" + done : out.reply, at: new Date().toISOString() });
       await saveConversation(conv); return out;
     };
-    const run = (onText) => runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500 }).then(finish);
+    // dropToolPreamble: a turn that calls a tool shows the customer only the text written after the tool
+    // returned, so planning lines never reach the chat (the final turn still streams word by word).
+    const run = (onText) => runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true }).then(finish);
     if (wantStream) return ndjsonResponse(run, cors(origin));
     try { return json(await run(), 200, cors(origin)); } catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
   }

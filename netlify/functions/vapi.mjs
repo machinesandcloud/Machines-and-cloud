@@ -1,8 +1,11 @@
-// Vapi server webhook: runs our tools during a call and files the transcript when the call ends.
+// Vapi server webhook: picks the assistant for an incoming call (with what we know about the caller),
+// runs our tools during the call, and files the transcript and the minutes when the call ends.
 import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, listRecords } from "./lib/store.mjs";
-import { bookVisit, flagLead } from "./lib/desk.mjs";
+import { bookVisit, flagLead, callerContext, cellIsForwardedLine } from "./lib/desk.mjs";
 import { json } from "./lib/agent.mjs";
 import { e164 } from "./lib/send.mjs";
+import { addUsage } from "./lib/usage.mjs";
+import { standardGreeting } from "./lib/vapi.mjs";
 
 export const config = { path: "/api/vapi" };
 
@@ -26,6 +29,24 @@ export default async (req) => {
   const caller = e164(m?.customer?.number || m?.call?.customer?.number || "");
   const callId = m?.call?.id || "call";
 
+  // Incoming call: which assistant, and what we already know about this caller.
+  if (m.type === "assistant-request") {
+    const assistantId = c.voice?.assistantId;
+    if (!assistantId || c.voice?.detached || !["testing", "live"].includes(c.status)) return json({ error: `${c.business?.name || "This line"} is not answering calls right now. Please call back during business hours.` });
+    const owner = c.owner?.name || "the owner";
+    if (caller && (c.rules?.bypass || []).includes(caller)) {
+      await logEvent(c.slug, "vip_call", { from: caller, rang: !cellIsForwardedLine(c) && c.owner?.phone ? "cell" : "assistant" });
+      if (!cellIsForwardedLine(c) && c.owner?.phone) return json({ destination: { type: "number", number: c.owner.phone, message: `Connecting you to ${owner}.` } });
+      return json({ assistantId, assistantOverrides: { firstMessage: `This is ${c.business?.name || "the front desk"}. Please leave a message after the tone and ${owner} will call you back.`, variableValues: { customerName: "", isExisting: "", upcomingVisit: "", vip: "yes" } } });
+    }
+    const ctx = await callerContext(c, caller);
+    const first = ctx.upcomingVisit
+      ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, your visit is ${ctx.upcomingVisit}. How can I help?`
+      : ctx.customerName ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, how can I help today?` : standardGreeting(c);
+    await logEvent(c.slug, "call_started", { from: caller, known: !!ctx.customerName });
+    return json({ assistantId, assistantOverrides: { firstMessage: first, variableValues: { customerName: ctx.customerName, isExisting: ctx.isExisting, upcomingVisit: ctx.upcomingVisit, vip: "" } } });
+  }
+
   if (m.type === "tool-calls") {
     const results = [];
     for (const t of m.toolCallList || []) {
@@ -48,7 +69,9 @@ export default async (req) => {
     conv.summary = m?.analysis?.summary || "";
     conv.endedReason = m.endedReason;
     await saveConversation(conv);
-    await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds: m.startedAt && m.endedAt ? Math.round((new Date(m.endedAt) - new Date(m.startedAt)) / 1000) : null });
+    const seconds = m.startedAt && m.endedAt ? Math.max(0, Math.round((new Date(m.endedAt) - new Date(m.startedAt)) / 1000)) : null;
+    await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds });
+    try { await addUsage(c, { minutes: seconds ? Math.ceil(seconds / 60) : 0, calls: 1 }); } catch (err) { console.error("usage", err); }
     if (/transfer/i.test(String(m.endedReason || ""))) await logEvent(c.slug, "transferred", { from: caller });
     // A call that produced neither a booking nor a lead still deserves an owner note when we know the number.
     if (caller) {

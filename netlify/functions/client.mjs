@@ -1,5 +1,6 @@
 // Owner portal API. GET ?c=slug returns the public widget view; with &k=key the owner view plus
 // records, health, and forwarding instructions. PUT with the key updates the editable config (loop-checked).
+// GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
 import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks } from "./lib/store.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls } from "./lib/config.mjs";
@@ -8,6 +9,7 @@ import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mj
 import { googleEnabled } from "./lib/calendar.mjs";
 import { stripeEnabled } from "./lib/billing.mjs";
 import { dailyDigest, lineHealth, ackAlertsFor } from "./lib/desk.mjs";
+import { getUsage, usageView } from "./lib/usage.mjs";
 import { updateVoicePrompt, detachVoice, attachVoice } from "./lib/vapi.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
 
@@ -29,13 +31,18 @@ export default async (req) => {
   const site = process.env.URL || url.origin;
 
   if (req.method === "GET") {
-    if (!isOwner) return json(publicView(c), 200, CORS(origin));
-    const [bookings, leads, convs, events, alerts] = await Promise.all([
-      listRecords("bookings", c.slug, 100), listRecords("leads", c.slug, 100), listJSON("conversations", c.slug + "/", 60), listJSON("events", c.slug + "/", 300), listRecords("alerts", c.slug, 100),
+    if (!isOwner) {
+      if (url.searchParams.get("export")) return json({ error: "forbidden" }, 403);
+      return json(publicView(c), 200, CORS(origin));
+    }
+    const exp = url.searchParams.get("export");
+    if (exp) return exportCSV(c, exp);
+    const [bookings, leads, convs, events, alerts, usage] = await Promise.all([
+      listRecords("bookings", c.slug, 100), listRecords("leads", c.slug, 100), listJSON("conversations", c.slug + "/", 60), listJSON("events", c.slug + "/", 300), listRecords("alerts", c.slug, 100), getUsage(c.slug),
     ]);
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     return json({
-      client: ownerView(c), plan: PLANS[c.plan], bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       health: lineHealth(c, events),
@@ -67,7 +74,9 @@ export default async (req) => {
       ackMinutes: ACK_MINUTES.includes(Number(b.rules.ackMinutes)) ? Number(b.rules.ackMinutes) : (c.rules.ackMinutes || 10),
       callbackHours: s(b.rules.callbackHours, 80) || c.rules.callbackHours || "within 30 minutes",
       callbackAfterHours: s(b.rules.callbackAfterHours, 80) || c.rules.callbackAfterHours || "by 8 am tomorrow",
+      bypass: b.rules.bypass !== undefined ? [...new Set(arr(b.rules.bypass, 20).map((n) => e164(n)).filter(Boolean))].slice(0, 20) : (c.rules.bypass || []),
     };
+    if (b.digest) c.digest = { ...(c.digest || {}), ...(b.digest.text !== undefined ? { text: !!b.digest.text } : {}) };
     if (b.faq) c.faq = (Array.isArray(b.faq) ? b.faq : []).map((x) => ({ q: s(x.q, 200), a: s(x.a, 600) })).filter((x) => x.q && x.a).slice(0, 40);
     if (b.summary !== undefined) c.summary = s(b.summary, 2000);
     if (b.widget) c.widget = { ...c.widget, greeting: s(b.widget.greeting, 200), allowedOrigins: arr(b.widget.allowedOrigins, 5) };
@@ -149,3 +158,23 @@ export default async (req) => {
   }
   return json({ error: "method_not_allowed" }, 405);
 };
+
+// ---- CSV export (RFC 4180, UTF-8 BOM, attachment) ----
+const csvCell = (v) => { const t = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v); return /[",\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+const csv = (header, rows) => "\uFEFF" + [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
+async function exportCSV(c, what) {
+  const today = new Date().toISOString().slice(0, 10);
+  let header, rows;
+  if (what === "bookings") {
+    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "date", "window", "urgency", "status", "outcome", "customerType", "channel", "notes", "unsure", "consent.at", "consent.channel"];
+    rows = (await listRecords("bookings", c.slug, 2000)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel]);
+  } else if (what === "leads") {
+    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure"];
+    rows = (await listRecords("leads", c.slug, 2000)).map((l) => [l.id, l.createdAt, l.customer_name, l.phone, l.address, l.issue, l.reason, l.outcome, l.urgency, l.wanted, l.status, l.channel, l.unsure]);
+  } else if (what === "conversations") {
+    header = ["channel", "contact", "at", "role", "content", "flag_note"];
+    rows = [];
+    for (const v of await listJSON("conversations", c.slug + "/", 2000)) for (const m of v.messages || []) rows.push([v.channel, v.contact, m.at, m.role, m.content, v.flag?.note || ""]);
+  } else return json({ error: "unknown_export" }, 400);
+  return new Response(csv(header, rows), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${c.slug}-${what}-${today}.csv"`, "Cache-Control": "no-store" } });
+}

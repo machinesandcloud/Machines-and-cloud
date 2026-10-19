@@ -31,7 +31,8 @@ export function newClient({ slug, ownerKey, owner, business }) {
     owner: { name: "", email: "", phone: "", backupPhone: "", ...owner },
     business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", legal: {}, ...business },
     services: [], fees: [], windows: DEFAULT_WINDOWS.slice(),
-    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: "", ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow" },
+    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: "", ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
+    digest: { text: true },
     faq: [], leadSources: [], software: "google",
     phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
     voice: { provider: "none" }, provision: { status: "pending", steps: {} },
@@ -49,6 +50,9 @@ export function loopCheck(c) {
   if (same(o.phone, p.twilioNumber)) return { field: "owner.phone", message: "Your cell cannot be the front desk number." };
   if (o.backupPhone && (same(o.backupPhone, p.businessNumber) || same(o.backupPhone, p.twilioNumber) || same(o.backupPhone, o.phone))) return { field: "owner.backupPhone", message: "The backup number must be a different phone from your cell, your business line, and the front desk number." };
   if (p.forwarding === "all" && p.transferTo && same(p.transferTo, p.businessNumber)) return { field: "phone.transferTo", message: "With all calls forwarded, transfers must go to a phone that is not the forwarded line, or every transfer comes straight back to the front desk. Leave it blank and the front desk takes a message and promises a callback instead." };
+  for (const n of c.rules?.bypass || []) {
+    if (same(n, p.businessNumber) || same(n, p.twilioNumber) || same(n, o.phone)) return { field: "rules.bypass", message: "The always-ring-through list is for customers' numbers, not your business line, the front desk number, or your cell." };
+  }
   return null;
 }
 
@@ -86,8 +90,8 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
     : channel === "voice"
     ? "You are answering the phone. Short spoken sentences, one question at a time, no formatting."
     : channel === "test"
-    ? "This is the owner's private test line. Behave exactly as you would with a real customer."
-    : "You are the chat on the company website. Keep replies to one to three short sentences, one question at a time.";
+    ? "This is the owner's private test line. Behave exactly as you would with a real customer. Never write notes to yourself or narrate what you are about to do; every sentence you write is shown to the customer."
+    : "You are the chat on the company website. Keep replies to one to three short sentences, one question at a time. Never write notes to yourself or narrate what you are about to do; every sentence you write is shown to the customer.";
   const upcoming = extra.bookings?.length
     ? `\nThis customer's upcoming visit(s): ${extra.bookings.map((v) => `ref ${v.id}, ${v.date || "date not set"}, ${v.window}, ${v.issue}`).join("; ")}.\nReminder texts say "Reply C to confirm or R to reschedule". If they reply R or ask to reschedule: offer the arrival windows and call update_visit with action "reschedule" once they pick a day and window. If they reply C or confirm: call update_visit with action "confirm". If they want to cancel: call update_visit with action "cancel_request"; you do not cancel visits yourself, ${owner} does.\n`
     : "";

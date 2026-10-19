@@ -109,7 +109,7 @@ Acceptance (now):
 Acceptance (later, keyed, S1-19): Twilio accepts the campaign without a privacy or terms validation error and the console shows both URLs.
 
 ### S1-04 One sender: Messaging Service, registered bridge, inbound mapping
-Status: delivered again 2026-10-19 (engineer): the provisioning text now goes through `sendSMS({ client, type: "number_assigned" })`; grep is clean. Previously returned: `grep -rn "from: c.phone.twilioNumber" netlify/functions` still hit `provision-background.mjs` line 73 (the number-assigned text to the owner), which will fail with 30034 on the first keyed client; change it to `sendSMS({ to: c.owner.phone, client: c, force: true, type: "number_assigned", body })`. Every other "now" line passed (sender `bridge` on every send, `own` after `tenDlc: approved`, events carry `sender`, `ok`, `logged`, `preview`). Bridge inbound mapping (`resolveClient` via `index` `bridge:`) could not be exercised on the draft because the MC number is not exposed; code path reviewed, keyed pass covers it.
+Status: verified 2026-10-19 6ad67daca202d234da481d56. Returned once (bare `from:` in `provision-background.mjs` line 73); now `sendSMS({ client, force: true, type: "number_assigned" })` and `grep -rn "from: c.phone.twilioNumber" netlify/functions` is clean. The send itself runs only when a number is bought, so it is exercised in the keyed pass (S2-01).
 Size and scope: Size: M (was L). Implements: Epic 2 MUST "texts from a Machines & Cloud registered sender until the campaign clears". Closes the sending half of L2 and L3.
 
 Already on disk: `lib/send.mjs` `sendSMS({ to, from, body, client, messagingServiceSid, force })` picks the shop's own number plus Messaging Service when `tenDlc === "approved"`, else `MC_MESSAGING_SERVICE_SID` or `MC_TWILIO_NUMBER` with the business name prefixed; sends with `MessagingServiceSid` when a service is known; writes `health` store `lastsend:{slug}`. `desk.mjs`, `scheduler.mjs`, `voice.mjs`, `client.mjs` already call `sendSMS` with `client`. `notifyOwner` sends with `force: true`.
@@ -443,7 +443,7 @@ Acceptance (keyed only):
 - [ ] `admin delete` on the test shop returns the released number SID and Vapi ids; the Twilio console no longer lists the number.
 
 ### S1-20 One alert per customer, not one per turn
-Status: delivered 2026-10-19 (engineer), self-checked on draft 6ad67cb6b485ce16084fb1d2: one waiting alert and one escalate task for a three-turn gas-smell conversation. Built one level up from the ticket: `flagLead` merges a repeat `notify_owner` for the same phone or conversation within 30 minutes into the open lead (owner gets an UPDATE line with what changed), and opens an alert only if none is waiting for that lead, so one chain runs per customer. Verify with the ticket's scenario: one `waiting` alert, one `escalate` task, `lead_updated` events instead of extra leads.
+Status: verified 2026-10-19 6ad67daca202d234da481d56: a three-turn gas-smell conversation produced one lead, one `waiting` alert, one `escalate` task; `ok REF` acknowledged it; a second number opened its own alert. Built one level up from the ticket (repeat `notify_owner` within 30 minutes merges into the open lead with an UPDATE text when something changed); accepted.
 Original status: todo. Size: S. Implements: Epic 3 MUST acknowledge-and-escalate (correctness). Found in the S1-10 verification: one emergency conversation opened three `alerts` records and three `escalate` chains.
 
 Files: `netlify/functions/lib/desk.mjs`.
@@ -453,7 +453,7 @@ Change: `openAlert(c, lead, kind)` first looks for a `waiting` alert for the sam
 Acceptance (now): on the test line, "I smell gas" followed by the address and number in a second turn and "yes tell the owner" in a third: `admin records kind=alerts` shows exactly one `waiting` alert for that number, `admin tasks` exactly one `escalate`, and an `alert_merged` event per extra lead; `ok REF` with any of the lead refs acknowledges it. A second emergency from a different number opens its own alert.
 
 ### S1-21 SMS replies never carry the model's planning text
-Status: delivered 2026-10-19 (engineer), self-checked on draft 6ad67cb6b485ce16084fb1d2: three SMS bookings, every reply starts with the customer sentence. `runAgent` drops text emitted in a turn that ends in a tool call when `dropToolPreamble` is set (SMS background agent sets it); prompt line added; last-resort first-sentence filter logs `reply_trimmed`.
+Status: verified 2026-10-19 6ad67daca202d234da481d56: three SMS bookings from fresh numbers; every assistant turn starts with the customer-facing sentence; zero `reply_trimmed` events were needed.
 Original status: todo. Size: S. Implements: Epic 6 MUST (quality of the SMS channel). Found in the S1-11 verification: the reply sent after an SMS booking began "Have name, address, issue, window. Phone filled automatically. Book." before the customer-facing sentence, because `runAgent` concatenates text emitted before a tool call with the text after it.
 
 Files: `netlify/functions/lib/agent.mjs`, `netlify/functions/sms-agent-background.mjs`, `netlify/functions/lib/config.mjs`.
@@ -463,7 +463,7 @@ Change: in `runAgent`, when an iteration ends in `tool_use`, discard the text em
 Acceptance (now): repeat the S1-11 SMS booking three times with fresh numbers; every assistant turn in `admin records kind=conversations` starts with a customer-facing sentence (name, greeting, or answer), no `reply_trimmed` event is needed for a pass but is allowed; the test-line and web replies still stream.
 
 ### S1-22 Portal and tooling leftovers from verification
-Status: delivered 2026-10-19 (engineer), self-checked: unknown action 400, clear_optout 200. Off codes as tap-to-dial while paused or cancelled with `offLong`; Test tab hidden when cancelled; `admin clear_optout`; unknown admin actions return 400.
+Status: verified 2026-10-19 6ad67daca202d234da481d56: `admin clear_optout` returns `{ ok, cleared }`; an unknown admin action returns 400 `unknown_action`; the paused GET carries `forwarding.off` and `offLong`, and `desk.html` renders the tap-to-dial codes while paused or cancelled and hides the Test tab when cancelled (page code read, not a browser).
 Original status: todo. Size: S. Implements: the open lines from S1-02, S1-05, S1-15.
 
 Files: `desk.html`, `netlify/functions/admin.mjs`.
@@ -595,3 +595,7 @@ Observed and worth knowing before the keyed pass: the escalation chain, the dail
 
 ### Keyed pass
 Pending S1-19 (Steve's Twilio, Vapi, Resend keys). Order and checklist in section 5.3.
+
+### Follow-up pass, 2026-10-19, draft `6ad67daca202d234da481d56` (fresh draft of commit `875f118`)
+
+`scratchpad/verify3.py`, 24 checks, 24 passed; test shop `pm-test-hvac-0be2` with number `+17135550113`, deleted at the end; `GET /api/admin` lists no PM Test shop. Covered: S1-04 (static grep), S1-20 (one alert, one chain, ack, second number), S1-21 (three SMS bookings, no planning text, no trims), S1-22 (admin actions, paused payload for the portal), and the Round 2 M1 and M2 code the PO reported as built: "Yes" from a subscribed number gets a model reply and `yes` confirms a single upcoming visit; all-calls onboarding without a transfer target returns 200 and the voice prompt uses the callback sentence; AT&T missed-call code carries `**15#`; the Verizon note says there is no ring-time setting. One M2 sentence is not in the code yet (the escalation call on an all-calls shop without a transfer target still rings the forwarded line); it is built in SPRINT2.md S2-04.

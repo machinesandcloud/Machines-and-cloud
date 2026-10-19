@@ -32,14 +32,23 @@ export const TEMPLATES = {
 const OUTCOME = { booked: "BOOKED", needs_action: "NEEDS ACTION", took_message: "TOOK MESSAGE", wants_call: "WANTS A CALL", spam: "SPAM", rescheduled: "RESCHEDULED", cancel_request: "NEEDS ACTION" };
 const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action", emergency: "needs_action", question: "took_message", wants_call: "wants_call", spam: "spam" }[reason] || "needs_action");
 
+// "Existing customer" means a visit that happened: marked done or paid, or dated before today and
+// not cancelled. Leads, spam records, and future bookings do not count.
 export async function customerType(slug, phone) {
   if (!phone) return "new";
-  const cutoff = Date.now() - 10 * 60 * 1000;
-  for (const kind of ["bookings", "leads"]) {
-    const recs = await listRecords(kind, slug, 300);
-    if (recs.some((r) => r.phone === phone && new Date(r.createdAt).getTime() < cutoff)) return "existing";
-  }
-  return "new";
+  const today = visitDate("today"); today.setHours(0, 0, 0, 0);
+  const recs = await listRecords("bookings", slug, 300);
+  const had = recs.some((b) => b.phone === phone && (["done", "paid"].includes(b.status) || (b.date && b.status !== "cancelled" && visitDate(b.date).getTime() < today.getTime())));
+  return had ? "existing" : "new";
+}
+
+// The owner's cell is the forwarded line when it is the business number, or when all calls are
+// forwarded and no separate transfer phone was given. Calling it would bounce into the front desk.
+export function cellIsForwardedLine(c) {
+  const p = c.phone || {}, o = c.owner || {};
+  if (o.phone && p.businessNumber && o.phone === p.businessNumber) return true;
+  if (p.forwarding === "all" && !p.transferTo) return true;
+  return false;
 }
 
 // The owner's text: a job ticket.
@@ -133,6 +142,19 @@ export async function flagLead(c, input, ctx = {}) {
   return l;
 }
 
+// What the voice assistant should know before it says hello: the caller's name from the most recent
+// booking or lead with that number, whether they are an existing customer, and any upcoming visit.
+export async function callerContext(c, phone) {
+  const out = { customerName: "", isExisting: "new", upcomingVisit: "" };
+  if (!phone) return out;
+  const recs = (await listRecords("bookings", c.slug, 300)).concat(await listRecords("leads", c.slug, 300)).filter((r) => r.phone === phone && r.customer_name && r.status !== "spam").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+  if (recs.length) out.customerName = recs[recs.length - 1].customer_name.split(" ")[0];
+  out.isExisting = await customerType(c.slug, phone) === "existing" ? "existing customer" : "new";
+  const up = await upcomingBookings(c, phone);
+  if (up.length) { const b = up[0]; out.upcomingVisit = `${b.date && b.date !== "today" ? b.date + ", " : "today, "}${b.window}${b.issue ? ", for the " + b.issue.replace(/[.\s]+$/, "") : ""}`; }
+  return out;
+}
+
 // ---- Acknowledge and escalate ----
 export async function openAlert(c, lead, kind) {
   const a = await addRecord("alerts", c.slug, { leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
@@ -157,18 +179,36 @@ export async function runEscalation(c, task) {
   const mins = Number(c.rules?.ackMinutes) || 10;
   const owner = c.owner?.name || "the owner";
   const summary = ownerSummary(c, lead.reason, lead);
+  const light = a.kind === "wants_call";
   a.step = (a.step || 0) + 1;
   let how = "";
-  if (a.step === 1) {
-    if (c.owner?.backupPhone) { const r = await sendSMS({ to: c.owner.backupPhone, client: c, type: "escalation", force: true, body: `${owner} has not acknowledged this in ${mins} min:\n${summary}` }); how = r.ok ? "backup texted" : r.logged ? "backup texted (logged)" : "backup skipped"; }
-    else how = "backup skipped";
-  } else if (a.step === 2) {
-    const r = await placeCall({ to: c.owner?.phone, say: `Urgent lead from your ${c.business.name} front desk. Please check your texts. Urgent lead from your ${c.business.name} front desk. Please check your texts.` });
-    how = r.ok ? "call" : "call (logged)";
-  } else {
+  const backupText = async () => {
+    if (!c.owner?.backupPhone) return "backup skipped";
+    const r = await sendSMS({ to: c.owner.backupPhone, client: c, type: "escalation", force: true, body: `${owner} has not acknowledged this in ${mins} min:\n${summary}` });
+    return r.ok ? "backup texted" : r.logged ? "backup texted (logged)" : "backup skipped";
+  };
+  const tellCustomer = async () => {
     const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", hour12: false }).format(new Date()));
     const win = hour >= 7 && hour < 19 ? (c.rules?.callbackHours || "within 30 minutes") : (c.rules?.callbackAfterHours || "by 8 am tomorrow");
     if (lead.phone) await sendSMS({ to: lead.phone, client: c, type: "fallback_window", body: `${c.business.name}: we have your request and ${owner} will call you ${win}.` });
+  };
+  if (light) {
+    // Someone who wants a call: backup text, then the customer is told the window. No call, no Steve.
+    if (a.step === 1) how = await backupText();
+    else { await tellCustomer(); how = "customer told window"; a.status = "exhausted"; }
+  } else if (a.step === 1) {
+    how = await backupText();
+  } else if (a.step === 2) {
+    if (cellIsForwardedLine(c)) {
+      // A call to the forwarded line would come straight back to the front desk: text again instead.
+      await sendSMS({ to: c.owner?.phone, client: c, type: "owner_alert", force: true, body: `Second notice: not acknowledged in ${mins * 2} min.\n${summary}` });
+      how = "call replaced by text (forwarded line)";
+    } else {
+      const r = await placeCall({ to: c.owner?.phone, say: `Urgent lead from your ${c.business.name} front desk. Please check your texts. Urgent lead from your ${c.business.name} front desk. Please check your texts.` });
+      how = r.ok ? "call" : "call (logged)";
+    }
+  } else {
+    await tellCustomer();
     if (STEVE_PHONE) await sendSMS({ to: STEVE_PHONE, from: process.env.MC_TWILIO_NUMBER, body: `Unacknowledged ${a.kind} at ${c.business.name}:\n${summary}`.slice(0, 1200), force: true });
     await notifySteve(`Unacknowledged ${a.kind}: ${c.business.name}`, `${summary}\n\n${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`);
     how = "customer told window, Steve notified";
@@ -176,7 +216,7 @@ export async function runEscalation(c, task) {
   }
   a.history.push({ step: a.step, how, at: new Date().toISOString() });
   await saveRecord("alerts", a);
-  await logEvent(c.slug, "escalated", { id: a.id, step: a.step, how });
+  await logEvent(c.slug, "escalated", { id: a.id, step: a.step, how, kind: a.kind });
   if (a.status === "waiting") await scheduleTask(c.slug, new Date(Date.now() + mins * 60 * 1000), "escalate", { alertId: a.id });
   return `step ${a.step}: ${how}`;
 }
@@ -290,7 +330,7 @@ export async function dailyDigest(c, events) {
   const wants = leads.filter((l) => l.outcome === "wants_call").length;
   const spam = leads.filter((l) => l.outcome === "spam").length;
   const name = c.business.name;
-  if (!bookings.length && !leads.length && !convs.length) return { text: `${name}: nothing today. Line OK, last call ${t(h.lastInboundCall)}, errors ${h.errors24h}.`, email: `${name}: nothing today.\nLast call: ${t(h.lastInboundCall)}. Last text: ${t(h.lastInboundText)}. Errors: ${h.errors24h}.` };
+  if (!bookings.length && !leads.length && !convs.length) return { empty: true, text: `${name}: nothing today. Line OK, last call ${t(h.lastInboundCall)}, errors ${h.errors24h}.`, email: `${name}: nothing today.\nLast call: ${t(h.lastInboundCall)}. Last text: ${t(h.lastInboundText)}. Errors: ${h.errors24h}.` };
   const text = `${name}, today: ${bookings.length} booked${bookings.length ? " (" + bookings.map((b) => b.id).join(", ") + ")" : ""}, ${needs.length} leads need action${needs.length ? " (" + needs.map((l) => l.id).join(", ") + ")" : ""}, ${emergencies} emergencies, ${wants} wants a call, ${spam} spam. Flagged: ${convs.length}${convs.length ? " (" + (convs[0].flag.note || "").slice(0, 60) + ")" : ""}. Line: last call ${t(h.lastInboundCall)}, last text ${t(h.lastInboundText)}, errors ${h.errors24h}.`;
   const email = [`${name}: today's front desk`, "",
     ...bookings.map((b) => `Booked ${b.id}: ${b.customer_name} ${b.phone}, ${b.date || ""} ${b.window}, ${b.issue}${b.unsure ? " (unsure: " + b.unsure + ")" : ""}`),

@@ -5,7 +5,8 @@ import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, 
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
 import { TEMPLATES, dailyDigest, runEscalation } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
-import { a2pEnabled, brandStatus, createCampaign, campaignStatus } from "./lib/twilio.mjs";
+import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
+import { releaseVoice } from "./lib/vapi.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -66,6 +67,28 @@ export async function run({ forceHour } = {}) {
       } catch (err) { console.error("10dlc poll", slug, err); }
     }
   }
+  // Cancelled shops whose 30-day window has ended: release the number and the assistant, and stop routing.
+  let released = 0;
+  for (const slug of await list("clients", "")) {
+    const c = await getClient(slug);
+    if (!c || c.status !== "cancelled" || !c.serviceEndsAt || new Date(c.serviceEndsAt).getTime() > Date.now()) continue;
+    if (!c.phone?.twilioNumber && !c.phone?.twilioNumberSid && !c.voice?.assistantId) continue;
+    try {
+      const out = { number: c.phone?.twilioNumber || null, sid: c.phone?.twilioNumberSid || null };
+      let skipped = false;
+      if (twilioEnabled() && c.phone?.twilioNumberSid) { try { out.twilio = await releaseNumber(c.phone.twilioNumberSid, c.phone.messagingServiceSid); } catch (e) { out.twilioError = String(e.message).slice(0, 200); } } else skipped = true;
+      if (c.voice?.assistantId) { try { out.voice = await releaseVoice(c); if (out.voice?.skipped) skipped = true; } catch (e) { out.voiceError = String(e.message).slice(0, 200); } }
+      if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
+      if (c.voice?.assistantId) await del("index", "vapi:" + c.voice.assistantId);
+      c.phone = { ...c.phone, releasedNumber: c.phone.twilioNumber || "", twilioNumber: "", twilioNumberSid: "", messagingServiceSid: "" };
+      c.voice = { provider: "none", released: c.voice?.assistantId || "" };
+      c.releasedAt = new Date().toISOString();
+      await saveClient(c);
+      await logEvent(c.slug, skipped ? "number_release_skipped" : "number_released", out);
+      await notifySteve(`${skipped ? "Number release skipped (no keys)" : "Number released"}: ${c.business?.name}`, `${c.slug}: ${JSON.stringify(out)}\nCancelled ${c.cancelledAt}, window ended ${c.serviceEndsAt}.`);
+      released++;
+    } catch (err) { console.error("release", slug, err); }
+  }
   // 6 pm Houston: daily digest to every live shop; Steve gets a copy for the first 7 days.
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
   const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
@@ -77,16 +100,18 @@ export async function run({ forceHour } = {}) {
       if (!c || c.status !== "live") continue;
       try {
         const d = await dailyDigest(c);
-        await notifyOwner(c, d.text, { type: "digest" });
+        // Quiet days go by email only; the owner can turn the daily text off altogether.
+        const text = !d.empty && c.digest?.text !== false && c.owner.phone;
+        if (text) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "digest", body: d.text });
         await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
         if (c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) await notifySteve(`Digest: ${c.business.name}`, d.email);
-        await logEvent(c.slug, "digest", { text: d.text });
+        await logEvent(c.slug, "digest", { text: d.text, empty: !!d.empty, texted: !!text });
         digests++;
       } catch (err) { console.error("digest", slug, err); }
     }
   }
-  console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`);
-  return { due: due.length, results, digests };
+  console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `released ${released}`);
+  return { due: due.length, results, digests, released };
 }
 
 export default async () => {

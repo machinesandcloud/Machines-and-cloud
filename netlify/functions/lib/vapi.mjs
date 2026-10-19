@@ -36,6 +36,12 @@ function transferDef(client) {
   };
 }
 
+export function standardGreeting(client) {
+  return client.business?.spanish
+    ? `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today? Si prefiere español, dígamelo.`
+    : `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today?`;
+}
+
 export function voicePrompt(client) {
   const owner = client.owner?.name || "the owner";
   const r = client.rules || {};
@@ -46,7 +52,9 @@ export function voicePrompt(client) {
     : `If the caller asks for a person or the owner, say you are the front desk assistant, say ${owner} will call them ${window}, take their number, and call notify_owner with reason wants_call. Never say "someone will call you back" without the window.`;
   return buildSystemPrompt(client, "voice") + `
 
-You are on a phone call. Speak in short, natural sentences, one idea at a time. Never read URLs, reference codes, or markdown aloud. Confirm phone numbers and addresses back to the caller digit by digit before booking. ${person} When the caller is done, say goodbye and end the call.`;
+You are on a phone call. Speak in short, natural sentences, one idea at a time. Never read URLs, reference codes, or markdown aloud. Confirm phone numbers and addresses back to the caller digit by digit before booking. ${person} When the caller is done, say goodbye and end the call.
+
+What we know about this caller before the call: name "{{customerName}}" ({{isExisting}}); upcoming visit: "{{upcomingVisit}}". When these are filled in, use them and do not ask for them again; when they are empty, the caller is new to us. If "{{vip}}" is "yes", the caller is on ${owner}'s always-ring-through list: take a message for ${owner} and call notify_owner with reason handoff.`;
 }
 
 function modelBlock(client, toolIds) {
@@ -59,12 +67,9 @@ export async function provisionVoice(client, site) {
   for (const t of [BOOK_VISIT, NOTIFY_OWNER]) toolIds.push((await vapi("/tool", toolDef(t, serverUrl))).id);
   let transferToolId = null;
   if (client.phone?.forwarding === "all" && client.phone?.transferTo && !loopCheck(client)) { transferToolId = (await vapi("/tool", transferDef(client))).id; toolIds.push(transferToolId); }
-  const first = client.business?.spanish
-    ? `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today? Si prefiere español, dígamelo.`
-    : `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today?`;
   const assistant = await vapi("/assistant", {
     name: `${client.business.name} front desk (${client.slug})`,
-    firstMessage: first,
+    firstMessage: standardGreeting(client),
     firstMessageMode: "assistant-speaks-first",
     model: modelBlock(client, toolIds),
     transcriber: { provider: "deepgram", model: "nova-3", language: client.business?.spanish ? "multi" : "en" },
@@ -76,7 +81,9 @@ export async function provisionVoice(client, site) {
   });
   let phoneNumberId = null;
   if (client.phone?.twilioNumber) {
-    const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, assistantId: assistant.id, smsEnabled: false, name: `${client.business.name} (${client.slug})`, server: { url: serverUrl } });
+    // No fixed assistantId on the number: Vapi asks our webhook (assistant-request) on every call, and
+    // we answer with the assistant plus what we know about the caller (name, upcoming visit, VIP).
+    const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, name: `${client.business.name} (${client.slug})`, server: { url: serverUrl, timeoutSeconds: 20 } });
     phoneNumberId = pn.id;
   }
   return { assistantId: assistant.id, toolIds, functionToolIds: toolIds.filter((id) => id !== transferToolId), transferToolId, phoneNumberId };
@@ -119,7 +126,7 @@ export async function attachVoice(client, site) {
   try {
     if (client.voice.vapiVoiceUrl) await setNumberWebhooks(client.phone.twilioNumberSid, { voiceUrl: client.voice.vapiVoiceUrl, smsUrl: `${site}/api/sms` });
     else if (vapiEnabled() && client.phone.twilioNumber) {
-      const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, assistantId: client.voice.assistantId, smsEnabled: false, server: { url: `${site}/api/vapi` } });
+      const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, server: { url: `${site}/api/vapi`, timeoutSeconds: 20 } });
       client.voice.phoneNumberId = pn.id;
     }
     client.voice.detached = false;

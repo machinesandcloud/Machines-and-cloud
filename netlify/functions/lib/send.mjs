@@ -55,6 +55,7 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   if (!smsEnabled() || (!from && !service)) {
     console.log(`[sms:disabled] to=${to} from=${from || service || "-"} :: ${text}`);
     if (client) await logEvent(client.slug, "sms_sent", { to, type, sender: mode, ok: false, logged: true, preview: text.slice(0, 300) });
+    if (client && !smsEnabled()) await countText(client, type);
     return { ok: false, reason: "disabled", logged: true };
   }
   const params = { To: to, Body: text };
@@ -67,7 +68,13 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   const data = await res.json().catch(() => ({}));
   if (!res.ok) console.error("twilio send failed", res.status, data?.message);
   if (client) await logEvent(client.slug, res.ok ? "sms_sent" : "sms_failed", { to, type, sender: mode, ok: res.ok, sid: data?.sid, code: data?.code, message: data?.message, preview: text.slice(0, 300) });
+  if (client && res.ok) await countText(client, type);
   return { ok: res.ok, sid: data?.sid, error: data?.message };
+}
+
+// Customer-facing texts count toward the plan (usage.mjs); owner alerts and digests do not.
+async function countText(client, type) {
+  try { const { addUsage, CUSTOMER_TEXT_TYPES } = await import("./usage.mjs"); if (CUSTOMER_TEXT_TYPES.includes(type)) await addUsage(client, { texts: 1 }); } catch (e) { console.error("usage count", e); }
 }
 
 export async function sendEmail({ to, subject, text, html }) {
