@@ -18,6 +18,7 @@ The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"er
 - Nav: Demo, Pricing, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact with trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
 
 ## The interactive demo
+- `stories.js` plays scripted sample conversations (`SCENES`) in any element with `data-scene="<id>"` when it scrolls into view; the hero scene loops (`data-loop`). Scenes are labeled samples; they need no API. Edit copy in `SCENES`, keep prices consistent with the persona briefs in `chat.mjs`.
 - `demo.js` renders `#demo`: tabs for four fictional Houston companies (Bayou Air & Heat, Katy Pipeworks, Brazos Electric Co., Gulf Coast Roofing) plus Machines & Cloud itself, a customer chat with suggested prompts, and an "owner's phone" panel. It POSTs `{persona, messages, page}` to `/api/chat`. The corner widget is skipped on index (`<body data-no-widget>`), since the demo includes the M&C persona.
 - `netlify/functions/chat.mjs`: persona briefs live in `PERSONAS`; each fictional company has published prices, hours, service area, and owner rules. Persona mode uses a strict `send_owner_summary` tool whose input is returned to the page as an `owner_notification` event (never posted anywhere). The `mc` persona keeps `capture_lead` -> Netlify Forms `agent-lead`. To add a company: add a brief in `PERSONAS` and a scenario in `demo.js` (same id).
 - Founder privacy rule applies to every persona prompt.

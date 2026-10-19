@@ -32,7 +32,7 @@
       greeting: "Hi, this is the Westheimer Maids front desk. Are you looking for a one-time clean or regular service?",
       prompts: ['How much for a move-out clean on a 3 bedroom, 2 bath this Friday?', 'Do you bring your own supplies?', '¿Cuánto cuesta una limpieza profunda?', 'Can you do Sunday morning?'] },
     { id: 'mc', company: 'Machines & Cloud', trade: 'Us', owner: 'Steve', area: 'Houston',
-      problem: 'This is our own front desk. Ask what the pilot costs, or leave your details and Steve gets a real lead.',
+      problem: 'Our real front desk, not a made-up one. Ask what the pilot costs. Leave your details and Steve gets a real lead.',
       greeting: "Hi, I'm the Machines & Cloud front desk agent. I'm an AI, and I'm the same product we install for your business. Ask me what it costs or how the pilot works.",
       prompts: ['What does the free pilot include?', 'What happens if the agent does not know an answer?', 'I run an HVAC company in Katy. How do I start?', 'Where did Steve work before?'] },
   ];
@@ -40,23 +40,24 @@
   var state = { scenario: SCENARIOS[0], transcripts: {}, notifications: {}, busy: false };
 
   root.innerHTML =
-    '<div class="demo-pick" role="tablist" aria-label="Choose a company"></div>' +
     '<div class="demo-grid">' +
       '<section class="demo-chat" aria-label="Customer chat">' +
-        '<header class="demo-chat-head"><div><strong class="demo-company"></strong><span class="demo-sub">Fictional company. Real agent. You are the customer.</span></div><button type="button" class="demo-reset" id="demoReset">Start over</button></header>' +
+        '<header class="demo-chat-head">' +
+          '<label class="demo-picker"><span class="demo-picker-label">You are texting</span><select id="demoSelect" aria-label="Choose a company"></select></label>' +
+          '<button type="button" class="demo-reset" id="demoReset">Start over</button>' +
+        '</header>' +
         '<p class="demo-problem"></p>' +
         '<div class="demo-messages" id="demoMessages" aria-live="polite"></div>' +
-        '<div class="demo-prompts" id="demoPrompts"></div>' +
+        '<div class="demo-prompts" id="demoPrompts"><span class="demo-prompts-label">Try:</span></div>' +
         '<form class="demo-form" id="demoForm"><label for="demoInput" class="sr-only">Your message</label><textarea id="demoInput" rows="1" maxlength="1500" placeholder="Type like a customer would" required></textarea><button type="submit" class="btn btn-primary" id="demoSend">Send</button></form>' +
       '</section>' +
       '<aside class="demo-phone" aria-label="What the owner receives">' +
         '<div class="demo-phone-frame"><div class="demo-phone-top"><span class="demo-phone-owner"></span><span class="demo-phone-time">now</span></div><div class="demo-phone-body" id="demoPhone"></div></div>' +
-        '<p class="demo-phone-note">Every conversation ends up here as a text to the owner. Nothing gets lost in voicemail.</p>' +
+        '<p class="demo-phone-note">What the owner gets, as it happens.</p>' +
       '</aside>' +
     '</div>';
 
-  var pick = root.querySelector('.demo-pick');
-  var companyEl = root.querySelector('.demo-company');
+  var pick = document.getElementById('demoSelect');
   var problemEl = root.querySelector('.demo-problem');
   var list = document.getElementById('demoMessages');
   var promptsEl = document.getElementById('demoPrompts');
@@ -70,12 +71,10 @@
   function linkify(e) { return e.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
 
   SCENARIOS.forEach(function (s) {
-    var b = document.createElement('button');
-    b.type = 'button'; b.className = 'demo-tab'; b.setAttribute('role', 'tab'); b.dataset.id = s.id;
-    b.innerHTML = '<span class="demo-tab-trade">' + esc(s.trade) + '</span><span class="demo-tab-name">' + esc(s.company) + '</span>';
-    b.addEventListener('click', function () { select(s.id); });
-    pick.appendChild(b);
+    var o = document.createElement('option'); o.value = s.id; o.textContent = s.company + (s.id === 'mc' ? ' (that is us)' : ' · ' + s.trade);
+    pick.appendChild(o);
   });
+  pick.addEventListener('change', function () { select(pick.value); input.focus(); });
 
   function addMsg(role, text) {
     var el = document.createElement('div');
@@ -115,7 +114,7 @@
   }
 
   function renderPrompts() {
-    promptsEl.innerHTML = '';
+    promptsEl.innerHTML = '<span class="demo-prompts-label">Try:</span>';
     state.scenario.prompts.forEach(function (p) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'demo-prompt'; b.textContent = p;
       b.addEventListener('click', function () { send(p); });
@@ -126,8 +125,7 @@
   function select(id) {
     state.scenario = SCENARIOS.filter(function (s) { return s.id === id; })[0] || SCENARIOS[0];
     var s = state.scenario;
-    pick.querySelectorAll('.demo-tab').forEach(function (b) { var on = b.dataset.id === s.id; b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
-    companyEl.textContent = s.company;
+    pick.value = s.id;
     problemEl.textContent = s.problem;
     list.innerHTML = '';
     addMsg('agent', s.greeting);
