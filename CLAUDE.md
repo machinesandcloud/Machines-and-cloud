@@ -1,7 +1,7 @@
 # Machines & Cloud — site repo guide
 
 Marketing site for machinesandcloud.com: AI front desk agents (website chat + phone) for service businesses, Houston based, founder led.
-Static HTML + one `styles.css` + one `script.js` + `agent-widget.js`, plus one Netlify Function (`netlify/functions/chat.mjs`) that powers the live agent widget.
+Static HTML + one `styles.css` + one `script.js` + `agent-widget.js`, plus Netlify Functions that power the live agent widget and the whole client product (onboarding, owner portal, per-client front desks on chat, SMS, and voice, scheduler, billing). See `OPERATIONS.md` for the flow, storage, env vars, and per-client steps.
 
 ## Run locally
 ```
@@ -70,3 +70,11 @@ node --check script.js agent-widget.js netlify/functions/chat.mjs
 - Light pages use `assets/logo-dark.png` (nav and footer); dark pages keep `assets/logo.png`.
 - Photos in `assets/photos/` are Pexels (free license, no attribution required): hero-hvac (homepage hero background via `.hero-bg`), plumber, electrician, roofer, cleaning (one per weekly example, `.week-photo` inside `.week-head.has-photo`), roof-house (about page `.about-photo`). Modeled on Sameday's bright photo-led look at Steve's request; no fake customer or team photos.
 - Spacing tokens: `--space-7` does not exist in styles.css (5, 6, 8 do). Use px or an existing token.
+
+## Onboarding and delivery (built 2026-10-19)
+- Pages: `onboard.html` (five-step questionnaire, noindex, prefilled from the pilot form or `?plan=`), `desk.html` (owner portal, needs `?c=slug&k=key`), `embed.js` (client website widget, `data-client`). Both pages use the light theme without the corner widget (`data-no-widget`).
+- Functions (`netlify/functions/`): `onboard` (create client, trigger build), `onboard-build-background` (crawl site, Claude profile via strict tool, merge, status testing), `client` (owner GET/PUT/POST actions, public view for the embed), `chat` (modes: mc, personas, `client` with `book_visit` and `notify_owner`), `sms` and `voice` (Twilio webhooks), `scheduler` (cron every 10 min), `billing` and `stripe-webhook`, `google` (OAuth auth + callback), `admin` (`x-admin-key`). Shared code in `lib/`: `store` (Blobs), `config` (client schema, prompt builder, tool schemas), `agent` (streaming tool loop), `desk` (booking, leads, owner commands, templates, digest), `send` (Twilio, Resend, owner and Steve alerts), `calendar`, `billing`.
+- Stored turns carry `[Done: visit booked, ref X]` markers so the agent knows an action already happened; never strip them.
+- Env vars: see `.env.example` and OPERATIONS.md. `ADMIN_KEY` is set in Netlify (production, previews, branches); Steve can read it in Netlify site settings. Without Twilio, Resend, Google, or Stripe keys those paths log instead of send and the portal says "being switched on".
+- Testing: draft deploys share the production Blobs store, so delete test clients with `POST /api/admin {"slug","action":"delete"}`. `scratchpad/e2e.py` from the 2026-10-19 session is the pattern (onboard, poll build, test chat with booking, simulated SMS and voice).
+- Not yet built: phone AI itself (set `phone.voiceForwardTo` to a Retell or Vapi SIP/number per client), Angi webhook receiver, Jobber and Housecall Pro API connections, Thumbtack and Google LSA replies, per-IP rate limiting.
