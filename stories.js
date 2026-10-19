@@ -66,7 +66,7 @@
 
   function build(el, scene) {
     el.innerHTML =
-      '<div class="scene-chat"><div class="scene-chat-head"><span class="scene-dot"></span><span class="scene-company">' + esc(scene.company) + ' front desk</span><span class="scene-when">' + esc(scene.when) + '</span></div>' +
+      '<div class="scene-chat"><div class="scene-chat-head"><span class="scene-dot"></span><span class="scene-company">' + esc(scene.company) + '</span><span class="scene-when">' + esc(scene.when) + '</span></div>' +
       '<div class="scene-msgs"></div></div>' +
       '<div class="scene-phone"><div class="scene-phone-frame"><div class="scene-phone-top"><span>' + esc(scene.owner) + "'s phone</span><span class=\"scene-phone-time\"></span></div><div class=\"scene-phone-body\"><div class=\"scene-phone-empty\">" + esc(scene.owner) + ' is on a job. Watch what lands here.</div></div></div></div>' +
       '<button type="button" class="scene-replay" hidden>Replay</button>';
