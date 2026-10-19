@@ -19,6 +19,7 @@
         ['c', "Maria Lopez, 713 555 0142"],
         ['a', "Thanks Maria. Ray has your details and will text you an arrival window in a few minutes. Stay in the coolest room and drink water."]
       ],
+      earlier: [['6:52 pm', 'Tune-up booked, Thu 8 to 12', 'D. Nguyen'], ['4:10 pm', 'Quote request, new system', 'The Okafors']],
       notif: { urgency: 'EMERGENCY', time: '10:16 pm', rows: [['Customer', 'Maria Lopez'], ['Phone', '713 555 0142'], ['Where', '4120 Kelliwood Dr, Katy'], ['Issue', 'No cooling, 91°F inside'], ['Window', 'Tonight, after hours']] }
     },
     'katy-sunday': {
@@ -32,6 +33,7 @@
         ['c', "Tom Reyes, 281 555 0199"],
         ['a', "Done, Tom. Dana has it. Keep the valve closed until she arrives."]
       ],
+      earlier: [['Sat 5:30 pm', 'Drain clearing booked, Mon 1 to 5', 'A. Whitfield'], ['Sat 11:05 am', 'Question answered: repipe timeline', 'K. Patel']],
       notif: { urgency: 'EMERGENCY', time: '7:42 am', rows: [['Customer', 'Tom Reyes'], ['Phone', '281 555 0199'], ['Issue', 'Leaking water heater, garage'], ['Window', 'Today, 8 to 12']] }
     },
     'maids-spanish': {
@@ -45,6 +47,7 @@
         ['c', "Lucía Herrera, 832 555 0177"],
         ['a', "Listo, Lucía. Nia le confirma por mensaje."]
       ],
+      earlier: [['6:18 pm', 'Biweekly clean booked, Fri 10 to 12', 'M. Chen'], ['2:40 pm', 'Move-out quote requested', 'R. Dawson']],
       notif: { urgency: 'This week', time: '9:07 pm', rows: [['Customer', 'Lucía Herrera'], ['Phone', '832 555 0177'], ['Issue', 'Deep clean, 2 bed 2 bath apartment'], ['Window', 'Saturday, 8 to 10'], ['Language', 'Spanish']] }
     },
     'brazos-shopper': {
@@ -58,11 +61,19 @@
         ['c', "12 to 5. Jen Park, 346 555 0133"],
         ['a', "Booked for 12 to 5, Jen. Luis has it."]
       ],
+      earlier: [['11:20 am', 'Ceiling fan install booked, Wed 8 to 12', 'B. Morales'], ['9:02 am', 'Surge protector quote accepted', 'T. Lindqvist']],
       notif: { urgency: 'This week', time: '12:33 pm', rows: [['Customer', 'Jen Park'], ['Phone', '346 555 0133'], ['Issue', 'EV charger install, 3 competing quotes'], ['Window', 'Tomorrow, 12 to 5']] }
     }
   };
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function resting(scene) {
+    var clock = scene.when.split(', ')[1] || '';
+    return '<div class="phone-lock"><div class="phone-clock">' + esc(clock) + '</div><div class="phone-day">' + esc(scene.when.split(', ')[0]) + ' · ' + esc(scene.owner) + ' is on a job</div></div>' +
+      '<div class="phone-earlier-label">Earlier</div>' +
+      scene.earlier.map(function (e) { return '<div class="phone-earlier"><span class="phone-earlier-time">' + esc(e[0]) + '</span><span class="phone-earlier-text">' + esc(e[1]) + '</span><span class="phone-earlier-who">' + esc(e[2]) + '</span></div>'; }).join('');
+  }
 
   function build(el, scene) {
     el.innerHTML =
@@ -76,7 +87,7 @@
     if (el.dataset.playing === 'true') return;
     el.dataset.playing = 'true';
     var msgs = el.querySelector('.scene-msgs'), body = el.querySelector('.scene-phone-body'), replay = el.querySelector('.scene-replay'), ptime = el.querySelector('.scene-phone-time');
-    msgs.innerHTML = ''; body.innerHTML = '<div class="scene-phone-empty">' + esc(scene.owner) + ' is on a job.</div>'; replay.hidden = true; ptime.textContent = '';
+    msgs.innerHTML = ''; body.innerHTML = resting(scene); replay.hidden = true; ptime.textContent = '';
     var i = 0;
     function next() {
       if (i >= scene.msgs.length) return notify();
@@ -94,8 +105,10 @@
       setTimeout(function () {
         var n = scene.notif;
         ptime.textContent = n.time;
-        body.innerHTML = '<div class="scene-notif' + (n.urgency === 'EMERGENCY' ? ' is-emergency' : '') + '"><div class="scene-notif-head">' + esc(scene.company) + ' front desk · <b>' + esc(n.urgency) + '</b></div><div class="scene-notif-body">' +
-          n.rows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span>' + esc(r[1]) + '</div>'; }).join('') + '</div></div>';
+        var lock = body.querySelector('.phone-lock'); if (lock) lock.querySelector('.phone-day').textContent = 'New message from the front desk';
+        var card = document.createElement('div'); card.className = 'scene-notif' + (n.urgency === 'EMERGENCY' ? ' is-emergency' : '');
+        card.innerHTML = '<div class="scene-notif-head">' + esc(scene.company) + ' front desk · <b>' + esc(n.urgency) + '</b></div><div class="scene-notif-body">' + n.rows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span>' + esc(r[1]) + '</div>'; }).join('') + '</div>';
+        var label = body.querySelector('.phone-earlier-label'); body.insertBefore(card, label);
         var frame = el.querySelector('.scene-phone-frame'); frame.classList.remove('is-buzz'); void frame.offsetWidth; frame.classList.add('is-buzz');
         replay.hidden = false;
         el.dataset.playing = 'false';

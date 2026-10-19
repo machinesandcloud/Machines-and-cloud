@@ -12,7 +12,7 @@ The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"er
 
 ## Site structure (two-page site, 2026-10-18)
 - Research-driven rebuild (NN/g attention and trust studies, Unbounce reading-level data, a 2,000-page A/B study, Storylane demo data, 15 competitor teardowns, Indie Hackers/HN founder threads). Rules applied: everything that sells in the first three screens; product in use as the hero (the interactive demo), not a stock image; one primary CTA; prices and contact up front; plain 6th-grade words; no fake proof, say we are new; four-field form; sticky mobile CTA; links out to LinkedIn and Maps for "connection to the rest of the web".
-- Core pages (in nav): `index` (hero + interactive demo `#demo-wrap`, honesty strip, how it works `#how`, pricing `#pricing`, compare, FAQ, pilot form `#pilot`) and `about`. `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
+- Core pages (in nav): `index` (hero with a self-playing example, three scroll examples, live chat `#your-turn`, how it works `#how`, FAQ, pilot form `#pilot`) and `about`. There is no pricing section: the price lives in the hero note and the FAQ ("What does it cost?", "Can it answer the phone too?"). The footer carries no trust line (Steve's instruction 2026-10-18: no "we are new / no logos" language anywhere). `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
 - Retired via 301 to index anchors: `services`, `pricing`, `how-it-works`, `demo`, `contact`.
 - SEO pages stay live and out of the nav (see earlier note). Never delete them without asking.
 - Nav: Demo, Pricing, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact with trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
@@ -30,7 +30,7 @@ The core pages were produced by one-off generator scripts in the 2026-10-18 sess
 - Front Desk Agent: free 7 day pilot on the client's real site, then one-time $1,497 build + $397/month, no contract.
 - Phone answering: add-on, $297/month with 300 call minutes included, then $0.35/minute, no setup fee when added during the pilot (set 2026-10-18 from market data; Steve may change).
 - Custom projects: case by case, not priced on the site.
-Shared copy to keep in sync on a price change: `index.html` (hero note, price card, FAQ, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
+Shared copy to keep in sync on a price change: `index.html` (hero note, FAQ, pilot card, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
 
 ## The live agent
 - `agent-widget.js` renders the corner launcher + panel on every page except those with `data-no-widget` on body, keeps the transcript in sessionStorage, POSTs `{messages, page}` to `/api/chat` (persona `mc`), and opens on any `[data-open-agent]` element, `a[href="#agent"]`, or the `#agent` hash.

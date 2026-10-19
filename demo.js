@@ -11,27 +11,27 @@
   var OFFLINE = 'The demo agent is offline right now. Email support@machinesandcloud.com or call (346) 248-8359 and a person will reply within one business day.';
 
   var SCENARIOS = [
-    { id: 'bayou-air', company: 'Bayou Air & Heat', trade: 'HVAC', owner: 'Ray', area: 'Katy, Cypress, Sugar Land',
+    { id: 'bayou-air', company: 'Bayou Air & Heat', trade: 'HVAC', owner: 'Ray', area: 'Katy, Cypress, Sugar Land', earlier: [['6:52 pm', 'Tune-up booked, Thu 8 to 12', 'D. Nguyen'], ['4:10 pm', 'Quote request, new system', 'The Okafors']],
       problem: 'HVAC. Katy, Cypress, Sugar Land. Diagnostic $89, after-hours $189.',
       greeting: "Hi, this is the Bayou Air & Heat front desk. How can I help with your heating or cooling today?",
       prompts: ['My AC just stopped cooling and it is 95 degrees. Can someone come tonight?', 'Do you cover Cypress? How much is a visit?', 'Mi aire no enfría. ¿Hablan español?', 'Can the tech be here by 2 pm tomorrow?'] },
-    { id: 'katy-pipeworks', company: 'Katy Pipeworks', trade: 'Plumbing', owner: 'Dana', area: 'Katy, Fulshear, Richmond',
+    { id: 'katy-pipeworks', company: 'Katy Pipeworks', trade: 'Plumbing', owner: 'Dana', area: 'Katy, Fulshear, Richmond', earlier: [['5:30 pm', 'Drain clearing booked, Mon 1 to 5', 'A. Whitfield'], ['11:05 am', 'Question answered: repipe timeline', 'K. Patel']],
       problem: 'Plumbing. Katy, Fulshear, Richmond. 24/7 for leaks and no water.',
       greeting: "Katy Pipeworks front desk here. What's going on with your plumbing?",
       prompts: ['My water heater is leaking. How much to replace it?', 'I smell gas near the stove, what do I do?', 'Do you do emergency calls on Sunday?', 'Can you give me a discount on drain clearing?'] },
-    { id: 'brazos-electric', company: 'Brazos Electric Co.', trade: 'Electrical', owner: 'Luis', area: 'Pearland, League City, Clear Lake',
+    { id: 'brazos-electric', company: 'Brazos Electric Co.', trade: 'Electrical', owner: 'Luis', area: 'Pearland, League City, Clear Lake', earlier: [['11:20 am', 'Ceiling fan install booked, Wed 8 to 12', 'B. Morales'], ['9:02 am', 'Surge protector quote accepted', 'T. Lindqvist']],
       problem: 'Electrical. Pearland, League City, Clear Lake. Weekdays, emergencies any time.',
       greeting: "Thanks for reaching out to Brazos Electric. What can we help you with?",
       prompts: ['How much to install an EV charger in my garage?', 'There is a burning smell from my breaker panel.', 'Can you come out this Saturday?', 'I need a quote for a panel upgrade.'] },
-    { id: 'gulf-coast-roofing', company: 'Gulf Coast Roofing', trade: 'Roofing', owner: 'Pam', area: 'The Woodlands, Spring, Conroe',
+    { id: 'gulf-coast-roofing', company: 'Gulf Coast Roofing', trade: 'Roofing', owner: 'Pam', area: 'The Woodlands, Spring, Conroe', earlier: [['3:15 pm', 'Inspection booked, Tue 8 to 10', 'S. Alvarez'], ['1:48 pm', 'Gutter quote requested', 'J. Brooks']],
       problem: 'Roofing. The Woodlands, Spring, Conroe. Free inspections.',
       greeting: "Gulf Coast Roofing front desk. Storm damage, a leak, or something else?",
       prompts: ['We had hail last night. Can someone look at my roof?', 'Will my insurance cover a new roof?', 'How much is a new roof?', 'I have water dripping from the ceiling right now.'] },
-    { id: 'westheimer-maids', company: 'Westheimer Maids', trade: 'Cleaning', owner: 'Nia', area: 'Galleria, Memorial, Bellaire',
+    { id: 'westheimer-maids', company: 'Westheimer Maids', trade: 'Cleaning', owner: 'Nia', area: 'Galleria, Memorial, Bellaire', earlier: [['6:18 pm', 'Biweekly clean booked, Fri 10 to 12', 'M. Chen'], ['2:40 pm', 'Move-out quote requested', 'R. Dawson']],
       problem: 'Cleaning. Galleria, Memorial, Bellaire. Standard clean from $129.',
       greeting: "Hi, this is the Westheimer Maids front desk. Are you looking for a one-time clean or regular service?",
       prompts: ['How much for a move-out clean on a 3 bedroom, 2 bath this Friday?', 'Do you bring your own supplies?', '¿Cuánto cuesta una limpieza profunda?', 'Can you do Sunday morning?'] },
-    { id: 'mc', company: 'Machines & Cloud', trade: 'Us', owner: 'Steve', area: 'Houston',
+    { id: 'mc', company: 'Machines & Cloud', trade: 'Us', owner: 'Steve', area: 'Houston', earlier: [['Today', 'Pilot questionnaire sent', 'A Katy plumbing company'], ['Yesterday', 'Agent went live', 'A Spring roofing company']],
       problem: 'Our own front desk. Ask about the pilot, or leave your details and Steve will call you.',
       greeting: "Hi, I'm the Machines & Cloud front desk agent. I'm an AI, and I'm the same product we install for your business. Ask me what it costs or how the pilot works.",
       prompts: ['What does the free pilot include?', 'What happens if the agent does not know an answer?', 'I run an HVAC company in Katy. How do I start?', 'Where did Steve work before?'] },
@@ -87,16 +87,18 @@
     list.appendChild(el); list.scrollTop = list.scrollHeight; return el;
   }
 
+  function resting(s) {
+    var now = new Date(); var h = now.getHours(); var m = now.getMinutes(); var clock = ((h % 12) || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' am' : ' pm');
+    return '<div class="phone-lock"><div class="phone-clock">' + clock + '</div><div class="phone-day">' + esc(s.owner) + ' is on a job</div></div>' +
+      '<div class="phone-earlier-label">Earlier</div>' +
+      (s.earlier || []).map(function (e) { return '<div class="phone-earlier"><span class="phone-earlier-time">' + esc(e[0]) + '</span><span class="phone-earlier-text">' + esc(e[1]) + '</span><span class="phone-earlier-who">' + esc(e[2]) + '</span></div>'; }).join('');
+  }
   function renderPhone() {
     var s = state.scenario; var notes = state.notifications[s.id] || [];
     ownerEl.textContent = s.owner + "'s phone";
-    if (!notes.length) {
-      phone.innerHTML = '<div class="demo-phone-empty">Nothing yet. Start a conversation and ' + esc(s.owner) + "'s phone fills in.</div>";
-      return;
-    }
-    phone.innerHTML = notes.map(function (n) {
+    var cards = notes.map(function (n) {
       if (n.type === 'lead_captured') {
-        return '<div class="demo-notif"><div class="demo-notif-head">Machines &amp; Cloud</div><div class="demo-notif-body">New pilot request. Steve has your details and will reply within one business day.</div></div>';
+        return '<div class="demo-notif"><div class="demo-notif-head">Machines &amp; Cloud front desk</div><div class="demo-notif-body"><div><span>Lead</span>New pilot request. Steve replies within one business day.</div></div></div>';
       }
       var d = n.data || {};
       var urg = { emergency: 'EMERGENCY', today: 'Today', this_week: 'This week', flexible: 'Flexible' }[d.urgency] || '';
@@ -110,7 +112,10 @@
           (d.requested_window ? '<div><span>Window</span>' + esc(d.requested_window) + '</div>' : '') +
           (d.language === 'es' ? '<div><span>Language</span>Spanish</div>' : '') +
         '</div></div>';
-    }).join('');
+    }).reverse().join('');
+    var rest = resting(s);
+    if (notes.length) rest = rest.replace(esc(s.owner) + ' is on a job', 'New message from the front desk');
+    phone.innerHTML = rest.replace('<div class="phone-earlier-label">', cards + '<div class="phone-earlier-label">');
   }
 
   function renderPrompts() {
