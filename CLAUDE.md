@@ -10,20 +10,21 @@ python3 -m http.server 8787            # static only, no function
 ```
 The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"error":"offline"}` and the widget shows contact details instead. Set the key in Netlify's site environment variables for production (never in the repo).
 
-## Site structure (simplified nav 2026-10-18; SEO pages kept, hidden from nav)
-- Core pages (in nav): `index` (7 sections), `pricing`, `demo`, `industries` + 5 short industry pages (`industry-home-services`, `industry-healthcare`, `industry-legal`, `industry-automotive`, `industry-real-estate`), `about`, `contact`, `houston`.
-- SEO pages, kept live but out of the nav (Steve's call, 2026-10-18: "they still have value"): 50 city pages + `locations` hub, `houston-{downtown,galleria,midtown}`, 15 enterprise `industry-*` pages, 65 `priority-*` use-case pages, `workflow-library`, service/workflow landing pages, `guides`, `insights`, `guide-*`, `insight-*`, comparison articles, `approach`, `workflow-readiness`, `templates-checklists`. They are linked from the footer (All locations, Workflow blueprints), the industries hub ("More industries"), the hubs, `sitemap.xml`, and `llms-full.txt`. Only `services.html` (now `pricing.html`) and `case-studies.html` are retired via 301.
-- Utility: `privacy-policy`, `terms-of-service`, `thank-you` (noindex), `404` (noindex, Netlify serves it automatically).
-- Nav is five flat links (Product, Pricing, Demo, Industries, About) plus a Book a call button. Footer is one compact block with the trust line. Both are inlined on every page (~181 files); a change means a scripted edit (regex on `<nav class="navbar" id="navbar">…</nav>` and `<footer class="footer">…</footer>`). Every page also carries the hidden `agent-lead` Netlify form and `agent-widget.js`.
+## Site structure (revamped 2026-10-18 for a zero-customer launch)
+- Positioning: one product, one market. AI front desk (website chat agent) for Houston home service companies (HVAC, plumbing, electrical, roofing). Phone answering is an add-on. No enterprise ladder on the core pages.
+- Core pages (in nav): `index`, `how-it-works` (steps, rules, pricing), `demo`, `about`, `contact` (the pilot form, anchor `#pilot`), plus `houston` and `thank-you` (noindex).
+- SEO pages, live but out of the nav (Steve's call: "they still have value"): 50 city pages + `locations`, `houston-*`, 20 `industry-*` pages + `industries` hub, 65 `priority-*`, `workflow-library`, service/workflow landing pages, `guides`, `insights`, `guide-*`, `insight-*`, comparison articles, `approach`, `workflow-readiness`, `templates-checklists`. Linked from the footer "More" column, the hubs, `sitemap.xml`, `llms-full.txt`. Never delete them without asking. Retired via 301: `services.html`, `pricing.html`, `case-studies.html`.
+- Nav: Home, How it works, Demo, About, Contact + "Start a free pilot" button. Footer: compact, with the trust line. Both inlined on all 181 pages (regex-replace to change).
+- Founder privacy (Steve's instruction 2026-10-18): the site says only "Steve Ngoumnai, a Houston engineer with ten years running production systems" plus a LinkedIn link. No employers, dates, certifications, or dollar figures anywhere, including the agent prompt and the Person schema.
 
 ## Generator
-The core pages were produced by a one-off generator (`scratchpad/rebuild.py` in the 2026-10-18 session, not committed). Treat the HTML as the source of truth now; edit it directly. Shared copy that must stay in sync when a price changes: `index.html` (products section, FAQ text + FAQ JSON-LD, Service schema offer), `pricing.html` (cards + FAQ + JSON-LD), every `industry-*.html` (price card + FAQ), `houston.html`, `netlify/functions/chat.mjs` (SYSTEM prompt price list), `llms.txt`/`llms-full.txt`.
+The core pages were produced by one-off generator scripts in the 2026-10-18 session (not committed). Treat the HTML as the source of truth; edit it directly.
 
 ## Prices (published, as of 2026-10-18)
-- Front Desk Agent: from $1,497 build + $397/month, live in 7 days, no contract.
-- Phone Receptionist: add-on, priced on call volume, no public number yet (Steve to set).
-- Lead Follow-up Agent: $3,500 to $5,000 fixed, 2 to 4 weeks.
-- Custom builds: $950 Opportunity Sprint (credited within 30 days), fixed-fee Proof of Value, milestone-based Production Launch.
+- Front Desk Agent: free 7 day pilot on the client's real site, then one-time $1,497 build + $397/month, no contract.
+- Phone answering: add-on, quoted on call volume, no public number yet (Steve to set).
+- Custom projects: case by case, not priced on the site.
+Shared copy to keep in sync on a price change: `index.html` (price card, FAQ, Service schema), `how-it-works.html`, every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` SYSTEM prompt, `llms.txt`/`llms-full.txt`.
 
 ## The live agent
 - `agent-widget.js` renders the launcher + panel on every page, keeps the transcript in sessionStorage, POSTs `{messages, page}` to `/api/chat`, and opens on any `[data-open-agent]` element, any `a[href="#agent"]`, or the `#agent` hash. It is labeled as an AI and never pretends to be a person.
@@ -41,7 +42,7 @@ The core pages were produced by a one-off generator (`scratchpad/rebuild.py` in 
 
 ## Hosting / deploy
 - GitHub `machinesandcloud/Machines-and-cloud`, branch `main`, Netlify deploys on push (live within about a minute).
-- A stray `Desktop/Repositories/netlify.toml` in the parent folder used to break the CLI; the repo-local `netlify.toml` now takes precedence.
+- Netlify CLI is linked to site `machines-and-cloud` (id f87916f1-bcc4-4171-a96f-2900cbf0b6dc); `netlify api listSiteDeploys --data '{"site_id":"f87916f1-bcc4-4171-a96f-2900cbf0b6dc","per_page":4}'` shows deploy states. Netlify's Pretty URLs post-processing rewrites `.html` links to extensionless on deploy, so live HTML differs from the repo's hrefs.
 - Known mismatch: Netlify's primary domain is the apex (`www` 301s to apex) while canonicals point to `www`. Decide one and align; don't add host rules to `_redirects`.
 - After each deploy that touches forms, check Netlify → Forms shows `contact` and `agent-lead`.
 
