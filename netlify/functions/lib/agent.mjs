@@ -52,7 +52,7 @@ export function toApiMessages(stored) {
  * execTool(name, input) -> { content: string, is_error?: boolean, event?: object }
  * Returns { reply, events }.
  */
-export async function runAgent({ system, tools, messages, onText, execTool, maxTokens = 2000, effort = "low" }) {
+export async function runAgent({ system, tools, messages, onText, execTool, maxTokens = 2000, effort = "low", dropToolPreamble = false }) {
   const client = makeClient();
   const events = [];
   let reply = "";
@@ -68,15 +68,20 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
       messages,
     });
     let needSep = reply.length > 0 && !/\s$/.test(reply);
+    let iterText = "";
     for await (const ev of stream) {
       if (ev.type === "content_block_delta" && ev.delta.type === "text_delta" && ev.delta.text) {
         const piece = needSep ? " " + ev.delta.text : ev.delta.text;
         needSep = false;
-        reply += piece;
-        if (onText) onText(piece);
+        iterText += piece;
+        if (!dropToolPreamble) { reply += piece; if (onText) onText(piece); }
       }
     }
     const response = await stream.finalMessage();
+    if (dropToolPreamble) {
+      // On text and voice the customer sees one message at the end: keep only the text of the final turn.
+      if (response.stop_reason !== "tool_use") { reply += iterText; if (onText) onText(iterText); }
+    }
     if (response.stop_reason === "refusal") {
       const t = "I can't help with that one. Anything else, ask away.";
       const piece = (reply ? " " : "") + t; reply += piece; if (onText) onText(piece);

@@ -30,8 +30,10 @@ export default async (req) => {
   };
   let reply, done = "";
   try {
-    const out = await runAgent({ system: buildSystemPrompt(c, "sms", { bookings }), tools, messages: history, execTool, maxTokens: 1200 });
+    const out = await runAgent({ system: buildSystemPrompt(c, "sms", { bookings }), tools, messages: history, execTool, maxTokens: 1200, dropToolPreamble: true });
     reply = out.reply;
+    const first = reply.split(/(?<=[.!?])\s+/)[0] || "";
+    if (/^(have|need|got|book|call|now|phone filled|ok,? (i|let)|let me)/i.test(first) && first.split(/\s+/).length < 12 && reply.length > first.length + 10) { reply = reply.slice(first.length).trim(); await logEvent(c.slug, "reply_trimmed", { from, dropped: first }); }
     done = (out.events || []).map((e) => e.type === "booking" ? `[Done: visit booked, ref ${e.id}]` : e.type === "lead" ? `[Done: owner notified, ref ${e.id}]` : e.type === "confirmed" ? `[Done: visit confirmed, ref ${e.id}]` : e.type === "rescheduled" ? `[Done: visit moved to ${e.date} ${e.window}, ref ${e.id}]` : e.type === "cancel_request" ? `[Done: cancel request sent, ref ${e.id}]` : "").filter(Boolean).join(" ");
   } catch (err) {
     console.error("sms agent failed", err);

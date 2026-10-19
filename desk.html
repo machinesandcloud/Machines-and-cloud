@@ -137,9 +137,11 @@
       $('title').textContent = (c.business.name || 'Your front desk');
       var st = $('status'); st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status; st.className = 'st' + (c.status === 'live' ? ' live' : '');
       st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;
-      $('liveBtns').innerHTML = c.status === 'cancelled' ? '<span class="muted">line rings through until ' + esc((c.serviceEndsAt || '').slice(0, 10)) + '</span>' : c.status === 'paused'
+      var offBtns = (d.forwarding && d.forwarding.off && d.forwarding.off.length && (c.status === 'paused' || c.status === 'cancelled')) ? '<div class="muted" style="margin-top:8px">Send calls back to your phone: ' + d.forwarding.off.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') + '<br>' + esc(d.forwarding.offLong || '') + '</div>' : '';
+      document.querySelector('.tabs button[data-t="test"]').style.display = c.status === 'cancelled' ? 'none' : '';
+      $('liveBtns').innerHTML = (c.status === 'cancelled' ? '<span class="muted">line rings through until ' + esc((c.serviceEndsAt || '').slice(0, 10)) + '</span>' : c.status === 'paused'
         ? '<button class="btn-pill btn-pill-blue btn-sm" id="resume">Resume</button> <button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn">Cancel service</button>'
-        : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7">Cancel service</button>';
+        : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7">Cancel service</button>') + offBtns;
       var go = $('golive'), pa = $('pause'), re = $('resume'), ca = $('cancelBtn');
       if (go) go.addEventListener('click', function () { action('go_live').then(function () { toast('Live. Your website chat and texting number are answering.'); load(); }); });
       if (pa) pa.addEventListener('click', function () { action('pause').then(function () { toast('Paused. Calls to your front desk number now ring your own phone.'); load(); }); });

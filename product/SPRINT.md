@@ -2,7 +2,7 @@
 
 Owner: Product Manager. Cut from `BACKLOG.md` round 1 (2026-10-19). Engineer builds in the order below and marks each ticket `delivered` with a verification note; the PM runs the acceptance checklist and records `verified` or `returned` with the failing line. Trade-offs go to `DECISIONS.md`.
 
-Status legend per ticket: `todo` | `in progress` | `delivered` | `verified` | `returned`.
+Status legend per ticket: `todo` | `in progress` | `delivered` | `verified` | `verified with follow-up` (every launch-relevant criterion passed; the named leftover lines are tracked in a follow-up ticket) | `returned` (a criterion that matters failed; the line and what was seen are on the status line).
 
 Engineer notes (2026-10-19), read before verifying:
 - Model-driven SMS replies no longer come back in the webhook's TwiML. Twilio allows a webhook 15 seconds and a thoughtful reply can take 20, so `sms.mjs` answers Twilio with an empty `<Response/>`, saves the inbound turn, and starts `sms-agent-background`, which runs the model and sends the reply through `sendSMS` (type `reply`). Verify model replies through `admin records kind=conversations` (the assistant turn appears within about 30 seconds) and the `sms_sent` event with `type: "reply"`. Fast paths still reply inline in TwiML: owner commands, STOP, START, paused notice, and `C` or `R` when exactly one visit is upcoming.
@@ -41,7 +41,8 @@ Sprint rules for the engineer:
 ## 2. Tickets
 
 ### S1-01 Admin verification hooks
-Status: todo. Size: S. Implements: nothing customer-facing; makes every other ticket verifiable from curl.
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56.
+Size and scope: Size: S. Implements: nothing customer-facing; makes every other ticket verifiable from curl.
 
 Files: `netlify/functions/admin.mjs`, `netlify/functions/sms.mjs`, `netlify/functions/voice.mjs`, `netlify/functions/scheduler.mjs`.
 
@@ -62,7 +63,8 @@ Acceptance (now, no keys):
 - [ ] A wrong admin key on any of the above returns 403.
 
 ### S1-02 Pause that actually stops the desk (status model)
-Status: in progress (partial on disk). Size: M. Implements: Epic 4 MUST "Pause actually stops the front desk". Closes L6 (with S1-15, S1-17).
+Status: verified with follow-up 2026-10-19 6ad677072d68cf5cf1481d56. Open line: the portal does not render the off codes as tap-to-dial buttons while paused (tracked in S1-22); the codes reach the owner by text, by email, and in the `pause` response (`off`).
+Size and scope: Size: M. Implements: Epic 4 MUST "Pause actually stops the front desk". Closes L6 (with S1-15, S1-17).
 
 Already on disk (2026-10-19, unverified): `client.mjs` actions `pause` (stores `pausedFrom`), `resume`, `cancel`; `sms.mjs` stays silent on `paused`; `voice.mjs` pass-through `<Dial timeout="30">` to `businessNumber || owner.phone` logging `call_passthrough`; `chat.mjs` returns 403 `{"error":"paused"}`; `desk.html` shows Pause, Resume, Cancel service and the paused status text.
 
@@ -85,7 +87,8 @@ Acceptance (now):
 - [ ] `resume` returns `status` `live`; the simulated text gets a model reply again; the portal shows the Pause button.
 
 ### S1-03 Per-client policy and terms page, filed on the campaign
-Status: in progress (partial on disk). Size: S (was M). Implements: Epic 1 MUST "add PrivacyPolicyUrl and TermsAndConditionsUrl"; Epic 4 MUST data policy paragraph (constant lives here). Closes part of L3.
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56.
+Size and scope: Size: S (was M). Implements: Epic 1 MUST "add PrivacyPolicyUrl and TermsAndConditionsUrl"; Epic 4 MUST data policy paragraph (constant lives here). Closes part of L3.
 
 Already on disk: `netlify/functions/policy.mjs` at `/policy?c=slug` renders one page with `#terms` and `#privacy` anchors (program, opt-in, frequency, STOP, HELP, rates, privacy bullets, Machines & Cloud address); `lib/twilio.mjs` `createCampaign` sends `PrivacyPolicyUrl` `.../policy?c=slug#privacy` and `TermsAndConditionsUrl` `.../policy?c=slug#terms` built from `process.env.URL`.
 
@@ -106,7 +109,8 @@ Acceptance (now):
 Acceptance (later, keyed, S1-19): Twilio accepts the campaign without a privacy or terms validation error and the console shows both URLs.
 
 ### S1-04 One sender: Messaging Service, registered bridge, inbound mapping
-Status: in progress (partial on disk). Size: M (was L). Implements: Epic 2 MUST "texts from a Machines & Cloud registered sender until the campaign clears". Closes the sending half of L2 and L3.
+Status: delivered again 2026-10-19 (engineer): the provisioning text now goes through `sendSMS({ client, type: "number_assigned" })`; grep is clean. Previously returned: `grep -rn "from: c.phone.twilioNumber" netlify/functions` still hit `provision-background.mjs` line 73 (the number-assigned text to the owner), which will fail with 30034 on the first keyed client; change it to `sendSMS({ to: c.owner.phone, client: c, force: true, type: "number_assigned", body })`. Every other "now" line passed (sender `bridge` on every send, `own` after `tenDlc: approved`, events carry `sender`, `ok`, `logged`, `preview`). Bridge inbound mapping (`resolveClient` via `index` `bridge:`) could not be exercised on the draft because the MC number is not exposed; code path reviewed, keyed pass covers it.
+Size and scope: Size: M (was L). Implements: Epic 2 MUST "texts from a Machines & Cloud registered sender until the campaign clears". Closes the sending half of L2 and L3.
 
 Already on disk: `lib/send.mjs` `sendSMS({ to, from, body, client, messagingServiceSid, force })` picks the shop's own number plus Messaging Service when `tenDlc === "approved"`, else `MC_MESSAGING_SERVICE_SID` or `MC_TWILIO_NUMBER` with the business name prefixed; sends with `MessagingServiceSid` when a service is known; writes `health` store `lastsend:{slug}`. `desk.mjs`, `scheduler.mjs`, `voice.mjs`, `client.mjs` already call `sendSMS` with `client`. `notifyOwner` sends with `force: true`.
 
@@ -130,7 +134,8 @@ Acceptance (now, no Twilio keys, `MC_TWILIO_NUMBER` set in Netlify):
 Acceptance (later, keyed, S1-19): with a pending campaign, the text-back from a real forwarded call arrives on Steve's phone from the MC number, prefixed with the shop name, within 15 seconds; replying to it continues the conversation with the shop; after approval the next text comes from the shop's own number.
 
 ### S1-05 STOP end to end
-Status: in progress (partial on disk). Size: S (was M). Implements: Epic 2 MUST "a customer who texts STOP never gets another message"; Epic 2 SHOULD 24-hour text-back dedupe. Closes L4.
+Status: verified with follow-up 2026-10-19 6ad677072d68cf5cf1481d56. Open lines (S1-22): `admin clear_optout` does not exist, and `admin.mjs` answers an unknown action that carries a slug with `ok: true` (a generic update), which hides that; delete already removes a test shop's opt-outs. The scheduler's `opted out` result was verified in code only (`scheduler.mjs` line 22): the draft run could not produce a surviving reminder for an opted-out number because STOP cancels them first and a same-day booking gets no 24 h reminder.
+Size and scope: Size: S (was M). Implements: Epic 2 MUST "a customer who texts STOP never gets another message"; Epic 2 SHOULD 24-hour text-back dedupe. Closes L4.
 
 Already on disk: `optouts` store keyed by the bare E.164 number (global across shops) with `{ at, slug, words }`; `sendSMS` refuses opted-out numbers unless `force`; `sms.mjs` matches STOP words and short sentences, calls `store.cancelTasksForNumber(from)`, logs `opt_out`, replies "you are unsubscribed..."; `START`, `UNSTOP`, `YES` clear it with an `opt_in` event; voice text-back now goes through `sendSMS` with the client and ends with "Reply STOP to opt out."
 
@@ -157,7 +162,8 @@ Acceptance (now):
 Acceptance (later, keyed): on Steve's phone, book by SMS, text STOP, confirm one confirmation arrives (not two), and the 24 h reminder slot passes with nothing received.
 
 ### S1-06 Consent line at booking, consent record on the booking
-Status: todo. Size: S. Implements: Epic 2 MUST "told once that I will get appointment texts and can reply STOP; booking stores when, channel, wording".
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56.
+Size and scope: Size: S. Implements: Epic 2 MUST "told once that I will get appointment texts and can reply STOP; booking stores when, channel, wording".
 
 Files: `netlify/functions/lib/config.mjs`, `netlify/functions/lib/desk.mjs`, `netlify/functions/lib/vapi.mjs`.
 
@@ -174,7 +180,8 @@ Acceptance (now):
 - [ ] Spanish booking on the test line (write in Spanish) gets the sentence in Spanish, once.
 
 ### S1-07 Three questions first; wants a person gets a callback window
-Status: todo. Size: S. Implements: Epic 6 MUST "answers area, cost, when before asking for a name"; Epic 3 MUST "missed-calls shop: takes the number and states a callback window"; Epic 3 MUST "says what it is" (verified, not changed).
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56.
+Size and scope: Size: S. Implements: Epic 6 MUST "answers area, cost, when before asking for a name"; Epic 3 MUST "missed-calls shop: takes the number and states a callback window"; Epic 3 MUST "says what it is" (verified, not changed).
 
 Files: `netlify/functions/lib/config.mjs`, `netlify/functions/lib/vapi.mjs`.
 
@@ -191,7 +198,8 @@ Acceptance (now, test line, `stream:false`):
 - [ ] `admin prompt channel=voice` contains "within 30 minutes" and not "will call them back and take their number".
 
 ### S1-08 Every alert is a job ticket
-Status: todo. Size: M. Implements: Epic 5 MUST "every alert is a job ticket" (outcome tag, new or existing, unsure line).
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56.
+Size and scope: Size: M. Implements: Epic 5 MUST "every alert is a job ticket" (outcome tag, new or existing, unsure line).
 
 Files: `netlify/functions/lib/config.mjs`, `netlify/functions/lib/desk.mjs`, `netlify/functions/lib/store.mjs`, `netlify/functions/vapi.mjs`, `desk.html`.
 
@@ -210,7 +218,8 @@ Acceptance (now):
 - [ ] The portal leads table shows the Outcome column.
 
 ### S1-09 Loop-proof numbers: backup, transfer target, acknowledgment settings
-Status: todo. Size: M. Implements: Epic 3 MUST "onboarding refuses an escalation or backup number that equals the forwarded line or the front desk number"; stores the fields S1-10 and S1-17 need.
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56 at the API level (onboarding 400s, PUT 400 with unchanged value, prompt picks up the edited window); the `onboard.html` field reveal and inline error were checked in the page code, not in a browser.
+Size and scope: Size: M. Implements: Epic 3 MUST "onboarding refuses an escalation or backup number that equals the forwarded line or the front desk number"; stores the fields S1-10 and S1-17 need.
 
 Files: `netlify/functions/lib/config.mjs`, `netlify/functions/onboard.mjs`, `netlify/functions/client.mjs`, `onboard.html`, `desk.html`.
 
@@ -229,7 +238,8 @@ Acceptance (now):
 - [ ] On `onboard.html` (draft URL), choosing "All of them" reveals the transfer field; submitting the looping pair shows the message under the field without leaving the page.
 
 ### S1-10 Acknowledge and escalate
-Status: todo. Size: L. Implements: Epic 3 MUST "an emergency or wants-a-call alert expects my reply; escalates to backup, then calls my cell, then texts the customer"; Steve is the backstop of last resort. Closes L5 (with S1-07, S1-08, S1-18).
+Status: verified with follow-up 2026-10-19 6ad677072d68cf5cf1481d56. Finding: one emergency conversation opened three alerts (the model called `notify_owner` on consecutive turns), so three escalation chains ran for one customer: three backup texts, three calls, three Steve emails. New ticket S1-20.
+Size and scope: Size: L. Implements: Epic 3 MUST "an emergency or wants-a-call alert expects my reply; escalates to backup, then calls my cell, then texts the customer"; Steve is the backstop of last resort. Closes L5 (with S1-07, S1-08, S1-18).
 
 Files: `netlify/functions/lib/desk.mjs`, `netlify/functions/lib/send.mjs`, `netlify/functions/lib/store.mjs`, `netlify/functions/sms.mjs`, `netlify/functions/scheduler.mjs`, `netlify/functions/voice.mjs`, `netlify/functions/client.mjs`, `netlify/functions/admin.mjs`, `desk.html`.
 
@@ -252,7 +262,8 @@ Acceptance (now):
 Acceptance (later, keyed): Steve's cell as owner, a second phone as backup: ignore the emergency text; within 10 to 20 minutes the backup phone gets the text; within another 10 to 20 minutes the cell rings with the spoken line; then the customer phone gets the window text and Steve's email arrives.
 
 ### S1-11 Reschedule or confirm by reply
-Status: todo. Size: L. Implements: Epic 6 MUST "Reply R to reschedule or C to confirm works"; Epic 6 SHOULD "front desk only notifies on a cancellation" (cheap here). Keeps the Starter card and reminder copy true.
+Status: verified with follow-up 2026-10-19 6ad677072d68cf5cf1481d56. Finding: the first SMS reply after booking began with the model's planning text ("Have name, address, issue, window. Phone filled automatically. Book.") before the customer-facing sentence. New ticket S1-21. Note: a visit booked for tomorrow after today's window start gets only the 1 h reminder (24 h reminder would be in the past); by design.
+Size and scope: Size: L. Implements: Epic 6 MUST "Reply R to reschedule or C to confirm works"; Epic 6 SHOULD "front desk only notifies on a cancellation" (cheap here). Keeps the Starter card and reminder copy true.
 
 Files: `netlify/functions/lib/config.mjs`, `netlify/functions/lib/desk.mjs`, `netlify/functions/lib/calendar.mjs`, `netlify/functions/sms.mjs`.
 
@@ -274,7 +285,8 @@ Acceptance (now, simulated SMS from `+17135550123`):
 Acceptance (later, keyed): the 24 h reminder arrives on Steve's phone; replying `R` then a window moves the Google Calendar event (visible in Calendar) and texts the owner.
 
 ### S1-12 Line health card
-Status: todo. Size: M. Implements: Epic 1 MUST "line-health check in the portal". Also fixes `forwardingVerified` being set by any first call.
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56; the `errors24h` counter was not exercised (no cheap error trigger on a draft), code path reviewed.
+Size and scope: Size: M. Implements: Epic 1 MUST "line-health check in the portal". Also fixes `forwardingVerified` being set by any first call.
 
 Files: `netlify/functions/client.mjs`, `netlify/functions/voice.mjs`, `netlify/functions/sms.mjs`, `netlify/functions/vapi.mjs`, `netlify/functions/lib/desk.mjs`, `desk.html`.
 
@@ -292,7 +304,8 @@ Acceptance (now):
 - [ ] The portal Setup pane shows the card with "none yet" wording, no "null".
 
 ### S1-13 Flag a conversation
-Status: todo. Size: S. Implements: Epic 5 MUST "flag any conversation with one tap and a note; flags go to Steve the same day and appear in the digest". Closes the owner half of L8.
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56.
+Size and scope: Size: S. Implements: Epic 5 MUST "flag any conversation with one tap and a note; flags go to Steve the same day and appear in the digest". Closes the owner half of L8.
 
 Files: `netlify/functions/client.mjs`, `netlify/functions/lib/store.mjs`, `desk.html`.
 
@@ -307,7 +320,8 @@ Acceptance (now):
 - [ ] Portal: Flag -> prompt -> the conversation shows the note; Unflag clears it.
 
 ### S1-14 Daily digest at 6 pm for every live shop
-Status: todo. Size: M. Implements: Epic 5 MUST "one digest text and email a day"; cut 6 (daily replaces the Pro-only Monday digest); L8 Steve copy for the first week.
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56; the testing-shop exclusion was verified in code (`c.status !== "live"`), not with a second shop.
+Size and scope: Size: M. Implements: Epic 5 MUST "one digest text and email a day"; cut 6 (daily replaces the Pro-only Monday digest); L8 Steve copy for the first week.
 
 Files: `netlify/functions/lib/desk.mjs`, `netlify/functions/scheduler.mjs`, `netlify/functions/client.mjs`, `netlify/functions/admin.mjs`.
 
@@ -326,7 +340,8 @@ Acceptance (now):
 Acceptance (later, keyed): Steve's phone and inbox get the test shop's digest at 6:00 to 6:10 pm Houston; the Steve copy arrives while `liveAt` is under 7 days old and stops after.
 
 ### S1-15 Cancel from the portal
-Status: in progress (partial on disk). Size: S (was M). Implements: Epic 4 MUST "cancel with one click; carrier cancel code texted; number forwards to my phone for 30 days; Steve gets a verification task; written confirmation". Closes L6 with S1-02.
+Status: verified with follow-up 2026-10-19 6ad677072d68cf5cf1481d56. Open lines (S1-22): in the cancelled state the portal shows "line rings through until <date>" but not the off codes as tap-to-dial buttons or `offLong`, and the Test tab stays visible. The email includes `DATA_POLICY` ("ask for an export at any time"), which is the intended wording; the old "export on the portal" promise is gone.
+Size and scope: Size: S (was M). Implements: Epic 4 MUST "cancel with one click; carrier cancel code texted; number forwards to my phone for 30 days; Steve gets a verification task; written confirmation". Closes L6 with S1-02.
 
 Already on disk: `client.mjs` action `cancel` `{ reason }` sets `status` `cancelled` and `cancelledAt`, texts the owner the off codes and the 30-day line, emails "cancellation confirmed" with the last billing date, notifies Steve to verify forwarding within 2 business days; `desk.html` has the Cancel service box with the optional reason; `voice.mjs` pass-through covers `cancelled` (loop fix in S1-02 applies).
 
@@ -347,7 +362,8 @@ Acceptance (now):
 - [ ] `admin` `{"status":"live"}` brings it back; the simulated text gets a model reply.
 
 ### S1-16 Truthful copy: timelines, plan cards, FAQ, LSA line, data policy, forwarding notes
-Status: todo. Size: M. Implements: Epic 2 MUST "true timeline"; cut 1 and open question 5 (Growth card trimmed to what is real); cut 5 (seasonal reminders line removed); Epic 4 MUST data policy on site and portal; Epic 7 SHOULD one LSA line; research log iPhone Live Voicemail. Closes L7 (with S1-11 keeping "reschedules by reply" true).
+Status: verified 2026-10-19 6ad677072d68cf5cf1481d56: 0 stale timeline or card phrases, prices once each and identical to the pre-sprint commit (HEAD~1), nine FAQs in HTML and JSON-LD, no "few days", no em dashes, sitecheck passes, MC desk answers Jobber and own-number texting honestly, portal GET carries `dataPolicy` and the policy link, forwarding text carries the Live Voicemail line. The onboarding page copy was checked in the file, not in a browser.
+Size and scope: Size: M. Implements: Epic 2 MUST "true timeline"; cut 1 and open question 5 (Growth card trimmed to what is real); cut 5 (seasonal reminders line removed); Epic 4 MUST data policy on site and portal; Epic 7 SHOULD one LSA line; research log iPhone Live Voicemail. Closes L7 (with S1-11 keeping "reschedules by reply" true).
 
 Files: `index.html`, `onboard.html`, `desk.html`, `netlify/functions/chat.mjs` (MC_SYSTEM), `netlify/functions/provision-background.mjs`, `netlify/functions/lib/forwarding.mjs`, `llms.txt`, `llms-full.txt`, `CLAUDE.md`.
 
@@ -373,7 +389,8 @@ Acceptance (now, on the draft URL and in the repo):
 - [ ] `python3 -I scripts/sitecheck.py .` passes; no em dash (U+2014) in any changed file (`grep -P "\x{2014}"`).
 
 ### S1-17 Pause and resume detach and reattach voice answering (keyed)
-Status: todo. Size: M. Implements: Epic 4 MUST Pause (voice half when Vapi owns the number). Closes L6 for Vapi-answered shops.
+Status: waiting mode verified 2026-10-19 6ad677072d68cf5cf1481d56 (no voice events without an assistant; `voice_detach_skipped` with a fake assistant and no Twilio keys); keyed lines pending S1-19.
+Size and scope: Size: M. Implements: Epic 4 MUST Pause (voice half when Vapi owns the number). Closes L6 for Vapi-answered shops.
 
 Files: `netlify/functions/client.mjs`, `netlify/functions/lib/twilio.mjs`, `netlify/functions/lib/vapi.mjs`.
 
@@ -390,7 +407,8 @@ Acceptance (now, no keys):
 Acceptance (later, keyed, S1-19 run): on a Vapi-answered test shop, Pause, then call the number from Steve's phone: the fallback (Dial to the owner's cell, or the Say) plays, not the assistant; `voice_detached` event present and the Twilio console shows the number's voice webhook as `/api/voice`. Resume, call again: the assistant answers; `voice_attached` present.
 
 ### S1-18 Warm transfer on all-calls shops (keyed)
-Status: todo. Size: M. Implements: Epic 3 MUST "warm-transferred to the owner's cell with a spoken summary; if nobody picks up in 25 seconds, the front desk returns and commits to a callback time". Closes the voice half of L5 for `forwarding: all` shops.
+Status: waiting mode verified 2026-10-19 6ad677072d68cf5cf1481d56 (all-calls voice prompt carries `call transferCall` and the window; missed mode carries neither); keyed lines pending S1-19.
+Size and scope: Size: M. Implements: Epic 3 MUST "warm-transferred to the owner's cell with a spoken summary; if nobody picks up in 25 seconds, the front desk returns and commits to a callback time". Closes the voice half of L5 for `forwarding: all` shops.
 
 Files: `netlify/functions/lib/vapi.mjs`, `netlify/functions/lib/config.mjs`.
 
@@ -407,7 +425,8 @@ Acceptance (now, no keys):
 Acceptance (later, keyed, S1-19 run): Steve forwards all calls; a second phone calls and asks for a person; Steve's cell rings and hears the spoken summary before the caller is joined. Repeat and do not answer: after about 25 seconds the assistant returns, states the window, takes the number; a `wants_call` lead and alert exist.
 
 ### S1-19 Real-account run on a test shop and field-name fixes (keyed)
-Status: todo. Size: M (plus waiting time). Implements: Epic 1 MUST "run the full path on a test shop with production keys". Closes L1, L2, L3 in the keyed pass.
+Status: todo, keyed only; waits on Steve's accounts.
+Size and scope: Size: M (plus waiting time). Implements: Epic 1 MUST "run the full path on a test shop with production keys". Closes L1, L2, L3 in the keyed pass.
 
 Files: `netlify/functions/lib/twilio.mjs`, `netlify/functions/lib/vapi.mjs`, `netlify/functions/provision-background.mjs`, `netlify/functions/admin.mjs`, `OPERATIONS.md`, `product/DECISIONS.md`.
 
@@ -422,6 +441,36 @@ Acceptance (keyed only):
 - [ ] L2: book by SMS for tomorrow 8 to 12; confirmation now, 24 h and 1 h reminders at the right Houston times, `otw REF` sends the on-the-way text; all four land on the phone.
 - [ ] L3: campaign accepted by the API with the policy URLs (S1-03); the brand and campaign statuses visible in the portal text.
 - [ ] `admin delete` on the test shop returns the released number SID and Vapi ids; the Twilio console no longer lists the number.
+
+### S1-20 One alert per customer, not one per turn
+Status: delivered 2026-10-19 (engineer). Built one level up from the ticket: `flagLead` merges a repeat `notify_owner` for the same phone or conversation within 30 minutes into the open lead (owner gets an UPDATE line with what changed), and opens an alert only if none is waiting for that lead, so one chain runs per customer. Verify with the ticket's scenario: one `waiting` alert, one `escalate` task, `lead_updated` events instead of extra leads.
+Original status: todo. Size: S. Implements: Epic 3 MUST acknowledge-and-escalate (correctness). Found in the S1-10 verification: one emergency conversation opened three `alerts` records and three `escalate` chains.
+
+Files: `netlify/functions/lib/desk.mjs`.
+
+Change: `openAlert(c, lead, kind)` first looks for a `waiting` alert for the same phone number (or the same conversation contact when the phone is empty) opened in the last 30 minutes; if one exists, attach the new lead id to it (`leadIds: []`), log `alert_merged`, and do not schedule another `escalate` task. `ackAlertsFor` acknowledges by any lead id in `leadIds`. The owner still gets each `notify_owner` text (the model may add information), but only one chain runs.
+
+Acceptance (now): on the test line, "I smell gas" followed by the address and number in a second turn and "yes tell the owner" in a third: `admin records kind=alerts` shows exactly one `waiting` alert for that number, `admin tasks` exactly one `escalate`, and an `alert_merged` event per extra lead; `ok REF` with any of the lead refs acknowledges it. A second emergency from a different number opens its own alert.
+
+### S1-21 SMS replies never carry the model's planning text
+Status: delivered 2026-10-19 (engineer): `runAgent` drops text emitted in a turn that ends in a tool call when `dropToolPreamble` is set (SMS background agent sets it); prompt line added; last-resort first-sentence filter logs `reply_trimmed`.
+Original status: todo. Size: S. Implements: Epic 6 MUST (quality of the SMS channel). Found in the S1-11 verification: the reply sent after an SMS booking began "Have name, address, issue, window. Phone filled automatically. Book." before the customer-facing sentence, because `runAgent` concatenates text emitted before a tool call with the text after it.
+
+Files: `netlify/functions/lib/agent.mjs`, `netlify/functions/sms-agent-background.mjs`, `netlify/functions/lib/config.mjs`.
+
+Change: in `runAgent`, when an iteration ends in `tool_use`, discard the text emitted in that iteration unless it is a complete customer-facing sentence (simplest rule: drop it entirely on the `sms` and `voice` channels, where the customer sees nothing until the final message anyway, and keep streaming it on `web` and `test`). Add a prompt line under the texting channel note: "Never write notes to yourself; every sentence you write is sent to the customer." Add a last-resort filter in `sms-agent-background.mjs`: if the reply's first sentence matches `/^(have|need|got|book|call|now|phone filled)/i` and is under 12 words, drop that sentence and log `reply_trimmed`.
+
+Acceptance (now): repeat the S1-11 SMS booking three times with fresh numbers; every assistant turn in `admin records kind=conversations` starts with a customer-facing sentence (name, greeting, or answer), no `reply_trimmed` event is needed for a pass but is allowed; the test-line and web replies still stream.
+
+### S1-22 Portal and tooling leftovers from verification
+Status: delivered 2026-10-19 (engineer): off codes as tap-to-dial while paused or cancelled with `offLong`; Test tab hidden when cancelled; `admin clear_optout`; unknown admin actions return 400.
+Original status: todo. Size: S. Implements: the open lines from S1-02, S1-05, S1-15.
+
+Files: `desk.html`, `netlify/functions/admin.mjs`.
+
+Change: (a) while `paused` or `cancelled`, the portal header shows the carrier off codes as tap-to-dial buttons (`forwarding.off`) plus `forwarding.offLong`, and the Test tab is hidden when `cancelled`; (b) `admin.mjs` gains `clear_optout` `{ phone }` and returns 400 `{ error: "unknown_action" }` for an unrecognized `action` instead of treating it as an update.
+
+Acceptance (now): paused and cancelled test shops show `tel:` links for `#61#`, `#67#`, `#21#` (AT&T) or `*73` (Verizon); `admin` `{"slug","action":"clear_optout","phone":"+17135550123"}` removes the key; `{"slug","action":"nonsense"}` returns 400.
 
 ## 3. Assumptions (Steve can overturn any of these; each is one line to change)
 
@@ -519,3 +568,30 @@ Merged to `main` first (the scheduler must be the new code). Shop onboarded thro
 | 14 | "Is this a real person?" | says it is the front desk assistant |
 
 A go-live is signed off only when all 14 pass on the test line and 1, 3, 6, 9, 13 pass on real SMS and voice.
+
+## 6. Verification record
+
+### Pre-key pass, 2026-10-19, draft `6ad677072d68cf5cf1481d56`
+
+Run by the PM with `scratchpad/verify.py` (129 checks) and `verify2.py` (11 checks) against the draft URL; test shops `pm-test-hvac-0ba1` and `pm-test-plumbing-c70e`, Twilio numbers `+17135550111` and `+17135550112` attached by admin, owner cell `+17135550199`, business line `+17135550100`, backup `+17135550188`. Both shops deleted with `admin delete`; `GET /api/admin` lists no PM Test shop; the public GET returns 404. Opt-outs for the fake numbers were cleared by START during the run and by delete (they carry the slug).
+
+Result: 121 of 128 automated lines passed in the main run, 11 of 11 in the second; the 7 failures are check artifacts, explained below; two product findings became S1-20 and S1-21; one explicit criterion failed and S1-04 is returned.
+
+Engineer-note adjustments applied: model-driven SMS replies verified through `records kind=conversations` and `sms_sent` `type: "reply"` (arrived in 10 to 40 s); fast paths (`C`, `R`, STOP, START, owner commands, paused notice) verified inline; `go_live` and `resume` treated as one action; opt-out records read as `phone: "+1..."`.
+
+| Automated line | Why it is not a product failure |
+|---|---|
+| S1-06 confirmation preview mentions STOP | `sms_sent.preview` is cut at 120 characters; `desk.mjs` line 85 ends the body with "Reply STOP to opt out." |
+| S1-02 owner pause text carries `#61#` | same 120-character cut; the `pause` response returned `off: ["#61#","#67#","#21#"]` and `client.mjs` line 103 puts the codes in the text |
+| S1-10 escalated events steps 1..3 | three alerts ran in parallel (see S1-20), so the last three events were all step 3; each chain logged steps 1, 2, 3 |
+| S1-11 two reminder tasks | a "tomorrow 8 to 12" visit booked in the afternoon gets only the 1 h reminder (the 24 h slot is already past); the Friday reschedule produced both |
+| S1-05 `sms_blocked` after `otw` | `ownerCommand` returns before sending for an opted-out customer; the real block path was exercised by the confirmation to the opted-out number (`sms_blocked` logged) |
+| S1-05 nudged reminder "opted out" | no `reminder_24h` existed for the same reason as above; the guard is `scheduler.mjs` line 22, code-verified |
+| S1-15 owner cancel text has the end date | 120-character cut; `client.mjs` line 116 includes "Until <date>" |
+
+Not exercisable on a draft, verified in code: bridge inbound routing on the MC number (S1-04), `errors24h` increments (S1-12), testing shops excluded from the digest (S1-14), keyed lines of S1-17, S1-18, S1-19. Browser-only lines (onboarding field reveal, portal buttons) were read in the page code; the two portal gaps found that way are in S1-22.
+
+Observed and worth knowing before the keyed pass: the escalation chain, the daily digest (text and email), reschedule by reply with calendar update, STOP including Twilio's `OptOutType` case, Pause and Cancel pass-through TwiML, and the loop guard on the shop's own number all behaved as specified. The three-questions prompt answered area and fee before asking for a name on every try, and "is this a real person" was answered truthfully on web and in the voice prompt.
+
+### Keyed pass
+Pending S1-19 (Steve's Twilio, Vapi, Resend keys). Order and checklist in section 5.3.

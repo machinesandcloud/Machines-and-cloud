@@ -82,7 +82,7 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
   const fees = c.fees?.length ? c.fees.map((f) => `${f.label}: ${f.amount}${f.note ? " (" + f.note + ")" : ""}`).join("; ") : "no published prices; every price is confirmed on site";
   const faq = c.faq?.length ? c.faq.map((x) => `Q: ${x.q}\nA: ${x.a}`).join("\n") : "";
   const channelNote = channel === "sms"
-    ? "You are texting. The customer's phone number is the number they are texting from, so never ask for it; pass it to the tools as given in the conversation or leave it empty and it is filled in. Keep every message under 300 characters, one question at a time, no formatting, no links unless asked. Never narrate what you still need; just ask the next question."
+    ? "You are texting. The customer's phone number is the number they are texting from, so never ask for it; pass it to the tools as given in the conversation or leave it empty and it is filled in. Keep every message under 300 characters, one question at a time, no formatting, no links unless asked. Never write notes to yourself; every sentence you write is sent to the customer. Never narrate what you still need; just ask the next question."
     : channel === "voice"
     ? "You are answering the phone. Short spoken sentences, one question at a time, no formatting."
     : channel === "test"
