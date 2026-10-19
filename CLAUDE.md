@@ -10,12 +10,13 @@ python3 -m http.server 8787            # static only, no function
 ```
 The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"error":"offline"}` and the widget shows contact details instead. Set the key in Netlify's site environment variables for production (never in the repo).
 
-## Site structure (two-page site, 2026-10-18)
-- Research-driven rebuild (NN/g attention and trust studies, Unbounce reading-level data, a 2,000-page A/B study, Storylane demo data, 15 competitor teardowns, Indie Hackers/HN founder threads). Rules applied: everything that sells in the first three screens; product in use as the hero (the interactive demo), not a stock image; one primary CTA; prices and contact up front; plain 6th-grade words; no fake proof, say we are new; four-field form; sticky mobile CTA; links out to LinkedIn and Maps for "connection to the rest of the web".
-- Core pages (in nav): `index` (hero with a looping missed-call-to-text example `#demo-wrap`; a "one week with a front desk" rail `#week` with four examples in their real channels: answered call, SMS price shopper, Thumbtack lead, Spanish website chat; "both sides of the counter" `#sides`; "after the job" texts `#after`; how it works `#how`; six research-driven FAQs; pilot form `#pilot`) and `about`. Built 2026-10-18 from `RESEARCH-customer-journey.md`. The inline live chat section was removed 2026-10-18 at Steve's request; the corner widget (`agent-widget.js`, persona `mc`) is the live agent on every page including index. There is no pricing section: the price lives in the hero note and the FAQ ("What does it cost?", "Can it answer the phone too?"). The footer carries no trust line (Steve's instruction 2026-10-18: no "we are new / no logos" language anywhere). `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
-- Retired via 301 to index anchors: `services`, `pricing`, `how-it-works`, `demo`, `contact`.
-- SEO pages stay live and out of the nav (see earlier note). Never delete them without asking.
-- Nav: Demo, Pricing, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact with trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
+## Site structure (two-page site, rebuilt from scratch 2026-10-18)
+- Built from `RESEARCH-customer-workflow.md` (the full owner workflow: lead sources and costs, channels, quoting, closing, booking, confirming, delivery, payment, follow-up, tools, Houston) and `RESEARCH-customer-journey.md`. The services are named for the workflow stages where small shops lose work.
+- Core pages (in nav): `index` (hero with a looping missed-call example `#demo-wrap`; "Where the jobs leak out" `#leaks`, five stages with research numbers; "What we sell" `#services` with three cards: Answer `#answer` (core, $397/mo, phone add-on $297), Book and confirm `#book` (included), Follow up `#followup` ($197/mo add-on); "One week with a front desk" `#week` with four examples in their real channels; "The rules" `#rules` (never/always); how it works `#how` (3 steps); seven FAQs with no prices; pilot form `#pilot`) and `about`. `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
+- Price rule (Steve): each price appears once on the homepage, in the services cards and the build-fee footnote under them. The FAQ and the steps carry no prices. No "we are new / no logos" copy anywhere; no footer trust line.
+- Retired via 301 to index anchors: `services`, `pricing` (-> `#services`), `how-it-works` (-> `#how`), `demo` (-> `#demo-wrap`), `contact` (-> `#pilot`).
+- SEO pages stay live and out of the nav. Never delete them without asking.
+- Nav: Services, See it work, How it works, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact, no trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
 
 ## The interactive demo
 - `stories.js` plays scripted example conversations (`SCENES`) in any element with `data-scene="<id>"` when it scrolls into view. Each scene has a `channel` (`sms`, `call`, `lead`, `web`) that sets its look (SMS bubbles, call transcript with timer, Thumbtack lead card, website chat), optional `loop`, `notes`, and `lead`. The owner's phone panel is the same for all. No API needed. Never call them "scenes" or "samples" in visible copy (Steve: sounds fake); the page says "examples" once, in a footnote.
@@ -31,7 +32,7 @@ The core pages were produced by one-off generator scripts in the 2026-10-18 sess
 - Phone answering: add-on, $297/month with 300 call minutes included, then $0.35/minute, no setup fee when added during the pilot (set 2026-10-18 from market data; Steve may change).
 - Lead follow-up and reviews add-on: $197/month, 500 texts included, then $0.03/text (set 2026-10-18; Steve may change). Not built yet: needs a lead webhook receiver (Angi JSON webhook, Thumbtack pro webhook, website forms), Twilio with A2P 10DLC per client, a scheduler for the 48h chase and post-job review text, and a consent/STOP store. Thumbtack in-app replies need partner API approval; Google LSA leads cannot be texted directly (masked numbers).
 - Custom projects: case by case, not priced on the site.
-Shared copy to keep in sync on a price change: `index.html` (hero note, FAQ, pilot card, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
+Service names on the site: Answer (core), Book and confirm (included), Follow up (add-on). Shared copy to keep in sync on a price change: `index.html` (services cards, footnote, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
 
 ## The live agent
 - `agent-widget.js` renders the corner launcher + panel on every page except those with `data-no-widget` on body, keeps the transcript in sessionStorage, POSTs `{messages, page}` to `/api/chat` (persona `mc`), and opens on any `[data-open-agent]` element, `a[href="#agent"]`, or the `#agent` hash.
@@ -44,7 +45,7 @@ Shared copy to keep in sync on a price change: `index.html` (hero note, FAQ, pil
 - `script.js` is one IIFE with section banners; features are guarded by element-existence checks. The old scripted "M&C Guide" fake companion was removed; never add a fake chat widget.
 - `styles.css` is large and mostly legacy; new sections are appended at the end under dated banners. Design tokens at the top.
 - Contact form (`contact.html`) and the agent lead form both use Netlify Forms. Keep the hidden `form-name` inputs.
-- Copy rules from the audit: no em dashes, no invented stats or client names, targets labeled as targets, the footer trust line stays until real client proof replaces it.
+- Copy rules: no em dashes, no invented stats or client names, no prototype words (scene, sample, fictional, try to break it) in visible copy, no "we are new" language, no personal details about Steve beyond the one sentence on the about page.
 - No analytics tag yet (see ANALYTICS-SETUP.md). Calendly link: calendly.com/ngoumnaisteve/30.
 
 ## Hosting / deploy

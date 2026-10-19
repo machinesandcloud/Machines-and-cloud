@@ -8870,3 +8870,36 @@ body.agent-mode .navbar {
 .hero-kicker { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-sm); color: var(--color-neutral-300); margin-top: var(--space-5); }
 .hero-kicker b { color: #fff; }
 @media (max-width: 900px) { .scene { grid-template-columns: 1fr; } }
+
+/* ============================================
+   From-scratch homepage (2026-10-18): leaks, services, rules
+   ============================================ */
+.leaks { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); }
+@media (max-width: 1100px) { .leaks { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 720px) { .leaks { grid-template-columns: 1fr; } }
+.leak { position: relative; padding: var(--space-5); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-2xl); background: rgba(255,255,255,0.03); display: flex; flex-direction: column; }
+.leak-stage { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-primary-400); }
+.leak-stat { display: block; font-family: var(--font-display); font-size: var(--text-4xl); color: #fff; line-height: 1.1; margin: var(--space-3) 0 var(--space-2); }
+.leak-what { font-size: var(--text-sm); color: var(--color-neutral-400); margin: 0 0 var(--space-4); line-height: 1.55; flex: 1; }
+.leak-fix { font-size: var(--text-sm); color: #fff; margin: 0; padding-top: var(--space-3); border-top: 1px solid rgba(59,130,246,0.35); }
+.leak-fix::before { content: "→ "; color: var(--color-primary-400); }
+.services { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); align-items: stretch; }
+@media (max-width: 900px) { .services { grid-template-columns: 1fr; } }
+.service { padding: var(--space-6); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-2xl); background: rgba(255,255,255,0.03); display: flex; flex-direction: column; }
+.service.is-core { border-color: var(--color-primary-500); background: linear-gradient(180deg, rgba(59,130,246,0.12) 0%, rgba(15,36,71,0.5) 100%); }
+.service-tag { align-self: flex-start; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-primary-400); padding: 4px 10px; border: 1px solid rgba(59,130,246,0.4); border-radius: var(--radius-full); }
+.service h3 { font-family: var(--font-display); font-size: var(--text-2xl); color: #fff; margin: var(--space-4) 0 var(--space-2); }
+.service-price { font-size: var(--text-sm); color: var(--color-neutral-300); margin: 0 0 var(--space-3); }
+.service-price strong { font-family: var(--font-display); font-size: var(--text-xl); color: #fff; }
+.service-desc { font-size: var(--text-sm); color: var(--color-neutral-400); line-height: 1.6; margin: 0 0 var(--space-4); }
+.service ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+.service li { font-size: var(--text-sm); color: var(--color-neutral-200); padding-left: 22px; position: relative; }
+.service li::before { content: "✓"; position: absolute; left: 0; color: var(--color-success); }
+.never { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); max-width: 960px; margin: 0 auto; }
+@media (max-width: 768px) { .never { grid-template-columns: 1fr; } }
+.never > div { padding: var(--space-6); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-2xl); background: rgba(255,255,255,0.02); }
+.never h3 { font-size: var(--text-xl); color: #fff; margin: 0 0 var(--space-3); }
+.never ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+.never li { font-size: var(--text-sm); color: var(--color-neutral-200); padding-left: 22px; position: relative; }
+.never > div:first-child li::before { content: "✕"; position: absolute; left: 0; color: #f87171; }
+.never > div:last-child li::before { content: "✓"; position: absolute; left: 0; color: var(--color-success); }
