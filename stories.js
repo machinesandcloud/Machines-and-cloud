@@ -23,6 +23,7 @@
       notif: { urgency: 'EMERGENCY', time: '10:16 pm', rows: [['Customer', 'Maria Lopez'], ['Phone', '713 555 0142'], ['Where', '4120 Kelliwood Dr, Katy'], ['Issue', 'No cooling, 91°F inside'], ['Window', 'Tonight, after hours']] }
     },
     'katy-sunday': {
+      variant: 'flipped', tone: 'morning',
       company: 'Katy Pipeworks', trade: 'Plumbing', owner: 'Dana', when: 'Sunday, 7:40 am', lang: 'en',
       point: 'Safety first, a real starting price, and no "I\'ll be there by 9" that the plumber can\'t keep.',
       msgs: [
@@ -37,6 +38,7 @@
       notif: { urgency: 'EMERGENCY', time: '7:42 am', rows: [['Customer', 'Tom Reyes'], ['Phone', '281 555 0199'], ['Issue', 'Leaking water heater, garage'], ['Window', 'Today, 8 to 12']] }
     },
     'maids-spanish': {
+      variant: 'phone', tone: 'night',
       company: 'Westheimer Maids', trade: 'Cleaning', owner: 'Nia', when: 'Thursday, 9:05 pm', lang: 'es',
       point: 'The customer wrote in Spanish, so the agent answered in Spanish. Nia reads the summary in English.',
       msgs: [
@@ -51,6 +53,7 @@
       notif: { urgency: 'This week', time: '9:07 pm', rows: [['Customer', 'Lucía Herrera'], ['Phone', '832 555 0177'], ['Issue', 'Deep clean, 2 bed 2 bath apartment'], ['Window', 'Saturday, 8 to 10'], ['Language', 'Spanish']] }
     },
     'brazos-shopper': {
+      variant: 'annotated', tone: 'day', notes: { 1: 'Published price only', 3: 'No promised time', 5: 'Still booked' },
       company: 'Brazos Electric Co.', trade: 'Electrical', owner: 'Luis', when: 'Monday, 12:30 pm', lang: 'en',
       point: 'Asked for a discount and a 2 pm promise. Got neither, and still booked. Luis sees "3 competing quotes."',
       msgs: [
@@ -76,18 +79,31 @@
   }
 
   function build(el, scene) {
-    el.innerHTML =
-      '<div class="scene-chat"><div class="scene-chat-head"><span class="scene-dot"></span><span class="scene-company">' + esc(scene.company) + '</span><span class="scene-when">' + esc(scene.when) + '</span></div>' +
-      '<div class="scene-msgs"></div></div>' +
-      '<div class="scene-phone"><div class="scene-phone-frame"><div class="scene-phone-top"><span>' + esc(scene.owner) + "'s phone</span><span class=\"scene-phone-time\"></span></div><div class=\"scene-phone-body\"><div class=\"scene-phone-empty\">" + esc(scene.owner) + ' is on a job. Watch what lands here.</div></div></div></div>' +
-      '<button type="button" class="scene-replay" hidden>Replay</button>';
+    var v = scene.variant || 'split';
+    el.classList.add('scene-' + v);
+    if (scene.tone) el.classList.add('tone-' + scene.tone);
+    var chat = '<div class="scene-chat"><div class="scene-chat-head"><span class="scene-dot"></span><span class="scene-company">' + esc(scene.company) + '</span><span class="scene-when">' + esc(scene.when) + '</span></div><div class="scene-msgs"></div></div>';
+    var phone = '<div class="scene-phone"><div class="scene-phone-frame"><div class="scene-phone-top"><span>' + esc(scene.owner) + "'s phone</span><span class=\"scene-phone-time\"></span></div><div class=\"scene-phone-body\">" + resting(scene) + '</div></div></div>';
+    var replay = '<button type="button" class="scene-replay" hidden>Replay</button>';
+    if (v === 'phone') {
+      // The customer's own phone: one frame, SMS style, the owner's text arrives as a banner at the top.
+      el.innerHTML = '<div class="scene-handset"><div class="scene-handset-top"><span class="scene-handset-name">' + esc(scene.company) + '</span><span class="scene-handset-when">' + esc(scene.when) + '</span></div><div class="scene-banner-slot"></div><div class="scene-msgs"></div><div class="scene-handset-bar"><span>Message</span></div></div>' +
+        '<div class="scene-aside"><div class="scene-aside-card"><span class="scene-aside-label">Meanwhile, on ' + esc(scene.owner) + "'s phone</span><div class=\"scene-phone-body\">" + resting(scene) + '</div></div></div>' + replay;
+    } else if (v === 'annotated') {
+      el.innerHTML = chat + '<div class="scene-notes" aria-hidden="true"></div><div class="scene-sms"></div>' + replay;
+    } else if (v === 'flipped') {
+      el.innerHTML = phone + chat + replay;
+    } else {
+      el.innerHTML = chat + phone + replay;
+    }
   }
 
   function play(el, scene) {
     if (el.dataset.playing === 'true') return;
     el.dataset.playing = 'true';
     var msgs = el.querySelector('.scene-msgs'), body = el.querySelector('.scene-phone-body'), replay = el.querySelector('.scene-replay'), ptime = el.querySelector('.scene-phone-time');
-    msgs.innerHTML = ''; body.innerHTML = resting(scene); replay.hidden = true; ptime.textContent = '';
+    var notesEl = el.querySelector('.scene-notes'), smsEl = el.querySelector('.scene-sms'), slot = el.querySelector('.scene-banner-slot');
+    msgs.innerHTML = ''; if (body) body.innerHTML = resting(scene); replay.hidden = true; if (ptime) ptime.textContent = ''; if (notesEl) notesEl.innerHTML = ''; if (smsEl) smsEl.innerHTML = ''; if (slot) slot.innerHTML = '';
     var i = 0;
     function next() {
       if (i >= scene.msgs.length) return notify();
@@ -97,19 +113,32 @@
       if (!reduce) { ty = document.createElement('div'); ty.className = 'scene-msg ' + (role === 'a' ? 'agent' : 'user') + ' scene-typing'; ty.innerHTML = '<span></span><span></span><span></span>'; msgs.appendChild(ty); msgs.scrollTop = msgs.scrollHeight; }
       setTimeout(function () {
         if (ty) ty.remove();
-        var d = document.createElement('div'); d.className = 'scene-msg ' + (role === 'a' ? 'agent' : 'user'); d.textContent = text; msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+        var d = document.createElement('div'); d.className = 'scene-msg ' + (role === 'a' ? 'agent' : 'user'); d.textContent = text;
+        var note = scene.notes && scene.notes[i - 1];
+        if (note) { var tag = document.createElement('span'); tag.className = 'scene-note'; tag.textContent = note; d.appendChild(tag); }
+        msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
         setTimeout(next, reduce ? 0 : 350);
       }, delayType);
     }
     function notify() {
       setTimeout(function () {
-        var n = scene.notif;
-        ptime.textContent = n.time;
-        var lock = body.querySelector('.phone-lock'); if (lock) lock.querySelector('.phone-day').textContent = 'New message from the front desk';
+        var n = scene.notif; var v = scene.variant || 'split';
+        var rowsHtml = n.rows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span>' + esc(r[1]) + '</div>'; }).join('');
         var card = document.createElement('div'); card.className = 'scene-notif' + (n.urgency === 'EMERGENCY' ? ' is-emergency' : '');
-        card.innerHTML = '<div class="scene-notif-head">' + esc(scene.company) + ' front desk · <b>' + esc(n.urgency) + '</b></div><div class="scene-notif-body">' + n.rows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span>' + esc(r[1]) + '</div>'; }).join('') + '</div>';
-        var label = body.querySelector('.phone-earlier-label'); body.insertBefore(card, label);
-        var frame = el.querySelector('.scene-phone-frame'); frame.classList.remove('is-buzz'); void frame.offsetWidth; frame.classList.add('is-buzz');
+        card.innerHTML = '<div class="scene-notif-head">' + esc(scene.company) + ' front desk · <b>' + esc(n.urgency) + '</b></div><div class="scene-notif-body">' + rowsHtml + '</div>';
+        if (v === 'phone') {
+          var banner = document.createElement('div'); banner.className = 'scene-banner';
+          banner.innerHTML = '<span class="scene-banner-app">Front desk</span><span class="scene-banner-text">Sent to ' + esc(scene.owner) + ': ' + esc(n.rows[0][1]) + ', ' + esc(n.rows.filter(function (r) { return r[0] === 'Issue'; })[0][1]) + '</span>';
+          slot.appendChild(banner);
+          if (body) { body.querySelector('.phone-day').textContent = 'New message from the front desk'; body.insertBefore(card, body.querySelector('.phone-earlier-label')); }
+        } else if (v === 'annotated') {
+          smsEl.innerHTML = '<div class="scene-sms-bubble"><span class="scene-sms-to">Text to ' + esc(scene.owner) + ' · ' + esc(n.time) + '</span>' + esc(scene.company) + ' front desk: ' + n.rows.map(function (r) { return r[1]; }).join(' · ') + '</div>';
+        } else {
+          if (ptime) ptime.textContent = n.time;
+          var lock = body.querySelector('.phone-lock'); if (lock) lock.querySelector('.phone-day').textContent = 'New message from the front desk';
+          body.insertBefore(card, body.querySelector('.phone-earlier-label'));
+          var frame = el.querySelector('.scene-phone-frame'); frame.classList.remove('is-buzz'); void frame.offsetWidth; frame.classList.add('is-buzz');
+        }
         replay.hidden = false;
         el.dataset.playing = 'false';
         if (el.dataset.loop === 'true') setTimeout(function () { if (el.dataset.playing !== 'true') play(el, scene); }, 9000);

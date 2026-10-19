@@ -150,7 +150,7 @@
         if (!r.ok || !r.data || typeof r.data.reply !== 'string') {
           var msg = (r.data && r.data.error === 'busy')
             ? 'I am getting a lot of questions right now. Give me a minute and try again, or email support@machinesandcloud.com.'
-            : OFFLINE;
+            : (r.status === 503 ? OFFLINE : 'Something went wrong on my end. Please try that again, or email support@machinesandcloud.com.');
           addMessage('agent', msg);
           return;
         }

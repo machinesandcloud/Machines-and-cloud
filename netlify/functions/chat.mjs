@@ -126,7 +126,7 @@ function sameOrigin(req) {
   const origin = req.headers.get("origin") || "";
   if (!origin) return true;
   const allowed = [process.env.URL, process.env.DEPLOY_PRIME_URL, process.env.DEPLOY_URL, "http://localhost:8888", "http://127.0.0.1:8888"].filter(Boolean);
-  return allowed.some((u) => origin === u) || /^https:\/\/(www\.)?machinesandcloud\.com$/.test(origin);
+  return allowed.some((u) => origin === u) || /^https:\/\/(www\.)?machinesandcloud\.com$/.test(origin) || /^https:\/\/([a-z0-9-]+--)?machines-and-cloud\.netlify\.app$/.test(origin);
 }
 
 async function captureLead(input, page) {
