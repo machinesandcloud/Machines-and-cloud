@@ -224,7 +224,7 @@ export async function ownerCommand(c, text) {
   if (cmd === "ok" || cmd === "okay") return `Got it, ${b.customer_name || b.phone} is yours.`;
   const blocked = b.phone ? await optedOut(b.phone) : false;
   if (cmd === "otw") {
-    if (blocked) return `${b.customer_name || b.phone} opted out of texts; nothing sent.`;
+    if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
     const r = b.phone ? await sendSMS({ to: b.phone, client: c, type: "on_my_way", body: TEMPLATES.on_my_way(c, b) }) : { ok: false };
     b.status = "on_the_way"; await saveRecord("bookings", b);
     return r.ok || r.logged ? `On-the-way text sent to ${b.customer_name || b.phone}.` : `Could not text ${b.customer_name || b.phone} (${r.reason || r.error || "no number"}).`;
