@@ -112,6 +112,7 @@ export default async (req) => {
     const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
     await sendEmail({ to: c.owner.email, subject: `${b.name || "Your front desk"} is ready to test`, text: `Your front desk is built from ${c.business.website} and your answers. Test it here, read what it knows, and fix anything wrong:\n${portal}\n\nWhat your website is missing (we filled it from your answers where we could): ${c.build.notes || "nothing major"}.` });
     await notifySteve(`Built: ${b.name || c.slug}`, `Pages read: ${pages.length}. Missing: ${c.build.notes || "-"}\n${portal}`);
+    try { await fetch(`${new URL(req.url).origin}/.netlify/functions/provision-background`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: c.slug, key: c.ownerKey }) }); } catch (e) { console.error("could not start provisioning", e); }
   } catch (err) {
     console.error("build failed", err);
     c.build = { ...c.build, status: "failed", notes: String(err?.message || err).slice(0, 300) };

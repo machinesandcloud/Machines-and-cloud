@@ -7,6 +7,8 @@ import { sendSMS, smsEnabled, e164 } from "./lib/send.mjs";
 import { googleEnabled } from "./lib/calendar.mjs";
 import { stripeEnabled } from "./lib/billing.mjs";
 import { weeklyDigest } from "./lib/desk.mjs";
+import { updateVoicePrompt } from "./lib/vapi.mjs";
+import { forwardingInstructions } from "./lib/forwarding.mjs";
 
 export const config = { path: "/api/client" };
 
@@ -34,6 +36,7 @@ export default async (req) => {
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 50),
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
+      forwarding: forwardingInstructions(c),
       site: process.env.URL || url.origin,
     });
   }
@@ -55,11 +58,13 @@ export default async (req) => {
     if (b.faq) c.faq = (Array.isArray(b.faq) ? b.faq : []).map((x) => ({ q: s(x.q, 200), a: s(x.a, 600) })).filter((x) => x.q && x.a).slice(0, 40);
     if (b.summary !== undefined) c.summary = s(b.summary, 2000);
     if (b.widget) c.widget = { ...c.widget, greeting: s(b.widget.greeting, 200), allowedOrigins: arr(b.widget.allowedOrigins, 5) };
-    if (b.phone) c.phone = { ...c.phone, businessNumber: e164(s(b.phone.businessNumber, 30)) || c.phone.businessNumber, forwarding: ["missed", "all", "none"].includes(b.phone.forwarding) ? b.phone.forwarding : c.phone.forwarding };
+    if (b.phone) c.phone = { ...c.phone, businessNumber: e164(s(b.phone.businessNumber, 30)) || c.phone.businessNumber, forwarding: ["missed", "all", "none"].includes(b.phone.forwarding) ? b.phone.forwarding : c.phone.forwarding, carrier: ["att", "verizon", "tmobile", "voip", "other"].includes(b.phone.carrier) ? b.phone.carrier : c.phone.carrier };
+    if (b.legal) c.business.legal = { ...(c.business.legal || {}), legalName: s(b.legal.legalName, 120), ein: s(b.legal.ein, 20), businessType: ["llc", "corp", "sole", "partnership", "nonprofit"].includes(b.legal.businessType) ? b.legal.businessType : (c.business.legal?.businessType || "llc"), street: s(b.legal.street, 120), city: s(b.legal.city, 80), state: s(b.legal.state, 2).toUpperCase() || "TX", zip: s(b.legal.zip, 10) };
     if (["starter", "growth", "pro"].includes(b.plan)) c.plan = b.plan;
     if (b.software) c.software = s(b.software, 30);
     await saveClient(c); await indexClient(c);
     await logEvent(c.slug, "config_updated", {});
+    try { await updateVoicePrompt(c); } catch (e) { console.error("voice prompt update", e); }
     return json({ ok: true, client: ownerView(c) });
   }
 
@@ -73,6 +78,11 @@ export default async (req) => {
       return json({ ok: r.ok, logged: !!r.logged, error: r.error || r.reason });
     }
     if (b.action === "digest") return json({ ok: true, text: await weeklyDigest(c) });
+    if (b.action === "provision") {
+      try { await fetch(`${url.origin}/.netlify/functions/provision-background`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: c.slug, key: c.ownerKey }) }); } catch (e) { return json({ error: "could_not_start" }, 502); }
+      return json({ ok: true });
+    }
+    if (b.action === "forwarding_verified") { c.phone.forwardingVerified = true; await saveClient(c); return json({ ok: true }); }
     return json({ error: "unknown_action" }, 400);
   }
   return json({ error: "method_not_allowed" }, 405);

@@ -51,7 +51,8 @@ export default async (req) => {
   c.faq = lines(b.faq, 40).map((line) => { const i = line.indexOf("?"); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : { q: line, a: "" }; }).filter((x) => x.a);
   c.leadSources = arr(b.leadSources, 10);
   c.software = s(b.software, 30) || "google";
-  c.phone = { ...c.phone, businessNumber: e164(s(b.businessNumber, 30)), forwarding: ["missed", "all", "none"].includes(b.forwarding) ? b.forwarding : "missed" };
+  c.phone = { ...c.phone, businessNumber: e164(s(b.businessNumber, 30)), forwarding: ["missed", "all", "none"].includes(b.forwarding) ? b.forwarding : "missed", carrier: ["att", "verizon", "tmobile", "voip", "other"].includes(b.carrier) ? b.carrier : "other" };
+  c.business.legal = { legalName: s(b.legalName, 120), ein: s(b.ein, 20), businessType: ["llc", "corp", "sole", "partnership", "nonprofit"].includes(b.businessType) ? b.businessType : "llc", street: s(b.street, 120), city: s(b.legalCity, 80) || c.business.city, state: s(b.state, 2).toUpperCase() || "TX", zip: s(b.zip, 10) };
   c.summary = s(b.notes, 1500);
   c.widget = { ...c.widget, greeting: s(b.greeting, 200) };
   c.status = "building";

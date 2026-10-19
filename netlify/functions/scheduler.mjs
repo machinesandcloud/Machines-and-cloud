@@ -4,6 +4,9 @@ import { dueTasks, del, getRecord, getClient, saveRecord, scheduleTask, logEvent
 import { sendSMS, notifyOwner } from "./lib/send.mjs";
 import { TEMPLATES, weeklyDigest } from "./lib/desk.mjs";
 import { PLANS } from "./lib/config.mjs";
+import { a2pEnabled, brandStatus, createCampaign, campaignStatus } from "./lib/twilio.mjs";
+import { notifySteve, sendEmail } from "./lib/send.mjs";
+import { saveClient } from "./lib/store.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -43,6 +46,27 @@ export default async () => {
     try { results.push([task.type, await runTask(task)]); }
     catch (err) { console.error("task failed", task.type, err); results.push([task.type, "error"]); }
     await del("tasks", key);
+  }
+  // Texting registration: move brands to campaigns and campaigns to approved.
+  if (a2pEnabled()) {
+    for (const slug of await list("clients", "")) {
+      const c = await getClient(slug);
+      if (!c?.phone?.brandSid || !["brand_pending", "campaign_pending"].includes(c.phone.tenDlc)) continue;
+      try {
+        if (c.phone.tenDlc === "brand_pending") {
+          const st = await brandStatus(c.phone.brandSid);
+          if (st === "APPROVED") { const camp = await createCampaign(c, c.phone.messagingServiceSid, c.phone.brandSid); Object.assign(c.phone, camp, { tenDlc: "campaign_pending", brandStatus: st }); }
+          else if (st === "FAILED") { c.phone.tenDlc = "failed"; c.phone.brandStatus = st; await notifySteve(`10DLC brand failed: ${c.business.name}`, `Brand ${c.phone.brandSid} failed. Check the Twilio console.`); }
+          else c.phone.brandStatus = st;
+        } else {
+          const st = await campaignStatus(c.phone.messagingServiceSid, c.phone.campaignSid);
+          c.phone.campaignStatus = st;
+          if (st === "VERIFIED") { c.phone.tenDlc = "approved"; await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting is live`, text: `Carriers approved your business for texting. Your front desk now texts customers back from ${c.phone.twilioNumber}: missed calls, confirmations, reminders, and follow-ups.` }); if (c.owner.phone) await sendSMS({ to: c.owner.phone, from: c.phone.twilioNumber, body: `${c.business.name}: texting is approved. Your front desk now texts customers from this number.` }); }
+          else if (st === "FAILED") { c.phone.tenDlc = "failed"; await notifySteve(`10DLC campaign failed: ${c.business.name}`, `Campaign ${c.phone.campaignSid} failed. Check the Twilio console.`); }
+        }
+        await saveClient(c);
+      } catch (err) { console.error("10dlc poll", slug, err); }
+    }
   }
   // Monday 13:00 UTC (8 am Houston): weekly digest for Pro clients and a summary to Steve.
   const now = new Date();

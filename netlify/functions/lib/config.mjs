@@ -20,10 +20,10 @@ export function newClient({ slug, ownerKey, owner, business }) {
     slug, ownerKey, status: "new", plan: "growth",
     createdAt: new Date().toISOString(),
     owner: { name: "", email: "", phone: "", ...owner },
-    business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", ...business },
+    business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", legal: {}, ...business },
     services: [], fees: [], windows: DEFAULT_WINDOWS.slice(), rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: "" },
     faq: [], leadSources: [], software: "google",
-    phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
+    phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", voiceForwardTo: "", textBack: true, tenDlc: "not_started" }, voice: { provider: "none" }, provision: { status: "pending", steps: {} },
     calendar: { provider: "none" }, billing: { status: "none" },
     build: { status: "pending", notes: "", sourcePages: [] },
     widget: { greeting: "", allowedOrigins: [] },
@@ -43,8 +43,8 @@ export function publicView(c) {
 
 // What the owner portal sees (no secrets beyond their own key).
 export function ownerView(c) {
-  const { calendar, billing, ...rest } = c;
-  return { ...rest, calendar: { provider: calendar?.provider || "none", connected: !!calendar?.google?.refreshToken }, billing: { status: billing?.status || "none", plan: c.plan, trialEnd: billing?.trialEnd || null } };
+  const { calendar, billing, voice, ...rest } = c;
+  return { ...rest, calendar: { provider: calendar?.provider || "none", connected: !!calendar?.google?.refreshToken }, billing: { status: billing?.status || "none", plan: c.plan, trialEnd: billing?.trialEnd || null }, voice: { provider: voice?.provider || "none", ready: !!voice?.assistantId } };
 }
 
 const list = (arr) => (arr && arr.length ? arr.map((x) => (typeof x === "string" ? x : `${x.label}: ${x.amount}${x.note ? " (" + x.note + ")" : ""}`)).join("; ") : "none listed");
@@ -57,6 +57,8 @@ export function buildSystemPrompt(c, channel = "web") {
   const faq = c.faq?.length ? c.faq.map((x) => `Q: ${x.q}\nA: ${x.a}`).join("\n") : "";
   const channelNote = channel === "sms"
     ? "You are texting. Keep every message under 300 characters, one question at a time, no formatting, no links unless asked."
+    : channel === "voice"
+    ? "You are answering the phone. Short spoken sentences, one question at a time, no formatting."
     : channel === "test"
     ? "This is the owner's private test line. Behave exactly as you would with a real customer."
     : "You are the chat on the company website. Keep replies to one to three short sentences, one question at a time.";

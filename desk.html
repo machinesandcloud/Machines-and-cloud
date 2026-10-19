@@ -95,9 +95,15 @@
 
   <section class="pane" id="p-setup">
     <div class="grid2">
-      <div class="card2"><h3>Checklist</h3><div id="checklist"></div></div>
+      <div class="card2"><h3>Checklist</h3><div id="checklist"></div>
+        <h3 style="margin-top:18px">Your front desk number</h3><p id="numberText" class="muted"></p>
+        <h3 style="margin-top:18px">Forward your calls (one minute, from your business cell)</h3><div id="fwd" class="muted"></div>
+        <h3 style="margin-top:18px">Texting registration</h3><p id="tenDlc" class="muted"></p>
+        <div id="legalForm" style="display:none"><form id="legal"><div class="grid2"><div class="form-group"><label class="form-label">Legal business name</label><input class="form-input" name="legalName"></div><div class="form-group"><label class="form-label">EIN</label><input class="form-input" name="ein"></div><div class="form-group"><label class="form-label">Business type</label><select class="form-input" name="businessType"><option value="llc">LLC</option><option value="corp">Corporation</option><option value="sole">Sole proprietorship</option><option value="partnership">Partnership</option><option value="nonprofit">Non-profit</option></select></div><div class="form-group"><label class="form-label">Street address</label><input class="form-input" name="street"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" name="city"></div><div class="form-group"><label class="form-label">State and ZIP</label><div style="display:flex;gap:8px"><input class="form-input" name="state" maxlength="2" style="width:70px"><input class="form-input" name="zip"></div></div></div><button type="submit" class="btn-pill btn-pill-blue btn-sm">Save and file registration</button> <span class="muted" id="legalMsg"></span></form></div>
+        <h3 style="margin-top:18px">Phone answering</h3><p id="voiceText" class="muted"></p>
+      </div>
       <div class="card2"><h3>Add the chat to your website</h3><p class="muted">Paste this one line before <code>&lt;/body&gt;</code> on every page, or send it to whoever runs your site. It only works on your domain.</p><pre class="snip" id="snippet"></pre>
-        <h3 style="margin-top:18px">Your plan</h3><p class="muted" id="planText"></p><p><a class="btn-pill btn-pill-dark btn-sm" id="billingBtn" href="#">Put a card on file</a> <span class="muted">Nothing is charged until day 8.</span></p>
+        <h3 style="margin-top:18px">Paste this on your website too</h3><p class="muted">Most trade websites are missing hours, a service area, and answers to the first five questions. Here is yours, written from what your front desk knows. Copy it onto your contact or FAQ page.</p><pre class="snip" id="siteBlock" style="white-space:pre-wrap"></pre>
         <h3 style="margin-top:18px">Calendar</h3><p><a class="btn-pill btn-pill-dark btn-sm" id="calBtn" href="#">Connect Google Calendar</a> <span class="muted" id="calText"></span></p>
         <h3 style="margin-top:18px">Texts to your cell</h3><p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="testSms">Send me a test text</button> <span class="muted" id="smsText"></span></p>
         <h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every lead text carries a ref. Reply <code>otw REF</code> to send the on-the-way text, <code>done REF</code> when the job is finished (starts the review request), <code>quote REF 1450</code> when you sent a quote (day-14 check), <code>paid REF</code>, <code>cancel REF</code>.</p>
@@ -116,8 +122,10 @@
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var ref = { calendar: q.get('calendar'), billing: q.get('billing') };
-  if (ref.calendar === 'ok') toast('Calendar connected.'); if (ref.billing === 'ok') toast('Card on file. Nothing is charged until day 8.');
+  if (ref.calendar === 'ok') toast('Calendar connected.');
 
+  function showTab(t) { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); }); }
+  if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
   document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + b.dataset.t); }); }); });
 
   function load() {
@@ -144,17 +152,26 @@
       f.elements['faq'].value = (c.faq || []).map(function (x) { return x.q + ' ' + x.a; }).join('\n'); f.elements['owner.name'].value = c.owner.name || ''; f.elements['owner.phone'].value = c.owner.phone || ''; f.elements['business.reviewLink'].value = c.business.reviewLink || ''; f.elements['business.payLink'].value = c.business.payLink || '';
       // setup
       $('snippet').textContent = '<script src="' + d.site + '/embed.js" data-client="' + c.slug + '" async><\/script>';
-      $('planText').textContent = d.plan.name + ', $' + d.plan.price + ' a month, ' + d.plan.minutes + ' call minutes and ' + d.plan.texts + ' texts. Card on file: ' + (c.billing.status === 'none' ? 'not yet' : c.billing.status) + '.';
-      $('billingBtn').href = '/api/billing?c=' + c.slug + '&k=' + key + '&plan=' + c.plan; if (!d.integrations.stripe) { $('billingBtn').addEventListener('click', function (e) { e.preventDefault(); toast('Billing is being switched on; Steve will email you before day 8.'); }); }
       $('calBtn').href = '/api/google/auth?c=' + c.slug + '&k=' + key; $('calText').textContent = c.calendar.connected ? 'Connected.' : (d.integrations.google ? 'Bookings go on your Google Calendar once connected.' : 'Coming online; bookings are texted to you meanwhile.'); if (!d.integrations.google) $('calBtn').addEventListener('click', function (e) { e.preventDefault(); toast('Calendar connection is being switched on. Bookings are texted to you meanwhile.'); });
+      var ph = c.phone || {}, fw = d.forwarding || {}, dlc = ph.tenDlc || 'not_started';
+      var dlcText = { not_started: 'Not filed yet.', waiting_keys: 'Being filed by Machines & Cloud.', needs_business_details: 'We need your legal business name, EIN, and address to file it. Add them below.', brand_pending: 'Filed. Carriers are reviewing your business (usually 1 to 3 days).', campaign_pending: 'Business approved. Carriers are reviewing the texting use case (usually a few days).', approved: 'Approved. Your front desk texts customers from your number.', failed: 'The carriers rejected the filing. Steve has been notified and will fix it with you.' }[dlc] || dlc;
+      $('numberText').textContent = ph.twilioNumber ? ph.twilioNumber + ' (calls you forward and all customer texts go here; you keep your main number).' : (c.provision && c.provision.status === 'running' ? 'Being set up now.' : 'Being assigned. You will get it by text and email.');
+      $('fwd').innerHTML = ph.twilioNumber ? ('<p>' + esc(fw.carrier || 'Your carrier') + ': ' + (fw.codes && fw.codes.length ? fw.codes.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') : esc(fw.note || '')) + '</p><p>' + esc(fw.long || '') + '</p><p>' + (ph.forwardingVerified ? 'Verified: a forwarded call reached the front desk.' : 'Not verified yet. Call your own number from another phone, do not answer, and the front desk should pick up.') + ' <button type="button" class="btn-pill btn-pill-dark btn-sm" id="fwOk">I did this</button></p>') : '<p>Available once your number is assigned.</p>';
+      var fwOk = $('fwOk'); if (fwOk) fwOk.addEventListener('click', function () { action('forwarding_verified').then(function () { toast('Thanks. We will confirm it on the first forwarded call.'); load(); }); });
+      $('tenDlc').textContent = dlcText;
+      var lg = (c.business && c.business.legal) || {}; var lf = $('legal');
+      $('legalForm').style.display = (dlc === 'needs_business_details' || dlc === 'not_started' || dlc === 'failed') ? 'block' : 'none';
+      lf.elements['legalName'].value = lg.legalName || ''; lf.elements['ein'].value = lg.ein || ''; lf.elements['businessType'].value = lg.businessType || 'llc'; lf.elements['street'].value = lg.street || ''; lf.elements['city'].value = lg.city || ''; lf.elements['state'].value = lg.state || 'TX'; lf.elements['zip'].value = lg.zip || '';
+      $('voiceText').textContent = c.voice && c.voice.ready ? 'On. Forwarded calls are answered by your front desk, which books visits and texts you the details.' : (ph.twilioNumber ? 'Forwarded calls hear a short message and get a text back within seconds; the front desk continues by text. Live phone answering is being switched on.' : 'Available once your number is assigned.');
+      $('siteBlock').textContent = ['Hours: ' + (c.business.hours || '[your hours]') + (c.business.afterHours ? '. After hours: ' + c.business.afterHours : ''), 'Service area: ' + ((c.business.serviceArea || []).join(', ') || '[your area]'), (c.fees || []).length ? 'Pricing: ' + c.fees.map(function (x) { return x.label + ' ' + x.amount + (x.note ? ' (' + x.note + ')' : ''); }).join('; ') : '', '', (c.faq || []).filter(function (x) { return !/ASK OWNER/i.test(x.a); }).slice(0, 6).map(function (x) { return x.q + '\n' + x.a; }).join('\n\n')].filter(Boolean).join('\n');
       $('checklist').innerHTML = [
         ['ok', 'Front desk built from your website and answers'],
         [c.faq.some(function (x) { return /ASK OWNER/i.test(x.a); }) ? 'wait' : 'ok', 'Answers checked under What it knows'],
         [c.owner.phone ? 'ok' : 'wait', 'Your cell on file for lead texts'],
-        [c.phone.twilioNumber ? 'ok' : 'wait', 'Texting number assigned and registered with carriers (we do this; a few days)'],
-        [c.phone.forwarding === 'none' ? 'ok' : (c.phone.twilioNumber ? 'wait' : 'wait'), c.phone.forwarding === 'none' ? 'Phone: texts and chat only for now' : 'Call forwarding set with you on a quick call (' + (c.phone.forwarding === 'all' ? 'all calls' : 'missed calls') + ')'],
-        [c.calendar.connected ? 'ok' : 'wait', 'Calendar connected'],
-        [c.billing.status === 'none' ? 'wait' : 'ok', 'Card on file (nothing charged until day 8)'],
+        [ph.twilioNumber ? 'ok' : 'wait', 'Front desk number assigned'],
+        [ph.forwarding === 'none' ? 'ok' : (ph.forwardingVerified ? 'ok' : 'wait'), ph.forwarding === 'none' ? 'Phone: texts and chat only for now' : 'Call forwarding turned on from your cell (' + (ph.forwarding === 'all' ? 'all calls' : 'missed calls') + ')'],
+        [dlc === 'approved' ? 'ok' : 'wait', 'Texting registration approved by carriers'],
+        [c.calendar.connected ? 'ok' : 'wait', 'Calendar connected (optional; bookings are texted to you either way)'],
         [c.status === 'live' ? 'ok' : 'wait', 'Live on your website'],
       ].map(function (x) { return '<div class="check"><span class="dot ' + x[0] + '"></span><span>' + x[1] + '</span></div>'; }).join('');
       $('liveEvents').innerHTML = d.events.length ? d.events.slice(0, 8).map(function (e) { return '<div>' + esc((e.at || '').slice(5, 16).replace('T', ' ')) + ' ' + esc(e.type) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') : 'Nothing yet. Book a test visit on the left.';
@@ -171,6 +188,12 @@
       windows: L('windows'), rules: { handoff: L('rules.handoff'), never: L('rules.never'), emergencies: f.elements['rules.emergencies'].value }, summary: f.elements['summary'].value, widget: { greeting: f.elements['widget.greeting'].value, allowedOrigins: data.client.widget.allowedOrigins || [] },
       faq: L('faq').map(function (line) { var i = line.indexOf('?'); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : null; }).filter(Boolean) };
     fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (r) { $('saveMsg').textContent = r.ok ? 'Saved. The front desk uses it on the next message.' : 'Could not save.'; load(); });
+  });
+
+  $('legal').addEventListener('submit', function (e) {
+    e.preventDefault(); var f = e.target;
+    fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legal: { legalName: f.elements['legalName'].value, ein: f.elements['ein'].value, businessType: f.elements['businessType'].value, street: f.elements['street'].value, city: f.elements['city'].value, state: f.elements['state'].value, zip: f.elements['zip'].value } }) })
+      .then(function (r) { return r.json(); }).then(function () { return action('provision'); }).then(function () { $('legalMsg').textContent = 'Saved. Filing now; check back in a day.'; setTimeout(load, 4000); });
   });
 
   // test chat

@@ -44,7 +44,7 @@
 <main class="ob">
   <h1>Set up your front desk</h1>
   <p class="lead">About ten minutes. We read your website too, so skip anything it already says. You can change everything later.</p>
-  <div class="ob-steps"><span class="on">1 You</span><span>2 Shop</span><span>3 Prices and windows</span><span>4 Rules</span><span>5 Phone and leads</span></div>
+  <div class="ob-steps"><span class="on">1 You</span><span>2 Shop</span><span>3 Prices and windows</span><span>4 Rules</span><span>5 Phone and texting</span></div>
   <form id="ob" novalidate>
     <p hidden><input name="botfield" tabindex="-1" autocomplete="off"></p>
     <fieldset class="on" data-step="1"><legend>You</legend>
@@ -96,10 +96,27 @@
       <div class="form-group"><label class="form-label" for="notes">Anything else a new receptionist should know</label><textarea class="form-input" id="notes" name="notes" placeholder="We are a family shop, 12 years in Katy. Say 'Ray or one of the guys' not 'a technician'."></textarea></div>
       <div class="form-group"><label class="form-label" for="greeting">First line of the website chat (optional)</label><input class="form-input" id="greeting" name="greeting" placeholder="Hi, this is the Bayou Air front desk. What can we help with today?"></div>
     </fieldset>
-    <fieldset data-step="5"><legend>Phone, leads, software</legend>
+    <fieldset data-step="5"><legend>Phone, texting, leads</legend>
       <div class="row">
         <div class="form-group"><label class="form-label" for="businessNumber">Business number customers call</label><input class="form-input" id="businessNumber" name="businessNumber" type="tel" placeholder="(281) 555 0100"></div>
         <div class="form-group"><label class="form-label" for="forwarding">Which calls should the front desk take?</label><select class="form-input" id="forwarding" name="forwarding"><option value="missed">Only the ones I miss</option><option value="all">All of them, transfer the ones that need me</option><option value="none">None yet, texts and chat only</option></select></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="carrier">Carrier for that number</label><select class="form-input" id="carrier" name="carrier"><option value="att">AT&amp;T</option><option value="verizon">Verizon</option><option value="tmobile">T-Mobile</option><option value="voip">Office phone or VoIP (RingCentral, Google Voice, etc.)</option><option value="other">Other</option></select></div>
+        <div class="form-group"></div>
+      </div>
+      <p class="hint">Texting registration. Carriers require every business that texts customers to be registered (it is called 10DLC). We file it for you with these details; it usually clears in a few days. Leave blank to add later from your portal.</p>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="legalName">Legal business name</label><input class="form-input" id="legalName" name="legalName" placeholder="Katy Pipeworks LLC"></div>
+        <div class="form-group"><label class="form-label" for="ein">EIN</label><input class="form-input" id="ein" name="ein" placeholder="12-3456789" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="businessType">Business type</label><select class="form-input" id="businessType" name="businessType"><option value="llc">LLC</option><option value="corp">Corporation</option><option value="sole">Sole proprietorship</option><option value="partnership">Partnership</option><option value="nonprofit">Non-profit</option></select></div>
+        <div class="form-group"><label class="form-label" for="street">Business street address</label><input class="form-input" id="street" name="street" placeholder="1234 Mason Rd"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="legalCity">City</label><input class="form-input" id="legalCity" name="legalCity" placeholder="Katy"></div>
+        <div class="form-group"><label class="form-label" for="zip">State and ZIP</label><div style="display:flex;gap:8px"><input class="form-input" id="state" name="state" value="TX" maxlength="2" style="width:70px"><input class="form-input" id="zip" name="zip" placeholder="77450" inputmode="numeric"></div></div>
       </div>
       <p class="hint">Where your leads come from (check all)</p>
       <div class="chk"><label><input type="checkbox" name="leadSources" value="referrals"> Referrals and repeat</label></div>
@@ -121,7 +138,7 @@
     <h2 style="margin-top:0">Building your front desk</h2>
     <p class="status" id="buildStatus">Reading your website and drafting what it knows. This takes a minute or two.</p>
     <p><b>Your portal and test line</b> (keep this link, it is your login):<br><a class="portal" id="portalLink" href="#"></a></p>
-    <p class="status">We also emailed it to you. On the portal you can chat with your front desk as a customer, read everything it knows, fix anything wrong, add the chat to your website with one line, and connect your calendar.</p>
+    <p class="status">We also emailed it to you. On the portal you can chat with your front desk as a customer, read everything it knows, fix anything wrong, and add the chat to your website with one line. Your front desk number and the one-minute forwarding step arrive by text and email as soon as the number is ready.</p>
     <p><a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my portal</a></p>
   </section>
 </main>

@@ -16,7 +16,7 @@ How a shop goes from the pilot form to a live front desk, what runs where, and w
    - Leads and handoffs: `notify_owner` writes the lead, texts the owner, and (Growth and Pro) schedules the three quiet-lead chases over two days.
    - Owner commands by text: `otw REF`, `done REF`, `quote REF amount`, `paid REF`, `cancel REF`, `help`. `done` starts the review request (2 h), the nudge (50 h), payment reminders (day 3 and 7), and the referral ask (day 8). `quote` schedules the day-14 check.
    - Scheduler (`scheduler.mjs`, every 10 minutes): sends due tasks, skips closed records, Monday 8 am Houston digest to Pro owners.
-6. **Billing**: `/api/billing` -> Stripe Checkout, subscription with a 7-day trial and card required; `/api/stripe-webhook` keeps `billing.status`. Cancel in Stripe pauses the front desk.
+6. **Billing** (parked for now): `/api/billing` and `/api/stripe-webhook` exist but the portal does not show them until Stripe keys are set.
 
 ## Storage (Netlify Blobs, site-wide)
 
@@ -28,7 +28,10 @@ Stores: `clients` (slug -> record), `index` (`email:`, `number:` -> slug), `conv
 |---|---|---|
 | `ANTHROPIC_API_KEY` | everything | set |
 | `ADMIN_KEY` | `/api/admin` | any long random string; send as `x-admin-key` |
-| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | texts, calls | from the Twilio console |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | texts, calls, buying numbers | from the Twilio console |
+| `TWILIO_PRIMARY_PROFILE_SID` | 10DLC filing | BU... SID of the approved Primary Customer Profile |
+| `TWILIO_NOTIFY_EMAIL` | 10DLC status emails from Twilio | defaults to STEVE_EMAIL |
+| `VAPI_API_KEY`, `VAPI_MODEL`, `VAPI_VOICE_PROVIDER`, `VAPI_VOICE_ID`, `VAPI_WEBHOOK_SECRET` | phone answering | model defaults to claude-sonnet-5; voice optional (Vapi default); set the secret on the Vapi org and we check `x-vapi-secret` |
 | `MC_TWILIO_NUMBER` | texts to Steve and test texts before a client has a number | a Twilio number in E.164 |
 | `STEVE_PHONE`, `STEVE_EMAIL` | alerts to Steve | E.164; email defaults to support@ |
 | `RESEND_API_KEY`, `FROM_EMAIL` | owner emails (portal link, ready-to-test) | verify the sending domain in Resend |
@@ -37,12 +40,19 @@ Stores: `clients` (slug -> record), `index` (`email:`, `number:` -> slug), `conv
 
 Without a key, the matching feature degrades: texts and emails are logged instead of sent, the portal buttons explain it is being switched on, bookings still land in the portal.
 
-## Per-client steps that are still Steve's (a few minutes each)
+## Provisioning (automatic, after the build)
 
-1. Buy a local Twilio number, set its voice webhook to `https://machinesandcloud.com/api/voice` and messaging webhook to `https://machinesandcloud.com/api/sms` (POST), then attach it: `POST /api/admin {"slug":"...", "phone":{"twilioNumber":"+1713..."}}`.
-2. File A2P 10DLC for the client's business in the Twilio console (brand + campaign "customer care"); mark it: `{"phone":{"tenDlc":"approved"}}`.
-3. Walk the owner through conditional call forwarding on their carrier (missed or all calls) to the Twilio number.
-4. Optional phone AI: create the agent on Retell or Vapi with the same rules, point it at the client's config, and set `phone.voiceForwardTo` to the SIP URI or number it gives you.
+`provision-background.mjs` runs as soon as the build finishes and again whenever the owner saves registration details (portal action `provision`):
+
+1. **Number.** Buys a local Twilio number in the shop's area code (falls back to 713/281/832/346), points voice to `/api/voice` and messaging to `/api/sms`, indexes it to the client.
+2. **Messaging Service** with the number attached (needed for 10DLC).
+3. **10DLC registration** through Twilio's API: Secondary Customer Profile (legal name, EIN, address, owner as authorized representative) -> A2P Trust Product -> Brand. The scheduler polls the brand every 10 minutes; when approved it files the campaign (MIXED use case: customer care, reminders, follow-ups) and polls again; when verified it marks `phone.tenDlc = approved` and tells the owner texting is live. Needs the owner's legal name, EIN, and address (asked in onboarding step 5 and on the portal) and `TWILIO_PRIMARY_PROFILE_SID` (Machines & Cloud's own approved Primary Customer Profile, a one-time console setup under Trust Hub with business type "ISV Reseller or Partner").
+4. **Phone answering** through Vapi: two function tools pointing at `/api/vapi`, an assistant with the client's prompt (voice variant) and `claude-sonnet-5` (override with `VAPI_MODEL`), the Twilio number imported into Vapi with `smsEnabled: false` so our SMS webhook stays. Vapi then answers forwarded calls; `/api/vapi` runs `book_visit` and `notify_owner` during the call and files the transcript on `end-of-call-report`. Without `VAPI_API_KEY`, forwarded calls get the missed-call text-back instead.
+5. **Owner instructions.** Text and email with the number and the exact forwarding code for their carrier (AT&T, Verizon, T-Mobile, VoIP, other), also shown as tap-to-dial buttons on the portal. The first forwarded call that reaches `/api/voice` marks forwarding verified. (Vapi-answered calls do not pass through `/api/voice`; the owner can press "I did this".)
+
+Every step that lacks a key records `waiting: ...` in `provision.steps` and Steve gets one email listing what is missing. Nothing blocks the website chat or the portal.
+
+Steve's one-time setup: Twilio account (keys, Primary Customer Profile approved as ISV), Vapi account (key), Resend (key + verified domain), Google OAuth client, optional Stripe. After that, nothing per client.
 
 ## Testing without real accounts
 

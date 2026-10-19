@@ -1,7 +1,7 @@
 // Twilio voice webhook for a client's number. If the client has a voice agent destination, the call is
 // connected there. Otherwise the caller hears a short message, the call ends, and the front desk texts
 // them back within seconds (missed-call text-back). The owner gets a missed-call alert either way.
-import { clientByNumber, getConversation, saveConversation, logEvent } from "./lib/store.mjs";
+import { clientByNumber, getConversation, saveConversation, logEvent, saveClient } from "./lib/store.mjs";
 import { sendSMS, notifyOwner, twilioSignatureValid, e164 } from "./lib/send.mjs";
 
 export const config = { path: "/api/voice" };
@@ -20,6 +20,8 @@ export default async (req) => {
   const c = await clientByNumber(to);
   if (!c) return xml(`<Say>Sorry, this number is not in service.</Say><Hangup/>`);
   const name = c.business?.name || "the office";
+  // The first call that lands here proves the owner's forwarding works.
+  if (params.ForwardedFrom || !c.phone?.forwardingVerified) { c.phone = { ...c.phone, forwardingVerified: true, firstCallAt: c.phone?.firstCallAt || new Date().toISOString() }; await saveClient(c); }
 
   // Voice agent connected (Retell, Vapi, or a SIP destination): hand the call over.
   if (c.phone?.voiceForwardTo && ["testing", "live"].includes(c.status)) {
