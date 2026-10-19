@@ -21,15 +21,19 @@ What Machines & Cloud sells (quote these prices plainly, they are published). Th
 - Timeline: day 1 the business sends its website and answers a ten minute questionnaire; days 2 to 5 they test the agent on a private link; day 7 it goes live, and the first 7 days are free.
 - Phone number: the business keeps its number. Unanswered calls forward to the front desk, or the front desk answers first and transfers the ones that need a person.
 - Who it is for: Houston home service companies first (HVAC, plumbing, electrical, roofing, cleaning, landscaping). Other service businesses also fit and are served remotely anywhere in the US.
-- The demo companies on this website (Bayou Air & Heat, Katy Pipeworks, Brazos Electric, Gulf Coast Roofing, Westheimer Maids) are fictional. They exist so visitors can chat as a customer and see what the owner receives.
+- The conversations shown on the homepage (Bayou Air & Heat, Katy Pipeworks, Brazos Electric, Gulf Coast Roofing, Westheimer Maids) illustrate the product. Do not bring them up on your own. If a visitor asks whether those companies are real, say they are illustrations of what the front desk does, in one short sentence, and move on.
+- Call forwarding: every major carrier can forward unanswered or busy calls to another number with a short code or a setting in the carrier app, and it can be switched off any time. We set it up with the owner during the build. Do not give carrier-specific codes.
+- Scheduling software: Google Calendar on every plan; Jobber and Housecall Pro on Growth and Pro. ServiceTitan and other tools are not connected yet; Steve can discuss them on a call.
+- Spam leads: it answers every lead; the owner sees each one by text and can add rules on Pro. It does not filter spam automatically.
 - What the agent never does on a customer's site: quote a price the owner has not published, promise an arrival time the owner has not set, pretend to be a person, or give advice on gas, electrical, or safety beyond "call us or 911".
 - Larger custom automation projects: Steve takes those case by case. Do not quote prices for them; offer the booking link.
 - Contact: support@machinesandcloud.com, (346) 248-8359, 5718 Westheimer Rd Suite 1000, Houston TX 77057. Booking link: https://calendly.com/ngoumnaisteve/30. Start a pilot: the form at https://www.machinesandcloud.com/#pilot.
 - Founder: Steve Ngoumnai, a Houston engineer with ten years running production systems. He builds every agent himself. Do not share any other personal details about him.
 
 How to behave:
-- Keep replies short: two to four sentences, plain words. No bullet lists unless asked, no markdown headings.
-- Answer from the facts above. If you do not know, say so and offer to have Steve answer. Never invent prices, discounts, guarantees, delivery dates, or client names. Machines & Cloud is new and has no public client references; if asked, say so honestly and point to the free pilot and the demo companies.
+- Keep replies short: one to three sentences, plain words, like a sharp front desk person talking to a busy owner. Answer the question first, then at most one follow-up question. No bullet lists unless asked, no markdown, no headings. Only go longer when the visitor asks for a full rundown.
+- Answer from the facts above. If you do not know, say so in one sentence and offer to have Steve answer. Never invent prices, discounts, guarantees, delivery dates, integrations, or client names. If asked for references or client names, say we do not publish client names and offer the free 7 days instead. Never describe Machines & Cloud as new or small unprompted.
+- Do not call yourself a demo. You are the front desk, working.
 - No medical, legal, or financial advice. Stay on topics related to Machines & Cloud; steer back politely.
 - When the visitor wants a pilot, a call, or says they are interested, collect their name, email, and website or business (phone optional), then call the capture_lead tool once you have at least a real name and a real email. After the tool succeeds, confirm Steve will reach out within one business day and offer the booking link. Never call the tool with placeholder or test data.
 - If the visitor is clearly not a fit, say so kindly.`;
@@ -140,6 +144,71 @@ async function captureLead(input, page) {
   return { ok: res.ok };
 }
 
+function classifyError(err) {
+  if (err instanceof Anthropic.RateLimitError) return { error: "busy", status: 429 };
+  if (err instanceof Anthropic.AuthenticationError) return { error: "offline", status: 503 };
+  if (err instanceof Anthropic.APIStatusError) return { error: "upstream", status: 502 };
+  if (err instanceof Anthropic.APIConnectionError) return { error: "upstream", status: 502 };
+  console.error("chat function error", err);
+  return { error: "internal", status: 500 };
+}
+
+// Runs the agent loop. onText receives streamed text as it arrives. Returns { reply, events }.
+async function runAgent({ client, system, tools, messages, persona, page, onText }) {
+  const events = [];
+  let reply = "";
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const stream = client.beta.messages.stream({
+      model: MODEL,
+      max_tokens: 400,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      output_config: { effort: "low" },
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+      tools,
+      messages,
+    });
+    let needSep = reply.length > 0 && !/\s$/.test(reply);
+    for await (const ev of stream) {
+      if (ev.type === "content_block_delta" && ev.delta.type === "text_delta" && ev.delta.text) {
+        const piece = needSep ? " " + ev.delta.text : ev.delta.text;
+        needSep = false;
+        reply += piece;
+        if (onText) onText(piece);
+      }
+    }
+    const response = await stream.finalMessage();
+    if (response.stop_reason === "refusal") {
+      const t = "I can't help with that one. Anything else about the business, ask away.";
+      reply += (reply ? " " : "") + t; if (onText) onText((reply.length > t.length ? " " : "") + t);
+      return { reply, events };
+    }
+    const toolUses = response.content.filter((b) => b.type === "tool_use");
+    if (response.stop_reason !== "tool_use" || toolUses.length === 0) {
+      if (!reply.trim()) { reply = "Sorry, could you say that again?"; if (onText) onText(reply); }
+      return { reply: reply.trim(), events };
+    }
+    messages.push({ role: "assistant", content: response.content });
+    const results = [];
+    for (const tu of toolUses) {
+      if (tu.name === "capture_lead" && !persona) {
+        const r = await captureLead(tu.input, page);
+        if (r.ok) events.push({ type: "lead_captured" });
+        results.push({ type: "tool_result", tool_use_id: tu.id, content: r.ok ? "Lead recorded. Steve will follow up within one business day." : "Lead could not be recorded; ask the visitor to email support@machinesandcloud.com.", is_error: !r.ok });
+      } else if (tu.name === "send_owner_summary" && persona) {
+        events.push({ type: "owner_notification", owner: persona.owner, company: persona.company, data: tu.input, at: new Date().toISOString() });
+        results.push({ type: "tool_result", tool_use_id: tu.id, content: `Text sent to ${persona.owner}. They will see the customer's name, phone, address, issue, urgency, and requested window.` });
+      } else {
+        results.push({ type: "tool_result", tool_use_id: tu.id, content: "Unknown tool.", is_error: true });
+      }
+    }
+    messages.push({ role: "user", content: results });
+  }
+  const tail = "Let me get the owner to pick this up. What is the best number to reach you?";
+  reply += (reply ? " " : "") + tail; if (onText) onText((reply.length > tail.length ? " " : "") + tail);
+  return { reply: reply.trim(), events };
+}
+
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!sameOrigin(req)) return json({ error: "forbidden" }, 403);
@@ -154,56 +223,26 @@ export default async (req) => {
   const persona = personaId === "mc" ? null : PERSONAS[personaId];
   const system = persona ? personaSystem(persona) : MC_SYSTEM;
   const tools = persona ? [OWNER_SUMMARY] : [CAPTURE_LEAD];
-
   const client = new Anthropic({ maxRetries: 1, timeout: 25_000 });
-  const events = [];
+  const args = { client, system, tools, messages, persona, page };
 
-  try {
-    for (let i = 0; i < MAX_ITERATIONS; i++) {
-      const response = await client.beta.messages.create({
-        model: MODEL,
-        max_tokens: 500,
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
-        output_config: { effort: "low" },
-        system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-        tools,
-        messages,
-      });
-
-      if (response.stop_reason === "refusal") {
-        return json({ reply: "I can't help with that one. Anything else about the business, ask away.", events });
-      }
-
-      const toolUses = response.content.filter((b) => b.type === "tool_use");
-      if (response.stop_reason !== "tool_use" || toolUses.length === 0) {
-        const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-        return json({ reply: text || "Sorry, could you say that again?", events });
-      }
-
-      messages.push({ role: "assistant", content: response.content });
-      const results = [];
-      for (const tu of toolUses) {
-        if (tu.name === "capture_lead" && !persona) {
-          const r = await captureLead(tu.input, page);
-          if (r.ok) events.push({ type: "lead_captured" });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: r.ok ? "Lead recorded. Steve will follow up within one business day." : "Lead could not be recorded; ask the visitor to email support@machinesandcloud.com.", is_error: !r.ok });
-        } else if (tu.name === "send_owner_summary" && persona) {
-          events.push({ type: "owner_notification", owner: persona.owner, company: persona.company, data: tu.input, at: new Date().toISOString() });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: `Text sent to ${persona.owner}. They will see the customer's name, phone, address, issue, urgency, and requested window.` });
-        } else {
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: "Unknown tool.", is_error: true });
-        }
-      }
-      messages.push({ role: "user", content: results });
-    }
-    return json({ reply: "Let me get the owner to pick this up. What is the best number to reach you?", events });
-  } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) return json({ error: "busy" }, 429);
-    if (err instanceof Anthropic.AuthenticationError) return json({ error: "offline" }, 503);
-    if (err instanceof Anthropic.APIStatusError) return json({ error: "upstream", status: err.status }, 502);
-    if (err instanceof Anthropic.APIConnectionError) return json({ error: "upstream" }, 502);
-    console.error("chat function error", err);
-    return json({ error: "internal" }, 500);
+  if (body?.stream !== true) {
+    try { return json(await runAgent(args)); }
+    catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status); }
   }
+
+  // Streaming: newline-delimited JSON. {t:"delta",text} ... {t:"done",reply,events} or {t:"error",error}
+  const enc = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (o) => controller.enqueue(enc.encode(JSON.stringify(o) + "\n"));
+      try {
+        const out = await runAgent({ ...args, onText: (text) => send({ t: "delta", text }) });
+        send({ t: "done", reply: out.reply, events: out.events });
+      } catch (err) {
+        const e = classifyError(err); send({ t: "error", error: e.error });
+      } finally { controller.close(); }
+    },
+  });
+  return new Response(stream, { status: 200, headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" } });
 };
