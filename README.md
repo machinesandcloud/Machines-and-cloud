@@ -1,14 +1,18 @@
 # Machines & Cloud Website
 
-Static marketing site for Machines & Cloud (agentic automation engineering).
+Marketing site for Machines & Cloud: AI front desk agents for service businesses, built in Houston.
 
 ## Run locally
-Open `index.html` in your browser.
+```
+netlify dev --offline --port 8888   # static site + the /api/chat agent function
+```
+The agent widget needs `ANTHROPIC_API_KEY` (set it in Netlify's site environment, or locally in `.env`). Without it the widget shows contact details instead of chatting.
 
-## Publishing
-- Canonical redirect rules live in `_redirects`
-- Search discovery is managed through `sitemap.xml`
-- Deployment and IndexNow notes live in `PUBLISHING-SETUP.md`
+## Layout
+- Core pages: `index`, `pricing`, `demo`, `industries` + `industry-*`, `about`, `contact`, `houston`
+- Reading (not in nav): `guides`, `insights`, `guide-*`, `insight-*`, comparison articles, `approach`
+- `agent-widget.js` + `netlify/functions/chat.mjs`: the live front desk agent
+- `_redirects`: extensionless URLs and 301s for every retired page
+- `sitemap.xml`, `rss.xml`, `robots.txt`, `llms.txt`: discovery files
 
-## Assets
-- `assets/logo.png` — provided logo.
+See `CLAUDE.md` for conventions and the price list that must stay in sync across pages.
