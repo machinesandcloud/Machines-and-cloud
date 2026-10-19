@@ -75,8 +75,34 @@
   function linkify(escaped) {
     return escaped.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   }
+  // Minimal markdown: **bold**, "- " or "* " bullets, "1. " numbered lists, paragraphs. Everything is escaped first.
+  function inline(escaped) {
+    return linkify(escaped).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  }
   function renderText(el, text) {
-    el.innerHTML = linkify(escapeHtml(text)).replace(/\n/g, '<br>');
+    var lines = String(text).replace(/\r/g, '').split('\n');
+    var html = '', listType = null, para = [];
+    function flushPara() { if (para.length) { html += '<p>' + inline(escapeHtml(para.join(' '))) + '</p>'; para = []; } }
+    function closeList() { if (listType) { html += '</' + listType + '>'; listType = null; } }
+    lines.forEach(function (raw) {
+      var line = raw.trim();
+      var m;
+      if (!line) { flushPara(); closeList(); return; }
+      if ((m = line.match(/^>\s?(.*)$/))) {
+        flushPara(); closeList(); html += '<blockquote>' + inline(escapeHtml(m[1])) + '</blockquote>'; return;
+      }
+      if ((m = line.match(/^[-*•]\s+(.*)$/))) {
+        flushPara(); if (listType !== 'ul') { closeList(); listType = 'ul'; html += '<ul>'; }
+        html += '<li>' + inline(escapeHtml(m[1])) + '</li>'; return;
+      }
+      if ((m = line.match(/^\d+[.)]\s+(.*)$/))) {
+        flushPara(); if (listType !== 'ol') { closeList(); listType = 'ol'; html += '<ol>'; }
+        html += '<li>' + inline(escapeHtml(m[1])) + '</li>'; return;
+      }
+      closeList(); para.push(line);
+    });
+    flushPara(); closeList();
+    el.innerHTML = html;
   }
   function scrollDown() { list.scrollTop = list.scrollHeight; }
   function addMessage(role, text) {
