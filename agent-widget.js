@@ -7,6 +7,7 @@
 (function () {
   'use strict';
   if (document.getElementById('mcAgent')) return;
+  if (document.body && document.body.hasAttribute('data-no-widget')) return; // pages with the inline demo
 
   var ENDPOINT = '/api/chat';
   var STORE_KEY = 'mc_agent_transcript_v1';

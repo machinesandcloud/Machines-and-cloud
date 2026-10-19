@@ -10,12 +10,17 @@ python3 -m http.server 8787            # static only, no function
 ```
 The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"error":"offline"}` and the widget shows contact details instead. Set the key in Netlify's site environment variables for production (never in the repo).
 
-## Site structure (revamped 2026-10-18 for a zero-customer launch)
-- Positioning: one product, one market. AI front desk (website chat agent) for Houston home service companies (HVAC, plumbing, electrical, roofing). Phone answering is an add-on. No enterprise ladder on the core pages.
-- Core pages (in nav): `index`, `how-it-works` (steps, rules, pricing), `demo`, `about`, `contact` (the pilot form, anchor `#pilot`), plus `houston` and `thank-you` (noindex).
-- SEO pages, live but out of the nav (Steve's call: "they still have value"): 50 city pages + `locations`, `houston-*`, 20 `industry-*` pages + `industries` hub, 65 `priority-*`, `workflow-library`, service/workflow landing pages, `guides`, `insights`, `guide-*`, `insight-*`, comparison articles, `approach`, `workflow-readiness`, `templates-checklists`. Linked from the footer "More" column, the hubs, `sitemap.xml`, `llms-full.txt`. Never delete them without asking. Retired via 301: `services.html`, `pricing.html`, `case-studies.html`.
-- Nav: Home, How it works, Demo, About, Contact + "Start a free pilot" button. Footer: compact, with the trust line. Both inlined on all 181 pages (regex-replace to change).
-- Founder privacy (Steve's instruction 2026-10-18): the site says only "Steve Ngoumnai, a Houston engineer with ten years running production systems" plus a LinkedIn link. No employers, dates, certifications, or dollar figures anywhere, including the agent prompt and the Person schema.
+## Site structure (two-page site, 2026-10-18)
+- Research-driven rebuild (NN/g attention and trust studies, Unbounce reading-level data, a 2,000-page A/B study, Storylane demo data, 15 competitor teardowns, Indie Hackers/HN founder threads). Rules applied: everything that sells in the first three screens; product in use as the hero (the interactive demo), not a stock image; one primary CTA; prices and contact up front; plain 6th-grade words; no fake proof, say we are new; four-field form; sticky mobile CTA; links out to LinkedIn and Maps for "connection to the rest of the web".
+- Core pages (in nav): `index` (hero + interactive demo `#demo-wrap`, honesty strip, how it works `#how`, pricing `#pricing`, compare, FAQ, pilot form `#pilot`) and `about`. `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
+- Retired via 301 to index anchors: `services`, `pricing`, `how-it-works`, `demo`, `contact`.
+- SEO pages stay live and out of the nav (see earlier note). Never delete them without asking.
+- Nav: Demo, Pricing, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact with trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
+
+## The interactive demo
+- `demo.js` renders `#demo`: tabs for four fictional Houston companies (Bayou Air & Heat, Katy Pipeworks, Brazos Electric Co., Gulf Coast Roofing) plus Machines & Cloud itself, a customer chat with suggested prompts, and an "owner's phone" panel. It POSTs `{persona, messages, page}` to `/api/chat`. The corner widget is skipped on index (`<body data-no-widget>`), since the demo includes the M&C persona.
+- `netlify/functions/chat.mjs`: persona briefs live in `PERSONAS`; each fictional company has published prices, hours, service area, and owner rules. Persona mode uses a strict `send_owner_summary` tool whose input is returned to the page as an `owner_notification` event (never posted anywhere). The `mc` persona keeps `capture_lead` -> Netlify Forms `agent-lead`. To add a company: add a brief in `PERSONAS` and a scenario in `demo.js` (same id).
+- Founder privacy rule applies to every persona prompt.
 
 ## Generator
 The core pages were produced by one-off generator scripts in the 2026-10-18 session (not committed). Treat the HTML as the source of truth; edit it directly.
@@ -24,10 +29,10 @@ The core pages were produced by one-off generator scripts in the 2026-10-18 sess
 - Front Desk Agent: free 7 day pilot on the client's real site, then one-time $1,497 build + $397/month, no contract.
 - Phone answering: add-on, quoted on call volume, no public number yet (Steve to set).
 - Custom projects: case by case, not priced on the site.
-Shared copy to keep in sync on a price change: `index.html` (price card, FAQ, Service schema), `how-it-works.html`, every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` SYSTEM prompt, `llms.txt`/`llms-full.txt`.
+Shared copy to keep in sync on a price change: `index.html` (hero note, price card, FAQ, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
 
 ## The live agent
-- `agent-widget.js` renders the launcher + panel on every page, keeps the transcript in sessionStorage, POSTs `{messages, page}` to `/api/chat`, and opens on any `[data-open-agent]` element, any `a[href="#agent"]`, or the `#agent` hash. It is labeled as an AI and never pretends to be a person.
+- `agent-widget.js` renders the corner launcher + panel on every page except those with `data-no-widget` on body, keeps the transcript in sessionStorage, POSTs `{messages, page}` to `/api/chat` (persona `mc`), and opens on any `[data-open-agent]` element, `a[href="#agent"]`, or the `#agent` hash.
 - `netlify/functions/chat.mjs` (Netlify Functions v2, `export const config = { path: "/api/chat" }`) calls Claude `claude-opus-5-5` at low effort with a `capture_lead` strict tool. A captured lead is POSTed to Netlify Forms as form `agent-lead` (hidden form is in every page's HTML; Netlify needs it there to register the form). Same-origin check on the Origin header, input sanitized (≤20 alternating messages, ≤1500 chars each), 3 tool iterations max.
 - Dependencies: `package.json` with `@anthropic-ai/sdk`; `netlify.toml` sets `publish = "."` and esbuild bundling, so Netlify installs deps and bundles the SDK into the function. `node_modules/` is gitignored.
 - No rate limiting beyond Netlify's defaults. If abuse shows up in Anthropic usage, add a per-IP limiter (Netlify Blobs or an edge function) before touching the prompt.
