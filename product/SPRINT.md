@@ -443,7 +443,7 @@ Acceptance (keyed only):
 - [ ] `admin delete` on the test shop returns the released number SID and Vapi ids; the Twilio console no longer lists the number.
 
 ### S1-20 One alert per customer, not one per turn
-Status: delivered 2026-10-19 (engineer). Built one level up from the ticket: `flagLead` merges a repeat `notify_owner` for the same phone or conversation within 30 minutes into the open lead (owner gets an UPDATE line with what changed), and opens an alert only if none is waiting for that lead, so one chain runs per customer. Verify with the ticket's scenario: one `waiting` alert, one `escalate` task, `lead_updated` events instead of extra leads.
+Status: delivered 2026-10-19 (engineer), self-checked on draft 6ad67cb6b485ce16084fb1d2: one waiting alert and one escalate task for a three-turn gas-smell conversation. Built one level up from the ticket: `flagLead` merges a repeat `notify_owner` for the same phone or conversation within 30 minutes into the open lead (owner gets an UPDATE line with what changed), and opens an alert only if none is waiting for that lead, so one chain runs per customer. Verify with the ticket's scenario: one `waiting` alert, one `escalate` task, `lead_updated` events instead of extra leads.
 Original status: todo. Size: S. Implements: Epic 3 MUST acknowledge-and-escalate (correctness). Found in the S1-10 verification: one emergency conversation opened three `alerts` records and three `escalate` chains.
 
 Files: `netlify/functions/lib/desk.mjs`.
@@ -453,7 +453,7 @@ Change: `openAlert(c, lead, kind)` first looks for a `waiting` alert for the sam
 Acceptance (now): on the test line, "I smell gas" followed by the address and number in a second turn and "yes tell the owner" in a third: `admin records kind=alerts` shows exactly one `waiting` alert for that number, `admin tasks` exactly one `escalate`, and an `alert_merged` event per extra lead; `ok REF` with any of the lead refs acknowledges it. A second emergency from a different number opens its own alert.
 
 ### S1-21 SMS replies never carry the model's planning text
-Status: delivered 2026-10-19 (engineer): `runAgent` drops text emitted in a turn that ends in a tool call when `dropToolPreamble` is set (SMS background agent sets it); prompt line added; last-resort first-sentence filter logs `reply_trimmed`.
+Status: delivered 2026-10-19 (engineer), self-checked on draft 6ad67cb6b485ce16084fb1d2: three SMS bookings, every reply starts with the customer sentence. `runAgent` drops text emitted in a turn that ends in a tool call when `dropToolPreamble` is set (SMS background agent sets it); prompt line added; last-resort first-sentence filter logs `reply_trimmed`.
 Original status: todo. Size: S. Implements: Epic 6 MUST (quality of the SMS channel). Found in the S1-11 verification: the reply sent after an SMS booking began "Have name, address, issue, window. Phone filled automatically. Book." before the customer-facing sentence, because `runAgent` concatenates text emitted before a tool call with the text after it.
 
 Files: `netlify/functions/lib/agent.mjs`, `netlify/functions/sms-agent-background.mjs`, `netlify/functions/lib/config.mjs`.
@@ -463,7 +463,7 @@ Change: in `runAgent`, when an iteration ends in `tool_use`, discard the text em
 Acceptance (now): repeat the S1-11 SMS booking three times with fresh numbers; every assistant turn in `admin records kind=conversations` starts with a customer-facing sentence (name, greeting, or answer), no `reply_trimmed` event is needed for a pass but is allowed; the test-line and web replies still stream.
 
 ### S1-22 Portal and tooling leftovers from verification
-Status: delivered 2026-10-19 (engineer): off codes as tap-to-dial while paused or cancelled with `offLong`; Test tab hidden when cancelled; `admin clear_optout`; unknown admin actions return 400.
+Status: delivered 2026-10-19 (engineer), self-checked: unknown action 400, clear_optout 200. Off codes as tap-to-dial while paused or cancelled with `offLong`; Test tab hidden when cancelled; `admin clear_optout`; unknown admin actions return 400.
 Original status: todo. Size: S. Implements: the open lines from S1-02, S1-05, S1-15.
 
 Files: `desk.html`, `netlify/functions/admin.mjs`.
