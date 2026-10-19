@@ -12,11 +12,11 @@ The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"er
 
 ## Site structure (two-page site, rebuilt from scratch 2026-10-18)
 - Built from `RESEARCH-customer-workflow.md` (the full owner workflow: lead sources and costs, channels, quoting, closing, booking, confirming, delivery, payment, follow-up, tools, Houston) and `RESEARCH-customer-journey.md`. The services are named for the workflow stages where small shops lose work.
-- Core pages (in nav): `index` (hero with a looping missed-call example `#demo-wrap`; "Where the jobs leak out" `#leaks`, five stages with research numbers; "What we sell" `#services` with three cards: Answer `#answer` (core, $397/mo, phone included), Book and confirm `#book` (included), Follow up `#followup` ($197/mo add-on); "One week with a front desk" `#week` with four examples in their real channels; "The rules" `#rules` (never/always); how it works `#how` (3 steps); seven FAQs with no prices; pilot form `#pilot`). Under the services: build-fee footnote and a "what it does not do" line (no lead generation, quotes, payments, dispatch). and `about`. `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
-- Price rule (Steve): each price appears once on the homepage, in the services cards and the build-fee footnote under them. The FAQ and the steps carry no prices. No "we are new / no logos" copy anywhere; no footer trust line.
-- Retired via 301 to index anchors: `services`, `pricing` (-> `#services`), `how-it-works` (-> `#how`), `demo` (-> `#demo-wrap`), `contact` (-> `#pilot`).
+- Core pages (in nav): `index` (full-bleed blurred photo hero `.hero-full` modeled on Sameday, two-tone headline, one white pill CTA; "Watch it answer" `#watch` with the looping missed-call example in `#demo-wrap`; "Where the jobs leak out" `#leaks`; "Plans" `#plans` with Starter/Growth/Pro cards and the setup and "what it does not do" footnotes; "One week with a front desk" `#week` with a trade photo on each example; "The rules" `#rules` as a photo band; how it works `#how`; seven FAQs with no prices; pilot form `#pilot` as a photo band). and `about`. `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
+- Price rule (Steve): each price appears once on the homepage, in the plans section. The FAQ and the steps carry no prices. No "we are new / no logos" copy anywhere; no footer trust line.
+- Retired via 301 to index anchors: `services`, `pricing` (-> `#plans`), `how-it-works` (-> `#how`), `demo` (-> `#demo-wrap`), `contact` (-> `#pilot`).
 - SEO pages stay live and out of the nav. Never delete them without asking.
-- Nav: Services, See it work, How it works, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact, no trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
+- Nav: Plans, See it work, How it works, About (+ "Start a free pilot" to `index.html#pilot`). Footer compact, no trust line, LinkedIn and Maps links. Inlined on every page; regex-replace to change.
 
 ## The interactive demo
 - `stories.js` plays scripted example conversations (`SCENES`) in any element with `data-scene="<id>"` when it scrolls into view. Each scene has a `channel` (`sms`, `call`, `lead`, `web`) that sets its look (SMS bubbles, call transcript with timer, Thumbtack lead card, website chat), optional `loop`, `notes`, and `lead`. The owner's phone panel is the same for all. No API needed. Never call them "scenes" or "samples" in visible copy (Steve: sounds fake); the page says "examples" once, in a footnote.
@@ -27,11 +27,17 @@ The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"er
 ## Generator
 The core pages were produced by one-off generator scripts in the 2026-10-18 session (not committed). Treat the HTML as the source of truth; edit it directly.
 
-## Prices (published, as of 2026-10-18)
-- Answer: $397/month with phone answering included (300 minutes, then $0.35/minute), plus one-time $1,497 build collected on day one and refunded in full if the client cancels during the 7 day pilot. No contract. Repriced 2026-10-18 after competitor research (Sameday $449/500 min, Rosie $49, Jobber add-on $29): phone is the product everywhere, so it is no longer an add-on.
-- Follow up add-on: $197/month, 500 texts included, then $0.03/text. Bundles review request, 48h nudge, day-14 quote check, quiet-lead chase, payment reminders (day 3 and 7), referral ask after a five-star reply, maintenance reminders. Not built yet: needs a lead webhook receiver (Angi JSON webhook, Thumbtack pro webhook, website forms), Twilio with A2P 10DLC per client, a scheduler for the 48h chase and post-job review text, and a consent/STOP store. Thumbtack in-app replies need partner API approval; Google LSA leads cannot be texted directly (masked numbers).
+## Prices (published, repriced 2026-10-19 to match the market)
+- Three plans by call minutes, setup included, no setup fee, first 7 days free with a card on file (nothing charged until day 8), no contract:
+  - Starter $99/month: 150 minutes, 500 texts. Calls, texts, website chat; existing number; published fees and windows only; Google Calendar booking, reminders, on-the-way text, reschedule by reply; owner alerts; handoff list.
+  - Growth $249/month (most popular): 600 minutes, 1,500 texts. Adds Angi, Thumbtack, Google LSA leads; review requests; day-14 quote check; quiet-lead chase; payment reminders; referral ask; Jobber or Housecall Pro.
+  - Pro $449/month: 1,500 minutes, 5,000 texts. Adds maintenance and seasonal reminders, custom rules, several crews and numbers, weekly report, priority support.
+  - Overage $0.35/minute, $0.03/text.
+- Anchors: Rosie $49/250 min to $299/2,000; Dialzara $29 to $349; Goodcall $79 to $299; Jobber AI receptionist $29 add-on; Sameday $449/500 min and $789/1,000; Smith.ai human $300/30 calls; Ruby $250/50 min; NiceJob about $75; Podium $399 to $599. We sit between self-serve and Sameday, done-for-you, with follow-up bundled.
+- The earlier $1,497 build fee and $397/$297/$197 structure are gone. Hard cost per client is roughly $30 to $100 a month; setup time (about four hours) is unpaid and covered by the card-on-file trial.
 - Custom projects: case by case, not priced on the site.
-Service names on the site: Answer (core), Book and confirm (included), Follow up (add-on). Shared copy to keep in sync on a price change: `index.html` (services cards, footnote, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
+- Not built yet (promised on the site): Twilio SMS with 10DLC, phone answering via a voice platform, Angi webhook, calendar and reminder scheduler, Follow up flows, Jobber and Housecall Pro connections. Thumbtack in-app replies need partner API approval; Google LSA leads cannot be texted directly.
+Shared copy to keep in sync on a price change: `index.html` (plans cards, plans footnote, Service schema AggregateOffer), every short `industry-*.html` FAQ and package card, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`, `about.html` CTA line.
 
 ## The live agent
 - `agent-widget.js` renders the corner launcher + panel on every page except those with `data-no-widget` on body, keeps the transcript in sessionStorage, POSTs `{messages, page}` to `/api/chat` (persona `mc`), and opens on any `[data-open-agent]` element, `a[href="#agent"]`, or the `#agent` hash.
