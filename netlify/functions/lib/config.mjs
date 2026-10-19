@@ -48,10 +48,7 @@ export function loopCheck(c) {
   const same = (a, b) => a && b && a === b;
   if (same(o.phone, p.twilioNumber)) return { field: "owner.phone", message: "Your cell cannot be the front desk number." };
   if (o.backupPhone && (same(o.backupPhone, p.businessNumber) || same(o.backupPhone, p.twilioNumber) || same(o.backupPhone, o.phone))) return { field: "owner.backupPhone", message: "The backup number must be a different phone from your cell, your business line, and the front desk number." };
-  if (p.forwarding === "all") {
-    const target = p.transferTo || o.phone;
-    if (same(target, p.businessNumber)) return { field: "phone.transferTo", message: "With all calls forwarded, transfers must go to a phone that is not the forwarded line, or every transfer comes straight back to the front desk." };
-  }
+  if (p.forwarding === "all" && p.transferTo && same(p.transferTo, p.businessNumber)) return { field: "phone.transferTo", message: "With all calls forwarded, transfers must go to a phone that is not the forwarded line, or every transfer comes straight back to the front desk. Leave it blank and the front desk takes a message and promises a callback instead." };
   return null;
 }
 

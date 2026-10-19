@@ -54,8 +54,10 @@ export default async (req) => {
     if (params.OptOutType) return twiml(""); // Twilio already sent the carrier-standard confirmation
     return twiml(`${name}: you're unsubscribed and will get no more texts from this number. Reply START to resume.`);
   }
-  if (START_RE.test(body)) { await clearOptOut(from); await logEvent(c.slug, "opt_in", { from }); return twiml(`${name}: you're subscribed again. Reply STOP any time.`); }
-  if (await optedOut(from)) return twiml(""); // opted out: no replies, no model
+  if (await optedOut(from)) {
+    if (START_RE.test(body)) { await clearOptOut(from); await logEvent(c.slug, "opt_in", { from }); return twiml(`${name}: you're subscribed again. Reply STOP any time.`); }
+    return twiml(""); // opted out: no replies, no model
+  }
 
   // Paused or cancelled: one reply per number per 24 hours pointing at the main line, no model.
   if (!ACTIVE.includes(c.status)) {

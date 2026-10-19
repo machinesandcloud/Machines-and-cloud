@@ -1,8 +1,72 @@
 # Backlog: Machines & Cloud front desk
 
-Owner: Product Owner. Round 1, 2026-10-19. Engineer and PM work from this file; the PM cuts tickets from the MUST items first, in the order the epics appear.
+Owner: Product Owner. Round 2 is at the top; round 1 (2026-10-19, the launch definition and epics) follows unchanged below it. Evidence shorthand is the same in both: `S#n` = RESEARCH-servicing.md ranked item n, `W§n` = RESEARCH-customer-workflow.md section n, `code:` = read in the repo, `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
 
-Evidence shorthand: `S#n` = RESEARCH-servicing.md, ranked item n in "What Machines & Cloud should change"; `S§name` = a section of that doc; `W§n` = RESEARCH-customer-workflow.md section n; `code:` = what the repo does today (verified by reading it, not by running it).
+---
+
+# Round 2 (2026-10-19, evening): judging sprint 1, sprint 2 priorities
+
+## R2.1 Verdict on the delivered product
+
+Sprint 1 built what round 1 asked for, and the build order was right. Against the eight launch conditions: L4 (STOP), L6 (Pause and Cancel), L7 (truthful copy), and L8 (digest, flag, Steve's week-one copy) are closed in code pending the PM's pre-key pass. L1, L2, L3, and L5 remain open until the keyed pass (S1-17, S1-18, S1-19); that was always the plan, and the Vapi and Twilio field names are the known risk (DECISIONS.md, 2026-10-19). Nothing the engineer built contradicts the vision. Four things are wrong for the customer, two of them bad enough to block the first paying customer:
+
+**New MUST (blocks launch)**
+
+- **M1. A customer who texts "Yes" gets "you're subscribed again" instead of an answer.** `sms.mjs` tests `START_RE` (`start|unstop|yes`) on every inbound customer text before the booking fast paths and before the model, and it is not gated on the number being opted out. "Is it urgent?" "Yes" is the most common two-turn exchange on SMS, and today the second turn ends the conversation with an opt-in confirmation. It also makes the `yes` confirm fast path dead code. Fix: treat start words as opt-in only when `optedOut(from)` is true. Evidence: code: `sms.mjs` order of checks; S#22 (form-filling and loop failures are the top product complaint).
+- **M2. The LSA advice on the site and onboarding sends one-phone owners into a dead end.** S1-16 added "Running Google Local Services ads? Choose 'All of them'" and the FAQ says the front desk "transfers the ones that need you." For an owner whose business number is their cell (the common one-truck case; onboarding step 1 says "Your cell" and step 5 "Business number customers call"), choosing "All of them" makes `loopCheck` return 400 "transfers must go to a phone that is not the forwarded line," because with unconditional forwarding every transfer and every escalation call comes straight back to the front desk. The owner cannot finish onboarding without a second phone, and nothing tells them that. The round-1 recommendation (Epic 7) was mine and it was wrong for this case. Fix, in one ticket: (a) allow `forwarding: "all"` without a transfer target: no transfer tool, the voice prompt uses the callback-window sentence, escalation skips the call step and texts twice; (b) forwarding instructions offer the no-answer ring timer on AT&T and T-Mobile (`**61*1{number}**15#`, 5 to 30 seconds in the GSM standard; to be confirmed on real SIMs in the keyed pass) so "missed calls" mode can beat Google's 20-second clock, and say plainly that Verizon's `*71` has no timer; (c) reword the site FAQ, onboarding hint, and MC desk prompt to: all calls if you have a second phone for transfers, otherwise missed calls with a 15-second ring. Evidence: code: `loopCheck` in `lib/config.mjs`, `onboard.html` line 108, `index.html` FAQ; [Wikipedia, call forwarding codes](https://en.wikipedia.org/wiki/Call_forwarding); [PPC Land on the 20-second rule](https://ppc.land/google-charges-local-services-advertisers-for-missed-calls-over-20-seconds/); SPRINT.md assumption 8 (first customer is an HVAC or plumbing shop on a cell carrier with LSA).
+
+**Wrong for the customer, fix in sprint 2 (SHOULD)**
+
+- **W1. The wants-a-call escalation is too heavy.** Every "can I talk to someone" that the owner does not answer with `ok REF` inside 10 minutes now texts the backup, then rings the owner's cell with a robot line, then emails Steve and texts the customer. During a workday that is alert fatigue by day three, and fatigue is what makes owners ignore the emergency that matters. Keep the full chain for emergencies; for `wants_call` stop after the backup text and the customer's fallback-window text. Evidence: S#14 (acknowledge-and-escalate is for emergencies and on-call), code: `runEscalation` in `lib/desk.mjs`.
+- **W2. "Existing customer" on the alert means any prior record, including a spam lead or an unbooked question.** `customerType` returns `existing` for any booking or lead older than 10 minutes. Owners read "existing customer" as "someone we have done work for." Count only bookings with status `done`, `paid`, or a past visit. Evidence: code: `customerType`; S#17.
+- **W3. A customer who texts "cancel" is unsubscribed and their visit stays booked.** `cancel` is a carrier-standard stop word, so the opt-out is right, but when that number has an upcoming visit the owner should also get the cancel request (S1-11's `cancelRequest`). One extra call in the STOP branch. Evidence: code: `STOP_RE`; SPRINT.md test matrix case 8.
+- **W4. The 6 pm digest texts "nothing today" every quiet day.** A two-truck shop in a slow week gets seven texts that say nothing, and learns to skip the one that matters. Send the empty-day digest by email only; text only when there is something to act on. Evidence: S#18 (Smith.ai's daily summary is the model, but it is an email); the July 2026 cleaning owner who dropped an AI receptionist for noise.
+
+Accepted as built: opt-outs keyed per phone across shops; the front desk never cancels a visit itself; Pause and Cancel dial the owner's cell only when it differs from the forwarded line; model replies on SMS go out through the Messages API from a background function (right call: Twilio's 15-second webhook limit would have cut thoughtful replies).
+
+## R2.2 Sprint 2 priorities (two weeks, one engineer)
+
+Order is priority order. Sizes as in SPRINT.md (S half a day, M a day and a half). The first item is not a ticket but a reservation: the keyed pass will surface Twilio Trust Hub, Messaging Service, and Vapi field fixes, and nothing below should push those out.
+
+| # | Item | Size | Why now |
+|---|---|---|---|
+| 0 | Keyed-pass fallout from S1-17, S1-18, S1-19 (field names, policy SIDs, transfer plan shape) | reserve 2.5 days | L1, L2, L3, L5 are still open; nothing else matters until they close |
+| 1 | **M1** "Yes" opt-in bug | S | blocks launch; one-line fix |
+| 2 | **M2** All-calls without a second phone, ring-timer codes, LSA copy | M | blocks launch for the assumed first customer |
+| 3 | W1 wants-a-call chain stops after the backup text; emergencies keep the call and the Steve step | S | alert fatigue is the churn path |
+| 4 | W3 + W2 together: "cancel" with an upcoming visit sends the owner a cancel request; "existing" means a completed or booked visit | S | two small correctness fixes in the same files |
+| 5 | W4 empty-day digest by email only; a portal toggle to turn the daily text off | S | noise control |
+| 6 | Returning caller on voice: Vapi `assistant-request` returns the caller's name and upcoming visit as variables so the assistant greets by name and knows the visit (`"Hi Sarah, your visit is Tuesday 8 to 12"`) | M | Jobber shipped this in Dec 2025 and it is the personalized text-back owners praise (S#19); the alert already says new or existing |
+| 7 | VIP and commercial bypass list: numbers the front desk never answers, rung straight through to the owner's cell in `/api/voice`, and on Vapi-answered shops returned as a transfer destination from `assistant-request` | M | S#9; the objection that lost the roofing thread; cheap once item 6 exists |
+| 8 | Usage counter and 80 and 100 percent texts: minutes from Vapi `end-of-call-report` `durationSeconds` and Twilio call duration, texts from `sms_sent`; portal card; no pause-at-limit, no billing | M | every competitor has it (Jobber 75/100, CallsAround 80/100); it is the data billing will need when Steve unparks it; S#5 |
+| 9 | CSV export of leads, bookings, conversations from the portal | S | makes the data policy true (S#12); the Jobber and Housecall Pro bridge (cut 1) |
+| 10 | If time: per-IP rate limit on `/api/chat` and the embed; scheduler task to release the number at `serviceEndsAt` | S + S | CLAUDE.md rule; cancellation hygiene |
+
+That is about 11 days with the reservation. Items 10 slide first, then 9.
+
+Held for sprint 3 (unchanged from round 1 SHOULD): the three-tier emergency table per trade (S#13), marketing-consent capture with Texas hours for offer texts (S#24, needed before any Growth customer's referral ask reads as promotional), the weekly email with missed-call-to-booking and no-book reasons (S#18, S#22), whole-call Spanish verification on voice (test, not code), and the Angi webhook.
+
+## R2.3 Open questions for Steve (round 2; the round-1 five are answered by SPRINT.md assumptions 1 to 8)
+
+1. For a one-phone LSA owner, do you want us to sell a second line as part of setup (a Twilio number on their phone via an app costs a few dollars a month) so "all calls" with transfers works, or keep missed-calls-plus-15-second-ring as the standard answer? (M2 ships either way; this decides the copy.)
+2. The wants-a-call chain: is "owner text, backup text, customer gets the window" enough during business hours, with you only ever hearing about emergencies? (W1 assumes yes.)
+
+## R2.4 Research log (round 2, 2026-10-19 evening)
+
+- **Named vendors, last weeks.** Searched for Sameday, Avoca, Rosie, Dialzara, Goodcall announcements in September and October 2026; none found. Goodcall's pricing is now $79, $129, $249 per agent plus $0.50 per unique customer over the plan limit (comparison page checked 2026-10-05, [modernmustardseed](https://modernmustardseed.com/alternatives/goodcall-alternatives)), so "unlimited minutes" has become per-customer metering; our anchors stand. Rosie unchanged at $49, $149, $299 (checked 2026-10-15). Nothing changed my mind.
+- **ServiceTitan Pantheon 2026 (2026-10-06).** Max (the agentic bundle) opened to every residential contractor, a consumer demand platform (Homh) and the Atlas mobile app launched; the Voice Agent is pitched as a 30-minute setup ([press release](https://www.servicetitan.com/press/servicetitan-announcing-new-and-expanded-capabilities-at-pantheon-2026)). Enterprise only; no change for a one-to-ten-truck shop.
+- **Housecall Pro.** CSR AI text answering is "in alpha" per a new help article ([HCP help](https://help.housecallpro.com/en/articles/16673934-csr-ai-text-answering-in-alpha)); SMS and Spanish are still not generally available. Our SMS-plus-Spanish gap holds for now; it will not hold for long, which is why item 6 (returning caller) is in sprint 2 and not sprint 4.
+- **Jobber.** No October change found beyond the July 2026 help article already logged in round 1 (existing-client recognition, 24-hour text-back dedupe, pause at limit, 75 and 100 percent emails). Confirms items 6 and 8.
+- **Twilio.** From 2026-09-15 campaign and toll-free rejections return specific error codes ([Twilio changelog](https://www.twilio.com/en-us/changelog)); useful for S1-19 debugging, no design change. No Programmable Voice webhook change. Functions Classic retirement and the TLS rotation do not touch us.
+- **Vapi.** No October changelog entries found. `warm-transfer-twiml` mode (Feb 2025) can run a `<Gather>` before connecting, which would give Rosie's "press 1 to take this call" gate ([Vapi docs](https://docs.vapi.ai/tools/transfer-call)); LATER, after the plain warm transfer works on a real account.
+- **Google LSA.** Still no official statement on whether an AI-answered or forwarded call counts as answered, or when the 20 seconds start ([Avoca](https://www.avoca.ai/blog/google-lsa-missed-call-charges-2026); [Mediagistic](https://www.mediagistic.com/blog/glsa-lead-charge-policy-2026)). LSA is migrating into Performance Max with pay-per-lead goals ([Google Ads help, via r/googleads 2026-10-13](https://support.google.com/google-ads/answer/17213585)). Changed my mind: the right advice is not "all calls" but "answer inside 20 seconds," which for a one-phone owner means a 15-second ring timer on missed-calls forwarding (M2).
+- **Carrier ring timers.** The GSM code `**61*<number>**<seconds>#` sets the no-answer delay in 5-second steps on "GSM networks of some US carriers" (AT&T and T-Mobile lineage); Verizon's `*71` is non-standard and has no timer ([Wikipedia](https://en.wikipedia.org/wiki/Call_forwarding)). Not verified on a US SIM; the keyed pass does that.
+- **Reddit, since 2026-09-20 (Arctic Shift: r/cleaningbusiness, r/sweatystartup, r/HVAC, r/Plumbing, r/Roofing, r/electricians, r/Contractor, r/smallbusiness, r/PPC, r/googleads).** No new owner threads about AI receptionists; the one post asking "how do you handle calls mid-job" (r/Contractor, 2026-10-01) drew "some guy shilling AI slop" and a rules reminder, so cut 7 stands. On LSA: an agency owner tells new plumbing shops to start with LSA and "rate every lead in the app and ask every happy customer for a review, because that's most of the ranking" ([r/googleads, 2026-10-12](https://reddit.com/r/googleads/comments/1svrzxm/is_hiring_a_marketing_agency_for_google_ads_worth/pficcc9/)); responsiveness and reviews are the LSA levers, which supports the review request on Growth and item 2.
+- **Code read of the sprint 1 build** (`sms.mjs`, `voice.mjs`, `scheduler.mjs`, `lib/desk.mjs`, `lib/config.mjs`, `lib/vapi.mjs`, `lib/forwarding.mjs`, `index.html`, `onboard.html`): produced M1, M2, W1 to W4 above.
+
+---
+
+# Round 1 (2026-10-19): vision, launch-ready, epics
 
 ## 1. Vision and launch-ready
 

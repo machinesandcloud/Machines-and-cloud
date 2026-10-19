@@ -1,9 +1,9 @@
 // Carrier call-forwarding instructions with tap-to-dial codes. Codes differ by carrier and line
 // type; the portal shows the two most common forms for AT&T and tells the owner to test by calling.
 export const CARRIERS = {
-  verizon: { name: "Verizon", missed: (n) => [`*71${n}`], all: (n) => [`*72${n}`], off: ["*73"], note: "One code covers busy and unanswered calls." },
-  tmobile: { name: "T-Mobile", missed: (n) => [`**61*1${n}#`, `**67*1${n}#`], all: (n) => [`**21*1${n}#`], off: ["##61#", "##67#", "##21#"], note: "Dial the first code for unanswered calls and the second for busy." },
-  att: { name: "AT&T", missed: (n) => [`*61*1${n}#`, `*67*1${n}#`], all: (n) => [`*21*1${n}#`], off: ["#61#", "#67#", "#21#"], note: "If a code is refused, try it with two stars (**61*1...#). AT&T landlines use *92 and *90 instead." },
+  verizon: { name: "Verizon", missed: (n) => [`*71${n}`], all: (n) => [`*72${n}`], off: ["*73"], note: "One code covers busy and unanswered calls. Verizon has no ring-time setting, so unanswered calls forward after about 25 seconds; if you run Google Local Services ads, use *72 (all calls) on that line to stay under Google's 20-second clock." },
+  tmobile: { name: "T-Mobile", missed: (n) => [`**61*1${n}**15#`, `**67*1${n}#`], all: (n) => [`**21*1${n}#`], off: ["##61#", "##67#", "##21#"], note: "The first code forwards unanswered calls after 15 seconds (the **15# part sets the ring time, which keeps you under Google's 20-second clock); the second covers busy." },
+  att: { name: "AT&T", missed: (n) => [`*61*1${n}**15#`, `*67*1${n}#`], all: (n) => [`*21*1${n}#`], off: ["#61#", "#67#", "#21#"], note: "The first code forwards unanswered calls after 15 seconds (the **15# part sets the ring time, which keeps you under Google's 20-second clock); the second covers busy. If a code is refused, try it with two stars (**61*1...**15#). AT&T landlines use *92 and *90 instead." },
   other: { name: "Your carrier", missed: () => [], all: () => [], off: [], note: "Search your carrier app for 'call forwarding when unanswered' and enter the front desk number." },
   voip: { name: "VoIP or office phone", missed: () => [], all: () => [], off: [], note: "In your phone system's admin page, set 'no answer' and 'busy' forwarding to the front desk number." },
 };

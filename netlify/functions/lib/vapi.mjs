@@ -25,7 +25,7 @@ function toolDef(t, serverUrl) {
 }
 
 function transferDef(client) {
-  const target = client.phone?.transferTo || client.owner?.phone;
+  const target = client.phone?.transferTo;
   const owner = client.owner?.name || "the owner";
   return {
     type: "transferCall",
@@ -40,7 +40,7 @@ export function voicePrompt(client) {
   const owner = client.owner?.name || "the owner";
   const r = client.rules || {};
   const window = `${r.callbackHours || "within 30 minutes"} during business hours or ${r.callbackAfterHours || "by 8 am tomorrow"} after hours`;
-  const allCalls = client.phone?.forwarding === "all" && !loopCheck(client);
+  const allCalls = client.phone?.forwarding === "all" && !!client.phone?.transferTo && !loopCheck(client);
   const person = allCalls
     ? `If the caller asks for a person, the owner, or anything on the handoff list, say you will connect them and call transferCall. If the transfer fails or nobody answers, say ${owner} will call them ${window}, take their number, and call notify_owner with reason wants_call.`
     : `If the caller asks for a person or the owner, say you are the front desk assistant, say ${owner} will call them ${window}, take their number, and call notify_owner with reason wants_call. Never say "someone will call you back" without the window.`;
@@ -58,7 +58,7 @@ export async function provisionVoice(client, site) {
   const toolIds = [];
   for (const t of [BOOK_VISIT, NOTIFY_OWNER]) toolIds.push((await vapi("/tool", toolDef(t, serverUrl))).id);
   let transferToolId = null;
-  if (client.phone?.forwarding === "all" && !loopCheck(client)) { transferToolId = (await vapi("/tool", transferDef(client))).id; toolIds.push(transferToolId); }
+  if (client.phone?.forwarding === "all" && client.phone?.transferTo && !loopCheck(client)) { transferToolId = (await vapi("/tool", transferDef(client))).id; toolIds.push(transferToolId); }
   const first = client.business?.spanish
     ? `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today? Si prefiere español, dígamelo.`
     : `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today?`;
@@ -90,7 +90,7 @@ export async function updateVoicePrompt(client) {
   const fn = client.voice.functionToolIds || client.voice.toolIds || [];
   const defs = [BOOK_VISIT, NOTIFY_OWNER];
   for (let i = 0; i < fn.length && i < defs.length; i++) { try { await vapi(`/tool/${fn[i]}`, toolDef(defs[i], serverUrl), "PATCH"); } catch (e) { console.error("tool patch", e); } }
-  const wantTransfer = client.phone?.forwarding === "all" && !loopCheck(client);
+  const wantTransfer = client.phone?.forwarding === "all" && !!client.phone?.transferTo && !loopCheck(client);
   let transferToolId = client.voice.transferToolId || null;
   if (wantTransfer && !transferToolId) transferToolId = (await vapi("/tool", transferDef(client))).id;
   else if (wantTransfer && transferToolId) { try { await vapi(`/tool/${transferToolId}`, transferDef(client), "PATCH"); } catch (e) { console.error("transfer patch", e); } }
