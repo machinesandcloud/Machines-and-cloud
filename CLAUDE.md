@@ -58,3 +58,8 @@ Service names on the site: Answer (core), Book and confirm (included), Follow up
 python3 -I scripts/sitecheck.py .       # broken local links, sitemap, redirects, canonicals (skips noindex pages)
 node --check script.js agent-widget.js netlify/functions/chat.mjs
 ```
+
+## Theme (2026-10-19)
+- Core pages carry `body.theme-light`: warm cream background (#FBF8F3, sand #F3EDE3 for `.bg-dark`), ink text, terracotta eyebrows, white cards, dark device panels for the examples. Styles are the appended "Warm light theme" block at the end of `styles.css`; everything is scoped under `.theme-light`, so the 145 legacy SEO pages stay dark and untouched. Pages on the light theme: index, about, thank-you, 404, houston, industries, industry-home-services, -healthcare, -legal, -automotive, -real-estate.
+- Light pages use `assets/logo-dark.png` (nav and footer); dark pages keep `assets/logo.png`.
+- Photos in `assets/photos/` are Pexels (free license, no attribution required): hero-hvac (homepage hero background via `.hero-bg`), plumber, electrician, roofer, cleaning (one per weekly example, `.week-photo` inside `.week-head.has-photo`), roof-house (about page `.about-photo`). Modeled on Sameday's bright photo-led look at Steve's request; no fake customer or team photos.
