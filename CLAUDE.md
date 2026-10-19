@@ -29,6 +29,7 @@ The core pages were produced by one-off generator scripts in the 2026-10-18 sess
 ## Prices (published, as of 2026-10-18)
 - Front Desk Agent: free 7 day pilot on the client's real site, then one-time $1,497 build + $397/month, no contract.
 - Phone answering: add-on, $297/month with 300 call minutes included, then $0.35/minute, no setup fee when added during the pilot (set 2026-10-18 from market data; Steve may change).
+- Lead follow-up and reviews add-on: $197/month, 500 texts included, then $0.03/text (set 2026-10-18; Steve may change). Not built yet: needs a lead webhook receiver (Angi JSON webhook, Thumbtack pro webhook, website forms), Twilio with A2P 10DLC per client, a scheduler for the 48h chase and post-job review text, and a consent/STOP store. Thumbtack in-app replies need partner API approval; Google LSA leads cannot be texted directly (masked numbers).
 - Custom projects: case by case, not priced on the site.
 Shared copy to keep in sync on a price change: `index.html` (hero note, FAQ, pilot card, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
 

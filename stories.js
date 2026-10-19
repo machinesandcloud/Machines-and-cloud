@@ -52,6 +52,22 @@
       earlier: [['6:18 pm', 'Biweekly clean booked, Fri 10 to 12', 'M. Chen'], ['2:40 pm', 'Move-out quote requested', 'R. Dawson']],
       notif: { urgency: 'This week', time: '9:07 pm', rows: [['Customer', 'Lucía Herrera'], ['Phone', '832 555 0177'], ['Issue', 'Deep clean, 2 bed 2 bath apartment'], ['Window', 'Saturday, 8 to 10'], ['Language', 'Spanish']] }
     },
+    'thumbtack-lead': {
+      variant: 'split', tone: 'day',
+      company: 'Gulf Coast Roofing', trade: 'Roofing', owner: 'Pam', when: 'Wednesday, 2:14 pm', lang: 'en',
+      earlier: [['11:50 am', 'Inspection booked, Fri 8 to 10', 'C. Reyes'], ['9:30 am', 'Gutter quote accepted', 'The Hendersons']],
+      msgs: [
+        ['s', "2:14 pm · Thumbtack lead: hail damage, Spring 77379 · sent to 4 roofers"],
+        ['a', "Hi Marcus, this is Gulf Coast Roofing. You asked on Thumbtack about hail damage in Spring. Inspections are free. We have Thursday 8 to 10 or 1 to 3. Which works?"],
+        ['s', "Texted 42 seconds after the lead arrived"],
+        ['c', "Thursday 1 to 3. Is it really free?"],
+        ['a', "Yes, free and no obligation. Pam texts you Thursday morning when the inspector is on the way. What's the address?"],
+        ['c', "19127 Oak Hollow Ln"],
+        ['a', "Booked Thursday 1 to 3 at 19127 Oak Hollow Ln. Thanks Marcus."],
+        ['s', "Friday, job done · one review request texted to Marcus"]
+      ],
+      notif: { urgency: 'This week', time: '2:16 pm', rows: [['Customer', 'Marcus Bell'], ['Phone', '281 555 0164'], ['Where', '19127 Oak Hollow Ln, Spring'], ['Issue', 'Hail damage inspection (Thumbtack lead)'], ['Window', 'Thursday, 1 to 3']] }
+    },
     'brazos-shopper': {
       variant: 'annotated', tone: 'day', notes: { 1: 'Published price only', 3: 'No promised time', 5: 'Still booked' },
       company: 'Brazos Electric Co.', trade: 'Electrical', owner: 'Luis', when: 'Monday, 12:30 pm', lang: 'en',
@@ -108,6 +124,10 @@
     function next() {
       if (i >= scene.msgs.length) return notify();
       var m = scene.msgs[i++]; var role = m[0], text = m[1];
+      if (role === 's') {
+        var sys = document.createElement('div'); sys.className = 'scene-sys'; sys.textContent = text; msgs.appendChild(sys); msgs.scrollTop = msgs.scrollHeight;
+        setTimeout(next, reduce ? 0 : 900); return;
+      }
       var delayType = reduce ? 0 : (role === 'a' ? 900 + Math.min(text.length * 12, 1400) : 500 + Math.min(text.length * 25, 1200));
       var ty = null;
       if (!reduce) { ty = document.createElement('div'); ty.className = 'scene-msg ' + (role === 'a' ? 'agent' : 'user') + ' scene-typing'; ty.innerHTML = '<span></span><span></span><span></span>'; msgs.appendChild(ty); msgs.scrollTop = msgs.scrollHeight; }
