@@ -32,10 +32,10 @@ export default async (req) => {
       const name = t.function?.name || t.name; let input = t.function?.arguments ?? t.arguments ?? {};
       if (typeof input === "string") { try { input = JSON.parse(input); } catch { input = {}; } }
       try {
-        if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: input.phone || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. The owner has the details and the customer will get a text reminder.` }); }
-        else if (name === "notify_owner") { const l = await flagLead(c, { ...input, phone: input.phone || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `The owner has been texted, reference ${l.id}.` }); }
+        if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. The owner has the details and the customer will get a text reminder.` }); }
+        else if (name === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `The owner has been texted, reference ${l.id}.` }); }
         else results.push({ toolCallId: t.id, error: "Unknown tool." });
-      } catch (err) { console.error("vapi tool", name, err); results.push({ toolCallId: t.id, error: "The tool failed. Apologize and take the caller's number for a callback." }); }
+      } catch (err) { console.error("vapi tool", name, err); await logEvent(c.slug, "vapi_tool_failed", { name, error: String(err?.message || err).slice(0, 200) }); results.push({ toolCallId: t.id, error: "The tool failed. Apologize and take the caller's number for a callback." }); }
     }
     return json({ results });
   }
@@ -49,10 +49,11 @@ export default async (req) => {
     conv.endedReason = m.endedReason;
     await saveConversation(conv);
     await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds: m.startedAt && m.endedAt ? Math.round((new Date(m.endedAt) - new Date(m.startedAt)) / 1000) : null });
+    if (/transfer/i.test(String(m.endedReason || ""))) await logEvent(c.slug, "transferred", { from: caller });
     // A call that produced neither a booking nor a lead still deserves an owner note when we know the number.
     if (caller) {
       const recent = (await listRecords("leads", c.slug, 20)).concat(await listRecords("bookings", c.slug, 20)).filter((r) => r.phone === caller && Date.now() - new Date(r.createdAt).getTime() < 15 * 60 * 1000);
-      if (!recent.length && conv.summary) await flagLead(c, { customer_name: "", phone: caller, address: "", issue: conv.summary.slice(0, 200), reason: "question", urgency: "flexible", language: "en" }, { channel: "call", contact: caller });
+      if (!recent.length && conv.summary) await flagLead(c, { customer_name: "", phone: caller, address: "", issue: conv.summary.slice(0, 200), reason: "question", urgency: "flexible", wanted: "", language: "en", unsure: "" }, { channel: "call", contact: caller });
     }
     return json({ ok: true });
   }

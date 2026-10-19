@@ -1,12 +1,11 @@
-// Runs every 10 minutes: sends whatever is due (reminders, review requests, quote checks,
-// payment reminders, quiet-lead chases) and a Monday digest.
-import { dueTasks, del, getRecord, getClient, saveRecord, scheduleTask, logEvent, list } from "./lib/store.mjs";
-import { sendSMS, notifyOwner } from "./lib/send.mjs";
-import { TEMPLATES, weeklyDigest } from "./lib/desk.mjs";
-import { PLANS } from "./lib/config.mjs";
+// Runs every 10 minutes: sends whatever is due (reminders, review requests, quote checks, payment
+// reminders, quiet-lead chases), runs alert escalations, polls texting registration, and sends the
+// 6 pm Houston daily digest to every live shop.
+import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list } from "./lib/store.mjs";
+import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
+import { TEMPLATES, dailyDigest, runEscalation } from "./lib/desk.mjs";
+import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus } from "./lib/twilio.mjs";
-import { notifySteve, sendEmail } from "./lib/send.mjs";
-import { saveClient } from "./lib/store.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -14,37 +13,32 @@ const D = 24 * 3600 * 1000;
 
 async function runTask(t) {
   const c = await getClient(t.slug);
-  if (!c || !["testing", "live"].includes(c.status)) return "skipped";
-  const from = c.phone?.twilioNumber;
+  if (!c) return "no client";
+  if (!ACTIVE.includes(c.status)) { await logEvent(c.slug, "task_skipped", { type: t.type, reason: c.status }); return "skipped"; }
+  if (t.type === "escalate") return runEscalation(c, t);
   const rec = t.data?.bookingId ? await getRecord("bookings", c.slug, t.data.bookingId) : t.data?.leadId ? await getRecord("leads", c.slug, t.data.leadId) : null;
   if (!rec || rec.status === "cancelled") return "no record";
-  if (!from || !rec.phone) return "no number";
+  if (!rec.phone) return "no number";
+  if (await optedOut(rec.phone)) return "opted out";
   const tpl = TEMPLATES[t.type];
   if (!tpl) return "no template";
-  if (["reminder_24h", "reminder_1h"].includes(t.type) && !["booked", "on_the_way"].includes(rec.status)) return "booking not active";
+  if (["reminder_24h", "reminder_1h"].includes(t.type) && !["booked", "confirmed", "on_the_way"].includes(rec.status)) return "booking not active";
   if (t.type === "lead_chase" && rec.status !== "open") return "lead closed";
   if (t.type === "quote_check" && rec.status !== "quoted") return "quote closed";
   if (t.type === "payment_reminder" && rec.status !== "done") return "paid or not done";
   const body = t.type === "lead_chase" ? tpl(c, rec, t.data.n) : tpl(c, rec);
-  const r = await sendSMS({ to: rec.phone, from, body });
-  await logEvent(c.slug, "task_sent", { type: t.type, id: rec.id, ok: r.ok });
-  // Payment reminders are scheduled when a job is marked done: day 3 and day 7.
-  if (t.type === "review_request" && PLANS[c.plan]?.followUp && rec.status === "done" && !rec.paymentRemindersScheduled) {
-    const done = new Date(rec.doneAt || rec.updatedAt || Date.now()).getTime();
-    await scheduleTask(c.slug, new Date(done + 3 * D), "payment_reminder", { bookingId: rec.id });
-    await scheduleTask(c.slug, new Date(done + 7 * D), "payment_reminder", { bookingId: rec.id });
-    rec.paymentRemindersScheduled = true; await saveRecord("bookings", rec);
-  }
-  return r.ok ? "sent" : "send failed";
+  const r = await sendSMS({ to: rec.phone, client: c, type: t.type, body });
+  await logEvent(c.slug, "task_sent", { type: t.type, id: rec.id, ok: r.ok, logged: !!r.logged });
+  return r.ok ? "sent" : r.logged ? "logged" : "send failed";
 }
 
-export default async () => {
+export async function run({ forceHour } = {}) {
   const nowISO = new Date().toISOString();
   const due = await dueTasks(nowISO);
   const results = [];
   for (const { key, task } of due) {
     try { results.push([task.type, await runTask(task)]); }
-    catch (err) { console.error("task failed", task.type, err); results.push([task.type, "error"]); }
+    catch (err) { console.error("task failed", task.type, err); results.push([task.type, "error"]); try { await logEvent(task.slug, "task_error", { type: task.type, error: String(err?.message || err).slice(0, 200) }); } catch { /* ignore */ } }
     await del("tasks", key);
   }
   // Texting registration: move brands to campaigns and campaigns to approved.
@@ -61,25 +55,41 @@ export default async () => {
         } else {
           const st = await campaignStatus(c.phone.messagingServiceSid, c.phone.campaignSid);
           c.phone.campaignStatus = st;
-          if (st === "VERIFIED") { c.phone.tenDlc = "approved"; await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting is live`, text: `Carriers approved your business for texting. Your front desk now texts customers back from ${c.phone.twilioNumber}: missed calls, confirmations, reminders, and follow-ups.` }); if (c.owner.phone) await sendSMS({ to: c.owner.phone, from: c.phone.twilioNumber, body: `${c.business.name}: texting is approved. Your front desk now texts customers from this number.` }); }
-          else if (st === "FAILED") { c.phone.tenDlc = "failed"; await notifySteve(`10DLC campaign failed: ${c.business.name}`, `Campaign ${c.phone.campaignSid} failed. Check the Twilio console.`); }
+          if (st === "VERIFIED") {
+            c.phone.tenDlc = "approved";
+            await logEvent(c.slug, "sender_switched", { to: "own" });
+            await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting is live from your number`, text: `Carriers approved your business for texting. Your front desk now texts customers from ${c.phone.twilioNumber}: missed calls, confirmations, reminders, and follow-ups.` });
+            if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${c.business.name}: texting is approved. Your front desk now texts customers from your own number.` });
+          } else if (st === "FAILED") { c.phone.tenDlc = "failed"; await notifySteve(`10DLC campaign failed: ${c.business.name}`, `Campaign ${c.phone.campaignSid} failed. Check the Twilio console.`); }
         }
         await saveClient(c);
       } catch (err) { console.error("10dlc poll", slug, err); }
     }
   }
-  // Monday 13:00 UTC (8 am Houston): weekly digest for Pro clients and a summary to Steve.
-  const now = new Date();
-  if (now.getUTCDay() === 1 && now.getUTCHours() === 13 && now.getUTCMinutes() < 10) {
-    const slugs = await list("clients", "");
-    for (const slug of slugs) {
+  // 6 pm Houston: daily digest to every live shop; Steve gets a copy for the first 7 days.
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
+  const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
+  const minute = forceHour !== undefined ? 0 : Number(parts.find((p) => p.type === "minute")?.value);
+  let digests = 0;
+  if (hour === 18 && minute < 10) {
+    for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
       if (!c || c.status !== "live") continue;
-      const text = await weeklyDigest(c);
-      if (PLANS[c.plan]?.name === "Pro") await notifyOwner(c, text);
-      await logEvent(c.slug, "digest", { text });
+      try {
+        const d = await dailyDigest(c);
+        await notifyOwner(c, d.text, { type: "digest" });
+        await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
+        if (c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) await notifySteve(`Digest: ${c.business.name}`, d.email);
+        await logEvent(c.slug, "digest", { text: d.text });
+        digests++;
+      } catch (err) { console.error("digest", slug, err); }
     }
   }
-  console.log(`scheduler: ${due.length} due`, results);
-  return new Response(JSON.stringify({ due: due.length, results }), { headers: { "Content-Type": "application/json" } });
+  console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`);
+  return { due: due.length, results, digests };
+}
+
+export default async () => {
+  const out = await run();
+  return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
 };

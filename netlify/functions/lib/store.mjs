@@ -13,19 +13,22 @@ export const id = (n = 6) => randomBytes(n).toString("hex");
 export const secret = () => randomBytes(24).toString("hex");
 export const now = () => new Date().toISOString();
 
+// Blobs turns "+" in a key into a space; phone numbers are E.164, so encode the plus.
+const safe = (k) => String(k).replace(/\+/g, "~");
+export const unsafe = (k) => String(k).replace(/~/g, "+");
 export async function get(kind, key) {
-  try { return await store(kind).get(key, { type: "json" }); } catch { return null; }
+  try { return await store(kind).get(safe(key), { type: "json" }); } catch { return null; }
 }
 export async function put(kind, key, value) {
-  await store(kind).setJSON(key, value);
+  await store(kind).setJSON(safe(key), value);
   return value;
 }
 export async function del(kind, key) {
-  try { await store(kind).delete(key); } catch { /* ignore */ }
+  try { await store(kind).delete(safe(key)); } catch { /* ignore */ }
 }
 export async function list(kind, prefix = "") {
-  const { blobs } = await store(kind).list({ prefix });
-  return blobs.map((b) => b.key).sort();
+  const { blobs } = await store(kind).list({ prefix: safe(prefix) });
+  return blobs.map((b) => unsafe(b.key)).sort();
 }
 export async function listJSON(kind, prefix = "", limit = 200) {
   const keys = (await list(kind, prefix)).slice(-limit);
@@ -88,6 +91,17 @@ export async function cancelTasks(slug, predicate) {
     const t = await get("tasks", k);
     if (t && t.slug === slug && predicate(t)) await del("tasks", k);
   }
+}
+export async function cancelTasksForNumber(e164Number) {
+  const keys = await list("tasks", "");
+  let n = 0;
+  for (const k of keys) {
+    const t = await get("tasks", k);
+    if (!t) continue;
+    const rec = t.data?.bookingId ? await get("bookings", `${t.slug}/${t.data.bookingId}`) : t.data?.leadId ? await get("leads", `${t.slug}/${t.data.leadId}`) : null;
+    if (rec && rec.phone === e164Number) { await del("tasks", k); n++; }
+  }
+  return n;
 }
 export async function logEvent(slug, type, data = {}) {
   const rec = { id: id(4), slug, type, data, at: now() };

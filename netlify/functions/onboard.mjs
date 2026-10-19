@@ -1,7 +1,7 @@
 // Onboarding: POST creates the client from the questionnaire and starts the build job.
 // GET ?c=slug&k=key returns build status for the onboarding page to poll.
 import { getClient, saveClient, indexClient, clientByEmail, id, secret, logEvent } from "./lib/store.mjs";
-import { newClient, ownerView } from "./lib/config.mjs";
+import { newClient, ownerView, loopCheck } from "./lib/config.mjs";
 import { notifySteve, sendEmail, e164 } from "./lib/send.mjs";
 import { json } from "./lib/agent.mjs";
 
@@ -42,7 +42,7 @@ export default async (req) => {
     serviceArea: arr(b.serviceArea), notServed: arr(b.notServed), hours: s(b.hours, 300), afterHours: s(b.afterHours, 300),
     spanish: b.spanish !== false && b.spanish !== "no", licenses: s(b.licenses, 200), googlePlaceId: s(b.googlePlaceId, 120), reviewLink: s(b.reviewLink, 300), payLink: s(b.payLink, 300),
   });
-  c.owner = { ...c.owner, name: s(b.name) || c.owner.name, phone: e164(s(b.phone, 30)) || c.owner.phone };
+  c.owner = { ...c.owner, name: s(b.name) || c.owner.name, phone: e164(s(b.phone, 30)) || c.owner.phone, backupPhone: e164(s(b.backupPhone, 30)) };
   c.plan = ["starter", "growth", "pro"].includes(b.plan) ? b.plan : "growth";
   c.services = lines(b.services, 60);
   c.fees = lines(b.fees, 30).map((line) => { const m = line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/); return m ? { label: m[1].trim(), amount: m[2].trim(), note: (m[3] || "").trim() } : { label: line, amount: "", note: "" }; });
@@ -51,10 +51,12 @@ export default async (req) => {
   c.faq = lines(b.faq, 40).map((line) => { const i = line.indexOf("?"); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : { q: line, a: "" }; }).filter((x) => x.a);
   c.leadSources = arr(b.leadSources, 10);
   c.software = s(b.software, 30) || "google";
-  c.phone = { ...c.phone, businessNumber: e164(s(b.businessNumber, 30)), forwarding: ["missed", "all", "none"].includes(b.forwarding) ? b.forwarding : "missed", carrier: ["att", "verizon", "tmobile", "voip", "other"].includes(b.carrier) ? b.carrier : "other" };
+  c.phone = { ...c.phone, businessNumber: e164(s(b.businessNumber, 30)), forwarding: ["missed", "all", "none"].includes(b.forwarding) ? b.forwarding : "missed", carrier: ["att", "verizon", "tmobile", "voip", "other"].includes(b.carrier) ? b.carrier : "other", transferTo: e164(s(b.transferTo, 30)) };
   c.business.legal = { legalName: s(b.legalName, 120), ein: s(b.ein, 20), businessType: ["llc", "corp", "sole", "partnership", "nonprofit"].includes(b.businessType) ? b.businessType : "llc", street: s(b.street, 120), city: s(b.legalCity, 80) || c.business.city, state: s(b.state, 2).toUpperCase() || "TX", zip: s(b.zip, 10) };
   c.summary = s(b.notes, 1500);
   c.widget = { ...c.widget, greeting: s(b.greeting, 200) };
+  const loop = loopCheck(c);
+  if (loop) return json({ error: "loop", ...loop }, 400);
   c.status = "building";
   c.build = { status: "queued", notes: "", sourcePages: [], queuedAt: new Date().toISOString() };
   await saveClient(c);

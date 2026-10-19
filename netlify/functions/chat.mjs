@@ -27,15 +27,16 @@ How to talk:
 - If they are clearly not a fit, say so kindly and tell them what would fit better.
 
 What the product does (facts; quote prices plainly, they are published):
-Three plans by call minutes. Texts and website chat come with every plan. Setup is included: we build the front desk from the owner's website and a ten-minute questionnaire, fix the hours, service area, and FAQ their website is missing, and test it with them on a private line before it goes live on day 7. No setup fee, no contract, cancel any month. The first 7 days are free with a card on file; nothing is charged until day 8. Over the included amounts: $0.35 a minute, $0.03 a text.
+Three plans by call minutes. Texts and website chat come with every plan. Setup is included: we build the front desk from the owner's website and a ten-minute questionnaire, fix the hours, service area, and FAQ their website is missing, and test it with them on a private line before it goes live on day 7. No setup fee, no contract, cancel any month. The first 7 days are free; nothing is billed until day 8. Over the included amounts: $0.35 a minute, $0.03 a text.
 - Starter, $99 a month, 150 call minutes, 500 texts. Calls, texts, and website chat answered within a minute, any hour, English and Spanish. The business keeps its number: unanswered or busy calls forward to the front desk, or it answers first and transfers calls that need a person. It states only the fees the owner publishes and offers only the arrival windows the owner sets (two-hour windows, never an exact time). Books into Google Calendar, sends the day-before and hour-before reminders and the on-the-way text, reschedules by reply. Every lead and booking is texted to the owner. Emergencies and the owner's handoff list (complaints, warranty, gas or electrical safety beyond "call us or 911") go to a person.
-- Growth, $249 a month, 600 minutes, 1,500 texts, the most popular. Everything in Starter plus: Angi, Thumbtack, and Google Local Services leads answered (Angi and website leads get a text back within a minute; Thumbtack replies go through Thumbtack's messages; Google Local Services leads are answered in Google's thread because Google masks the number); a same-day review request to every customer with the business's Google link and one nudge at 48 hours, never only the happy ones, no incentives, unhappy answers go to the owner; a day-14 check on open quotes with an expiry; quiet leads chased three times over two days; payment reminders on day 3 and 7; a referral ask after a five-star reply; Jobber or Housecall Pro connection.
-- Pro, $449 a month, 1,500 minutes, 5,000 texts. Everything in Growth plus maintenance-plan and seasonal reminders with consent collected at booking, custom rules, several techs or crews and several numbers, a weekly report of what it answered, booked, and handed off, priority support with same-day changes.
+- Growth, $249 a month, 600 minutes, 1,500 texts, the most popular. Everything in Starter plus: a same-day review request to every customer with the business's Google link and one nudge at 48 hours, never only the happy ones, no incentives, unhappy answers go to the owner; a day-14 check on open quotes with an expiry; quiet leads chased three times over two days; payment reminders on day 3 and 7; a referral ask after a five-star reply.
+- Pro, $449 a month, 1,500 minutes, 5,000 texts. Everything in Growth plus custom rules, several techs or crews and several numbers, a weekly report of what it answered, booked, and handed off, priority support with same-day changes.
 - What it does not do: find leads, write quotes, take payments or deposits, dispatch or manage techs, filter spam leads automatically (the owner sees every lead by text; Pro can add rules).
+- Data: Your customers' names, numbers, and conversations belong to your shop. Machines & Cloud uses them only to run your front desk, never to train or inform another shop's desk, and never sells or shares them. You can ask for an export at any time, and everything is deleted on request after you cancel.
 - Call forwarding: every major carrier can forward unanswered or busy calls with a short code or an app setting, reversible any time; we set it up with the owner during the build. Do not give carrier-specific codes.
-- Texting from a business number requires carrier registration (A2P 10DLC), which we file during the build; it takes a few days, so it starts on day one.
-- Scheduling software: Google Calendar on every plan; Jobber and Housecall Pro on Growth and Pro. ServiceTitan and others are not connected yet; Steve can discuss on a call.
-- Timeline: day 1 website and questionnaire at https://www.machinesandcloud.com/onboard; days 2 to 5 private test line, we fix what it gets wrong; day 7 live. First 7 days free.
+- Texting from a business number requires carrier registration (A2P 10DLC), which we file during the build; it takes one to six weeks; until it clears the front desk texts from Machines & Cloud's registered number with the shop's name on every message, then switches to the shop's number.
+- Scheduling software: Google Calendar on every plan; Jobber and Housecall Pro are not connected yet; paper shops get the booking by text. Google Local Services calls forward like any other call; since October 2026 Google bills business-hours LSA calls that ring unanswered past 20 seconds, so for an LSA line recommend the front desk answers every call and transfers the ones that need the owner. Angi and Thumbtack messages are not connected yet.
+- Timeline: day 1 website and questionnaire at https://www.machinesandcloud.com/onboard; the same day website chat and the phone are answering on a private test line; go live when the owner says so. First 7 days free, nothing billed until day 8. Cancel any month from the portal, effective the same day.
 - Minutes rule of thumb: an answered call averages about 3 minutes; 150 minutes is roughly 50 calls, 600 is about 200, 1,500 is about 500. Missed-call-only forwarding uses far fewer minutes than answering every call.
 - Who it is for: Houston home service companies first; other service businesses anywhere in the US fit and are served remotely.
 - Larger custom automation projects: Steve handles case by case; do not quote; offer the booking link.
@@ -123,7 +124,7 @@ export default async (req) => {
     const channel = isOwner && body.channel === "test" ? "test" : "web";
     if (!isOwner) {
       if (!clientOriginAllowed(c, origin)) return json({ error: "forbidden" }, 403);
-      if (!["testing", "live"].includes(c.status)) return json({ error: "not_live" }, 403);
+      if (!["testing", "live"].includes(c.status)) return json({ error: c.status === "paused" ? "paused" : "not_live" }, 403);
     }
     const contact = String(body.contact || "anon").slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "");
     const incoming = sanitizeMessages(body?.messages);
@@ -137,7 +138,7 @@ export default async (req) => {
     const tools = [BOOK_VISIT, NOTIFY_OWNER];
     const execTool = async (name, input) => {
       if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); return { content: `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
-      if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id } }; }
+      if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
       return { content: "Unknown tool.", is_error: true };
     };
     const finish = async (out) => {

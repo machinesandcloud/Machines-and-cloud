@@ -55,6 +55,7 @@
 
   fetch(BASE + '/api/client?c=' + encodeURIComponent(slug)).then(function (r) { return r.json(); }).then(function (d) {
     if (d && d.name) { cfg.name = d.name; cfg.greeting = d.greeting || cfg.greeting; root.querySelector('.h b').textContent = cfg.name; }
+    if (d && (d.status === 'paused' || d.status === 'cancelled')) { cfg.greeting = 'We are not taking chats right now. Please call ' + (d.businessNumber || 'us') + '.'; input.disabled = true; sendBtn.disabled = true; }
     if (rendered) render();
   }).catch(function () { /* keep defaults */ });
 

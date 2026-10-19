@@ -71,7 +71,7 @@ export default async (req) => {
   if (c.phone.twilioNumber) {
     const text = `${c.business.name}: your front desk number is ${c.phone.twilioNumber}. ${fw.short} Portal: ${portal}`;
     if (c.owner.phone) await sendSMS({ to: c.owner.phone, from: c.phone.twilioNumber, body: text });
-    await sendEmail({ to: c.owner.email, subject: `Your front desk number: ${c.phone.twilioNumber}`, text: `Your front desk now has its own number: ${c.phone.twilioNumber}.\n\nOne step is yours, and it takes a minute: turn on call forwarding from your phone.\n\n${fw.long}\n\nTexting from this number starts as soon as the carriers approve the business registration (usually a few days; we filed it). Website chat works now: the one-line snippet is on your portal.\n\n${portal}` });
+    await sendEmail({ to: c.owner.email, subject: `Your front desk number: ${c.phone.twilioNumber}`, text: `Your front desk now has its own number: ${c.phone.twilioNumber}.\n\nOne step is yours, and it takes a minute: turn on call forwarding from your phone.\n\n${fw.long}\n\nTexting from this number starts as soon as the carriers approve the business registration (one to six weeks; we filed it). Until then your front desk texts from our registered number with your business name on every message. Website chat works now: the one-line snippet is on your portal.\n\n${portal}` });
   }
   await notifySteve(`Provisioned: ${c.business.name} (${c.provision.status})`, `${JSON.stringify(c.provision.steps, null, 1)}\n${notes.join("\n")}\n${portal}`);
   return new Response("ok");

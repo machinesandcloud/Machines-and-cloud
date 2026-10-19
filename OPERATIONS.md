@@ -32,7 +32,7 @@ Stores: `clients` (slug -> record), `index` (`email:`, `number:` -> slug), `conv
 | `TWILIO_PRIMARY_PROFILE_SID` | 10DLC filing | BU... SID of the approved Primary Customer Profile |
 | `TWILIO_NOTIFY_EMAIL` | 10DLC status emails from Twilio | defaults to STEVE_EMAIL |
 | `VAPI_API_KEY`, `VAPI_MODEL`, `VAPI_VOICE_PROVIDER`, `VAPI_VOICE_ID`, `VAPI_WEBHOOK_SECRET` | phone answering | model defaults to claude-sonnet-5; voice optional (Vapi default); set the secret on the Vapi org and we check `x-vapi-secret` |
-| `MC_TWILIO_NUMBER` | texts to Steve and test texts before a client has a number | a Twilio number in E.164 |
+| `MC_TWILIO_NUMBER`, `MC_MESSAGING_SERVICE_SID` | the registered bridge sender: every client's texts go out from it (with the shop's name prefixed) until the client's own 10DLC campaign is approved; also texts to Steve | one-time: buy the number, register Machines & Cloud's own brand and campaign, attach the number to a Messaging Service, paste its SID |
 | `STEVE_PHONE`, `STEVE_EMAIL` | alerts to Steve | E.164; email defaults to support@ |
 | `RESEND_API_KEY`, `FROM_EMAIL` | owner emails (portal link, ready-to-test) | verify the sending domain in Resend |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | calendar connect | OAuth client, redirect URI `https://machinesandcloud.com/api/google/callback` |

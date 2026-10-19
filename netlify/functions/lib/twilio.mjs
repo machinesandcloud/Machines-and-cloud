@@ -2,6 +2,8 @@
 // and register the shop for A2P 10DLC (Secondary Customer Profile -> A2P Trust Product -> Brand ->
 // Campaign). Needs TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PRIMARY_PROFILE_SID (the
 // approved Primary Customer Profile of Machines & Cloud, a one-time setup in the Twilio console).
+import { policyUrls } from "./config.mjs";
+
 const SID = process.env.TWILIO_ACCOUNT_SID;
 const TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const PRIMARY = process.env.TWILIO_PRIMARY_PROFILE_SID;
@@ -18,6 +20,7 @@ async function tw(url, params, method = "POST") {
     headers: { Authorization: "Basic " + Buffer.from(`${SID}:${TOKEN}`).toString("base64"), ...(method === "POST" ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) },
     body: method === "POST" ? new URLSearchParams(params).toString() : undefined,
   });
+  if (res.status === 204) return {};
   const d = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`twilio ${url.split("/").slice(-2).join("/")}: ${d.message || d.error || res.status}`);
   return d;
@@ -103,13 +106,16 @@ export async function createCampaign(client, serviceSid, brandSid) {
   const c = await tw(msg(`Services/${serviceSid}/Compliance/Usa2p`), {
     BrandRegistrationSid: brandSid,
     Description: `${name} is a ${client.business.trade || "home service"} company. This number texts customers who contacted the business about service: replies to their questions, appointment confirmations and reminders, on-the-way notices, follow-up on open estimates, and review requests after a completed job. One-to-one conversational messaging; no marketing blasts.`,
-    MessageFlow: `Customers opt in by calling or texting ${name}, booking a visit by phone, website chat, or text, or giving their mobile number to the technician. At booking they are told they will receive appointment texts and can reply STOP at any time.`,
+    MessageFlow: `Customers opt in by calling, texting, or chatting with ${name} or booking a visit; at booking the front desk tells them they will get appointment texts at this number and can reply STOP. Terms: ${policyUrls(client.slug).terms}. Privacy: ${policyUrls(client.slug).privacy}.`,
     MessageSamples: [
       `${name}: you're booked for tomorrow, 8 to 12. We'll text a reminder and again when the tech is on the way. Reply STOP to opt out.`,
-      `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? Reply here and we'll get you scheduled.`,
+      `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? Reply here and we'll get you scheduled. Reply STOP to opt out.`,
       `Thanks for choosing ${name}. How did we do? A quick Google review helps a small shop a lot. Reply here if anything was not right.`,
     ],
     UsAppToPersonUsecase: "MIXED",
+    PrivacyPolicyUrl: policyUrls(client.slug).privacy,
+    TermsAndConditionsUrl: policyUrls(client.slug).terms,
+    OptInMessage: `${name}: you're booked. We'll text appointment reminders to this number. Reply STOP to opt out, HELP for help.`,
     HasEmbeddedLinks: "true",
     HasEmbeddedPhone: "true",
     SubscriberOptIn: "true",
@@ -122,4 +128,17 @@ export async function createCampaign(client, serviceSid, brandSid) {
 export async function campaignStatus(serviceSid, campaignSid) {
   const d = await tw(msg(`Services/${serviceSid}/Compliance/Usa2p/${campaignSid}`), null, "GET");
   return d.campaign_status; // PENDING, VERIFIED, FAILED, IN_PROGRESS
+}
+
+export async function getNumber(numberSid) {
+  const d = await tw(api(`IncomingPhoneNumbers/${numberSid}.json`), null, "GET");
+  return { voice_url: d.voice_url, sms_url: d.sms_url, phone_number: d.phone_number };
+}
+
+export async function releaseNumber(numberSid, messagingServiceSid) {
+  const out = {};
+  if (messagingServiceSid) { try { await tw(msg(`Services/${messagingServiceSid}`), null, "DELETE"); out.messagingService = messagingServiceSid; } catch (e) { out.messagingServiceError = e.message; } }
+  await tw(api(`IncomingPhoneNumbers/${numberSid}.json`), null, "DELETE");
+  out.number = numberSid;
+  return out;
 }

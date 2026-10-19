@@ -103,9 +103,10 @@
       </div>
       <div class="row">
         <div class="form-group"><label class="form-label" for="carrier">Carrier for that number</label><select class="form-input" id="carrier" name="carrier"><option value="att">AT&amp;T</option><option value="verizon">Verizon</option><option value="tmobile">T-Mobile</option><option value="voip">Office phone or VoIP (RingCentral, Google Voice, etc.)</option><option value="other">Other</option></select></div>
-        <div class="form-group"></div>
+        <div class="form-group"><label class="form-label" for="backupPhone">Backup number for urgent alerts (optional)</label><input class="form-input" id="backupPhone" name="backupPhone" type="tel" placeholder="A second phone, not your cell"><span class="hint" style="display:block;margin-top:4px">If you do not acknowledge an urgent alert within 10 minutes, it goes here.</span></div>
       </div>
-      <p class="hint">Texting registration. Carriers require every business that texts customers to be registered (it is called 10DLC). We file it for you with these details; it usually clears in a few days. Leave blank to add later from your portal.</p>
+      <div class="row" id="transferRow" style="display:none"><div class="form-group"><label class="form-label" for="transferTo">Transfer calls that need you to</label><input class="form-input" id="transferTo" name="transferTo" type="tel" placeholder="Your cell"></div><div class="form-group"><span class="hint">Running Google Local Services ads? Choose "All of them": Google now bills business-hours calls that ring unanswered past 20 seconds.</span></div></div>
+      <p class="hint">Texting registration. Carriers require every business that texts customers to be registered (it is called 10DLC). We file it for you with these details; it takes one to six weeks; until it clears, your front desk texts from our registered number with your business name on every message. Leave blank to add later from your portal.</p>
       <div class="row">
         <div class="form-group"><label class="form-label" for="legalName">Legal business name</label><input class="form-input" id="legalName" name="legalName" placeholder="Katy Pipeworks LLC"></div>
         <div class="form-group"><label class="form-label" for="ein">EIN</label><input class="form-input" id="ein" name="ein" placeholder="12-3456789" inputmode="numeric"></div>
@@ -138,7 +139,7 @@
     <h2 style="margin-top:0">Building your front desk</h2>
     <p class="status" id="buildStatus">Reading your website and drafting what it knows. This takes a minute or two.</p>
     <p><b>Your portal and test line</b> (keep this link, it is your login):<br><a class="portal" id="portalLink" href="#"></a></p>
-    <p class="status">We also emailed it to you. On the portal you can chat with your front desk as a customer, read everything it knows, fix anything wrong, and add the chat to your website with one line. Your front desk number and the one-minute forwarding step arrive by text and email as soon as the number is ready.</p>
+    <p class="status">We also emailed it to you. On the portal you can chat with your front desk as a customer, read everything it knows, fix anything wrong, and add the chat to your website with one line. Your front desk number and the one-minute forwarding step arrive by text and email as soon as the number is ready. Texting from your own number starts when carriers approve the registration (one to six weeks); your desk texts from our registered number until then.</p>
     <p><a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my portal</a></p>
   </section>
 </main>
@@ -149,6 +150,7 @@
   var q = new URLSearchParams(location.search);
   ['name', 'email', 'website', 'phone', 'business'].forEach(function (k) { if (q.get(k)) form.elements[k].value = q.get(k); });
   if (q.get('plan')) { var r = form.querySelector('input[name=plan][value=' + q.get('plan') + ']'); if (r) r.checked = true; }
+  var fwdSel = form.elements['forwarding']; function fwdUI() { document.getElementById('transferRow').style.display = fwdSel.value === 'all' ? 'grid' : 'none'; if (fwdSel.value === 'all' && !form.elements['transferTo'].value) form.elements['transferTo'].value = form.elements['phone'].value; } fwdSel.addEventListener('change', fwdUI);
   form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { form.querySelectorAll('.plans-pick label').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }); });
   function show(n) { i = n; steps.forEach(function (s, k) { s.classList.toggle('on', k === n); }); pills.forEach(function (p, k) { p.classList.toggle('on', k <= n); }); back.style.visibility = n ? 'visible' : 'hidden'; next.textContent = n === steps.length - 1 ? 'Build my front desk' : 'Next'; err.textContent = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
   function valid() { var ok = true; steps[i].querySelectorAll('[required]').forEach(function (f) { var bad = !f.value.trim() || (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.value)); f.classList.toggle('error', bad); if (bad) ok = false; }); if (!ok) err.textContent = 'Fill in the highlighted fields.'; return ok; }
@@ -161,6 +163,7 @@
     fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (r) {
+        if (!r.ok && r.d.error === 'loop') { var fld = form.elements[(r.d.field || '').split('.').pop()] || form.elements['phone']; fld.classList.add('error'); err.textContent = r.d.message; next.disabled = false; next.textContent = 'Build my front desk'; return; }
         if (!r.ok || !r.d.portal) throw new Error(r.d.error || 'failed');
         form.style.display = 'none'; document.querySelector('.ob-steps').style.display = 'none';
         var done = document.getElementById('done'); done.classList.add('on');

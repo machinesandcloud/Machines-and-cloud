@@ -49,6 +49,11 @@ export function visitDate(dateStr, tz = "America/Chicago") {
   if (d === "tomorrow") { const t = new Date(today); t.setDate(t.getDate() + 1); return t; }
   const m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (m) return new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const wd = days.findIndex((n) => d.startsWith(n.slice(0, 3)));
+  if (wd >= 0) { const t = new Date(today); let delta = (wd - t.getDay() + 7) % 7; if (delta === 0) delta = 7; t.setDate(t.getDate() + delta); return t; }
+  const us = d.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+  if (us) { const y = us[3] ? (us[3].length === 2 ? 2000 + parseInt(us[3]) : parseInt(us[3])) : today.getFullYear(); return new Date(y, parseInt(us[1]) - 1, parseInt(us[2])); }
   return today;
 }
 
@@ -82,4 +87,19 @@ export async function createEvent(client, booking) {
   const d = await res.json().catch(() => ({}));
   if (!res.ok) { console.error("calendar insert failed", res.status, d); return null; }
   return { id: d.id, link: d.htmlLink };
+}
+
+export async function updateEvent(client, booking) {
+  const g = client.calendar?.google;
+  if (!googleEnabled() || !g?.refreshToken || !booking.calendarEventId) return null;
+  const token = await accessToken(g.refreshToken);
+  const date = visitDate(booking.date);
+  const { start, end } = windowHours(booking.window);
+  const calId = encodeURIComponent(g.calendarId || "primary");
+  const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${encodeURIComponent(booking.calendarEventId)}`, {
+    method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ start: { dateTime: houstonISO(date, start), timeZone: "America/Chicago" }, end: { dateTime: houstonISO(date, end), timeZone: "America/Chicago" } }),
+  });
+  if (!res.ok) { console.error("calendar patch failed", res.status); return null; }
+  return await res.json();
 }
