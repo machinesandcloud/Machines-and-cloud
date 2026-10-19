@@ -89,13 +89,35 @@ export async function bookVisit(c, input, ctx = {}) {
   return b;
 }
 
+// A repeat notify_owner for the same customer within 30 minutes updates the open lead instead of
+// opening a second one (and a second escalation chain).
+async function recentOpenLead(c, phone, contact) {
+  const cutoff = Date.now() - 30 * 60 * 1000;
+  const leads = (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > cutoff);
+  return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
+}
+
 export async function flagLead(c, input, ctx = {}) {
   const phone = e164(input.phone) || esc(input.phone);
   const reason = input.reason || "lead";
+  const prior = reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact);
+  if (prior) {
+    const changed = [];
+    for (const k of ["customer_name", "phone", "address", "issue", "wanted", "unsure"]) { const v = k === "phone" ? phone : esc(input[k]); if (v && v !== prior[k]) { prior[k] = v; changed.push(k); } }
+    const escalate = (reason === "emergency" || input.urgency === "emergency") && prior.urgency !== "emergency";
+    if (escalate) { prior.urgency = "emergency"; prior.reason = "emergency"; prior.outcome = "needs_action"; changed.push("urgency"); }
+    if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); }
+    await saveRecord("leads", prior);
+    if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
+    const waiting = (await listRecords("alerts", c.slug, 100)).some((a) => a.leadId === prior.id && a.status === "waiting");
+    if (!waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
+    await logEvent(c.slug, "lead_updated", { id: prior.id, changed, channel: ctx.channel });
+    return prior;
+  }
   const l = await addRecord("leads", c.slug, {
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure),
-    channel: ctx.channel || "web", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
+    channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
   });
   if (reason !== "spam") {
     await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
