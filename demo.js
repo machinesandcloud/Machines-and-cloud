@@ -12,27 +12,27 @@
 
   var SCENARIOS = [
     { id: 'bayou-air', company: 'Bayou Air & Heat', trade: 'HVAC', owner: 'Ray', area: 'Katy, Cypress, Sugar Land',
-      problem: 'The AC dies at 10 pm in July. The first company to answer gets the job.',
+      problem: 'HVAC. Katy, Cypress, Sugar Land. Diagnostic $89, after-hours $189.',
       greeting: "Hi, this is the Bayou Air & Heat front desk. How can I help with your heating or cooling today?",
       prompts: ['My AC just stopped cooling and it is 95 degrees. Can someone come tonight?', 'Do you cover Cypress? How much is a visit?', 'Mi aire no enfría. ¿Hablan español?', 'Can the tech be here by 2 pm tomorrow?'] },
     { id: 'katy-pipeworks', company: 'Katy Pipeworks', trade: 'Plumbing', owner: 'Dana', area: 'Katy, Fulshear, Richmond',
-      problem: 'A leaking water heater at 6 am. The customer wants a price and a time, now.',
+      problem: 'Plumbing. Katy, Fulshear, Richmond. 24/7 for leaks and no water.',
       greeting: "Katy Pipeworks front desk here. What's going on with your plumbing?",
       prompts: ['My water heater is leaking. How much to replace it?', 'I smell gas near the stove, what do I do?', 'Do you do emergency calls on Sunday?', 'Can you give me a discount on drain clearing?'] },
     { id: 'brazos-electric', company: 'Brazos Electric Co.', trade: 'Electrical', owner: 'Luis', area: 'Pearland, League City, Clear Lake',
-      problem: 'A homeowner shopping EV charger installs sends the same question to four electricians.',
+      problem: 'Electrical. Pearland, League City, Clear Lake. Weekdays, emergencies any time.',
       greeting: "Thanks for reaching out to Brazos Electric. What can we help you with?",
       prompts: ['How much to install an EV charger in my garage?', 'There is a burning smell from my breaker panel.', 'Can you come out this Saturday?', 'I need a quote for a panel upgrade.'] },
     { id: 'gulf-coast-roofing', company: 'Gulf Coast Roofing', trade: 'Roofing', owner: 'Pam', area: 'The Woodlands, Spring, Conroe',
-      problem: 'The day after a hailstorm, 40 homeowners want an inspection and the phone never stops.',
+      problem: 'Roofing. The Woodlands, Spring, Conroe. Free inspections.',
       greeting: "Gulf Coast Roofing front desk. Storm damage, a leak, or something else?",
       prompts: ['We had hail last night. Can someone look at my roof?', 'Will my insurance cover a new roof?', 'How much is a new roof?', 'I have water dripping from the ceiling right now.'] },
     { id: 'westheimer-maids', company: 'Westheimer Maids', trade: 'Cleaning', owner: 'Nia', area: 'Galleria, Memorial, Bellaire',
-      problem: 'A tenant moving out Friday needs a price and a slot. Three cleaning companies got the same text.',
+      problem: 'Cleaning. Galleria, Memorial, Bellaire. Standard clean from $129.',
       greeting: "Hi, this is the Westheimer Maids front desk. Are you looking for a one-time clean or regular service?",
       prompts: ['How much for a move-out clean on a 3 bedroom, 2 bath this Friday?', 'Do you bring your own supplies?', '¿Cuánto cuesta una limpieza profunda?', 'Can you do Sunday morning?'] },
     { id: 'mc', company: 'Machines & Cloud', trade: 'Us', owner: 'Steve', area: 'Houston',
-      problem: 'Our real front desk, not a made-up one. Ask what the pilot costs. Leave your details and Steve gets a real lead.',
+      problem: 'Our own front desk. Ask about the pilot, or leave your details and Steve will call you.',
       greeting: "Hi, I'm the Machines & Cloud front desk agent. I'm an AI, and I'm the same product we install for your business. Ask me what it costs or how the pilot works.",
       prompts: ['What does the free pilot include?', 'What happens if the agent does not know an answer?', 'I run an HVAC company in Katy. How do I start?', 'Where did Steve work before?'] },
   ];
@@ -43,17 +43,17 @@
     '<div class="demo-grid">' +
       '<section class="demo-chat" aria-label="Customer chat">' +
         '<header class="demo-chat-head">' +
-          '<label class="demo-picker"><span class="demo-picker-label">You are texting</span><select id="demoSelect" aria-label="Choose a company"></select></label>' +
+          '<label class="demo-picker"><span class="demo-picker-label">Company</span><select id="demoSelect" aria-label="Choose a company"></select></label>' +
           '<button type="button" class="demo-reset" id="demoReset">Start over</button>' +
         '</header>' +
         '<p class="demo-problem"></p>' +
         '<div class="demo-messages" id="demoMessages" aria-live="polite"></div>' +
         '<div class="demo-prompts" id="demoPrompts"><span class="demo-prompts-label">Try:</span></div>' +
-        '<form class="demo-form" id="demoForm"><label for="demoInput" class="sr-only">Your message</label><textarea id="demoInput" rows="1" maxlength="1500" placeholder="Type like a customer would" required></textarea><button type="submit" class="btn btn-primary" id="demoSend">Send</button></form>' +
+        '<form class="demo-form" id="demoForm"><label for="demoInput" class="sr-only">Your message</label><textarea id="demoInput" rows="1" maxlength="1500" placeholder="Type a message" required></textarea><button type="submit" class="btn btn-primary" id="demoSend">Send</button></form>' +
       '</section>' +
       '<aside class="demo-phone" aria-label="What the owner receives">' +
         '<div class="demo-phone-frame"><div class="demo-phone-top"><span class="demo-phone-owner"></span><span class="demo-phone-time">now</span></div><div class="demo-phone-body" id="demoPhone"></div></div>' +
-        '<p class="demo-phone-note">What the owner gets, as it happens.</p>' +
+        '<p class="demo-phone-note">What the owner receives.</p>' +
       '</aside>' +
     '</div>';
 
@@ -71,7 +71,7 @@
   function linkify(e) { return e.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
 
   SCENARIOS.forEach(function (s) {
-    var o = document.createElement('option'); o.value = s.id; o.textContent = s.company + (s.id === 'mc' ? ' (that is us)' : ' · ' + s.trade);
+    var o = document.createElement('option'); o.value = s.id; o.textContent = s.company + (s.id === 'mc' ? ' (our own front desk)' : ' · ' + s.trade);
     pick.appendChild(o);
   });
   pick.addEventListener('change', function () { select(pick.value); input.focus(); });
@@ -91,7 +91,7 @@
     var s = state.scenario; var notes = state.notifications[s.id] || [];
     ownerEl.textContent = s.owner + "'s phone";
     if (!notes.length) {
-      phone.innerHTML = '<div class="demo-phone-empty">Nothing yet. Chat as a customer on the left and watch what ' + esc(s.owner) + ' gets.</div>';
+      phone.innerHTML = '<div class="demo-phone-empty">Nothing yet. Start a conversation and ' + esc(s.owner) + "'s phone fills in.</div>";
       return;
     }
     phone.innerHTML = notes.map(function (n) {
@@ -114,7 +114,7 @@
   }
 
   function renderPrompts() {
-    promptsEl.innerHTML = '<span class="demo-prompts-label">Try:</span>';
+    promptsEl.innerHTML = '<span class="demo-prompts-label">Ask:</span>';
     state.scenario.prompts.forEach(function (p) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'demo-prompt'; b.textContent = p;
       b.addEventListener('click', function () { send(p); });

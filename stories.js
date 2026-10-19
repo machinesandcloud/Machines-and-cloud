@@ -76,7 +76,7 @@
     if (el.dataset.playing === 'true') return;
     el.dataset.playing = 'true';
     var msgs = el.querySelector('.scene-msgs'), body = el.querySelector('.scene-phone-body'), replay = el.querySelector('.scene-replay'), ptime = el.querySelector('.scene-phone-time');
-    msgs.innerHTML = ''; body.innerHTML = '<div class="scene-phone-empty">' + esc(scene.owner) + ' is on a job. Watch what lands here.</div>'; replay.hidden = true; ptime.textContent = '';
+    msgs.innerHTML = ''; body.innerHTML = '<div class="scene-phone-empty">' + esc(scene.owner) + ' is on a job.</div>'; replay.hidden = true; ptime.textContent = '';
     var i = 0;
     function next() {
       if (i >= scene.msgs.length) return notify();
