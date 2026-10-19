@@ -27,7 +27,7 @@ The core pages were produced by one-off generator scripts in the 2026-10-18 sess
 
 ## Prices (published, as of 2026-10-18)
 - Front Desk Agent: free 7 day pilot on the client's real site, then one-time $1,497 build + $397/month, no contract.
-- Phone answering: add-on, quoted on call volume, no public number yet (Steve to set).
+- Phone answering: add-on, $297/month with 300 call minutes included, then $0.35/minute, no setup fee when added during the pilot (set 2026-10-18 from market data; Steve may change).
 - Custom projects: case by case, not priced on the site.
 Shared copy to keep in sync on a price change: `index.html` (hero note, price card, FAQ, Service schema), every `industry-*.html` FAQ, `houston.html`, `netlify/functions/chat.mjs` MC_SYSTEM, `llms.txt`/`llms-full.txt`.
 
