@@ -320,6 +320,12 @@
           if (!res.ok) throw new Error('Form submit failed: ' + res.status);
           submitBtn.textContent = 'Message Sent!';
           submitBtn.classList.add('success');
+          if (form.classList.contains('pilot-form')) {
+            var fd = new FormData(form);
+            var qs = new URLSearchParams({ name: fd.get('name') || '', email: fd.get('email') || '', website: fd.get('website') || '', phone: fd.get('phone') || '' }).toString();
+            window.location.href = 'onboard.html?' + qs;
+            return;
+          }
           window.location.href = form.getAttribute('action') || 'thank-you.html';
         })
         .catch(() => {

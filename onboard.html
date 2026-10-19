@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set up your front desk | Machines &amp; Cloud</title>
+  <meta name="description" content="Ten minutes of answers and your front desk is built from your website.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .ob { max-width: 760px; margin: 0 auto; padding: 120px 20px 80px; }
+    .ob h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); margin: 0 0 8px; }
+    .ob .lead { color: #5B6273; margin: 0 0 28px; }
+    .ob-steps { display: flex; gap: 8px; margin: 0 0 24px; flex-wrap: wrap; }
+    .ob-steps span { font-size: 12px; padding: 6px 12px; border-radius: 999px; border: 1px solid #E8E1D5; background: #fff; color: #5B6273; }
+    .ob-steps span.on { background: #1E2433; color: #fff; border-color: #1E2433; }
+    .ob fieldset { border: 1px solid #E8E1D5; border-radius: 20px; background: #fff; padding: 22px 22px 8px; margin: 0 0 18px; display: none; }
+    .ob fieldset.on { display: block; }
+    .ob legend { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: #1E2433; padding: 0 6px; }
+    .ob .hint { font-size: 13px; color: #5B6273; margin: -2px 0 14px; }
+    .ob .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .ob .row { grid-template-columns: 1fr; } }
+    .ob .form-group { margin-bottom: 14px; }
+    .ob textarea.form-input { min-height: 84px; resize: vertical; }
+    .ob .plans-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 600px) { .ob .plans-pick { grid-template-columns: 1fr; } }
+    .ob .plans-pick label { border: 1px solid #E8E1D5; border-radius: 14px; padding: 12px; cursor: pointer; display: block; }
+    .ob .plans-pick input { margin-right: 6px; }
+    .ob .plans-pick label.on { border-color: #2563EB; background: #EEF4FF; }
+    .ob .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; }
+    .ob .btn-pill { cursor: pointer; border: 0; }
+    .ob .done { display: none; border: 1px solid #E8E1D5; border-radius: 20px; background: #fff; padding: 26px; }
+    .ob .done.on { display: block; }
+    .ob .status { font-size: 14px; color: #5B6273; margin: 10px 0; }
+    .ob code { background: #F3EDE3; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+    .ob .portal { word-break: break-all; }
+    .ob .chk { display: flex; gap: 10px; align-items: center; margin: 8px 0; font-size: 14px; }
+  </style>
+</head>
+<body class="theme-light" data-no-widget>
+<nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
+<main class="ob">
+  <h1>Set up your front desk</h1>
+  <p class="lead">About ten minutes. We read your website too, so skip anything it already says. You can change everything later.</p>
+  <div class="ob-steps"><span class="on">1 You</span><span>2 Shop</span><span>3 Prices and windows</span><span>4 Rules</span><span>5 Phone and leads</span></div>
+  <form id="ob" novalidate>
+    <p hidden><input name="botfield" tabindex="-1" autocomplete="off"></p>
+    <fieldset class="on" data-step="1"><legend>You</legend>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="name">Your name</label><input class="form-input" id="name" name="name" required autocomplete="name"></div>
+        <div class="form-group"><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="phone">Your cell (where leads get texted)</label><input class="form-input" id="phone" name="phone" type="tel" placeholder="(713) 555 0100" autocomplete="tel"></div>
+        <div class="form-group"><label class="form-label" for="website">Your website</label><input class="form-input" id="website" name="website" type="url" placeholder="https://" required></div>
+      </div>
+      <p class="hint">Plan</p>
+      <div class="plans-pick">
+        <label><input type="radio" name="plan" value="starter"> <b>Starter</b> $99<br><small>Calls, texts, chat, booking</small></label>
+        <label class="on"><input type="radio" name="plan" value="growth" checked> <b>Growth</b> $249<br><small>Adds lead platforms and follow-up</small></label>
+        <label><input type="radio" name="plan" value="pro"> <b>Pro</b> $449<br><small>Several crews, reports</small></label>
+      </div>
+    </fieldset>
+    <fieldset data-step="2"><legend>Your shop</legend>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="business">Business name</label><input class="form-input" id="business" name="business" required></div>
+        <div class="form-group"><label class="form-label" for="trade">Trade</label><input class="form-input" id="trade" name="trade" placeholder="HVAC, plumbing, electrical, roofing, cleaning" list="trades"><datalist id="trades"><option>HVAC</option><option>Plumbing</option><option>Electrical</option><option>Roofing</option><option>Cleaning</option><option>Landscaping</option><option>Pest control</option><option>Garage doors</option><option>Handyman</option></datalist></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="services">What you do (one per line)</label><textarea class="form-input" id="services" name="services" placeholder="AC repair&#10;AC replacement&#10;Maintenance plans"></textarea></div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="hours">Hours</label><input class="form-input" id="hours" name="hours" placeholder="Mon to Fri 7 to 6, Sat 8 to 2"></div>
+        <div class="form-group"><label class="form-label" for="afterHours">After hours</label><input class="form-input" id="afterHours" name="afterHours" placeholder="Emergencies only, $150 fee"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="serviceArea">Service area (one per line or commas)</label><textarea class="form-input" id="serviceArea" name="serviceArea" placeholder="Katy, Cypress, Sugar Land"></textarea></div>
+        <div class="form-group"><label class="form-label" for="notServed">Not served</label><textarea class="form-input" id="notServed" name="notServed" placeholder="Inside the Loop, The Woodlands"></textarea></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="city">City</label><input class="form-input" id="city" name="city" value="Houston"></div>
+        <div class="form-group"><label class="form-label" for="spanish">Answer in Spanish too?</label><select class="form-input" id="spanish" name="spanish"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="licenses">License numbers (optional)</label><input class="form-input" id="licenses" name="licenses" placeholder="TACLA 12345C, TECL 1234"></div>
+    </fieldset>
+    <fieldset data-step="3"><legend>Prices and arrival windows</legend>
+      <p class="hint">The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.</p>
+      <div class="form-group"><label class="form-label" for="fees">Published prices (one per line: what: amount (note))</label><textarea class="form-input" id="fees" name="fees" placeholder="Diagnostic visit: $89 (applied to the repair)&#10;After-hours fee: $150&#10;Drain clearing: from $149"></textarea></div>
+      <div class="form-group"><label class="form-label" for="windows">Arrival windows you offer (one per line)</label><textarea class="form-input" id="windows" name="windows" placeholder="8 to 12&#10;12 to 5"></textarea></div>
+      <div class="form-group"><label class="form-label" for="faq">Questions customers ask, with your answer (one per line: Question? Answer)</label><textarea class="form-input" id="faq" name="faq" placeholder="Do you charge a service call fee? $89, waived if you go ahead with the repair.&#10;Are you licensed and insured? Yes, TACLA 12345C."></textarea></div>
+    </fieldset>
+    <fieldset data-step="4"><legend>Rules</legend>
+      <div class="form-group"><label class="form-label" for="handoff">Always hand these to a person (one per line)</label><textarea class="form-input" id="handoff" name="handoff" placeholder="Complaints about past work&#10;Warranty questions&#10;Commercial jobs"></textarea></div>
+      <div class="form-group"><label class="form-label" for="never">Never do (one per line; the basics are already in)</label><textarea class="form-input" id="never" name="never" placeholder="Never quote a replacement price&#10;No window units"></textarea></div>
+      <div class="form-group"><label class="form-label" for="emergencies">What to tell a customer in an emergency, in your words</label><textarea class="form-input" id="emergencies" name="emergencies" placeholder="Gas smell: leave the house, call CenterPoint or 911, then us. No cooling with a baby or elderly person: we come tonight."></textarea></div>
+      <div class="form-group"><label class="form-label" for="notes">Anything else a new receptionist should know</label><textarea class="form-input" id="notes" name="notes" placeholder="We are a family shop, 12 years in Katy. Say 'Ray or one of the guys' not 'a technician'."></textarea></div>
+      <div class="form-group"><label class="form-label" for="greeting">First line of the website chat (optional)</label><input class="form-input" id="greeting" name="greeting" placeholder="Hi, this is the Bayou Air front desk. What can we help with today?"></div>
+    </fieldset>
+    <fieldset data-step="5"><legend>Phone, leads, software</legend>
+      <div class="row">
+        <div class="form-group"><label class="form-label" for="businessNumber">Business number customers call</label><input class="form-input" id="businessNumber" name="businessNumber" type="tel" placeholder="(281) 555 0100"></div>
+        <div class="form-group"><label class="form-label" for="forwarding">Which calls should the front desk take?</label><select class="form-input" id="forwarding" name="forwarding"><option value="missed">Only the ones I miss</option><option value="all">All of them, transfer the ones that need me</option><option value="none">None yet, texts and chat only</option></select></div>
+      </div>
+      <p class="hint">Where your leads come from (check all)</p>
+      <div class="chk"><label><input type="checkbox" name="leadSources" value="referrals"> Referrals and repeat</label></div>
+      <div class="chk"><label><input type="checkbox" name="leadSources" value="google"> Google search and Business Profile</label></div>
+      <div class="chk"><label><input type="checkbox" name="leadSources" value="lsa"> Google Local Services Ads</label></div>
+      <div class="chk"><label><input type="checkbox" name="leadSources" value="angi"> Angi</label></div>
+      <div class="chk"><label><input type="checkbox" name="leadSources" value="thumbtack"> Thumbtack</label></div>
+      <div class="chk"><label><input type="checkbox" name="leadSources" value="nextdoor"> Nextdoor or Facebook</label></div>
+      <div class="row" style="margin-top:12px;">
+        <div class="form-group"><label class="form-label" for="software">Scheduling software</label><select class="form-input" id="software" name="software"><option value="google">Google Calendar</option><option value="jobber">Jobber</option><option value="housecall">Housecall Pro</option><option value="servicetitan">ServiceTitan</option><option value="paper">Paper or whiteboard</option><option value="other">Something else</option></select></div>
+        <div class="form-group"><label class="form-label" for="reviewLink">Google review link (optional)</label><input class="form-input" id="reviewLink" name="reviewLink" placeholder="https://g.page/r/..."></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="payLink">Payment link for invoices (optional)</label><input class="form-input" id="payLink" name="payLink" placeholder="https://"></div>
+    </fieldset>
+    <div class="nav"><button type="button" class="btn-pill btn-pill-dark" id="back" style="visibility:hidden">Back</button><button type="button" class="btn-pill btn-pill-blue" id="next">Next</button></div>
+    <p class="form-status" id="err" role="alert"></p>
+  </form>
+  <section class="done" id="done">
+    <h2 style="margin-top:0">Building your front desk</h2>
+    <p class="status" id="buildStatus">Reading your website and drafting what it knows. This takes a minute or two.</p>
+    <p><b>Your portal and test line</b> (keep this link, it is your login):<br><a class="portal" id="portalLink" href="#"></a></p>
+    <p class="status">We also emailed it to you. On the portal you can chat with your front desk as a customer, read everything it knows, fix anything wrong, add the chat to your website with one line, and connect your calendar.</p>
+    <p><a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my portal</a></p>
+  </section>
+</main>
+<script>
+(function () {
+  var form = document.getElementById('ob'), steps = [].slice.call(form.querySelectorAll('fieldset')), pills = [].slice.call(document.querySelectorAll('.ob-steps span'));
+  var i = 0, back = document.getElementById('back'), next = document.getElementById('next'), err = document.getElementById('err');
+  var q = new URLSearchParams(location.search);
+  ['name', 'email', 'website', 'phone', 'business'].forEach(function (k) { if (q.get(k)) form.elements[k].value = q.get(k); });
+  if (q.get('plan')) { var r = form.querySelector('input[name=plan][value=' + q.get('plan') + ']'); if (r) r.checked = true; }
+  form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { form.querySelectorAll('.plans-pick label').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }); });
+  function show(n) { i = n; steps.forEach(function (s, k) { s.classList.toggle('on', k === n); }); pills.forEach(function (p, k) { p.classList.toggle('on', k <= n); }); back.style.visibility = n ? 'visible' : 'hidden'; next.textContent = n === steps.length - 1 ? 'Build my front desk' : 'Next'; err.textContent = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function valid() { var ok = true; steps[i].querySelectorAll('[required]').forEach(function (f) { var bad = !f.value.trim() || (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.value)); f.classList.toggle('error', bad); if (bad) ok = false; }); if (!ok) err.textContent = 'Fill in the highlighted fields.'; return ok; }
+  back.addEventListener('click', function () { if (i > 0) show(i - 1); });
+  next.addEventListener('click', function () {
+    if (!valid()) return;
+    if (i < steps.length - 1) return show(i + 1);
+    next.disabled = true; next.textContent = 'Building...';
+    var data = {}; new FormData(form).forEach(function (v, k) { if (k === 'leadSources') { (data.leadSources = data.leadSources || []).push(v); } else data[k] = v; });
+    fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (r) {
+        if (!r.ok || !r.d.portal) throw new Error(r.d.error || 'failed');
+        form.style.display = 'none'; document.querySelector('.ob-steps').style.display = 'none';
+        var done = document.getElementById('done'); done.classList.add('on');
+        document.getElementById('portalLink').textContent = r.d.portal; document.getElementById('portalLink').href = r.d.portal; document.getElementById('goPortal').href = r.d.portal;
+        var st = document.getElementById('buildStatus'), tries = 0;
+        (function poll() { tries++; fetch('/api/onboard?c=' + r.d.slug + '&k=' + r.d.key).then(function (x) { return x.json(); }).then(function (s) {
+          if (s.status === 'testing') { st.textContent = 'Built. ' + (s.build && s.build.notes ? 'Your website is missing: ' + s.build.notes + '. We filled in what we could from your answers.' : 'Open your portal to test it.'); return; }
+          if (s.build && s.build.status === 'failed') { st.textContent = 'We could not read your website automatically. Your answers are loaded; Steve will finish the rest by hand today.'; return; }
+          if (tries < 60) setTimeout(poll, 5000);
+        }).catch(function () { if (tries < 60) setTimeout(poll, 8000); }); })();
+      })
+      .catch(function (e) { next.disabled = false; next.textContent = 'Build my front desk'; err.textContent = 'Something went wrong (' + e.message + '). Email support@machinesandcloud.com and we will set you up by hand.'; });
+  });
+  show(0);
+})();
+</script>
+</body>
+</html>
