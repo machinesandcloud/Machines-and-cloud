@@ -3,7 +3,7 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
-import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, weeklyReport } from "./lib/desk.mjs";
+import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
@@ -19,6 +19,7 @@ async function runTask(t) {
   if (t.type === "escalate") return runEscalation(c, t);
   if (t.type === "callback_check") return runCallbackCheck(c, t);
   if (t.type === "visit_check") return runVisitCheck(c, t);
+  if (t.type === "consent_ask") return runConsentAsk(c, t);
   const rec = t.data?.bookingId ? await getRecord("bookings", c.slug, t.data.bookingId) : t.data?.leadId ? await getRecord("leads", c.slug, t.data.leadId) : null;
   if (!rec || rec.status === "cancelled") return "no record";
   if (!rec.phone) return "no number";
@@ -31,6 +32,7 @@ async function runTask(t) {
   if (t.type === "payment_reminder" && (rec.status !== "done" || !rec.invoicedAt)) return "paid or not invoiced";
   if (t.type === "review_nudge" && rec.reviewReply) return "already replied";
   if (t.type === "referral_ask" && rec.reviewReply?.sentiment !== "positive") return "no positive reply";
+  if (t.type === "maintenance_reminder" && !(await getCustomer(c.slug, rec.phone)).marketingConsent) return "no marketing consent";
   const body = t.type === "lead_chase" ? tpl(c, rec, t.data.n) : tpl(c, rec);
   const r = await sendSMS({ to: rec.phone, client: c, type: t.type, body });
   if (r.ok || r.logged) {

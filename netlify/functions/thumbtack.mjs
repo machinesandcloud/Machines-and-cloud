@@ -1,0 +1,35 @@
+// Thumbtack self-serve lead webhook: Thumbtack posts new leads to the URL the pro registers, with a
+// basic-auth or secret header the pro sets. Set the shop's secret by admin ({"leads":{"thumbtackSecret":"..."}});
+// the owner pastes https://<site>/api/thumbtack?c=<slug> and the secret into Thumbtack (OPERATIONS.md).
+import { getClient } from "./lib/store.mjs";
+import { json } from "./lib/agent.mjs";
+import { receivePlatformLead } from "./lib/desk.mjs";
+
+export const config = { path: "/api/thumbtack" };
+
+function presented(req, url) {
+  const auth = req.headers.get("authorization") || "";
+  if (/^basic /i.test(auth)) { try { return Buffer.from(auth.slice(6), "base64").toString("utf8").split(":").pop(); } catch { return ""; } }
+  if (/^bearer /i.test(auth)) return auth.slice(7).trim();
+  return req.headers.get("x-thumbtack-secret") || req.headers.get("x-webhook-secret") || url.searchParams.get("secret") || "";
+}
+
+export default async (req) => {
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  const url = new URL(req.url);
+  const c = await getClient(url.searchParams.get("c") || "");
+  if (!c) return json({ error: "not_found" }, 404);
+  if (!c.leads?.thumbtackSecret || presented(req, url) !== c.leads.thumbtackSecret) return json({ error: "forbidden" }, 403);
+  let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+  const lead = b.lead || b;
+  const cust = lead.customer || {};
+  const req_ = lead.request || {};
+  const loc = req_.location || {};
+  const address = [loc.address1 || loc.address, loc.city, loc.state, loc.zipCode || loc.zip].filter(Boolean).join(", ");
+  const task = [req_.category || lead.category, req_.title || lead.title, req_.description || lead.description].filter(Boolean).join(": ");
+  const r = await receivePlatformLead(c, "thumbtack", {
+    id: String(lead.leadID || lead.leadId || lead.id || b.leadID || ""), name: cust.name || lead.customerName || "", phone: cust.phone || lead.phone || "", email: cust.email || "",
+    address, task, raw: b,
+  });
+  return json({ status: "success", ...r });
+};

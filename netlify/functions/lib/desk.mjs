@@ -1,10 +1,10 @@
 // What happens when the front desk books a visit or flags a lead for a real client:
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
-import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put } from "./store.mjs";
+import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation } from "./store.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
-import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday } from "./config.mjs";
+import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
 import { getUsage, usageView } from "./usage.mjs";
 
 const H = 3600 * 1000, D = 24 * H;
@@ -63,6 +63,44 @@ export const STRINGS = {
     cancelled: (c, b) => `${c.business.name}: su visita (${dateEs(b.date)}, ${winEs(b.window)}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
   },
 };
+// Marketing texts (the maintenance reminder) need a separate written yes; the ask goes once, after a
+// positive review reply, only when the owner has switched it on.
+STRINGS.en.consent_ask = (c) => `${c.business.name}: want a text when your next tune-up is due? Reply YES. Nothing else changes.`;
+STRINGS.es.consent_ask = (c) => `${c.business.name}: ¿quiere un mensaje cuando toque su próximo mantenimiento? Responda SÍ. Nada más cambia.`;
+STRINGS.en.consent_yes = (c) => `${c.business.name}: thanks, we will text you when your next tune-up is due. Reply STOP any time.`;
+STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cuando toque su próximo mantenimiento. Responda STOP o ALTO cuando quiera.`;
+TEMPLATES.maintenance_reminder = (c, j) => `${c.business.name}: it has been about six months since your last visit${j.issue ? " (" + j.issue + ")" : ""}. A tune-up keeps the system running through the season. Reply here with a day and we will fit you in. Reply STOP to end these.`;
+TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su última visita${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con un día y lo agendamos. Responda STOP o ALTO para no recibir más.`;
+export const customerKey = (slug, phone) => `${slug}/${phone}`;
+export const getCustomer = async (slug, phone) => (await get("customers", customerKey(slug, phone))) || { slug, phone };
+export const saveCustomer = (rec) => put("customers", customerKey(rec.slug, rec.phone), { ...rec, updatedAt: new Date().toISOString() });
+export async function runConsentAsk(c, task) {
+  const phone = task.data?.phone; if (!phone) return "no number";
+  const cust = await getCustomer(c.slug, phone);
+  if (cust.marketingConsent) return "already consented";
+  if (cust.consentAskedAt) return "already asked";
+  const b = task.data?.bookingId ? await getRecord("bookings", c.slug, task.data.bookingId) : null;
+  const wording = str("consent_ask", b || {})(c);
+  const r = await sendSMS({ to: phone, client: c, type: "consent_ask", body: wording });
+  if (!(r.ok || r.logged)) return "send failed";
+  cust.consentAskedAt = new Date().toISOString(); cust.consentWording = wording; cust.language = b?.language || "en";
+  await saveCustomer(cust);
+  const conv = await getConversation(c.slug, "sms", phone); conv.messages.push({ role: "assistant", content: wording, at: new Date().toISOString(), system: "consent_ask" }); await saveConversation(conv);
+  await logEvent(c.slug, "consent_asked", { phone, id: b?.id });
+  return r.ok ? "sent" : "logged";
+}
+// A YES or SI from a number asked inside the last 7 days: store the consent record. Returns the reply or null.
+export async function noteConsentReply(c, phone, text) {
+  if (!/^\s*(yes|yeah|yep|si|sí|claro)\s*[.!]*\s*$/i.test(text)) return null;
+  const cust = await getCustomer(c.slug, phone);
+  if (!cust.consentAskedAt || cust.marketingConsent) return null;
+  if (Date.now() - new Date(cust.consentAskedAt).getTime() > 7 * D) return null;
+  cust.marketingConsent = { at: new Date().toISOString(), channel: "sms", wording: cust.consentWording, reply: text.trim().slice(0, 40), number: c.phone?.twilioNumber || process.env.MC_TWILIO_NUMBER || "" };
+  await saveCustomer(cust);
+  await logEvent(c.slug, "marketing_consent", { phone });
+  return str("consent_yes", { language: cust.language })(c);
+}
+
 export const lang = (rec) => (rec?.language === "es" ? "es" : "en");
 export const template = (type, rec) => (lang(rec) === "es" ? TEMPLATES_ES : TEMPLATES)[type];
 export const str = (key, rec) => STRINGS[lang(rec)][key];
@@ -111,7 +149,7 @@ export function ownerSummary(c, kind, r) {
 // Monday to Saturday, noon to 9 pm Sunday, Houston time. A due time inside quiet hours moves to the
 // next opening minute. Visit confirmations, reminders, on-the-way texts, text-backs, and live replies
 // are exempt; only the scheduled follow-ups below go through this.
-export const FOLLOW_UP_TYPES = ["review_request", "review_nudge", "quote_check", "lead_chase", "referral_ask", "payment_reminder"];
+export const FOLLOW_UP_TYPES = ["review_request", "review_nudge", "quote_check", "lead_chase", "referral_ask", "payment_reminder", "consent_ask", "maintenance_reminder"];
 const HOU = (d) => { const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(d).filter((x) => x.type !== "literal").map((x) => [x.type, x.value])); return { day: p.weekday, hour: Number(p.hour) % 24, minute: Number(p.minute) }; };
 export function nextOpenTime(at) {
   let t = new Date(at);
@@ -286,6 +324,36 @@ export async function callerContext(c, phone, at) {
   return out;
 }
 
+// A lead posted by Angi or Thumbtack: one lead per platform id, the owner alerted, and the customer
+// texted at once (a reply to their own request, so no quiet-hours deferral).
+export async function receivePlatformLead(c, source, { id, name, phone, email, address, task, raw }) {
+  const pid = id || "";
+  if (pid) {
+    const dup = (await listRecords("leads", c.slug, 500)).find((l) => l.source === source && l.sourceId === pid);
+    if (dup) return { ok: true, duplicate: true, id: dup.id };
+  }
+  const p = e164(phone);
+  const l = await addRecord("leads", c.slug, {
+    customer_name: esc(name), phone: p, email: esc(email), address: esc(address), issue: esc(task).slice(0, 300), reason: "lead", urgency: "this_week", wanted: "", language: "en", unsure: "",
+    nobook_reason: "none", channel: source, contact: p || pid, source, sourceId: pid, raw: raw ? JSON.stringify(raw).slice(0, 4000) : "", status: "open", outcome: "needs_action", customerType: await customerType(c.slug, p),
+  });
+  const label = source === "angi" ? "Angi" : source === "thumbtack" ? "Thumbtack" : source;
+  await notifyOwner(c, `${label} lead: ` + ownerSummary(c, "lead", l), { type: "owner_alert" });
+  let texted = false;
+  if (p && !(await optedOut(p))) {
+    const first = (l.customer_name || "").split(" ")[0];
+    const r = await sendSMS({ to: p, client: c, type: "text_back", body: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request${l.issue ? " about " + l.issue.slice(0, 80) : ""}. What is going on, and when works for a visit? We offer ${(c.windows || []).join(" or ")}. Reply STOP to opt out.` });
+    texted = !!(r.ok || r.logged);
+    if (texted) { const conv = await getConversation(c.slug, "sms", p); conv.messages.push({ role: "assistant", content: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request. What is going on, and when works for a visit?`, at: new Date().toISOString(), system: "platform-lead text-back" }); await saveConversation(conv); }
+  }
+  if (PLANS[c.plan]?.followUp && p) {
+    await scheduleFollowUp(c, new Date(Date.now() + 4 * H), "lead_chase", { leadId: l.id, n: 1 });
+    await scheduleFollowUp(c, new Date(Date.now() + 26 * H), "lead_chase", { leadId: l.id, n: 2 });
+  }
+  await logEvent(c.slug, "platform_lead", { id: l.id, source, texted });
+  return { ok: true, id: l.id, texted };
+}
+
 // ---- Acknowledge and escalate ----
 export async function openAlert(c, lead, kind) {
   const a = await addRecord("alerts", c.slug, { leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
@@ -418,6 +486,7 @@ export async function ownerCommand(c, text) {
     return r.ok || r.logged ? `On-the-way text sent to ${b.customer_name || b.phone}.` : `Could not text ${b.customer_name || b.phone} (${r.reason || r.error || "no number"}).`;
   }
   if (cmd === "done") {
+    if (["done", "paid"].includes(b.status)) return `${b.customer_name || b.phone} was already marked ${b.status}; nothing changed.`;
     b.status = "done"; b.doneAt = new Date().toISOString(); await saveRecord("bookings", b);
     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
     if (plan.followUp && b.phone && !blocked && !reviewLink(c)) {
@@ -430,6 +499,7 @@ export async function ownerCommand(c, text) {
       await scheduleFollowUp(c, new Date(Date.now() + 2 * H), "review_request", { bookingId: b.id });
       await scheduleFollowUp(c, new Date(Date.now() + 50 * H), "review_nudge", { bookingId: b.id });
       await scheduleFollowUp(c, new Date(Date.now() + 8 * D), "referral_ask", { bookingId: b.id });
+      if (c.plan === "pro" && tradeKey(c.business?.trade) === "hvac") await scheduleFollowUp(c, new Date(Date.now() + 182 * D), "maintenance_reminder", { bookingId: b.id });
       return `Marked done. Review request goes out in 2 hours (inside 9 am to 9 pm), a nudge in 2 days if they do not reply. If they still owe you, text "invoice ${b.id} amount" and reminders go out on day 3 and 7.`;
     }
     return `Marked done.`;
@@ -486,6 +556,10 @@ export async function noteReviewReply(c, phone, text) {
     await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} replied to the review request: "${text.slice(0, 200)}"\nRef ${b.id}, ${b.issue || ""}. No review nudge or referral ask will go out. Reply "ok ${b.id}" when you have it.`, { type: "owner_alert" });
   } else if (sentiment === "positive") {
     await cancelTasks(c.slug, (t) => t.type === "review_nudge" && t.data?.bookingId === b.id);
+    if (c.rules?.consentAsk && phone) {
+      const cust = await getCustomer(c.slug, phone);
+      if (!cust.consentAskedAt && !cust.marketingConsent && !cust.consentScheduledAt) { cust.consentScheduledAt = new Date().toISOString(); await saveCustomer(cust); await scheduleFollowUp(c, new Date(Date.now() + 60 * 60 * 1000), "consent_ask", { bookingId: b.id, phone }); }
+    }
   }
   await logEvent(c.slug, "review_reply", { id: b.id, sentiment });
   return { booking: b, sentiment };
@@ -584,6 +658,7 @@ export async function weeklyReport(c) {
     `Leads still needing you: ${open.length}${open.length ? " (" + open.map((l) => l.id).join(", ") + ")" : ""}`,
     unbooked.length ? `Did not book: ${unbooked.length}. Why: ${Object.entries(reasons).map(([k, v]) => `${v} ${label(k)}`).join(", ")}` : "Did not book: 0",
     `Emergencies: ${emergencies}`,
+    (() => { const bySrc = {}; for (const l of wl.filter((x) => x.source)) bySrc[l.source] = (bySrc[l.source] || 0) + 1; return Object.keys(bySrc).length ? `Leads from platforms: ${Object.entries(bySrc).map(([k, v]) => `${v} ${k === "angi" ? "Angi" : k === "thumbtack" ? "Thumbtack" : k}`).join(", ")}` : ""; })(),
     promised.length ? `Callback promises: ${kept} kept on time, ${missed} overdue, ${promised.length - kept - missed} pending` : "",
     `Usage this month: ${u.minutes} of ${u.included.minutes} call minutes, ${u.texts} of ${u.included.texts} texts`,
     `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,

@@ -149,7 +149,8 @@ Acceptance (now, draft):
 - [ ] The onboarding page prefills the seven rows from the crawl and the portal edits them.
 
 ### S3-11 Spanish templates localize the date word and the window
-Status: delivered 2026-10-20 (commit after bef6777, `winEs` and `dateEs` in `lib/desk.mjs`; `str("confirmation", {language:"es"})` now returns "su visita queda agendada para mañana, 8 a 12", reminders "8 a 12", calendar dates in Spanish long form). Engineer note: with round 4 item 1 the stored date is YYYY-MM-DD, so the Spanish confirmation uses `friendlyDate(iso, "es")` (hoy, mañana, or "sábado, 24 de octubre"). Size: S. Implements: Round 3 item 6 (completeness); found in the S3-07 verification.
+Status: verified 2026-10-20 6ad6c37fced41ca2ef1323b7: a Spanish booking for tomorrow produced "su visita queda agendada para mañana, 8 a 12" with no "tomorrow" or " to ", and the 1 h reminder read "su ventana de llegada (8 a 12)"; by node `winEs("8 to 12")` is "8 a 12", `dateEs("2026-10-24")` is "sábado, 24 de octubre", and the 24 h reminder says "mañana" by design (it is sent the day before).
+Size and scope: Size: S. Implements: Round 3 item 6 (completeness); found in the S3-07 verification.
 
 Files: `netlify/functions/lib/desk.mjs` (`TEMPLATES_ES`, `STRINGS.es`), `netlify/functions/lib/calendar.mjs` or a small helper for Spanish day names.
 

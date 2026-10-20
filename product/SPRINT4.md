@@ -15,7 +15,8 @@ Sprint rules carried over: every new store kind extends `admin.mjs` `delete`; ev
 ## 2. Tickets
 
 ### S4-01 Booking dates are calendar dates, never "today" or "tomorrow"
-Status: delivered 2026-10-20 (engineer, draft `6ad6c2e225f6d9972cd9bb31`); PM verdict below. Size: S. Implements: Round 4 item 1 (MUST).
+Status: verified 2026-10-20 6ad6c37fced41ca2ef1323b7 (reschedule line re-run in the second pass: a reply of "Thursday 12 to 5" stored 2026-10-22 with `dateSaid` kept, and the owner text read "RESCHEDULED ref ... to Thu, Oct 22, 12 to 5 (was tomorrow, 8 to 12)"): a visit booked "for tomorrow" stored `date` 2026-10-20 with `dateSaid` "tomorrow" and the confirmation read "tomorrow, 8 to 12"; `assistant-request` today returned `upcomingVisit` "tomorrow, 8 to 12, ..." and `isExisting` "new", and with `at` three days later `upcomingVisit` "" and "existing customer"; by node, `normalizeDate`, `bookingDay` on an old "tomorrow" record, and `friendlyDate` ("Sat, Oct 24", "sábado, 24 de octubre") behave. My first reschedule attempt asked for a Saturday on a Monday-to-Friday shop and the desk correctly declined ("We're closed on weekends"); the weekday rerun is recorded in the second pass below.
+Size and scope: Size: S. Implements: Round 4 item 1 (MUST).
 
 Engineer note: `bookVisit` and `rescheduleVisit` store `date` as `YYYY-MM-DD` Houston (`normalizeDate`) and the customer's words in `dateSaid`; records written earlier with "today" or "tomorrow" are read relative to `createdAt` (`bookingDay`), so no migration; texts render the date with `friendlyDate` ("tomorrow, 8 to 12", "Sat, Oct 24, 12 to 5"); `POST /api/vapi` accepts a top-level `at` next to `message` for tests.
 
@@ -28,7 +29,8 @@ Acceptance (now, draft):
 - [ ] `node -e`: `normalizeDate("tomorrow")` is tomorrow's ISO date, `bookingDay({ date: "tomorrow", createdAt: <Oct 19> })` is Oct 20, `friendlyDate("2026-10-24")` is "Sat, Oct 24" and "sábado, 24 de octubre" in Spanish.
 
 ### S4-02 No review request without a review link
-Status: delivered 2026-10-20 (engineer, same draft); PM verdict below. Size: S. Implements: Round 4 item 2 (MUST).
+Status: verified 2026-10-20 6ad6c37fced41ca2ef1323b7: on a Growth shop with no review link, `done REF` created no review task, replied "No review request went out: add your Google review link on the portal", and logged `review_skipped`; after `PUT business.reviewLink` the next `done` scheduled the request and its preview carried the link; the checklist line and the crawl's `g.page`, `maps.app.goo.gl`, `writereview` capture are in the code.
+Size and scope: Size: S. Implements: Round 4 item 2 (MUST).
 
 Engineer note: on a Growth or Pro shop with no `reviewLink` and no `googlePlaceId`, `done REF` schedules no `review_request`, `review_nudge`, or `referral_ask`, replies "No review request went out: add your Google review link on the portal ...", and logs `review_skipped`; after `PUT business.reviewLink` the next `done` schedules the request with the link in the text; the checklist has "Google review link added"; the build keeps a `g.page`, `maps.app.goo.gl`, or `writereview` URL the crawl finds.
 
@@ -40,7 +42,8 @@ Acceptance (now, draft):
 - [ ] `grep -c "Google review link added" desk.html` is 1; the build code captures `g.page`, `maps.app.goo.gl`, and `writereview` URLs.
 
 ### S4-03 Hours parsing and the after-hours promise for the two common Houston cases
-Status: delivered 2026-10-20 (engineer, same draft); PM verdict below. Size: S. Implements: Round 4 item 3 (MUST).
+Status: verified 2026-10-20 6ad6c37fced41ca2ef1323b7: "Mon to Fri 8 to 5, 24/7 emergency service" gave Mon to Fri 08:00 to 17:00, weekend null, `emergency247` true; the prompt at Tuesday 2 am said closed and that a Tier 1 after hours is handled as Tier 0 with the fee; at Tuesday 6:30 am it said "when the shop opens at 8 this morning"; by node `callbackDue` for that phrase at 6:30 am is 08:00 Houston the same day, and a bare "Open 24/7" still parses as open all day.
+Size and scope: Size: S. Implements: Round 4 item 3 (MUST).
 
 Engineer note: "Mon to Fri 8 to 5, 24/7 emergency service" parses to Mon to Fri 08:00 to 17:00 with the weekend null and `rules.emergency247` true; the prompt at a closed hour on such a shop says a Tier 1 is handled as Tier 0 with the fee stated; `admin prompt` with `at` = Tuesday 6:30 am Houston contains "when the shop opens at 8 this morning" and a `wants_call` lead opened then gets `callbackDueAt` at 08:00 the same day (`callbackPromise`, `opensLaterToday`); the 2 am prompt still says closed.
 
@@ -55,7 +58,8 @@ Acceptance (now, draft):
 Status: todo. Size: reserve 2.5 days. Implements: sprint 2 S2-01 unchanged, plus the sprint 2 and 3 keyed lines (ring-timer SIM check, returning-caller greeting, real number release, `VAPI_WEBHOOK_SECRET`, Spanish voice greeting, a callback promise on Steve's phone). Spent first whenever Steve's keys arrive.
 
 ### S4-05 "Did the visit happen?" owner nudge
-Status: delivered 2026-10-20, draft 6ad76c97160dbdfc11d6f9e8 (built as round 4 item 4 before the cut; see DECISIONS.md). Engineer check: every booking schedules `visit_check` at 9:00 am Houston the day after its date; nudged and run on a booking still `booked` it returned `asked`, texted the owner "Did the visit for Lee Park at 12 Oak St, Katy (tomorrow, 8 to 12) happen? Reply \"done REF\" if it did, or \"cancel REF\" if it did not." as `owner_note`, set `visitCheckedAt` so it never repeats; `done REF` in reply scheduled the review request; `done`, `cancel`, and a reschedule clear or move the task. Size: S. Implements: Round 4 item 4 (SHOULD, renewal lever).
+Status: verified 2026-10-20 6ad76dbd7c2e487c9e6845ee: a visit booked for tomorrow carried a `visit_check` at 9:00 am Houston the day after; a reschedule to Thursday moved it to Friday 9:00 am; nudged on a still-booked visit the check returned `asked`, texted the owner once ("PM Test HVAC front desk: Did the visit for Tom Reyes at 1402 Mason Rd, Katy, TX 77450 (Thu, Oct 22, 12 to 5) happen? Reply \"done REF\" if it did, or \"cancel REF\" if it did not.") and set `visitCheckedAt`; `done REF` in reply scheduled the review request; a booking marked done before its check had no `visit_check` task left. My automated line for the owner text failed only because it looked for a preview starting with "Did the visit" and the bridge sender prefixes the shop name; the event itself is quoted above.
+Size and scope: Size: S. Implements: Round 4 item 4 (SHOULD, renewal lever).
 
 Files: `netlify/functions/lib/desk.mjs` (`bookVisit`, `rescheduleVisit` schedule a `visit_check` task at 9:00 am Houston the day after the visit date; `runVisitCheck`), `netlify/functions/scheduler.mjs`, `netlify/functions/lib/config.mjs` (nothing new unless a per-plan switch is wanted; assumption 3 says every plan).
 
@@ -64,7 +68,8 @@ Change: when the check runs and the booking is still `booked`, `confirmed`, or `
 Acceptance (now, draft): a visit booked for tomorrow 8 to 12 has a `visit_check` task due the day after at 9:00 am Houston; nudged and run with no `done` or `cancel`, exactly one owner `sms_sent` whose preview starts with "Did the visit" and `visitCheckedAt` set; `done REF` in reply schedules the review request; a booking marked `done` before the check makes the task return "already done"; a rescheduled visit moves the check to the new day.
 
 ### S4-06 Spanish opt-out words
-Status: delivered 2026-10-20, draft 6ad76c97160dbdfc11d6f9e8. Engineer check: ALTO, PARAR, CANCELAR, BASTA, DETENER and the phrases "no me manden más mensajes", "no más mensajes", "dejen de escribir" record `opt_out`, cancel the number's tasks, and reply once in Spanish ("ya no recibirá más mensajes de este número. Responda START para volver a recibirlos"); a second stop word from a number already out is silent (English too, which was a pre-existing double confirmation); EMPEZAR, INICIAR, and SÍ opt back in with a Spanish line; the Spanish confirmation and consent line say "STOP o ALTO"; OPERATIONS.md one-time setup adds ALTO and PARAR (and EMPEZAR) on the Messaging Service. Size: S. Implements: Round 4 item 5 (SHOULD).
+Status: verified 2026-10-20 6ad76dbd7c2e487c9e6845ee: the Spanish confirmation ends "Responda STOP o ALTO para no recibir más mensajes"; ALTO from a number with a Spanish booking recorded `opt_out`, cancelled its tasks, and replied once "ya no recibirá más mensajes de este número. Responda START ..."; a repeat ALTO was silent; EMPEZAR opted back in with a Spanish line; "no me manden más mensajes" from another number opted out with the Spanish line; English STOP unchanged; OPERATIONS.md names ALTO, PARAR, and EMPEZAR for the Messaging Service.
+Size and scope: Size: S. Implements: Round 4 item 5 (SHOULD).
 
 Files: `netlify/functions/sms.mjs` (`STOP_RE`, `STOP_PHRASE`, the unsubscribe reply by language), `netlify/functions/lib/desk.mjs` (`STRINGS.es` confirmation and `CONSENT_LINE_ES` say "Responda STOP o ALTO"), `OPERATIONS.md` (one-time Twilio setting: ALTO and PARAR as custom opt-out keywords on the Messaging Service).
 
@@ -73,7 +78,8 @@ Change: add `alto`, `parar`, `cancelar`, `basta`, `detener` as whole-message sto
 Acceptance (now, draft): "ALTO" and "no me manden más mensajes" from a number with a Spanish booking each record an `opt_out`, cancel that number's tasks, and return the Spanish unsubscribe line once (with `OptOutType` present, nothing); the Spanish confirmation preview contains "ALTO"; "STOP" still works in English; OPERATIONS.md names the Messaging Service keywords.
 
 ### S4-07 The owner's first 48 hours
-Status: delivered 2026-10-20, draft 6ad76c97160dbdfc11d6f9e8. Engineer check: the first `go_live` sent an owner `sms_sent` `type: "welcome"` ("you're live. Every lead and booking comes to this number as a job ticket with a ref. Reply ok, otw, done, called ...") and an email "<shop>: you're live" with the sample ticket and the commands; `resume` after a pause sent no second welcome; `GET` carries `today: { calls, texts, bookings, needsYou }`; the portal opens a live shop on Leads and bookings with the Today strip (calls, texts in, booked today, need you, line) unless a hash or a tab click says otherwise; the Test tab stays. Browser check is the PM's. Size: M. Implements: Round 4 item 6 (SHOULD).
+Status: verified 2026-10-20 6ad76dbd7c2e487c9e6845ee: the first `go_live` sent an owner `sms_sent` `type: "welcome"` ("you're live. Every lead and booking comes to this number as a job ticket with a ref. Reply ok, otw, done, called ..."); pause then resume sent no second welcome; `GET` carries `today` with `calls`, `texts`, `bookings`, `needsYou`; the Today strip and the live-shop default tab are in `desk.html` (page code read; the browser check is still the PM's at the first go-live).
+Size and scope: Size: M. Implements: Round 4 item 6 (SHOULD).
 
 Files: `netlify/functions/client.mjs` (`go_live` sends the welcome text and email), `netlify/functions/lib/desk.mjs` (`welcomeText(c)`), `desk.html` (a live shop opens on Leads and bookings with a "Today" strip: calls, texts, bookings, leads needing you, line health; the Test tab stays but is not the default).
 
@@ -82,14 +88,16 @@ Change: at the first `go_live` (not on resume), owner text `type: "welcome"`: "Y
 Acceptance (now, draft): `go_live` on a testing shop logs an owner `sms_sent` `type: "welcome"` and the email subject "You're live" appears in the function log; `resume` sends no welcome; `GET` carries `today: { calls, texts, bookings, needsYou }`; the portal for a live shop shows the Leads and bookings tab selected with the strip above it (page code read, plus a browser check by the PM).
 
 ### S4-08 Onboarding from a phone: cell required, website optional
-Status: delivered 2026-10-20, draft 6ad76c97160dbdfc11d6f9e8. Engineer check: `POST /api/onboard` without a phone returned 400 `{ error: "missing_fields", field: "owner.phone", message }`; with a phone and no website it returned 200 with a slug from the business name (`no-site-cleaning-5419`) and reached `testing` with `build.notes` starting "No website given; built from your answers." (the model still drafts FAQ and the missing list from the answers; no crawl); the onboarding page marks the cell required and the website "leave blank if you do not have one yet"; the emails no longer name a website when there is none. Size: S. Implements: Round 4 item 7 (SHOULD).
+Status: verified with follow-up 2026-10-20 6ad76dbd7c2e487c9e6845ee: `POST /api/onboard` without a phone returned 400 `missing_fields` naming `owner.phone` with the message; with a phone and no website it returned 200 with slug `pm-test-cleaning-...` and reached `testing` with `build.notes` starting "No website given; built from your answers."; the onboarding page marks the cell required and the website optional. Follow-up (small, folded into the next copy pass): the same notes go on to say "Website could not be read", which reads oddly when none was given; drop that item from the missing list when `business.website` is empty.
+Size and scope: Size: S. Implements: Round 4 item 7 (SHOULD).
 
 Files: `onboard.html` (required attributes; "No website yet" checkbox), `netlify/functions/onboard.mjs` (400 `{ error: "missing_fields", field: "owner.phone" }` without a cell; website optional; `loopCheck` unchanged), `netlify/functions/onboard-build-background.mjs` (no website: build from the answers, `build.notes` says so, no crawl).
 
 Acceptance (now, draft): `POST /api/onboard` without `phone` returns 400 naming `owner.phone`; with `phone` and no `website` returns 200 and reaches `status: "testing"` with `build.notes` containing "built from your answers"; the slug derives from the business name; the onboarding page marks the cell required and the website optional.
 
 ### S4-09 Weekly email numbers an owner can repeat
-Status: delivered 2026-10-20, draft 6ad76c97160dbdfc11d6f9e8. Engineer check: a week with 3 `end-of-call-report`s, 2 missed calls texted back, 13 conversations of which the model tagged 3 `question_only`, and 4 bookings (one by SMS after a text-back) read "Calls: 3 answered by the front desk, 2 texted back after a missed call", "Booking rate: 4 booked of 10 bookable conversations (40 percent)", and "Jobs that would have gone to voicemail: 1"; `stats` carries `answered`, `textedBack`, `bookable`, `voicemailJobs`. Question-only exclusion keys on both phone and contact. Size: S. Implements: Round 4 item 8 (SHOULD).
+Status: verified 2026-10-20 6ad76dbd7c2e487c9e6845ee: with 3 call reports, 2 missed calls texted back, 6 actionable conversations of which the model tagged 1 `question_only`, and 4 bookings (one by SMS after a text-back), the email read "Calls: 3 answered by the front desk, 2 texted back after a missed call", "Booking rate: 4 booked of 5 bookable conversations (80 percent)", and "Jobs that would have gone to voicemail: 1"; `stats` carries `answered`, `textedBack`, `bookable`, `voicemailJobs`; the denominator matched actionable minus the stored `question_only` leads.
+Size and scope: Size: S. Implements: Round 4 item 8 (SHOULD).
 
 Files: `netlify/functions/lib/desk.mjs` (`weeklyReport`), `netlify/functions/lib/config.mjs` (no change unless `question_only` needs a lead status).
 
@@ -98,7 +106,7 @@ Change: "Calls: N answered by the front desk, M texted back after a missed call"
 Acceptance (now, draft): for a week with 3 call reports, 2 missed calls texted back, 10 actionable conversations of which 2 are `question_only`, and 4 bookings: the email reads "3 answered by the front desk, 2 texted back" and "4 booked of 8 bookable conversations (50 percent)"; a booking that followed a missed-call text-back counts in "would have gone to voicemail".
 
 ### S4-10 Marketing consent by keyword, unlocking the maintenance reminder
-Status: todo. Size: M. Implements: Round 4 item 9 (SHOULD); Round 1 Epic 2 SHOULD and cut 5 (Pro seasonal reminders behind consent).
+Status: delivered 2026-10-20, draft 6ad76dfd7976da4d9c9bf7e1. Engineer check: with `rules.consentAsk` off (the default) a positive review reply scheduled no ask; with it on (PUT), one `consent_ask` task appeared at the next open minute, nudged and run it sent "<shop>: want a text when your next tune-up is due? Reply YES. Nothing else changes." (Spanish version in `STRINGS.es`) and stamped `consentAskedAt` on `customers/{slug}/{phone}`; "YES" stored `marketingConsent { at, channel, wording, reply, number }`, logged `marketing_consent`, and answered without the model; a second positive reply from the same number produced no second ask; a Pro HVAC `done` schedules `maintenance_reminder` 182 days out through quiet hours, and the scheduler returns "no marketing consent" for a number without the record (admin hook `{"action":"schedule_task","type":"maintenance_reminder","data":{"bookingId"}}` puts one due now; allow a few seconds before `run_scheduler`, Blobs listing lags a fresh write) and sends it with one. `admin records kind=customers` and `delete` cover the store. The portal You card has the switch. Size: M. Implements: Round 4 item 9 (SHOULD); Round 1 Epic 2 SHOULD and cut 5 (Pro seasonal reminders behind consent).
 
 Files: `netlify/functions/lib/desk.mjs` (`noteReviewReply` positive branch schedules `consent_ask` via `scheduleFollowUp`; `STRINGS` en and es), `netlify/functions/sms.mjs` (a "YES" or "SÍ" from a number with a pending ask stores `marketingConsent`), `netlify/functions/lib/store.mjs` (`customers` kind, key `{slug}/{phone}` holding `marketingConsent { at, channel, wording, number }`), `netlify/functions/scheduler.mjs` (`maintenance_reminder` returns "no marketing consent" without it), `netlify/functions/lib/config.mjs` (`rules.consentAsk` default `false` until Steve approves the sentence, assumption 5), `netlify/functions/admin.mjs` (`records kind=customers`, `delete`).
 
@@ -107,7 +115,7 @@ Change: after a positive review reply on a shop with `rules.consentAsk` true, on
 Acceptance (now, draft): with `consentAsk` true, a positive review reply produces one `consent_ask` task at the next open minute; nudged and run, one customer `sms_sent` with the sentence; "YES" from that number stores `customers/{slug}/{phone}.marketingConsent` with `wording` and `at` (visible in `admin records kind=customers`) and logs `marketing_consent`; a second positive reply from the same number produces no second ask; with `consentAsk` false nothing is sent; `admin` scheduling a `maintenance_reminder` for a number without consent returns "no marketing consent" from `run_scheduler`.
 
 ### S4-11 The site says what the product does now
-Status: todo, pending Steve on the Pro line (question 1). Size: S. Implements: Round 4 item 11 (SHOULD).
+Status: delivered 2026-10-20 (default assumption 1; the Pro line is untouched pending Steve). Engineer check: the Starter card gained the Monday report, emergency rules by trade, Spanish on every channel, and the always-ring-through list; the rules band gained "Texts only between 9 am and 9 pm unless you booked a visit"; `MC_SYSTEM`, `llms.txt`, and `llms-full.txt` say the same; `grep -c` for the three prices is unchanged (2 lines); `sitecheck.py` passes; no em dashes. Size: S. Implements: Round 4 item 11 (SHOULD).
 
 Files: `index.html` (plans cards, rules band, FAQPage JSON-LD if a FAQ changes), `netlify/functions/chat.mjs` (`MC_SYSTEM`), `llms.txt`, `llms-full.txt`.
 
@@ -116,7 +124,7 @@ Change (default, assumption 1): Starter adds "Emergency rules by trade", "Spanis
 Acceptance (now, repo): `grep -c "\$99\|\$249\|\$449" index.html` is unchanged from the current commit; the Starter card contains the four new lines; the rules band contains the 9 am to 9 pm line; `MC_SYSTEM` mentions the same four features; `sitecheck.py` passes; no em dashes.
 
 ### S4-12 Angi and Thumbtack lead receivers (if a paying lead-platform shop appears)
-Status: todo, conditional (question 4). Size: M. Implements: Round 4 item 10 (SHOULD).
+Status: delivered 2026-10-20, draft 6ad76f60a5bcaff0fcd62344 (built although conditional: it is self-contained and the PO found Thumbtack's self-serve webhooks). Engineer check: `POST /api/angi?c=slug` with `X-API-KEY` equal to `leads.angiKey` (set by admin) returned `{status:"success", id, texted:true}`, created a lead with `source: "angi"`, `sourceId`, the address joined from Angi's fields, and the task as the issue, texted the owner "Angi lead: ..." and the customer in the same request, and scheduled two chases on Growth; a wrong key got 403; the same Angi lead id again returned success with `duplicate: true` and no second lead; `POST /api/thumbtack?c=slug` with basic auth (the secret as the password) or a bearer token did the same with `source: "thumbtack"`; the weekly email reads "Leads from platforms: 1 Angi, 1 Thumbtack". OPERATIONS.md has the owner's paste-in steps. Field names follow each platform's public docs and may need fixes on the first real post. Size: M. Implements: Round 4 item 10 (SHOULD).
 
 Files: new `netlify/functions/angi.mjs` (`/api/angi?c=slug`, per-client key in `X-API-KEY` matched against `leads.angiKey` set by admin, JSON reply containing "success"), new `netlify/functions/thumbtack.mjs` (`/api/thumbtack?c=slug`, Thumbtack's self-serve webhook with a per-client secret), `netlify/functions/lib/desk.mjs` (`flagLead` accepts `source`), `netlify/functions/lib/config.mjs` (`leads: { angiKey, thumbtackSecret }`), `OPERATIONS.md` (how the owner pastes the endpoint and key into Angi and Thumbtack).
 
@@ -154,3 +162,20 @@ Pre-key pass: each ticket's "now" lines against the engineer's named draft, reco
 Keyed pass (S4-04): as in `SPRINT2.md` section 5 plus the sprint 3 keyed lines; add the welcome text on `go_live` (S4-07) and a Spanish ALTO from Steve's phone (S4-06).
 
 Go-live gate for customers two and three: S4-04 complete, S4-01 to S4-03 verified, S4-05 and S4-07 verified, the 14-case matrix plus the S3-05 emergency cases and an ALTO case passed on the customer's test line, the OPERATIONS.md runbook followed and the sheet filed.
+
+## 6. Verification record
+
+### Pre-key pass for S4-01 to S4-03 (and S3-11), 2026-10-20, draft `6ad6c37fced41ca2ef1323b7` (built by the PM from `main` at `8d65a94`)
+
+`scratchpad/verify7.py`, 18 checks, 15 passed; the 3 failures were mine: a weekend reschedule target on a weekday-only shop (the desk declined correctly; re-run on a weekday in the next pass) and its dependent owner-text line, and a cleanup line that counted two shops the engineer created ("No Site Cleaning", "S4 Test Dana"), which I left in place. My shop `pm-test-hvac-099b` (number `+17135550117`) was deleted; no opt-outs were created.
+
+### Pre-key pass for S4-05 to S4-09 and the S4-01 reschedule rerun, 2026-10-20, draft `6ad76dbd7c2e487c9e6845ee` (built by the PM from `main` at `61a6317`)
+
+`scratchpad/verify8.py`, 27 checks, 26 passed; the one failure was my prefix check on the visit-nudge text (the event is quoted on S4-05). Test shops `pm-test-hvac-34ca` (number `+17135550118`) and `pm-test-cleaning-2c58` deleted; opt-outs for the two fake numbers cleared; `GET /api/admin` lists no PM Test shop. One shop named "S4 Test Dana" that I did not create remains in the shared store (the engineer's, per their notes) and is left in place.
+
+Results: S4-01 to S4-03, S4-05, S4-06, S4-07, S4-09 verified; S4-08 verified with a one-line copy follow-up; S4-04 (keyed pass) and S4-10 to S4-12 are todo.
+
+Observed and worth knowing: the visit nudge, the reschedule, and the friendly dates now agree with each other (the nudge quoted "Thu, Oct 22, 12 to 5" after the move); the Spanish opt-out path is as strict as the English one and silent on repeats; the weekly email's denominator is built from the stored `question_only` reasons, so it cannot drift from the leads the owner sees.
+
+### Keyed pass
+Pending S4-04 (Steve's keys). Order in section 5.

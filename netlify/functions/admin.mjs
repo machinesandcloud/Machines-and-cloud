@@ -42,6 +42,11 @@ export default async (req) => {
     for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug) tasks.push({ key: k, type: t.type, dueAt: t.dueAt, data: t.data, id: t.id }); }
     return json({ tasks });
   }
+  if (b.action === "schedule_task") {
+    const { scheduleTask } = await import("./lib/store.mjs");
+    const t = await scheduleTask(c.slug, new Date(Date.now() - 60000), String(b.type || ""), b.data || {});
+    return json({ ok: true, task: t });
+  }
   if (b.action === "nudge_task") {
     // Move one task (by id) or all of the slug's tasks into the past so run_scheduler picks them up.
     const keys = await list("tasks", "");
@@ -50,7 +55,7 @@ export default async (req) => {
     return json({ ok: true, nudged: n });
   }
   if (b.action === "records") {
-    const kind = ["bookings", "leads", "alerts", "conversations", "events", "usage"].includes(b.kind) ? b.kind : "events";
+    const kind = ["bookings", "leads", "alerts", "conversations", "events", "usage", "customers"].includes(b.kind) ? b.kind : "events";
     if (b.kind === "optouts") { const keys = await list("optouts", ""); const out = []; for (const k of keys) out.push({ key: k, phone: k, ...(await get("optouts", k)) }); return json({ records: out.filter((o) => !o.slug || o.slug === c.slug) }); }
     return json({ records: await listJSON(kind, c.slug + "/", 500) });
   }
@@ -68,7 +73,7 @@ export default async (req) => {
     const released = {};
     try { if (twilioEnabled() && c.phone?.twilioNumberSid) released.number = await releaseNumber(c.phone.twilioNumberSid, c.phone.messagingServiceSid); } catch (e) { released.numberError = String(e.message); }
     try { if (c.voice?.assistantId) released.voice = await releaseVoice(c); } catch (e) { released.voiceError = String(e.message); }
-    for (const kind of ["bookings", "leads", "alerts", "conversations", "events", "usage"]) for (const k of await list(kind, c.slug + "/")) await del(kind, k);
+    for (const kind of ["bookings", "leads", "alerts", "conversations", "events", "usage", "customers"]) for (const k of await list(kind, c.slug + "/")) await del(kind, k);
     for (const k of await list("tasks", "")) { const t = await get("tasks", k); if (t?.slug === c.slug) await del("tasks", k); }
     for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await del("optouts", k); }
     for (const k of await list("index", "bridge:")) { const sl = await get("index", k); if (sl === c.slug) await del("index", k); }
@@ -89,6 +94,7 @@ export default async (req) => {
   if (b.status && STATUSES.includes(b.status)) c.status = b.status;
   if (b.plan && ["starter", "growth", "pro"].includes(b.plan)) c.plan = b.plan;
   if (b.billing) c.billing = { ...c.billing, ...b.billing };
+  if (b.leads) c.leads = { ...(c.leads || {}), ...(b.leads.angiKey !== undefined ? { angiKey: String(b.leads.angiKey) } : {}), ...(b.leads.thumbtackSecret !== undefined ? { thumbtackSecret: String(b.leads.thumbtackSecret) } : {}) };
   if (b.serviceEndsAt !== undefined) c.serviceEndsAt = b.serviceEndsAt ? new Date(b.serviceEndsAt).toISOString() : null;
   await saveClient(c); await indexClient(c);
   await logEvent(c.slug, "admin_update", { fields: Object.keys(b) });

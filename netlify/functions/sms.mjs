@@ -4,7 +4,7 @@
 import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
-import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply } from "./lib/desk.mjs";
+import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optedOut } from "./lib/send.mjs";
 
 export const config = { path: "/api/sms" };
@@ -93,6 +93,15 @@ export default async (req) => {
   await logEvent(c.slug, "sms_inbound", { from });
   try { await noteReviewReply(c, from, body); } catch (err) { console.error("review reply", err); }
   const conv = await getConversation(c.slug, "sms", from);
+  // A YES to the marketing-consent ask: record it and answer without the model.
+  try {
+    const consentReply = await noteConsentReply(c, from, body);
+    if (consentReply) {
+      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: consentReply + "\n[Done: marketing consent recorded]", at: new Date().toISOString() });
+      await saveConversation(conv);
+      return twiml(consentReply);
+    }
+  } catch (err) { console.error("consent reply", err); }
   const bookings = await upcomingBookings(c, from);
 
   // Fast paths with no model: C confirms, R starts a reschedule, when exactly one visit is upcoming.

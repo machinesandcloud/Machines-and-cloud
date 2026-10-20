@@ -63,6 +63,11 @@ Every step that lacks a key records `waiting: ...` in `provision.steps` and Stev
 
 Steve's one-time setup: Twilio account (keys, Primary Customer Profile approved as ISV, and on the Machines & Cloud Messaging Service add ALTO and PARAR as custom opt-out keywords and EMPEZAR as a custom opt-in keyword under Opt-Out Management, so the carrier layer honors Spanish stop words the same way our webhook does), Vapi account (key), Resend (key + verified domain), Google OAuth client, optional Stripe. After that, nothing per client.
 
+## Angi and Thumbtack leads
+
+- Angi: set a key by admin (`{"slug":"...","leads":{"angiKey":"<random>"}}`). The owner (or Steve on the call) enters `https://machinesandcloud.com/api/angi?c=<slug>` as the CRM endpoint in Angi Leads with the key as `X-API-KEY`. Each post creates a lead with `source: "angi"`, alerts the owner ("Angi lead: ..."), texts the customer at once when a phone is present, and, on Growth and Pro, chases twice. Repeats of the same Angi lead id are ignored. The reply is `{"status":"success"}`.
+- Thumbtack: set a secret by admin (`{"slug":"...","leads":{"thumbtackSecret":"<random>"}}`). In Thumbtack's integrations page the owner registers `https://machinesandcloud.com/api/thumbtack?c=<slug>` for new leads with basic auth (any user, the secret as the password) or a bearer token equal to the secret. Same behaviour with `source: "thumbtack"`. In-thread Thumbtack replies still need partner access, so the first reply goes by text to the customer's number.
+
 ## Testing without real accounts
 
 - Draft deploy: `netlify deploy --dir=. --functions=netlify/functions --json` (uses the site's env vars and the site-wide Blobs store).

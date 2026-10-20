@@ -76,7 +76,7 @@ async function draftProfile(pages, c) {
     output_config: { effort: "medium" },
     system: "You set up AI front desks for home service companies. Read the website text and the owner's answers, then call save_front_desk_profile exactly once with everything a receptionist needs. Never invent prices, hours, or areas: if the site and the owner are silent, leave the field empty or write ASK OWNER. Keep service names short. Hours in plain words.",
     tools: [PROFILE_TOOL],
-    messages: [{ role: "user", content: `${owner}\n\nWEBSITE TEXT:\n${corpus || "(the website could not be read)"}` }],
+    messages: [{ role: "user", content: `${owner}\n\nWEBSITE TEXT:\n${corpus || (c.business.website ? "(the website could not be read)" : "(no website was given; the owner's answers are the whole source, so do not mention a website in the missing list)")}` }],
   });
   const tu = res.content.find((b) => b.type === "tool_use");
   return tu ? tu.input : null;
