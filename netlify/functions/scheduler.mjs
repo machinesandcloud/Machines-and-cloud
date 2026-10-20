@@ -2,8 +2,9 @@
 // reminders, quiet-lead chases), runs alert escalations, polls texting registration, and sends the
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords } from "./lib/store.mjs";
+import { fanout, claimFanout } from "./lib/fanout.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
-import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport, monthlyReport, autoFlagDay, day7Draft } from "./lib/desk.mjs";
+import { template, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, day7Draft } from "./lib/desk.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
@@ -120,20 +121,36 @@ async function healthAlerts(c) {
   return n;
 }
 
-export async function run({ forceHour, forceDay } = {}) {
-  const nowISO = new Date().toISOString();
-  const due = await dueTasks(nowISO);
+async function block(record, name, fn) {
+  const t = Date.now();
+  try { const out = await fn(); record.blocks[name] = { ok: true, ms: Date.now() - t, ...(out && typeof out === "object" ? out : {}) }; return out; }
+  catch (err) { console.error("scheduler block", name, err); record.blocks[name] = { ok: false, ms: Date.now() - t, error: String(err?.message || err).slice(0, 300) }; return null; }
+}
+
+// Every block is wrapped and recorded in health/scheduler:lastRun; a failure in one never stops the next.
+// Fan-outs to every live shop (digest, audit, weekly, monthly) run in a background function at their hour,
+// claimed once per Houston day; with forceHour (tests) they run inline so the caller sees the result.
+export async function run({ forceHour, forceDay, inline } = {}) {
+  const record = { at: new Date().toISOString(), blocks: {} };
+  const nowISO = record.at;
   const results = [];
-  for (const { key, task } of due) {
-    try { results.push([task.type, await runTask(task)]); }
-    catch (err) { console.error("task failed", task.type, err); results.push([task.type, "error"]); try { await logEvent(task.slug, "task_error", { type: task.type, error: String(err?.message || err).slice(0, 200) }); } catch { /* ignore */ } }
-    await del("tasks", key);
-  }
-  // Texting registration: move brands to campaigns and campaigns to approved.
-  if (a2pEnabled()) {
+  let dueCount = 0;
+  await block(record, "tasks", async () => {
+    const due = await dueTasks(nowISO); dueCount = due.length;
+    for (const { key, task } of due) {
+      try { results.push([task.type, await runTask(task)]); }
+      catch (err) { console.error("task failed", task.type, err); results.push([task.type, "error"]); try { await logEvent(task.slug, "task_error", { type: task.type, error: String(err?.message || err).slice(0, 200) }); } catch { /* ignore */ } }
+      await del("tasks", key);
+    }
+    return { due: due.length };
+  });
+  await block(record, "tenDlc", async () => {
+    if (!a2pEnabled()) return { skipped: "no keys" };
+    let polled = 0;
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
       if (!c?.phone?.brandSid || !["brand_pending", "campaign_pending"].includes(c.phone.tenDlc)) continue;
+      polled++;
       try {
         if (c.phone.tenDlc === "brand_pending") {
           const st = await brandStatus(c.phone.brandSid);
@@ -153,102 +170,73 @@ export async function run({ forceHour, forceDay } = {}) {
         await saveClient(c);
       } catch (err) { console.error("10dlc poll", slug, err); }
     }
-  }
-  // Health alerts to Steve: SMS failure spikes, voice failures, and a live line that has gone silent. Lifecycle messages.
+    return { polled };
+  });
   let alerts = 0, lifecycles = 0;
-  for (const slug of await list("clients", "")) {
-    const c = await getClient(slug);
-    if (!c || !["testing", "live"].includes(c.status)) continue;
-    try { alerts += await healthAlerts(c); } catch (err) { console.error("health", slug, err); }
-    try { lifecycles += await lifecycle(c); } catch (err) { console.error("lifecycle", slug, err); }
-  }
-  // Cancelled shops whose 30-day window has ended: release the number and the assistant, and stop routing.
+  await block(record, "healthLifecycle", async () => {
+    for (const slug of await list("clients", "")) {
+      const c = await getClient(slug);
+      if (!c || !["testing", "live"].includes(c.status)) continue;
+      try { alerts += await healthAlerts(c); } catch (err) { console.error("health", slug, err); }
+      try { lifecycles += await lifecycle(c); } catch (err) { console.error("lifecycle", slug, err); }
+    }
+    return { alerts, lifecycles };
+  });
   let released = 0;
-  for (const slug of await list("clients", "")) {
-    const c = await getClient(slug);
-    if (!c || c.status !== "cancelled" || !c.serviceEndsAt || new Date(c.serviceEndsAt).getTime() > Date.now()) continue;
-    if (!c.phone?.twilioNumber && !c.phone?.twilioNumberSid && !c.voice?.assistantId) continue;
-    try {
-      const out = { number: c.phone?.twilioNumber || null, sid: c.phone?.twilioNumberSid || null };
-      let skipped = false;
-      if (twilioEnabled() && c.phone?.twilioNumberSid) { try { out.twilio = await releaseNumber(c.phone.twilioNumberSid, c.phone.messagingServiceSid); } catch (e) { out.twilioError = String(e.message).slice(0, 200); } } else skipped = true;
-      if (c.voice?.assistantId) { try { out.voice = await releaseVoice(c); if (out.voice?.skipped) skipped = true; } catch (e) { out.voiceError = String(e.message).slice(0, 200); } }
-      if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
-      if (c.voice?.assistantId) await del("index", "vapi:" + c.voice.assistantId);
-      c.phone = { ...c.phone, releasedNumber: c.phone.twilioNumber || "", twilioNumber: "", twilioNumberSid: "", messagingServiceSid: "" };
-      c.voice = { provider: "none", released: c.voice?.assistantId || "" };
-      c.releasedAt = new Date().toISOString();
-      await saveClient(c);
-      await logEvent(c.slug, skipped ? "number_release_skipped" : "number_released", out);
-      await notifySteve(`${skipped ? "Number release skipped (no keys)" : "Number released"}: ${c.business?.name}`, `${c.slug}: ${JSON.stringify(out)}\nCancelled ${c.cancelledAt}, window ended ${c.serviceEndsAt}.`);
-      released++;
-    } catch (err) { console.error("release", slug, err); }
-  }
-  // 6 pm Houston: daily digest to every live shop; Steve gets a copy for the first 7 days.
+  await block(record, "release", async () => {
+    for (const slug of await list("clients", "")) {
+      const c = await getClient(slug);
+      if (!c || c.status !== "cancelled" || !c.serviceEndsAt || new Date(c.serviceEndsAt).getTime() > Date.now()) continue;
+      if (!c.phone?.twilioNumber && !c.phone?.twilioNumberSid && !c.voice?.assistantId) continue;
+      try {
+        const out = { number: c.phone?.twilioNumber || null, sid: c.phone?.twilioNumberSid || null };
+        let skipped = false;
+        if (twilioEnabled() && c.phone?.twilioNumberSid) { try { out.twilio = await releaseNumber(c.phone.twilioNumberSid, c.phone.messagingServiceSid); } catch (e) { out.twilioError = String(e.message).slice(0, 200); } } else skipped = true;
+        if (c.voice?.assistantId) { try { out.voice = await releaseVoice(c); if (out.voice?.skipped) skipped = true; } catch (e) { out.voiceError = String(e.message).slice(0, 200); } }
+        if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
+        if (c.voice?.assistantId) await del("index", "vapi:" + c.voice.assistantId);
+        c.phone = { ...c.phone, releasedNumber: c.phone.twilioNumber || "", twilioNumber: "", twilioNumberSid: "", messagingServiceSid: "" };
+        c.voice = { provider: "none", released: c.voice?.assistantId || "" };
+        c.releasedAt = new Date().toISOString();
+        await saveClient(c);
+        await logEvent(c.slug, skipped ? "number_release_skipped" : "number_released", out);
+        await notifySteve(`${skipped ? "Number release skipped (no keys)" : "Number released"}: ${c.business?.name}`, `${c.slug}: ${JSON.stringify(out)}\nCancelled ${c.cancelledAt}, window ended ${c.serviceEndsAt}.`);
+        released++;
+      } catch (err) { console.error("release", slug, err); }
+    }
+    return { released };
+  });
+  // The clock, Houston.
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
   const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
-  const minute = forceHour !== undefined ? 0 : Number(parts.find((p) => p.type === "minute")?.value);
   const day = forceDay && isNaN(Number(forceDay)) ? forceDay : new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short" }).format(new Date());
   const dom = forceDay && !isNaN(Number(forceDay)) ? Number(forceDay) : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", day: "numeric" }).format(new Date()));
-  let digests = 0, weeklies = 0, monthlies = 0;
-  // 9 pm Houston: the day's customer conversations against the rubric; auto_flag events for Steve.
-  let autoFlags = 0;
-  if (hour === 21 && minute < 10) {
-    for (const slug of await list("clients", "")) {
-      const c = await getClient(slug);
-      if (!c || c.status !== "live") continue;
-      try { autoFlags += await autoFlagDay(c); } catch (err) { console.error("autoflag", slug, err); }
-    }
+  const dateKey = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date());
+  const forced = forceHour !== undefined;
+  const wanted = [];
+  if (hour === 18) wanted.push("digest");
+  if (hour === 21) wanted.push("autoflag");
+  if (day === "Mon" && hour === 8) wanted.push("weekly");
+  if (dom === 1 && hour === 9) wanted.push("monthly");
+  const fanouts = {};
+  for (const kind of wanted) {
+    await block(record, `fanout:${kind}`, async () => {
+      // Forced runs (tests) run inline and are not stamped; a scheduled run claims the day once, then hands off.
+      if (forced || inline) { const r = await fanout(kind); fanouts[kind] = r; return { inline: true, done: r.done, errors: r.errors.length }; }
+      if (!(await claimFanout(kind, dateKey))) return { skipped: "already sent today" };
+      const base = process.env.URL;
+      if (!base) throw new Error("no site URL for the background function");
+      const res = await fetch(`${base}/.netlify/functions/scheduler-fanout-background`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": process.env.ADMIN_KEY || "" }, body: JSON.stringify({ kind }) });
+      if (res.status >= 300) throw new Error(`background start ${res.status}`);
+      return { started: true };
+    });
   }
-  // The 1st at 9 am Houston: last month's statement to every live shop, and to Steve with the invoice line.
-  if (dom === 1 && hour === 9 && minute < 10) {
-    for (const slug of await list("clients", "")) {
-      const c = await getClient(slug);
-      if (!c || c.status !== "live") continue;
-      // A shop live for less than a day of the statement month gets no statement for it.
-      const monthEnd = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })); monthEnd.setDate(1); monthEnd.setHours(0, 0, 0, 0);
-      if (c.liveAt && new Date(new Date(c.liveAt).toLocaleString("en-US", { timeZone: "America/Chicago" })).getTime() > monthEnd.getTime() - D) continue;
-      try {
-        const mth = await monthlyReport(c);
-        await sendEmail({ to: c.owner.email, subject: mth.subject, text: mth.text });
-        await notifySteve(`Statement: ${c.business.name} (${mth.month})`, `${mth.text}\n\n${mth.invoice}`);
-        await logEvent(c.slug, "monthly", { month: mth.month, stats: mth.stats });
-        monthlies++;
-      } catch (err) { console.error("monthly", slug, err); }
-    }
-  }
-  // Monday 8 am Houston: the weekly "what it did for you" email to every live shop, by email only.
-  if (day === "Mon" && hour === 8 && minute < 10) {
-    for (const slug of await list("clients", "")) {
-      const c = await getClient(slug);
-      if (!c || c.status !== "live") continue;
-      try {
-        const w = await weeklyReport(c);
-        await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text });
-        if (c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 28 * D) await notifySteve(`Weekly: ${c.business.name}`, w.text);
-        await logEvent(c.slug, "weekly", { empty: !!w.empty, stats: w.stats || null });
-        weeklies++;
-      } catch (err) { console.error("weekly", slug, err); }
-    }
-  }
-  if (hour === 18 && minute < 10) {
-    for (const slug of await list("clients", "")) {
-      const c = await getClient(slug);
-      if (!c || c.status !== "live") continue;
-      try {
-        const d = await dailyDigest(c);
-        // A quiet day sends nothing to the owner (the Monday email counts quiet days); Steve still gets week-one and nightly-check copies.
-        const text = !d.empty && c.digest?.text !== false && c.owner.phone;
-        if (text) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "digest", body: d.text });
-        if (!d.empty) await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
-        if ((c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) || d.steveNote) await notifySteve(`Digest: ${c.business.name}`, d.email + (d.steveNote || ""));
-        await logEvent(c.slug, "digest", { text: d.text, empty: !!d.empty, texted: !!text, emailed: !d.empty });
-        digests++;
-      } catch (err) { console.error("digest", slug, err); }
-    }
-  }
-  console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`);
-  return { due: due.length, results, digests, weeklies, monthlies, released, alerts, lifecycles, autoFlags };
+  record.ok = Object.values(record.blocks).every((b) => b.ok);
+  record.ms = Date.now() - new Date(record.at).getTime();
+  try { await put("health", "scheduler:lastRun", record); } catch (err) { console.error("run record", err); }
+  const digests = fanouts.digest?.done || 0, weeklies = fanouts.weekly?.done || 0, monthlies = fanouts.monthly?.done || 0, autoFlags = fanouts.autoflag?.done || 0;
+  console.log(`scheduler: ${dueCount} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`, record.ok ? "ok" : "with errors");
+  return { due: dueCount, results, digests, weeklies, monthlies, released, alerts, lifecycles, autoFlags, fanouts: wanted, blocks: record.blocks, ok: record.ok };
 }
 
 export default async () => {

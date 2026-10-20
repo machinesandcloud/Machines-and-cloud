@@ -5,7 +5,20 @@ import { randomBytes } from "node:crypto";
 
 // Opened per call, never cached at module level: a warm function instance that outlives the Blobs
 // token would otherwise fail every write with "Token expired".
+// MC_MEMORY_STORE=1 (the deploy smoke test) swaps Blobs for an in-process Map with the same four calls.
+const memory = new Map();
+function memStore(name) {
+  if (!memory.has(name)) memory.set(name, new Map());
+  const m = memory.get(name);
+  return {
+    async get(key, opts) { const v = m.get(key); return v === undefined ? null : (opts?.type === "json" ? JSON.parse(v) : v); },
+    async setJSON(key, value) { m.set(key, JSON.stringify(value)); },
+    async delete(key) { m.delete(key); },
+    async list({ prefix = "" } = {}) { return { blobs: [...m.keys()].filter((k) => k.startsWith(prefix)).map((key) => ({ key })) }; },
+  };
+}
 function store(name) {
+  if (process.env.MC_MEMORY_STORE === "1") return memStore(name);
   return getStore({ name, consistency: "strong" });
 }
 

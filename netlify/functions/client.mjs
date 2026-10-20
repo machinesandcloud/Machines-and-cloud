@@ -109,7 +109,7 @@ export default async (req) => {
       await saveClient(c); await logEvent(c.slug, wasPaused ? "resumed" : "live", {});
       if (wasPaused) { try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error("attach voice", e); } }
       else {
-        const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket, and each one names the single reply it needs (ok, called, otw, or done). A 6 pm summary comes daily and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
+        const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket, and each one names the single reply it needs (ok, called, otw, or done). A 6 pm summary comes on any day it handled something, and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
         if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "welcome", body: welcome });
         await sendEmail({ to: c.owner.email, subject: `${name}: you're live`, text: `${welcome}
 
