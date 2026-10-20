@@ -36,6 +36,14 @@ export default async (req) => {
         row.overdueCallbacks = leads.filter((l) => l.status === "open" && l.overdueAt && !l.calledAt).length;
         row.lastInbound = [h.lastInboundCall, h.lastInboundText].filter(Boolean).sort().pop() || null;
         row.leads = { angiKey: c.leads?.angiKey || "", thumbtackSecret: c.leads?.thumbtackSecret || "" };
+        const dayMs = 86400000;
+        row.autoFlags7d = events.filter((e) => e.type === "auto_flag" && Date.now() - new Date(e.at).getTime() < 7 * dayMs).length;
+        row.healthAlerts7d = events.filter((e) => e.type === "health_alert" && Date.now() - new Date(e.at).getTime() < 7 * dayMs).map((e) => e.data?.reason);
+        row.overdueOld = leads.filter((l) => l.status === "open" && l.overdueAt && !l.calledAt && Date.now() - new Date(l.overdueAt).getTime() > dayMs).length;
+        row.testingDays = c.status === "testing" && c.build?.builtAt ? Math.floor((Date.now() - new Date(c.build.builtAt).getTime()) / dayMs) : 0;
+        row.forwardingUnverifiedDays = c.phone?.twilioNumber && c.phone?.forwarding !== "none" && !c.phone?.forwardingVerified && c.provision?.startedAt ? Math.floor((Date.now() - new Date(c.provision.startedAt).getTime()) / dayMs) : 0;
+        row.spanishReviewPending = !!c.business?.spanish && !process.env.SPANISH_REVIEWED_ON;
+        row.lifecycle = c.lifecycle || {};
         for (const e of events) if (Date.now() - new Date(e.at).getTime() < 86400000) stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type, data: e.data });
       }
       out.push(row);
@@ -62,6 +70,15 @@ export default async (req) => {
     for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug) tasks.push({ key: k, type: t.type, dueAt: t.dueAt, data: t.data, id: t.id }); }
     return json({ tasks });
   }
+  if (b.action === "put_conversation") {
+    const { getConversation, saveConversation } = await import("./lib/store.mjs");
+    const conv = await getConversation(c.slug, String(b.channel || "sms"), String(b.contact || "test"));
+    conv.messages = (b.messages || []).map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: String(m.content || "").slice(0, 1500), at: m.at || new Date().toISOString() }));
+    conv.autoFlag = null; await saveConversation(conv);
+    return json({ ok: true, messages: conv.messages.length });
+  }
+  if (b.action === "autoflag") { const { autoFlagDay } = await import("./lib/desk.mjs"); const r = await autoFlagDay(c, !!b.debug); return json({ ok: true, ...(b.debug ? r : { flagged: r }) }); }
+  if (b.action === "day7") { const { day7Draft } = await import("./lib/desk.mjs"); return json({ ok: true, draft: await day7Draft(c) }); }
   if (b.action === "log_event") { const ev = await logEvent(c.slug, String(b.type || "note"), b.data || {}); return json({ ok: true, event: ev }); }
   if (b.action === "schedule_task") {
     const { scheduleTask } = await import("./lib/store.mjs");
@@ -130,6 +147,8 @@ export default async (req) => {
   if (b.billing) c.billing = { ...c.billing, ...b.billing };
   if (b.leads) c.leads = { ...(c.leads || {}), ...(b.leads.angiKey !== undefined ? { angiKey: String(b.leads.angiKey) } : {}), ...(b.leads.thumbtackSecret !== undefined ? { thumbtackSecret: String(b.leads.thumbtackSecret) } : {}) };
   if (b.serviceEndsAt !== undefined) c.serviceEndsAt = b.serviceEndsAt ? new Date(b.serviceEndsAt).toISOString() : null;
+  if (b.builtAt !== undefined) c.build = { ...(c.build || {}), builtAt: b.builtAt };
+  if (b.provisionStartedAt !== undefined) c.provision = { ...(c.provision || {}), startedAt: b.provisionStartedAt };
   if (b.nextMonthNote !== undefined) c.nextMonthNote = String(b.nextMonthNote).slice(0, 300);
   if (b.liveAt !== undefined) c.liveAt = b.liveAt ? new Date(b.liveAt).toISOString() : null;
   await saveClient(c); await indexClient(c);

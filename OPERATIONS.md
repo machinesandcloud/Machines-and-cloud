@@ -67,6 +67,10 @@ Provisioning appends `?cell=%2B1...` for a shop whose owner cell is not the forw
 
 Steve's one-time setup: Twilio account (keys, Primary Customer Profile approved as ISV, and on the Machines & Cloud Messaging Service add ALTO and PARAR as custom opt-out keywords and EMPEZAR as a custom opt-in keyword under Opt-Out Management, so the carrier layer honors Spanish stop words the same way our webhook does), Vapi account (key), Resend (key + verified domain), Google OAuth client, optional Stripe. After that, nothing per client.
 
+## Lifecycle messages and the nightly check
+
+Each is sent once per shop (stamped on the client record): day 8 after go-live, "your free week is over" by email; three days in testing with no go-live, a text and email asking the owner to test and press Go live; a number assigned for two business days with no verified forwarding, a text with the code and the Live Voicemail reminder; a failed carrier registration, a text and email naming the legal name, EIN, and address fields to fix; day 7 after go-live, Steve gets the drafted "what I changed" email to edit and send (the runbook's step 9). At 9 pm Houston the day's conversations on every live shop go through a fixed rubric (price not listed, exact time promised, Tier 0 missed, no callback window, Spanish mishandled, no address, question unanswered); hits are `auto_flag` events, listed on the admin page and in Steve's digest copy, so after week one Steve reads flags, not everything.
+
 ## Steve's admin page
 
 `admin.html` (noindex) takes the admin key once (kept in the browser's sessionStorage, never in the page) and lists every shop with status, plan, live since, texting registration and sender, this month's usage, errors in 24 hours, last inbound, open flags, waiting alerts, and pending or overdue callbacks, with per-shop buttons: Portal (opens as the owner), Policy, Pause or Resume, Digest, Weekly, Monthly (shown, or sent on confirm), Angi and Thumbtack keys, Clear opt-out, Delete. Below the table: the last 24 hours of events across every shop. Everything it does is also `curl` against `/api/admin` with `x-admin-key`.

@@ -583,8 +583,8 @@ export async function noteReviewReply(c, phone, text) {
   try {
     const { makeClient, MODEL } = await import("./agent.mjs");
     const client = makeClient();
-    const r = await client.messages.create({ model: MODEL, max_tokens: 5, system: "A home service company texted a customer asking how the visit went and for a Google review. Classify the customer's reply. Answer with one word: positive (happy, thanks, will do, good job), negative (a complaint, something wrong, unhappy, refuses because of the service), or none (a question, a new request, unrelated, or unclear).", messages: [{ role: "user", content: text.slice(0, 500) }] });
-    const w = (r.content?.[0]?.text || "").trim().toLowerCase();
+    const r = await client.messages.create({ model: MODEL, max_tokens: 400, thinking: { type: "adaptive" }, output_config: { effort: "low" }, system: "A home service company texted a customer asking how the visit went and for a Google review. Classify the customer's reply. Answer with one word: positive (happy, thanks, will do, good job), negative (a complaint, something wrong, unhappy, refuses because of the service), or none (a question, a new request, unrelated, or unclear).", messages: [{ role: "user", content: text.slice(0, 500) }] });
+    const w = (r.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").trim().toLowerCase();
     sentiment = w.startsWith("pos") ? "positive" : w.startsWith("neg") ? "negative" : "none";
   } catch (err) { console.error("review classify", err); }
   b.reviewReply = { sentiment, text: text.slice(0, 300), at: new Date().toISOString() };
@@ -622,6 +622,7 @@ export function lineHealth(c, events = []) {
 
 export async function dailyDigest(c, events) {
   const today = houstonDay(new Date().toISOString());
+  const autoToday = (events || (await listRecords("events", c.slug, 300))).filter((e) => e.type === "auto_flag" && houstonDay(e.at) === today);
   const sameDay = (r) => houstonDay(r.createdAt || r.at) === today;
   const bookings = (await listRecords("bookings", c.slug, 300)).filter(sameDay);
   const leads = (await listRecords("leads", c.slug, 300)).filter(sameDay);
@@ -634,7 +635,8 @@ export async function dailyDigest(c, events) {
   const wants = leads.filter((l) => l.outcome === "wants_call").length;
   const spam = leads.filter((l) => l.outcome === "spam").length;
   const name = c.business.name;
-  if (!bookings.length && !leads.length && !convs.length) return { empty: true, text: `${name}: nothing today. Line OK, last call ${t(h.lastInboundCall)}, errors ${h.errors24h}.`, email: `${name}: nothing today.\nLast call: ${t(h.lastInboundCall)}. Last text: ${t(h.lastInboundText)}. Errors: ${h.errors24h}.` };
+  const steveNote = autoToday.length ? `\n\nNightly check flagged ${autoToday.length}: ${autoToday.map((e) => `${e.data.channel} ${e.data.contact} (${(e.data.reasons || []).join(", ")})`).join("; ")}` : "";
+  if (!bookings.length && !leads.length && !convs.length) return { empty: true, text: `${name}: nothing today. Line OK, last call ${t(h.lastInboundCall)}, errors ${h.errors24h}.`, email: `${name}: nothing today.\nLast call: ${t(h.lastInboundCall)}. Last text: ${t(h.lastInboundText)}. Errors: ${h.errors24h}.`, steveNote };
   const text = `${name}, today: ${bookings.length} booked${bookings.length ? " (" + bookings.map((b) => b.id).join(", ") + ")" : ""}, ${needs.length} leads need action${needs.length ? " (" + needs.map((l) => l.id).join(", ") + ")" : ""}, ${emergencies} emergencies, ${wants} wants a call, ${spam} spam. Flagged: ${convs.length}${convs.length ? " (" + (convs[0].flag.note || "").slice(0, 60) + ")" : ""}. Line: last call ${t(h.lastInboundCall)}, last text ${t(h.lastInboundText)}, errors ${h.errors24h}.`;
   const email = [`${name}: today's front desk`, "",
     ...bookings.map((b) => `Booked ${b.id}: ${b.customer_name} ${b.phone}, ${when(b)}, ${b.issue}${b.unsure ? " (unsure: " + b.unsure + ")" : ""}`),
@@ -642,9 +644,51 @@ export async function dailyDigest(c, events) {
     spam ? `Spam: ${spam}` : "",
     ...convs.map((v) => `Flagged (${v.channel} ${v.contact}): ${v.flag.note || ""}`),
     "", `Line: last call ${t(h.lastInboundCall)}, last text ${t(h.lastInboundText)}, last text delivered ${t(h.lastOutboundText)}, errors in 24 h ${h.errors24h}.`].filter((x) => x !== "").join("\n");
-  return { text, email };
+  return { text, email, steveNote };
 }
 
+// Nightly rubric pass over the day's customer conversations (Steve reads flags instead of everything).
+const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person answered without saying when the owner will call)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (a visit booked with no street address)", "question_unanswered (a direct customer question the desk never answered)"];
+export async function autoFlagDay(c, debug = false) {
+  const today = houstonDay(new Date().toISOString()); const raws = [];
+  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && !v.autoFlag && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
+  if (!convs.length) return 0;
+  const { makeClient, MODEL } = await import("./agent.mjs");
+  const client = makeClient();
+  const prices = (c.fees || []).map((f) => `${f.label} ${f.amount}`).join("; ") || "none published";
+  let n = 0;
+  for (const v of convs.slice(0, 40)) {
+    const text = (v.messages || []).filter((m) => houstonDay(m.at) === today || true).slice(-30).map((m) => `${m.role === "user" ? "Customer" : "Desk"}: ${String(m.content || "").replace(/\n\[Done:[^\]]*\]/g, "")}`).join("\n").slice(0, 6000);
+    try {
+      const r = await client.messages.create({ model: MODEL, max_tokens: 600, thinking: { type: "adaptive" }, output_config: { effort: "low" }, system: `You audit an AI front desk's conversations for a ${c.business?.trade || "home service"} company. Published prices: ${prices}. Arrival windows: ${(c.windows || []).join(", ")}. Reply with the matching reason codes from this list separated by commas, or the single word none: ${RUBRIC.join("; ")}.`, messages: [{ role: "user", content: text }] });
+      const out = (r.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").toLowerCase();
+      if (debug) raws.push({ contact: v.contact, out, stop: r.stop_reason, blocks: (r.content || []).map((b) => b.type) });
+      const reasons = ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"].filter((k) => out.includes(k));
+      v.autoFlag = { at: new Date().toISOString(), reasons };
+      await (await import("./store.mjs")).saveConversation(v);
+      if (reasons.length) { await logEvent(c.slug, "auto_flag", { channel: v.channel, contact: v.contact, reasons }); n++; }
+    } catch (err) { console.error("autoflag", err); if (debug) raws.push({ contact: v.contact, error: String(err?.message || err) }); }
+  }
+  return debug ? { n, raws } : n;
+}
+// Day 7: the "what I changed" email, drafted for Steve to edit and send.
+export async function day7Draft(c) {
+  const since = Date.now() - 7 * D;
+  const events = (await listRecords("events", c.slug, 1000)).filter((e) => new Date(e.at).getTime() > since);
+  const w = await weeklyReport(c);
+  const changes = events.filter((e) => e.type === "config_updated").length;
+  const flags = events.filter((e) => e.type === "flagged").length;
+  const auto = events.filter((e) => e.type === "auto_flag").flatMap((e) => e.data?.reasons || []);
+  const counts = {}; for (const r of auto) counts[r] = (counts[r] || 0) + 1;
+  const first = (c.owner?.name || "").split(" ")[0] || "there";
+  return [`To: ${c.owner?.email}`, `Subject: Your first week with the front desk`, "",
+    `Hi ${first},`, "",
+    `One week in. Here is what your front desk handled and what I changed.`, "",
+    `Handled: ${w.stats?.booked || 0} visits booked, ${w.stats?.open || 0} leads handed to you, ${w.stats?.emergencies || 0} emergencies, ${w.stats?.textedBack || 0} calls answered that would have gone to voicemail.`, "",
+    `Changed: [${changes} edits were saved under What it knows this week; ${flags} conversations flagged by you; ${Object.keys(counts).length ? "the nightly check raised " + Object.entries(counts).map(([k, v]) => `${v} ${k.replace(/_/g, " ")}`).join(", ") : "the nightly check raised nothing"}. Write one line per fix here.]`, "",
+    `Still open: [anything the owner must answer, or "nothing"]`, "",
+    `Your portal has every conversation. Flag anything that reads wrong and I see it the same day. Reply to this email any time.`, "", `Steve`].join("\n");
+}
 // Monthly statement on the 1st: the previous Houston month in one email; Steve's copy carries the hand-invoice line.
 export async function monthlyReport(c, month) {
   const now = new Date();
@@ -677,11 +721,23 @@ export async function monthlyReport(c, month) {
   const overage = Math.round((overMin * 0.35 + overTxt * 0.03) * 100) / 100;
   const label = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(y, mo - 1, 1));
   const name = c.business.name;
+  const avg = Number(c.rules?.avgTicket) || 0;
+  const worth = avg && voicemailJobs ? `About $${(avg * voicemailJobs).toLocaleString("en-US")} of work that would have gone to voicemail (your average job value of $${avg.toLocaleString("en-US")} times ${voicemailJobs}).` : "";
+  let compare = "";
+  if (avg) {
+    const pm = new Date(y, mo - 2, 1); const pmKey = `${pm.getFullYear()}-${String(pm.getMonth() + 1).padStart(2, "0")}`;
+    const inPrev = (iso) => iso && new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso)).slice(0, 7) === pmKey;
+    const pb = bookings.filter((b) => inPrev(b.createdAt)).length, pe = events.filter((e) => inPrev(e.at));
+    const pCalls = pe.filter((e) => e.type === "call_ended").length + pe.filter((e) => e.type === "missed_call").length;
+    const curCalls = answered + me.filter((e) => e.type === "missed_call").length;
+    if (pb || pCalls) compare = `Compared with last month: calls ${pCalls} then, ${curCalls} now; bookings ${pb} then, ${mb.length} now.`;
+  }
   const lines = [
     `${name}: your front desk in ${label}`, "",
     `Calls: ${answered} answered by the front desk, ${textedBack} texted back after a missed call`,
     `Booked: ${mb.length}${mb.length ? " (" + Object.entries(byChannel).map(([k, v]) => `${v} by ${k === "sms" ? "text" : k === "call" ? "phone" : k}`).join(", ") + ")" : ""}`,
     `Jobs that would have gone to voicemail: ${voicemailJobs}`,
+    worth, compare,
     `Review requests sent: ${reviewsSent}; customers who replied they were happy: ${positive}`,
     promised.length ? `Callback promises kept on time: ${kept} of ${promised.length}` : "Callback promises: none made",
     `Emergencies handled: ${emergencies}`,

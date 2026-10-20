@@ -76,6 +76,7 @@ export default async (req) => {
       callbackHours: s(b.rules.callbackHours, 80) || c.rules.callbackHours || "within 30 minutes",
       callbackAfterHours: s(b.rules.callbackAfterHours, 80) || c.rules.callbackAfterHours || "by 8 am tomorrow",
       consentAsk: b.rules.consentAsk !== undefined ? !!b.rules.consentAsk : !!c.rules.consentAsk,
+      avgTicket: b.rules.avgTicket !== undefined ? (Math.max(0, Math.round(Number(String(b.rules.avgTicket).replace(/[^\d.]/g, "")) || 0)) || 0) : (c.rules.avgTicket || 0),
       emergency247: b.rules.emergency247 !== undefined ? !!b.rules.emergency247 : (b.business?.hours !== undefined ? emergency247(s(b.business.hours, 300)) : !!c.rules.emergency247),
       hours: b.rules.hours !== undefined ? (normalizeHours(b.rules.hours) || (typeof b.rules.hours === "string" ? parseHours(b.rules.hours) : null)) : (c.rules.hours || null),
       bypass: b.rules.bypass !== undefined ? [...new Set(arr(b.rules.bypass, 20).map((n) => e164(n)).filter(Boolean))].slice(0, 20) : (c.rules.bypass || []),

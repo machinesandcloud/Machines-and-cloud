@@ -3,7 +3,8 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
-import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport, monthlyReport } from "./lib/desk.mjs";
+import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport, monthlyReport, autoFlagDay, day7Draft } from "./lib/desk.mjs";
+import { forwardingInstructions } from "./lib/forwarding.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
@@ -46,6 +47,47 @@ async function runTask(t) {
   return r.ok ? "sent" : r.logged ? "logged" : "send failed";
 }
 
+async function tellOwnerTenDlcFailed(c) {
+  const portal = `${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}#setup`;
+  const text = `${c.business.name}: carriers did not accept the texting registration. Usually the legal business name or EIN does not match the IRS letter, or the address differs. Check them on your portal (Setup, Texting registration) and save to refile: ${portal}. Until it clears, texts keep going out from our registered number with your name.`;
+  if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: text });
+  await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting registration needs a fix`, text });
+  await logEvent(c.slug, "tendlc_owner_told", {});
+}
+// One-time lifecycle messages, each sent once (stamped on the client record).
+async function lifecycle(c) {
+  let n = 0;
+  const stamps = c.lifecycle || {};
+  const portal = `${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`;
+  const mark = async (k, type) => { stamps[k] = new Date().toISOString(); c.lifecycle = stamps; await saveClient(c); await logEvent(c.slug, type, {}); n++; };
+  // (a) Day 8: the free week is over.
+  if (c.status === "live" && c.liveAt && !stamps.trialOver && Date.now() - new Date(c.liveAt).getTime() >= 8 * D) {
+    const text = `${c.business.name}: your free week is over. Nothing changes on the line. Your first statement arrives on the 1st, and Steve sends the invoice with it. Reply to this email with anything you want the front desk to do differently.`;
+    await sendEmail({ to: c.owner.email, subject: `${c.business.name}: your free week is over`, text });
+    await mark("trialOver", "trial_over");
+  }
+  // (b) Stuck in testing for three days.
+  if (c.status === "testing" && c.build?.builtAt && !stamps.testingNudge && Date.now() - new Date(c.build.builtAt).getTime() >= 3 * D) {
+    const text = `${c.business.name}: your front desk has been ready to test for three days. Open ${portal} and try the hard ones on the Test it tab: ask for a price you did not publish, an exact arrival time, a gas smell, Spanish. Fix anything under What it knows, then press Go live. Reply to this email if something is in the way.`;
+    if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${c.business.name}: your front desk is ready to test. Open your portal, try it as a customer, then press Go live. Stuck? Reply here.` });
+    await sendEmail({ to: c.owner.email, subject: `${c.business.name}: ready to test, waiting on you`, text });
+    await mark("testingNudge", "testing_nudge");
+  }
+  // (c) Number assigned, forwarding never verified for two business days.
+  if (["testing", "live"].includes(c.status) && c.phone?.twilioNumber && c.phone?.forwarding !== "none" && !c.phone?.forwardingVerified && !stamps.forwardingNudge && c.provision?.startedAt && businessDaysSince(c.provision.startedAt) >= 2) {
+    const fw = forwardingInstructions(c);
+    const text = `${c.business.name}: no forwarded call has reached your front desk yet. ${fw.short || "Turn on forwarding to " + c.phone.twilioNumber + " in your carrier app."} iPhone: turn off Live Voicemail first (Settings, Phone, Live Voicemail). Then call your own number from another phone and let it ring.`;
+    if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: text });
+    await mark("forwardingNudge", "forwarding_nudge");
+  }
+  // (e) Day 7: draft the "what I changed" email into Steve's inbox.
+  if (c.status === "live" && c.liveAt && !stamps.day7Draft && Date.now() - new Date(c.liveAt).getTime() >= 7 * D) {
+    const draft = await day7Draft(c);
+    await notifySteve(`Day 7 draft for ${c.business.name} (edit and send)`, draft);
+    await mark("day7Draft", "day7_draft");
+  }
+  return n;
+}
 // Business days between two instants (Houston), counting Monday to Friday only.
 function businessDaysSince(iso) {
   const day = (d) => new Date(d.toLocaleString("en-US", { timeZone: "America/Chicago" }));
@@ -96,7 +138,7 @@ export async function run({ forceHour, forceDay } = {}) {
         if (c.phone.tenDlc === "brand_pending") {
           const st = await brandStatus(c.phone.brandSid);
           if (st === "APPROVED") { const camp = await createCampaign(c, c.phone.messagingServiceSid, c.phone.brandSid); Object.assign(c.phone, camp, { tenDlc: "campaign_pending", brandStatus: st }); }
-          else if (st === "FAILED") { c.phone.tenDlc = "failed"; c.phone.brandStatus = st; await notifySteve(`10DLC brand failed: ${c.business.name}`, `Brand ${c.phone.brandSid} failed. Check the Twilio console.`); }
+          else if (st === "FAILED") { c.phone.tenDlc = "failed"; c.phone.brandStatus = st; await notifySteve(`10DLC brand failed: ${c.business.name}`, `Brand ${c.phone.brandSid} failed. Check the Twilio console.`); await tellOwnerTenDlcFailed(c); }
           else c.phone.brandStatus = st;
         } else {
           const st = await campaignStatus(c.phone.messagingServiceSid, c.phone.campaignSid);
@@ -106,18 +148,19 @@ export async function run({ forceHour, forceDay } = {}) {
             await logEvent(c.slug, "sender_switched", { to: "own" });
             await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting is live from your number`, text: `Carriers approved your business for texting. Your front desk now texts customers from ${c.phone.twilioNumber}: missed calls, confirmations, reminders, and follow-ups.` });
             if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${c.business.name}: texting is approved. Your front desk now texts customers from your own number.` });
-          } else if (st === "FAILED") { c.phone.tenDlc = "failed"; await notifySteve(`10DLC campaign failed: ${c.business.name}`, `Campaign ${c.phone.campaignSid} failed. Check the Twilio console.`); }
+          } else if (st === "FAILED") { c.phone.tenDlc = "failed"; await notifySteve(`10DLC campaign failed: ${c.business.name}`, `Campaign ${c.phone.campaignSid} failed. Check the Twilio console.`); await tellOwnerTenDlcFailed(c); }
         }
         await saveClient(c);
       } catch (err) { console.error("10dlc poll", slug, err); }
     }
   }
-  // Health alerts to Steve: SMS failure spikes, voice failures, and a live line that has gone silent.
-  let alerts = 0;
+  // Health alerts to Steve: SMS failure spikes, voice failures, and a live line that has gone silent. Lifecycle messages.
+  let alerts = 0, lifecycles = 0;
   for (const slug of await list("clients", "")) {
     const c = await getClient(slug);
     if (!c || !["testing", "live"].includes(c.status)) continue;
     try { alerts += await healthAlerts(c); } catch (err) { console.error("health", slug, err); }
+    try { lifecycles += await lifecycle(c); } catch (err) { console.error("lifecycle", slug, err); }
   }
   // Cancelled shops whose 30-day window has ended: release the number and the assistant, and stop routing.
   let released = 0;
@@ -140,6 +183,15 @@ export async function run({ forceHour, forceDay } = {}) {
       await notifySteve(`${skipped ? "Number release skipped (no keys)" : "Number released"}: ${c.business?.name}`, `${c.slug}: ${JSON.stringify(out)}\nCancelled ${c.cancelledAt}, window ended ${c.serviceEndsAt}.`);
       released++;
     } catch (err) { console.error("release", slug, err); }
+  }
+  // 9 pm Houston: the day's customer conversations against the rubric; auto_flag events for Steve.
+  let autoFlags = 0;
+  if (hour === 21 && minute < 10) {
+    for (const slug of await list("clients", "")) {
+      const c = await getClient(slug);
+      if (!c || c.status !== "live") continue;
+      try { autoFlags += await autoFlagDay(c); } catch (err) { console.error("autoflag", slug, err); }
+    }
   }
   // 6 pm Houston: daily digest to every live shop; Steve gets a copy for the first 7 days.
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
@@ -189,14 +241,14 @@ export async function run({ forceHour, forceDay } = {}) {
         const text = !d.empty && c.digest?.text !== false && c.owner.phone;
         if (text) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "digest", body: d.text });
         await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
-        if (c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) await notifySteve(`Digest: ${c.business.name}`, d.email);
+        if ((c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) || d.steveNote) await notifySteve(`Digest: ${c.business.name}`, d.email + (d.steveNote || ""));
         await logEvent(c.slug, "digest", { text: d.text, empty: !!d.empty, texted: !!text });
         digests++;
       } catch (err) { console.error("digest", slug, err); }
     }
   }
   console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`);
-  return { due: due.length, results, digests, weeklies, monthlies, released, alerts };
+  return { due: due.length, results, digests, weeklies, monthlies, released, alerts, lifecycles, autoFlags };
 }
 
 export default async () => {

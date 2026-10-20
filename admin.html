@@ -21,6 +21,7 @@
 <main class="ad">
   <h1>Front desk admin</h1>
   <p class="muted" id="keyRow">Admin key: <input class="key" id="key" type="password" placeholder="paste the admin key once"> <button class="btn" id="keyGo">Load</button> <span id="msg"></span></p>
+  <h2>Needs me</h2><div id="needs" class="muted">Load with the key.</div>
   <div id="shops"></div>
   <h2>Events, last 24 hours, every shop</h2>
   <div class="ev" id="events">Load with the key.</div>
@@ -40,6 +41,18 @@
     api(null, 'GET').then(function (d) {
       try { sessionStorage.setItem('mc_admin_key', key); } catch (e) { /* ignore */ }
       $('msg').textContent = d.clients.length + ' shop' + (d.clients.length === 1 ? '' : 's');
+      var needs = []; var dow = new Date().getDay(), dom = new Date().getDate();
+      d.clients.forEach(function (c) { var link = '<a href="' + esc(c.portal) + '" target="_blank" rel="noopener">' + esc(c.name || c.slug) + '</a>';
+        if (c.openFlags) needs.push(link + ': ' + c.openFlags + ' flagged conversation' + (c.openFlags > 1 ? 's' : '') + ' to read');
+        if (c.autoFlags7d) needs.push(link + ': ' + c.autoFlags7d + ' auto-flag' + (c.autoFlags7d > 1 ? 's' : '') + ' from the nightly check this week');
+        if (c.overdueOld) needs.push(link + ': ' + c.overdueOld + ' callback' + (c.overdueOld > 1 ? 's' : '') + ' overdue for more than a day');
+        if (c.testingDays >= 3) needs.push(link + ': in testing for ' + c.testingDays + ' days, no go-live');
+        if (c.forwardingUnverifiedDays >= 2) needs.push(link + ': number assigned ' + c.forwardingUnverifiedDays + ' days ago, forwarding never verified');
+        if ((c.phone || {}).tenDlc === 'failed') needs.push(link + ': texting registration failed');
+        if (c.healthAlerts7d && c.healthAlerts7d.length) needs.push(link + ': health alert' + (c.healthAlerts7d.length > 1 ? 's' : '') + ' this week (' + c.healthAlerts7d.join(', ') + ')');
+        if (c.status === 'live' && dom <= 7) needs.push(link + ': statement and invoice due this week');
+        if (c.spanishReviewPending && c.status === 'live') needs.push(link + ': Spanish texts still waiting for the reviewer'); });
+      $('needs').innerHTML = needs.length ? needs.map(function (n) { return '<div>' + n + '</div>'; }).join('') : 'Nothing needs you.';
       $('shops').innerHTML = d.clients.length ? '<table><tr><th>Shop</th><th>Status</th><th>Plan</th><th>Live since</th><th>Texting</th><th>Usage</th><th>Errors 24 h</th><th>Last inbound</th><th>Flags</th><th>Waiting</th><th>Callbacks</th><th>Actions</th></tr>' + d.clients.map(function (c) {
         var h = c.health || {}, u = c.usage || {};
         return '<tr data-slug="' + esc(c.slug) + '"><td><b>' + esc(c.name || c.slug) + '</b><br><span class="muted">' + esc(c.slug) + '<br>' + esc((c.owner || {}).name || '') + ' ' + esc((c.owner || {}).phone || '') + '</span></td>'
