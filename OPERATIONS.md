@@ -61,6 +61,8 @@ Without a key, the matching feature degrades: texts and emails are logged instea
 
 Every step that lacks a key records `waiting: ...` in `provision.steps` and Steve gets one email listing what is missing. Nothing blocks the website chat or the portal.
 
+Fallbacks and alerts: every number bought gets `VoiceFallbackUrl` and `SmsFallbackUrl` from `VOICE_FALLBACK_TWIML_URL` and `SMS_FALLBACK_TWIML_URL` (two static TwiML Bins Steve creates once in the Twilio console: voice says "We are having trouble connecting right now; please call back in a few minutes" and, where the owner's cell is not the forwarded line, dials it first; SMS replies "We got your text and will reply shortly"). A Vapi-answered number gets `VoiceFallbackUrl` set to our `/api/voice` after the import, so a Vapi outage degrades to the missed-call text-back. The scheduler texts and emails Steve, once per hour per shop, when three or more texts failed in an hour or any voice failure was logged in the last 15 minutes, and once per five days when a live shop with verified forwarding has had no inbound call or text for five business days (`health_alert` event with `reason`).
+
 Steve's one-time setup: Twilio account (keys, Primary Customer Profile approved as ISV, and on the Machines & Cloud Messaging Service add ALTO and PARAR as custom opt-out keywords and EMPEZAR as a custom opt-in keyword under Opt-Out Management, so the carrier layer honors Spanish stop words the same way our webhook does), Vapi account (key), Resend (key + verified domain), Google OAuth client, optional Stripe. After that, nothing per client.
 
 ## Angi and Thumbtack leads

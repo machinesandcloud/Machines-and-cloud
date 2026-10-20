@@ -2,7 +2,7 @@
 // 10DLC registration, the voice assistant, and the owner's forwarding instructions. Every step that
 // lacks a key is recorded as "waiting" instead of failing, and Steve is told what is missing.
 import { getClient, saveClient, indexClient, put, logEvent } from "./lib/store.mjs";
-import { twilioEnabled, a2pEnabled, buyLocalNumber, createMessagingService, addNumberToService, registerA2P } from "./lib/twilio.mjs";
+import { twilioEnabled, a2pEnabled, buyLocalNumber, createMessagingService, addNumberToService, registerA2P, setVoiceFallback } from "./lib/twilio.mjs";
 import { vapiEnabled, provisionVoice } from "./lib/vapi.mjs";
 import { notifySteve, sendEmail, sendSMS } from "./lib/send.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
@@ -57,6 +57,8 @@ export default async (req) => {
         c.phone.voiceForwardTo = ""; // Vapi owns the number's voice webhook now
         await put("index", "vapi:" + v.assistantId, c.slug);
         c.provision.steps.voice = "done";
+        // Vapi now owns the voice webhook; if Vapi fails, Twilio falls back to our text-back path.
+        if (c.phone.twilioNumberSid) { try { await setVoiceFallback(c.phone.twilioNumberSid, `${site}/api/voice`); c.provision.steps.voiceFallback = "done"; } catch (err) { c.provision.steps.voiceFallback = "failed: " + err.message; } }
       } catch (err) { c.provision.steps.voice = "failed: " + err.message; notes.push("voice: " + err.message); }
     } else { c.provision.steps.voice = "waiting: Vapi key (missed-call text-back is on)"; }
   }

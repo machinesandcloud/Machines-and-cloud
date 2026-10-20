@@ -42,6 +42,7 @@ export default async (req) => {
     for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug) tasks.push({ key: k, type: t.type, dueAt: t.dueAt, data: t.data, id: t.id }); }
     return json({ tasks });
   }
+  if (b.action === "log_event") { const ev = await logEvent(c.slug, String(b.type || "note"), b.data || {}); return json({ ok: true, event: ev }); }
   if (b.action === "schedule_task") {
     const { scheduleTask } = await import("./lib/store.mjs");
     const t = await scheduleTask(c.slug, new Date(Date.now() - 60000), String(b.type || ""), b.data || {});
@@ -81,6 +82,7 @@ export default async (req) => {
     if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
     if (c.voice?.assistantId) await del("index", "vapi:" + c.voice.assistantId);
     await del("health", "lastsend:" + c.slug);
+    for (const k of await list("health", "alert:" + c.slug + ":")) await del("health", k);
     await del("clients", c.slug);
     return json({ ok: true, deleted: c.slug, released });
   }
@@ -88,7 +90,7 @@ export default async (req) => {
   if (b.action) return json({ error: "unknown_action", action: String(b.action) }, 400);
   if (b.phone) {
     if (c.phone?.twilioNumber && b.phone.twilioNumber !== undefined && e164(b.phone.twilioNumber) !== c.phone.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
-    c.phone = { ...c.phone, ...(b.phone.twilioNumber !== undefined ? { twilioNumber: e164(b.phone.twilioNumber) } : {}), ...(b.phone.twilioNumberSid !== undefined ? { twilioNumberSid: String(b.phone.twilioNumberSid) } : {}), ...(b.phone.voiceForwardTo !== undefined ? { voiceForwardTo: String(b.phone.voiceForwardTo).trim() } : {}), ...(b.phone.tenDlc ? { tenDlc: String(b.phone.tenDlc) } : {}), ...(b.phone.textBack !== undefined ? { textBack: !!b.phone.textBack } : {}) };
+    c.phone = { ...c.phone, ...(b.phone.twilioNumber !== undefined ? { twilioNumber: e164(b.phone.twilioNumber) } : {}), ...(b.phone.twilioNumberSid !== undefined ? { twilioNumberSid: String(b.phone.twilioNumberSid) } : {}), ...(b.phone.voiceForwardTo !== undefined ? { voiceForwardTo: String(b.phone.voiceForwardTo).trim() } : {}), ...(b.phone.tenDlc ? { tenDlc: String(b.phone.tenDlc) } : {}), ...(b.phone.textBack !== undefined ? { textBack: !!b.phone.textBack } : {}), ...(b.phone.forwardingVerified !== undefined ? { forwardingVerified: !!b.phone.forwardingVerified } : {}), ...(b.phone.firstCallAt !== undefined ? { firstCallAt: b.phone.firstCallAt } : {}) };
   }
   if (b.voice) c.voice = { ...c.voice, ...b.voice };
   if (b.status && STATUSES.includes(b.status)) c.status = b.status;
@@ -96,6 +98,7 @@ export default async (req) => {
   if (b.billing) c.billing = { ...c.billing, ...b.billing };
   if (b.leads) c.leads = { ...(c.leads || {}), ...(b.leads.angiKey !== undefined ? { angiKey: String(b.leads.angiKey) } : {}), ...(b.leads.thumbtackSecret !== undefined ? { thumbtackSecret: String(b.leads.thumbtackSecret) } : {}) };
   if (b.serviceEndsAt !== undefined) c.serviceEndsAt = b.serviceEndsAt ? new Date(b.serviceEndsAt).toISOString() : null;
+  if (b.liveAt !== undefined) c.liveAt = b.liveAt ? new Date(b.liveAt).toISOString() : null;
   await saveClient(c); await indexClient(c);
   await logEvent(c.slug, "admin_update", { fields: Object.keys(b) });
   return json({ ok: true, client: { slug: c.slug, status: c.status, plan: c.plan, phone: c.phone, voice: c.voice, billing: c.billing } });

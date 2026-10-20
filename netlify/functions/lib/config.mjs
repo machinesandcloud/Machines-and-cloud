@@ -40,22 +40,38 @@ function clock(str, isClose) {
   if (h > 24) return null;
   return hhmm(h, min);
 }
-// Parses "Mon to Fri 7 to 6, Sat 8 to 2" or "Monday-Friday 8am-5pm; Saturday 9-1; Sunday closed".
+// Parses the hours sentences trade websites use: "Mon to Fri 7 to 6, Sat 8 to 2", "Mon-Fri: 7AM-7PM | Sat: 8AM-4PM | Sun: Closed",
+// "Weekdays 8-5", "Open daily 8am-6pm", "7 days a week, 8am to 8pm", "Lunes a Viernes 8am a 6pm", "Monday-Friday 8AM–5PM Saturday 9AM–1PM".
+const DAY_WORDS = "(?:mon|tue|wed|thu|fri|sat|sun|lun|mar|mi[eé]|jue|vie|s[aá]b|dom)";
+const DAY_CODE = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 0, lun: 1, mar: 2, mie: 3, mié: 3, jue: 4, vie: 5, sab: 6, sáb: 6, dom: 0 };
+const TIME = "(\\d{1,2}(?::\\d{2})?\\s*(?:am|pm|a|p)?)";
+const RANGE = new RegExp(`${TIME}\\s*(?:to|-|a|until|hasta)\\s*${TIME}`, "i");
+function expandDays(a, b) { const out = []; for (let i = a, n = 0; n < 7; i = (i + 1) % 7, n++) { out.push(DAYS[(i + 6) % 7]); if (i === b) break; } return out; }
 export function parseHours(str) {
+  let t = String(str || "").toLowerCase()
+    .replace(/[–—]/g, "-").replace(/\b([ap])\.\s*m\./g, "$1m").replace(/\b([ap])\.m\b/g, "$1m")
+    .replace(/\bhours?\s*:/g, " ").replace(/\b(we are|we're|were)\s+open\b/g, " ").replace(/\bopen\b/g, " ")
+    .replace(/\b(weekdays?|lunes a viernes|monday through friday)\b/g, " mon-fri ").replace(/\bm\s*-\s*f\b/g, " mon-fri ").replace(/\bm\s*-\s*(sat|sa)\b/g, " mon-sat ").replace(/\bweekends?\b/g, " sat-sun ")
+    .replace(/\b(every ?day|daily|all week|7 days(?: a week)?|todos los d[ií]as|mon(?:day)?\s*(?:-|to|through|thru)\s*sun(?:day)?)\b/g, " mon-sun ")
+    .replace(/\|/g, ",");
   const out = {}; let any = false;
-  for (const part of String(str || "").split(/[,;\n]+/)) {
-    const t = part.trim().toLowerCase().replace(/\./g, "");
-    if (!t) continue;
-    const dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun|m|t|w|r|f)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun|m|t|w|r|f)[a-z]*)?\s*:?\s*(.*)$/);
-    if (!dm) { if (/24\s*\/\s*7|24 hours|around the clock/.test(t) && !/emergenc|on call|after hours/.test(t) && !any) { for (const d of DAYS) out[d] = { open: "00:00", close: "24:00" }; any = true; } continue; }
-    const a = DAY_IDX[dm[1]], b = dm[2] ? DAY_IDX[dm[2]] : a; const rest = dm[3];
-    const days = []; for (let i = a; ; i = (i + 1) % 7) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; if (days.length > 7) break; }
-    if (/closed|by appointment/.test(rest)) { for (const d of days) out[d] = null; any = true; continue; }
-    const tm = rest.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/);
-    if (!tm) continue;
-    const open = clock(tm[1], false), close = clock(tm[2], true);
+  // Scan for "<day>[ to <day>][:] <range or closed>" anywhere in the sentence.
+  const re = new RegExp(`(${DAY_WORDS})[a-zé]*\\.?(?:\\s*(?:to|-|through|thru|a|al|hasta)\\s*(${DAY_WORDS})[a-zé]*\\.?)?\\s*:?\\s*(closed|cerrado|${TIME}\\s*(?:to|-|a|until|hasta)\\s*${TIME})`, "gi");
+  let m;
+  while ((m = re.exec(t))) {
+    const a = DAY_CODE[m[1]], b = m[2] ? DAY_CODE[m[2]] : a;
+    if (a === undefined || b === undefined) continue;
+    const days = expandDays(a, b);
+    if (/^(closed|cerrado)/.test(m[3])) { for (const d of days) out[d] = null; any = true; continue; }
+    const open = clock(m[4], false), close = clock(m[5], true);
     if (!open || !close) continue;
     for (const d of days) out[d] = { open, close }; any = true;
+  }
+  if (!any) {
+    // No day words: a bare range applies to every day; "24 hours" alone means always open.
+    const r = t.match(RANGE);
+    if (r && !/emergenc|on call|after hours/.test(t)) { const open = clock(r[1], false), close = clock(r[2], true); if (open && close) { for (const d of DAYS) out[d] = { open, close }; any = true; } }
+    else if (/24\s*\/\s*7|24 hours|around the clock/.test(t) && !/emergenc|on call|after hours/.test(t)) { for (const d of DAYS) out[d] = { open: "00:00", close: "24:00" }; any = true; }
   }
   if (!any) return null;
   for (const d of DAYS) if (out[d] === undefined) out[d] = null;

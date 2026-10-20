@@ -4,7 +4,7 @@
 // VAPI_VOICE_PROVIDER and VAPI_VOICE_ID. Field names follow the Vapi docs as of 2026-10 and are
 // expected to need small fixes on the first real run (see product/DECISIONS.md).
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, loopCheck } from "./config.mjs";
-import { getNumber, setNumberWebhooks, twilioEnabled } from "./twilio.mjs";
+import { getNumber, setNumberWebhooks, setVoiceFallback, twilioEnabled } from "./twilio.mjs";
 import { logEvent } from "./store.mjs";
 
 const KEY = process.env.VAPI_API_KEY;
@@ -131,6 +131,7 @@ export async function attachVoice(client, site) {
       const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, server: { url: `${site}/api/vapi`, timeoutSeconds: 20 } });
       client.voice.phoneNumberId = pn.id;
     }
+    try { await setVoiceFallback(client.phone.twilioNumberSid, `${site}/api/voice`); } catch { /* fallback stays as it was */ }
     client.voice.detached = false;
     await logEvent(client.slug, "voice_attached", {});
   } catch (err) { await logEvent(client.slug, "voice_attach_failed", { error: String(err.message).slice(0, 200) }); }

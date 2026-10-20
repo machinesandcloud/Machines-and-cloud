@@ -29,6 +29,8 @@ const api = (p) => `https://api.twilio.com/2010-04-01/Accounts/${SID}/${p}`;
 const trust = (p) => `https://trusthub.twilio.com/v1/${p}`;
 const msg = (p) => `https://messaging.twilio.com/v1/${p}`;
 
+// Fallbacks when our functions or Vapi do not answer: Steve's static TwiML Bins (OPERATIONS.md one-time setup).
+export const fallbackUrls = () => ({ voice: process.env.VOICE_FALLBACK_TWIML_URL || "", sms: process.env.SMS_FALLBACK_TWIML_URL || "" });
 export async function buyLocalNumber({ areaCode = "713", friendlyName, voiceUrl, smsUrl }) {
   let list = [];
   for (const ac of [areaCode, "713", "281", "832", "346"]) {
@@ -37,12 +39,18 @@ export async function buyLocalNumber({ areaCode = "713", friendlyName, voiceUrl,
     if (list.length) break;
   }
   if (!list.length) throw new Error("no local numbers available");
-  const n = await tw(api("IncomingPhoneNumbers.json"), { PhoneNumber: list[0].phone_number, FriendlyName: friendlyName, VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST" });
+  const fb = fallbackUrls();
+  const n = await tw(api("IncomingPhoneNumbers.json"), { PhoneNumber: list[0].phone_number, FriendlyName: friendlyName, VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST", ...(fb.voice ? { VoiceFallbackUrl: fb.voice, VoiceFallbackMethod: "POST" } : {}), ...(fb.sms ? { SmsFallbackUrl: fb.sms, SmsFallbackMethod: "POST" } : {}) });
   return { number: n.phone_number, sid: n.sid };
 }
 
 export async function setNumberWebhooks(numberSid, { voiceUrl, smsUrl }) {
-  return tw(api(`IncomingPhoneNumbers/${numberSid}.json`), { VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST" });
+  const fb = fallbackUrls();
+  return tw(api(`IncomingPhoneNumbers/${numberSid}.json`), { VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST", ...(fb.voice ? { VoiceFallbackUrl: fb.voice, VoiceFallbackMethod: "POST" } : {}), ...(fb.sms ? { SmsFallbackUrl: fb.sms, SmsFallbackMethod: "POST" } : {}) });
+}
+// A Vapi-answered number falls back to our own /api/voice (missed-call text-back) when Vapi does not answer.
+export async function setVoiceFallback(numberSid, voiceFallbackUrl) {
+  return tw(api(`IncomingPhoneNumbers/${numberSid}.json`), { VoiceFallbackUrl: voiceFallbackUrl, VoiceFallbackMethod: "POST" });
 }
 
 export async function createMessagingService({ friendlyName, inboundUrl }) {

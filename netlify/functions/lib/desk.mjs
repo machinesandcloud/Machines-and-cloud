@@ -90,8 +90,11 @@ export async function runConsentAsk(c, task) {
   return r.ok ? "sent" : "logged";
 }
 // A YES or SI from a number asked inside the last 7 days: store the consent record. Returns the reply or null.
-export async function noteConsentReply(c, phone, text) {
+export async function noteConsentReply(c, phone, text, conv) {
   if (!/^\s*(yes|yeah|yep|si|sí|claro)\s*[.!]*\s*$/i.test(text)) return null;
+  // Only when the consent ask is the last thing we sent: a yes to a reminder or a window offer is not consent.
+  const lastOut = [...(conv?.messages || [])].reverse().find((m) => m.role === "assistant");
+  if (!lastOut || lastOut.system !== "consent_ask") return null;
   const cust = await getCustomer(c.slug, phone);
   if (!cust.consentAskedAt || cust.marketingConsent) return null;
   if (Date.now() - new Date(cust.consentAskedAt).getTime() > 7 * D) return null;

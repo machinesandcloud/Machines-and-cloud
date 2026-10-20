@@ -101,6 +101,7 @@ export default async (req) => {
       b.hours = b.hours || p.hours; b.afterHours = b.afterHours || p.after_hours; b.licenses = b.licenses || p.licenses;
       if (!b.reviewLink && !b.googlePlaceId && /^https?:\/\/(g\.page|maps\.app\.goo\.gl|search\.google\.com\/local\/writereview|g\.co)/i.test(p.google_review_link || "")) b.reviewLink = p.google_review_link.trim().slice(0, 300);
       if (!hadHours && b.hours && !c.rules.hours) { const { parseHours } = await import("./lib/config.mjs"); c.rules.hours = parseHours(b.hours) || null; }
+      if (!c.rules.hours) { p.missing = [...(p.missing || []), b.hours ? "hours could not be read; set per-day hours on the portal" : "hours; set per-day hours on the portal"]; }
       if (!c.services?.length) c.services = p.services || [];
       if (!c.fees?.length) c.fees = (p.published_prices || []).filter((f) => f.amount);
       const have = new Set((c.faq || []).map((x) => x.q.toLowerCase()));
@@ -117,7 +118,7 @@ export default async (req) => {
     await logEvent(c.slug, "built", { pages: pages.length, missing: c.build.missing });
     const base = process.env.URL || "";
     const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
-    await sendEmail({ to: c.owner.email, subject: `${b.name || "Your front desk"} is ready to test`, text: `Your front desk is built from ${c.business.website ? c.business.website + " and " : ""}your answers. Test it here, read what it knows, and fix anything wrong:\n${portal}\n\nWhat your website is missing (we filled it from your answers where we could): ${c.build.notes || "nothing major"}.` });
+    await sendEmail({ to: c.owner.email, subject: `${b.name || "Your front desk"} is ready to test`, text: `Your front desk is built from ${c.business.website ? c.business.website + " and " : ""}your answers. Test it here, read what it knows, and fix anything wrong:\n${portal}\n\nWhat your website is missing (we filled it from your answers where we could): ${c.build.notes || "nothing major"}.${c.rules?.hours ? "" : "\n\nWe could not read your hours; the front desk is using 7 am to 7 pm until you fill in the rows on your portal (What it knows, Hours)."}` });
     await notifySteve(`Built: ${b.name || c.slug}`, `Pages read: ${pages.length}. Missing: ${c.build.notes || "-"}\n${portal}`);
     try { await fetch(`${new URL(req.url).origin}/.netlify/functions/provision-background`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: c.slug, key: c.ownerKey }) }); } catch (e) { console.error("could not start provisioning", e); }
   } catch (err) {

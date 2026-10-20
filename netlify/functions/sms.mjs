@@ -4,7 +4,7 @@
 import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
-import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply } from "./lib/desk.mjs";
+import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optedOut } from "./lib/send.mjs";
 
 export const config = { path: "/api/sms" };
@@ -95,7 +95,7 @@ export default async (req) => {
   const conv = await getConversation(c.slug, "sms", from);
   // A YES to the marketing-consent ask: record it and answer without the model.
   try {
-    const consentReply = await noteConsentReply(c, from, body);
+    const consentReply = await noteConsentReply(c, from, body, conv);
     if (consentReply) {
       conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: consentReply + "\n[Done: marketing consent recorded]", at: new Date().toISOString() });
       await saveConversation(conv);
@@ -109,13 +109,13 @@ export default async (req) => {
     const b = bookings[0];
     if (/^\s*(c|confirm|confirmed|yes)\s*[.!]*\s*$/i.test(body)) {
       await confirmVisit(c, b);
-      const msg = `${name}: confirmed for ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window}. See you then.`;
+      const msg = b.language === "es" ? `${name}: confirmada para ${when(b).replace(/\s+to\s+/, " a ")}. Nos vemos.` : `${name}: confirmed for ${when(b)}. See you then.`;
       conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg + `\n[Done: visit confirmed, ref ${b.id}]`, at: new Date().toISOString() });
       await saveConversation(conv);
       return twiml(msg);
     }
     if (/^\s*(r|reschedule)\s*[.!]*\s*$/i.test(body)) {
-      const msg = `${name}: no problem. Which day and window works? We offer ${(c.windows || []).join(" or ")}.`;
+      const msg = b.language === "es" ? `${name}: sin problema. ¿Qué día y ventana le conviene? Ofrecemos ${(c.windows || []).map((w) => w.replace(/\s+to\s+/, " a ")).join(" o ")}.` : `${name}: no problem. Which day and window works? We offer ${(c.windows || []).join(" or ")}.`;
       conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg, at: new Date().toISOString() });
       await saveConversation(conv);
       return twiml(msg);

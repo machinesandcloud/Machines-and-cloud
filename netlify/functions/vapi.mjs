@@ -32,7 +32,7 @@ export default async (req) => {
   // Incoming call: which assistant, and what we already know about this caller.
   if (m.type === "assistant-request") {
     const assistantId = c.voice?.assistantId;
-    if (!assistantId || c.voice?.detached || !["testing", "live"].includes(c.status)) return json({ error: `${c.business?.name || "This line"} is not answering calls right now. Please call back during business hours.` });
+    if (!assistantId || c.voice?.detached || !["testing", "live"].includes(c.status)) { await logEvent(c.slug, "assistant_request_failed", { from: caller, reason: !assistantId ? "no_assistant" : c.voice?.detached ? "detached" : c.status }); return json({ error: `${c.business?.name || "This line"} is not answering calls right now. Please call back during business hours.` }); }
     const owner = c.owner?.name || "the owner";
     if (caller && (c.rules?.bypass || []).includes(caller)) {
       await logEvent(c.slug, "vip_call", { from: caller, rang: !cellIsForwardedLine(c) && c.owner?.phone ? "cell" : "assistant" });

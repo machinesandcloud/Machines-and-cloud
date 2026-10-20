@@ -1,7 +1,7 @@
 // Runs every 10 minutes: sends whatever is due (reminders, review requests, quote checks, payment
 // reminders, quiet-lead chases), runs alert escalations, polls texting registration, and sends the
 // 6 pm Houston daily digest to every live shop.
-import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation } from "./lib/store.mjs";
+import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
 import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
@@ -46,6 +46,38 @@ async function runTask(t) {
   return r.ok ? "sent" : r.logged ? "logged" : "send failed";
 }
 
+// Business days between two instants (Houston), counting Monday to Friday only.
+function businessDaysSince(iso) {
+  const day = (d) => new Date(d.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  let t = day(new Date(iso)); const now = day(new Date()); let n = 0;
+  t.setHours(0, 0, 0, 0); now.setHours(0, 0, 0, 0);
+  while (t < now) { t.setDate(t.getDate() + 1); if (t.getDay() !== 0 && t.getDay() !== 6) n++; }
+  return n;
+}
+async function alertOnce(c, reason, hours, subject, text) {
+  const k = `alert:${c.slug}:${reason}`;
+  const last = await get("health", k);
+  if (last && Date.now() - new Date(last.at).getTime() < hours * 3600 * 1000) return false;
+  await put("health", k, { at: new Date().toISOString() });
+  await notifySteve(subject, `${text}\n${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`);
+  await logEvent(c.slug, "health_alert", { reason });
+  return true;
+}
+async function healthAlerts(c) {
+  const events = await listRecords("events", c.slug, 400);
+  const since = (ms) => events.filter((e) => Date.now() - new Date(e.at).getTime() < ms);
+  let n = 0;
+  const failed = since(3600 * 1000).filter((e) => e.type === "sms_failed");
+  if (failed.length >= 3 && (await alertOnce(c, "sms_failures", 1, `Texts failing: ${c.business.name}`, `${failed.length} texts failed in the last hour. Last error: ${failed[failed.length - 1].data?.message || failed[failed.length - 1].data?.code || "-"}.`))) n++;
+  const voice = since(15 * 60 * 1000).filter((e) => ["vapi_tool_failed", "assistant_request_failed", "voice_attach_failed", "voice_detach_failed"].includes(e.type));
+  if (voice.length && (await alertOnce(c, "voice_failures", 1, `Voice failing: ${c.business.name}`, `${voice.length} voice failure(s) in the last 15 minutes: ${voice.map((e) => e.type + " " + (e.data?.error || e.data?.name || "")).join("; ").slice(0, 400)}.`))) n++;
+  if (c.status === "live" && c.phone?.forwardingVerified && c.phone?.forwarding !== "none") {
+    const inbound = events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
+    if (inbound && businessDaysSince(inbound) >= 5 && (await alertOnce(c, "no_inbound", 5 * 24, `Line silent: ${c.business.name}`, `No call or text has reached the front desk for ${businessDaysSince(inbound)} business days (last at ${inbound}). Forwarding may have dropped: ask the owner to dial *#61# and check Live Voicemail, then call the business number from another phone.`))) n++;
+  }
+  return n;
+}
+
 export async function run({ forceHour, forceDay } = {}) {
   const nowISO = new Date().toISOString();
   const due = await dueTasks(nowISO);
@@ -79,6 +111,13 @@ export async function run({ forceHour, forceDay } = {}) {
         await saveClient(c);
       } catch (err) { console.error("10dlc poll", slug, err); }
     }
+  }
+  // Health alerts to Steve: SMS failure spikes, voice failures, and a live line that has gone silent.
+  let alerts = 0;
+  for (const slug of await list("clients", "")) {
+    const c = await getClient(slug);
+    if (!c || !["testing", "live"].includes(c.status)) continue;
+    try { alerts += await healthAlerts(c); } catch (err) { console.error("health", slug, err); }
   }
   // Cancelled shops whose 30-day window has ended: release the number and the assistant, and stop routing.
   let released = 0;
@@ -139,7 +178,7 @@ export async function run({ forceHour, forceDay } = {}) {
     }
   }
   console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`);
-  return { due: due.length, results, digests, weeklies, released };
+  return { due: due.length, results, digests, weeklies, released, alerts };
 }
 
 export default async () => {
