@@ -2,7 +2,7 @@
 // 10DLC registration, the voice assistant, and the owner's forwarding instructions. Every step that
 // lacks a key is recorded as "waiting" instead of failing, and Steve is told what is missing.
 import { getClient, saveClient, indexClient, put, logEvent } from "./lib/store.mjs";
-import { twilioEnabled, a2pEnabled, buyLocalNumber, createMessagingService, addNumberToService, registerA2P, setVoiceFallback } from "./lib/twilio.mjs";
+import { twilioEnabled, a2pEnabled, buyLocalNumber, createMessagingService, addNumberToService, registerA2P, setVoiceFallback, voiceFallbackFor } from "./lib/twilio.mjs";
 import { vapiEnabled, provisionVoice } from "./lib/vapi.mjs";
 import { notifySteve, sendEmail, sendSMS } from "./lib/send.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
@@ -22,7 +22,7 @@ export default async (req) => {
     if (twilioEnabled()) {
       try {
         const area = (c.phone.businessNumber || "").replace(/^\+1/, "").slice(0, 3) || "713";
-        const n = await buyLocalNumber({ areaCode: area, friendlyName: `${c.business.name} (${c.slug})`, voiceUrl: `${site}/api/voice`, smsUrl: `${site}/api/sms` });
+        const n = await buyLocalNumber({ areaCode: area, friendlyName: `${c.business.name} (${c.slug})`, voiceUrl: `${site}/api/voice`, smsUrl: `${site}/api/sms`, voiceFallbackUrl: voiceFallbackFor(c) });
         c.phone.twilioNumber = n.number; c.phone.twilioNumberSid = n.sid; c.provision.steps.number = "done";
         await indexClient(c);
       } catch (err) { c.provision.steps.number = "failed: " + err.message; notes.push("number: " + err.message); }

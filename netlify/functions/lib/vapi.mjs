@@ -4,7 +4,7 @@
 // VAPI_VOICE_PROVIDER and VAPI_VOICE_ID. Field names follow the Vapi docs as of 2026-10 and are
 // expected to need small fixes on the first real run (see product/DECISIONS.md).
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, loopCheck } from "./config.mjs";
-import { getNumber, setNumberWebhooks, setVoiceFallback, twilioEnabled } from "./twilio.mjs";
+import { getNumber, setNumberWebhooks, setVoiceFallback, twilioEnabled, voiceFallbackFor } from "./twilio.mjs";
 import { logEvent } from "./store.mjs";
 
 const KEY = process.env.VAPI_API_KEY;
@@ -116,7 +116,7 @@ export async function detachVoice(client, site) {
   try {
     const n = await getNumber(client.phone.twilioNumberSid);
     if (n.voice_url && !n.voice_url.includes("/api/voice")) client.voice.vapiVoiceUrl = n.voice_url;
-    await setNumberWebhooks(client.phone.twilioNumberSid, { voiceUrl: `${site}/api/voice`, smsUrl: `${site}/api/sms` });
+    await setNumberWebhooks(client.phone.twilioNumberSid, { voiceUrl: `${site}/api/voice`, smsUrl: `${site}/api/sms`, voiceFallbackUrl: voiceFallbackFor(client) });
     client.voice.detached = true;
     await logEvent(client.slug, "voice_detached", {});
   } catch (err) { await logEvent(client.slug, "voice_detach_failed", { error: String(err.message).slice(0, 200) }); }

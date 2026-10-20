@@ -9,6 +9,14 @@ import { standardGreeting } from "./lib/vapi.mjs";
 
 export const config = { path: "/api/vapi" };
 
+// Vapi ended reasons that mean the call failed on the platform side (as opposed to a caller hanging up).
+const NORMAL_END = /^(customer-ended-call|assistant-ended-call|assistant-forwarded-call|assistant-said-end-call-phrase|voicemail|silence-timed-out|exceeded-max-duration|customer-busy|customer-did-not-answer|customer-did-not-give-microphone-permission|manually-canceled|assistant-ended-call-after-message-spoken|assistant-ended-call-with-hangup-task)$/;
+export function isVoiceFailure(reason) {
+  const r = String(reason || "");
+  if (!r || NORMAL_END.test(r)) return false;
+  return /^(assistant-request-returned-error|assistant-request-failed|assistant-not-found|assistant-not-valid|assistant-request-returned-invalid|twilio-failed-to-connect-call|phone-call-provider-|call\.in-progress\.error-|pipeline-error-|db-error|unknown-error|worker-shutdown|vonage-)|-(llm|voice|transcriber)-failed|-failed$|error/.test(r);
+}
+
 async function resolveClient(m) {
   const slug = m?.assistant?.metadata?.slug || m?.call?.assistant?.metadata?.slug;
   if (slug) { const c = await getClient(slug); if (c) return c; }
@@ -71,6 +79,7 @@ export default async (req) => {
     await saveConversation(conv);
     const seconds = m.startedAt && m.endedAt ? Math.max(0, Math.round((new Date(m.endedAt) - new Date(m.startedAt)) / 1000)) : null;
     await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds });
+    if (isVoiceFailure(m.endedReason)) await logEvent(c.slug, "voice_failed", { from: caller, reason: m.endedReason });
     try { await addUsage(c, { minutes: seconds ? Math.ceil(seconds / 60) : 0, calls: 1 }); } catch (err) { console.error("usage", err); }
     if (/transfer/i.test(String(m.endedReason || ""))) await logEvent(c.slug, "transferred", { from: caller });
     // A call that produced neither a booking nor a lead still deserves an owner note when we know the number.

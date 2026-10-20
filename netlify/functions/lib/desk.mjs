@@ -144,14 +144,16 @@ export function ownerSummary(c, kind, r) {
   if (r.notes) lines.push(`Access: ${r.notes}`);
   if (r.language === "es") lines.push("Language: Spanish");
   if (r.unsure) lines.push(`Unsure about: ${r.unsure}`);
-  if (r.id) lines.push(`Ref ${r.id}. ${askFor(kind, r)}`);
+  if (r.id) lines.push(`Ref ${r.id}.${askFor(kind, r) ? " " + askFor(kind, r) : ""}`);
   return lines.join("\n");
 }
 // Each alert asks for exactly one reply.
 function askFor(kind, r) {
   if (kind === "booking" || r.outcome === "booked") return `Reply "otw ${r.id}" when you are on the way.`;
   if (r.reason === "wants_call" || r.reason === "handoff") return `Reply "called ${r.id}" once you have reached them.`;
-  return `Reply "ok ${r.id}" to acknowledge.`;
+  if (r.reason === "emergency" || r.urgency === "emergency") return `Reply "ok ${r.id}" to acknowledge.`;
+  // Took-message, question, and platform leads: nothing waits on a reply; the 6 pm digest lists them.
+  return "";
 }
 
 // Quiet hours for follow-up texts (Texas Business and Commerce Code ch. 304 hours): 9 am to 9 pm
@@ -348,7 +350,7 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
   });
   const label = source === "angi" ? "Angi" : source === "thumbtack" ? "Thumbtack" : source;
   let summary = ownerSummary(c, "lead", l);
-  if (!p) summary = summary.replace(/Reply "ok [^"]+" to acknowledge\./, source === "thumbtack" ? "No phone number comes with Thumbtack leads. Reply in the Thumbtack app." : "No phone number came with this lead; reply on the platform.");
+  if (!p) summary += (source === "thumbtack" ? " No phone number comes with Thumbtack leads. Reply in the Thumbtack app." : " No phone number came with this lead; reply on the platform.");
   await notifyOwner(c, `${label} lead: ` + summary, { type: "owner_alert" });
   if (unmapped) await notifySteve(`${label} field names differ: ${c.business.name}`, `A ${label} post reached ${c.slug} with no recognized fields. The lead was created from the raw body (ref ${l.id}). Body:\n${JSON.stringify(raw).slice(0, 3000)}`);
   let texted = false;
@@ -477,11 +479,17 @@ export async function cancelRequest(c, b) {
 // A bare "ok", "done", "otw", or "called" applies when exactly one record fits; with more, the reply lists them.
 async function bareCandidates(c, cmd) {
   const today = visitDate("today"); today.setHours(0, 0, 0, 0);
-  if (cmd === "ok") { const alerts = (await listRecords("alerts", c.slug, 100)).filter((a) => a.status === "waiting"); const ids = [...new Set(alerts.map((a) => a.leadId))]; const out = []; for (const id of ids) { const l = await getRecord("leads", c.slug, id); if (l) out.push(l); } return out; }
+  if (cmd === "ok") {
+    const alerts = (await listRecords("alerts", c.slug, 100)).filter((a) => a.status === "waiting"); const ids = [...new Set(alerts.map((a) => a.leadId))]; const out = []; for (const id of ids) { const l = await getRecord("leads", c.slug, id); if (l) out.push(l); }
+    if (out.length) return out;
+    // Nothing waiting: the newest lead from the last 24 hours that asked for an ok and has none.
+    const recent = (await listRecords("leads", c.slug, 100)).filter((l) => l.status === "open" && !l.ackedAt && Date.now() - new Date(l.createdAt).getTime() < D && (l.reason === "emergency" || l.urgency === "emergency")).sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+    return recent.length ? [recent[recent.length - 1]] : [];
+  }
   if (cmd === "called") return (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && l.callbackDueAt && !l.calledAt);
   const bookings = (await listRecords("bookings", c.slug, 300)).filter((b) => ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date);
   if (cmd === "otw") return bookings.filter((b) => b.status !== "on_the_way" && bookingDay(b).getTime() === today.getTime());
-  if (cmd === "done") return bookings.filter((b) => bookingDay(b).getTime() <= today.getTime());
+  if (cmd === "done") { const past = bookings.filter((b) => bookingDay(b).getTime() < today.getTime() || b.visitCheckedAt); return past.length ? past : bookings.filter((b) => bookingDay(b).getTime() === today.getTime()); }
   return [];
 }
 export async function ownerCommand(c, text) {
@@ -601,7 +609,7 @@ const houstonDay = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: "Americ
 export function lineHealth(c, events = []) {
   const latest = (types) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); return e || null; };
   const since = Date.now() - D;
-  const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
+  const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
   const own = c.phone?.twilioNumber && c.phone?.tenDlc === "approved";
   const sender = own ? "own" : (process.env.MC_MESSAGING_SERVICE_SID || process.env.MC_TWILIO_NUMBER) ? "bridge" : "none";
   return {

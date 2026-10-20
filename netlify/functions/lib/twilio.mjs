@@ -31,7 +31,15 @@ const msg = (p) => `https://messaging.twilio.com/v1/${p}`;
 
 // Fallbacks when our functions or Vapi do not answer: Steve's static TwiML Bins (OPERATIONS.md one-time setup).
 export const fallbackUrls = () => ({ voice: process.env.VOICE_FALLBACK_TWIML_URL || "", sms: process.env.SMS_FALLBACK_TWIML_URL || "" });
-export async function buyLocalNumber({ areaCode = "713", friendlyName, voiceUrl, smsUrl }) {
+// The voice bin is a Mustache template: {{#cell}}<Dial timeout="25">{{cell}}</Dial>{{/cell}}<Say>...</Say>. A two-phone shop
+// gets its owner's cell in the query string; a one-phone shop gets the bare URL (dialing the forwarded line would loop).
+export function voiceFallbackFor(client) {
+  const base = fallbackUrls().voice; if (!base) return "";
+  const p = client.phone || {}, o = client.owner || {};
+  const forwardedLine = (o.phone && p.businessNumber && o.phone === p.businessNumber) || (p.forwarding === "all" && !p.transferTo);
+  return o.phone && !forwardedLine ? `${base}${base.includes("?") ? "&" : "?"}cell=${encodeURIComponent(o.phone)}` : base;
+}
+export async function buyLocalNumber({ areaCode = "713", friendlyName, voiceUrl, smsUrl, voiceFallbackUrl }) {
   let list = [];
   for (const ac of [areaCode, "713", "281", "832", "346"]) {
     const d = await tw(api(`AvailablePhoneNumbers/US/Local.json?AreaCode=${ac}&SmsEnabled=true&VoiceEnabled=true&PageSize=5`), null, "GET");
@@ -39,14 +47,24 @@ export async function buyLocalNumber({ areaCode = "713", friendlyName, voiceUrl,
     if (list.length) break;
   }
   if (!list.length) throw new Error("no local numbers available");
-  const fb = fallbackUrls();
-  const n = await tw(api("IncomingPhoneNumbers.json"), { PhoneNumber: list[0].phone_number, FriendlyName: friendlyName, VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST", ...(fb.voice ? { VoiceFallbackUrl: fb.voice, VoiceFallbackMethod: "POST" } : {}), ...(fb.sms ? { SmsFallbackUrl: fb.sms, SmsFallbackMethod: "POST" } : {}) });
+  const fb = fallbackUrls(); const vf = voiceFallbackUrl || fb.voice;
+  const n = await tw(api("IncomingPhoneNumbers.json"), { PhoneNumber: list[0].phone_number, FriendlyName: friendlyName, VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST", ...(vf ? { VoiceFallbackUrl: vf, VoiceFallbackMethod: "POST" } : {}), ...(fb.sms ? { SmsFallbackUrl: fb.sms, SmsFallbackMethod: "POST" } : {}) });
   return { number: n.phone_number, sid: n.sid };
 }
 
-export async function setNumberWebhooks(numberSid, { voiceUrl, smsUrl }) {
-  const fb = fallbackUrls();
-  return tw(api(`IncomingPhoneNumbers/${numberSid}.json`), { VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST", ...(fb.voice ? { VoiceFallbackUrl: fb.voice, VoiceFallbackMethod: "POST" } : {}), ...(fb.sms ? { SmsFallbackUrl: fb.sms, SmsFallbackMethod: "POST" } : {}) });
+export async function setNumberWebhooks(numberSid, { voiceUrl, smsUrl, voiceFallbackUrl }) {
+  const fb = fallbackUrls(); const vf = voiceFallbackUrl || fb.voice;
+  return tw(api(`IncomingPhoneNumbers/${numberSid}.json`), { VoiceUrl: voiceUrl, VoiceMethod: "POST", SmsUrl: smsUrl, SmsMethod: "POST", ...(vf ? { VoiceFallbackUrl: vf, VoiceFallbackMethod: "POST" } : {}), ...(fb.sms ? { SmsFallbackUrl: fb.sms, SmsFallbackMethod: "POST" } : {}) });
+}
+// Re-point the voice fallback after the owner's cell, business number, or forwarding mode changes.
+export async function syncVoiceFallback(client) {
+  if (!twilioEnabled() || !client.phone?.twilioNumberSid) return null;
+  // A Vapi-answered line falls back to our /api/voice; a line we answer falls back to the bin (with the cell when safe).
+  const site = process.env.URL || "https://machinesandcloud.com";
+  const url = client.voice?.assistantId && !client.voice?.detached ? `${site}/api/voice` : voiceFallbackFor(client);
+  if (!url) return null;
+  await setVoiceFallback(client.phone.twilioNumberSid, url);
+  return url;
 }
 // A Vapi-answered number falls back to our own /api/voice (missed-call text-back) when Vapi does not answer.
 export async function setVoiceFallback(numberSid, voiceFallbackUrl) {

@@ -93,6 +93,7 @@ export default async (req) => {
     await saveClient(c); await indexClient(c);
     await logEvent(c.slug, "config_updated", {});
     try { await updateVoicePrompt(c); } catch (e) { console.error("voice prompt update", e); }
+    try { const { syncVoiceFallback } = await import("./lib/twilio.mjs"); await syncVoiceFallback(c); } catch (e) { console.error("voice fallback sync", e); }
     return json({ ok: true, client: ownerView(c) });
   }
 
