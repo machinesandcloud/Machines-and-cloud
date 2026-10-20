@@ -32,9 +32,13 @@ export const TEMPLATES = {
 
 // Spanish set, chosen when the record's language is "es". Drafted by the model; a Spanish speaker
 // Steve names reviews them before the first Spanish-speaking customer goes live (DECISIONS.md).
+// "8 to 12" -> "8 a 12", "tomorrow" -> "mañana", "today" -> "hoy", weekday names translated.
+const DAYS_ES = { monday: "lunes", tuesday: "martes", wednesday: "miércoles", thursday: "jueves", friday: "viernes", saturday: "sábado", sunday: "domingo" };
+export const winEs = (w) => String(w || "").replace(/\s+to\s+/gi, " a ").replace(/\b(\d{1,2})\s*(am)\b/gi, "$1 de la mañana").replace(/\b(\d{1,2})\s*(pm)\b/gi, "$1 de la tarde");
+export const dateEs = (d) => { const t = String(d || "").toLowerCase().trim(); if (!t || t === "today") return "hoy"; if (t === "tomorrow") return "mañana"; for (const [en, es] of Object.entries(DAYS_ES)) if (t.startsWith(en.slice(0, 3))) return "el " + es; return t; };
 export const TEMPLATES_ES = {
-  reminder_24h: (c, b) => `Recordatorio de ${c.business.name}: su visita es mañana, ${b.window}. Responda C para confirmar o R para cambiar la hora.`,
-  reminder_1h: (c, b) => `${c.business.name}: su ventana de llegada (${b.window}) empieza pronto. Responda aquí si algo cambió.`,
+  reminder_24h: (c, b) => `Recordatorio de ${c.business.name}: su visita es mañana, ${winEs(b.window)}. Responda C para confirmar o R para cambiar la hora.`,
+  reminder_1h: (c, b) => `${c.business.name}: su ventana de llegada (${winEs(b.window)}) empieza pronto. Responda aquí si algo cambió.`,
   on_my_way: (c, b) => `${c.business.name}: el técnico va en camino a ${b.address}. Por favor asegure a sus mascotas y despeje el área.${b.notes ? " Nota: " + b.notes : ""}`,
   review_request: (c, j) => `Gracias por elegir ${c.business.name}${j.customer_name ? ", " + j.customer_name.split(" ")[0] : ""}. ¿Cómo lo hicimos? Una reseña rápida en Google ayuda mucho a un negocio pequeño: ${reviewLink(c) || "(enlace de reseña)"}. Responda aquí si algo no estuvo bien.`,
   review_nudge: (c, j) => `${c.business.name}: si tiene 30 segundos, nos encantaría una reseña: ${reviewLink(c) || "(enlace de reseña)"}. Gracias.`,
@@ -43,7 +47,7 @@ export const TEMPLATES_ES = {
   referral_ask: (c, j) => `${c.business.name}: gracias de nuevo. Si un vecino necesita ayuda, le agradeceríamos la recomendación. Solo pídale que escriba a este número.`,
   lead_chase: (c, l, n) => n === 1
     ? `Hola${l.customer_name ? " " + l.customer_name.split(" ")[0] : ""}, le escribe ${c.business.name}. Vimos su solicitud${l.issue ? " sobre " + l.issue : ""}. ¿Todavía necesita ayuda? Responda con una hora que le convenga y lo agendamos.`
-    : n === 2 ? `${c.business.name}: tenemos espacio ${(c.windows || [])[0] ? "(" + c.windows.join(" o ") + ")" : "esta semana"}. ¿Le interesa?`
+    : n === 2 ? `${c.business.name}: tenemos espacio ${(c.windows || [])[0] ? "(" + c.windows.map(winEs).join(" o ") + ")" : "esta semana"}. ¿Le interesa?`
     : `${c.business.name}: última nota de nuestra parte. Si todavía necesita ayuda, responda cuando quiera y lo atendemos.`,
 };
 export const STRINGS = {
@@ -53,9 +57,9 @@ export const STRINGS = {
     cancelled: (c, b) => `${c.business.name}: your visit (${b.date || ""} ${b.window}) is cancelled as requested. Text us any time to rebook.`,
   },
   es: {
-    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP para no recibir más mensajes.`,
+    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${winEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP para no recibir más mensajes.`,
     fallback_window: (c, owner, win) => `${c.business.name}: recibimos su solicitud y ${owner} le llamará ${win}.`,
-    cancelled: (c, b) => `${c.business.name}: su visita (${b.date || ""} ${b.window}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
+    cancelled: (c, b) => `${c.business.name}: su visita (${dateEs(b.date)}, ${winEs(b.window)}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
   },
 };
 export const lang = (rec) => (rec?.language === "es" ? "es" : "en");
