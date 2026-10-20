@@ -1,7 +1,7 @@
 // Onboarding: POST creates the client from the questionnaire and starts the build job.
 // GET ?c=slug&k=key returns build status for the onboarding page to poll.
 import { getClient, saveClient, indexClient, clientByEmail, id, secret, logEvent } from "./lib/store.mjs";
-import { newClient, ownerView, loopCheck } from "./lib/config.mjs";
+import { newClient, ownerView, loopCheck, normalizeEmergencies } from "./lib/config.mjs";
 import { notifySteve, sendEmail, e164 } from "./lib/send.mjs";
 import { json } from "./lib/agent.mjs";
 
@@ -47,7 +47,8 @@ export default async (req) => {
   c.services = lines(b.services, 60);
   c.fees = lines(b.fees, 30).map((line) => { const m = line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/); return m ? { label: m[1].trim(), amount: m[2].trim(), note: (m[3] || "").trim() } : { label: line, amount: "", note: "" }; });
   c.windows = lines(b.windows, 8).length ? lines(b.windows, 8) : c.windows;
-  c.rules = { never: lines(b.never, 20).length ? lines(b.never, 20) : c.rules.never, handoff: lines(b.handoff, 20).length ? lines(b.handoff, 20) : c.rules.handoff, emergencies: s(b.emergencies, 500) };
+  c.rules = { ...c.rules, never: lines(b.never, 20).length ? lines(b.never, 20) : c.rules.never, handoff: lines(b.handoff, 20).length ? lines(b.handoff, 20) : c.rules.handoff,
+    emergencies: normalizeEmergencies({ ...(b.tier0 !== undefined ? { tier0: b.tier0 } : {}), ...(b.tier1 !== undefined ? { tier1: b.tier1 } : {}), script: s(b.emergencies, 500) }, bz.trade) };
   c.faq = lines(b.faq, 40).map((line) => { const i = line.indexOf("?"); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : { q: line, a: "" }; }).filter((x) => x.a);
   c.leadSources = arr(b.leadSources, 10);
   c.software = s(b.software, 30) || "google";

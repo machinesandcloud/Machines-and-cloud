@@ -3,7 +3,7 @@
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
 import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks } from "./lib/store.mjs";
-import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls } from "./lib/config.mjs";
+import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
 import { googleEnabled } from "./lib/calendar.mjs";
@@ -70,7 +70,7 @@ export default async (req) => {
     if (b.rules) c.rules = {
       ...c.rules,
       never: b.rules.never !== undefined ? arr(b.rules.never, 20) : c.rules.never, handoff: b.rules.handoff !== undefined ? arr(b.rules.handoff, 20) : c.rules.handoff,
-      emergencies: b.rules.emergencies !== undefined ? s(b.rules.emergencies, 500) : c.rules.emergencies,
+      emergencies: b.rules.emergencies !== undefined ? normalizeEmergencies(typeof b.rules.emergencies === "string" ? { ...normalizeEmergencies(c.rules.emergencies, c.business.trade), script: s(b.rules.emergencies, 500) } : b.rules.emergencies, c.business.trade) : c.rules.emergencies,
       ackMinutes: ACK_MINUTES.includes(Number(b.rules.ackMinutes)) ? Number(b.rules.ackMinutes) : (c.rules.ackMinutes || 10),
       callbackHours: s(b.rules.callbackHours, 80) || c.rules.callbackHours || "within 30 minutes",
       callbackAfterHours: s(b.rules.callbackAfterHours, 80) || c.rules.callbackAfterHours || "by 8 am tomorrow",

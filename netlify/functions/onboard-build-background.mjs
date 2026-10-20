@@ -92,7 +92,9 @@ export default async (req) => {
     const p = await draftProfile(pages, c);
     const b = c.business;
     if (p) {
+      const hadTrade = !!b.trade;
       b.name = b.name || p.business_name; b.trade = b.trade || p.trade; b.city = b.city || p.city;
+      if (!hadTrade && b.trade) { const { normalizeEmergencies } = await import("./lib/config.mjs"); const e = normalizeEmergencies(c.rules?.emergencies, ""); c.rules.emergencies = normalizeEmergencies({ script: e.script }, b.trade); }
       if (!b.serviceArea?.length) b.serviceArea = p.service_area || [];
       b.hours = b.hours || p.hours; b.afterHours = b.afterHours || p.after_hours; b.licenses = b.licenses || p.licenses;
       if (!c.services?.length) c.services = p.services || [];

@@ -24,6 +24,40 @@ export const DEFAULT_NEVER = [
 export const DEFAULT_HANDOFF = ["Complaints about past work", "Warranty questions", "Anything about a bill or refund", "Commercial or large projects"];
 export const ACK_MINUTES = [5, 10, 15, 30];
 
+// Emergency tiers by trade. Tier 0 is life safety (safety script, no intake beyond phone and
+// address, emergency chain). Tier 1 is same day (a "today" lead, the after-hours fee quoted outside
+// hours); with an infant, elderly, or medically dependent person in the home a Tier 1 becomes Tier 0.
+// Tier 2 is everything else: next available window. The owner edits all three.
+const TIER0_COMMON = ["Gas smell", "Carbon monoxide alarm", "Smoke or fire", "Sparks or a burning smell from the panel or an outlet", "Sewage flooding a living space"];
+export const EMERGENCY_TIERS = {
+  hvac: { tier0: TIER0_COMMON, tier1: ["No cooling when the forecast high is 90°F or more", "No cooling with an infant, elderly, or medically dependent person in the home", "No heat when it is at or below freezing outside", "Water pouring from the air handler"] },
+  plumbing: { tier0: TIER0_COMMON, tier1: ["Uncontrolled water (a burst pipe, a leak that will not stop)", "No water in the house", "Sewage backup", "Leaking water heater", "No hot water with an infant, elderly, or medically dependent person in the home"] },
+  electrical: { tier0: TIER0_COMMON, tier1: ["Loss of power from the home's own system, not a utility outage", "A hot outlet, switch, or breaker", "Partial power or flickering across the house", "Exposed or damaged wiring"] },
+  roofing: { tier0: TIER0_COMMON, tier1: ["Active leak during rain", "Storm or tree damage with the interior exposed", "Tarping after hail or wind"] },
+  cleaning: { tier0: TIER0_COMMON, tier1: [] },
+  other: { tier0: TIER0_COMMON, tier1: [] },
+};
+export function tradeKey(trade) {
+  const t = String(trade || "").toLowerCase();
+  if (/hvac|air|cool|heat|a\/c|ac\b/.test(t)) return "hvac";
+  if (/plumb|drain|water heater|sewer/.test(t)) return "plumbing";
+  if (/electr/.test(t)) return "electrical";
+  if (/roof/.test(t)) return "roofing";
+  if (/clean|maid|janitor/.test(t)) return "cleaning";
+  return "other";
+}
+export function defaultEmergencies(trade, script = "") {
+  const d = EMERGENCY_TIERS[tradeKey(trade)] || EMERGENCY_TIERS.other;
+  return { tier0: d.tier0.slice(), tier1: d.tier1.slice(), tier2: "Everything else: offer the next available window.", script: String(script || "") };
+}
+// Accepts the old free-text string or a partial object; always returns the full shape.
+export function normalizeEmergencies(v, trade) {
+  if (!v || typeof v === "string") return defaultEmergencies(trade, v || "");
+  const d = defaultEmergencies(trade);
+  const list = (x) => (Array.isArray(x) ? x : String(x || "").split(/\n+/)).map((y) => String(y).trim().slice(0, 160)).filter(Boolean).slice(0, 20);
+  return { tier0: v.tier0 !== undefined ? list(v.tier0) : d.tier0, tier1: v.tier1 !== undefined ? list(v.tier1) : d.tier1, tier2: typeof v.tier2 === "string" && v.tier2.trim() ? v.tier2.trim().slice(0, 200) : d.tier2, script: String(v.script || "").slice(0, 500) };
+}
+
 export function newClient({ slug, ownerKey, owner, business }) {
   return {
     slug, ownerKey, status: "new", plan: "growth",
@@ -31,7 +65,7 @@ export function newClient({ slug, ownerKey, owner, business }) {
     owner: { name: "", email: "", phone: "", backupPhone: "", ...owner },
     business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", legal: {}, ...business },
     services: [], fees: [], windows: DEFAULT_WINDOWS.slice(),
-    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: "", ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
+    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
     digest: { text: true },
     faq: [], leadSources: [], software: "google",
     phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
@@ -70,6 +104,7 @@ export function publicView(c) {
 // What the owner portal sees (no secrets beyond their own key).
 export function ownerView(c) {
   const { calendar, billing, voice, ...rest } = c;
+  rest.rules = { ...(c.rules || {}), emergencies: normalizeEmergencies(c.rules?.emergencies, c.business?.trade) };
   return { ...rest, calendar: { provider: calendar?.provider || "none", connected: !!calendar?.google?.refreshToken }, billing: { status: billing?.status || "none", plan: c.plan, trialEnd: billing?.trialEnd || null }, voice: { provider: voice?.provider || "none", ready: !!voice?.assistantId, detached: !!voice?.detached } };
 }
 
@@ -114,12 +149,12 @@ ${(r.never || DEFAULT_NEVER).map((x) => "- " + x).join("\n")}
 - For anything not covered above, say the tech or ${owner} will confirm, and keep helping.
 
 Hand to a person (collect name and phone, then call notify_owner with reason "handoff"): ${list(r.handoff)}.
-${r.emergencies ? `Emergency instructions from the owner: ${r.emergencies}\n` : ""}${upcoming}
+${emergencyBlock(c)}${upcoming}
 How a conversation should go:
 - Start by asking what's going on, in one question. If the customer asks whether you serve their area, what it costs or what the fee covers, or when you can come, answer that first from the facts above, before asking for anything.
 - Ask for the name and best phone number only after you know what they need and they want a visit or a callback. Never ask for a form's worth of details in a row; one question at a time.
 - If they want a visit, offer the next windows and call book_visit once you have name, phone, address, issue, and a window. If they are not ready to book, call notify_owner so ${owner} has the lead.
-- Emergencies (no cooling in extreme heat, active leak, no water, sewage, gas smell, sparking, burning smell, no power, active roof leak): give the owner's safety instruction first, get a phone number and address fast, and call notify_owner with urgency "emergency" right away.
+- Emergencies follow the owner's table above: Tier 0 means the safety script first and no intake beyond a phone number and address, then notify_owner with reason "emergency" and urgency "emergency"; Tier 1 means same day, urgency "today", booked into today's window or handed to ${owner} with notify_owner urgency "today"; a Tier 1 with an infant, elderly, or medically dependent person in the home is handled as Tier 0. Everything else is Tier 2: offer the next available window, never urgency "emergency".
 - If the customer asks for a person, a human, the owner, or whether you are real: say you are the front desk assistant, say ${callback}, take their number, and call notify_owner with reason "wants_call". Never say "someone will call you back" without the window.
 - Obvious spam or sales pitches (SEO, lead lists, loans, "page one of Google"): call notify_owner with reason "spam" and end politely.
 - Never tell the customer something is booked or that the owner was told until the tool has actually returned. Call the tool first, then say it.
@@ -128,6 +163,16 @@ How a conversation should go:
 - After a tool succeeds, tell the customer what happens next in one sentence. When book_visit succeeds, say this once, in the customer's language: "${consentLine(c)}" Never say it twice in one conversation.
 - In the "unsure" field of a tool, write anything you were not confident about (the address, the issue, whether it is in the area); leave it empty when you are sure.
 - Never invent prices, discounts, availability, or guarantees. Never say anything negative about other companies.`;
+}
+
+function emergencyBlock(c) {
+  const e = normalizeEmergencies(c.rules?.emergencies, c.business?.trade);
+  const fee = c.business?.afterHours ? ` Outside business hours, say what the owner published about after-hours work before booking a Tier 1: "${c.business.afterHours}".` : "";
+  return `Emergency table from the owner:
+- Tier 0, life safety (stop everything, give the safety script, take only a phone number and an address, then notify_owner with reason "emergency", urgency "emergency", and do not book): ${e.tier0.length ? e.tier0.join("; ") : "none listed"}.${e.script ? ` Safety script in the owner's words: "${e.script}"` : ' Safety script: "Leave the area now, call 911 if there is any danger, then call us back."'}
+- Tier 1, same day (urgency "today"; book today's window if one is open, otherwise notify_owner with urgency "today"; treat as Tier 0 when an infant, elderly, or medically dependent person is in the home): ${e.tier1.length ? e.tier1.join("; ") : "none listed; use Tier 2"}.${fee}
+- Tier 2: ${e.tier2}
+`;
 }
 
 const UNSURE = { type: "string", description: "Anything you were not confident about: the address, the issue, whether it is in the area; empty string if none" };
