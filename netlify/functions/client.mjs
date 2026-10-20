@@ -8,7 +8,7 @@ import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
 import { googleEnabled } from "./lib/calendar.mjs";
 import { stripeEnabled } from "./lib/billing.mjs";
-import { dailyDigest, lineHealth, ackAlertsFor, weeklyReport } from "./lib/desk.mjs";
+import { dailyDigest, lineHealth, ackAlertsFor, weeklyReport, monthlyReport } from "./lib/desk.mjs";
 import { getUsage, usageView } from "./lib/usage.mjs";
 import { updateVoicePrompt, detachVoice, attachVoice } from "./lib/vapi.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
@@ -107,7 +107,7 @@ export default async (req) => {
       await saveClient(c); await logEvent(c.slug, wasPaused ? "resumed" : "live", {});
       if (wasPaused) { try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error("attach voice", e); } }
       else {
-        const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket with a ref. Reply "ok REF" to acknowledge, "otw REF" on the way, "done REF" when finished, "called REF" after a callback. A 6 pm summary comes daily and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
+        const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket, and each one names the single reply it needs (ok, called, otw, or done). A 6 pm summary comes daily and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
         if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "welcome", body: welcome });
         await sendEmail({ to: c.owner.email, subject: `${name}: you're live`, text: `${welcome}
 
@@ -167,6 +167,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
     }
     if (b.action === "digest") { const d = await dailyDigest(c); return json({ ok: true, text: d.text, email: d.email }); }
     if (b.action === "weekly") { const w = await weeklyReport(c); return json({ ok: true, ...w }); }
+    if (b.action === "monthly") { const mth = await monthlyReport(c, s(b.month, 7) || undefined); const { invoice, ...rest } = mth; return json({ ok: true, ...rest }); }
     if (b.action === "test_sms") {
       if (!c.owner.phone) return json({ error: "no_owner_phone" }, 400);
       const r = await sendSMS({ to: c.owner.phone, client: c, force: true, type: "test", body: `${name}: test text from your front desk. Reply "help" any time to see the commands.` });

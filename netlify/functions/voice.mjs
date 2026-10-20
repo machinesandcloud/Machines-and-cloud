@@ -88,7 +88,7 @@ export default async (req) => {
     else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; await logEvent(c.slug, "text_back_skipped", { from, reason: "recent" }); }
     else {
       const text = c.business?.spanish
-        ? `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda ${name}. ¿En qué le podemos ayudar? Reply STOP to opt out.`
+        ? `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda ${name}. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.`
         : `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? Reply here and we will get you scheduled. Reply STOP to opt out.`;
       const r = await sendSMS({ to: from, client: c, type: "text_back", body: text });
       textBack = r.ok ? "sent" : r.logged ? "logged" : "failed";

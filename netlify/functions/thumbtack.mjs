@@ -21,15 +21,19 @@ export default async (req) => {
   if (!c) return json({ error: "not_found" }, 404);
   if (!c.leads?.thumbtackSecret || presented(req, url) !== c.leads.thumbtackSecret) return json({ error: "forbidden" }, 403);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
-  const lead = b.lead || b;
+  // NegotiationCreatedV4 (current): { negotiationID, customer: { customerID, displayName, location: { city, state, zipCode } }, request: { category, title, description, location? } }.
+  // Older shapes carried lead.leadID and customer.name; both are read. The documented payload has no phone.
+  const lead = b.negotiation || b.lead || b;
   const cust = lead.customer || {};
   const req_ = lead.request || {};
-  const loc = req_.location || {};
+  const loc = cust.location || req_.location || lead.location || {};
   const address = [loc.address1 || loc.address, loc.city, loc.state, loc.zipCode || loc.zip].filter(Boolean).join(", ");
   const task = [req_.category || lead.category, req_.title || lead.title, req_.description || lead.description].filter(Boolean).join(": ");
+  const id = String(lead.negotiationID || lead.negotiationId || b.negotiationID || lead.leadID || lead.leadId || lead.id || b.leadID || "");
+  const name = cust.displayName || cust.name || lead.customerName || "";
   const r = await receivePlatformLead(c, "thumbtack", {
-    id: String(lead.leadID || lead.leadId || lead.id || b.leadID || ""), name: cust.name || lead.customerName || "", phone: cust.phone || lead.phone || "", email: cust.email || "",
-    address, task, raw: b,
+    id, name, phone: cust.phone || cust.phoneNumber || lead.phone || "", email: cust.email || "",
+    address, task, raw: b, unmapped: !id && !name && !task,
   });
   return json({ status: "success", ...r });
 };

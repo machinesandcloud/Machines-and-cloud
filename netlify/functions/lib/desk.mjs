@@ -144,8 +144,14 @@ export function ownerSummary(c, kind, r) {
   if (r.notes) lines.push(`Access: ${r.notes}`);
   if (r.language === "es") lines.push("Language: Spanish");
   if (r.unsure) lines.push(`Unsure about: ${r.unsure}`);
-  if (r.id) lines.push(`Ref ${r.id}. Reply "ok ${r.id}" to acknowledge, "otw ${r.id}" on the way, "done ${r.id}" finished, "quote ${r.id} amount" quoted.`);
+  if (r.id) lines.push(`Ref ${r.id}. ${askFor(kind, r)}`);
   return lines.join("\n");
+}
+// Each alert asks for exactly one reply.
+function askFor(kind, r) {
+  if (kind === "booking" || r.outcome === "booked") return `Reply "otw ${r.id}" when you are on the way.`;
+  if (r.reason === "wants_call" || r.reason === "handoff") return `Reply "called ${r.id}" once you have reached them.`;
+  return `Reply "ok ${r.id}" to acknowledge.`;
 }
 
 // Quiet hours for follow-up texts (Texas Business and Commerce Code ch. 304 hours): 9 am to 9 pm
@@ -329,7 +335,7 @@ export async function callerContext(c, phone, at) {
 
 // A lead posted by Angi or Thumbtack: one lead per platform id, the owner alerted, and the customer
 // texted at once (a reply to their own request, so no quiet-hours deferral).
-export async function receivePlatformLead(c, source, { id, name, phone, email, address, task, raw }) {
+export async function receivePlatformLead(c, source, { id, name, phone, email, address, task, raw, unmapped }) {
   const pid = id || "";
   if (pid) {
     const dup = (await listRecords("leads", c.slug, 500)).find((l) => l.source === source && l.sourceId === pid);
@@ -341,7 +347,10 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
     nobook_reason: "none", channel: source, contact: p || pid, source, sourceId: pid, raw: raw ? JSON.stringify(raw).slice(0, 4000) : "", status: "open", outcome: "needs_action", customerType: await customerType(c.slug, p),
   });
   const label = source === "angi" ? "Angi" : source === "thumbtack" ? "Thumbtack" : source;
-  await notifyOwner(c, `${label} lead: ` + ownerSummary(c, "lead", l), { type: "owner_alert" });
+  let summary = ownerSummary(c, "lead", l);
+  if (!p) summary = summary.replace(/Reply "ok [^"]+" to acknowledge\./, source === "thumbtack" ? "No phone number comes with Thumbtack leads. Reply in the Thumbtack app." : "No phone number came with this lead; reply on the platform.");
+  await notifyOwner(c, `${label} lead: ` + summary, { type: "owner_alert" });
+  if (unmapped) await notifySteve(`${label} field names differ: ${c.business.name}`, `A ${label} post reached ${c.slug} with no recognized fields. The lead was created from the raw body (ref ${l.id}). Body:\n${JSON.stringify(raw).slice(0, 3000)}`);
   let texted = false;
   if (p && !(await optedOut(p))) {
     const first = (l.customer_name || "").split(" ")[0];
@@ -349,7 +358,7 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
     texted = !!(r.ok || r.logged);
     if (texted) { const conv = await getConversation(c.slug, "sms", p); conv.messages.push({ role: "assistant", content: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request. What is going on, and when works for a visit?`, at: new Date().toISOString(), system: "platform-lead text-back" }); await saveConversation(conv); }
   }
-  if (PLANS[c.plan]?.followUp && p) {
+  if (PLANS[c.plan]?.followUp && p && texted) {
     await scheduleFollowUp(c, new Date(Date.now() + 4 * H), "lead_chase", { leadId: l.id, n: 1 });
     await scheduleFollowUp(c, new Date(Date.now() + 26 * H), "lead_chase", { leadId: l.id, n: 2 });
   }
@@ -465,7 +474,25 @@ export async function cancelRequest(c, b) {
 }
 
 // ---- Owner commands by text: ok, otw, done, quote, paid, cancel ----
+// A bare "ok", "done", "otw", or "called" applies when exactly one record fits; with more, the reply lists them.
+async function bareCandidates(c, cmd) {
+  const today = visitDate("today"); today.setHours(0, 0, 0, 0);
+  if (cmd === "ok") { const alerts = (await listRecords("alerts", c.slug, 100)).filter((a) => a.status === "waiting"); const ids = [...new Set(alerts.map((a) => a.leadId))]; const out = []; for (const id of ids) { const l = await getRecord("leads", c.slug, id); if (l) out.push(l); } return out; }
+  if (cmd === "called") return (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && l.callbackDueAt && !l.calledAt);
+  const bookings = (await listRecords("bookings", c.slug, 300)).filter((b) => ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date);
+  if (cmd === "otw") return bookings.filter((b) => b.status !== "on_the_way" && bookingDay(b).getTime() === today.getTime());
+  if (cmd === "done") return bookings.filter((b) => bookingDay(b).getTime() <= today.getTime());
+  return [];
+}
 export async function ownerCommand(c, text) {
+  const bare = String(text || "").trim().match(/^(ok|okay|done|otw|called)\s*[.!]*$/i);
+  if (bare) {
+    const cmd = bare[1].toLowerCase() === "okay" ? "ok" : bare[1].toLowerCase();
+    const cands = await bareCandidates(c, cmd);
+    if (cands.length === 1) return ownerCommand(c, `${cmd} ${cands[0].id}`);
+    if (!cands.length) return `Nothing is waiting for "${cmd}" right now. Add the ref if you meant a specific one (it is on the alert text).`;
+    return `Which one? ${cands.slice(0, 5).map((r) => `${r.customer_name || r.phone} (${cmd} ${r.id})`).join(", ")}.`;
+  }
   const m = String(text || "").trim().match(/^(ok|okay|done|quote|otw|cancel|paid|invoice|called)\s+([a-z0-9]{6,12})(?:\s+(.*))?$/i);
   if (!m) return null;
   const [, cmdRaw, id, rest] = m; const cmd = cmdRaw.toLowerCase();
@@ -486,7 +513,7 @@ export async function ownerCommand(c, text) {
     if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
     const r = b.phone ? await sendSMS({ to: b.phone, client: c, type: "on_my_way", body: template("on_my_way", b)(c, b) }) : { ok: false };
     b.status = "on_the_way"; await saveRecord("bookings", b);
-    return r.ok || r.logged ? `On-the-way text sent to ${b.customer_name || b.phone}.` : `Could not text ${b.customer_name || b.phone} (${r.reason || r.error || "no number"}).`;
+    return r.ok || r.logged ? `On-the-way text sent to ${b.customer_name || b.phone}. Reply "done ${b.id}" when the job is finished.` : `Could not text ${b.customer_name || b.phone} (${r.reason || r.error || "no number"}).`;
   }
   if (cmd === "done") {
     if (["done", "paid"].includes(b.status)) return `${b.customer_name || b.phone} was already marked ${b.status}; nothing changed.`;
@@ -610,6 +637,56 @@ export async function dailyDigest(c, events) {
   return { text, email };
 }
 
+// Monthly statement on the 1st: the previous Houston month in one email; Steve's copy carries the hand-invoice line.
+export async function monthlyReport(c, month) {
+  const now = new Date();
+  const hou = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  const prev = new Date(hou.getFullYear(), hou.getMonth() - 1, 1);
+  const m = month || `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}`;
+  const [y, mo] = m.split("-").map(Number);
+  const inMonth = (iso) => iso && new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso)).slice(0, 7) === m;
+  const bypass = new Set(c.rules?.bypass || []);
+  const [bookings, leads, events, convs, usage] = await Promise.all([
+    listRecords("bookings", c.slug, 1000), listRecords("leads", c.slug, 1000), listRecords("events", c.slug, 3000),
+    (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 1000), getUsage(c.slug, m),
+  ]);
+  const mb = bookings.filter((b) => inMonth(b.createdAt)), ml = leads.filter((l) => inMonth(l.createdAt)), me = events.filter((e) => inMonth(e.at));
+  const spamNumbers = new Set(ml.filter((l) => l.status === "spam").map((l) => l.phone).filter(Boolean));
+  const answered = me.filter((e) => e.type === "call_ended" && !spamNumbers.has(e.data?.from)).length;
+  const textedBack = me.filter((e) => e.type === "missed_call" && ["sent", "logged"].includes(e.data?.textBack)).length;
+  const byChannel = {}; for (const b of mb) byChannel[b.channel || "web"] = (byChannel[b.channel || "web"] || 0) + 1;
+  const textBackContacts = new Set(convs.filter((v) => v.channel === "sms" && (v.messages || []).some((x) => x.system === "missed-call text-back")).map((v) => v.contact));
+  const voicemailJobs = mb.filter((b) => textBackContacts.has(b.phone) || !isBusinessHours(c, b.createdAt)).length;
+  const reviewsSent = me.filter((e) => e.type === "task_sent" && e.data?.type === "review_request").length;
+  const positive = me.filter((e) => e.type === "review_reply" && e.data?.sentiment === "positive").length;
+  const promised = ml.filter((l) => l.callbackDueAt);
+  const kept = promised.filter((l) => (l.calledAt && l.calledAt <= l.callbackDueAt) || (l.ackedAt && l.ackedAt <= l.callbackDueAt)).length;
+  const emergencies = ml.filter((l) => l.urgency === "emergency").length + mb.filter((b) => b.urgency === "emergency").length;
+  const bySrc = {}; for (const l of ml.filter((x) => x.source)) bySrc[l.source] = (bySrc[l.source] || 0) + 1;
+  const changes = me.filter((e) => e.type === "config_updated").length, flags = me.filter((e) => e.type === "flagged").length;
+  const plan = PLANS[c.plan] || PLANS.growth;
+  const overMin = Math.max(0, (usage.minutes || 0) - plan.minutes), overTxt = Math.max(0, (usage.texts || 0) - plan.texts);
+  const overage = Math.round((overMin * 0.35 + overTxt * 0.03) * 100) / 100;
+  const label = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(y, mo - 1, 1));
+  const name = c.business.name;
+  const lines = [
+    `${name}: your front desk in ${label}`, "",
+    `Calls: ${answered} answered by the front desk, ${textedBack} texted back after a missed call`,
+    `Booked: ${mb.length}${mb.length ? " (" + Object.entries(byChannel).map(([k, v]) => `${v} by ${k === "sms" ? "text" : k === "call" ? "phone" : k}`).join(", ") + ")" : ""}`,
+    `Jobs that would have gone to voicemail: ${voicemailJobs}`,
+    `Review requests sent: ${reviewsSent}; customers who replied they were happy: ${positive}`,
+    promised.length ? `Callback promises kept on time: ${kept} of ${promised.length}` : "Callback promises: none made",
+    `Emergencies handled: ${emergencies}`,
+    Object.keys(bySrc).length ? `Leads from platforms: ${Object.entries(bySrc).map(([k, v]) => `${v} ${k === "angi" ? "Angi" : k === "thumbtack" ? "Thumbtack" : k}`).join(", ")}` : "",
+    `Usage: ${usage.minutes || 0} of ${plan.minutes} call minutes, ${usage.texts || 0} of ${plan.texts} texts${overage ? ` (over the plan by $${overage.toFixed(2)})` : " (inside the plan)"}`,
+    `What changed: ${changes} edits to what it knows, ${flags} conversations you flagged`,
+    `Next month: ${c.nextMonthNote || "Steve reads your flagged conversations and tightens what it says; reply to this email with the one thing you want better."}`,
+    "", `Every conversation is on your portal. Reply to this email any time.`,
+  ].filter((x) => x !== "");
+  const invoice = `Invoice: $${plan.price} plus $${overage.toFixed(2)} overage`;
+  return { month: m, subject: `${name}: ${label} statement`, text: lines.join("\n"), invoice, stats: { answered, textedBack, booked: mb.length, voicemailJobs, reviewsSent, positive, kept, promised: promised.length, emergencies, overage } };
+}
+
 // Monday email: what the front desk did for the shop in the last seven Houston days.
 export async function weeklyReport(c) {
   const since = Date.now() - 7 * D;
@@ -623,7 +700,9 @@ export async function weeklyReport(c) {
   const spamContacts = new Set(wl.filter((l) => l.status === "spam").map((l) => l.phone || l.contact));
   const wc = convs.filter((v) => inWin(v.updatedAt) && (v.messages || []).some((m) => m.role === "user" && inWin(m.at)));
   const actionable = wc.filter((v) => !bypass.has(v.contact) && !spamContacts.has(v.contact));
-  const answered = we.filter((e) => e.type === "call_ended").length;
+  const spamNumbers = new Set(wl.filter((l) => l.status === "spam").map((l) => l.phone).filter(Boolean));
+  const answered = we.filter((e) => e.type === "call_ended" && !spamNumbers.has(e.data?.from)).length;
+  const spamCalls = we.filter((e) => e.type === "call_ended" && spamNumbers.has(e.data?.from)).length;
   const textedBack = we.filter((e) => e.type === "missed_call" && ["sent", "logged"].includes(e.data?.textBack)).length;
   const calls = answered + we.filter((e) => e.type === "missed_call").length;
   const afterHours = we.filter((e) => ["missed_call", "call_ended", "sms_inbound"].includes(e.type) && !isBusinessHours(c, e.at)).length;
@@ -633,7 +712,8 @@ export async function weeklyReport(c) {
   const questionOnly = new Set(wl.filter((l) => l.nobook_reason === "question_only").flatMap(keys));
   const bookedContacts = new Set(wb.flatMap(keys));
   const bookable = actionable.filter((v) => !questionOnly.has(v.contact) || bookedContacts.has(v.contact));
-  const rate = bookable.length ? Math.round((wb.length / bookable.length) * 100) : 0;
+  const bookedCustomers = new Set(wb.map((b) => b.phone || b.contact)).size;
+  const rate = bookable.length ? Math.min(100, Math.round((bookedCustomers / bookable.length) * 100)) : 0;
   // Jobs that would have gone to voicemail: booked after a missed-call text-back, or booked after hours.
   const textBackContacts = new Set(wc.filter((v) => v.channel === "sms" && (v.messages || []).some((m) => m.system === "missed-call text-back")).map((v) => v.contact));
   const voicemailJobs = wb.filter((b) => textBackContacts.has(b.phone) || !isBusinessHours(c, b.createdAt)).length;
@@ -654,9 +734,9 @@ export async function weeklyReport(c) {
   const lines = [
     `${name}: your front desk, last 7 days`, "",
     `Calls: ${answered} answered by the front desk, ${textedBack} texted back after a missed call${afterHours ? ` (${afterHours} contacts after hours)` : ""}`,
-    `Conversations that could become a job: ${actionable.length}${spam ? ` (plus ${spam} spam, not counted)` : ""}`,
+    `Conversations that could become a job: ${actionable.length}${spam || spamCalls ? ` (plus ${spam} spam${spamCalls ? ", " + spamCalls + " spam call" + (spamCalls === 1 ? "" : "s") : ""}, not counted)` : ""}`,
     `Booked: ${wb.length}${wb.length ? " (" + Object.entries(byChannel).map(([k, v]) => `${v} by ${k === "sms" ? "text" : k === "call" ? "phone" : k}`).join(", ") + ")" : ""}`,
-    `Booking rate: ${wb.length} booked of ${bookable.length} bookable conversations (${rate} percent)`,
+    `Booking rate: ${bookedCustomers} booked of ${bookable.length} bookable conversations (${rate} percent)${wb.length > bookedCustomers ? ` (${wb.length} visits in all)` : ""}`,
     `Jobs that would have gone to voicemail: ${voicemailJobs}`,
     `Leads still needing you: ${open.length}${open.length ? " (" + open.map((l) => l.id).join(", ") + ")" : ""}`,
     unbooked.length ? `Did not book: ${unbooked.length}. Why: ${Object.entries(reasons).map(([k, v]) => `${v} ${label(k)}`).join(", ")}` : "Did not book: 0",
@@ -667,5 +747,5 @@ export async function weeklyReport(c) {
     `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,
     "", `Every conversation is on your portal. Flag anything that reads wrong and Steve sees it the same day.`,
   ].filter((x) => x !== "");
-  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, answered, textedBack, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
+  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, answered, textedBack, spamCalls, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, bookedCustomers, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
 }

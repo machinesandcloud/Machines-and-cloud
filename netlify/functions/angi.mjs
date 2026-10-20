@@ -18,9 +18,12 @@ export default async (req) => {
   // Angi's field names vary by product; take the common ones and keep the raw body on the lead.
   const name = [b.firstName || b.first_name, b.lastName || b.last_name].filter(Boolean).join(" ") || b.name || b.customerName || "";
   const address = [b.address || b.street || b.address1, b.city, b.state, b.zip || b.postalCode].filter(Boolean).join(", ");
+  const id = String(b.leadId || b.id || b.lead_id || b.srOid || b.leadID || "");
+  const phone = b.phone || b.primaryPhone || b.phoneNumber || b.mobilePhone || "";
+  const task = b.task || b.taskName || b.description || b.comments || b.category || b.serviceRequest || "";
   const r = await receivePlatformLead(c, "angi", {
-    id: String(b.leadId || b.id || b.lead_id || b.srOid || ""), name, phone: b.phone || b.primaryPhone || b.phoneNumber || "", email: b.email || "",
-    address, task: b.task || b.taskName || b.description || b.comments || b.category || "", raw: b,
+    id, name, phone, email: b.email || "", address, task, raw: b,
+    unmapped: !id && !name && !phone && !task,
   });
   return json({ status: "success", ...r });
 };

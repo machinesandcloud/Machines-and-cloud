@@ -7,7 +7,8 @@ import { json } from "./lib/agent.mjs";
 import { e164, notifyOwner, sendEmail, notifySteve } from "./lib/send.mjs";
 import { buildSystemPrompt, STATUSES } from "./lib/config.mjs";
 import { voicePrompt, releaseVoice } from "./lib/vapi.mjs";
-import { upcomingBookings, dailyDigest, weeklyReport } from "./lib/desk.mjs";
+import { upcomingBookings, dailyDigest, weeklyReport, monthlyReport, lineHealth } from "./lib/desk.mjs";
+import { getUsage, usageView } from "./lib/usage.mjs";
 import { run as runScheduler } from "./scheduler.mjs";
 import { releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 
@@ -18,10 +19,29 @@ export default async (req) => {
   if (!key) return json({ error: "admin_not_configured" }, 503);
   if (req.headers.get("x-admin-key") !== key) return json({ error: "forbidden" }, 403);
   if (req.method === "GET") {
+    const url = new URL(req.url);
+    const full = url.searchParams.get("full") === "1";
     const slugs = await list("clients", "");
-    const out = [];
-    for (const sl of slugs) { const c = await getClient(sl); if (c) out.push({ slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, portal: `${process.env.URL}/desk?c=${c.slug}&k=${c.ownerKey}` }); }
-    return json({ clients: out });
+    const out = []; const stream = [];
+    for (const sl of slugs) {
+      const c = await getClient(sl); if (!c) continue;
+      const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${c.slug}&k=${c.ownerKey}`, policy: `${process.env.URL}/policy?c=${c.slug}` };
+      if (full) {
+        const [events, alerts, leads, convs, usage] = await Promise.all([listJSON("events", c.slug + "/", 400), listJSON("alerts", c.slug + "/", 100), listJSON("leads", c.slug + "/", 200), listJSON("conversations", c.slug + "/", 100), getUsage(c.slug)]);
+        const h = lineHealth(c, events);
+        row.health = h; row.usage = usageView(c, usage);
+        row.waitingAlerts = alerts.filter((a) => a.status === "waiting").length;
+        row.openFlags = convs.filter((v) => v.flag).length;
+        row.pendingCallbacks = leads.filter((l) => l.status === "open" && l.callbackDueAt && !l.calledAt).length;
+        row.overdueCallbacks = leads.filter((l) => l.status === "open" && l.overdueAt && !l.calledAt).length;
+        row.lastInbound = [h.lastInboundCall, h.lastInboundText].filter(Boolean).sort().pop() || null;
+        row.leads = { angiKey: c.leads?.angiKey || "", thumbtackSecret: c.leads?.thumbtackSecret || "" };
+        for (const e of events) if (Date.now() - new Date(e.at).getTime() < 86400000) stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type, data: e.data });
+      }
+      out.push(row);
+    }
+    stream.sort((a, b) => b.at.localeCompare(a.at));
+    return json({ clients: out, ...(full ? { events: stream.slice(0, 300) } : {}) });
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
@@ -60,6 +80,11 @@ export default async (req) => {
     if (b.kind === "optouts") { const keys = await list("optouts", ""); const out = []; for (const k of keys) out.push({ key: k, phone: k, ...(await get("optouts", k)) }); return json({ records: out.filter((o) => !o.slug || o.slug === c.slug) }); }
     return json({ records: await listJSON(kind, c.slug + "/", 500) });
   }
+  if (b.action === "monthly") {
+    const mth = await monthlyReport(c, b.month);
+    if (b.send) { await sendEmail({ to: c.owner.email, subject: mth.subject, text: mth.text }); await notifySteve(`Statement: ${c.business.name} (${mth.month})`, `${mth.text}\n\n${mth.invoice}`); await logEvent(c.slug, "monthly", { month: mth.month, stats: mth.stats }); }
+    return json({ ok: true, ...mth });
+  }
   if (b.action === "weekly") {
     const w = await weeklyReport(c);
     if (b.send) { await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text }); await logEvent(c.slug, "weekly", { empty: !!w.empty, stats: w.stats || null }); }
@@ -86,6 +111,13 @@ export default async (req) => {
     await del("clients", c.slug);
     return json({ ok: true, deleted: c.slug, released });
   }
+  if (b.action === "pause" || b.action === "resume") {
+    const { detachVoice, attachVoice } = await import("./lib/vapi.mjs");
+    const site = process.env.URL || new URL(req.url).origin;
+    if (b.action === "pause") { if (!["testing", "live"].includes(c.status)) return json({ error: "not_active" }, 400); c.pausedFrom = c.status; c.status = "paused"; c.pausedAt = new Date().toISOString(); await saveClient(c); await logEvent(c.slug, "paused", { by: "admin" }); try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
+    else { if (c.status !== "paused") return json({ error: "not_paused" }, 400); c.status = "live"; c.pausedAt = null; c.liveAt = c.liveAt || new Date().toISOString(); await saveClient(c); await logEvent(c.slug, "resumed", { by: "admin" }); try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
+    return json({ ok: true, status: c.status });
+  }
   if (b.action === "clear_optout") { const n = e164(b.phone || ""); if (!n) return json({ error: "missing_phone" }, 400); await del("optouts", n); return json({ ok: true, cleared: n }); }
   if (b.action) return json({ error: "unknown_action", action: String(b.action) }, 400);
   if (b.phone) {
@@ -98,6 +130,7 @@ export default async (req) => {
   if (b.billing) c.billing = { ...c.billing, ...b.billing };
   if (b.leads) c.leads = { ...(c.leads || {}), ...(b.leads.angiKey !== undefined ? { angiKey: String(b.leads.angiKey) } : {}), ...(b.leads.thumbtackSecret !== undefined ? { thumbtackSecret: String(b.leads.thumbtackSecret) } : {}) };
   if (b.serviceEndsAt !== undefined) c.serviceEndsAt = b.serviceEndsAt ? new Date(b.serviceEndsAt).toISOString() : null;
+  if (b.nextMonthNote !== undefined) c.nextMonthNote = String(b.nextMonthNote).slice(0, 300);
   if (b.liveAt !== undefined) c.liveAt = b.liveAt ? new Date(b.liveAt).toISOString() : null;
   await saveClient(c); await indexClient(c);
   await logEvent(c.slug, "admin_update", { fields: Object.keys(b) });

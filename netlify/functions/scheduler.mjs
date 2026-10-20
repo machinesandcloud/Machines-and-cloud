@@ -3,7 +3,7 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
-import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport } from "./lib/desk.mjs";
+import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, weeklyReport, monthlyReport } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
@@ -145,8 +145,26 @@ export async function run({ forceHour, forceDay } = {}) {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
   const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
   const minute = forceHour !== undefined ? 0 : Number(parts.find((p) => p.type === "minute")?.value);
-  const day = forceDay || new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short" }).format(new Date());
-  let digests = 0, weeklies = 0;
+  const day = forceDay && isNaN(Number(forceDay)) ? forceDay : new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short" }).format(new Date());
+  const dom = forceDay && !isNaN(Number(forceDay)) ? Number(forceDay) : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", day: "numeric" }).format(new Date()));
+  let digests = 0, weeklies = 0, monthlies = 0;
+  // The 1st at 9 am Houston: last month's statement to every live shop, and to Steve with the invoice line.
+  if (dom === 1 && hour === 9 && minute < 10) {
+    for (const slug of await list("clients", "")) {
+      const c = await getClient(slug);
+      if (!c || c.status !== "live") continue;
+      // A shop live for less than a day of the statement month gets no statement for it.
+      const monthEnd = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })); monthEnd.setDate(1); monthEnd.setHours(0, 0, 0, 0);
+      if (c.liveAt && new Date(new Date(c.liveAt).toLocaleString("en-US", { timeZone: "America/Chicago" })).getTime() > monthEnd.getTime() - D) continue;
+      try {
+        const mth = await monthlyReport(c);
+        await sendEmail({ to: c.owner.email, subject: mth.subject, text: mth.text });
+        await notifySteve(`Statement: ${c.business.name} (${mth.month})`, `${mth.text}\n\n${mth.invoice}`);
+        await logEvent(c.slug, "monthly", { month: mth.month, stats: mth.stats });
+        monthlies++;
+      } catch (err) { console.error("monthly", slug, err); }
+    }
+  }
   // Monday 8 am Houston: the weekly "what it did for you" email to every live shop, by email only.
   if (day === "Mon" && hour === 8 && minute < 10) {
     for (const slug of await list("clients", "")) {
@@ -178,7 +196,7 @@ export async function run({ forceHour, forceDay } = {}) {
     }
   }
   console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`);
-  return { due: due.length, results, digests, weeklies, released, alerts };
+  return { due: due.length, results, digests, weeklies, monthlies, released, alerts };
 }
 
 export default async () => {

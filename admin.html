@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow">
+<title>Front desk admin</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="styles.css">
+<style>
+  body { background: #FFFFFF; }
+  .ad { max-width: 1280px; margin: 0 auto; padding: 24px 16px 60px; color: #1E2433; font-size: 14px; }
+  .ad h1 { font-size: 24px; margin: 0 0 12px; } .ad h2 { font-size: 16px; margin: 24px 0 8px; }
+  .ad table { width: 100%; border-collapse: collapse; font-size: 13px; } .ad th, .ad td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
+  .ad th { font-weight: 600; color: #5B6273; font-size: 12px; } .ad .muted { color: #5B6273; } .ad .bad { color: #B91C1C; font-weight: 600; }
+  .ad .btn { padding: 5px 10px; border: 1px solid #D1D5DB; border-radius: 999px; background: #fff; cursor: pointer; font: inherit; font-size: 12px; margin: 2px 2px 2px 0; } .ad .btn:hover { background: #F3F4F6; }
+  .ad input.key { padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; width: 360px; max-width: 100%; }
+  .ad .ev { font-size: 12px; font-family: ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 420px; overflow: auto; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px; background: #F9FAFB; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1E2433; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; display: none; }
+  @media (max-width: 800px) { .ad table { display: block; overflow-x: auto; } }
+</style>
+</head>
+<body class="theme-light" data-no-widget>
+<main class="ad">
+  <h1>Front desk admin</h1>
+  <p class="muted" id="keyRow">Admin key: <input class="key" id="key" type="password" placeholder="paste the admin key once"> <button class="btn" id="keyGo">Load</button> <span id="msg"></span></p>
+  <div id="shops"></div>
+  <h2>Events, last 24 hours, every shop</h2>
+  <div class="ev" id="events">Load with the key.</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var key = ''; try { key = sessionStorage.getItem('mc_admin_key') || ''; } catch (e) { /* ignore */ }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
+  function rel(iso) { if (!iso) return 'none'; var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; }
+  function api(body, method) { return fetch('/api/admin' + (method === 'GET' ? '?full=1' : ''), { method: method || 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: method === 'GET' ? undefined : JSON.stringify(body) }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || r.status); return d; }); }); }
+  function load() {
+    if (!key) return;
+    $('msg').textContent = 'loading';
+    api(null, 'GET').then(function (d) {
+      try { sessionStorage.setItem('mc_admin_key', key); } catch (e) { /* ignore */ }
+      $('msg').textContent = d.clients.length + ' shop' + (d.clients.length === 1 ? '' : 's');
+      $('shops').innerHTML = d.clients.length ? '<table><tr><th>Shop</th><th>Status</th><th>Plan</th><th>Live since</th><th>Texting</th><th>Usage</th><th>Errors 24 h</th><th>Last inbound</th><th>Flags</th><th>Waiting</th><th>Callbacks</th><th>Actions</th></tr>' + d.clients.map(function (c) {
+        var h = c.health || {}, u = c.usage || {};
+        return '<tr data-slug="' + esc(c.slug) + '"><td><b>' + esc(c.name || c.slug) + '</b><br><span class="muted">' + esc(c.slug) + '<br>' + esc((c.owner || {}).name || '') + ' ' + esc((c.owner || {}).phone || '') + '</span></td>'
+          + '<td>' + esc(c.status) + '</td><td>' + esc(c.plan) + '</td><td>' + esc((c.liveAt || '').slice(0, 10) || '-') + '</td>'
+          + '<td>' + esc((c.phone || {}).tenDlc || '-') + '<br><span class="muted">' + esc(h.sender || '') + '</span></td>'
+          + '<td>' + (u.minutes || 0) + '/' + ((u.included || {}).minutes || '-') + ' min<br>' + (u.texts || 0) + '/' + ((u.included || {}).texts || '-') + ' txt</td>'
+          + '<td class="' + (h.errors24h ? 'bad' : '') + '">' + (h.errors24h || 0) + '</td><td>' + esc(rel(c.lastInbound)) + '</td><td>' + (c.openFlags || 0) + '</td><td class="' + (c.waitingAlerts ? 'bad' : '') + '">' + (c.waitingAlerts || 0) + '</td><td>' + (c.pendingCallbacks || 0) + (c.overdueCallbacks ? ' <span class="bad">(' + c.overdueCallbacks + ' overdue)</span>' : '') + '</td>'
+          + '<td><a class="btn" href="' + esc(c.portal) + '" target="_blank" rel="noopener">Portal</a><a class="btn" href="' + esc(c.policy) + '" target="_blank" rel="noopener">Policy</a>'
+          + (c.status === 'paused' ? '<button class="btn" data-a="resume">Resume</button>' : (c.status === 'live' || c.status === 'testing') ? '<button class="btn" data-a="pause">Pause</button>' : '')
+          + '<button class="btn" data-a="digest">Digest</button><button class="btn" data-a="weekly">Weekly</button><button class="btn" data-a="monthly">Monthly</button><button class="btn" data-a="keys">Angi/Thumbtack keys</button><button class="btn" data-a="clear_optout">Clear opt-out</button><button class="btn" data-a="delete">Delete</button></td></tr>';
+      }).join('') + '</table>' : '<p class="muted">No shops.</p>';
+      $('events').textContent = (d.events || []).map(function (e) { return e.at.slice(5, 16).replace('T', ' ') + '  ' + (e.name || e.slug).slice(0, 18).padEnd(18) + ' ' + e.type + (e.data && e.data.id ? ' ref ' + e.data.id : '') + (e.data && e.data.reason ? ' ' + e.data.reason : '') + (e.data && e.data.preview ? '  "' + String(e.data.preview).slice(0, 60) + '"' : ''); }).join('\n') || 'Nothing in the last 24 hours.';
+    }).catch(function (e) { $('msg').textContent = 'Could not load: ' + e.message; });
+  }
+  $('shops').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-a]'); if (!b) return;
+    var slug = b.closest('tr').dataset.slug, a = b.dataset.a;
+    if (a === 'delete' && !confirm('Delete ' + slug + ' and everything under it? This releases the number too.')) return;
+    if (a === 'clear_optout') { var ph = prompt('Phone number to clear (E.164)'); if (!ph) return; return api({ slug: slug, action: 'clear_optout', phone: ph }).then(function (r) { toast('Cleared ' + r.cleared); }).catch(function (e) { toast(e.message); }); }
+    if (a === 'keys') { var ak = prompt('Angi key (blank keeps current)'); var ts = prompt('Thumbtack secret (blank keeps current)'); var leads = {}; if (ak) leads.angiKey = ak; if (ts) leads.thumbtackSecret = ts; if (!Object.keys(leads).length) return; return api({ slug: slug, leads: leads }).then(function () { toast('Keys saved'); }).catch(function (e) { toast(e.message); }); }
+    if (a === 'digest' || a === 'weekly' || a === 'monthly') { var send = confirm('Send it to the owner too? Cancel shows it here only.'); return api({ slug: slug, action: a, send: send }).then(function (r) { alert(r.text || r.email || JSON.stringify(r)); toast(send ? 'Sent' : 'Shown'); }).catch(function (e) { toast(e.message); }); }
+    api({ slug: slug, action: a }).then(function (r) { toast(a + ': ' + (r.status || (r.ok ? 'ok' : JSON.stringify(r)))); load(); }).catch(function (e) { toast(e.message); });
+  });
+  $('keyGo').addEventListener('click', function () { key = $('key').value.trim(); load(); });
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') { key = $('key').value.trim(); load(); } });
+  if (key) { $('key').value = key; load(); }
+})();
+</script>
+</body>
+</html>

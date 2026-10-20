@@ -43,7 +43,13 @@
 <nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
 <main class="dk">
   <div class="dk-head"><div><h1 id="title">Your front desk</h1><span class="st" id="status">loading</span></div><div id="liveBtns"></div></div>
-  <div class="tabs"><button class="on" data-t="test">Test it</button><button data-t="leads">Leads and bookings</button><button data-t="convs">Conversations</button><button data-t="know">What it knows</button><button data-t="setup">Setup</button></div>
+  <div class="tabs"><button data-t="today" id="tabToday" style="display:none">Today</button><button class="on" data-t="test" id="tabTest">Test it</button><button data-t="leads">Leads and bookings</button><button data-t="convs">Conversations</button><button data-t="know">What it knows</button><button data-t="setup">Setup</button><button data-t="account">Account</button></div>
+
+  <section class="pane" id="p-today">
+    <div class="card2"><h3>Today</h3><div class="grid2" id="today"></div></div>
+    <div class="card2"><h3>Needs you</h3><div id="needsYou" class="muted"></div></div>
+    <div class="card2"><h3>Last 24 hours</h3><div id="todayEvents" class="muted"></div></div>
+  </section>
 
   <section class="pane on" id="p-test">
     <div class="grid2">
@@ -57,7 +63,6 @@
   </section>
 
   <section class="pane" id="p-leads">
-    <div class="card2" id="todayStrip" style="display:none"><h3>Today</h3><div class="grid2" id="today"></div></div>
     <div class="card2"><h3>Bookings</h3><div id="bookings"></div></div>
     <div class="card2"><h3>Leads handed to you</h3><div id="leads"></div></div>
   </section>
@@ -112,9 +117,16 @@
         <h3 style="margin-top:18px">Paste this on your website too</h3><p class="muted">Most trade websites are missing hours, a service area, and answers to the first five questions. Here is yours, written from what your front desk knows. Copy it onto your contact or FAQ page.</p><pre class="snip" id="siteBlock" style="white-space:pre-wrap"></pre>
         <h3 style="margin-top:18px">Calendar</h3><p><a class="btn-pill btn-pill-dark btn-sm" id="calBtn" href="#">Connect Google Calendar</a> <span class="muted" id="calText"></span></p>
         <h3 style="margin-top:18px">Texts to your cell</h3><p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="testSms">Send me a test text</button> <span class="muted" id="smsText"></span></p>
-        <h3 style="margin-top:18px">This month</h3><p class="muted" id="usage"></p>
-        <h3 style="margin-top:18px">Your data</h3><p class="muted" id="dataPolicy"></p><p class="muted">Download: <a id="expBookings" href="#">bookings</a>, <a id="expLeads" href="#">leads</a>, <a id="expConvs" href="#">conversations</a> (CSV, opens in Excel or Sheets), or <a id="expCustomers" href="#">customers</a> in the column names Jobber and Housecall Pro import.</p><p class="muted">Texting terms your customers can read: <a id="policyLink" href="#" target="_blank" rel="noopener"></a></p>
-        <h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every lead text carries a ref. Reply <code>ok REF</code> to acknowledge, <code>called REF</code> when you have reached someone who asked for a call, <code>otw REF</code> to send the on-the-way text, <code>done REF</code> when the job is finished (starts the review request), <code>invoice REF 450</code> if they still owe you (payment reminders on day 3 and 7), <code>paid REF</code> to stop them, <code>quote REF 1450</code> when you sent a quote (day-14 check), <code>cancel REF</code>. Follow-up texts only go out between 9 am and 9 pm (noon to 9 pm on Sunday).</p>
+      </div>
+    </div>
+  </section>
+  <section class="pane" id="p-account">
+    <div class="grid2">
+      <div class="card2"><h3>This month</h3><p class="muted" id="usage"></p>
+        <h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every alert names the one reply it needs: <code>ok REF</code> to acknowledge, <code>called REF</code> when you have reached someone who asked for a call, <code>otw REF</code> on the way, <code>done REF</code> when the job is finished, <code>cancel REF</code>. A bare <code>ok</code>, <code>called</code>, <code>otw</code>, or <code>done</code> works when only one job fits. Also <code>invoice REF 450</code> if they still owe you (payment reminders on day 3 and 7), <code>paid REF</code> to stop them, <code>quote REF 1450</code> when you sent a quote. Follow-up texts only go out between 9 am and 9 pm (noon to 9 pm on Sunday).</p>
+      </div>
+      <div class="card2"><h3>Your data</h3><p class="muted" id="dataPolicy"></p><p class="muted">Download: <a id="expBookings" href="#">bookings</a>, <a id="expLeads" href="#">leads</a>, <a id="expConvs" href="#">conversations</a> (CSV, opens in Excel or Sheets), or <a id="expCustomers" href="#">customers</a> in the column names Jobber and Housecall Pro import.</p><p class="muted">Texting terms your customers can read: <a id="policyLink" href="#" target="_blank" rel="noopener"></a></p>
+        <h3 style="margin-top:18px">Service</h3><p class="muted">Pause or resume from the buttons at the top. To end the service: <button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelBtn2">Cancel service</button></p>
       </div>
     </div>
   </section>
@@ -145,15 +157,19 @@
       st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;
       var offBtns = (d.forwarding && d.forwarding.off && d.forwarding.off.length && (c.status === 'paused' || c.status === 'cancelled')) ? '<div class="muted" style="margin-top:8px">Send calls back to your phone: ' + d.forwarding.off.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') + '<br>' + esc(d.forwarding.offLong || '') + '</div>' : '';
       document.querySelector('.tabs button[data-t="test"]').style.display = c.status === 'cancelled' ? 'none' : '';
-      if (c.status === 'live' && !location.hash && !window.__tabPicked) { showTab('leads'); window.__tabPicked = true; }
+      var live = c.status === 'live'; $('tabToday').style.display = live ? '' : 'none'; $('tabTest').style.display = live || c.status === 'cancelled' ? 'none' : '';
+      if (live && !location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
+      if (live && !$('testLink')) { var tl = document.createElement('a'); tl.id = 'testLink'; tl.href = '#test'; tl.className = 'muted'; tl.style.marginLeft = '10px'; tl.textContent = 'Test it'; tl.addEventListener('click', function (ev) { ev.preventDefault(); window.__tabPicked = true; showTab('test'); }); $('liveBtns').appendChild(tl); }
+      $('needsYou').innerHTML = (function () { var rows = d.leads.filter(function (l) { return l.status === 'open' && (l.alertWaiting || l.overdueAt || l.outcome === 'needs_action' || l.outcome === 'wants_call'); }); return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(l.id) + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : 'Nothing waiting on you.'; })();
+      $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || 'Quiet so far.';
       (function () { var dayOf = function (iso) { return iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }) : ''; }; var today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
         var t = d.today || {}; var calls = t.calls || 0, texts = t.texts || 0, booked = t.bookings || 0, need = t.needsYou || 0; var h = d.health || {};
-        var strip = document.getElementById('todayStrip'); strip.style.display = c.status === 'live' ? 'block' : 'none';
         document.getElementById('today').innerHTML = '<div><b>' + calls + '</b> calls</div><div><b>' + texts + '</b> texts in</div><div><b>' + booked + '</b> booked today</div><div><b>' + need + '</b> need you</div><div class="muted">Line: ' + (h.errors24h ? h.errors24h + ' errors in 24 h' : 'OK') + '</div>'; })();
       $('liveBtns').innerHTML = (c.status === 'cancelled' ? '<span class="muted">line rings through until ' + esc((c.serviceEndsAt || '').slice(0, 10)) + '</span>' : c.status === 'paused'
         ? '<button class="btn-pill btn-pill-blue btn-sm" id="resume">Resume</button> <button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn">Cancel service</button>'
-        : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7">Cancel service</button>') + offBtns;
-      var go = $('golive'), pa = $('pause'), re = $('resume'), ca = $('cancelBtn');
+        : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7' + (c.status === 'live' ? ';display:none' : '') + '">Cancel service</button>') + offBtns;
+      var go = $('golive'), pa = $('pause'), re = $('resume'), ca = $('cancelBtn') || $('cancelBtn2');
+      if ($('cancelBtn') && $('cancelBtn2')) $('cancelBtn2').addEventListener('click', function () { $('cancelBtn').click(); });
       if (go) go.addEventListener('click', function () { action('go_live').then(function () { toast('Live. Your website chat and texting number are answering.'); load(); }); });
       if (pa) pa.addEventListener('click', function () { action('pause').then(function () { toast('Paused. Calls to your front desk number now ring your own phone.'); load(); }); });
       if (re) re.addEventListener('click', function () { action('resume').then(function () { toast('Back on.'); load(); }); });

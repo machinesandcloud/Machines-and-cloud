@@ -4,14 +4,14 @@
 import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
-import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when } from "./lib/desk.mjs";
+import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optedOut } from "./lib/send.mjs";
 
 export const config = { path: "/api/sms" };
 
 const twiml = (msg) => new Response(`<?xml version="1.0" encoding="UTF-8"?><Response>${msg ? `<Message>${msg.replace(/[<>&]/g, (ch) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[ch]))}</Message>` : ""}</Response>`, { status: 200, headers: { "Content-Type": "text/xml" } });
 
-const HELP = 'Commands: "ok <ref>" acknowledges an alert, "otw <ref>" sends the on-the-way text, "done <ref>" marks the job done and starts the review request, "invoice <ref> <amount>" starts payment reminders on day 3 and 7, "paid <ref>" stops them, "quote <ref> <amount>" logs a quote (day-14 check), "cancel <ref>". The ref is on each summary text.';
+const HELP = 'Each alert names the one reply it needs: "ok REF" (acknowledge), "called REF" (you reached them), "otw REF" (on the way), "done REF" (finished), "cancel REF". A bare "ok", "called", "otw", or "done" works when only one job fits. Also: "invoice REF amount" (payment reminders), "paid REF", "quote REF amount".';
 const STOP_RE = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|opt\s*out|optout|alto|parar|cancelar|basta|detener)\b[\s.!]*$/i;
 const STOP_PHRASE = /\b(stop texting|stop messaging|do not text|don't text|no more texts|remove me|no me (escriban?|manden?|env[ií]en?|texteen?)( m[aá]s)?( mensajes)?|no m[aá]s mensajes|dejen? de (escribir|mandar|enviar)|no quiero m[aá]s mensajes)\b/i;
 const SPANISH_STOP = /\b(alto|parar|cancelar|basta|detener|no me (escriban?|manden?|env[ií]en?|texteen?)|no m[aá]s mensajes|dejen? de|no quiero m[aá]s)\b/i;
@@ -68,7 +68,7 @@ export default async (req) => {
       if (visits.length) told = ` We've told ${c.owner?.name || "the owner"} about your visit.`;
     }
     if (params.OptOutType) return twiml(""); // Twilio already sent the carrier-standard confirmation
-    if (SPANISH_STOP.test(body)) return twiml(`${name}: ya no recibirá más mensajes de este número.${told ? ` Le avisamos a ${c.owner?.name || "el dueño"} sobre su visita.` : ""} Responda START para volver a recibirlos.`);
+    if (SPANISH_STOP.test(body)) return twiml(`${name}: ya no recibirá más mensajes de este número.${told ? ` Le avisamos a ${c.owner?.name || "el dueño"} sobre su visita.` : ""} Responda EMPEZAR para volver a recibirlos.`);
     return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
   }
   if (await optedOut(from)) {
@@ -109,7 +109,7 @@ export default async (req) => {
     const b = bookings[0];
     if (/^\s*(c|confirm|confirmed|yes)\s*[.!]*\s*$/i.test(body)) {
       await confirmVisit(c, b);
-      const msg = b.language === "es" ? `${name}: confirmada para ${when(b).replace(/\s+to\s+/, " a ")}. Nos vemos.` : `${name}: confirmed for ${when(b)}. See you then.`;
+      const msg = b.language === "es" ? `${name}: confirmada para ${dateEs(b.date)}, ${winEs(b.window)}. Nos vemos.` : `${name}: confirmed for ${when(b)}. See you then.`;
       conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg + `\n[Done: visit confirmed, ref ${b.id}]`, at: new Date().toISOString() });
       await saveConversation(conv);
       return twiml(msg);
