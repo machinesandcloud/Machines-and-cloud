@@ -168,3 +168,9 @@ export async function releaseNumber(numberSid, messagingServiceSid) {
   out.number = numberSid;
   return out;
 }
+
+export async function deleteRecording(recordingSid) {
+  const res = await fetch(api(`Recordings/${recordingSid}.json`), { method: "DELETE", headers: { Authorization: "Basic " + Buffer.from(`${SID}:${TOKEN}`).toString("base64") } });
+  if (!res.ok && res.status !== 404) throw new Error(`recording delete ${res.status}`);
+  return true;
+}

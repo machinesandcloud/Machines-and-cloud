@@ -44,7 +44,7 @@ export default async (req) => {
   if (path.endsWith("/recorded")) {
     const link = String(params.RecordingUrl || "");
     await notifyOwner(c, `VIP voicemail from ${from || "unknown"}: ${link ? link + ".mp3" : "(no recording)"}${params.RecordingDuration ? ` (${params.RecordingDuration} s)` : ""}`, { type: "owner_note" });
-    await logEvent(c.slug, "vip_voicemail", { from, url: link, seconds: Number(params.RecordingDuration) || null });
+    await logEvent(c.slug, "vip_voicemail", { from, url: link, sid: params.RecordingSid || "", seconds: Number(params.RecordingDuration) || null });
     return xml(`<Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`);
   }
 

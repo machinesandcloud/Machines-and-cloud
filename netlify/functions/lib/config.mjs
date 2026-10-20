@@ -9,7 +9,7 @@ export const PLANS = {
 export const ACTIVE = ["testing", "live"];
 export const STATUSES = ["new", "building", "testing", "live", "paused", "cancelled"];
 
-export const DATA_POLICY = "Your customers' names, numbers, and conversations belong to your shop. Machines & Cloud uses them only to run your front desk, never to train or inform another shop's desk, and never sells or shares them. You can ask for an export at any time, and everything is deleted on request after you cancel.";
+export const DATA_POLICY = "Your customers' names, numbers, and conversations belong to your shop. Machines & Cloud uses them only to run your front desk, never to train or inform another shop's desk, and never sells or shares them. You can ask for an export at any time, and everything we hold is deleted on request after you cancel. Our phone and texting providers keep their own call and message logs for a limited time under their policies, and a customer's request to stop texts is kept so it is honored.";
 export const CONSENT_LINE = "You'll get appointment texts from {name} at this number. Reply STOP any time to end them.";
 export const CONSENT_LINE_ES = "Recibirá mensajes de texto sobre su cita de {name} en este número. Responda STOP o ALTO cuando quiera para dejar de recibirlos.";
 export const consentLine = (c, lang = "en") => (lang === "es" ? CONSENT_LINE_ES : CONSENT_LINE).replace("{name}", c.business?.name || "us");

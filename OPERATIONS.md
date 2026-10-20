@@ -65,6 +65,20 @@ Fallbacks and alerts: every number bought gets `VoiceFallbackUrl` and `SmsFallba
 `<Response>{{#cell}}<Dial timeout="25">{{cell}}</Dial>{{/cell}}<Say voice="Polly.Joanna">We are having trouble connecting right now. Please call back in a few minutes.</Say></Response>`
 Provisioning appends `?cell=%2B1...` for a shop whose owner cell is not the forwarded line and leaves the bare URL for a one-phone shop; the URL is re-set when the owner changes the cell, business number, or forwarding mode on the portal (`syncVoiceFallback`), on pause (the bin with the cell) and resume (`/api/voice` on a Vapi line). The SMS bin is `<Response><Message>We got your text and will reply shortly.</Message></Response>`. Twilio Debugger webhook: in the console under Monitor, Alerts, set the webhook to `https://machinesandcloud.com/api/twilio-alert` and turn on email alerts; each failure Twilio sees (11200 could not reach the webhook, 11205 timeout, 30034 unregistered sender) is logged as `twilio_error` on the shop whose number appears in the request and counts toward the alerts below. Vapi calls that end with a platform error (`assistant-request-returned-error`, `pipeline-error-*`, `*-llm-failed`, and the other failure families) log `voice_failed` from the end-of-call report. A Vapi-answered number gets `VoiceFallbackUrl` set to our `/api/voice` after the import, so a Vapi outage degrades to the missed-call text-back. The scheduler texts and emails Steve, once per hour per shop, when three or more texts failed in an hour or any voice failure was logged in the last 15 minutes, and once per five days when a live shop with verified forwarding has had no inbound call or text for five business days (`health_alert` event with `reason`).
 
+## The critical path to customer one (dated, longest lead time first)
+
+| Step | Who | Lead time | Proof |
+|---|---|---|---|
+| 1. File Machines & Cloud's own 10DLC brand and campaign for the bridge sender (`MC_MESSAGING_SERVICE_SID`, `MC_TWILIO_NUMBER`). Until carriers verify it, no customer text can go out from any shop, whatever the shop's own filing says. | Steve, Twilio console (Trust Hub: Primary Customer Profile as ISV, Brand, Campaign on the Messaging Service) | 1 to 2 weeks typical, up to 6 | `DECISIONS.md` line with the submission date and the date the campaign read VERIFIED |
+| 2. Twilio keys, `TWILIO_PRIMARY_PROFILE_SID`, the two TwiML Bins, the Debugger webhook with email alerts, ALTO and PARAR (and EMPEZAR) on the Messaging Service | Steve, console and Netlify env | 2 hours | `.env.example` names filled in Netlify; a test number bought by provisioning shows the fallback URLs |
+| 3. Vapi key and `VAPI_WEBHOOK_SECRET`; Resend key with the verified domain; Google OAuth client | Steve | 1 hour | the keyed pass (sprint tickets S2-01, S3-04, S4-04, S5-04, S6-04) |
+| 4. The keyed pass on a test shop with Steve's own entity | engineer and PM | 2.5 days reserved | the sprint 2 S2-01 lines ticked |
+| 5. Spanish texts reviewed by a Spanish speaker Steve names; `SPANISH_REVIEWED_ON` set | reviewer | 1 hour of reading | the date in Netlify and in `DECISIONS.md` |
+| 6. Jobber trial import of the customers file | Steve | 30 minutes | one line in `DECISIONS.md` |
+| 7. The first customer's own go-live, by the runbook below | Steve with the owner | the day it starts, then 7 days of reading flags | `product/golive-<slug>.md` |
+
+Step 1 is the long pole; file it today and the rest fits inside its wait. Each step's date goes in `DECISIONS.md` when it happens.
+
 Steve's one-time setup: Twilio account (keys, Primary Customer Profile approved as ISV, and on the Machines & Cloud Messaging Service add ALTO and PARAR as custom opt-out keywords and EMPEZAR as a custom opt-in keyword under Opt-Out Management, so the carrier layer honors Spanish stop words the same way our webhook does), Vapi account (key), Resend (key + verified domain), Google OAuth client, optional Stripe. After that, nothing per client.
 
 ## Lifecycle messages and the nightly check

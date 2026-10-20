@@ -34,7 +34,7 @@ export default async (req) => {
 <li>Your information belongs to ${name}. It is not sold, rented, or shared with third parties for their marketing. Mobile numbers and texting consent are never shared with third parties or affiliates for marketing purposes.</li>
 <li>${esc(DATA_POLICY)}</li>
 <li>Machines &amp; Cloud processes this data on ${name}'s behalf to run the front desk and does not use it to serve any other business. See also the <a href="https://www.machinesandcloud.com/privacy-policy.html">Machines &amp; Cloud privacy policy</a>.</li>
-<li>You can ask ${name} to correct or delete your information at any time using the contact details above.</li>
+<li>You can ask ${name} to correct or delete your information at any time using the contact details above. Twilio, which carries the calls and texts, keeps message and call logs for up to 13 months and call recordings until we delete them, and the voice provider keeps call records and transcripts under its own retention policy; a request to stop texts is kept so that it is honored.</li>
 </ul>
 <p class="muted">Machines &amp; Cloud, 5718 Westheimer Rd Suite 1000, Houston, TX 77057, support@machinesandcloud.com.</p>
 </body></html>`;

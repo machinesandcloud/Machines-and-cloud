@@ -37,7 +37,7 @@ export default async (req) => {
         row.lastInbound = [h.lastInboundCall, h.lastInboundText].filter(Boolean).sort().pop() || null;
         row.leads = { angiKey: c.leads?.angiKey || "", thumbtackSecret: c.leads?.thumbtackSecret || "" };
         const dayMs = 86400000;
-        row.autoFlags7d = events.filter((e) => e.type === "auto_flag" && Date.now() - new Date(e.at).getTime() < 7 * dayMs).length;
+        row.autoFlags7d = events.filter((e) => e.type === "auto_flag" && !e.data?.test && Date.now() - new Date(e.at).getTime() < 7 * dayMs).length;
         row.healthAlerts7d = events.filter((e) => e.type === "health_alert" && Date.now() - new Date(e.at).getTime() < 7 * dayMs).map((e) => e.data?.reason);
         row.overdueOld = leads.filter((l) => l.status === "open" && l.overdueAt && !l.calledAt && Date.now() - new Date(l.overdueAt).getTime() > dayMs).length;
         row.testingDays = c.status === "testing" && c.build?.builtAt ? Math.floor((Date.now() - new Date(c.build.builtAt).getTime()) / dayMs) : 0;
@@ -116,9 +116,12 @@ export default async (req) => {
     const released = {};
     try { if (twilioEnabled() && c.phone?.twilioNumberSid) released.number = await releaseNumber(c.phone.twilioNumberSid, c.phone.messagingServiceSid); } catch (e) { released.numberError = String(e.message); }
     try { if (c.voice?.assistantId) released.voice = await releaseVoice(c); } catch (e) { released.voiceError = String(e.message); }
+    // Recordings we made (VIP voicemails) are deleted at Twilio when keys allow; Twilio and Vapi keep their own logs.
+    try { const { deleteRecording, twilioEnabled: tw } = await import("./lib/twilio.mjs"); if (tw()) { for (const e of await listJSON("events", c.slug + "/", 2000)) if (e.type === "vip_voicemail" && e.data?.sid) { try { await deleteRecording(e.data.sid); (released.recordings = released.recordings || []).push(e.data.sid); } catch (err) { released.recordingError = String(err.message); } } } } catch { /* ignore */ }
     for (const kind of ["bookings", "leads", "alerts", "conversations", "events", "usage", "customers"]) for (const k of await list(kind, c.slug + "/")) await del(kind, k);
     for (const k of await list("tasks", "")) { const t = await get("tasks", k); if (t?.slug === c.slug) await del("tasks", k); }
-    for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await del("optouts", k); }
+    // Opt-outs are keyed by phone across shops (the bridge sender is shared): keep them, forget the shop.
+    for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await put("optouts", k, { ...o, slug: "", formerSlug: c.slug }); }
     for (const k of await list("index", "bridge:")) { const sl = await get("index", k); if (sl === c.slug) await del("index", k); }
     if (c.owner?.email) await del("index", "email:" + c.owner.email.toLowerCase());
     if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);

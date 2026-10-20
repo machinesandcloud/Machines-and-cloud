@@ -622,7 +622,7 @@ export function lineHealth(c, events = []) {
 
 export async function dailyDigest(c, events) {
   const today = houstonDay(new Date().toISOString());
-  const autoToday = (events || (await listRecords("events", c.slug, 300))).filter((e) => e.type === "auto_flag" && houstonDay(e.at) === today);
+  const autoToday = (events || (await listRecords("events", c.slug, 300))).filter((e) => e.type === "auto_flag" && !e.data?.test && houstonDay(e.at) === today);
   const sameDay = (r) => houstonDay(r.createdAt || r.at) === today;
   const bookings = (await listRecords("bookings", c.slug, 300)).filter(sameDay);
   const leads = (await listRecords("leads", c.slug, 300)).filter(sameDay);
@@ -651,22 +651,22 @@ export async function dailyDigest(c, events) {
 const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person answered without saying when the owner will call)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (a visit booked with no street address)", "question_unanswered (a direct customer question the desk never answered)"];
 export async function autoFlagDay(c, debug = false) {
   const today = houstonDay(new Date().toISOString()); const raws = [];
-  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && !v.autoFlag && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
+  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && v.autoFlag?.day !== today && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
   if (!convs.length) return 0;
   const { makeClient, MODEL } = await import("./agent.mjs");
   const client = makeClient();
   const prices = (c.fees || []).map((f) => `${f.label} ${f.amount}`).join("; ") || "none published";
   let n = 0;
   for (const v of convs.slice(0, 40)) {
-    const text = (v.messages || []).filter((m) => houstonDay(m.at) === today || true).slice(-30).map((m) => `${m.role === "user" ? "Customer" : "Desk"}: ${String(m.content || "").replace(/\n\[Done:[^\]]*\]/g, "")}`).join("\n").slice(0, 6000);
+    const text = (v.messages || []).slice(-30).map((m) => `${m.role === "user" ? "Customer" : "Desk"}: ${String(m.content || "").replace(/\n\[Done:[^\]]*\]/g, "")}`).join("\n").slice(0, 6000);
     try {
       const r = await client.messages.create({ model: MODEL, max_tokens: 600, thinking: { type: "adaptive" }, output_config: { effort: "low" }, system: `You audit an AI front desk's conversations for a ${c.business?.trade || "home service"} company. Published prices: ${prices}. Arrival windows: ${(c.windows || []).join(", ")}. Reply with the matching reason codes from this list separated by commas, or the single word none: ${RUBRIC.join("; ")}.`, messages: [{ role: "user", content: text }] });
       const out = (r.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").toLowerCase();
       if (debug) raws.push({ contact: v.contact, out, stop: r.stop_reason, blocks: (r.content || []).map((b) => b.type) });
       const reasons = ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"].filter((k) => out.includes(k));
-      v.autoFlag = { at: new Date().toISOString(), reasons };
+      v.autoFlag = { at: new Date().toISOString(), day: today, reasons, test: v.channel === "test" };
       await (await import("./store.mjs")).saveConversation(v);
-      if (reasons.length) { await logEvent(c.slug, "auto_flag", { channel: v.channel, contact: v.contact, reasons }); n++; }
+      if (reasons.length) { await logEvent(c.slug, "auto_flag", { channel: v.channel, contact: v.contact, reasons, test: v.channel === "test" }); if (v.channel !== "test") n++; }
     } catch (err) { console.error("autoflag", err); if (debug) raws.push({ contact: v.contact, error: String(err?.message || err) }); }
   }
   return debug ? { n, raws } : n;
