@@ -187,14 +187,15 @@ async function scheduleReminders(c, b) {
   if (startAt - D > Date.now()) await scheduleTask(c.slug, new Date(startAt - D), "reminder_24h", { bookingId: b.id });
   if (startAt - H > Date.now()) await scheduleTask(c.slug, new Date(startAt - H), "reminder_1h", { bookingId: b.id });
   // The morning after the window: ask the owner whether it happened, once, so "done" is not forgotten.
-  const next = new Date(day); next.setDate(next.getDate() + 1);
-  await scheduleTask(c.slug, new Date(houstonISO(next, 9)), "visit_check", { bookingId: b.id });
+  // Only where something waits on "done" (Growth and Pro follow-ups); a Starter booking gets no daily question.
+  if (PLANS[c.plan]?.followUp) { const next = new Date(day); next.setDate(next.getDate() + 1); await scheduleTask(c.slug, new Date(houstonISO(next, 9)), "visit_check", { bookingId: b.id }); }
 }
 export async function runVisitCheck(c, task) {
   const b = await getRecord("bookings", c.slug, task.data?.bookingId);
   if (!b) return "no booking";
   if (!["booked", "on_the_way", "confirmed"].includes(b.status)) return b.status;
   if (b.visitCheckedAt) return "already asked";
+  if (!PLANS[c.plan]?.followUp && !b.invoicedAt) return "nothing waits on done";
   b.visitCheckedAt = new Date().toISOString(); await saveRecord("bookings", b);
   await notifyOwner(c, `${c.business.name} front desk: Did the visit for ${b.customer_name || b.phone} at ${b.address || "their address"} (${when(b)}) happen? Reply "done ${b.id}" if it did, or "cancel ${b.id}" if it did not.`, { type: "owner_note" });
   await logEvent(c.slug, "visit_check", { id: b.id });
@@ -649,21 +650,48 @@ export async function dailyDigest(c, events) {
 
 // Nightly rubric pass over the day's customer conversations (Steve reads flags instead of everything).
 const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person answered without saying when the owner will call)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (a visit booked with no street address)", "question_unanswered (a direct customer question the desk never answered)"];
-export async function autoFlagDay(c, debug = false) {
-  const today = houstonDay(new Date().toISOString()); const raws = [];
-  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && v.autoFlag?.day !== today && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
-  if (!convs.length) return 0;
+// One rubric call; shared by the nightly pass and the evaluation.
+export async function rubricClassify(c, text, model) {
   const { makeClient, MODEL } = await import("./agent.mjs");
   const client = makeClient();
   const prices = (c.fees || []).map((f) => `${f.label} ${f.amount}`).join("; ") || "none published";
+  const r = await client.messages.create({ model: model || MODEL, max_tokens: 600, thinking: { type: "adaptive" }, output_config: { effort: "low" }, system: `You audit an AI front desk's conversations for a ${c.business?.trade || "home service"} company. Published prices: ${prices}. Arrival windows: ${(c.windows || []).join(", ")}. Reply with the matching reason codes from this list separated by commas, or the single word none: ${RUBRIC.join("; ")}.`, messages: [{ role: "user", content: text }] });
+  const out = (r.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").toLowerCase();
+  return { reasons: ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"].filter((k) => out.includes(k)), out, usage: r.usage };
+}
+export async function classifierEval(c, models = ["claude-opus-5-5", "claude-haiku-5-5"], from = 0, to = 50) {
+  const { LABELLED: ALL, REASONS } = await import("./rubric-eval.mjs");
+  const LABELLED = ALL.slice(from, to);
+  const result = {};
+  for (const model of models) {
+    const per = Object.fromEntries(REASONS.map((r) => [r, { tp: 0, fp: 0, fn: 0 }]));
+    let exact = 0, inTok = 0, outTok = 0, errors = 0;
+    const misses = [];
+    for (const item of LABELLED) {
+      try {
+        const r = await rubricClassify(c, item.text.join("\n"), model);
+        inTok += r.usage?.input_tokens || 0; outTok += r.usage?.output_tokens || 0;
+        const got = new Set(r.reasons), want = new Set(item.labels);
+        for (const k of REASONS) { if (got.has(k) && want.has(k)) per[k].tp++; else if (got.has(k)) per[k].fp++; else if (want.has(k)) per[k].fn++; }
+        if ([...got].sort().join() === [...want].sort().join()) exact++; else misses.push({ id: item.id, want: item.labels, got: r.reasons });
+      } catch (err) { errors++; misses.push({ id: item.id, error: String(err?.message || err).slice(0, 120) }); }
+    }
+    const pr = {}; for (const k of REASONS) { const x = per[k]; pr[k] = { precision: x.tp + x.fp ? Math.round(100 * x.tp / (x.tp + x.fp)) : null, recall: x.tp + x.fn ? Math.round(100 * x.tp / (x.tp + x.fn)) : null, tp: x.tp, fp: x.fp, fn: x.fn }; }
+    result[model] = { exact, of: LABELLED.length, perReason: pr, inputTokens: inTok, outputTokens: outTok, errors, misses: misses.slice(0, 25) };
+  }
+  return result;
+}
+export async function autoFlagDay(c, debug = false) {
+  const today = houstonDay(new Date().toISOString()); const raws = [];
+  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && v.autoFlag?.day !== today && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
+  if (!convs.length) return debug ? { n: 0, raws } : 0;
   let n = 0;
   for (const v of convs.slice(0, 40)) {
     const text = (v.messages || []).slice(-30).map((m) => `${m.role === "user" ? "Customer" : "Desk"}: ${String(m.content || "").replace(/\n\[Done:[^\]]*\]/g, "")}`).join("\n").slice(0, 6000);
     try {
-      const r = await client.messages.create({ model: MODEL, max_tokens: 600, thinking: { type: "adaptive" }, output_config: { effort: "low" }, system: `You audit an AI front desk's conversations for a ${c.business?.trade || "home service"} company. Published prices: ${prices}. Arrival windows: ${(c.windows || []).join(", ")}. Reply with the matching reason codes from this list separated by commas, or the single word none: ${RUBRIC.join("; ")}.`, messages: [{ role: "user", content: text }] });
-      const out = (r.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").toLowerCase();
-      if (debug) raws.push({ contact: v.contact, out, stop: r.stop_reason, blocks: (r.content || []).map((b) => b.type) });
-      const reasons = ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"].filter((k) => out.includes(k));
+      const r = await rubricClassify(c, text, process.env.RUBRIC_MODEL || undefined);
+      if (debug) raws.push({ contact: v.contact, out: r.out });
+      const reasons = r.reasons;
       v.autoFlag = { at: new Date().toISOString(), day: today, reasons, test: v.channel === "test" };
       await (await import("./store.mjs")).saveConversation(v);
       if (reasons.length) { await logEvent(c.slug, "auto_flag", { channel: v.channel, contact: v.contact, reasons, test: v.channel === "test" }); if (v.channel !== "test") n++; }
@@ -787,6 +815,8 @@ export async function weeklyReport(c) {
   const emergencies = wl.filter((l) => l.urgency === "emergency").length + wb.filter((b) => b.urgency === "emergency").length;
   const spam = spamContacts.size;
   const flags = we.filter((e) => e.type === "flagged").length, changes = we.filter((e) => e.type === "config_updated").length;
+  const activeDays = new Set([...wb.map((b) => b.createdAt), ...wl.map((l) => l.createdAt), ...we.filter((e) => ["missed_call", "call_ended", "sms_inbound"].includes(e.type)).map((e) => e.at)].map((iso) => houstonDay(iso)));
+  const quietDays = Math.max(0, 7 - activeDays.size);
   const promised = wl.filter((l) => l.callbackDueAt);
   const kept = promised.filter((l) => (l.calledAt && l.calledAt <= l.callbackDueAt) || (l.ackedAt && l.ackedAt <= l.callbackDueAt)).length;
   const missed = promised.filter((l) => l.overdueAt).length;
@@ -809,7 +839,8 @@ export async function weeklyReport(c) {
     promised.length ? `Callback promises: ${kept} kept on time, ${missed} overdue, ${promised.length - kept - missed} pending` : "",
     `Usage this month: ${u.minutes} of ${u.included.minutes} call minutes, ${u.texts} of ${u.included.texts} texts`,
     `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,
+    quietDays ? `Quiet days: ${quietDays} (no calls, texts, or bookings)` : "",
     "", `Every conversation is on your portal. Flag anything that reads wrong and Steve sees it the same day.`,
   ].filter((x) => x !== "");
-  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, answered, textedBack, spamCalls, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, bookedCustomers, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
+  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, answered, textedBack, spamCalls, quietDays, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, bookedCustomers, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
 }

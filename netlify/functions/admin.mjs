@@ -44,6 +44,8 @@ export default async (req) => {
         row.forwardingUnverifiedDays = c.phone?.twilioNumber && c.phone?.forwarding !== "none" && !c.phone?.forwardingVerified && c.provision?.startedAt ? Math.floor((Date.now() - new Date(c.provision.startedAt).getTime()) / dayMs) : 0;
         row.spanishReviewPending = !!c.business?.spanish && !process.env.SPANISH_REVIEWED_ON;
         row.lifecycle = c.lifecycle || {};
+        row.liveDays = c.liveAt ? Math.floor((Date.now() - new Date(c.liveAt).getTime()) / dayMs) : null;
+        row.newShopDays = Math.floor((Date.now() - new Date(c.createdAt).getTime()) / dayMs);
         for (const e of events) if (Date.now() - new Date(e.at).getTime() < 86400000) stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type, data: e.data });
       }
       out.push(row);
@@ -78,6 +80,7 @@ export default async (req) => {
     return json({ ok: true, messages: conv.messages.length });
   }
   if (b.action === "autoflag") { const { autoFlagDay } = await import("./lib/desk.mjs"); const r = await autoFlagDay(c, !!b.debug); return json({ ok: true, ...(b.debug ? r : { flagged: r }) }); }
+  if (b.action === "classifier_eval") { const { classifierEval } = await import("./lib/desk.mjs"); return json({ ok: true, results: await classifierEval(c, Array.isArray(b.models) && b.models.length ? b.models : undefined, Number(b.from) || 0, Number(b.to) || 50) }); }
   if (b.action === "day7") { const { day7Draft } = await import("./lib/desk.mjs"); return json({ ok: true, draft: await day7Draft(c) }); }
   if (b.action === "log_event") { const ev = await logEvent(c.slug, String(b.type || "note"), b.data || {}); return json({ ok: true, event: ev }); }
   if (b.action === "schedule_task") {
@@ -152,6 +155,7 @@ export default async (req) => {
   if (b.serviceEndsAt !== undefined) c.serviceEndsAt = b.serviceEndsAt ? new Date(b.serviceEndsAt).toISOString() : null;
   if (b.builtAt !== undefined) c.build = { ...(c.build || {}), builtAt: b.builtAt };
   if (b.provisionStartedAt !== undefined) c.provision = { ...(c.provision || {}), startedAt: b.provisionStartedAt };
+  if (b.lifecycle && typeof b.lifecycle === "object") { c.lifecycle = { ...(c.lifecycle || {}) }; for (const k of ["day7Sent", "onboardingCallAt", "invoicedFor"]) if (b.lifecycle[k] !== undefined) { if (b.lifecycle[k] === null || b.lifecycle[k] === "") delete c.lifecycle[k]; else c.lifecycle[k] = String(b.lifecycle[k]); } }
   if (b.nextMonthNote !== undefined) c.nextMonthNote = String(b.nextMonthNote).slice(0, 300);
   if (b.liveAt !== undefined) c.liveAt = b.liveAt ? new Date(b.liveAt).toISOString() : null;
   await saveClient(c); await indexClient(c);

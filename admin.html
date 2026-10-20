@@ -50,7 +50,11 @@
         if (c.forwardingUnverifiedDays >= 2) needs.push(link + ': number assigned ' + c.forwardingUnverifiedDays + ' days ago, forwarding never verified');
         if ((c.phone || {}).tenDlc === 'failed') needs.push(link + ': texting registration failed');
         if (c.healthAlerts7d && c.healthAlerts7d.length) needs.push(link + ': health alert' + (c.healthAlerts7d.length > 1 ? 's' : '') + ' this week (' + c.healthAlerts7d.join(', ') + ')');
-        if (c.status === 'live' && dom <= 7) needs.push(link + ': statement and invoice due this week');
+        var lc = c.lifecycle || {}; var lastMonth = (function () { var d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); })();
+        if (c.status === 'live' && dom <= 7 && lc.invoicedFor !== lastMonth && c.liveDays !== null && c.liveDays >= 1) needs.push(link + ': statement and invoice due for ' + lastMonth + ' <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="invoicedFor" data-val="' + lastMonth + '">Invoiced</button>');
+        if (c.status === 'live' && c.liveDays === 6 && !lc.day7Sent) needs.push(link + ': day-7 email tomorrow (the draft lands in your inbox)');
+        if (c.status === 'live' && c.liveDays !== null && c.liveDays >= 7 && !lc.day7Sent) needs.push(link + ': day-7 "what I changed" email due (the free-week-over email waits on it) <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="day7Sent">Sent</button>');
+        if (!lc.onboardingCallAt && c.newShopDays <= 7 && c.status !== 'cancelled') needs.push(link + ': new shop, onboarding call promised within one business day <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="onboardingCallAt">Called</button>');
         if (c.spanishReviewPending && c.status === 'live') needs.push(link + ': Spanish texts still waiting for the reviewer'); });
       $('needs').innerHTML = needs.length ? needs.map(function (n) { return '<div>' + n + '</div>'; }).join('') : 'Nothing needs you.';
       $('shops').innerHTML = d.clients.length ? '<table><tr><th>Shop</th><th>Status</th><th>Plan</th><th>Live since</th><th>Texting</th><th>Usage</th><th>Errors 24 h</th><th>Last inbound</th><th>Flags</th><th>Waiting</th><th>Callbacks</th><th>Actions</th></tr>' + d.clients.map(function (c) {
@@ -67,6 +71,11 @@
       $('events').textContent = (d.events || []).map(function (e) { return e.at.slice(5, 16).replace('T', ' ') + '  ' + (e.name || e.slug).slice(0, 18).padEnd(18) + ' ' + e.type + (e.data && e.data.id ? ' ref ' + e.data.id : '') + (e.data && e.data.reason ? ' ' + e.data.reason : '') + (e.data && e.data.preview ? '  "' + String(e.data.preview).slice(0, 60) + '"' : ''); }).join('\n') || 'Nothing in the last 24 hours.';
     }).catch(function (e) { $('msg').textContent = 'Could not load: ' + e.message; });
   }
+  $('needs').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-stamp]'); if (!b) return;
+    var body = { slug: b.dataset.slug, lifecycle: {} }; body.lifecycle[b.dataset.stamp] = b.dataset.val || new Date().toISOString();
+    api(body).then(function () { toast('Noted'); load(); }).catch(function (e) { toast(e.message); });
+  });
   $('shops').addEventListener('click', function (ev) {
     var b = ev.target.closest('button[data-a]'); if (!b) return;
     var slug = b.closest('tr').dataset.slug, a = b.dataset.a;

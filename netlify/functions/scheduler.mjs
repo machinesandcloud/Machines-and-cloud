@@ -61,7 +61,7 @@ async function lifecycle(c) {
   const portal = `${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`;
   const mark = async (k, type) => { stamps[k] = new Date().toISOString(); c.lifecycle = stamps; await saveClient(c); await logEvent(c.slug, type, {}); n++; };
   // (a) Day 8: the free week is over.
-  if (c.status === "live" && c.liveAt && !stamps.trialOver && Date.now() - new Date(c.liveAt).getTime() >= 8 * D) {
+  if (c.status === "live" && c.liveAt && !stamps.trialOver && stamps.day7Sent && Date.now() - new Date(c.liveAt).getTime() >= 8 * D) {
     const text = `${c.business.name}: your free week is over. Nothing changes on the line. Your first statement arrives on the 1st, and Steve sends the invoice with it. Reply to this email with anything you want the front desk to do differently.`;
     await sendEmail({ to: c.owner.email, subject: `${c.business.name}: your free week is over`, text });
     await mark("trialOver", "trial_over");
@@ -184,6 +184,13 @@ export async function run({ forceHour, forceDay } = {}) {
       released++;
     } catch (err) { console.error("release", slug, err); }
   }
+  // 6 pm Houston: daily digest to every live shop; Steve gets a copy for the first 7 days.
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
+  const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
+  const minute = forceHour !== undefined ? 0 : Number(parts.find((p) => p.type === "minute")?.value);
+  const day = forceDay && isNaN(Number(forceDay)) ? forceDay : new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short" }).format(new Date());
+  const dom = forceDay && !isNaN(Number(forceDay)) ? Number(forceDay) : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", day: "numeric" }).format(new Date()));
+  let digests = 0, weeklies = 0, monthlies = 0;
   // 9 pm Houston: the day's customer conversations against the rubric; auto_flag events for Steve.
   let autoFlags = 0;
   if (hour === 21 && minute < 10) {
@@ -193,13 +200,6 @@ export async function run({ forceHour, forceDay } = {}) {
       try { autoFlags += await autoFlagDay(c); } catch (err) { console.error("autoflag", slug, err); }
     }
   }
-  // 6 pm Houston: daily digest to every live shop; Steve gets a copy for the first 7 days.
-  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
-  const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
-  const minute = forceHour !== undefined ? 0 : Number(parts.find((p) => p.type === "minute")?.value);
-  const day = forceDay && isNaN(Number(forceDay)) ? forceDay : new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short" }).format(new Date());
-  const dom = forceDay && !isNaN(Number(forceDay)) ? Number(forceDay) : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", day: "numeric" }).format(new Date()));
-  let digests = 0, weeklies = 0, monthlies = 0;
   // The 1st at 9 am Houston: last month's statement to every live shop, and to Steve with the invoice line.
   if (dom === 1 && hour === 9 && minute < 10) {
     for (const slug of await list("clients", "")) {
@@ -237,12 +237,12 @@ export async function run({ forceHour, forceDay } = {}) {
       if (!c || c.status !== "live") continue;
       try {
         const d = await dailyDigest(c);
-        // Quiet days go by email only; the owner can turn the daily text off altogether.
+        // A quiet day sends nothing to the owner (the Monday email counts quiet days); Steve still gets week-one and nightly-check copies.
         const text = !d.empty && c.digest?.text !== false && c.owner.phone;
         if (text) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "digest", body: d.text });
-        await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
+        if (!d.empty) await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
         if ((c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) || d.steveNote) await notifySteve(`Digest: ${c.business.name}`, d.email + (d.steveNote || ""));
-        await logEvent(c.slug, "digest", { text: d.text, empty: !!d.empty, texted: !!text });
+        await logEvent(c.slug, "digest", { text: d.text, empty: !!d.empty, texted: !!text, emailed: !d.empty });
         digests++;
       } catch (err) { console.error("digest", slug, err); }
     }
