@@ -3,8 +3,8 @@
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
 import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put } from "./store.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
-import { createEvent, updateEvent, visitDate, windowHours, houstonISO } from "./calendar.mjs";
-import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS } from "./config.mjs";
+import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
+import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday } from "./config.mjs";
 import { getUsage, usageView } from "./usage.mjs";
 
 const H = 3600 * 1000, D = 24 * H;
@@ -35,7 +35,8 @@ export const TEMPLATES = {
 // "8 to 12" -> "8 a 12", "tomorrow" -> "mañana", "today" -> "hoy", weekday names translated.
 const DAYS_ES = { monday: "lunes", tuesday: "martes", wednesday: "miércoles", thursday: "jueves", friday: "viernes", saturday: "sábado", sunday: "domingo" };
 export const winEs = (w) => String(w || "").replace(/\s+to\s+/gi, " a ").replace(/\b(\d{1,2})\s*(am)\b/gi, "$1 de la mañana").replace(/\b(\d{1,2})\s*(pm)\b/gi, "$1 de la tarde");
-export const dateEs = (d) => { const t = String(d || "").toLowerCase().trim(); if (!t || t === "today") return "hoy"; if (t === "tomorrow") return "mañana"; for (const [en, es] of Object.entries(DAYS_ES)) if (t.startsWith(en.slice(0, 3))) return "el " + es; return t; };
+export const dateEs = (d) => { const t = String(d || "").toLowerCase().trim(); if (!t || t === "today") return "hoy"; if (t === "tomorrow") return "mañana"; if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return friendlyDate(t, "es"); for (const [en, es] of Object.entries(DAYS_ES)) if (t.startsWith(en.slice(0, 3))) return "el " + es; return t; };
+export const when = (b) => `${b.date ? friendlyDate(b.date) + ", " : ""}${b.window}`;
 export const TEMPLATES_ES = {
   reminder_24h: (c, b) => `Recordatorio de ${c.business.name}: su visita es mañana, ${winEs(b.window)}. Responda C para confirmar o R para cambiar la hora.`,
   reminder_1h: (c, b) => `${c.business.name}: su ventana de llegada (${winEs(b.window)}) empieza pronto. Responda aquí si algo cambió.`,
@@ -52,9 +53,9 @@ export const TEMPLATES_ES = {
 };
 export const STRINGS = {
   en: {
-    confirmation: (c, b) => `${c.business.name}: you're booked for ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window}. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out.`,
+    confirmation: (c, b) => `${c.business.name}: you're booked for ${when(b)}. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out.`,
     fallback_window: (c, owner, win) => `${c.business.name}: we have your request and ${owner} will call you ${win}.`,
-    cancelled: (c, b) => `${c.business.name}: your visit (${b.date || ""} ${b.window}) is cancelled as requested. Text us any time to rebook.`,
+    cancelled: (c, b) => `${c.business.name}: your visit (${when(b)}) is cancelled as requested. Text us any time to rebook.`,
   },
   es: {
     confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${winEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP para no recibir más mensajes.`,
@@ -71,11 +72,11 @@ const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action",
 
 // "Existing customer" means a visit that happened: marked done or paid, or dated before today and
 // not cancelled. Leads, spam records, and future bookings do not count.
-export async function customerType(slug, phone) {
+export async function customerType(slug, phone, at) {
   if (!phone) return "new";
-  const today = visitDate("today"); today.setHours(0, 0, 0, 0);
+  const today = at ? new Date(new Date(at).toLocaleString("en-US", { timeZone: "America/Chicago" })) : visitDate("today"); today.setHours(0, 0, 0, 0);
   const recs = await listRecords("bookings", slug, 300);
-  const had = recs.some((b) => b.phone === phone && (["done", "paid"].includes(b.status) || (b.date && b.status !== "cancelled" && visitDate(b.date).getTime() < today.getTime())));
+  const had = recs.some((b) => b.phone === phone && (["done", "paid"].includes(b.status) || (b.date && b.status !== "cancelled" && bookingDay(b).getTime() < today.getTime())));
   return had ? "existing" : "new";
 }
 
@@ -97,7 +98,7 @@ export function ownerSummary(c, kind, r) {
   if (r.address) lines.push(`Where: ${r.address}`);
   if (r.issue) lines.push(`Issue: ${r.issue}`);
   if (r.urgency) lines.push(`Urgency: ${r.urgency.replace("_", " ")}`);
-  if (r.window) lines.push(`Window: ${r.date && r.date !== "today" ? r.date + ", " : ""}${r.window}`);
+  if (r.window) lines.push(`Window: ${when(r)}`);
   else if (r.wanted) lines.push(`Wants: ${r.wanted}`);
   if (r.notes) lines.push(`Access: ${r.notes}`);
   if (r.language === "es") lines.push("Language: Spanish");
@@ -132,7 +133,7 @@ export async function scheduleFollowUp(c, at, type, data) {
 
 async function scheduleReminders(c, b) {
   if (!b.date) return;
-  const day = visitDate(b.date); const { start } = windowHours(b.window);
+  const day = bookingDay(b); const { start } = windowHours(b.window);
   const startAt = new Date(houstonISO(day, start)).getTime();
   if (startAt - D > Date.now()) await scheduleTask(c.slug, new Date(startAt - D), "reminder_24h", { bookingId: b.id });
   if (startAt - H > Date.now()) await scheduleTask(c.slug, new Date(startAt - H), "reminder_1h", { bookingId: b.id });
@@ -142,7 +143,7 @@ export async function bookVisit(c, input, ctx = {}) {
   const phone = e164(input.phone) || esc(input.phone);
   const b = await addRecord("bookings", c.slug, {
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
-    date: esc(input.date), window: esc(input.window), urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
+    date: normalizeDate(esc(input.date)), dateSaid: esc(input.date), window: esc(input.window), urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: await customerType(c.slug, phone),
   });
   try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { console.error("calendar", e); }
@@ -176,12 +177,16 @@ async function recentOpenLead(c, phone, contact) {
 
 // The promise the front desk makes in the owner's name, and when it comes due.
 export function callbackPromise(c, at) {
-  return isBusinessHours(c, at) ? (c.rules?.callbackHours || "within 30 minutes") : (c.rules?.callbackAfterHours || "by 8 am tomorrow");
+  if (isBusinessHours(c, at)) return c.rules?.callbackHours || "within 30 minutes";
+  const o = opensLaterToday(c, at);
+  if (o) return `when we open at ${o.label} this morning`;
+  return c.rules?.callbackAfterHours || "by 8 am tomorrow";
 }
-export function callbackDue(phrase, at) {
+export function callbackDue(phrase, at, c) {
   const now = at ? new Date(at) : new Date();
   const t = String(phrase || "").toLowerCase();
   let m;
+  if (/when we open at/.test(t) && c) { const o = opensLaterToday(c, at); if (o) return o.at; }
   if ((m = t.match(/(\d+)\s*(?:min|minute)/))) return new Date(now.getTime() + Number(m[1]) * 60000);
   if (/(within|in) (the|an|one) hour/.test(t)) return new Date(now.getTime() + 60 * 60000);
   if ((m = t.match(/(\d+)\s*(?:hr|hour)/))) return new Date(now.getTime() + Number(m[1]) * 3600000);
@@ -198,7 +203,7 @@ export function callbackDue(phrase, at) {
 }
 async function trackCallback(c, lead) {
   const promise = callbackPromise(c);
-  lead.callbackPromise = promise; lead.callbackDueAt = callbackDue(promise).toISOString(); lead.overdueAt = null;
+  lead.callbackPromise = promise; lead.callbackDueAt = callbackDue(promise, undefined, c).toISOString(); lead.overdueAt = null;
   await cancelTasks(c.slug, (t) => t.type === "callback_check" && t.data?.leadId === lead.id);
   await scheduleTask(c.slug, new Date(lead.callbackDueAt), "callback_check", { leadId: lead.id });
 }
@@ -257,14 +262,14 @@ export async function flagLead(c, input, ctx = {}) {
 
 // What the voice assistant should know before it says hello: the caller's name from the most recent
 // booking or lead with that number, whether they are an existing customer, and any upcoming visit.
-export async function callerContext(c, phone) {
+export async function callerContext(c, phone, at) {
   const out = { customerName: "", isExisting: "new", upcomingVisit: "" };
   if (!phone) return out;
   const recs = (await listRecords("bookings", c.slug, 300)).concat(await listRecords("leads", c.slug, 300)).filter((r) => r.phone === phone && r.customer_name && r.status !== "spam").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   if (recs.length) out.customerName = recs[recs.length - 1].customer_name.split(" ")[0];
-  out.isExisting = await customerType(c.slug, phone) === "existing" ? "existing customer" : "new";
-  const up = await upcomingBookings(c, phone);
-  if (up.length) { const b = up[0]; out.upcomingVisit = `${b.date && b.date !== "today" ? b.date + ", " : "today, "}${b.window}${b.issue ? ", for the " + b.issue.replace(/[.\s]+$/, "") : ""}`; }
+  out.isExisting = await customerType(c.slug, phone, at) === "existing" ? "existing customer" : "new";
+  const up = await upcomingBookings(c, phone, at);
+  if (up.length) { const b = up[0]; out.upcomingVisit = `${b.date ? friendlyDate(b.date) : "today"}, ${b.window}${b.issue ? ", for the " + b.issue.replace(/[.\s]+$/, "") : ""}`; }
   return out;
 }
 
@@ -335,10 +340,20 @@ export async function runEscalation(c, task) {
 }
 
 // ---- Confirm, reschedule, cancel request (SMS replies) ----
-export async function upcomingBookings(c, phone) {
+// Records written before 2026-10-20 may hold "today" or "tomorrow": read them relative to createdAt.
+export function bookingDay(b) {
+  if (!b.date) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(b.date)) return visitDate(b.date);
+  const base = new Date(new Date(b.createdAt || Date.now()).toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  const t = b.date.toLowerCase();
+  if (t === "today") return base;
+  if (t === "tomorrow") { base.setDate(base.getDate() + 1); return base; }
+  return visitDate(b.date);
+}
+export async function upcomingBookings(c, phone, at) {
   if (!phone) return [];
-  const today = visitDate("today"); today.setHours(0, 0, 0, 0);
-  return (await listRecords("bookings", c.slug, 300)).filter((b) => b.phone === phone && ["booked", "on_the_way", "confirmed"].includes(b.status) && (!b.date || visitDate(b.date).getTime() >= today.getTime()));
+  const today = at ? new Date(new Date(at).toLocaleString("en-US", { timeZone: "America/Chicago" })) : visitDate("today"); today.setHours(0, 0, 0, 0);
+  return (await listRecords("bookings", c.slug, 300)).filter((b) => b.phone === phone && ["booked", "on_the_way", "confirmed"].includes(b.status) && (!b.date || bookingDay(b).getTime() >= today.getTime()));
 }
 
 export async function confirmVisit(c, b) {
@@ -348,19 +363,19 @@ export async function confirmVisit(c, b) {
 }
 
 export async function rescheduleVisit(c, b, date, window) {
-  const old = `${b.date || ""} ${b.window}`.trim();
-  b.date = esc(date) || b.date; b.window = esc(window) || b.window; b.status = "booked"; b.confirmedAt = null;
+  const old = when(b);
+  b.date = normalizeDate(esc(date)) || b.date; b.window = esc(window) || b.window; b.status = "booked"; b.confirmedAt = null;
   await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h"].includes(t.type) && t.data?.bookingId === b.id);
   await scheduleReminders(c, b);
   try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { console.error("calendar update", e); }
   await saveRecord("bookings", b);
-  await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
+  await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
   await logEvent(c.slug, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
   return b;
 }
 
 export async function cancelRequest(c, b) {
-  await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${b.date || ""} ${b.window}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" });
+  await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" });
   await logEvent(c.slug, "cancel_requested", { id: b.id });
   return b;
 }
@@ -392,6 +407,10 @@ export async function ownerCommand(c, text) {
   if (cmd === "done") {
     b.status = "done"; b.doneAt = new Date().toISOString(); await saveRecord("bookings", b);
     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h"].includes(t.type) && t.data?.bookingId === b.id);
+    if (plan.followUp && b.phone && !blocked && !reviewLink(c)) {
+      await logEvent(c.slug, "review_skipped", { id: b.id, reason: "no_review_link" });
+      return `Marked done. No review request went out: add your Google review link on the portal (Setup, Google review link) to start review requests. If they still owe you, text "invoice ${b.id} amount".`;
+    }
     if (plan.followUp && b.phone && !blocked) {
       // Review request, a nudge if they do not reply, and the referral ask only after a positive reply.
       // Payment reminders are not automatic: most residential jobs are paid on the spot (text "invoice REF amount").
@@ -493,7 +512,7 @@ export async function dailyDigest(c, events) {
   if (!bookings.length && !leads.length && !convs.length) return { empty: true, text: `${name}: nothing today. Line OK, last call ${t(h.lastInboundCall)}, errors ${h.errors24h}.`, email: `${name}: nothing today.\nLast call: ${t(h.lastInboundCall)}. Last text: ${t(h.lastInboundText)}. Errors: ${h.errors24h}.` };
   const text = `${name}, today: ${bookings.length} booked${bookings.length ? " (" + bookings.map((b) => b.id).join(", ") + ")" : ""}, ${needs.length} leads need action${needs.length ? " (" + needs.map((l) => l.id).join(", ") + ")" : ""}, ${emergencies} emergencies, ${wants} wants a call, ${spam} spam. Flagged: ${convs.length}${convs.length ? " (" + (convs[0].flag.note || "").slice(0, 60) + ")" : ""}. Line: last call ${t(h.lastInboundCall)}, last text ${t(h.lastInboundText)}, errors ${h.errors24h}.`;
   const email = [`${name}: today's front desk`, "",
-    ...bookings.map((b) => `Booked ${b.id}: ${b.customer_name} ${b.phone}, ${b.date || ""} ${b.window}, ${b.issue}${b.unsure ? " (unsure: " + b.unsure + ")" : ""}`),
+    ...bookings.map((b) => `Booked ${b.id}: ${b.customer_name} ${b.phone}, ${when(b)}, ${b.issue}${b.unsure ? " (unsure: " + b.unsure + ")" : ""}`),
     ...leads.filter((l) => l.outcome !== "spam").map((l) => `${OUTCOME[l.outcome] || l.outcome} ${l.id}: ${l.customer_name || "no name"} ${l.phone}, ${l.issue}${l.urgency === "emergency" ? " EMERGENCY" : ""}`),
     spam ? `Spam: ${spam}` : "",
     ...convs.map((v) => `Flagged (${v.channel} ${v.contact}): ${v.flag.note || ""}`),

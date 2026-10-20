@@ -39,7 +39,7 @@ export default async (req) => {
       if (!cellIsForwardedLine(c) && c.owner?.phone) return json({ destination: { type: "number", number: c.owner.phone, message: `Connecting you to ${owner}.` } });
       return json({ assistantId, assistantOverrides: { firstMessage: `This is ${c.business?.name || "the front desk"}. Please leave a message after the tone and ${owner} will call you back.`, variableValues: { customerName: "", isExisting: "", upcomingVisit: "", vip: "yes" } } });
     }
-    const ctx = await callerContext(c, caller);
+    const ctx = await callerContext(c, caller, body?.at || undefined);
     const first = ctx.upcomingVisit
       ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, your visit is ${ctx.upcomingVisit}. How can I help?`
       : ctx.customerName ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, how can I help today?` : standardGreeting(c);

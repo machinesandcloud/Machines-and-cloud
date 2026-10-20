@@ -53,6 +53,7 @@ const PROFILE_TOOL = {
       business_name: { type: "string" }, trade: { type: "string", description: "e.g. HVAC, plumbing, electrical, roofing, cleaning" },
       city: { type: "string" }, service_area: { type: "array", items: { type: "string" } },
       hours: { type: "string" }, after_hours: { type: "string" },
+      google_review_link: { type: "string", description: "A Google review URL found on the site (g.page/..., maps.app.goo.gl/..., search.google.com/local/writereview?placeid=...), else empty" },
       services: { type: "array", items: { type: "string" } },
       published_prices: { type: "array", items: { type: "object", properties: { label: { type: "string" }, amount: { type: "string" }, note: { type: "string" } }, required: ["label", "amount", "note"], additionalProperties: false } },
       licenses: { type: "string" }, spanish: { type: "boolean" },
@@ -60,7 +61,7 @@ const PROFILE_TOOL = {
       missing: { type: "array", items: { type: "string" }, description: "What the website is missing that a front desk needs: hours, service area, fees, FAQ, phone, etc." },
       summary: { type: "string", description: "Three or four sentences a new receptionist would want to know about this company, from the site." },
     },
-    required: ["business_name", "trade", "city", "service_area", "hours", "after_hours", "services", "published_prices", "licenses", "spanish", "faq", "missing", "summary"],
+    required: ["business_name", "trade", "city", "service_area", "hours", "after_hours", "google_review_link", "services", "published_prices", "licenses", "spanish", "faq", "missing", "summary"],
     additionalProperties: false,
   },
 };
@@ -98,6 +99,7 @@ export default async (req) => {
       if (!b.serviceArea?.length) b.serviceArea = p.service_area || [];
       const hadHours = !!b.hours;
       b.hours = b.hours || p.hours; b.afterHours = b.afterHours || p.after_hours; b.licenses = b.licenses || p.licenses;
+      if (!b.reviewLink && !b.googlePlaceId && /^https?:\/\/(g\.page|maps\.app\.goo\.gl|search\.google\.com\/local\/writereview|g\.co)/i.test(p.google_review_link || "")) b.reviewLink = p.google_review_link.trim().slice(0, 300);
       if (!hadHours && b.hours && !c.rules.hours) { const { parseHours } = await import("./lib/config.mjs"); c.rules.hours = parseHours(b.hours) || null; }
       if (!c.services?.length) c.services = p.services || [];
       if (!c.fees?.length) c.fees = (p.published_prices || []).filter((f) => f.amount);

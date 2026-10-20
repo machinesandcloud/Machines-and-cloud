@@ -3,7 +3,7 @@
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
 import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks } from "./lib/store.mjs";
-import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours } from "./lib/config.mjs";
+import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
 import { googleEnabled } from "./lib/calendar.mjs";
@@ -74,6 +74,7 @@ export default async (req) => {
       ackMinutes: ACK_MINUTES.includes(Number(b.rules.ackMinutes)) ? Number(b.rules.ackMinutes) : (c.rules.ackMinutes || 10),
       callbackHours: s(b.rules.callbackHours, 80) || c.rules.callbackHours || "within 30 minutes",
       callbackAfterHours: s(b.rules.callbackAfterHours, 80) || c.rules.callbackAfterHours || "by 8 am tomorrow",
+      emergency247: b.rules.emergency247 !== undefined ? !!b.rules.emergency247 : (b.business?.hours !== undefined ? emergency247(s(b.business.hours, 300)) : !!c.rules.emergency247),
       hours: b.rules.hours !== undefined ? (normalizeHours(b.rules.hours) || (typeof b.rules.hours === "string" ? parseHours(b.rules.hours) : null)) : (c.rules.hours || null),
       bypass: b.rules.bypass !== undefined ? [...new Set(arr(b.rules.bypass, 20).map((n) => e164(n)).filter(Boolean))].slice(0, 20) : (c.rules.bypass || []),
     };

@@ -47,7 +47,7 @@ export function parseHours(str) {
     const t = part.trim().toLowerCase().replace(/\./g, "");
     if (!t) continue;
     const dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun|m|t|w|r|f)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun|m|t|w|r|f)[a-z]*)?\s*:?\s*(.*)$/);
-    if (!dm) { if (/24\s*\/\s*7|24 hours|around the clock/.test(t)) { for (const d of DAYS) out[d] = { open: "00:00", close: "24:00" }; any = true; } continue; }
+    if (!dm) { if (/24\s*\/\s*7|24 hours|around the clock/.test(t) && !/emergenc|on call|after hours/.test(t) && !any) { for (const d of DAYS) out[d] = { open: "00:00", close: "24:00" }; any = true; } continue; }
     const a = DAY_IDX[dm[1]], b = dm[2] ? DAY_IDX[dm[2]] : a; const rest = dm[3];
     const days = []; for (let i = a; ; i = (i + 1) % 7) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; if (days.length > 7) break; }
     if (/closed|by appointment/.test(rest)) { for (const d of days) out[d] = null; any = true; continue; }
@@ -60,6 +60,19 @@ export function parseHours(str) {
   if (!any) return null;
   for (const d of DAYS) if (out[d] === undefined) out[d] = null;
   return out;
+}
+// "24/7 emergency service" next to regular hours: emergencies answered after hours, Tier 1 same day at any hour.
+export const emergency247 = (str) => /24\s*\/\s*7|24 hours|around the clock|on call/i.test(String(str || "")) && /emergenc|on call|after hours/i.test(String(str || ""));
+// If the shop is closed now but opens later the same Houston day, when: { at: Date, label: "8 am" }.
+export function opensLaterToday(c, at) {
+  const hours = normalizeHours(c.rules?.hours) || DEFAULT_HOURS;
+  const { day, minutes } = houstonNow(at);
+  const h = hours[day]; if (!h) return null;
+  const open = Number(h.open.slice(0, 2)) * 60 + Number(h.open.slice(3));
+  if (minutes >= open) return null;
+  const d = at ? new Date(at) : new Date();
+  const hh = Number(h.open.slice(0, 2)), mm = h.open.slice(3);
+  return { at: new Date(d.getTime() + (open - minutes) * 60000), label: `${hh % 12 || 12}${mm === "00" ? "" : ":" + mm}${hh < 12 ? "" : " pm"}` };
 }
 export function normalizeHours(v) {
   if (!v || typeof v !== "object") return null;
@@ -130,7 +143,7 @@ export function newClient({ slug, ownerKey, owner, business }) {
     owner: { name: "", email: "", phone: "", backupPhone: "", ...owner },
     business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", legal: {}, ...business },
     services: [], fees: [], windows: DEFAULT_WINDOWS.slice(),
-    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), hours: parseHours(business?.hours) || null, ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
+    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), hours: parseHours(business?.hours) || null, emergency247: emergency247(business?.hours), ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
     digest: { text: true },
     faq: [], leadSources: [], software: "google",
     phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
@@ -205,7 +218,9 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
     : "";
   const open = isBusinessHours(c, extra.at);
   const now = houstonNow(extra.at);
-  const callback = open ? `${owner} will call them ${r.callbackHours || "within 30 minutes"}` : `${owner} will call them ${r.callbackAfterHours || "by 8 am tomorrow"} (the shop is closed right now)`;
+  const later = open ? null : opensLaterToday(c, extra.at);
+  const callback = open ? `${owner} will call them ${r.callbackHours || "within 30 minutes"}` : later ? `${owner} will call them when the shop opens at ${later.label} this morning` : `${owner} will call them ${r.callbackAfterHours || "by 8 am tomorrow"} (the shop is closed right now)`;
+  const e247 = r.emergency247 || emergency247(b.hours);
   const structured = hoursText(c);
   return `You are the front desk for ${b.name || "this company"}, a ${b.trade || "home service"} company in ${b.city || "Houston"}, run by ${owner}. You are an AI and you say so if asked; you never claim to be a person. Your job is to answer the customer, find out what they need, and book or request the visit on the owner's rules, then make sure ${owner} gets the details.
 
@@ -214,7 +229,7 @@ ${channelNote}
 About the company:
 - Services: ${list(c.services)}
 - Hours: ${structured || b.hours || "not specified; say you will confirm"}${b.afterHours ? `. After hours: ${b.afterHours}` : ""}
-- Right now it is ${now.label} in Houston and the shop is ${open ? "open" : "closed"}.${open ? "" : " Use the after-hours callback promise and the after-hours rules until it opens."}
+- Right now it is ${now.label} in Houston and the shop is ${open ? "open" : "closed"}.${open ? "" : " Use the after-hours callback promise and the after-hours rules until it opens."}${e247 && !open ? " This shop answers emergencies around the clock: a Tier 1 case right now is handled as Tier 0 (notify_owner with urgency \"emergency\"), with the after-hours fee stated." : ""}
 - Service area: ${list(b.serviceArea)}${b.notServed?.length ? `. Not served: ${list(b.notServed)}` : ""}
 - Published prices (the only prices you may state): ${fees}
 - Arrival windows you may offer: ${list(c.windows)}. Never promise an exact time; say ${owner} or the tech will text when on the way.

@@ -65,7 +65,8 @@ Status: todo. Size: reserve 2.5 days. Implements: sprint 2 S2-01 unchanged; L1, 
 Change and acceptance: as written in `SPRINT2.md` S2-01, plus the S2-03 ring-timer SIM check, the S2-07 returning-caller greeting, S2-12's real number release, and `VAPI_WEBHOOK_SECRET` set in Netlify (found unset in the sprint 2 pass). Spent first whenever Steve's keys arrive.
 
 ### S3-05 Three-tier emergency table per trade, prefilled at onboarding
-Status: delivered 2026-10-20, draft 6ad6bd7b4b058e24498fab7d. Engineer check (HVAC and plumbing test shops): `rules.emergencies` is `{ tier0, tier1, tier2, script }` prefilled by `tradeKey(business.trade)` with the onboarding text as `script`; "AC is out, it's 95 today and my mother is 84" opened an `emergency` alert and the reply quoted the $150 after-hours line; "78 tonight, just me" booked tomorrow's window with urgency `this_week` and no alert; "I smell gas" got the leave-the-house script before any question, an emergency alert, no booking; a PUT with a new `tier1` list showed in `admin prompt channel=test` and the 90°F line was gone; the plumbing default lists "Leaking water heater". Old string values are normalized on read (`normalizeEmergencies`), so existing shops keep their script. Onboarding step 4 prefills the two lists from the trade field and the portal Rules card edits all four fields. Size: M. Implements: Round 3 item 4 (SHOULD, before customer two); Epic 3 SHOULD.
+Status: verified 2026-10-20 6ad6c0f4fab06c144d1d2779: HVAC defaults prefilled (five Tier 0 items, four Tier 1, the onboarding text as `script`); "AC is out, 95 today, my mother is 84" opened an emergency alert and the reply quoted the $150 after-hours line; "78 tonight, just me" opened no alert and offered tomorrow's windows with no emergency urgency; "I smell gas in my kitchen" gave the leave-and-call-911 script before any question, opened an alert, and booked nothing; a PUT with a new `tier1` list showed in the prompt and the 90°F line was gone; the plumbing default lists "Leaking water heater" and cleaning has no Tier 1 (by node).
+Size and scope: Size: M. Implements: Round 3 item 4 (SHOULD, before customer two); Epic 3 SHOULD.
 
 Files: `netlify/functions/lib/config.mjs` (`EMERGENCY_TIERS` by trade, `rules.emergencies` becomes `{ tier0: [], tier1: [], tier2: "", script: "" }` with the old string kept as `script`), `netlify/functions/onboard.mjs`, `netlify/functions/onboard-build-background.mjs` (prefill by `business.trade`), `netlify/functions/client.mjs` (PUT), `netlify/functions/lib/config.mjs` `buildSystemPrompt`, `onboard.html` step 4, `desk.html` Rules card.
 
@@ -79,7 +80,8 @@ Acceptance (now, draft; HVAC test shop):
 - [ ] `PUT` with an edited `tier1` list is reflected in `admin prompt channel=test` on the next call; the plumbing default shows "leaking water heater" under Tier 1.
 
 ### S3-06 Monday "what it did for you" email with no-book reasons
-Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: `NOTIFY_OWNER` carries `nobook_reason` (seven values, exported as `NOBOOK_REASONS`); a test shop with 4 bookings, 6 unbooked leads, and 2 spam texts returned `POST {action:"weekly"}` text with "Missed-call-to-booking rate: 40 percent (4 booked of 10)", "plus 2 spam, not counted", "Did not book: 6. Why: 2 a question only, 1 out of the area, 1 the fee was too much, 1 wanted a price first, 1 wanted someone sooner"; `run_scheduler force_hour=8 force_day=Mon` sent it by email, logged `weekly` with `stats`, and texted nothing; `weeklyDigest` is gone (`weeklyReport` replaces it); `admin weekly` with `send` exists. Steve gets a copy for 28 days after `liveAt`. Size: M. Implements: Round 3 item 5 (SHOULD, before customer two); Epic 5 SHOULD weekly email; makes the Pro card's weekly report true for every plan.
+Status: verified 2026-10-20 6ad6c0f4fab06c144d1d2779: `NOBOOK_REASONS` has the seven values; a "more than I wanted to pay" lead stored `fee_objection`; the weekly text read "Missed-call-to-booking rate: 40 percent (4 booked of 10)" with spam not counted, "Did not book" with a reason each, and "Callback promises: 2 kept on time, 1 overdue, 0 pending"; `run_scheduler force_hour=8 force_day=Mon` logged `weekly` with `stats` and texted nothing; `weeklyDigest` is gone.
+Size and scope: Size: M. Implements: Round 3 item 5 (SHOULD, before customer two); Epic 5 SHOULD weekly email; makes the Pro card's weekly report true for every plan.
 
 Files: `netlify/functions/lib/config.mjs` (`NOTIFY_OWNER` gains `nobook_reason` enum: `wanted_price`, `wanted_sooner`, `out_of_area`, `fee_objection`, `question_only`, `other`, `none`), `netlify/functions/lib/desk.mjs` (`weeklyReport(c)` replaces the unused `weeklyDigest`), `netlify/functions/scheduler.mjs` (Monday 8:00 to 8:09 Houston, every `live` shop, all plans; Steve gets a copy), `netlify/functions/client.mjs` (POST `weekly` returns it), `netlify/functions/admin.mjs` (`weekly` with `send: true`).
 
@@ -92,7 +94,8 @@ Acceptance (now, draft):
 - [ ] `grep -c "weeklyDigest" netlify/functions/*.mjs netlify/functions/lib/*.mjs` returns 0.
 
 ### S3-07 Spanish all the way through
-Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: `TEMPLATES_ES` has the same nine keys as `TEMPLATES`; `STRINGS.es` covers confirmation, fallback window, and cancelled; `consentLine(c, "es")` is in the prompt on Spanish-enabled shops; a visit booked in Spanish on the test line stored `language: "es"` and its confirmation preview read "su visita queda agendada ... Responda STOP"; the reminder templates were checked with node (`template("reminder_24h", {language:"es"})` returns "Recordatorio de ..."); the public GET greeting on a Spanish shop reads "Hi, this is the X front desk ... / Hola, le atiende la recepción de X."; the voice prompt now states the first message, "Thanks for calling X. Hablamos español. This is the front desk assistant. How can I help you today?". Translation review: pending a Spanish speaker Steve names (DECISIONS.md). Size: M. Implements: Round 3 item 6 (SHOULD, before customer two); Epic 6 SHOULD.
+Status: verified with follow-up 2026-10-20 6ad6c0f4fab06c144d1d2779: the public greeting on a Spanish shop is bilingual and the English-only shop's is not; the voice first message opens "Thanks for calling X. Hablamos español."; a visit booked in Spanish stored `language: "es"`, its confirmation read "su visita queda agendada ... Responda STOP", and the nudged `reminder_1h` read "su ventana de llegada (8 to 12) empieza pronto"; `TEMPLATES_ES` has the same nine keys as `TEMPLATES`. Follow-up S3-11: the Spanish templates keep the English date word and window ("para tomorrow, 8 to 12"). Translation review by a Spanish speaker Steve names stays pending (assumption 4).
+Size and scope: Size: M. Implements: Round 3 item 6 (SHOULD, before customer two); Epic 6 SHOULD.
 
 Files: `netlify/functions/lib/desk.mjs` (`TEMPLATES_ES`, chosen by `booking.language` or `lead.language`), `netlify/functions/lib/config.mjs` (`publicView` greeting bilingual when `business.spanish`), `embed.js`, `netlify/functions/lib/vapi.mjs` (`standardGreeting` first sentence offers Spanish), `netlify/functions/voice.mjs` (text-back already bilingual), `product/DECISIONS.md` (translation review status).
 
@@ -105,7 +108,8 @@ Acceptance (now, draft):
 - [ ] `TEMPLATES_ES` has every key `TEMPLATES` has (`node -e` compares the key sets).
 
 ### S3-08 Callback promises are tracked
-Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: a `wants_call` lead carries `callbackPromise` and `callbackDueAt` (30 minutes out during hours; "by 8 am tomorrow" resolved to the next 8:00 am Houston after hours, which is what the draft run at 8 pm showed) and a `callback_check` task; nudged and run without an owner reply it returned `overdue`, texted the owner "Overdue callback: ... Reply \"called REF\"", set `overdueAt`, and the portal row shows the "overdue callback" tag; `called REF` replied "Logged: you reached ...", set `calledAt`, status `called`, and removed the check task; `ok REF` sets `ackedAt` and the check returns `acked`. The weekly email counts kept, overdue, and pending promises. Also: acknowledging an alert now cancels its `escalate` task (the S2-14 hygiene note). Size: S. Implements: Round 3 item 7 (SHOULD, before customer two).
+Status: verified 2026-10-20 6ad6c0f4fab06c144d1d2779: a `wants_call` lead opened at 8:20 pm carried `callbackPromise` "by 8 am tomorrow" and `callbackDueAt` at 8:00 am Houston with a `callback_check` task; nudged without an owner reply it returned `overdue`, texted "Overdue callback. Tom Reyes ... was promised a call by 8 am tomorrow", and set `overdueAt`; `called REF` replied "Logged: you reached Sam", set `calledAt`, status `called`, and removed the task; `ok REF` before the check made it return `acked` with no overdue text; the portal carries the "overdue callback" tag. The 30-minute daytime case was not exercised (the run was after hours); the engineer's draft run and `callbackDue` cover it.
+Size and scope: Size: S. Implements: Round 3 item 7 (SHOULD, before customer two).
 
 Files: `netlify/functions/lib/desk.mjs` (`flagLead` sets `callbackDueAt` on `wants_call` and `handoff` leads from `rules.callbackHours` or `callbackAfterHours` parsed as minutes or a clock time; `ownerCommand` gains `called REF`), `netlify/functions/scheduler.mjs` (task `callback_check` at `callbackDueAt`), `desk.html` (leads table "overdue" tag), `netlify/functions/lib/config.mjs` (`rules.callbackHours` stays free text but the parser understands "within N minutes", "within the hour", "by H am/pm").
 
@@ -118,7 +122,8 @@ Acceptance (now, draft):
 - [ ] After hours, the promise uses `callbackAfterHours` and `callbackDueAt` falls at the next morning time.
 
 ### S3-09 Customers export in Jobber and Housecall Pro headers
-Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: `export=customers` returned the eleven Jobber headers in order, one row per phone (12 rows for 12 numbers across bookings and leads, spam excluded), "Lee Park" split into First name and Last name, "12 Oak St, Katy" kept Street and City with State TX and an empty Zip, "1402 Mason Rd, Katy, TX 77450" split into Street, City, State, Zip Code, Note carries the last issue and the refs, Lead Source "Other", Tags "front desk"; Python's csv module parsed it. The portal Your data card has the fourth link. The Jobber trial import is Steve's keyed check. Size: S. Implements: Round 3 item 8 (SHOULD); cut 1's CSV bridge.
+Status: verified 2026-10-20 6ad6c0f4fab06c144d1d2779: `export=customers` returned the eleven Jobber headers in order and one row per unique phone (9 of 9, spam excluded); "Tom Reyes" at "1402 Mason Rd, Katy, TX 77450" split into First name, Last name, Street, City, State, Zip Code; "9 Oak St, Katy" kept Street and City with State TX and an empty Zip; Note carries the last issue and the refs; Lead Source "Other", Tags "front desk"; Python's csv module parsed it. The Jobber trial import is Steve's keyed check.
+Size and scope: Size: S. Implements: Round 3 item 8 (SHOULD); cut 1's CSV bridge.
 
 Files: `netlify/functions/client.mjs` (`export=customers`), `desk.html` (fourth link).
 
@@ -130,7 +135,8 @@ Acceptance (now, draft):
 - [ ] Python's `csv` module parses the file; a Jobber trial import is checked by Steve once (keyed by his account, not a draft line).
 
 ### S3-10 Structured business hours
-Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: onboarding "Mon to Fri 8 to 5" produced `rules.hours` with seven keys, Saturday and Sunday null; `admin prompt channel=test at=2026-10-23T23:00:00Z` (Friday 6 pm Houston) said "the shop is closed" and used the after-hours callback sentence, `at=2026-10-23T21:00:00Z` (4 pm) said open and "within 30 minutes"; PUT `rules.hours` is accepted (object, or a string parsed by `parseHours`); `hour >= 7 && hour < 19` is gone (`isBusinessHours` with a 7 am to 7 pm fallback, which the portal names). Onboarding step 2 fills seven time rows from the hours sentence as it is typed and sends them as `hoursTable`; the build parses crawled hours when the owner gave none; the portal edits the rows under Hours. The prompt also states the current Houston time and whether the shop is open. The index FAQ sentence about Google's business hours is unchanged (it is about Google's clock, not the shop's). Size: M. Implements: Round 3 item 9 (SHOULD).
+Status: verified 2026-10-20 6ad6c0f4fab06c144d1d2779: onboarding "Mon to Fri 8 to 5" produced `rules.hours` with seven keys (Mon 08:00 to 17:00, Saturday and Sunday null); the prompt at Friday 6 pm Houston said closed and used "by 8 am tomorrow", at 4 pm said open and "within 30 minutes"; a PUT of "Mon to Sat 7 to 7" as a string parsed to Saturday 07:00 to 19:00; the 7 am to 7 pm fallback holds for a shop with no hours (by node); `hour >= 7 && hour < 19` is gone; onboarding sends `hoursTable`.
+Size and scope: Size: M. Implements: Round 3 item 9 (SHOULD).
 
 Files: `netlify/functions/lib/config.mjs` (`rules.hours` as `{ mon: { open, close } ... sun }`, `isBusinessHours(c, date)`), `netlify/functions/onboard-build-background.mjs` (parse the crawled hours string into fields, keep the string as `business.hours` for the prompt), `onboard.html` step 2 (seven rows, prefilled), `desk.html`, `netlify/functions/lib/desk.mjs` (callback window choice, `cellIsForwardedLine` unchanged), `netlify/functions/lib/config.mjs` `buildSystemPrompt` (after-hours behavior), S3-06 after-hours count, the LSA copy's "business hours" sentence in `index.html` FAQ.
 
@@ -141,6 +147,15 @@ Acceptance (now, draft):
 - [ ] Test line "can I talk to a person" with the shop's clock set by `admin` `{"action":"prompt","channel":"test","at":"2026-10-23T23:00:00Z"}` (Friday 6 pm Houston) returns the after-hours sentence; at `2026-10-23T21:00:00Z` (4 pm) the business-hours one.
 - [ ] `grep -n "hour >= 7 && hour < 19" netlify/functions/lib/desk.mjs` returns nothing.
 - [ ] The onboarding page prefills the seven rows from the crawl and the portal edits them.
+
+### S3-11 Spanish templates localize the date word and the window
+Status: delivered 2026-10-20 (commit after bef6777, `winEs` and `dateEs` in `lib/desk.mjs`; `str("confirmation", {language:"es"})` now returns "su visita queda agendada para mañana, 8 a 12", reminders "8 a 12", calendar dates in Spanish long form). Engineer note: with round 4 item 1 the stored date is YYYY-MM-DD, so the Spanish confirmation uses `friendlyDate(iso, "es")` (hoy, mañana, or "sábado, 24 de octubre"). Size: S. Implements: Round 3 item 6 (completeness); found in the S3-07 verification.
+
+Files: `netlify/functions/lib/desk.mjs` (`TEMPLATES_ES`, `STRINGS.es`), `netlify/functions/lib/calendar.mjs` or a small helper for Spanish day names.
+
+Change: in the Spanish templates and strings, render `date` as "hoy", "mañana", or the Spanish weekday and day ("viernes 23 de octubre"), and the window as "de 8 a 12" (parse the stored "8 to 12" form; leave unknown forms as they are). English templates are unchanged.
+
+Acceptance (now, draft): a Spanish booking for tomorrow 8 to 12 produces a confirmation preview containing "para mañana, de 8 a 12" and no "tomorrow" or " to "; the 24 h and 1 h reminders follow the same form; a booking with a YYYY-MM-DD date shows the Spanish weekday and day; `node -e` on `template("reminder_24h", {language:"es"})` with `{ date: "2026-10-23", window: "12 to 5" }` prints "viernes 23 de octubre" and "de 12 a 5".
 
 ## 3. Assumptions (Steve can overturn any; each is one line to change)
 
@@ -187,6 +202,17 @@ Go-live gate for customers two and three: S3-04 complete, S3-01 to S3-03 verifie
 Results: S3-01, S3-02, S3-03 verified. S3-04 to S3-10 are todo.
 
 Observed and worth knowing: every scheduled follow-up now lands inside Texas hours to the minute; `done` at night no longer sends anything before 9 am; the negative-review path reached the owner within the same scheduler run and left no promotional text in the queue.
+
+### Keyed pass
+Pending S3-04 (Steve's keys). Order in section 5.
+
+### Pre-key pass for S3-05 to S3-10, 2026-10-20, draft `6ad6c0f4fab06c144d1d2779` (built by the PM from `main` at `bef6777`)
+
+`scratchpad/verify6.py`, 31 checks, 31 passed, plus the local node and grep lines (template key parity, `NOBOOK_REASONS`, trade defaults, the Spanish greeting, the hours fallback, the removed `weeklyDigest` and hard-coded hours, the portal and onboarding markers, no em dashes). Test shop `pm-test-hvac-b106` (number `+17135550116`) deleted; no opt-outs were created; `GET /api/admin` lists no shop at all.
+
+Results: S3-05, S3-06, S3-08, S3-09, S3-10 verified; S3-07 verified with follow-up S3-11. The S2-14 hygiene note is closed: acknowledging an alert now cancels its pending `escalate` task (`ackAlertsFor`).
+
+Observed and worth knowing: the emergency table changed the model's behavior exactly as intended on the three PO cases, including quoting the after-hours fee only on the Tier 1 case; the after-hours callback promise resolved to 8:00 am and the overdue check fired on it; the weekly email's callback line counted the kept, overdue, and pending promises from the same run.
 
 ### Keyed pass
 Pending S3-04 (Steve's keys). Order in section 5.

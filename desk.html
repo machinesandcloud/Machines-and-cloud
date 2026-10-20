@@ -200,6 +200,7 @@
         [ph.twilioNumber ? 'ok' : 'wait', 'Front desk number assigned'],
         [ph.forwarding === 'none' ? 'ok' : (ph.forwardingVerified ? 'ok' : 'wait'), ph.forwarding === 'none' ? 'Phone: texts and chat only for now' : 'Call forwarding turned on from your cell (' + (ph.forwarding === 'all' ? 'all calls' : 'missed calls') + ')'],
         [dlc === 'approved' ? 'ok' : 'wait', 'Texting registration approved by carriers'],
+        [(c.business.reviewLink || c.business.googlePlaceId) ? 'ok' : 'wait', 'Google review link added (review requests start only once it is there; the field is under You)'],
         [c.calendar.connected ? 'ok' : 'wait', 'Calendar connected (optional; bookings are texted to you either way)'],
         [c.status === 'live' ? 'ok' : 'wait', 'Live on your website'],
       ].map(function (x) { return '<div class="check"><span class="dot ' + x[0] + '"></span><span>' + x[1] + '</span></div>'; }).join('');

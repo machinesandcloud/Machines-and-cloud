@@ -1,7 +1,7 @@
 // Onboarding: POST creates the client from the questionnaire and starts the build job.
 // GET ?c=slug&k=key returns build status for the onboarding page to poll.
 import { getClient, saveClient, indexClient, clientByEmail, id, secret, logEvent } from "./lib/store.mjs";
-import { newClient, ownerView, loopCheck, normalizeEmergencies, normalizeHours, parseHours } from "./lib/config.mjs";
+import { newClient, ownerView, loopCheck, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { notifySteve, sendEmail, e164 } from "./lib/send.mjs";
 import { json } from "./lib/agent.mjs";
 
@@ -49,6 +49,7 @@ export default async (req) => {
   c.windows = lines(b.windows, 8).length ? lines(b.windows, 8) : c.windows;
   c.rules = { ...c.rules, never: lines(b.never, 20).length ? lines(b.never, 20) : c.rules.never, handoff: lines(b.handoff, 20).length ? lines(b.handoff, 20) : c.rules.handoff,
     emergencies: normalizeEmergencies({ ...(b.tier0 !== undefined ? { tier0: b.tier0 } : {}), ...(b.tier1 !== undefined ? { tier1: b.tier1 } : {}), script: s(b.emergencies, 500) }, bz.trade),
+    emergency247: emergency247(bz.hours),
     hours: normalizeHours(typeof b.hoursTable === "string" ? (() => { try { return JSON.parse(b.hoursTable); } catch { return null; } })() : b.hoursTable) || parseHours(bz.hours) || null };
   c.faq = lines(b.faq, 40).map((line) => { const i = line.indexOf("?"); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : { q: line, a: "" }; }).filter((x) => x.a);
   c.leadSources = arr(b.leadSources, 10);

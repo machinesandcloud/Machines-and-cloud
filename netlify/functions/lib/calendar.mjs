@@ -57,6 +57,21 @@ export function visitDate(dateStr, tz = "America/Chicago") {
   return today;
 }
 
+// A stored visit date: always YYYY-MM-DD in Houston time, never "today" or "tomorrow".
+export function isoDate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+export function normalizeDate(dateStr) { if (!dateStr) return ""; return isoDate(visitDate(dateStr)); }
+// "2026-10-21" -> "Tue Oct 21" (or "mañana"-style words in Spanish are handled by desk.mjs dateEs).
+export function friendlyDate(iso, lang = "en") {
+  const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return String(iso || "");
+  const d = new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+  const today = visitDate("today"); today.setHours(0, 0, 0, 0); d.setHours(0, 0, 0, 0);
+  const diff = Math.round((d - today) / 86400000);
+  if (lang === "es") { if (diff === 0) return "hoy"; if (diff === 1) return "mañana"; return new Intl.DateTimeFormat("es-US", { weekday: "long", day: "numeric", month: "long" }).format(d); }
+  if (diff === 0) return "today"; if (diff === 1) return "tomorrow";
+  return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" }).format(d);
+}
+
 // Builds an ISO time in Houston for a date and hour.
 export function houstonISO(date, hour) {
   const y = date.getFullYear(), mo = String(date.getMonth() + 1).padStart(2, "0"), da = String(date.getDate()).padStart(2, "0");
