@@ -649,7 +649,7 @@ export async function dailyDigest(c, events) {
 }
 
 // Nightly rubric pass over the day's customer conversations (Steve reads flags instead of everything).
-const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person answered without saying when the owner will call)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (a visit booked with no street address)", "question_unanswered (a direct customer question the desk never answered)"];
+const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person answered without saying when the owner will call)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (only when the desk confirmed a booked visit and no street address was given; not for threads with no booking)", "question_unanswered (a direct customer question the desk never answered at all; not when the desk answered it in another way or handed it to the owner)"];
 // One rubric call; shared by the nightly pass and the evaluation.
 export async function rubricClassify(c, text, model) {
   const { makeClient, MODEL } = await import("./agent.mjs");

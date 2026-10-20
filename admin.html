@@ -68,7 +68,7 @@
           + (c.status === 'paused' ? '<button class="btn" data-a="resume">Resume</button>' : (c.status === 'live' || c.status === 'testing') ? '<button class="btn" data-a="pause">Pause</button>' : '')
           + '<button class="btn" data-a="digest">Digest</button><button class="btn" data-a="weekly">Weekly</button><button class="btn" data-a="monthly">Monthly</button><button class="btn" data-a="keys">Angi/Thumbtack keys</button><button class="btn" data-a="clear_optout">Clear opt-out</button><button class="btn" data-a="delete">Delete</button></td></tr>';
       }).join('') + '</table>' : '<p class="muted">No shops.</p>';
-      $('events').textContent = (d.events || []).map(function (e) { return e.at.slice(5, 16).replace('T', ' ') + '  ' + (e.name || e.slug).slice(0, 18).padEnd(18) + ' ' + e.type + (e.data && e.data.id ? ' ref ' + e.data.id : '') + (e.data && e.data.reason ? ' ' + e.data.reason : '') + (e.data && e.data.preview ? '  "' + String(e.data.preview).slice(0, 60) + '"' : ''); }).join('\n') || 'Nothing in the last 24 hours.';
+      $('events').textContent = (d.events || []).map(function (e) { return e.at.slice(5, 16).replace('T', ' ') + '  ' + (e.name || e.slug).slice(0, 18).padEnd(18) + ' ' + e.type + (e.data && e.data.id ? ' ref ' + e.data.id : '') + (e.data && e.data.reason ? ' ' + e.data.reason : '') + (e.data && e.data.preview ? '  "' + String(e.data.preview).replace(/\s+/g, ' ').slice(0, 70) + '"' : ''); }).join('\n') || 'Nothing in the last 24 hours.';
     }).catch(function (e) { $('msg').textContent = 'Could not load: ' + e.message; });
   }
   $('needs').addEventListener('click', function (ev) {
