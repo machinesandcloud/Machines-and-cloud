@@ -3,7 +3,7 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
-import { template, dailyDigest, runEscalation, runCallbackCheck, weeklyReport } from "./lib/desk.mjs";
+import { template, dailyDigest, runEscalation, runCallbackCheck, runVisitCheck, weeklyReport } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
@@ -18,6 +18,7 @@ async function runTask(t) {
   if (!ACTIVE.includes(c.status)) { await logEvent(c.slug, "task_skipped", { type: t.type, reason: c.status }); return "skipped"; }
   if (t.type === "escalate") return runEscalation(c, t);
   if (t.type === "callback_check") return runCallbackCheck(c, t);
+  if (t.type === "visit_check") return runVisitCheck(c, t);
   const rec = t.data?.bookingId ? await getRecord("bookings", c.slug, t.data.bookingId) : t.data?.leadId ? await getRecord("leads", c.slug, t.data.leadId) : null;
   if (!rec || rec.status === "cancelled") return "no record";
   if (!rec.phone) return "no number";

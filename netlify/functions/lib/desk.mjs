@@ -58,7 +58,7 @@ export const STRINGS = {
     cancelled: (c, b) => `${c.business.name}: your visit (${when(b)}) is cancelled as requested. Text us any time to rebook.`,
   },
   es: {
-    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${winEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP para no recibir más mensajes.`,
+    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${winEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP o ALTO para no recibir más mensajes.`,
     fallback_window: (c, owner, win) => `${c.business.name}: recibimos su solicitud y ${owner} le llamará ${win}.`,
     cancelled: (c, b) => `${c.business.name}: su visita (${dateEs(b.date)}, ${winEs(b.window)}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
   },
@@ -137,6 +137,19 @@ async function scheduleReminders(c, b) {
   const startAt = new Date(houstonISO(day, start)).getTime();
   if (startAt - D > Date.now()) await scheduleTask(c.slug, new Date(startAt - D), "reminder_24h", { bookingId: b.id });
   if (startAt - H > Date.now()) await scheduleTask(c.slug, new Date(startAt - H), "reminder_1h", { bookingId: b.id });
+  // The morning after the window: ask the owner whether it happened, once, so "done" is not forgotten.
+  const next = new Date(day); next.setDate(next.getDate() + 1);
+  await scheduleTask(c.slug, new Date(houstonISO(next, 9)), "visit_check", { bookingId: b.id });
+}
+export async function runVisitCheck(c, task) {
+  const b = await getRecord("bookings", c.slug, task.data?.bookingId);
+  if (!b) return "no booking";
+  if (!["booked", "on_the_way", "confirmed"].includes(b.status)) return b.status;
+  if (b.visitCheckedAt) return "already asked";
+  b.visitCheckedAt = new Date().toISOString(); await saveRecord("bookings", b);
+  await notifyOwner(c, `${c.business.name} front desk: Did the visit for ${b.customer_name || b.phone} at ${b.address || "their address"} (${when(b)}) happen? Reply "done ${b.id}" if it did, or "cancel ${b.id}" if it did not.`, { type: "owner_note" });
+  await logEvent(c.slug, "visit_check", { id: b.id });
+  return "asked";
 }
 
 export async function bookVisit(c, input, ctx = {}) {
@@ -365,7 +378,7 @@ export async function confirmVisit(c, b) {
 export async function rescheduleVisit(c, b, date, window) {
   const old = when(b);
   b.date = normalizeDate(esc(date)) || b.date; b.window = esc(window) || b.window; b.status = "booked"; b.confirmedAt = null;
-  await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h"].includes(t.type) && t.data?.bookingId === b.id);
+  await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
   await scheduleReminders(c, b);
   try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { console.error("calendar update", e); }
   await saveRecord("bookings", b);
@@ -406,7 +419,7 @@ export async function ownerCommand(c, text) {
   }
   if (cmd === "done") {
     b.status = "done"; b.doneAt = new Date().toISOString(); await saveRecord("bookings", b);
-    await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h"].includes(t.type) && t.data?.bookingId === b.id);
+    await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
     if (plan.followUp && b.phone && !blocked && !reviewLink(c)) {
       await logEvent(c.slug, "review_skipped", { id: b.id, reason: "no_review_link" });
       return `Marked done. No review request went out: add your Google review link on the portal (Setup, Google review link) to start review requests. If they still owe you, text "invoice ${b.id} amount".`;
