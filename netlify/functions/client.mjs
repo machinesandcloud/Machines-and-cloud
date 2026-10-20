@@ -45,6 +45,7 @@ export default async (req) => {
       client: ownerView(c), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
+      today: todayStrip(c, bookings, leads, events),
       health: lineHealth(c, events),
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
       forwarding: forwardingInstructions(c),
@@ -104,6 +105,24 @@ export default async (req) => {
       c.liveAt = c.liveAt || new Date().toISOString(); c.pausedAt = null;
       await saveClient(c); await logEvent(c.slug, wasPaused ? "resumed" : "live", {});
       if (wasPaused) { try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error("attach voice", e); } }
+      else {
+        const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket with a ref. Reply "ok REF" to acknowledge, "otw REF" on the way, "done REF" when finished, "called REF" after a callback. A 6 pm summary comes daily and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
+        if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "welcome", body: welcome });
+        await sendEmail({ to: c.owner.email, subject: `${name}: you're live`, text: `${welcome}
+
+Your portal: ${site}/desk?c=${c.slug}&k=${c.ownerKey}
+
+What the first alert looks like:
+${name} front desk: BOOKED
+Customer: Maria Lopez (new)
+Phone: +1 713 555 0100
+Where: 1402 Mason Rd, Katy
+Issue: AC blowing warm air
+Window: tomorrow, 8 to 12
+Ref ab12cd. Reply "ok ab12cd" to acknowledge, "otw ab12cd" on the way, "done ab12cd" finished.
+
+Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "approved" ? "your number" : "Machines & Cloud's registered number with your shop's name until carriers approve yours"}.` });
+      }
       return json({ ok: true, status: c.status });
     }
     if (b.action === "pause") {
@@ -170,6 +189,18 @@ function splitAddress(addr, defaultCity) {
   const parts = t.split(",").map((x) => x.trim()).filter(Boolean);
   if (parts.length >= 2) return { street: parts[0], city: parts[1].replace(/\b(TX|Texas)\b/i, "").trim() || defaultCity, state: "TX", zip: "" };
   return { street: t, city: defaultCity, state: "TX", zip: "" };
+}
+
+// The portal's Today strip: this Houston day's calls, texts, bookings, and leads needing the owner.
+function todayStrip(c, bookings, leads, events) {
+  const day = (iso) => (iso ? new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso)) : "");
+  const today = day(new Date().toISOString());
+  return {
+    calls: events.filter((e) => ["missed_call", "call_ended"].includes(e.type) && day(e.at) === today).length,
+    texts: events.filter((e) => e.type === "sms_inbound" && day(e.at) === today).length,
+    bookings: bookings.filter((b) => day(b.createdAt) === today).length,
+    needsYou: leads.filter((l) => l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome)).length,
+  };
 }
 
 // ---- CSV export (RFC 4180, UTF-8 BOM, attachment) ----

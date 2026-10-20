@@ -57,6 +57,7 @@
   </section>
 
   <section class="pane" id="p-leads">
+    <div class="card2" id="todayStrip" style="display:none"><h3>Today</h3><div class="grid2" id="today"></div></div>
     <div class="card2"><h3>Bookings</h3><div id="bookings"></div></div>
     <div class="card2"><h3>Leads handed to you</h3><div id="leads"></div></div>
   </section>
@@ -133,7 +134,7 @@
 
   function showTab(t) { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); }); }
   if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
-  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + b.dataset.t); }); }); });
+  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { window.__tabPicked = true; document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + b.dataset.t); }); }); });
 
   function load() {
     return fetch(API).then(function (r) { return r.json(); }).then(function (d) {
@@ -144,6 +145,11 @@
       st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;
       var offBtns = (d.forwarding && d.forwarding.off && d.forwarding.off.length && (c.status === 'paused' || c.status === 'cancelled')) ? '<div class="muted" style="margin-top:8px">Send calls back to your phone: ' + d.forwarding.off.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') + '<br>' + esc(d.forwarding.offLong || '') + '</div>' : '';
       document.querySelector('.tabs button[data-t="test"]').style.display = c.status === 'cancelled' ? 'none' : '';
+      if (c.status === 'live' && !location.hash && !window.__tabPicked) { showTab('leads'); window.__tabPicked = true; }
+      (function () { var dayOf = function (iso) { return iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }) : ''; }; var today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+        var t = d.today || {}; var calls = t.calls || 0, texts = t.texts || 0, booked = t.bookings || 0, need = t.needsYou || 0; var h = d.health || {};
+        var strip = document.getElementById('todayStrip'); strip.style.display = c.status === 'live' ? 'block' : 'none';
+        document.getElementById('today').innerHTML = '<div><b>' + calls + '</b> calls</div><div><b>' + texts + '</b> texts in</div><div><b>' + booked + '</b> booked today</div><div><b>' + need + '</b> need you</div><div class="muted">Line: ' + (h.errors24h ? h.errors24h + ' errors in 24 h' : 'OK') + '</div>'; })();
       $('liveBtns').innerHTML = (c.status === 'cancelled' ? '<span class="muted">line rings through until ' + esc((c.serviceEndsAt || '').slice(0, 10)) + '</span>' : c.status === 'paused'
         ? '<button class="btn-pill btn-pill-blue btn-sm" id="resume">Resume</button> <button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn">Cancel service</button>'
         : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7">Cancel service</button>') + offBtns;

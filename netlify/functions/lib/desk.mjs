@@ -546,10 +546,20 @@ export async function weeklyReport(c) {
   const spamContacts = new Set(wl.filter((l) => l.status === "spam").map((l) => l.phone || l.contact));
   const wc = convs.filter((v) => inWin(v.updatedAt) && (v.messages || []).some((m) => m.role === "user" && inWin(m.at)));
   const actionable = wc.filter((v) => !bypass.has(v.contact) && !spamContacts.has(v.contact));
-  const calls = we.filter((e) => ["missed_call", "call_ended"].includes(e.type)).length;
+  const answered = we.filter((e) => e.type === "call_ended").length;
+  const textedBack = we.filter((e) => e.type === "missed_call" && ["sent", "logged"].includes(e.data?.textBack)).length;
+  const calls = answered + we.filter((e) => e.type === "missed_call").length;
   const afterHours = we.filter((e) => ["missed_call", "call_ended", "sms_inbound"].includes(e.type) && !isBusinessHours(c, e.at)).length;
   const byChannel = {}; for (const b of wb) byChannel[b.channel || "web"] = (byChannel[b.channel || "web"] || 0) + 1;
-  const rate = actionable.length ? Math.round((wb.length / actionable.length) * 100) : 0;
+  // Bookable conversations: actionable minus the ones that were only a question.
+  const keys = (r) => [r.phone, r.contact].filter(Boolean);
+  const questionOnly = new Set(wl.filter((l) => l.nobook_reason === "question_only").flatMap(keys));
+  const bookedContacts = new Set(wb.flatMap(keys));
+  const bookable = actionable.filter((v) => !questionOnly.has(v.contact) || bookedContacts.has(v.contact));
+  const rate = bookable.length ? Math.round((wb.length / bookable.length) * 100) : 0;
+  // Jobs that would have gone to voicemail: booked after a missed-call text-back, or booked after hours.
+  const textBackContacts = new Set(wc.filter((v) => v.channel === "sms" && (v.messages || []).some((m) => m.system === "missed-call text-back")).map((v) => v.contact));
+  const voicemailJobs = wb.filter((b) => textBackContacts.has(b.phone) || !isBusinessHours(c, b.createdAt)).length;
   const open = wl.filter((l) => l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome));
   const unbooked = wl.filter((l) => l.status !== "spam" && l.status !== "booked");
   const reasons = {}; for (const l of unbooked) { const r = l.nobook_reason && l.nobook_reason !== "none" ? l.nobook_reason : "not recorded"; reasons[r] = (reasons[r] || 0) + 1; }
@@ -566,10 +576,11 @@ export async function weeklyReport(c) {
   if (empty) return { empty: true, subject: `${name}: nothing this week`, text: `${name}: nothing this week. No calls, texts, or chats reached the front desk in the last 7 days. Line: ${lineHealth(c, events).errors24h} errors in the last 24 hours.` };
   const lines = [
     `${name}: your front desk, last 7 days`, "",
-    `Calls answered: ${calls}${afterHours ? ` (${afterHours} contacts after hours)` : ""}`,
+    `Calls: ${answered} answered by the front desk, ${textedBack} texted back after a missed call${afterHours ? ` (${afterHours} contacts after hours)` : ""}`,
     `Conversations that could become a job: ${actionable.length}${spam ? ` (plus ${spam} spam, not counted)` : ""}`,
     `Booked: ${wb.length}${wb.length ? " (" + Object.entries(byChannel).map(([k, v]) => `${v} by ${k === "sms" ? "text" : k === "call" ? "phone" : k}`).join(", ") + ")" : ""}`,
-    `Missed-call-to-booking rate: ${rate} percent (${wb.length} booked of ${actionable.length})`,
+    `Booking rate: ${wb.length} booked of ${bookable.length} bookable conversations (${rate} percent)`,
+    `Jobs that would have gone to voicemail: ${voicemailJobs}`,
     `Leads still needing you: ${open.length}${open.length ? " (" + open.map((l) => l.id).join(", ") + ")" : ""}`,
     unbooked.length ? `Did not book: ${unbooked.length}. Why: ${Object.entries(reasons).map(([k, v]) => `${v} ${label(k)}`).join(", ")}` : "Did not book: 0",
     `Emergencies: ${emergencies}`,
@@ -578,5 +589,5 @@ export async function weeklyReport(c) {
     `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,
     "", `Every conversation is on your portal. Flag anything that reads wrong and Steve sees it the same day.`,
   ].filter((x) => x !== "");
-  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, actionable: actionable.length, booked: wb.length, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
+  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, answered, textedBack, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
 }

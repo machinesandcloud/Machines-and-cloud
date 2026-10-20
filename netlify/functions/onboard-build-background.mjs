@@ -89,7 +89,7 @@ export default async (req) => {
   c.build = { ...c.build, status: "running", startedAt: new Date().toISOString() };
   await saveClient(c);
   try {
-    const pages = await crawl(c.business.website);
+    const pages = c.business.website ? await crawl(c.business.website) : [];
     const p = await draftProfile(pages, c);
     const b = c.business;
     if (p) {
@@ -106,9 +106,10 @@ export default async (req) => {
       const have = new Set((c.faq || []).map((x) => x.q.toLowerCase()));
       c.faq = [...(c.faq || []), ...(p.faq || []).filter((x) => x.q && !have.has(x.q.toLowerCase()))].slice(0, 40);
       c.summary = c.summary ? c.summary + "\n" + p.summary : p.summary;
-      c.build = { status: "built", notes: (p.missing || []).join("; "), sourcePages: pages.map((x) => x.url), builtAt: new Date().toISOString(), missing: p.missing || [] };
+      const prefix = c.business.website ? "" : "No website given; built from your answers. ";
+      c.build = { status: "built", notes: prefix + (p.missing || []).join("; "), sourcePages: pages.map((x) => x.url), builtAt: new Date().toISOString(), missing: p.missing || [] };
     } else {
-      c.build = { status: "built", notes: "Could not read the website; the owner's answers are the whole knowledge base.", sourcePages: pages.map((x) => x.url), builtAt: new Date().toISOString(), missing: ["website unreadable"] };
+      c.build = { status: "built", notes: c.business.website ? "Could not read the website; the owner's answers are the whole knowledge base." : "No website given; built from your answers.", sourcePages: pages.map((x) => x.url), builtAt: new Date().toISOString(), missing: [c.business.website ? "website unreadable" : "no website"] };
     }
     c.status = "testing";
     c.widget.greeting = c.widget.greeting || `Hi, this is the ${b.name || "front desk"}. What can we help with today?`;
@@ -116,7 +117,7 @@ export default async (req) => {
     await logEvent(c.slug, "built", { pages: pages.length, missing: c.build.missing });
     const base = process.env.URL || "";
     const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
-    await sendEmail({ to: c.owner.email, subject: `${b.name || "Your front desk"} is ready to test`, text: `Your front desk is built from ${c.business.website} and your answers. Test it here, read what it knows, and fix anything wrong:\n${portal}\n\nWhat your website is missing (we filled it from your answers where we could): ${c.build.notes || "nothing major"}.` });
+    await sendEmail({ to: c.owner.email, subject: `${b.name || "Your front desk"} is ready to test`, text: `Your front desk is built from ${c.business.website ? c.business.website + " and " : ""}your answers. Test it here, read what it knows, and fix anything wrong:\n${portal}\n\nWhat your website is missing (we filled it from your answers where we could): ${c.build.notes || "nothing major"}.` });
     await notifySteve(`Built: ${b.name || c.slug}`, `Pages read: ${pages.length}. Missing: ${c.build.notes || "-"}\n${portal}`);
     try { await fetch(`${new URL(req.url).origin}/.netlify/functions/provision-background`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: c.slug, key: c.ownerKey }) }); } catch (e) { console.error("could not start provisioning", e); }
   } catch (err) {

@@ -30,7 +30,9 @@ export default async (req) => {
   if (s(b.botfield)) return json({ ok: true });
   const email = s(b.email, 120).toLowerCase();
   const website = s(b.website, 200);
-  if (!email.includes("@") || !s(b.name) || !website) return json({ error: "missing_fields" }, 400);
+  const phone = e164(s(b.phone, 30));
+  if (!email.includes("@") || !s(b.name)) return json({ error: "missing_fields" }, 400);
+  if (!phone || phone.length < 11) return json({ error: "missing_fields", field: "owner.phone", message: "Your cell is where every lead and booking is texted; the front desk cannot run without it." }, 400);
 
   let c = await clientByEmail(email);
   if (!c) {
@@ -75,6 +77,6 @@ export default async (req) => {
 
   const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
   await notifySteve(`New front desk: ${c.business.name || c.slug} (${c.plan})`, `${c.owner.name} <${c.owner.email}> ${c.owner.phone || ""}\n${website}\nPortal: ${portal}`);
-  await sendEmail({ to: c.owner.email, subject: `Your front desk is being built, ${c.owner.name.split(" ")[0]}`, text: `Thanks. We are reading ${website} and drafting your front desk now. Your private portal and test line:\n${portal}\n\nKeep that link; it is your login. Steve will reach out within one business day.` });
+  await sendEmail({ to: c.owner.email, subject: `Your front desk is being built, ${c.owner.name.split(" ")[0]}`, text: `Thanks. We are ${website ? "reading " + website + " and " : ""}drafting your front desk from your answers now. Your private portal and test line:\n${portal}\n\nKeep that link; it is your login. Steve will reach out within one business day.` });
   return json({ ok: true, slug: c.slug, key: c.ownerKey, portal, client: ownerView(c) });
 };
