@@ -68,7 +68,8 @@ Acceptance (now, draft):
 Acceptance (keyed, S2-01): the `**15#` code is accepted by a real AT&T or T-Mobile SIM and the forwarded call reaches `/api/voice` about 15 seconds after the first ring; the result (works, refused, or different timing) goes in DECISIONS.md and, if refused, the code falls back to the plain `*61*1{n}#` with the note updated.
 
 ### S2-04 Escalation chain by kind: light for wants-a-call, full for emergencies, no self-calls (W1 + M2 delta)
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: wants_call chain gave `step 1: backup texted (logged)` then `step 2: customer told window`, alert exhausted with 2 history entries, `fallback_window` sent, no Steve; emergency on a two-phone shop gave backup, `call (logged)`, `customer told window, Steve notified`; on an all-calls shop with no transfer target step 2 read `call replaced by text (forwarded line)` and the owner got a `Second notice` text. `escalated` events now carry `kind`. Portal You card shows the two-line note. Helper `cellIsForwardedLine(c)` in `lib/desk.mjs` (owner cell equals the business line, or all calls with no transfer target) is shared with S2-08. Size: S. Implements: Round 2 W1; the M2 (a) sentence "escalation skips the call step and texts twice" which `runEscalation` does not do yet.
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: wants_call chain ran backup text then customer window and exhausted with 2 entries, no call and no Steve step, `fallback_window` sent; emergency on a two-phone shop ran backup, `call (logged)`, `customer told window, Steve notified`; on an all-calls shop without a transfer target step 2 read `call replaced by text (forwarded line)` and the owner got a `Second notice` text; the You card note is in `desk.html`.
+Size and scope: Size: S. Implements: Round 2 W1; the M2 (a) sentence "escalation skips the call step and texts twice" which `runEscalation` does not do yet.
 
 Files: `netlify/functions/lib/desk.mjs` (`runEscalation`, `openAlert`), `desk.html` (You card copy).
 
@@ -84,7 +85,8 @@ Acceptance (now, draft; nudge with `admin nudge_task`, run with `admin run_sched
 - [ ] Portal You card shows the two-line note.
 
 ### S2-05 "cancel" with a visit asks the owner; "existing customer" means a real customer (W3 + W2)
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: SMS booking then `cancel` returned "unsubscribed ... We've told Dana Whitfield about your visit", `opt_out` and `cancel_requested` events, owner text "wants to cancel", booking still `booked`, no reminder tasks left; `STOP` from another booked number gave `opt_out` only. `customerType`: a number with only leads is `new`; after `done REF` the next lead is `existing`. The 10-minute rule is gone. `cancel` from a paused or cancelled shop only opts out. Size: S. Implements: Round 2 W3 and W2.
+Status: verified with follow-up 2026-10-20 6ad687c6cfa858f714553022: `cancel` from a booked number replied "unsubscribed ... We've told Dana Whitfield about your visit", logged `opt_out` and `cancel_requested`, texted the owner "wants to cancel", left the booking `booked` with no reminders; `STOP` from another booked number gave `opt_out` only; a number with only leads reads "(new)" and the S2-07 lookup for the same number read "existing customer" after `done REF`. The one failed line: a second callback request from that number inside 30 minutes was merged into its still-open lead (S1-20) and the UPDATE text kept the lead's original "(new)"; follow-up S2-14. The past-visit rule was verified in code only.
+Size and scope: Size: S. Implements: Round 2 W3 and W2.
 
 Files: `netlify/functions/sms.mjs` (STOP branch), `netlify/functions/lib/desk.mjs` (`customerType`, `cancelRequest`).
 
@@ -98,7 +100,8 @@ Acceptance (now, draft):
 - [ ] Test-line lead from a number that only has a spam lead and an open lead older than 10 minutes: the alert says "(new)". Mark that number's booking `done` by owner text `done REF`, then a new test-line lead: "(existing customer)". A booking dated yesterday (set by admin `records` edit or a booking with `date` in the past) also counts.
 
 ### S2-06 Quiet days by email only, and a text-off switch (W4)
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: fresh live shop at `force_hour=18` logged `digest` with `empty: true` and no `sms_sent` `type: "digest"`; a shop with a lead that day got the text and the email; `PUT {"digest":{"text":false}}` stopped the text. `newClient` carries `digest: { text: true }`; the portal You card has the checkbox. The `digest` event records `empty` and `texted`. Size: S. Implements: Round 2 W4.
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: empty day logged `digest` with `empty: true`, `texted: false` and no `sms_sent` digest; a day with records texted and emailed with `texted: true`; `PUT {"digest":{"text":false}}` stopped the text and `GET` shows it.
+Size and scope: Size: S. Implements: Round 2 W4.
 
 Files: `netlify/functions/scheduler.mjs`, `netlify/functions/lib/desk.mjs` (`dailyDigest` returns `empty: true`), `netlify/functions/client.mjs` (PUT accepts `digest.text`), `netlify/functions/lib/config.mjs` (`digest: { text: true }` on `newClient`), `desk.html` (toggle on the You card).
 
@@ -110,7 +113,8 @@ Acceptance (now, draft):
 - [ ] `PUT` `{"digest":{"text":false}}` then the same run: email only; `GET` shows `client.digest.text` false; the portal checkbox reflects it.
 
 ### S2-07 Returning caller on voice: greet by name, know the visit
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check (assistant id set by admin, see section 5): a number with a done visit returned `customerName: "Lee"`, `isExisting: "existing customer"`; a number with a visit tomorrow got `firstMessage` "... Hi Sam, your visit is tomorrow, 8 to 12, for the AC stopped working. How can I help?"; an unknown number got the standard greeting with empty values; the voice prompt contains `{{customerName}}`, `{{isExisting}}`, `{{upcomingVisit}}`, `{{vip}}`. `callerContext(c, phone)` lives in `lib/desk.mjs`. The Twilio number is now imported into Vapi without a fixed assistant (see DECISIONS); `assistant-request` on a paused, detached, or assistant-less shop returns Vapi's `error` message. The 403 without `x-vapi-secret` is the sprint 1 check, unchanged. Size: M. Implements: Round 2 item 6; Epic 6 SHOULD "returning customer recognized".
+Status: verified 2026-10-20 6ad687c6cfa858f714553022 (assistant id set by admin): known number returned `customerName` "Tom", `isExisting` "existing customer", a `firstMessage` greeting by name; a number with a visit tomorrow got "your visit is tomorrow, 12 to 5, for the ..."; unknown number got the standard greeting with empty values; the voice prompt carries `{{customerName}}`; a detached shop gets the Vapi error message. `VAPI_WEBHOOK_SECRET` is not set in Netlify yet (a wrong secret still got 200), so that line waits for S2-01 setup; the keyed greeting waits for S2-01.
+Size and scope: Size: M. Implements: Round 2 item 6; Epic 6 SHOULD "returning customer recognized".
 
 Files: `netlify/functions/vapi.mjs` (handle `assistant-request`), `netlify/functions/lib/vapi.mjs` (`provisionVoice` registers the number with `server.url` and no fixed `assistantId`, or keeps the assistant and sets `assistantOverrides` from the request; prompt gains `{{customerName}}` and `{{upcomingVisit}}` placeholders), `netlify/functions/lib/desk.mjs` (`callerContext(c, phone)`).
 
@@ -125,7 +129,8 @@ Acceptance (now, draft; the Vapi payload is simulated with curl):
 Acceptance (keyed, S2-01): calling from Steve's phone after booking on it, the assistant opens with his name and the visit.
 
 ### S2-08 VIP and commercial bypass list
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: PUT with 21 numbers kept 20; the business line returned `loop` on `rules.bypass` (the owner's cell and the front desk number are rejected too); two-phone shop returned `<Dial timeout="25">cell</Dial>` then `<Say>` and `<Record action=".../api/voice/recorded">`, `vip_call` event, no `missed_call`; one-phone shop returned `<Record>` without `<Dial>`; `/api/voice/recorded` logged `vip_voicemail` and texted "VIP voicemail from ..."; Vapi `assistant-request` returned a `destination` (two-phone) or a "leave a message" `firstMessage` (one-phone); a VIP text gave an empty `<Response/>`, a "VIP text from" owner text, a `vip_text` event, and no `sms_inbound`. Portal: textarea under the handoff list. Size: M. Implements: Round 2 item 7; Epic 3 SHOULD "VIP list the front desk never answers".
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: 21 numbers kept 20; the business line on the list returned `loop` on `rules.bypass`; two-phone shop returned Dial cell, Say, Record with the `/api/voice/recorded` action and a `vip_call` event with no `missed_call`; one-phone shop returned Record without Dial; `/api/voice/recorded` logged `vip_voicemail` and texted "VIP voicemail from ... .mp3 (23 s)"; `assistant-request` from the bypass number returned a `destination` on the two-phone shop and a "leave a message" `firstMessage` on the one-phone shop; a VIP text gave an empty Response, a "VIP text from" owner note, and no `sms_inbound`.
+Size and scope: Size: M. Implements: Round 2 item 7; Epic 3 SHOULD "VIP list the front desk never answers".
 
 Files: `netlify/functions/lib/config.mjs` (`rules.bypass: []`, up to 20 E.164 numbers; `loopCheck` unaffected), `netlify/functions/client.mjs` (PUT), `netlify/functions/voice.mjs`, `netlify/functions/vapi.mjs` (`assistant-request` returns a transfer destination), `desk.html` (Rules card textarea "Numbers that always ring through to you"), `netlify/functions/sms.mjs` (bypass numbers' texts are forwarded to the owner, not answered).
 
@@ -140,7 +145,8 @@ Acceptance (now, draft):
 - [ ] `POST /api/sms` from the bypass number: empty `<Response/>`, owner `sms_sent` "VIP text from", no `sms_inbound` model run.
 
 ### S2-09 Usage meter with 80 and 100 percent alerts
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: a 150-second `end-of-call-report` gave `minutes: 3, calls: 1`; the shop's `texts` equalled its count of customer-facing `sms_sent` events (owner alerts excluded); on Starter, 121 minutes gave one `usage_alert` `{threshold: 80, kind: "minutes"}` plus an owner `sms_sent` `type: "usage"`, 151 gave the 100 alert, 181 gave nothing more; `GET /api/client` has `usage: { month, minutes, texts, calls, included, overage }` and the portal card reads "x of 150 call minutes, y of 500 texts to customers (2026-10)" with the overage sentence; `admin records kind=usage` and `delete` cover the store. Code in `lib/usage.mjs`; texts are counted inside `sendSMS`. Size: M. Implements: Round 2 item 8; Epic 5 SHOULD "usage card and alerts". No pause-at-limit, no billing.
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: a 150-second report gave `minutes: 3, calls: 1`; `texts` equalled the shop's customer-facing `sms_sent` count (6 of 6, owner alerts excluded; logged sends count when Twilio is not configured); on Starter, 121 minutes gave the 80 alert with an owner `sms_sent` `type: "usage"`, 151 the 100 alert, 181 nothing more; `GET` carries `usage` with `month`, `minutes`, `texts`, `calls`, `included`, `overage`; `records kind=usage` works and `delete` removes the store. The overage sentence on the portal card stands as assumption 9 until Steve rules on it.
+Size and scope: Size: M. Implements: Round 2 item 8; Epic 5 SHOULD "usage card and alerts". No pause-at-limit, no billing.
 
 Files: `netlify/functions/lib/store.mjs` (`usage` kind, key `{slug}/{YYYY-MM}` Houston month), `netlify/functions/lib/send.mjs` (count a text when `ok`, or when `logged` and Twilio is not configured), `netlify/functions/vapi.mjs` (`end-of-call-report`: minutes = `ceil(seconds / 60)`), `netlify/functions/voice.mjs` (a missed call counts 0 minutes), `netlify/functions/lib/desk.mjs` (`addUsage`, `usageAlerts`), `netlify/functions/client.mjs` (GET `usage`), `desk.html` (Usage card on Setup), `netlify/functions/admin.mjs` (`records kind=usage`, `delete` removes it).
 
@@ -154,7 +160,8 @@ Acceptance (now, draft):
 - [ ] `admin delete` removes `usage/{slug}/*`.
 
 ### S2-10 CSV export from the portal
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: `export=bookings` returned 200 `text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="<slug>-bookings-<date>.csv"`, a BOM, the header `id,createdAt,customer_name,...`, one row per booking, and Python's csv module parsed it (fields with commas and newlines are quoted, quotes doubled); `export=conversations` had one row per message with the flag note column; without `k`: 403. Portal Your data card has the three links. Size: S. Implements: Round 2 item 9; Epic 4 SHOULD; makes `DATA_POLICY` ("ask for an export at any time") self-serve.
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: `export=bookings` returned 200 `text/csv; charset=utf-8`, the attachment header, a BOM, the header row, one row per booking, and addresses with commas parsed intact; `export=conversations` had one row per message (24 of 24) with the flag note filled; without the key 403.
+Size and scope: Size: S. Implements: Round 2 item 9; Epic 4 SHOULD; makes `DATA_POLICY` ("ask for an export at any time") self-serve.
 
 Files: `netlify/functions/client.mjs` (GET with `export=bookings|leads|conversations`), `desk.html` (three links on the Your data card).
 
@@ -167,7 +174,8 @@ Acceptance (now, draft):
 - [ ] The portal Your data card shows three download links.
 
 ### S2-11 Per-IP rate limit on the chat endpoints (if time)
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: the 61st MC chat from one IP returned 429 `{"error":"busy"}`; the owner test line with the key still answered; `admin ratelimit_reset` returned `{ ok, cleared }`. The IP comes from Netlify's `context.ip` (or `x-nf-client-connection-ip`). The widgets already show their "something went wrong" line on a non-200. Size: S. Implements: Round 2 item 10 (first half); CLAUDE.md rule.
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: the 61st request from one IP returned 429 `busy` (invalid bodies count toward the limit, which is the safer reading); the owner test line with its key still answered; `admin ratelimit_reset` returned `ok`.
+Size and scope: Size: S. Implements: Round 2 item 10 (first half); CLAUDE.md rule.
 
 Files: `netlify/functions/chat.mjs`, `netlify/functions/lib/store.mjs` (`ratelimit` kind, key `{ip}/{10-minute bucket}`), `embed.js`, `agent-widget.js`.
 
@@ -178,7 +186,8 @@ Acceptance (now, draft):
 - [ ] Ten minutes later (or a new bucket via `admin` `{"action":"ratelimit_reset","ip":"..."}`), requests pass again.
 
 ### S2-12 Release the number when the cancel window ends (if time)
-Status: delivered 2026-10-19, draft 6ad684d239ca7ec63fb8620f. Engineer check: cancelled shop with `serviceEndsAt` set to the past by admin and a number attached: `run_scheduler` returned `released: 1`, logged `number_release_skipped` (no keys), cleared `phone.twilioNumber` (kept as `phone.releasedNumber`), removed the `number:` index, and a simulated call to the old number returned "not in service". Steve gets an email either way. With keys the same path releases the Twilio number and messaging service and deletes the Vapi assistant and number (`number_released`). Size: S. Implements: Round 2 item 10 (second half); sprint 1 assumption 15.
+Status: verified 2026-10-20 6ad687c6cfa858f714553022: a cancelled shop with `serviceEndsAt` set to the past by admin: `run_scheduler` returned `released: 1`, logged `number_release_skipped` (no keys), cleared `phone.twilioNumber` into `releasedNumber`, and a call to the old number answered "not in service". The keyed release waits for S2-01.
+Size and scope: Size: S. Implements: Round 2 item 10 (second half); sprint 1 assumption 15.
 
 Files: `netlify/functions/scheduler.mjs`, `netlify/functions/lib/twilio.mjs` (`releaseNumber` exists), `netlify/functions/lib/vapi.mjs` (`releaseVoice` exists).
 
@@ -187,13 +196,23 @@ Change: each scheduler run lists `cancelled` clients with `serviceEndsAt` in the
 Acceptance (now, draft): cancel a test shop, set `serviceEndsAt` to the past by admin (`{"serviceEndsAt": "..."}` accepted on the admin update), `admin run_scheduler`: `number_release_skipped` (no keys), `phone.twilioNumber` empty, `index` `number:` gone (a simulated call to the old number returns "not in service"). Keyed: `number_released` with the SIDs and the console no longer lists the number.
 
 ### S2-13 First-customer go-live runbook (ops, with the PM)
-Status: delivered 2026-10-19. `OPERATIONS.md` has the section "First customer: go-live and the first week": ten numbered steps, each with who does it and the proving artifact (events, portal, email, the matrix sheet at `product/golive-<slug>.md`), and the day-7 email template (no em dashes, no prototype words). Step 4 references the 14-case matrix in `SPRINT.md` section 5.4; step 5 the five keyed cases. The PM signs the sheet for the first customer. Size: S. Implements: Epic 5 MUST "Steve reviews every conversation on day one and daily for the first week, day-7 note"; Epic 6 MUST "written test matrix before each go-live".
+Status: verified 2026-10-20 (document): OPERATIONS.md "First customer: go-live and the first week" has ten numbered steps, each with who does it and the proving artifact (events, portal, email, the sheet at `product/golive-<slug>.md`), step 4 references the 14-case matrix and step 5 the five keyed cases, the day-7 template has no em dashes and no prototype words. The signed sheet is produced at the first go-live.
+Size and scope: Size: S. Implements: Epic 5 MUST "Steve reviews every conversation on day one and daily for the first week, day-7 note"; Epic 6 MUST "written test matrix before each go-live".
 
 Files: `OPERATIONS.md` (new section "First customer: go-live and the first week"), `product/SPRINT.md` section 5.4 (the matrix, referenced not copied).
 
 Change: a numbered runbook: onboarding with the owner on a call, legal details for 10DLC, forwarding code dialed together (ring timer, Live Voicemail off, `*#61#` check), the 14-case matrix run on the test line and the five keyed cases, go-live click, day-1 full read of every conversation by Steve, daily read for 7 days with flags cleared, the day-7 "what I changed" email (template included), and the first-month hand invoice note (assumption 1). Each step names who does it and what artifact proves it (event, email, matrix sheet).
 
 Acceptance: the section exists with those steps; every artifact named is one the PM can check (`admin records`, portal, email); the day-7 template has no em dashes and no prototype words; the PM signs the matrix sheet for the first customer and files it under `product/golive-<slug>.md`.
+
+### S2-14 Merged leads recompute new or existing; a booking closes the customer's open lead
+Status: delivered 2026-10-20, draft 6ad6bae471d3d40380534fad (see the engineer run in section 5). Engineer check: `flagLead`'s merge branch recomputes `customerType` and lists `customer` among the changed fields on the UPDATE text (a merged emergency from a number with a done visit read "existing"); `bookVisit` sets every open lead for that phone or contact from the last 24 hours to `booked` with `bookingId`, acknowledges its waiting alerts (`alert_acked` by "booking") so no escalation fires, and logs `lead_closed { id, by: "booking", bookingId }`. Size: S. Implements: Round 2 W2 (correctness of the merge path found in the S2-05 verification) and Epic 5 MUST (alerts and digest tell the truth).
+
+Files: `netlify/functions/lib/desk.mjs` (`flagLead` merge branch, `bookVisit`).
+
+Change: (a) when `flagLead` merges a repeat `notify_owner` into an open lead, recompute `customerType(c.slug, phone)` before writing the UPDATE text, so a customer marked done since the first contact reads "(existing customer)"; (b) when `bookVisit` books a visit for a phone number that has an `open` lead from the last 24 hours, set that lead's `status` to `booked` and log `lead_closed` `{ id, by: "booking" }`, so the digest's "leads need action" and the portal stop listing a customer who already booked, and any waiting alert for that lead closes (`runEscalation` already returns "lead closed" for a non-open lead).
+
+Acceptance (now, draft): test-line callback request from a number, `done REF` on a booking for that number, then a second callback request within 30 minutes: the UPDATE text reads "(existing customer)". Test-line callback request, then a booking from the same number within the hour: the lead's status is `booked`, a `lead_closed` event exists, `admin tasks` has no `escalate` for it, and the daily digest counts 1 booked and 0 needing action for that customer.
 
 ## 3. Assumptions (Steve can overturn any; each is one line to change)
 
@@ -234,3 +253,16 @@ Pre-key pass: each ticket's "now" lines against the engineer's named draft, reco
 Keyed pass (S2-01): merged to `main` first; run in this order: provisioning, L3, L1 (missed with the ring timer, then all calls), L2, L5, S1-17 pause and resume, S2-03 ring timer confirmation, S2-07 returning caller, then the five keyed matrix cases (1, 3, 6, 9, 13 from `SPRINT.md` section 5.4). Every text expected on a phone is logged with its arrival time; every rejected API field is a DECISIONS.md line.
 
 Go-live gate for the first customer: S2-01 complete, S2-02 to S2-06 verified, the 14-case matrix passed on the customer's own test line, the S2-13 runbook followed and the matrix sheet filed.
+
+## 6. Verification record
+
+### Pre-key pass, 2026-10-20, draft `6ad687c6cfa858f714553022` (built by the PM from `main` at commit `90cb341`)
+
+`scratchpad/verify4.py`, 59 checks, 58 passed; test shops `pm-test-hvac-7f2c` (orphaned by a script crash of mine, deleted) and `pm-test-hvac-daac` (number `+17135550114`, deleted at the end); fake-number opt-outs cleared; `GET /api/admin` lists no PM Test shop. Engineer hooks used: admin `voice` update with a fake assistant id for the `assistant-request` lines, `records kind=usage`, `ratelimit_reset`, admin `serviceEndsAt`.
+
+Results: S2-04, S2-06 to S2-13 verified; S2-05 verified with follow-up S2-14 (merged UPDATE texts keep the lead's original new/existing; open leads stay "needs action" after the customer books). Out-of-ticket deliveries: no planning text at the start of any test-line reply across nine test conversations (`dropToolPreamble`); the per-call Blobs store is a code change with no draft-level test. Not exercisable on a draft: the Vapi webhook secret (not set in Netlify yet; add it in S2-01 setup), the real number release, the past-visit branch of `customerType`.
+
+Observed and worth knowing: the rate limiter counts invalid requests, so a misbehaving script trips it quickly, which is the safer reading; the usage meter counted the text-back, confirmations, replies, and the fallback-window text and nothing sent to the owner; the all-calls shop without a transfer target got a "Second notice" text instead of a call, so no escalation can loop back into the front desk.
+
+### Keyed pass
+Pending S2-01 (Steve's keys). Order in section 5.

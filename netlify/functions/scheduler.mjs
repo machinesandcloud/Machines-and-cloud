@@ -1,7 +1,7 @@
 // Runs every 10 minutes: sends whatever is due (reminders, review requests, quote checks, payment
 // reminders, quiet-lead chases), runs alert escalations, polls texting registration, and sends the
 // 6 pm Houston daily digest to every live shop.
-import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list } from "./lib/store.mjs";
+import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
 import { TEMPLATES, dailyDigest, runEscalation } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
@@ -26,9 +26,18 @@ async function runTask(t) {
   if (["reminder_24h", "reminder_1h"].includes(t.type) && !["booked", "confirmed", "on_the_way"].includes(rec.status)) return "booking not active";
   if (t.type === "lead_chase" && rec.status !== "open") return "lead closed";
   if (t.type === "quote_check" && rec.status !== "quoted") return "quote closed";
-  if (t.type === "payment_reminder" && rec.status !== "done") return "paid or not done";
+  if (t.type === "payment_reminder" && (rec.status !== "done" || !rec.invoicedAt)) return "paid or not invoiced";
+  if (t.type === "review_nudge" && rec.reviewReply) return "already replied";
+  if (t.type === "referral_ask" && rec.reviewReply?.sentiment !== "positive") return "no positive reply";
   const body = t.type === "lead_chase" ? tpl(c, rec, t.data.n) : tpl(c, rec);
   const r = await sendSMS({ to: rec.phone, client: c, type: t.type, body });
+  if (r.ok || r.logged) {
+    // The front desk should know what it sent when the customer replies to it.
+    const conv = await getConversation(c.slug, "sms", rec.phone);
+    conv.messages.push({ role: "assistant", content: body, at: new Date().toISOString(), system: t.type });
+    await saveConversation(conv);
+    if (t.type === "review_request") { rec.reviewAskedAt = new Date().toISOString(); await saveRecord("bookings", rec); }
+  }
   await logEvent(c.slug, "task_sent", { type: t.type, id: rec.id, ok: r.ok, logged: !!r.logged });
   return r.ok ? "sent" : r.logged ? "logged" : "send failed";
 }

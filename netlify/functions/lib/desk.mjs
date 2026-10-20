@@ -69,6 +69,30 @@ export function ownerSummary(c, kind, r) {
   return lines.join("\n");
 }
 
+// Quiet hours for follow-up texts (Texas Business and Commerce Code ch. 304 hours): 9 am to 9 pm
+// Monday to Saturday, noon to 9 pm Sunday, Houston time. A due time inside quiet hours moves to the
+// next opening minute. Visit confirmations, reminders, on-the-way texts, text-backs, and live replies
+// are exempt; only the scheduled follow-ups below go through this.
+export const FOLLOW_UP_TYPES = ["review_request", "review_nudge", "quote_check", "lead_chase", "referral_ask", "payment_reminder"];
+const HOU = (d) => { const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(d).filter((x) => x.type !== "literal").map((x) => [x.type, x.value])); return { day: p.weekday, hour: Number(p.hour) % 24, minute: Number(p.minute) }; };
+export function nextOpenTime(at) {
+  let t = new Date(at);
+  for (let i = 0; i < 8; i++) {
+    const { day, hour, minute } = HOU(t);
+    const open = day === "Sun" ? 12 : 9, close = 21;
+    const mins = hour * 60 + minute;
+    if (mins >= open * 60 && mins < close * 60) return t;
+    // Before opening: move forward to the opening minute today. After closing: to the next day's opening.
+    const forward = mins < open * 60 ? (open * 60 - mins) : (24 * 60 - mins) + (HOU(new Date(t.getTime() + (24 * 60 - mins) * 60000)).day === "Sun" ? 12 : 9) * 60;
+    t = new Date(t.getTime() + forward * 60000);
+  }
+  return t;
+}
+export async function scheduleFollowUp(c, at, type, data) {
+  const due = FOLLOW_UP_TYPES.includes(type) ? nextOpenTime(at) : new Date(at);
+  return scheduleTask(c.slug, due, type, data);
+}
+
 async function scheduleReminders(c, b) {
   if (!b.date) return;
   const day = visitDate(b.date); const { start } = windowHours(b.window);
@@ -95,6 +119,13 @@ export async function bookVisit(c, input, ctx = {}) {
   }
   await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
   await logEvent(c.slug, "booking", { id: b.id, channel: ctx.channel });
+  // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
+  const since = Date.now() - D;
+  for (const l of (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) {
+    l.status = "booked"; l.bookingId = b.id; await saveRecord("leads", l);
+    await ackAlertsFor(c, l.id, "booking");
+    await logEvent(c.slug, "lead_closed", { id: l.id, by: "booking", bookingId: b.id });
+  }
   return b;
 }
 
@@ -113,6 +144,7 @@ export async function flagLead(c, input, ctx = {}) {
   if (prior) {
     const changed = [];
     for (const k of ["customer_name", "phone", "address", "issue", "wanted", "unsure"]) { const v = k === "phone" ? phone : esc(input[k]); if (v && v !== prior[k]) { prior[k] = v; changed.push(k); } }
+    const ct = await customerType(c.slug, prior.phone); if (ct !== prior.customerType) { prior.customerType = ct; changed.push("customer"); }
     const escalate = (reason === "emergency" || input.urgency === "emergency") && prior.urgency !== "emergency";
     if (escalate) { prior.urgency = "emergency"; prior.reason = "emergency"; prior.outcome = "needs_action"; changed.push("urgency"); }
     if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); }
@@ -133,9 +165,9 @@ export async function flagLead(c, input, ctx = {}) {
     const urgent = reason === "emergency" || reason === "wants_call" || input.urgency === "emergency";
     if (urgent) await openAlert(c, l, reason === "wants_call" ? "wants_call" : "emergency");
     if (PLANS[c.plan]?.followUp && l.phone && reason === "lead") {
-      await scheduleTask(c.slug, new Date(Date.now() + 4 * H), "lead_chase", { leadId: l.id, n: 1 });
-      await scheduleTask(c.slug, new Date(Date.now() + 26 * H), "lead_chase", { leadId: l.id, n: 2 });
-      await scheduleTask(c.slug, new Date(Date.now() + 48 * H), "lead_chase", { leadId: l.id, n: 3 });
+      await scheduleFollowUp(c, new Date(Date.now() + 4 * H), "lead_chase", { leadId: l.id, n: 1 });
+      await scheduleFollowUp(c, new Date(Date.now() + 26 * H), "lead_chase", { leadId: l.id, n: 2 });
+      await scheduleFollowUp(c, new Date(Date.now() + 48 * H), "lead_chase", { leadId: l.id, n: 3 });
     }
   }
   await logEvent(c.slug, "lead", { id: l.id, reason, channel: ctx.channel });
@@ -254,7 +286,7 @@ export async function cancelRequest(c, b) {
 
 // ---- Owner commands by text: ok, otw, done, quote, paid, cancel ----
 export async function ownerCommand(c, text) {
-  const m = String(text || "").trim().match(/^(ok|okay|done|quote|otw|cancel|paid)\s+([a-z0-9]{6,12})(?:\s+(.*))?$/i);
+  const m = String(text || "").trim().match(/^(ok|okay|done|quote|otw|cancel|paid|invoice)\s+([a-z0-9]{6,12})(?:\s+(.*))?$/i);
   if (!m) return null;
   const [, cmdRaw, id, rest] = m; const cmd = cmdRaw.toLowerCase();
   const b = (await getRecord("bookings", c.slug, id)) || (await getRecord("leads", c.slug, id));
@@ -273,23 +305,35 @@ export async function ownerCommand(c, text) {
     b.status = "done"; b.doneAt = new Date().toISOString(); await saveRecord("bookings", b);
     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h"].includes(t.type) && t.data?.bookingId === b.id);
     if (plan.followUp && b.phone && !blocked) {
-      await scheduleTask(c.slug, new Date(Date.now() + 2 * H), "review_request", { bookingId: b.id });
-      await scheduleTask(c.slug, new Date(Date.now() + 50 * H), "review_nudge", { bookingId: b.id });
-      await scheduleTask(c.slug, new Date(Date.now() + 3 * D), "payment_reminder", { bookingId: b.id });
-      await scheduleTask(c.slug, new Date(Date.now() + 7 * D), "payment_reminder", { bookingId: b.id });
-      await scheduleTask(c.slug, new Date(Date.now() + 8 * D), "referral_ask", { bookingId: b.id });
-      return `Marked done. Review request goes out in 2 hours, a nudge in 2 days if they do not reply. Text "paid ${b.id}" when paid, or payment reminders go out on day 3 and 7.`;
+      // Review request, a nudge if they do not reply, and the referral ask only after a positive reply.
+      // Payment reminders are not automatic: most residential jobs are paid on the spot (text "invoice REF amount").
+      await scheduleFollowUp(c, new Date(Date.now() + 2 * H), "review_request", { bookingId: b.id });
+      await scheduleFollowUp(c, new Date(Date.now() + 50 * H), "review_nudge", { bookingId: b.id });
+      await scheduleFollowUp(c, new Date(Date.now() + 8 * D), "referral_ask", { bookingId: b.id });
+      return `Marked done. Review request goes out in 2 hours (inside 9 am to 9 pm), a nudge in 2 days if they do not reply. If they still owe you, text "invoice ${b.id} amount" and reminders go out on day 3 and 7.`;
     }
     return `Marked done.`;
   }
+  if (cmd === "invoice") {
+    if (!plan.followUp) return `Payment reminders are on the Growth and Pro plans.`;
+    if (!b.phone) return `No phone number on ${id}, nothing to send.`;
+    if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "payment_reminder" }); return `${b.customer_name || b.phone} opted out of texts; no reminders.`; }
+    b.invoicedAt = new Date().toISOString(); if (rest) b.amount = /^\$/.test(rest.trim()) ? rest.trim() : "$" + rest.trim().replace(/^\$/, "");
+    if (b.status === "paid") b.status = "done";
+    await saveRecord("bookings", b);
+    await cancelTasks(c.slug, (t) => t.type === "payment_reminder" && t.data?.bookingId === b.id);
+    await scheduleFollowUp(c, new Date(Date.now() + 3 * D), "payment_reminder", { bookingId: b.id });
+    await scheduleFollowUp(c, new Date(Date.now() + 7 * D), "payment_reminder", { bookingId: b.id });
+    return `Invoice${b.amount ? " for " + b.amount : ""} logged for ${b.customer_name || b.phone}. Reminders go out on day 3 and 7 unless you text "paid ${b.id}".`;
+  }
   if (cmd === "quote") {
     b.status = "quoted"; b.quotedAt = new Date().toISOString(); if (rest) b.amount = rest; await saveRecord("bookings", b);
-    if (plan.followUp && b.phone && !blocked) { await scheduleTask(c.slug, new Date(Date.now() + 14 * D), "quote_check", { bookingId: b.id }); return `Quote logged. Day-14 check scheduled for ${b.customer_name || b.phone}.`; }
+    if (plan.followUp && b.phone && !blocked) { await scheduleFollowUp(c, new Date(Date.now() + 14 * D), "quote_check", { bookingId: b.id }); return `Quote logged. Day-14 check scheduled for ${b.customer_name || b.phone}.`; }
     return `Quote logged.`;
   }
   if (cmd === "paid") {
-    b.status = "paid"; await saveRecord("bookings", b); await cancelTasks(c.slug, (t) => t.type === "payment_reminder" && t.data?.bookingId === b.id);
-    return `Marked paid.`;
+    b.status = "paid"; b.paidAt = new Date().toISOString(); await saveRecord("bookings", b); await cancelTasks(c.slug, (t) => t.type === "payment_reminder" && t.data?.bookingId === b.id);
+    return `Marked paid. No payment reminders will go out.`;
   }
   if (cmd === "cancel") {
     b.status = "cancelled"; await saveRecord("bookings", b); await cancelTasks(c.slug, (t) => t.data?.bookingId === b.id || t.data?.leadId === b.id);
@@ -297,6 +341,34 @@ export async function ownerCommand(c, text) {
     return `Cancelled ${id}, reminders stopped.${acked ? "" : ""}`;
   }
   return null;
+}
+
+// ---- Review replies: the referral ask only goes to someone who said they were happy ----
+// Called before the model answers a customer text. If a review request went to this number and
+// has no reply yet, classify the text; a negative reply stops the nudge and the referral ask and
+// reaches the owner as NEEDS ACTION; a positive one unlocks the referral ask.
+export async function noteReviewReply(c, phone, text) {
+  const recs = (await listRecords("bookings", c.slug, 300)).filter((b) => b.phone === phone && b.reviewAskedAt && !b.reviewReply).sort((a, b) => (a.reviewAskedAt || "").localeCompare(b.reviewAskedAt || ""));
+  const b = recs[recs.length - 1];
+  if (!b) return null;
+  let sentiment = "none";
+  try {
+    const { makeClient, MODEL } = await import("./agent.mjs");
+    const client = makeClient();
+    const r = await client.messages.create({ model: MODEL, max_tokens: 5, system: "A home service company texted a customer asking how the visit went and for a Google review. Classify the customer's reply. Answer with one word: positive (happy, thanks, will do, good job), negative (a complaint, something wrong, unhappy, refuses because of the service), or none (a question, a new request, unrelated, or unclear).", messages: [{ role: "user", content: text.slice(0, 500) }] });
+    const w = (r.content?.[0]?.text || "").trim().toLowerCase();
+    sentiment = w.startsWith("pos") ? "positive" : w.startsWith("neg") ? "negative" : "none";
+  } catch (err) { console.error("review classify", err); }
+  b.reviewReply = { sentiment, text: text.slice(0, 300), at: new Date().toISOString() };
+  await saveRecord("bookings", b);
+  if (sentiment === "negative") {
+    await cancelTasks(c.slug, (t) => ["review_nudge", "referral_ask"].includes(t.type) && t.data?.bookingId === b.id);
+    await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} replied to the review request: "${text.slice(0, 200)}"\nRef ${b.id}, ${b.issue || ""}. No review nudge or referral ask will go out. Reply "ok ${b.id}" when you have it.`, { type: "owner_alert" });
+  } else if (sentiment === "positive") {
+    await cancelTasks(c.slug, (t) => t.type === "review_nudge" && t.data?.bookingId === b.id);
+  }
+  await logEvent(c.slug, "review_reply", { id: b.id, sentiment });
+  return { booking: b, sentiment };
 }
 
 // ---- Line health and digests ----

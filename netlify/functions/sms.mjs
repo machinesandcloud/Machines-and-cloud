@@ -4,14 +4,14 @@
 import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
-import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest } from "./lib/desk.mjs";
+import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optedOut } from "./lib/send.mjs";
 
 export const config = { path: "/api/sms" };
 
 const twiml = (msg) => new Response(`<?xml version="1.0" encoding="UTF-8"?><Response>${msg ? `<Message>${msg.replace(/[<>&]/g, (ch) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[ch]))}</Message>` : ""}</Response>`, { status: 200, headers: { "Content-Type": "text/xml" } });
 
-const HELP = 'Commands: "ok <ref>" acknowledges an alert, "otw <ref>" sends the on-the-way text, "done <ref>" marks the job done and starts the review and payment follow-ups, "quote <ref> <amount>" logs a quote (day-14 check), "paid <ref>", "cancel <ref>". The ref is on each summary text.';
+const HELP = 'Commands: "ok <ref>" acknowledges an alert, "otw <ref>" sends the on-the-way text, "done <ref>" marks the job done and starts the review request, "invoice <ref> <amount>" starts payment reminders on day 3 and 7, "paid <ref>" stops them, "quote <ref> <amount>" logs a quote (day-14 check), "cancel <ref>". The ref is on each summary text.';
 const STOP_RE = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|opt\s*out|optout)\b[\s.!]*$/i;
 const STOP_PHRASE = /\b(stop texting|stop messaging|do not text|don't text|no more texts|remove me)\b/i;
 const START_RE = /^\s*(start|unstop|yes)\s*[.!]*\s*$/i;
@@ -88,6 +88,7 @@ export default async (req) => {
   }
 
   await logEvent(c.slug, "sms_inbound", { from });
+  try { await noteReviewReply(c, from, body); } catch (err) { console.error("review reply", err); }
   const conv = await getConversation(c.slug, "sms", from);
   const bookings = await upcomingBookings(c, from);
 
