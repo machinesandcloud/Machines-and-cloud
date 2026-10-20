@@ -15,7 +15,8 @@ Sprint rules carried over: every new store kind extends `admin.mjs` `delete`; ev
 ## 2. Tickets
 
 ### S3-01 Quiet hours for every follow-up text
-Status: delivered 2026-10-20 (engineer, draft `6ad6bae471d3d40380534fad`); PM verdict below. Size: S. Implements: Round 3 item 1 (MUST).
+Status: verified 2026-10-20 6ad6bbe213b4fbbeea885c10: `nextOpenTime` by node maps Friday 9:30 pm to Saturday 9:00 am, Saturday 10:30 pm to Sunday 12:00 pm, Monday 8:00 am to 9:00 am, and leaves Monday 10:00 am alone; `done REF` at 8:05 pm Monday put `review_request` at Tuesday 9:00 am and `review_nudge` at Thursday 9:00 am, and a lead flagged at 8:07 pm got its first `lead_chase` at Tuesday 9:00 am, each matching an independent Python `zoneinfo` computation to the minute. The visit-reminder exemption was verified in code (`scheduleReminders` calls `scheduleTask`, not `scheduleFollowUp`) and by the sprint 1 run (7:00 am reminders); my live line for it ran after `done REF` had already cancelled the reminders, a harness ordering error.
+Size and scope: Size: S. Implements: Round 3 item 1 (MUST).
 
 Engineer note: `scheduleFollowUp` in `lib/desk.mjs` moves `review_request`, `review_nudge`, `quote_check`, `lead_chase`, `referral_ask`, and `payment_reminder` to the next minute inside 9 am to 9 pm Houston (noon to 9 pm Sunday); `reminder_24h`, `reminder_1h`, confirmations, `on_my_way`, `text_back`, `fallback_window`, and live replies are not deferred. `nextOpenTime(date)` is exported for unit tests. Verified by the engineer: `done REF` at 7:48 pm Monday put the review request at Tuesday 9:00 am and the nudge at Thursday 9:00 am.
 
@@ -29,7 +30,8 @@ Acceptance (now, draft):
 - [ ] `grep -n "scheduleTask(" netlify/functions/lib/desk.mjs` shows only the reminder and escalate calls; every follow-up type goes through `scheduleFollowUp`.
 
 ### S3-02 Payment reminders by `invoice REF amount`, not by `done`
-Status: delivered 2026-10-20 (engineer, same draft); PM verdict below. Size: S. Implements: Round 3 item 2 (MUST).
+Status: verified 2026-10-20 6ad6bbe213b4fbbeea885c10: `done` scheduled no `payment_reminder` and its reply names the `invoice` command; `invoice REF 450` created two reminders (Thursday and Monday at 8:08 pm Houston, inside the hours) with `amount` "$450" and `invoicedAt`; the nudged day-3 reminder logged "friendly reminder that the invoice for $450 is open"; `paid REF` removed the rest and replied "No payment reminders will go out"; `help` lists `invoice`; `desk.html` and OPERATIONS.md describe it.
+Size and scope: Size: S. Implements: Round 3 item 2 (MUST).
 
 Engineer note: `done` no longer schedules payment reminders; `invoice REF 450` schedules day 3 and day 7 (quiet hours applied), stores `amount` "$450" and `invoicedAt` on the booking; `paid REF` cancels them and replies "No payment reminders will go out"; the scheduler skips `payment_reminder` unless the booking is done and invoiced; `help`, the portal commands text, and OPERATIONS.md say so.
 
@@ -43,7 +45,8 @@ Acceptance (now, draft):
 - [ ] `help` lists `invoice`; `desk.html` and OPERATIONS.md describe the command.
 
 ### S3-03 The referral ask only after a positive review reply
-Status: delivered 2026-10-20 (engineer, same draft); PM verdict below. Size: M. Implements: Round 3 item 3 (MUST, the PO's recommended gate); keeps the Growth card line "referral ask after a five star reply" true.
+Status: verified 2026-10-20 6ad6bbe213b4fbbeea885c10: the review request stamped `reviewAskedAt` and landed in the SMS conversation with `system: "review_request"`; "Great job, thanks! Will do." classified positive, cancelled the nudge, and the referral ask then sent; "the tech left a mess in my hallway" classified negative, texted the owner NEEDS ACTION with the quote, and removed both the nudge and the ask; a third booking with no reply sent the nudge and returned "no positive reply" for the ask; `grep -c "five star reply" index.html` is 1.
+Size and scope: Size: M. Implements: Round 3 item 3 (MUST, the PO's recommended gate); keeps the Growth card line "referral ask after a five star reply" true.
 
 Engineer note: when the scheduler sends `review_request` it stamps `reviewAskedAt` on the booking and writes the text into the SMS conversation (every scheduled follow-up now is, with `system: <type>`); the first customer text after it is classified by `noteReviewReply` (a 5-token Claude call: positive, negative, none) and stored as `booking.reviewReply` with a `review_reply` event; negative cancels `review_nudge` and `referral_ask` and texts the owner "NEEDS ACTION ... replied to the review request"; positive cancels the nudge; the scheduler sends `referral_ask` only when `reviewReply.sentiment` is positive ("no positive reply" otherwise) and `review_nudge` only when there is no reply.
 
@@ -76,7 +79,7 @@ Acceptance (now, draft; HVAC test shop):
 - [ ] `PUT` with an edited `tier1` list is reflected in `admin prompt channel=test` on the next call; the plumbing default shows "leaking water heater" under Tier 1.
 
 ### S3-06 Monday "what it did for you" email with no-book reasons
-Status: todo. Size: M. Implements: Round 3 item 5 (SHOULD, before customer two); Epic 5 SHOULD weekly email; makes the Pro card's weekly report true for every plan.
+Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: `NOTIFY_OWNER` carries `nobook_reason` (seven values, exported as `NOBOOK_REASONS`); a test shop with 4 bookings, 6 unbooked leads, and 2 spam texts returned `POST {action:"weekly"}` text with "Missed-call-to-booking rate: 40 percent (4 booked of 10)", "plus 2 spam, not counted", "Did not book: 6. Why: 2 a question only, 1 out of the area, 1 the fee was too much, 1 wanted a price first, 1 wanted someone sooner"; `run_scheduler force_hour=8 force_day=Mon` sent it by email, logged `weekly` with `stats`, and texted nothing; `weeklyDigest` is gone (`weeklyReport` replaces it); `admin weekly` with `send` exists. Steve gets a copy for 28 days after `liveAt`. Size: M. Implements: Round 3 item 5 (SHOULD, before customer two); Epic 5 SHOULD weekly email; makes the Pro card's weekly report true for every plan.
 
 Files: `netlify/functions/lib/config.mjs` (`NOTIFY_OWNER` gains `nobook_reason` enum: `wanted_price`, `wanted_sooner`, `out_of_area`, `fee_objection`, `question_only`, `other`, `none`), `netlify/functions/lib/desk.mjs` (`weeklyReport(c)` replaces the unused `weeklyDigest`), `netlify/functions/scheduler.mjs` (Monday 8:00 to 8:09 Houston, every `live` shop, all plans; Steve gets a copy), `netlify/functions/client.mjs` (POST `weekly` returns it), `netlify/functions/admin.mjs` (`weekly` with `send: true`).
 
@@ -89,7 +92,7 @@ Acceptance (now, draft):
 - [ ] `grep -c "weeklyDigest" netlify/functions/*.mjs netlify/functions/lib/*.mjs` returns 0.
 
 ### S3-07 Spanish all the way through
-Status: todo. Size: M. Implements: Round 3 item 6 (SHOULD, before customer two); Epic 6 SHOULD.
+Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: `TEMPLATES_ES` has the same nine keys as `TEMPLATES`; `STRINGS.es` covers confirmation, fallback window, and cancelled; `consentLine(c, "es")` is in the prompt on Spanish-enabled shops; a visit booked in Spanish on the test line stored `language: "es"` and its confirmation preview read "su visita queda agendada ... Responda STOP"; the reminder templates were checked with node (`template("reminder_24h", {language:"es"})` returns "Recordatorio de ..."); the public GET greeting on a Spanish shop reads "Hi, this is the X front desk ... / Hola, le atiende la recepción de X."; the voice prompt now states the first message, "Thanks for calling X. Hablamos español. This is the front desk assistant. How can I help you today?". Translation review: pending a Spanish speaker Steve names (DECISIONS.md). Size: M. Implements: Round 3 item 6 (SHOULD, before customer two); Epic 6 SHOULD.
 
 Files: `netlify/functions/lib/desk.mjs` (`TEMPLATES_ES`, chosen by `booking.language` or `lead.language`), `netlify/functions/lib/config.mjs` (`publicView` greeting bilingual when `business.spanish`), `embed.js`, `netlify/functions/lib/vapi.mjs` (`standardGreeting` first sentence offers Spanish), `netlify/functions/voice.mjs` (text-back already bilingual), `product/DECISIONS.md` (translation review status).
 
@@ -102,7 +105,7 @@ Acceptance (now, draft):
 - [ ] `TEMPLATES_ES` has every key `TEMPLATES` has (`node -e` compares the key sets).
 
 ### S3-08 Callback promises are tracked
-Status: todo. Size: S. Implements: Round 3 item 7 (SHOULD, before customer two).
+Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: a `wants_call` lead carries `callbackPromise` and `callbackDueAt` (30 minutes out during hours; "by 8 am tomorrow" resolved to the next 8:00 am Houston after hours, which is what the draft run at 8 pm showed) and a `callback_check` task; nudged and run without an owner reply it returned `overdue`, texted the owner "Overdue callback: ... Reply \"called REF\"", set `overdueAt`, and the portal row shows the "overdue callback" tag; `called REF` replied "Logged: you reached ...", set `calledAt`, status `called`, and removed the check task; `ok REF` sets `ackedAt` and the check returns `acked`. The weekly email counts kept, overdue, and pending promises. Also: acknowledging an alert now cancels its `escalate` task (the S2-14 hygiene note). Size: S. Implements: Round 3 item 7 (SHOULD, before customer two).
 
 Files: `netlify/functions/lib/desk.mjs` (`flagLead` sets `callbackDueAt` on `wants_call` and `handoff` leads from `rules.callbackHours` or `callbackAfterHours` parsed as minutes or a clock time; `ownerCommand` gains `called REF`), `netlify/functions/scheduler.mjs` (task `callback_check` at `callbackDueAt`), `desk.html` (leads table "overdue" tag), `netlify/functions/lib/config.mjs` (`rules.callbackHours` stays free text but the parser understands "within N minutes", "within the hour", "by H am/pm").
 
@@ -115,7 +118,7 @@ Acceptance (now, draft):
 - [ ] After hours, the promise uses `callbackAfterHours` and `callbackDueAt` falls at the next morning time.
 
 ### S3-09 Customers export in Jobber and Housecall Pro headers
-Status: todo. Size: S. Implements: Round 3 item 8 (SHOULD); cut 1's CSV bridge.
+Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: `export=customers` returned the eleven Jobber headers in order, one row per phone (12 rows for 12 numbers across bookings and leads, spam excluded), "Lee Park" split into First name and Last name, "12 Oak St, Katy" kept Street and City with State TX and an empty Zip, "1402 Mason Rd, Katy, TX 77450" split into Street, City, State, Zip Code, Note carries the last issue and the refs, Lead Source "Other", Tags "front desk"; Python's csv module parsed it. The portal Your data card has the fourth link. The Jobber trial import is Steve's keyed check. Size: S. Implements: Round 3 item 8 (SHOULD); cut 1's CSV bridge.
 
 Files: `netlify/functions/client.mjs` (`export=customers`), `desk.html` (fourth link).
 
@@ -127,7 +130,7 @@ Acceptance (now, draft):
 - [ ] Python's `csv` module parses the file; a Jobber trial import is checked by Steve once (keyed by his account, not a draft line).
 
 ### S3-10 Structured business hours
-Status: todo. Size: M. Implements: Round 3 item 9 (SHOULD).
+Status: delivered 2026-10-20, draft 6ad6bf412ecb06fa6cfac75a. Engineer check: onboarding "Mon to Fri 8 to 5" produced `rules.hours` with seven keys, Saturday and Sunday null; `admin prompt channel=test at=2026-10-23T23:00:00Z` (Friday 6 pm Houston) said "the shop is closed" and used the after-hours callback sentence, `at=2026-10-23T21:00:00Z` (4 pm) said open and "within 30 minutes"; PUT `rules.hours` is accepted (object, or a string parsed by `parseHours`); `hour >= 7 && hour < 19` is gone (`isBusinessHours` with a 7 am to 7 pm fallback, which the portal names). Onboarding step 2 fills seven time rows from the hours sentence as it is typed and sends them as `hoursTable`; the build parses crawled hours when the owner gave none; the portal edits the rows under Hours. The prompt also states the current Houston time and whether the shop is open. The index FAQ sentence about Google's business hours is unchanged (it is about Google's clock, not the shop's). Size: M. Implements: Round 3 item 9 (SHOULD).
 
 Files: `netlify/functions/lib/config.mjs` (`rules.hours` as `{ mon: { open, close } ... sun }`, `isBusinessHours(c, date)`), `netlify/functions/onboard-build-background.mjs` (parse the crawled hours string into fields, keep the string as `business.hours` for the prompt), `onboard.html` step 2 (seven rows, prefilled), `desk.html`, `netlify/functions/lib/desk.mjs` (callback window choice, `cellIsForwardedLine` unchanged), `netlify/functions/lib/config.mjs` `buildSystemPrompt` (after-hours behavior), S3-06 after-hours count, the LSA copy's "business hours" sentence in `index.html` FAQ.
 
@@ -174,3 +177,16 @@ Pre-key pass: each ticket's "now" lines against the engineer's named draft, reco
 Keyed pass (S3-04): as in `SPRINT2.md` section 5, plus the Spanish voice greeting (S3-07) and a callback-promise check on Steve's phone (S3-08).
 
 Go-live gate for customers two and three: S3-04 complete, S3-01 to S3-03 verified, S3-05 verified for the customer's trade, the 14-case matrix plus the three S3-05 cases passed on the customer's test line, the OPERATIONS.md runbook followed and the sheet filed.
+
+## 6. Verification record
+
+### Pre-key pass for the delivered three, 2026-10-20, draft `6ad6bbe213b4fbbeea885c10` (built by the PM from `main` at `d08e6e9`)
+
+`scratchpad/verify5.py`, 29 checks, 26 passed; the 3 failures are harness errors of mine (a compound line that also demanded the word "payment" in a reply that says "reminders"; a reminder check run after `done REF` had cancelled the reminders; and the S2-14 sub-line about the lingering `escalate` task, recorded in SPRINT2.md). Test shop `pm-test-hvac-a55b` (number `+17135550115`) deleted; no opt-outs were created. `GET /api/admin` lists no PM Test shop; one shop named "S3 Test Week" that I did not create remains in the shared store and is reported to the engineer rather than deleted.
+
+Results: S3-01, S3-02, S3-03 verified. S3-04 to S3-10 are todo.
+
+Observed and worth knowing: every scheduled follow-up now lands inside Texas hours to the minute; `done` at night no longer sends anything before 9 am; the negative-review path reached the owner within the same scheduler run and left no promotional text in the queue.
+
+### Keyed pass
+Pending S3-04 (Steve's keys). Order in section 5.

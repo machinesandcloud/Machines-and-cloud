@@ -96,7 +96,9 @@ export default async (req) => {
       b.name = b.name || p.business_name; b.trade = b.trade || p.trade; b.city = b.city || p.city;
       if (!hadTrade && b.trade) { const { normalizeEmergencies } = await import("./lib/config.mjs"); const e = normalizeEmergencies(c.rules?.emergencies, ""); c.rules.emergencies = normalizeEmergencies({ script: e.script }, b.trade); }
       if (!b.serviceArea?.length) b.serviceArea = p.service_area || [];
+      const hadHours = !!b.hours;
       b.hours = b.hours || p.hours; b.afterHours = b.afterHours || p.after_hours; b.licenses = b.licenses || p.licenses;
+      if (!hadHours && b.hours && !c.rules.hours) { const { parseHours } = await import("./lib/config.mjs"); c.rules.hours = parseHours(b.hours) || null; }
       if (!c.services?.length) c.services = p.services || [];
       if (!c.fees?.length) c.fees = (p.published_prices || []).filter((f) => f.amount);
       const have = new Set((c.faq || []).map((x) => x.q.toLowerCase()));

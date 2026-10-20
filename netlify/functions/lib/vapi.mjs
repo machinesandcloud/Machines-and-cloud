@@ -38,7 +38,7 @@ function transferDef(client) {
 
 export function standardGreeting(client) {
   return client.business?.spanish
-    ? `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today? Si prefiere español, dígamelo.`
+    ? `Thanks for calling ${client.business.name}. Hablamos español. This is the front desk assistant. How can I help you today?`
     : `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today?`;
 }
 
@@ -53,6 +53,8 @@ export function voicePrompt(client) {
   return buildSystemPrompt(client, "voice") + `
 
 You are on a phone call. Speak in short, natural sentences, one idea at a time. Never read URLs, reference codes, or markdown aloud. Confirm phone numbers and addresses back to the caller digit by digit before booking. ${person} When the caller is done, say goodbye and end the call.
+
+Your first message on this call is: "${standardGreeting(client)}"
 
 What we know about this caller before the call: name "{{customerName}}" ({{isExisting}}); upcoming visit: "{{upcomingVisit}}". When these are filled in, use them and do not ask for them again; when they are empty, the caller is new to us. If "{{vip}}" is "yes", the caller is on ${owner}'s always-ring-through list: take a message for ${owner} and call notify_owner with reason handoff.`;
 }

@@ -11,7 +11,8 @@ export const STATUSES = ["new", "building", "testing", "live", "paused", "cancel
 
 export const DATA_POLICY = "Your customers' names, numbers, and conversations belong to your shop. Machines & Cloud uses them only to run your front desk, never to train or inform another shop's desk, and never sells or shares them. You can ask for an export at any time, and everything is deleted on request after you cancel.";
 export const CONSENT_LINE = "You'll get appointment texts from {name} at this number. Reply STOP any time to end them.";
-export const consentLine = (c) => CONSENT_LINE.replace("{name}", c.business?.name || "us");
+export const CONSENT_LINE_ES = "Recibirá mensajes de texto sobre su cita de {name} en este número. Responda STOP cuando quiera para dejar de recibirlos.";
+export const consentLine = (c, lang = "en") => (lang === "es" ? CONSENT_LINE_ES : CONSENT_LINE).replace("{name}", c.business?.name || "us");
 export const policyUrls = (slug, site = process.env.URL || "https://machinesandcloud.com") => ({ privacy: `${site}/policy?c=${slug}`, terms: `${site}/policy?c=${slug}&page=terms` });
 
 export const DEFAULT_WINDOWS = ["8 to 12", "12 to 5"];
@@ -23,6 +24,70 @@ export const DEFAULT_NEVER = [
 ];
 export const DEFAULT_HANDOFF = ["Complaints about past work", "Warranty questions", "Anything about a bill or refund", "Commercial or large projects"];
 export const ACK_MINUTES = [5, 10, 15, 30];
+
+// Structured business hours: { mon: { open: "08:00", close: "17:00" } | null, ... sun }. A shop with
+// none set falls back to 7 am to 7 pm every day for every hours-based decision (the portal says so).
+export const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+export const DEFAULT_HOURS = Object.fromEntries(DAYS.map((d) => [d, { open: "07:00", close: "19:00" }]));
+const DAY_IDX = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, su: 0, mo: 1, tu: 2, we: 3, th: 4, fr: 5, sa: 6, m: 1, t: 2, w: 3, r: 4, f: 5 };
+const hhmm = (h, m = 0) => `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+function clock(str, isClose) {
+  const m = String(str).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10); const min = parseInt(m[2] || "0", 10); const ap = (m[3] || "").toLowerCase();
+  if (ap.startsWith("p") && h < 12) h += 12; else if (ap.startsWith("a") && h === 12) h = 0;
+  else if (!ap) { if (isClose && h < 12 && h <= 9) h += 12; else if (!isClose && h < 5) h += 12; }
+  if (h > 24) return null;
+  return hhmm(h, min);
+}
+// Parses "Mon to Fri 7 to 6, Sat 8 to 2" or "Monday-Friday 8am-5pm; Saturday 9-1; Sunday closed".
+export function parseHours(str) {
+  const out = {}; let any = false;
+  for (const part of String(str || "").split(/[,;\n]+/)) {
+    const t = part.trim().toLowerCase().replace(/\./g, "");
+    if (!t) continue;
+    const dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun|m|t|w|r|f)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun|m|t|w|r|f)[a-z]*)?\s*:?\s*(.*)$/);
+    if (!dm) { if (/24\s*\/\s*7|24 hours|around the clock/.test(t)) { for (const d of DAYS) out[d] = { open: "00:00", close: "24:00" }; any = true; } continue; }
+    const a = DAY_IDX[dm[1]], b = dm[2] ? DAY_IDX[dm[2]] : a; const rest = dm[3];
+    const days = []; for (let i = a; ; i = (i + 1) % 7) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; if (days.length > 7) break; }
+    if (/closed|by appointment/.test(rest)) { for (const d of days) out[d] = null; any = true; continue; }
+    const tm = rest.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/);
+    if (!tm) continue;
+    const open = clock(tm[1], false), close = clock(tm[2], true);
+    if (!open || !close) continue;
+    for (const d of days) out[d] = { open, close }; any = true;
+  }
+  if (!any) return null;
+  for (const d of DAYS) if (out[d] === undefined) out[d] = null;
+  return out;
+}
+export function normalizeHours(v) {
+  if (!v || typeof v !== "object") return null;
+  const out = {}; let any = false;
+  for (const d of DAYS) {
+    const x = v[d];
+    if (x && typeof x === "object" && /^\d{2}:\d{2}$/.test(x.open || "") && /^\d{2}:\d{2}$/.test(x.close || "")) { out[d] = { open: x.open, close: x.close }; any = true; } else out[d] = null;
+  }
+  return any ? out : null;
+}
+export function houstonNow(at) {
+  const d = at ? new Date(at) : new Date();
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(d).filter((x) => x.type !== "literal").map((x) => [x.type, x.value]));
+  return { day: parts.weekday.toLowerCase().slice(0, 3), minutes: (Number(parts.hour) % 24) * 60 + Number(parts.minute), label: new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "long", hour: "numeric", minute: "2-digit" }).format(d) };
+}
+export function isBusinessHours(c, at) {
+  const hours = normalizeHours(c.rules?.hours) || DEFAULT_HOURS;
+  const { day, minutes } = houstonNow(at);
+  const h = hours[day]; if (!h) return false;
+  const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+  return minutes >= toMin(h.open) && minutes < toMin(h.close);
+}
+export function hoursText(c) {
+  const hours = normalizeHours(c.rules?.hours);
+  if (!hours) return "";
+  const fmt = (t) => { const h = Number(t.slice(0, 2)), m = t.slice(3); const ap = h >= 12 && h < 24 ? "pm" : "am"; const hh = h % 12 || 12; return m === "00" ? `${hh} ${ap}` : `${hh}:${m} ${ap}`; };
+  return DAYS.map((d) => `${d[0].toUpperCase() + d.slice(1)} ${hours[d] ? fmt(hours[d].open) + " to " + fmt(hours[d].close) : "closed"}`).join(", ");
+}
 
 // Emergency tiers by trade. Tier 0 is life safety (safety script, no intake beyond phone and
 // address, emergency chain). Tier 1 is same day (a "today" lead, the after-hours fee quoted outside
@@ -65,7 +130,7 @@ export function newClient({ slug, ownerKey, owner, business }) {
     owner: { name: "", email: "", phone: "", backupPhone: "", ...owner },
     business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", legal: {}, ...business },
     services: [], fees: [], windows: DEFAULT_WINDOWS.slice(),
-    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
+    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), hours: parseHours(business?.hours) || null, ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
     digest: { text: true },
     faq: [], leadSources: [], software: "google",
     phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
@@ -90,12 +155,20 @@ export function loopCheck(c) {
   return null;
 }
 
+// The widget's first line; one bilingual line on a Spanish-enabled shop unless the owner wrote Spanish into it already.
+export function bilingualGreeting(c) {
+  const name = c.business?.name || "front desk";
+  const g = c.widget?.greeting || `Hi, this is the ${name} front desk. What can we help with today?`;
+  if (!c.business?.spanish || /hola|español|ayud/i.test(g)) return g;
+  return `${g} / Hola, le atiende la recepción de ${name}. ¿En qué le podemos ayudar?`;
+}
+
 // What the browser widget on the client's site may know.
 export function publicView(c) {
   return {
     slug: c.slug, status: c.status,
     name: c.business?.name || "Front desk",
-    greeting: c.widget?.greeting || `Hi, this is the ${c.business?.name || "front desk"}. What can we help with today?`,
+    greeting: bilingualGreeting(c),
     spanish: !!c.business?.spanish,
     businessNumber: c.phone?.businessNumber || "",
   };
@@ -130,14 +203,18 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
   const upcoming = extra.bookings?.length
     ? `\nThis customer's upcoming visit(s): ${extra.bookings.map((v) => `ref ${v.id}, ${v.date || "date not set"}, ${v.window}, ${v.issue}`).join("; ")}.\nReminder texts say "Reply C to confirm or R to reschedule". If they reply R or ask to reschedule: offer the arrival windows and call update_visit with action "reschedule" once they pick a day and window. If they reply C or confirm: call update_visit with action "confirm". If they want to cancel: call update_visit with action "cancel_request"; you do not cancel visits yourself, ${owner} does.\n`
     : "";
-  const callback = `${owner} will call them ${r.callbackHours || "within 30 minutes"} during business hours or ${r.callbackAfterHours || "by 8 am tomorrow"} after hours`;
+  const open = isBusinessHours(c, extra.at);
+  const now = houstonNow(extra.at);
+  const callback = open ? `${owner} will call them ${r.callbackHours || "within 30 minutes"}` : `${owner} will call them ${r.callbackAfterHours || "by 8 am tomorrow"} (the shop is closed right now)`;
+  const structured = hoursText(c);
   return `You are the front desk for ${b.name || "this company"}, a ${b.trade || "home service"} company in ${b.city || "Houston"}, run by ${owner}. You are an AI and you say so if asked; you never claim to be a person. Your job is to answer the customer, find out what they need, and book or request the visit on the owner's rules, then make sure ${owner} gets the details.
 
 ${channelNote}
 
 About the company:
 - Services: ${list(c.services)}
-- Hours: ${b.hours || "not specified; say you will confirm"}${b.afterHours ? `. After hours: ${b.afterHours}` : ""}
+- Hours: ${structured || b.hours || "not specified; say you will confirm"}${b.afterHours ? `. After hours: ${b.afterHours}` : ""}
+- Right now it is ${now.label} in Houston and the shop is ${open ? "open" : "closed"}.${open ? "" : " Use the after-hours callback promise and the after-hours rules until it opens."}
 - Service area: ${list(b.serviceArea)}${b.notServed?.length ? `. Not served: ${list(b.notServed)}` : ""}
 - Published prices (the only prices you may state): ${fees}
 - Arrival windows you may offer: ${list(c.windows)}. Never promise an exact time; say ${owner} or the tech will text when on the way.
@@ -160,7 +237,7 @@ How a conversation should go:
 - Never tell the customer something is booked or that the owner was told until the tool has actually returned. Call the tool first, then say it.
 - A booking already alerts the owner with every detail. Do not call notify_owner for a customer you just booked unless something new and urgent comes up.
 - Lines like [Done: visit booked, ref X] at the end of your earlier messages mean that action already happened. Do not repeat it; refer to the ref if the customer asks.
-- After a tool succeeds, tell the customer what happens next in one sentence. When book_visit succeeds, say this once, in the customer's language: "${consentLine(c)}" Never say it twice in one conversation.
+- After a tool succeeds, tell the customer what happens next in one sentence. When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation.
 - In the "unsure" field of a tool, write anything you were not confident about (the address, the issue, whether it is in the area); leave it empty when you are sure.
 - Never invent prices, discounts, availability, or guarantees. Never say anything negative about other companies.`;
 }
@@ -174,6 +251,8 @@ function emergencyBlock(c) {
 - Tier 2: ${e.tier2}
 `;
 }
+
+export const NOBOOK_REASONS = ["wanted_price", "wanted_sooner", "out_of_area", "fee_objection", "question_only", "other", "none"];
 
 const UNSURE = { type: "string", description: "Anything you were not confident about: the address, the issue, whether it is in the area; empty string if none" };
 
@@ -211,9 +290,10 @@ export const NOTIFY_OWNER = {
       urgency: { type: "string", enum: ["emergency", "today", "this_week", "flexible"] },
       wanted: { type: "string", description: "When they want someone, in their words; empty if not said" },
       language: { type: "string", enum: ["en", "es"] },
+      nobook_reason: { type: "string", enum: NOBOOK_REASONS, description: "Why this customer did not book a visit: wanted_price (would not proceed without a number you could not give), wanted_sooner (no window soon enough), out_of_area, fee_objection (the published fee was too much), question_only (never wanted a visit), other, or none (not applicable, for example an emergency or spam)" },
       unsure: UNSURE,
     },
-    required: ["customer_name", "phone", "address", "issue", "reason", "urgency", "wanted", "language", "unsure"], additionalProperties: false,
+    required: ["customer_name", "phone", "address", "issue", "reason", "urgency", "wanted", "language", "nobook_reason", "unsure"], additionalProperties: false,
   },
 };
 

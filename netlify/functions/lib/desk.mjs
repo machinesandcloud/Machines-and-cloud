@@ -4,7 +4,8 @@
 import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put } from "./store.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO } from "./calendar.mjs";
-import { PLANS } from "./config.mjs";
+import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS } from "./config.mjs";
+import { getUsage, usageView } from "./usage.mjs";
 
 const H = 3600 * 1000, D = 24 * H;
 const esc = (s) => String(s || "").trim();
@@ -28,6 +29,38 @@ export const TEMPLATES = {
     : n === 2 ? `${c.business.name} here. We have openings ${(c.windows || [])[0] ? "(" + c.windows.join(" or ") + ")" : "this week"}. Want one?`
     : `${c.business.name}: last note from us. If you still need help, reply any time and we will fit you in.`,
 };
+
+// Spanish set, chosen when the record's language is "es". Drafted by the model; a Spanish speaker
+// Steve names reviews them before the first Spanish-speaking customer goes live (DECISIONS.md).
+export const TEMPLATES_ES = {
+  reminder_24h: (c, b) => `Recordatorio de ${c.business.name}: su visita es mañana, ${b.window}. Responda C para confirmar o R para cambiar la hora.`,
+  reminder_1h: (c, b) => `${c.business.name}: su ventana de llegada (${b.window}) empieza pronto. Responda aquí si algo cambió.`,
+  on_my_way: (c, b) => `${c.business.name}: el técnico va en camino a ${b.address}. Por favor asegure a sus mascotas y despeje el área.${b.notes ? " Nota: " + b.notes : ""}`,
+  review_request: (c, j) => `Gracias por elegir ${c.business.name}${j.customer_name ? ", " + j.customer_name.split(" ")[0] : ""}. ¿Cómo lo hicimos? Una reseña rápida en Google ayuda mucho a un negocio pequeño: ${reviewLink(c) || "(enlace de reseña)"}. Responda aquí si algo no estuvo bien.`,
+  review_nudge: (c, j) => `${c.business.name}: si tiene 30 segundos, nos encantaría una reseña: ${reviewLink(c) || "(enlace de reseña)"}. Gracias.`,
+  quote_check: (c, j) => `${c.business.name}: le escribimos sobre la cotización que le enviamos${j.issue ? " para " + j.issue : ""}. ¿Quiere que la cerremos o la dejamos abierta? Responda y nos encargamos.`,
+  payment_reminder: (c, j) => `${c.business.name}: un recordatorio amable de que la factura${j.amount ? " por " + j.amount : ""} sigue pendiente. ${c.business.payLink ? "Pague aquí: " + c.business.payLink : "Responda aquí con cualquier pregunta."}`,
+  referral_ask: (c, j) => `${c.business.name}: gracias de nuevo. Si un vecino necesita ayuda, le agradeceríamos la recomendación. Solo pídale que escriba a este número.`,
+  lead_chase: (c, l, n) => n === 1
+    ? `Hola${l.customer_name ? " " + l.customer_name.split(" ")[0] : ""}, le escribe ${c.business.name}. Vimos su solicitud${l.issue ? " sobre " + l.issue : ""}. ¿Todavía necesita ayuda? Responda con una hora que le convenga y lo agendamos.`
+    : n === 2 ? `${c.business.name}: tenemos espacio ${(c.windows || [])[0] ? "(" + c.windows.join(" o ") + ")" : "esta semana"}. ¿Le interesa?`
+    : `${c.business.name}: última nota de nuestra parte. Si todavía necesita ayuda, responda cuando quiera y lo atendemos.`,
+};
+export const STRINGS = {
+  en: {
+    confirmation: (c, b) => `${c.business.name}: you're booked for ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window}. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out.`,
+    fallback_window: (c, owner, win) => `${c.business.name}: we have your request and ${owner} will call you ${win}.`,
+    cancelled: (c, b) => `${c.business.name}: your visit (${b.date || ""} ${b.window}) is cancelled as requested. Text us any time to rebook.`,
+  },
+  es: {
+    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP para no recibir más mensajes.`,
+    fallback_window: (c, owner, win) => `${c.business.name}: recibimos su solicitud y ${owner} le llamará ${win}.`,
+    cancelled: (c, b) => `${c.business.name}: su visita (${b.date || ""} ${b.window}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
+  },
+};
+export const lang = (rec) => (rec?.language === "es" ? "es" : "en");
+export const template = (type, rec) => (lang(rec) === "es" ? TEMPLATES_ES : TEMPLATES)[type];
+export const str = (key, rec) => STRINGS[lang(rec)][key];
 
 const OUTCOME = { booked: "BOOKED", needs_action: "NEEDS ACTION", took_message: "TOOK MESSAGE", wants_call: "WANTS A CALL", spam: "SPAM", rescheduled: "RESCHEDULED", cancel_request: "NEEDS ACTION" };
 const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action", emergency: "needs_action", question: "took_message", wants_call: "wants_call", spam: "spam" }[reason] || "needs_action");
@@ -115,7 +148,7 @@ export async function bookVisit(c, input, ctx = {}) {
   b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
   await saveRecord("bookings", b);
   if (b.phone && ctx.channel !== "sms") {
-    await sendSMS({ to: b.phone, client: c, type: "confirmation", body: `${c.business.name}: you're booked for ${b.date && b.date !== "today" ? b.date + ", " : ""}${b.window}. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out.` });
+    await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
   }
   await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
   await logEvent(c.slug, "booking", { id: b.id, channel: ctx.channel });
@@ -137,6 +170,48 @@ async function recentOpenLead(c, phone, contact) {
   return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
 }
 
+// The promise the front desk makes in the owner's name, and when it comes due.
+export function callbackPromise(c, at) {
+  return isBusinessHours(c, at) ? (c.rules?.callbackHours || "within 30 minutes") : (c.rules?.callbackAfterHours || "by 8 am tomorrow");
+}
+export function callbackDue(phrase, at) {
+  const now = at ? new Date(at) : new Date();
+  const t = String(phrase || "").toLowerCase();
+  let m;
+  if ((m = t.match(/(\d+)\s*(?:min|minute)/))) return new Date(now.getTime() + Number(m[1]) * 60000);
+  if (/(within|in) (the|an|one) hour/.test(t)) return new Date(now.getTime() + 60 * 60000);
+  if ((m = t.match(/(\d+)\s*(?:hr|hour)/))) return new Date(now.getTime() + Number(m[1]) * 3600000);
+  if ((m = t.match(/by\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/))) {
+    let h = Number(m[1]); const min = Number(m[2] || 0); const ap = m[3];
+    if (ap === "pm" && h < 12) h += 12; if (ap === "am" && h === 12) h = 0;
+    const hn = houstonNow(now); let target = h * 60 + min;
+    let delta = target - hn.minutes;
+    if (delta <= 0 || /tomorrow|next/.test(t)) delta += 24 * 60;
+    return new Date(now.getTime() + delta * 60000);
+  }
+  if (/tomorrow|next business day/.test(t)) return new Date(now.getTime() + 18 * 3600000);
+  return new Date(now.getTime() + 60 * 60000);
+}
+async function trackCallback(c, lead) {
+  const promise = callbackPromise(c);
+  lead.callbackPromise = promise; lead.callbackDueAt = callbackDue(promise).toISOString(); lead.overdueAt = null;
+  await cancelTasks(c.slug, (t) => t.type === "callback_check" && t.data?.leadId === lead.id);
+  await scheduleTask(c.slug, new Date(lead.callbackDueAt), "callback_check", { leadId: lead.id });
+}
+// The scheduler runs this at callbackDueAt.
+export async function runCallbackCheck(c, task) {
+  const l = await getRecord("leads", c.slug, task.data?.leadId);
+  if (!l) return "no lead";
+  if (l.calledAt) return "called";
+  if (l.ackedAt) return "acked";
+  if (l.status !== "open") return "lead closed";
+  l.overdueAt = new Date().toISOString(); await saveRecord("leads", l);
+  const at = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" }).format(new Date(l.createdAt));
+  await notifyOwner(c, `${c.business.name} front desk: Overdue callback. ${l.customer_name || "A customer"} ${l.phone} was promised a call ${l.callbackPromise || ""} at ${at}${l.issue ? " about " + l.issue : ""}. Reply "called ${l.id}" when you have reached them.`, { type: "owner_note" });
+  await logEvent(c.slug, "callback_overdue", { id: l.id });
+  return "overdue";
+}
+
 export async function flagLead(c, input, ctx = {}) {
   const phone = e164(input.phone) || esc(input.phone);
   const reason = input.reason || "lead";
@@ -147,7 +222,8 @@ export async function flagLead(c, input, ctx = {}) {
     const ct = await customerType(c.slug, prior.phone); if (ct !== prior.customerType) { prior.customerType = ct; changed.push("customer"); }
     const escalate = (reason === "emergency" || input.urgency === "emergency") && prior.urgency !== "emergency";
     if (escalate) { prior.urgency = "emergency"; prior.reason = "emergency"; prior.outcome = "needs_action"; changed.push("urgency"); }
-    if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); }
+    if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); await trackCallback(c, prior); }
+    if (input.nobook_reason && input.nobook_reason !== "none" && input.nobook_reason !== prior.nobook_reason) prior.nobook_reason = input.nobook_reason;
     await saveRecord("leads", prior);
     if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
     const waiting = (await listRecords("alerts", c.slug, 100)).some((a) => a.leadId === prior.id && a.status === "waiting");
@@ -157,10 +233,11 @@ export async function flagLead(c, input, ctx = {}) {
   }
   const l = await addRecord("leads", c.slug, {
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
-    reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure),
+    reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
     channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
   });
   if (reason !== "spam") {
+    if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
     await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
     const urgent = reason === "emergency" || reason === "wants_call" || input.urgency === "emergency";
     if (urgent) await openAlert(c, l, reason === "wants_call" ? "wants_call" : "emergency");
@@ -199,6 +276,7 @@ export async function openAlert(c, lead, kind) {
 export async function ackAlertsFor(c, recordId, by = "owner") {
   const alerts = (await listRecords("alerts", c.slug, 200)).filter((a) => a.leadId === recordId && a.status === "waiting");
   for (const a of alerts) { a.status = "acked"; a.ackedAt = new Date().toISOString(); a.ackedBy = by; await saveRecord("alerts", a); await logEvent(c.slug, "alert_acked", { id: a.id, by }); }
+  if (alerts.length) { const ids = new Set(alerts.map((a) => a.id)); await cancelTasks(c.slug, (t) => t.type === "escalate" && ids.has(t.data?.alertId)); }
   return alerts.length;
 }
 
@@ -220,9 +298,8 @@ export async function runEscalation(c, task) {
     return r.ok ? "backup texted" : r.logged ? "backup texted (logged)" : "backup skipped";
   };
   const tellCustomer = async () => {
-    const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", hour12: false }).format(new Date()));
-    const win = hour >= 7 && hour < 19 ? (c.rules?.callbackHours || "within 30 minutes") : (c.rules?.callbackAfterHours || "by 8 am tomorrow");
-    if (lead.phone) await sendSMS({ to: lead.phone, client: c, type: "fallback_window", body: `${c.business.name}: we have your request and ${owner} will call you ${win}.` });
+    const win = callbackPromise(c);
+    if (lead.phone) await sendSMS({ to: lead.phone, client: c, type: "fallback_window", body: str("fallback_window", lead)(c, owner, win) });
   };
   if (light) {
     // Someone who wants a call: backup text, then the customer is told the window. No call, no Steve.
@@ -286,18 +363,25 @@ export async function cancelRequest(c, b) {
 
 // ---- Owner commands by text: ok, otw, done, quote, paid, cancel ----
 export async function ownerCommand(c, text) {
-  const m = String(text || "").trim().match(/^(ok|okay|done|quote|otw|cancel|paid|invoice)\s+([a-z0-9]{6,12})(?:\s+(.*))?$/i);
+  const m = String(text || "").trim().match(/^(ok|okay|done|quote|otw|cancel|paid|invoice|called)\s+([a-z0-9]{6,12})(?:\s+(.*))?$/i);
   if (!m) return null;
   const [, cmdRaw, id, rest] = m; const cmd = cmdRaw.toLowerCase();
   const b = (await getRecord("bookings", c.slug, id)) || (await getRecord("leads", c.slug, id));
   if (!b) return `No record ${id}. Check the ref on the summary text.`;
   const plan = PLANS[c.plan] || PLANS.growth;
   const acked = await ackAlertsFor(c, b.id);
-  if (cmd === "ok" || cmd === "okay") return `Got it, ${b.customer_name || b.phone} is yours.`;
+  if (cmd === "ok" || cmd === "okay") { if (!b.ackedAt) { b.ackedAt = new Date().toISOString(); await saveRecord(b.reason ? "leads" : "bookings", b); } return `Got it, ${b.customer_name || b.phone} is yours.`; }
+  if (cmd === "called") {
+    b.calledAt = new Date().toISOString(); if (b.status === "open") b.status = "called";
+    await saveRecord(b.reason ? "leads" : "bookings", b);
+    await cancelTasks(c.slug, (t) => t.type === "callback_check" && t.data?.leadId === b.id);
+    await logEvent(c.slug, "called", { id: b.id, kept: b.callbackDueAt ? b.calledAt <= b.callbackDueAt : null });
+    return `Logged: you reached ${b.customer_name || b.phone}.`;
+  }
   const blocked = b.phone ? await optedOut(b.phone) : false;
   if (cmd === "otw") {
     if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
-    const r = b.phone ? await sendSMS({ to: b.phone, client: c, type: "on_my_way", body: TEMPLATES.on_my_way(c, b) }) : { ok: false };
+    const r = b.phone ? await sendSMS({ to: b.phone, client: c, type: "on_my_way", body: template("on_my_way", b)(c, b) }) : { ok: false };
     b.status = "on_the_way"; await saveRecord("bookings", b);
     return r.ok || r.logged ? `On-the-way text sent to ${b.customer_name || b.phone}.` : `Could not text ${b.customer_name || b.phone} (${r.reason || r.error || "no number"}).`;
   }
@@ -337,7 +421,7 @@ export async function ownerCommand(c, text) {
   }
   if (cmd === "cancel") {
     b.status = "cancelled"; await saveRecord("bookings", b); await cancelTasks(c.slug, (t) => t.data?.bookingId === b.id || t.data?.leadId === b.id);
-    if (b.phone && !blocked && b.window) await sendSMS({ to: b.phone, client: c, type: "cancelled", body: `${c.business.name}: your visit (${b.date || ""} ${b.window}) is cancelled as requested. Text us any time to rebook.` });
+    if (b.phone && !blocked && b.window) await sendSMS({ to: b.phone, client: c, type: "cancelled", body: str("cancelled", b)(c, b) });
     return `Cancelled ${id}, reminders stopped.${acked ? "" : ""}`;
   }
   return null;
@@ -413,10 +497,50 @@ export async function dailyDigest(c, events) {
   return { text, email };
 }
 
-export async function weeklyDigest(c) {
+// Monday email: what the front desk did for the shop in the last seven Houston days.
+export async function weeklyReport(c) {
   const since = Date.now() - 7 * D;
-  const bookings = (await listRecords("bookings", c.slug, 500)).filter((b) => new Date(b.createdAt).getTime() > since);
-  const leads = (await listRecords("leads", c.slug, 500)).filter((l) => new Date(l.createdAt).getTime() > since);
-  const emergencies = leads.filter((l) => l.urgency === "emergency").length + bookings.filter((b) => b.urgency === "emergency").length;
-  return `${c.business.name}, last 7 days: ${bookings.length} booked, ${leads.length} leads handed to you, ${emergencies} emergencies. ${bookings.filter((b) => b.status === "done").length} marked done.`;
+  const inWin = (iso) => iso && new Date(iso).getTime() > since;
+  const bypass = new Set(c.rules?.bypass || []);
+  const [bookings, leads, events, convs, usage] = await Promise.all([
+    listRecords("bookings", c.slug, 500), listRecords("leads", c.slug, 500), listRecords("events", c.slug, 2000),
+    (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 500), getUsage(c.slug),
+  ]);
+  const wb = bookings.filter((b) => inWin(b.createdAt)), wl = leads.filter((l) => inWin(l.createdAt)), we = events.filter((e) => inWin(e.at));
+  const spamContacts = new Set(wl.filter((l) => l.status === "spam").map((l) => l.phone || l.contact));
+  const wc = convs.filter((v) => inWin(v.updatedAt) && (v.messages || []).some((m) => m.role === "user" && inWin(m.at)));
+  const actionable = wc.filter((v) => !bypass.has(v.contact) && !spamContacts.has(v.contact));
+  const calls = we.filter((e) => ["missed_call", "call_ended"].includes(e.type)).length;
+  const afterHours = we.filter((e) => ["missed_call", "call_ended", "sms_inbound"].includes(e.type) && !isBusinessHours(c, e.at)).length;
+  const byChannel = {}; for (const b of wb) byChannel[b.channel || "web"] = (byChannel[b.channel || "web"] || 0) + 1;
+  const rate = actionable.length ? Math.round((wb.length / actionable.length) * 100) : 0;
+  const open = wl.filter((l) => l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome));
+  const unbooked = wl.filter((l) => l.status !== "spam" && l.status !== "booked");
+  const reasons = {}; for (const l of unbooked) { const r = l.nobook_reason && l.nobook_reason !== "none" ? l.nobook_reason : "not recorded"; reasons[r] = (reasons[r] || 0) + 1; }
+  const emergencies = wl.filter((l) => l.urgency === "emergency").length + wb.filter((b) => b.urgency === "emergency").length;
+  const spam = spamContacts.size;
+  const flags = we.filter((e) => e.type === "flagged").length, changes = we.filter((e) => e.type === "config_updated").length;
+  const promised = wl.filter((l) => l.callbackDueAt);
+  const kept = promised.filter((l) => (l.calledAt && l.calledAt <= l.callbackDueAt) || (l.ackedAt && l.ackedAt <= l.callbackDueAt)).length;
+  const missed = promised.filter((l) => l.overdueAt).length;
+  const u = usageView(c, usage);
+  const name = c.business.name;
+  const label = (k) => ({ wanted_price: "wanted a price first", wanted_sooner: "wanted someone sooner", out_of_area: "out of the area", fee_objection: "the fee was too much", question_only: "a question only", other: "other" }[k] || k);
+  const empty = !wb.length && !wl.length && !actionable.length && !calls;
+  if (empty) return { empty: true, subject: `${name}: nothing this week`, text: `${name}: nothing this week. No calls, texts, or chats reached the front desk in the last 7 days. Line: ${lineHealth(c, events).errors24h} errors in the last 24 hours.` };
+  const lines = [
+    `${name}: your front desk, last 7 days`, "",
+    `Calls answered: ${calls}${afterHours ? ` (${afterHours} contacts after hours)` : ""}`,
+    `Conversations that could become a job: ${actionable.length}${spam ? ` (plus ${spam} spam, not counted)` : ""}`,
+    `Booked: ${wb.length}${wb.length ? " (" + Object.entries(byChannel).map(([k, v]) => `${v} by ${k === "sms" ? "text" : k === "call" ? "phone" : k}`).join(", ") + ")" : ""}`,
+    `Missed-call-to-booking rate: ${rate} percent (${wb.length} booked of ${actionable.length})`,
+    `Leads still needing you: ${open.length}${open.length ? " (" + open.map((l) => l.id).join(", ") + ")" : ""}`,
+    unbooked.length ? `Did not book: ${unbooked.length}. Why: ${Object.entries(reasons).map(([k, v]) => `${v} ${label(k)}`).join(", ")}` : "Did not book: 0",
+    `Emergencies: ${emergencies}`,
+    promised.length ? `Callback promises: ${kept} kept on time, ${missed} overdue, ${promised.length - kept - missed} pending` : "",
+    `Usage this month: ${u.minutes} of ${u.included.minutes} call minutes, ${u.texts} of ${u.included.texts} texts`,
+    `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,
+    "", `Every conversation is on your portal. Flag anything that reads wrong and Steve sees it the same day.`,
+  ].filter((x) => x !== "");
+  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, actionable: actionable.length, booked: wb.length, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
 }

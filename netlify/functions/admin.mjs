@@ -7,7 +7,7 @@ import { json } from "./lib/agent.mjs";
 import { e164, notifyOwner, sendEmail, notifySteve } from "./lib/send.mjs";
 import { buildSystemPrompt, STATUSES } from "./lib/config.mjs";
 import { voicePrompt, releaseVoice } from "./lib/vapi.mjs";
-import { upcomingBookings, dailyDigest } from "./lib/desk.mjs";
+import { upcomingBookings, dailyDigest, weeklyReport } from "./lib/desk.mjs";
 import { run as runScheduler } from "./scheduler.mjs";
 import { releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 
@@ -25,7 +25,7 @@ export default async (req) => {
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
-  if (b.action === "run_scheduler") return json(await runScheduler({ forceHour: b.force_hour !== undefined ? Number(b.force_hour) : undefined }));
+  if (b.action === "run_scheduler") return json(await runScheduler({ forceHour: b.force_hour !== undefined ? Number(b.force_hour) : undefined, forceDay: b.force_day ? String(b.force_day) : undefined }));
   if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", ip + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }
   const c = await getClient(b.slug || "");
   if (!c) return json({ error: "not_found" }, 404);
@@ -34,7 +34,7 @@ export default async (req) => {
     const channel = ["web", "sms", "voice", "test"].includes(b.channel) ? b.channel : "web";
     if (channel === "voice") return json({ prompt: voicePrompt(c) });
     const bookings = channel === "sms" && b.contact ? await upcomingBookings(c, e164(b.contact)) : [];
-    return json({ prompt: buildSystemPrompt(c, channel, { bookings }) });
+    return json({ prompt: buildSystemPrompt(c, channel, { bookings, at: b.at || undefined }) });
   }
   if (b.action === "tasks") {
     const keys = await list("tasks", "");
@@ -53,6 +53,11 @@ export default async (req) => {
     const kind = ["bookings", "leads", "alerts", "conversations", "events", "usage"].includes(b.kind) ? b.kind : "events";
     if (b.kind === "optouts") { const keys = await list("optouts", ""); const out = []; for (const k of keys) out.push({ key: k, phone: k, ...(await get("optouts", k)) }); return json({ records: out.filter((o) => !o.slug || o.slug === c.slug) }); }
     return json({ records: await listJSON(kind, c.slug + "/", 500) });
+  }
+  if (b.action === "weekly") {
+    const w = await weeklyReport(c);
+    if (b.send) { await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text }); await logEvent(c.slug, "weekly", { empty: !!w.empty, stats: w.stats || null }); }
+    return json({ ok: true, ...w });
   }
   if (b.action === "digest") {
     const d = await dailyDigest(c);

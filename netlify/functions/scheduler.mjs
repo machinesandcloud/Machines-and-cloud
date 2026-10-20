@@ -3,7 +3,7 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation } from "./lib/store.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
-import { TEMPLATES, dailyDigest, runEscalation } from "./lib/desk.mjs";
+import { template, dailyDigest, runEscalation, runCallbackCheck, weeklyReport } from "./lib/desk.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
@@ -17,11 +17,12 @@ async function runTask(t) {
   if (!c) return "no client";
   if (!ACTIVE.includes(c.status)) { await logEvent(c.slug, "task_skipped", { type: t.type, reason: c.status }); return "skipped"; }
   if (t.type === "escalate") return runEscalation(c, t);
+  if (t.type === "callback_check") return runCallbackCheck(c, t);
   const rec = t.data?.bookingId ? await getRecord("bookings", c.slug, t.data.bookingId) : t.data?.leadId ? await getRecord("leads", c.slug, t.data.leadId) : null;
   if (!rec || rec.status === "cancelled") return "no record";
   if (!rec.phone) return "no number";
   if (await optedOut(rec.phone)) return "opted out";
-  const tpl = TEMPLATES[t.type];
+  const tpl = template(t.type, rec);
   if (!tpl) return "no template";
   if (["reminder_24h", "reminder_1h"].includes(t.type) && !["booked", "confirmed", "on_the_way"].includes(rec.status)) return "booking not active";
   if (t.type === "lead_chase" && rec.status !== "open") return "lead closed";
@@ -42,7 +43,7 @@ async function runTask(t) {
   return r.ok ? "sent" : r.logged ? "logged" : "send failed";
 }
 
-export async function run({ forceHour } = {}) {
+export async function run({ forceHour, forceDay } = {}) {
   const nowISO = new Date().toISOString();
   const due = await dueTasks(nowISO);
   const results = [];
@@ -102,7 +103,22 @@ export async function run({ forceHour } = {}) {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
   const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
   const minute = forceHour !== undefined ? 0 : Number(parts.find((p) => p.type === "minute")?.value);
-  let digests = 0;
+  const day = forceDay || new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short" }).format(new Date());
+  let digests = 0, weeklies = 0;
+  // Monday 8 am Houston: the weekly "what it did for you" email to every live shop, by email only.
+  if (day === "Mon" && hour === 8 && minute < 10) {
+    for (const slug of await list("clients", "")) {
+      const c = await getClient(slug);
+      if (!c || c.status !== "live") continue;
+      try {
+        const w = await weeklyReport(c);
+        await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text });
+        if (c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 28 * D) await notifySteve(`Weekly: ${c.business.name}`, w.text);
+        await logEvent(c.slug, "weekly", { empty: !!w.empty, stats: w.stats || null });
+        weeklies++;
+      } catch (err) { console.error("weekly", slug, err); }
+    }
+  }
   if (hour === 18 && minute < 10) {
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
@@ -119,8 +135,8 @@ export async function run({ forceHour } = {}) {
       } catch (err) { console.error("digest", slug, err); }
     }
   }
-  console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `released ${released}`);
-  return { due: due.length, results, digests, released };
+  console.log(`scheduler: ${due.length} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`);
+  return { due: due.length, results, digests, weeklies, released };
 }
 
 export default async () => {

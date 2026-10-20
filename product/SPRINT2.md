@@ -206,7 +206,7 @@ Change: a numbered runbook: onboarding with the owner on a call, legal details f
 Acceptance: the section exists with those steps; every artifact named is one the PM can check (`admin records`, portal, email); the day-7 template has no em dashes and no prototype words; the PM signs the matrix sheet for the first customer and files it under `product/golive-<slug>.md`.
 
 ### S2-14 Merged leads recompute new or existing; a booking closes the customer's open lead
-Status: delivered 2026-10-20, draft 6ad6bae471d3d40380534fad (see the engineer run in section 5). Engineer check: `flagLead`'s merge branch recomputes `customerType` and lists `customer` among the changed fields on the UPDATE text (a merged emergency from a number with a done visit read "existing"); `bookVisit` sets every open lead for that phone or contact from the last 24 hours to `booked` with `bookingId`, acknowledges its waiting alerts (`alert_acked` by "booking") so no escalation fires, and logs `lead_closed { id, by: "booking", bookingId }`. Size: S. Implements: Round 2 W2 (correctness of the merge path found in the S2-05 verification) and Epic 5 MUST (alerts and digest tell the truth).
+Status: verified with follow-up 2026-10-20 6ad6bbe213b4fbbeea885c10: a booking for a number with an open callback lead set the lead to `booked` with the `bookingId` and the digest counted 0 leads needing action; after `done REF` on an older booking, a repeat request merged into the open lead with `changed` including `customer` and the UPDATE text reading "(existing customer)". Note: acknowledging an alert by booking leaves its `escalate` task in place until it runs and returns "acked" (no chain runs); cancelling the task at acknowledgment is a one-line hygiene item for sprint 3 (S3-08 touches the same code). `lead_closed` and `alert_acked` by "booking" are in the code path (`bookVisit`); the shop was deleted before I re-read the events, so those two event names are code-verified.
 
 Files: `netlify/functions/lib/desk.mjs` (`flagLead` merge branch, `bookVisit`).
 
@@ -266,3 +266,6 @@ Observed and worth knowing: the rate limiter counts invalid requests, so a misbe
 
 ### Keyed pass
 Pending S2-01 (Steve's keys). Order in section 5.
+
+### S2-14 pass, 2026-10-20, draft `6ad6bbe213b4fbbeea885c10` (built from `main` at `d08e6e9`)
+`scratchpad/verify5.py` (shared with the sprint 3 pass): both halves verified as above; one explicit sub-line (no `escalate` task left) differs from the build, which leaves the task to return "acked" when due. Test shop `pm-test-hvac-a55b` deleted; three earlier shops orphaned by harness bugs of mine (`-57ca`, `-7b41`, `-7c4c`) were each deleted before the relaunch.

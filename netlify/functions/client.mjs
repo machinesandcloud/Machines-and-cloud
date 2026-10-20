@@ -3,12 +3,12 @@
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
 import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks } from "./lib/store.mjs";
-import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies } from "./lib/config.mjs";
+import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
 import { googleEnabled } from "./lib/calendar.mjs";
 import { stripeEnabled } from "./lib/billing.mjs";
-import { dailyDigest, lineHealth, ackAlertsFor } from "./lib/desk.mjs";
+import { dailyDigest, lineHealth, ackAlertsFor, weeklyReport } from "./lib/desk.mjs";
 import { getUsage, usageView } from "./lib/usage.mjs";
 import { updateVoicePrompt, detachVoice, attachVoice } from "./lib/vapi.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
@@ -74,6 +74,7 @@ export default async (req) => {
       ackMinutes: ACK_MINUTES.includes(Number(b.rules.ackMinutes)) ? Number(b.rules.ackMinutes) : (c.rules.ackMinutes || 10),
       callbackHours: s(b.rules.callbackHours, 80) || c.rules.callbackHours || "within 30 minutes",
       callbackAfterHours: s(b.rules.callbackAfterHours, 80) || c.rules.callbackAfterHours || "by 8 am tomorrow",
+      hours: b.rules.hours !== undefined ? (normalizeHours(b.rules.hours) || (typeof b.rules.hours === "string" ? parseHours(b.rules.hours) : null)) : (c.rules.hours || null),
       bypass: b.rules.bypass !== undefined ? [...new Set(arr(b.rules.bypass, 20).map((n) => e164(n)).filter(Boolean))].slice(0, 20) : (c.rules.bypass || []),
     };
     if (b.digest) c.digest = { ...(c.digest || {}), ...(b.digest.text !== undefined ? { text: !!b.digest.text } : {}) };
@@ -144,6 +145,7 @@ export default async (req) => {
       return json({ ok: true, flag: conv.flag });
     }
     if (b.action === "digest") { const d = await dailyDigest(c); return json({ ok: true, text: d.text, email: d.email }); }
+    if (b.action === "weekly") { const w = await weeklyReport(c); return json({ ok: true, ...w }); }
     if (b.action === "test_sms") {
       if (!c.owner.phone) return json({ error: "no_owner_phone" }, 400);
       const r = await sendSMS({ to: c.owner.phone, client: c, force: true, type: "test", body: `${name}: test text from your front desk. Reply "help" any time to see the commands.` });
@@ -158,6 +160,16 @@ export default async (req) => {
   }
   return json({ error: "method_not_allowed" }, 405);
 };
+
+// "1402 Mason Rd, Katy, TX 77450" -> street, city, state, zip; without a ZIP the city falls back to the shop's.
+function splitAddress(addr, defaultCity) {
+  const t = String(addr || "").trim();
+  const m = t.match(/^(.*?)(?:,\s*([A-Za-z .'-]+?))?(?:,?\s*(TX|Texas))?\s*,?\s*(\d{5})(?:-\d{4})?$/i);
+  if (m) return { street: m[1].replace(/,\s*$/, "").trim(), city: (m[2] || defaultCity).trim(), state: "TX", zip: m[4] };
+  const parts = t.split(",").map((x) => x.trim()).filter(Boolean);
+  if (parts.length >= 2) return { street: parts[0], city: parts[1].replace(/\b(TX|Texas)\b/i, "").trim() || defaultCity, state: "TX", zip: "" };
+  return { street: t, city: defaultCity, state: "TX", zip: "" };
+}
 
 // ---- CSV export (RFC 4180, UTF-8 BOM, attachment) ----
 const csvCell = (v) => { const t = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v); return /[",\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
@@ -175,6 +187,25 @@ async function exportCSV(c, what) {
     header = ["channel", "contact", "at", "role", "content", "flag_note"];
     rows = [];
     for (const v of await listJSON("conversations", c.slug + "/", 2000)) for (const m of v.messages || []) rows.push([v.channel, v.contact, m.at, m.role, m.content, v.flag?.note || ""]);
+  } else if (what === "customers") {
+    // Jobber's supported import headers; Housecall Pro's wizard maps the same names.
+    header = ["First name", "Last name", "Mobile Phone", "Email", "Street", "City", "State", "Zip Code", "Note", "Lead Source", "Tags"];
+    const byPhone = new Map();
+    const all = [...(await listRecords("bookings", c.slug, 2000)).map((b) => ({ ...b, kind: "booking" })), ...(await listRecords("leads", c.slug, 2000)).filter((l) => l.status !== "spam").map((l) => ({ ...l, kind: "lead" }))].sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+    for (const r of all) {
+      if (!r.phone) continue;
+      const cur = byPhone.get(r.phone) || { name: "", address: "", issues: [], refs: [] };
+      if (r.customer_name) cur.name = r.customer_name;
+      if (r.address && (r.kind === "booking" || !cur.address)) cur.address = r.address;
+      if (r.issue) cur.issues.push(r.issue);
+      cur.refs.push(r.id);
+      byPhone.set(r.phone, cur);
+    }
+    rows = [...byPhone.entries()].map(([phone, x]) => {
+      const parts = x.name.trim().split(/\s+/); const first = parts[0] || ""; const last = parts.slice(1).join(" ");
+      const a = splitAddress(x.address, c.business?.city || "");
+      return [first, last, phone, "", a.street, a.city, a.state, a.zip, `${x.issues.slice(-1)[0] || ""}${x.refs.length ? " (refs " + x.refs.join(", ") + ")" : ""}`, "Other", "front desk"];
+    });
   } else return json({ error: "unknown_export" }, 400);
   return new Response(csv(header, rows), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${c.slug}-${what}-${today}.csv"`, "Cache-Control": "no-store" } });
 }

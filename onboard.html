@@ -37,7 +37,8 @@
     .ob code { background: #F3F4F6; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
     .ob .portal { word-break: break-all; }
     .ob .chk { display: flex; gap: 10px; align-items: center; margin: 8px 0; font-size: 14px; }
-  </style>
+  .hours-rows{display:grid;gap:6px;margin-top:8px}.hours-row{display:grid;grid-template-columns:44px 1fr 24px 1fr;align-items:center;gap:8px;font-size:14px}.hours-row input{padding:8px;border:1px solid #D1D5DB;border-radius:8px;font:inherit}
+</style>
 </head>
 <body class="theme-light" data-no-widget>
 <nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
@@ -70,7 +71,7 @@
       </div>
       <div class="form-group"><label class="form-label" for="services">What you do (one per line)</label><textarea class="form-input" id="services" name="services" placeholder="AC repair&#10;AC replacement&#10;Maintenance plans"></textarea></div>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="hours">Hours</label><input class="form-input" id="hours" name="hours" placeholder="Mon to Fri 7 to 6, Sat 8 to 2"></div>
+        <div class="form-group"><label class="form-label" for="hours">Hours</label><input class="form-input" id="hours" name="hours" placeholder="Mon to Fri 7 to 6, Sat 8 to 2"><div id="hoursRows" class="hours-rows"></div><span class="hint">The rows fill in from what you type; fix any day that is off. The front desk uses them for the callback promise and after-hours rules.</span><input type="hidden" name="hoursTable" id="hoursTable"></div>
         <div class="form-group"><label class="form-label" for="afterHours">After hours</label><input class="form-input" id="afterHours" name="afterHours" placeholder="Emergencies only, $150 fee"></div>
       </div>
       <div class="row">
@@ -160,6 +161,16 @@
   t0.addEventListener('input', function () { touched.t0 = true; }); t1.addEventListener('input', function () { touched.t1 = true; });
   function fillTiers() { if (!touched.t0) t0.value = T0; if (!touched.t1) t1.value = T1[tradeKey(form.elements['trade'].value)] || ''; }
   form.elements['trade'].addEventListener('change', fillTiers); form.elements['trade'].addEventListener('blur', fillTiers); fillTiers();
+  // Structured hours: seven rows, prefilled from the hours sentence (same parser as the server, simplified).
+  var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], DI = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+  function clock(str, isClose) { var m = String(str).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/i); if (!m) return null; var h = +m[1], mi = +(m[2] || 0), ap = (m[3] || '').toLowerCase(); if (ap.charAt(0) === 'p' && h < 12) h += 12; else if (ap.charAt(0) === 'a' && h === 12) h = 0; else if (!ap) { if (isClose && h <= 9) h += 12; else if (!isClose && h < 5) h += 12; } return (h < 10 ? '0' : '') + h + ':' + (mi < 10 ? '0' : '') + mi; }
+  function parseHours(str) { var out = {}, any = false; String(str || '').split(/[,;\n]+/).forEach(function (part) { var t = part.trim().toLowerCase().replace(/\./g, ''); var dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun)[a-z]*)?\s*:?\s*(.*)$/); if (!dm) return; var a = DI[dm[1]], b = dm[2] ? DI[dm[2]] : a, days = [], i = a; for (var k = 0; k < 7; k++) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; i = (i + 1) % 7; } if (/closed/.test(dm[3])) { days.forEach(function (d) { out[d] = null; }); any = true; return; } var tm = dm[3].match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/); if (!tm) return; var o = clock(tm[1], false), c = clock(tm[2], true); if (!o || !c) return; days.forEach(function (d) { out[d] = { open: o, close: c }; }); any = true; }); if (!any) return null; DAYS.forEach(function (d) { if (out[d] === undefined) out[d] = null; }); return out; }
+  var hoursRows = document.getElementById('hoursRows'), hoursTouched = false;
+  hoursRows.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" data-d="' + d + '" data-k="close"></div>'; }).join('');
+  hoursRows.addEventListener('input', function () { hoursTouched = true; });
+  function fillHours() { if (hoursTouched) return; var h = parseHours(form.elements['hours'].value); hoursRows.querySelectorAll('input').forEach(function (inp) { var v = h && h[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); }
+  form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
+  function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c } : null; }); return t; }
   var fwdSel = form.elements['forwarding']; function fwdUI() { document.getElementById('transferRow').style.display = fwdSel.value === 'all' ? 'grid' : 'none'; } fwdSel.addEventListener('change', fwdUI); fwdUI();
   form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { form.querySelectorAll('.plans-pick label').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }); });
   function show(n) { i = n; steps.forEach(function (s, k) { s.classList.toggle('on', k === n); }); pills.forEach(function (p, k) { p.classList.toggle('on', k <= n); }); back.style.visibility = n ? 'visible' : 'hidden'; next.textContent = n === steps.length - 1 ? 'Build my front desk' : 'Next'; err.textContent = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -169,6 +180,7 @@
     if (!valid()) return;
     if (i < steps.length - 1) return show(i + 1);
     next.disabled = true; next.textContent = 'Building...';
+    document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     var data = {}; new FormData(form).forEach(function (v, k) { if (k === 'leadSources') { (data.leadSources = data.leadSources || []).push(v); } else data[k] = v; });
     fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
