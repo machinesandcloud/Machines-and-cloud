@@ -117,33 +117,16 @@ The monthly statement goes to every live shop on the 1st at 9 am Houston (email 
 
 ## First customer: go-live and the first week
 
-Who does what, and the artifact that proves each step. Numbers in brackets refer to the test matrix in `product/SPRINT.md` section 5.4.
+Who does what, and the artifact that proves each step. The 18-case gate is the 14-case matrix in `product/SPRINT.md` section 5.4 plus the three emergency-table cases from `product/SPRINT3.md` S3-05 (95°F with an elderly person, 78°F alone, gas smell) and the ALTO opt-out case from `product/SPRINT4.md` S4-06.
 
-1. **Onboarding call (Steve with the owner, 30 minutes).** Fill the five onboarding steps together or review what the owner entered: hours, area, published prices, windows, handoff list, emergency instruction, backup phone, carrier. Proof: the client record (`GET /api/admin`), the portal What it knows tab with no line marked ASK OWNER.
-2. **Legal details for texting (owner, on the call).** Legal business name, EIN, business type, address, into the portal Setup tab. Proof: `provision.steps.tenDlc` reads `brand submitted` (`GET /api/admin`), the `provisioned` event.
+1. **Onboarding call (Steve with the owner, 30 minutes).** Review what the owner entered and fill the rest together on the portal: hours rows (What it knows, Hours; the front desk assumes 7 am to 7 pm until they are set), the emergency table for the trade (tier 0 and tier 1 lists, the safety script), published prices and windows, handoff list, the Google review link (without it a Growth or Pro shop sends no review request), the always-ring-through list, Spanish on or off, backup phone and carrier, the consent switch (off until Steve approves the sentence), and, when the shop pays for Angi or Thumbtack leads, the platform key or secret set from the admin page and pasted into the platform. Proof: the client record on the admin page, no line marked ASK OWNER under What it knows, `config_updated` events; press "Called" on the admin page's Needs-me line (`lifecycle.onboardingCallAt`).
+2. **Legal details for texting (owner, on the call).** Legal business name, EIN, business type, address as on the IRS letter, into the portal Setup tab. Proof: `provision.steps.tenDlc` reads `brand submitted`, the `provisioned` event.
 3. **Forwarding code dialed together (owner, on the call).** From the business cell: the carrier code from the portal (AT&T and T-Mobile with the 15-second ring timer; Verizon all calls on an LSA line); iPhone Live Voicemail off; `*#61#` to confirm. Then Steve calls the business number from another phone and does not answer. Proof: `missed_call` or `call_started` event, `phone.forwardingVerified` true, the text-back on Steve's phone.
-4. **Test matrix on the test line (Steve, same day).** All 14 cases in `product/SPRINT.md` section 5.4 on the portal Test tab; record each pass in `product/golive-<slug>.md` (case, what was said, pass or fail, fix). Proof: the filed sheet; events `booking`, `lead`, `alert_opened` for the cases that need them.
+4. **The 18-case gate on the test line (Steve, same day).** All 18 cases on the portal Test tab; record each pass in `product/golive-<slug>.md` (case, what was said, pass or fail, fix). Proof: the filed sheet; events `booking`, `lead`, `alert_opened`, `opt_out` for the cases that need them.
 5. **Keyed cases on real SMS and voice (Steve, same day).** Cases 1, 3, 6, 9, 13 from Steve's phone against the shop's real number. Proof: the five lines on the sheet with arrival times of every text; `sms_sent` with `ok: true`; `call_ended` with seconds.
-6. **Go live (owner clicks Go live on the portal; Steve on the call).** Proof: `live` event, `liveAt` set, the embed snippet on the owner's website (open the site and send one chat message; proof is the `web` conversation on the portal).
-7. **Day 1: Steve reads every conversation.** Conversations tab of the portal before 6 pm; anything wrong is flagged with a note and fixed in the record or the prompt. Proof: `flagged` and `unflagged` events, the config_updated event for each fix, Steve's digest copy at 6 pm.
-8. **Days 2 to 7: Steve reads the flags, not everything.** The nightly check (9 pm) flags the day's conversations against the rubric; Steve's digest copy and the admin Needs-me list carry the hits; every flag gets a note and an outcome; the usage card is checked against the plan. Proof: no open flags or unread auto-flags on the admin page at day 7, the digest copies in Steve's inbox.
-9. **Day 7: "what I changed" email (Steve to the owner).** Template:
+6. **Go live (owner clicks Go live on the portal; Steve on the call).** Proof: `live` event, `liveAt` set, the owner's `welcome` text (`sms_sent` with `type: "welcome"`), the embed snippet on the owner's website (open the site and send one chat message; proof is the `web` conversation on the portal).
+7. **Day 1: Steve reads every conversation.** Conversations tab of the portal before 6 pm; anything wrong is flagged with a note and fixed in the record or the prompt. Proof: `flagged` and `unflagged` events, the `config_updated` event for each fix, Steve's digest copy at 6 pm.
+8. **Days 2 to 7: Steve clears flags and auto-flags, not everything.** The nightly check (9 pm, `auto_flag` events) and the owner's own flags show on the admin Needs-me list and in Steve's digest copy; every one gets a note and an outcome; the usage card is checked against the plan. Proof: no open flag or unread auto-flag on the admin page at day 7, the digest copies in Steve's inbox.
+9. **Day 7: "what I changed" email (Steve to the owner).** The draft arrives in Steve's inbox on day 7 (`day7_draft` event, or `admin {"action":"day7"}`), already filled with the week's numbers, the edits, and the nightly check's hits; Steve edits the Changed and Still open lines, sends it, and presses "Sent" on the admin page (`lifecycle.day7Sent`), which releases the day-8 "your free week is over" email. Proof: the `day7_draft` event, the stamp, the `trial_over` event the next day.
+10. **The 1st: statement and invoice (Steve).** The statement goes to the owner at 9 am (`monthly` event); Steve's copy ends with the invoice line (plan price plus overage from the usage record). Billing is parked, so Steve invoices by hand and presses "Invoiced" on the admin page (`lifecycle.invoicedFor`). Proof: the invoice and the stamp.
 
-   Subject: Your first week with the front desk
-
-   Hi {owner first name},
-
-   One week in. Here is what your front desk handled and what I changed.
-
-   Handled: {bookings} visits booked, {leads} leads handed to you, {emergencies} emergencies, {missed} calls answered that would have gone to voicemail.
-
-   Changed: {one line per fix, for example "It now quotes the $89 service call before asking for a name" or "Added Fulshear to the service area"}.
-
-   Still open: {anything the owner must answer, or "nothing"}.
-
-   Your portal has every conversation. Flag anything that reads wrong and I see it the same day. Reply to this email any time.
-
-   Steve
-
-   Proof: the sent email in Steve's outbox; the owner's reply, if any, filed on the sheet.
-10. **First-month invoice (Steve, day 30).** Billing is parked, so the first month is invoiced by hand from the usage card (plan price, plus overage only if the owner was told at 100 percent). Proof: the invoice and the usage record (`admin records kind=usage`).

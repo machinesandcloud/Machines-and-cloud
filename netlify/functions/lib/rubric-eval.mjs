@@ -62,4 +62,28 @@ export const LABELLED = [
   { id: 49, labels: ["question_unanswered"], text: [C("Tienen técnicos que hablen español?"), D("¿Cuál es su dirección?"), C("Primero mi pregunta.")] },
   { id: 50, labels: ["question_unanswered"], text: [C("Do you install smart thermostats?"), D("Which window works, 8 to 12 or 12 to 5?"), C("I asked if you install them.")] },
 ];
+// Second set, after the two definitions were tightened: ten clean threads with no booking and no address,
+// ten where a direct question was answered late or by handing to the owner. Labels: all clean.
+export const LABELLED_2 = [
+  { id: 51, labels: [], text: [C("Do you work on heat pumps?"), D("Yes, heat pumps are part of AC repair. What is it doing?"), C("Just thinking ahead, thanks.")] },
+  { id: 52, labels: [], text: [C("Are you open on Saturday?"), D("Saturday 8 to 2. Want a window?"), C("No, next week maybe.")] },
+  { id: 53, labels: [], text: [C("What's the service call?"), D("$89, and it goes toward the repair if you go ahead."), C("Ok thanks.")] },
+  { id: 54, labels: [], text: [C("I'm in Cypress, do you come out here?"), D("Yes, Cypress is in our area. What is going on with the system?"), C("Nothing yet, checking who to call.")] },
+  { id: 55, labels: [], text: [C("Hola, hablan español?"), D("Sí, con gusto. ¿En qué le podemos ayudar?"), C("Solo preguntaba, gracias.")] },
+  { id: 56, labels: [], text: [C("Can I get a quote for a new system?"), D("Replacement quotes are done on site by Dana after a look at the house. The visit is $89 and goes toward the job. Want a window?"), C("I'll think about it.")] },
+  { id: 57, labels: [], text: [C("Do you do commercial?"), D("Commercial jobs go to Dana directly. Can I get your number so she can call you within 30 minutes?"), C("713-555-0301"), D("Thanks, Dana will call you within 30 minutes.")] },
+  { id: 58, labels: [], text: [C("How soon can someone come?"), D("Next window is tomorrow 8 to 12, or 12 to 5. Which works?"), C("Let me check with my wife.")] },
+  { id: 59, labels: [], text: [C("Is there a fee for the estimate?"), D("The service call is $89 and it goes toward the repair. If you only want a replacement estimate, Dana will confirm whether that visit is free."), C("Ok.")] },
+  { id: 60, labels: [], text: [C("What brands do you service?"), D("Any brand of central AC or furnace. What is going on with yours?"), C("Just asking.")] },
+  { id: 61, labels: [], text: [C("Do you offer financing?"), D("What is going on with your AC?"), C("It's fine, I asked about financing."), D("Sorry, I skipped that. Financing is not on our published list, so Dana will confirm; can I get your number?")] },
+  { id: 62, labels: [], text: [C("Are you licensed? And can you come Friday?"), D("Friday we have 8 to 12 or 12 to 5. Which works?"), C("12 to 5. And licensed?"), D("Yes, TACLA 12345. Booked for Friday 12 to 5; which address?"), C("12 Oak St Katy"), D("Booked for 12 Oak St, Friday 12 to 5.")] },
+  { id: 63, labels: [], text: [C("Is the service call waived if I do the repair?"), D("We have 8 to 12 or 12 to 5 tomorrow."), C("That doesn't answer my question."), D("You are right: yes, the $89 goes toward the repair if you go ahead. Which window?")] },
+  { id: 64, labels: [], text: [C("Tienen técnicos que hablen español?"), D("¿Cuál es su dirección?"), C("Primero mi pregunta."), D("Disculpe. Sí, nuestros técnicos hablan español. ¿Cuál es la dirección?")] },
+  { id: 65, labels: [], text: [C("Do you install smart thermostats?"), D("Which window works, 8 to 12 or 12 to 5?"), C("I asked if you install them."), D("Yes, we install smart thermostats. The service call is $89. Which window?")] },
+  { id: 66, labels: [], text: [C("How much is a tune-up and do you come to Fulshear?"), D("Fulshear yes. A tune-up is the $89 service call. Want a window?"), C("Great, next week.")] },
+  { id: 67, labels: [], text: [C("Are you the owner?"), D("I am the front desk assistant. Dana owns the shop and will call you within 30 minutes if you leave a number."), C("713-555-0302"), D("Thanks, Dana will call you within 30 minutes.")] },
+  { id: 68, labels: [], text: [C("Will you be out on Sunday?"), D("We are closed Sunday; the next window is Monday 8 to 12. Want it?"), C("Yes. 9 Elm St Katy, Mia Chen 713-555-0303"), D("Booked for Monday 8 to 12 at 9 Elm St.")] },
+  { id: 69, labels: [], text: [C("Does the $89 cover the repair?"), D("It covers the visit and the diagnosis, and it goes toward the repair if you go ahead. Want a window?"), C("Tomorrow 8 to 12, 4 Pine St Katy, Sam Hill 713-555-0304"), D("Booked for tomorrow 8 to 12 at 4 Pine St.")] },
+  { id: 70, labels: [], text: [C("Can you text me the invoice later?"), D("Dana handles invoices after the visit and can text it. What is going on with the system?"), C("AC is loud. Tomorrow 12 to 5, 7 Ash St Katy, Ana Ruiz 713-555-0305"), D("Booked for tomorrow 12 to 5 at 7 Ash St.")] },
+];
 export const REASONS = ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"];

@@ -659,8 +659,9 @@ export async function rubricClassify(c, text, model) {
   const out = (r.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").toLowerCase();
   return { reasons: ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"].filter((k) => out.includes(k)), out, usage: r.usage };
 }
-export async function classifierEval(c, models = ["claude-opus-5-5", "claude-haiku-5-5"], from = 0, to = 50) {
-  const { LABELLED: ALL, REASONS } = await import("./rubric-eval.mjs");
+export async function classifierEval(c, models = ["claude-opus-5-5", "claude-haiku-5-5"], from = 0, to = 50, set = 1) {
+  const mod = await import("./rubric-eval.mjs");
+  const { REASONS } = mod; const ALL = set === 2 ? mod.LABELLED_2 : mod.LABELLED;
   const LABELLED = ALL.slice(from, to);
   const result = {};
   for (const model of models) {

@@ -82,13 +82,25 @@ export default async (req) => {
     return json({ ok: true, messages: conv.messages.length });
   }
   if (b.action === "autoflag") { const { autoFlagDay } = await import("./lib/desk.mjs"); const r = await autoFlagDay(c, !!b.debug); return json({ ok: true, ...(b.debug ? r : { flagged: r }) }); }
-  if (b.action === "classifier_eval") { const { classifierEval } = await import("./lib/desk.mjs"); return json({ ok: true, results: await classifierEval(c, Array.isArray(b.models) && b.models.length ? b.models : undefined, Number(b.from) || 0, Number(b.to) || 50) }); }
+  if (b.action === "classifier_eval") { const { classifierEval } = await import("./lib/desk.mjs"); return json({ ok: true, results: await classifierEval(c, Array.isArray(b.models) && b.models.length ? b.models : undefined, Number(b.from) || 0, Number(b.to) || 50, Number(b.set) || 1) }); }
   if (b.action === "day7") { const { day7Draft } = await import("./lib/desk.mjs"); return json({ ok: true, draft: await day7Draft(c) }); }
   if (b.action === "log_event") { const ev = await logEvent(c.slug, String(b.type || "note"), b.data || {}); return json({ ok: true, event: ev }); }
   if (b.action === "schedule_task") {
     const { scheduleTask } = await import("./lib/store.mjs");
     const t = await scheduleTask(c.slug, new Date(Date.now() - 60000), String(b.type || ""), b.data || {});
     return json({ ok: true, task: t });
+  }
+  if (b.action === "cancel_task") {
+    const keys = await list("tasks", ""); let n = 0;
+    for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug && t.id === String(b.id || "")) { await del("tasks", k); n++; } }
+    if (n) await logEvent(c.slug, "task_cancelled", { id: String(b.id), by: "admin" });
+    return json({ ok: true, cancelled: n });
+  }
+  if (b.action === "reactivate") {
+    if (c.status !== "cancelled") return json({ error: "not_cancelled" }, 400);
+    c.status = "paused"; c.cancelledAt = null; c.serviceEndsAt = null; c.cancelReason = "";
+    await saveClient(c); await indexClient(c); await logEvent(c.slug, "reactivated", { by: "admin" });
+    return json({ ok: true, status: c.status, note: "Paused; the owner presses Resume on the portal (or admin resume) to go live again." });
   }
   if (b.action === "nudge_task") {
     // Move one task (by id) or all of the slug's tasks into the past so run_scheduler picks them up.
