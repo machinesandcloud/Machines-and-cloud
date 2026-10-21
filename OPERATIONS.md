@@ -83,6 +83,8 @@ Netlify builds `main` on every push and runs `scripts/smoke.mjs` first; a throw 
 
 Step 1 is the long pole; file it today and the rest fits inside its wait. Each step's date goes in `DECISIONS.md` when it happens.
 
+`node scripts/setup-check.mjs` reads a gitignored `.env` at the repo root, verifies each key with one call to its provider (Twilio account, ISV profile, bridge number, Messaging Service and its campaign status, Vapi, Resend domain, the two TwiML Bins' contents, Google, Anthropic), and prints the missing items in order with the console path for each; nothing is written and Netlify is not touched. Every value must then be mirrored into Netlify's site env vars (Functions scope).
+
 Steve's one-time setup: Twilio account (keys, Primary Customer Profile approved as ISV, and on the Machines & Cloud Messaging Service add ALTO and PARAR as custom opt-out keywords and EMPEZAR as a custom opt-in keyword under Opt-Out Management, so the carrier layer honors Spanish stop words the same way our webhook does), Vapi account (key), Resend (key + verified domain), Google OAuth client, optional Stripe. After that, nothing per client.
 
 ## Lifecycle messages and the nightly check
