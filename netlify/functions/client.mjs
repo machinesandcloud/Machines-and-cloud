@@ -2,7 +2,7 @@
 // records, health, and forwarding instructions. PUT with the key updates the editable config (loop-checked).
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
-import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks } from "./lib/store.mjs";
+import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound } from "./lib/store.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
@@ -46,7 +46,7 @@ export default async (req) => {
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, bookings, leads, events),
-      health: lineHealth(c, events),
+      health: lineHealth(c, events, await lastInbound(c.slug)),
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
       forwarding: forwardingInstructions(c),
       policy: policyUrls(c.slug, site), dataPolicy: DATA_POLICY, ackMinutesOptions: ACK_MINUTES,

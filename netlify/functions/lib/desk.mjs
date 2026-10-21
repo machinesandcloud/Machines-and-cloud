@@ -1,7 +1,7 @@
 // What happens when the front desk books a visit or flags a lead for a real client:
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
-import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation } from "./store.mjs";
+import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor } from "./store.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
@@ -116,7 +116,7 @@ const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action",
 export async function customerType(slug, phone, at) {
   if (!phone) return "new";
   const today = at ? new Date(new Date(at).toLocaleString("en-US", { timeZone: "America/Chicago" })) : visitDate("today"); today.setHours(0, 0, 0, 0);
-  const recs = await listRecords("bookings", slug, 300);
+  const recs = await recordsFor("bookings", slug, phone);
   const had = recs.some((b) => b.phone === phone && (["done", "paid"].includes(b.status) || (b.date && b.status !== "cancelled" && bookingDay(b).getTime() < today.getTime())));
   return had ? "existing" : "new";
 }
@@ -209,6 +209,7 @@ export async function bookVisit(c, input, ctx = {}) {
     date: normalizeDate(esc(input.date)), dateSaid: esc(input.date), window: esc(input.window), urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: await customerType(c.slug, phone),
   });
+  await addToIndex("bookings", c.slug, b.phone, b.id);
   try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { console.error("calendar", e); }
   await scheduleReminders(c, b);
   // consent: told at booking, recorded on the booking
@@ -222,7 +223,8 @@ export async function bookVisit(c, input, ctx = {}) {
   await logEvent(c.slug, "booking", { id: b.id, channel: ctx.channel });
   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
   const since = Date.now() - D;
-  for (const l of (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) {
+  const candidates = b.phone ? await recordsFor("leads", c.slug, b.phone) : await listRecords("leads", c.slug, 100);
+  for (const l of candidates.filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) {
     l.status = "booked"; l.bookingId = b.id; await saveRecord("leads", l);
     await ackAlertsFor(c, l.id, "booking");
     await logEvent(c.slug, "lead_closed", { id: l.id, by: "booking", bookingId: b.id });
@@ -234,7 +236,8 @@ export async function bookVisit(c, input, ctx = {}) {
 // opening a second one (and a second escalation chain).
 async function recentOpenLead(c, phone, contact) {
   const cutoff = Date.now() - 30 * 60 * 1000;
-  const leads = (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > cutoff);
+  const pool = phone ? await recordsFor("leads", c.slug, phone) : await listRecords("leads", c.slug, 60);
+  const leads = pool.filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > cutoff);
   return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
 }
 
@@ -308,6 +311,7 @@ export async function flagLead(c, input, ctx = {}) {
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
     channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
   });
+  await addToIndex("leads", c.slug, l.phone, l.id);
   if (reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
     await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
@@ -328,7 +332,7 @@ export async function flagLead(c, input, ctx = {}) {
 export async function callerContext(c, phone, at) {
   const out = { customerName: "", isExisting: "new", upcomingVisit: "" };
   if (!phone) return out;
-  const recs = (await listRecords("bookings", c.slug, 300)).concat(await listRecords("leads", c.slug, 300)).filter((r) => r.phone === phone && r.customer_name && r.status !== "spam").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+  const recs = (await recordsFor("bookings", c.slug, phone)).concat(await recordsFor("leads", c.slug, phone)).filter((r) => r.phone === phone && r.customer_name && r.status !== "spam").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   if (recs.length) out.customerName = recs[recs.length - 1].customer_name.split(" ")[0];
   out.isExisting = await customerType(c.slug, phone, at) === "existing" ? "existing customer" : "new";
   const up = await upcomingBookings(c, phone, at);
@@ -341,14 +345,16 @@ export async function callerContext(c, phone, at) {
 export async function receivePlatformLead(c, source, { id, name, phone, email, address, task, raw, unmapped }) {
   const pid = id || "";
   if (pid) {
-    const dup = (await listRecords("leads", c.slug, 500)).find((l) => l.source === source && l.sourceId === pid);
-    if (dup) return { ok: true, duplicate: true, id: dup.id };
+    const seen = await get("index", `platform:${c.slug}:${source}:${pid}`);
+    if (seen) return { ok: true, duplicate: true, id: seen };
   }
   const p = e164(phone);
   const l = await addRecord("leads", c.slug, {
     customer_name: esc(name), phone: p, email: esc(email), address: esc(address), issue: esc(task).slice(0, 300), reason: "lead", urgency: "this_week", wanted: "", language: "en", unsure: "",
     nobook_reason: "none", channel: source, contact: p || pid, source, sourceId: pid, raw: raw ? JSON.stringify(raw).slice(0, 4000) : "", status: "open", outcome: "needs_action", customerType: await customerType(c.slug, p),
   });
+  if (pid) await put("index", `platform:${c.slug}:${source}:${pid}`, l.id);
+  await addToIndex("leads", c.slug, l.phone, l.id);
   const label = source === "angi" ? "Angi" : source === "thumbtack" ? "Thumbtack" : source;
   let summary = ownerSummary(c, "lead", l);
   if (!p) summary += (source === "thumbtack" ? " No phone number comes with Thumbtack leads. Reply in the Thumbtack app." : " No phone number came with this lead; reply on the platform.");
@@ -449,7 +455,7 @@ export function bookingDay(b) {
 export async function upcomingBookings(c, phone, at) {
   if (!phone) return [];
   const today = at ? new Date(new Date(at).toLocaleString("en-US", { timeZone: "America/Chicago" })) : visitDate("today"); today.setHours(0, 0, 0, 0);
-  return (await listRecords("bookings", c.slug, 300)).filter((b) => b.phone === phone && ["booked", "on_the_way", "confirmed"].includes(b.status) && (!b.date || bookingDay(b).getTime() >= today.getTime()));
+  return (await recordsFor("bookings", c.slug, phone)).filter((b) => b.phone === phone && ["booked", "on_the_way", "confirmed"].includes(b.status) && (!b.date || bookingDay(b).getTime() >= today.getTime()));
 }
 
 export async function confirmVisit(c, b) {
@@ -577,7 +583,7 @@ export async function ownerCommand(c, text) {
 // has no reply yet, classify the text; a negative reply stops the nudge and the referral ask and
 // reaches the owner as NEEDS ACTION; a positive one unlocks the referral ask.
 export async function noteReviewReply(c, phone, text) {
-  const recs = (await listRecords("bookings", c.slug, 300)).filter((b) => b.phone === phone && b.reviewAskedAt && !b.reviewReply).sort((a, b) => (a.reviewAskedAt || "").localeCompare(b.reviewAskedAt || ""));
+  const recs = (await recordsFor("bookings", c.slug, phone)).filter((b) => b.phone === phone && b.reviewAskedAt && !b.reviewReply).sort((a, b) => (a.reviewAskedAt || "").localeCompare(b.reviewAskedAt || ""));
   const b = recs[recs.length - 1];
   if (!b) return null;
   let sentiment = "none";
@@ -607,8 +613,8 @@ export async function noteReviewReply(c, phone, text) {
 // ---- Line health and digests ----
 const houstonDay = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso));
 
-export function lineHealth(c, events = []) {
-  const latest = (types) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); return e || null; };
+export function lineHealth(c, events = [], pointer = null) {
+  const latest = (types) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); return e || pointer || null; };
   const since = Date.now() - D;
   const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
   const own = c.phone?.twilioNumber && c.phone?.tenDlc === "approved";

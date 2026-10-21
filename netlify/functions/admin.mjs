@@ -143,6 +143,8 @@ export default async (req) => {
     // Opt-outs are keyed by phone across shops (the bridge sender is shared): keep them, forget the shop.
     for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await put("optouts", k, { ...o, slug: "", formerSlug: c.slug }); }
     for (const k of await list("index", "bridge:")) { const sl = await get("index", k); if (sl === c.slug) await del("index", k); }
+    for (const prefix of [`bookings:${c.slug}:`, `leads:${c.slug}:`, `platform:${c.slug}:`]) for (const k of await list("index", prefix)) await del("index", k);
+    await del("health", "lastInbound:" + c.slug);
     if (c.owner?.email) await del("index", "email:" + c.owner.email.toLowerCase());
     if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
     if (c.voice?.assistantId) await del("index", "vapi:" + c.voice.assistantId);

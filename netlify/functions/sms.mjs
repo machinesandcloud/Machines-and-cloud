@@ -1,7 +1,7 @@
 // Twilio inbound SMS webhook. The "To" number identifies the client (or, on the shared bridge number,
 // the "From" number is looked up in the bridge index). Texts from the owner's phone are commands
 // (ok/otw/done/quote/paid/cancel/help); everything else is a customer talking to the front desk.
-import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber } from "./lib/store.mjs";
+import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber, noteInbound } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
 import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
@@ -90,7 +90,7 @@ export default async (req) => {
     return twiml(`Thanks for texting ${name}. Please call ${c.phone?.businessNumber || "our main line"} and we will help right away.`);
   }
 
-  await logEvent(c.slug, "sms_inbound", { from });
+  await logEvent(c.slug, "sms_inbound", { from }); await noteInbound(c.slug);
   try { await noteReviewReply(c, from, body); } catch (err) { console.error("review reply", err); }
   const conv = await getConversation(c.slug, "sms", from);
   // A YES to the marketing-consent ask: record it and answer without the model.

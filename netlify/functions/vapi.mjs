@@ -1,6 +1,6 @@
 // Vapi server webhook: picks the assistant for an incoming call (with what we know about the caller),
 // runs our tools during the call, and files the transcript and the minutes when the call ends.
-import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, listRecords } from "./lib/store.mjs";
+import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, listRecords, noteInbound } from "./lib/store.mjs";
 import { bookVisit, flagLead, callerContext, cellIsForwardedLine } from "./lib/desk.mjs";
 import { json } from "./lib/agent.mjs";
 import { e164 } from "./lib/send.mjs";
@@ -51,7 +51,7 @@ export default async (req) => {
     const first = ctx.upcomingVisit
       ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, your visit is ${ctx.upcomingVisit}. How can I help?`
       : ctx.customerName ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, how can I help today?` : standardGreeting(c);
-    await logEvent(c.slug, "call_started", { from: caller, known: !!ctx.customerName });
+    await logEvent(c.slug, "call_started", { from: caller, known: !!ctx.customerName }); await noteInbound(c.slug);
     return json({ assistantId, assistantOverrides: { firstMessage: first, variableValues: { customerName: ctx.customerName, isExisting: ctx.isExisting, upcomingVisit: ctx.upcomingVisit, vip: "" } } });
   }
 
@@ -78,7 +78,7 @@ export default async (req) => {
     conv.endedReason = m.endedReason;
     await saveConversation(conv);
     const seconds = m.startedAt && m.endedAt ? Math.max(0, Math.round((new Date(m.endedAt) - new Date(m.startedAt)) / 1000)) : null;
-    await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds });
+    await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds }); await noteInbound(c.slug);
     if (isVoiceFailure(m.endedReason)) await logEvent(c.slug, "voice_failed", { from: caller, reason: m.endedReason });
     try { await addUsage(c, { minutes: seconds ? Math.ceil(seconds / 60) : 0, calls: 1 }); } catch (err) { console.error("usage", err); }
     if (/transfer/i.test(String(m.endedReason || ""))) await logEvent(c.slug, "transferred", { from: caller });

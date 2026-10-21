@@ -1,7 +1,7 @@
 // Runs every 10 minutes: sends whatever is due (reminders, review requests, quote checks, payment
 // reminders, quiet-lead chases), runs alert escalations, polls texting registration, and sends the
 // 6 pm Houston daily digest to every live shop.
-import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords } from "./lib/store.mjs";
+import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords, lastInbound } from "./lib/store.mjs";
 import { fanout, claimFanout } from "./lib/fanout.mjs";
 import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
 import { template, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, day7Draft } from "./lib/desk.mjs";
@@ -107,7 +107,7 @@ async function alertOnce(c, reason, hours, subject, text) {
   return true;
 }
 async function healthAlerts(c) {
-  const events = await listRecords("events", c.slug, 400);
+  const events = await listRecords("events", c.slug, 150);
   const since = (ms) => events.filter((e) => Date.now() - new Date(e.at).getTime() < ms);
   let n = 0;
   const failed = since(3600 * 1000).filter((e) => e.type === "sms_failed" || (e.type === "twilio_error" && e.data?.kind === "sms"));
@@ -115,7 +115,7 @@ async function healthAlerts(c) {
   const voice = since(15 * 60 * 1000).filter((e) => ["vapi_tool_failed", "assistant_request_failed", "voice_attach_failed", "voice_detach_failed", "voice_failed"].includes(e.type) || (e.type === "twilio_error" && e.data?.kind === "voice"));
   if (voice.length && (await alertOnce(c, "voice_failures", 1, `Voice failing: ${c.business.name}`, `${voice.length} voice failure(s) in the last 15 minutes: ${voice.map((e) => e.type + " " + (e.data?.error || e.data?.reason || e.data?.code || e.data?.name || "")).join("; ").slice(0, 400)}.`))) n++;
   if (c.status === "live" && c.phone?.forwardingVerified && c.phone?.forwarding !== "none") {
-    const inbound = events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
+    const inbound = (await lastInbound(c.slug)) || events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
     if (inbound && businessDaysSince(inbound) >= 5 && (await alertOnce(c, "no_inbound", 5 * 24, `Line silent: ${c.business.name}`, `No call or text has reached the front desk for ${businessDaysSince(inbound)} business days (last at ${inbound}). Forwarding may have dropped: ask the owner to dial *#61# and check Live Voicemail, then call the business number from another phone.`))) n++;
   }
   return n;

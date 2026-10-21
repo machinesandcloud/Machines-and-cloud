@@ -55,6 +55,13 @@ Acceptance: from the admin page Steve can list a shop's scheduled sends and canc
 ### S8-07 Keyed pass reserve (S2-01, carried; step 4 of the critical path)
 Status: todo. Size: reserve 2.5 days. Spent first whenever Steve's keys arrive and the account is unfrozen.
 
+### S8-08 Resilience addendum from Round 9: the brake, a trimmed admin stream, a cached widget config, and the credit facts
+Status: verified 2026-10-21 on the local server at commit 8838d64 (in-memory store, no Netlify calls). Size: S. Implements: Round 9 (cost and resilience) items 1, 4, and 5 as built by the engineer; the freeze stands, so no SPRINT9.md is opened.
+
+Engineer note: `admin {"action":"brake","on":true}` stops the half-hour scans and the nightly audit while due texts, webhooks, reminders, and the digest keep running; the admin page has the Brake button and shows the last scheduler run next to the shop count; `GET /api/admin?full=1` carries `brake` and `lastRun` and caps the event stream at 50 per shop; the public `GET /api/client?c=` returns `Cache-Control: public, max-age=60` (and the durable Netlify CDN header) so the widget config is served from the CDN; OPERATIONS.md has the credit facts (compute, requests, bandwidth, and production deploys are metered; storage operations are not), Steve's account steps (auto recharge, threshold emails), and the 10-minute monitor.
+
+Acceptance (local, verified): with the brake on, `run_scheduler` with `all: true` and `force_hour` 21 skipped `healthLifecycle` and ran no autoflag fan-out while the tasks block ran; `force_hour` 18 still ran the digest fan-out (`digests: 1`); `?full=1` carried `brake { on, at, by }` and `lastRun`; with the brake off the scans ran again and the autoflag fan-out was attempted; after 60 Angi posts the stream held exactly 50 events for the shop; the public GET carried `cache-control: public, max-age=60` and `netlify-cdn-cache-control: public, max-age=60, durable` while the owner GET stayed uncacheable; `admin.html` carries the Brake button and the last-run display; OPERATIONS.md carries the credit section, the account steps, and the monitor; no em dashes.
+
 ## 3. Assumptions (Steve can overturn any; each is one line to change)
 
 1. Round 8 question 1: the external uptime monitor for `/api/health` is a one-time sign-up under Steve's email (the stronger choice: a watcher on the same platform shares its failures).
@@ -71,6 +78,7 @@ Status: todo. Size: reserve 2.5 days. Spent first whenever Steve's keys arrive a
 | Pro multi-number routing, in-thread Thumbtack replies, Google LSA source tagging, per-call latency, more lifecycle messages or rubric reasons, per-action permission toggles, Jobber and Housecall Pro APIs, further admin polish beyond S8-06 | until customer one is live (Round 8 item 7, the freeze); no `SPRINT9.md` before a real shop has a `liveAt` |
 | Billing, pre-conversion text, blocklist, call spam tagging, pause-at-limit | parked by Steve's rule |
 | Deploying anything to production | the Netlify credit freeze; Steve's account action, not a ticket |
+| Round 9 item 2 (the static site on a host a pause cannot reach), item 3 (storage access patterns), item 6 (another host) | Steve's decisions; unbuilt under the freeze, and Round 9's finding that Netlify meters deploys, compute, requests, and bandwidth but not storage operations reorders them |
 
 ## 5. Verification plan
 
@@ -89,3 +97,7 @@ Results: S8-03 verified; S8-02 verified for the local half; S8-01 verified by co
 ### Local pass, 2026-10-21, local server at commit 00a1b0a, in-memory store
 
 Rerun under Steve's local-only rule with `scratchpad/verify20.py`: S8-01 and S8-02 verified (the draft build log stays a Netlify-side check), S8-04 verified from the repo, S8-06 verified with the `reactivate` note, S8-05 partly (the hook and set exist; the measurement waits for the local model key). Results: S8-01, S8-02, S8-03, S8-04, S8-06 verified; S8-05 verified in part; S8-07 keyed pass todo. Sprint 8 is complete except the keyed pass and the one measurement, and per Round 8 item 7 no `SPRINT9.md` is cut until a real shop has a `liveAt`.
+
+### Local pass for S8-08, 2026-10-21, local server at commit 8838d64
+
+Every S8-08 line passed locally (the brake, the digest that keeps running under it, the stream cap, the cache headers, the admin page and OPERATIONS statics). Nothing was sent to Netlify. Holding as instructed: no SPRINT9.md, no deploys, no production calls, until the site is up and the freeze is lifted.

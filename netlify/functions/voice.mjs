@@ -3,7 +3,7 @@
 // them back within seconds (missed-call text-back). The owner gets a missed-call alert either way.
 // Paused or cancelled shops: the call rings the owner's cell (never the forwarded line) or hears a short message.
 // Numbers on the owner's always-ring-through list ring the cell, then record a voicemail that is texted to the owner.
-import { clientByNumber, getConversation, saveConversation, logEvent, saveClient } from "./lib/store.mjs";
+import { clientByNumber, getConversation, saveConversation, logEvent, saveClient, noteInbound } from "./lib/store.mjs";
 import { sendSMS, notifyOwner, twilioSignatureValid, e164, optedOut } from "./lib/send.mjs";
 import { ACTIVE } from "./lib/config.mjs";
 import { cellIsForwardedLine } from "./lib/desk.mjs";
@@ -72,7 +72,7 @@ export default async (req) => {
   if (c.phone?.voiceForwardTo) {
     const dest = c.phone.voiceForwardTo;
     const inner = dest.startsWith("sip:") ? `<Dial timeout="25"><Sip>${esc(dest)}</Sip></Dial>` : `<Dial timeout="25">${esc(dest)}</Dial>`;
-    await logEvent(c.slug, "call_forwarded", { from });
+    await logEvent(c.slug, "call_forwarded", { from }); await noteInbound(c.slug);
     return xml(inner);
   }
 
@@ -99,6 +99,6 @@ export default async (req) => {
     }
   }
   await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${textBack === "sent" || textBack === "logged" ? "Text-back sent; I will take it from here and text you the lead." : textBack === "skipped" ? "They were texted recently or opted out, so no text-back." : "No texting sender yet, so no text-back."}`, { type: "owner_note" });
-  await logEvent(c.slug, "missed_call", { from, textBack });
+  await logEvent(c.slug, "missed_call", { from, textBack }); await noteInbound(c.slug);
   return xml(`${say}<Hangup/>`);
 };

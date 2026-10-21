@@ -86,6 +86,24 @@ export const getRecord = (kind, slug, recId) => get(kind, `${slug}/${recId}`);
 export const saveRecord = (kind, rec) => put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
 export const listRecords = (kind, slug, limit) => listJSON(kind, slug + "/", limit);
 
+// Per-phone index: "bookings:<slug>:<phone>" and "leads:<slug>:<phone>" hold the record ids for that number,
+// so the hot paths (every inbound text, every call) read a handful of records instead of listing the history.
+export async function addToIndex(kind, slug, phone, recId) {
+  if (!phone) return;
+  const k = `${kind}:${slug}:${phone}`;
+  const ids = (await get("index", k)) || [];
+  if (!ids.includes(recId)) { ids.push(recId); await put("index", k, ids.slice(-100)); }
+}
+export async function recordsFor(kind, slug, phone) {
+  if (!phone) return [];
+  const ids = (await get("index", `${kind}:${slug}:${phone}`)) || [];
+  const recs = await Promise.all(ids.map((id) => getRecord(kind, slug, id)));
+  return recs.filter(Boolean);
+}
+// The latest customer contact per shop, written by the webhooks, read by the health alerts.
+export const noteInbound = (slug) => put("health", "lastInbound:" + slug, { at: now() });
+export const lastInbound = async (slug) => (await get("health", "lastInbound:" + slug))?.at || null;
+
 // Tasks are keyed by due time so the scheduler can list what is due.
 export async function scheduleTask(slug, dueAt, type, data) {
   const due = new Date(dueAt).toISOString();
