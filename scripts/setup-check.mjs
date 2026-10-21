@@ -4,7 +4,7 @@
 import { readFileSync, existsSync } from "node:fs";
 const root = new URL("../", import.meta.url).pathname;
 const env = {};
-if (existsSync(root + ".env")) for (const line of readFileSync(root + ".env", "utf8").split("\n")) { const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/); if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, ""); }
+if (existsSync(root + ".env")) for (const line of readFileSync(root + ".env", "utf8").split("\n")) { const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/); if (m) env[m[1]] = m[2].replace(/(^|\s+)#.*$/, "").replace(/^["']|["']$/g, ""); }
 const E = (k) => process.env[k] || env[k] || "";
 const rows = [];
 const add = (name, status, note, fix) => rows.push({ name, status, note, fix });

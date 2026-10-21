@@ -11,7 +11,7 @@ import { extname, join, normalize } from "node:path";
 
 const root = new URL("../", import.meta.url).pathname;
 // .env: KEY=value lines, never committed.
-if (existsSync(join(root, ".env"))) for (const line of readFileSync(join(root, ".env"), "utf8").split("\n")) { const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, ""); }
+if (existsSync(join(root, ".env"))) for (const line of readFileSync(join(root, ".env"), "utf8").split("\n")) { const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/(^|\s+)#.*$/, "").replace(/^["']|["']$/g, ""); }
 process.env.MC_MEMORY_STORE = process.env.MC_MEMORY_STORE || "1";
 process.env.ADMIN_KEY = process.env.ADMIN_KEY || "local-admin";
 // No Anthropic key: the deterministic fake model stands in so every flow still runs (MC_FAKE_MODEL=0 to refuse instead).
