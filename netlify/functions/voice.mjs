@@ -37,7 +37,12 @@ export default async (req) => {
   const c = await clientByNumber(to);
   if (c?.phone?.twilioNumber) ours.push(c.phone.twilioNumber);
   if (from && ours.includes(from)) return xml(`<Hangup/>`);
-  if (!c) return xml(`<Say>Sorry, this number is not in service.</Say><Hangup/>`);
+  if (!c) {
+    // A customer calling back the shared texting number: ring the shop that texted them.
+    const mc = e164(process.env.MC_TWILIO_NUMBER || "");
+    if (mc && to === mc && from) { const { get, getClient } = await import("./lib/store.mjs"); const slug = await get("index", "bridge:" + from); const shop = slug ? await getClient(slug) : null; if (shop) { await logEvent(shop.slug, "bridge_callback", { from }); return xml(fallbackTwiml(shop)); } }
+    return xml(`<Say>Sorry, this number is not in service.</Say><Hangup/>`);
+  }
   const name = c.business?.name || "the office";
 
   // A VIP voicemail just recorded: text the owner the link.

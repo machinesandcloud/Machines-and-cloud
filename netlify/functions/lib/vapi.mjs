@@ -10,6 +10,8 @@ import { logEvent } from "./store.mjs";
 const KEY = process.env.VAPI_API_KEY;
 export const vapiEnabled = () => Boolean(KEY && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
 const MODEL = process.env.VAPI_MODEL || "claude-sonnet-5";
+// Every server object carries the secret so Vapi sends x-vapi-secret, which /api/vapi checks.
+const srv = (url) => ({ url, timeoutSeconds: 20, ...(process.env.VAPI_WEBHOOK_SECRET ? { secret: process.env.VAPI_WEBHOOK_SECRET } : {}) });
 
 async function vapi(path, body, method = "POST") {
   const res = await fetch("https://api.vapi.ai" + path, { method, headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
@@ -21,7 +23,7 @@ async function vapi(path, body, method = "POST") {
 
 function toolDef(t, serverUrl) {
   const { additionalProperties, ...params } = t.input_schema;
-  return { type: "function", async: false, function: { name: t.name, description: t.description, parameters: params }, server: { url: serverUrl, timeoutSeconds: 20 } };
+  return { type: "function", async: false, function: { name: t.name, description: t.description, parameters: params }, server: srv(serverUrl) };
 }
 
 function transferDef(client) {
@@ -76,7 +78,7 @@ export async function provisionVoice(client, site) {
     model: modelBlock(client, toolIds),
     transcriber: { provider: "deepgram", model: "nova-3", language: client.business?.spanish ? "multi" : "en" },
     ...(process.env.VAPI_VOICE_PROVIDER && process.env.VAPI_VOICE_ID ? { voice: { provider: process.env.VAPI_VOICE_PROVIDER, voiceId: process.env.VAPI_VOICE_ID } } : {}),
-    server: { url: serverUrl, timeoutSeconds: 20 },
+    server: srv(serverUrl),
     serverMessages: ["tool-calls", "end-of-call-report"],
     endCallMessage: "Thanks for calling. Goodbye.",
     metadata: { slug: client.slug },
@@ -85,7 +87,7 @@ export async function provisionVoice(client, site) {
   if (client.phone?.twilioNumber) {
     // No fixed assistantId on the number: Vapi asks our webhook (assistant-request) on every call, and
     // we answer with the assistant plus what we know about the caller (name, upcoming visit, VIP).
-    const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, name: `${client.business.name} (${client.slug})`, server: { url: serverUrl, timeoutSeconds: 20 } });
+    const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, name: `${client.business.name} (${client.slug})`, server: srv(serverUrl) });
     phoneNumberId = pn.id;
   }
   return { assistantId: assistant.id, toolIds, functionToolIds: toolIds.filter((id) => id !== transferToolId), transferToolId, phoneNumberId };
@@ -128,7 +130,7 @@ export async function attachVoice(client, site) {
   try {
     if (client.voice.vapiVoiceUrl) await setNumberWebhooks(client.phone.twilioNumberSid, { voiceUrl: client.voice.vapiVoiceUrl, smsUrl: `${site}/api/sms` });
     else if (vapiEnabled() && client.phone.twilioNumber) {
-      const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, server: { url: `${site}/api/vapi`, timeoutSeconds: 20 } });
+      const pn = await vapi("/phone-number", { provider: "twilio", number: client.phone.twilioNumber, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN, smsEnabled: false, server: srv(`${site}/api/vapi`) });
       client.voice.phoneNumberId = pn.id;
     }
     try { await setVoiceFallback(client.phone.twilioNumberSid, `${site}/api/voice`); } catch { /* fallback stays as it was */ }
