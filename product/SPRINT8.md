@@ -11,21 +11,24 @@ Make the scheduled function safe to change (recorded blocks, background fan-outs
 ## 2. Tickets
 
 ### S8-01 The scheduler as recorded blocks with background fan-outs
-Status: delivered 2026-10-20 (engineer, commit `1abe15f`); PM verdict below. Size: M. Implements: Round 8 item 1 (MUST).
+Status: verified by code read only 2026-10-20: `run()` wraps each block and writes `health/scheduler:lastRun` with per-block ok, error, or skipped (`scheduler.mjs` lines 130 to 236), the four fan-outs live in `lib/fanout.mjs`, a scheduled run claims the day once (`claimFanout`) and hands off to `scheduler-fanout-background.mjs`, and `force_hour` runs them inline; the smoke test exercises every gate locally. The live lines (`last_run` under a minute old, the inline forced run) were refused with `usage_exceeded` on draft `6ad7bf5e17242792b323e060` and wait for the unfreeze.
+Size and scope: Size: M. Implements: Round 8 item 1 (MUST).
 
 Engineer note: `run()` is recorded blocks (`admin last_run` returns `health/scheduler:lastRun` with per-block ok, error, or skipped); the four shop-wide sends (audit, statement, weekly, digest) live in `lib/fanout.mjs` and run in `scheduler-fanout-background.mjs` at their hour, claimed once per Houston day, while `force_hour` runs them inline so tests see the events as before.
 
 Acceptance (now, draft): a bare `run_scheduler` returns 200 and `admin last_run` shows a record under a minute old with every block `ok`; a forced hour runs the fan-out inline and the events appear as before (digest, weekly, monthly, auto-flag); by code, a scheduled (unforced) run claims the day once and hands off to the background function, so a second claim the same day is skipped; a throw in one block is recorded on that block and the next block still runs (by code).
 
 ### S8-02 A smoke test on deploy and a dead-man switch
-Status: delivered 2026-10-20 (engineer, same commit); PM verdict below. Size: M. Implements: Round 8 item 2 (MUST); assumption 1.
+Status: verified 2026-10-20 for the local half: `node scripts/smoke.mjs` passes in about 110 ms, `netlify.toml` runs it as the build command, and injecting a read-before-declaration into `run()` on a local copy made it exit 1 naming "ReferenceError: Cannot access 'tdzProbe' before initialization" (the copy was restored). `/api/health` on draft `6ad7bf5e17242792b323e060` answered 503, but with the platform's `usage_exceeded` body rather than the function's own record, so the 503-then-200 lines and the draft build log wait for the unfreeze; OPERATIONS.md names the external monitor.
+Size and scope: Size: M. Implements: Round 8 item 2 (MUST); assumption 1.
 
 Engineer note: `scripts/smoke.mjs` is the Netlify build command (imports every module, seeds a shop in an in-memory store, runs every scheduler gate, calls the handlers; fails the deploy on a throw; about 150 ms locally); `/api/health` returns 200 when the last run is under 25 minutes old with every block ok, 503 otherwise.
 
 Acceptance: `node scripts/smoke.mjs` passes locally and a draft deploy's build runs it; reintroducing a read-before-declaration in `run()` on a local copy makes the smoke test exit non-zero naming the error (restored afterward); `/api/health` on a fresh draft (no run yet) returns 503 with `lastRunAt` null, and 200 with `minutesAgo` under 25 right after `run_scheduler`; OPERATIONS.md names the external monitor sign-up.
 
 ### S8-03 Copy that says what the code does
-Status: delivered 2026-10-20 (engineer, same commit); PM verdict below. Size: S. Implements: Round 8 item 3 (MUST).
+Status: verified 2026-10-20 (repo): no "every day", "comes daily", or "summary of the day" in `index.html` or `client.mjs`; the Starter card reads "a 6 pm summary on any day it handled something", the Growth card "Payment reminders on day 3 and 7 once you log an invoice", FAQ 10 and the welcome text match; CLAUDE.md has one Built list (line 39) and one Not-yet-built list (line 89); the runbook's step 8 reads flags and auto-flags; prices at the same counts; `sitecheck.py` passes; no em dashes in the visible copy (the one in CLAUDE.md is its title, internal).
+Size and scope: Size: S. Implements: Round 8 item 3 (MUST).
 
 Engineer note: 6 pm summary on days with activity, payment reminders once an invoice is logged, CLAUDE.md's built list, the runbook's days 2 to 7 read flags.
 
@@ -71,3 +74,11 @@ Status: todo. Size: reserve 2.5 days. Spent first whenever Steve's keys arrive a
 Setup as in `SPRINT.md` section 5.1 and `SPRINT2.md` section 5 on a draft deploy (production is frozen). Hooks this sprint uses: `admin last_run`, `/api/health`, `run_scheduler` with and without `force_hour`, `node scripts/smoke.mjs` locally and in the draft build log. Every session ends with `admin delete` for each test shop, `admin clear_optout` with a live slug for each fake number, and `GET /api/admin` showing no PM Test shop.
 
 Keyed pass (S8-07): everything from the earlier sprints, after the account is unfrozen.
+
+## 6. Verification record
+
+### Pre-key pass, 2026-10-20, draft `6ad7bf5e17242792b323e060` (built by the PM from `main` at `304d33e`), blocked by the account freeze
+
+Repo-level lines passed (S8-03 copy, the smoke test and its failure on an injected read-before-declaration, the CLAUDE.md lists, the runbook step). Every function call on the draft returned `usage_exceeded`, so S8-01's `last_run` and inline fan-out lines and S8-02's `/api/health` 503-then-200 lines are not run; they stand on code read until Steve restores the account's credits. Note recorded on S6-06: because production has been frozen at `b29aec9` since 9:24 am, the scheduler fault of commit `df36c03` never reached production and there was no outage.
+
+Results: S8-03 verified; S8-02 verified for the local half; S8-01 verified by code read; S8-04 to S8-06 in progress; S8-07 keyed pass todo.

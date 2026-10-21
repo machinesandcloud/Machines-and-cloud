@@ -146,6 +146,7 @@ export async function run({ forceHour, forceDay, inline } = {}) {
   });
   await block(record, "tenDlc", async () => {
     if (!a2pEnabled()) return { skipped: "no keys" };
+    if (!halfHour) return { skipped: "runs at :00 and :30" };
     let polled = 0;
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
@@ -172,8 +173,11 @@ export async function run({ forceHour, forceDay, inline } = {}) {
     }
     return { polled };
   });
+  const minuteNow = forceHour !== undefined ? 0 : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", minute: "numeric" }).formatToParts(new Date()).find((p) => p.type === "minute")?.value);
+  const halfHour = minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40);
   let alerts = 0, lifecycles = 0;
   await block(record, "healthLifecycle", async () => {
+    if (!halfHour) return { skipped: "runs at :00 and :30" };
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
       if (!c || !["testing", "live"].includes(c.status)) continue;
@@ -184,6 +188,7 @@ export async function run({ forceHour, forceDay, inline } = {}) {
   });
   let released = 0;
   await block(record, "release", async () => {
+    if (!halfHour) return { skipped: "runs at :00 and :30" };
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
       if (!c || c.status !== "cancelled" || !c.serviceEndsAt || new Date(c.serviceEndsAt).getTime() > Date.now()) continue;

@@ -91,7 +91,7 @@ Each is sent once per shop (stamped on the client record): day 8 after go-live, 
 
 ## The scheduler, the smoke test, and the health check
 
-`scheduler.mjs` runs every 10 minutes as recorded blocks (tasks, 10DLC polling, health alerts and lifecycle, number release); the record is `health/scheduler:lastRun` (`admin {"action":"last_run"}`). The four shop-wide sends (6 pm digest, 9 pm audit, Monday email, 1st-of-month statement) are claimed once per Houston day and handed to `scheduler-fanout-background.mjs`, so they have no synchronous time limit and one shop's failure never stops the rest (`health/fanout:<kind>:last` holds each run's count and errors; `admin {"action":"fanout","kind":"digest"}` runs one inline). Every deploy runs `scripts/smoke.mjs` as the build command: it imports every module, seeds a shop in an in-memory store, runs the scheduler at every gate, and calls the handlers; a throw fails the deploy. `/api/health` returns 200 when the last run is under 25 minutes old with every block ok and 503 otherwise. Steve's one-time step: point a free external uptime monitor (UptimeRobot or similar, 5-minute interval) at `https://machinesandcloud.com/api/health` with email alerts.
+`scheduler.mjs` runs every 10 minutes as recorded blocks (tasks, 10DLC polling, health alerts and lifecycle, number release); the record is `health/scheduler:lastRun` (`admin {"action":"last_run"}`). The four shop-wide sends (6 pm digest, 9 pm audit, Monday email, 1st-of-month statement) are claimed once per Houston day and handed to `scheduler-fanout-background.mjs`, so they have no synchronous time limit and one shop's failure never stops the rest (`health/fanout:<kind>:last` holds each run's count and errors; `admin {"action":"fanout","kind":"digest"}` runs one inline). Every deploy runs `scripts/smoke.mjs` as the build command: it imports every module, seeds a shop in an in-memory store, runs the scheduler at every gate, and calls the handlers; a throw fails the deploy. `/api/health` returns 200 when the last run is under 25 minutes old with every block ok and 503 otherwise. Steve's one-time step: point a free external uptime monitor (UptimeRobot or similar, 15-minute interval) at `https://machinesandcloud.com/api/health` with email alerts.
 
 ## Steve's admin page
 
@@ -103,6 +103,16 @@ The monthly statement goes to every live shop on the 1st at 9 am Houston (email 
 
 - Angi: set a key by admin (`{"slug":"...","leads":{"angiKey":"<random>"}}`). The owner (or Steve on the call) enters `https://machinesandcloud.com/api/angi?c=<slug>` as the CRM endpoint in Angi Leads with the key as `X-API-KEY`. Each post creates a lead with `source: "angi"`, alerts the owner ("Angi lead: ..."), texts the customer at once when a phone is present, and, on Growth and Pro, chases twice. Repeats of the same Angi lead id are ignored. The reply is `{"status":"success"}`.
 - Thumbtack: set a secret by admin (`{"slug":"...","leads":{"thumbtackSecret":"<random>"}}`). In Thumbtack's integrations page the owner registers `https://machinesandcloud.com/api/thumbtack?c=<slug>` for new leads with basic auth (any user, the secret as the password) or a bearer token equal to the secret. Same behaviour with `source: "thumbtack"`. In-thread Thumbtack replies still need partner access, so the first reply goes by text to the customer's number.
+
+## Testing without spending Netlify credits
+
+Every draft deploy, function call, and storage operation on Netlify costs credits, and a day of test loops exhausted the plan on 2026-10-20. The rule since then: verification runs locally and nothing goes to Netlify except one git push per verified sprint.
+
+- `node scripts/local-server.mjs` serves the site and every function at `http://localhost:8888` from the same modules production runs, against an in-memory store (`MC_MEMORY_STORE=1`); admin key `local-admin`; `MC_MEMORY_FILE=.local-store.json` keeps the store across restarts. Model calls need `ANTHROPIC_API_KEY=` in a gitignored `.env` at the repo root (the site's key lives at the Netlify team level and is not readable from the CLI); without it chat and the two classifiers fail cleanly and everything else works.
+- Every check script that took a draft URL takes `http://localhost:8888` instead; the background functions are routed too (`/.netlify/functions/<name>`).
+- `node scripts/smoke.mjs` is the deploy gate and runs locally in under a second.
+- Draft deploys (`netlify deploy --dir=.`) are for one final look per sprint at most, and never for loops. The two-model classifier evaluation is run locally, never through Netlify.
+- Production: `git push` builds `main` once; the scheduler runs every 10 minutes and does its per-shop scans only at :00 and :30 to keep storage reads down; the uptime monitor polls `/api/health` every 15 minutes, not 5.
 
 ## Testing without real accounts
 
