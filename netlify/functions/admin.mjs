@@ -55,7 +55,7 @@ export default async (req) => {
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
-  if (b.action === "run_scheduler") return json(await runScheduler({ forceHour: b.force_hour !== undefined ? Number(b.force_hour) : undefined, forceDay: b.force_day ? String(b.force_day) : undefined }));
+  if (b.action === "run_scheduler") return json(await runScheduler({ forceHour: b.force_hour !== undefined ? Number(b.force_hour) : undefined, forceDay: b.force_day ? String(b.force_day) : undefined, all: !!b.all }));
   if (b.action === "fanout") { const { fanout, KINDS } = await import("./lib/fanout.mjs"); if (!KINDS.includes(String(b.kind))) return json({ error: "unknown_kind" }, 400); return json({ ok: true, ...(await fanout(String(b.kind))) }); }
   if (b.action === "last_run") return json({ ok: true, lastRun: await get("health", "scheduler:lastRun") });
   if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", ip + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }

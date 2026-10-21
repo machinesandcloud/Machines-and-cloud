@@ -130,7 +130,7 @@ async function block(record, name, fn) {
 // Every block is wrapped and recorded in health/scheduler:lastRun; a failure in one never stops the next.
 // Fan-outs to every live shop (digest, audit, weekly, monthly) run in a background function at their hour,
 // claimed once per Houston day; with forceHour (tests) they run inline so the caller sees the result.
-export async function run({ forceHour, forceDay, inline } = {}) {
+export async function run({ forceHour, forceDay, inline, all } = {}) {
   const record = { at: new Date().toISOString(), blocks: {} };
   const nowISO = record.at;
   const results = [];
@@ -174,7 +174,7 @@ export async function run({ forceHour, forceDay, inline } = {}) {
     return { polled };
   });
   const minuteNow = forceHour !== undefined ? 0 : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", minute: "numeric" }).formatToParts(new Date()).find((p) => p.type === "minute")?.value);
-  const halfHour = minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40);
+  const halfHour = all || minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40);
   let alerts = 0, lifecycles = 0;
   await block(record, "healthLifecycle", async () => {
     if (!halfHour) return { skipped: "runs at :00 and :30" };

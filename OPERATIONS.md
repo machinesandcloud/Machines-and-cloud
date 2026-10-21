@@ -123,7 +123,7 @@ Every draft deploy, function call, and storage operation on Netlify costs credit
 - Voice without a Vapi key: set `{"slug":"...","voice":{"provider":"vapi","assistantId":"asst_test"}}` by admin, then simulate `assistant-request` and `end-of-call-report` with `POST /api/vapi {"message":{...}}` (the `x-admin-key` header stands in for the Vapi secret on a draft).
 - Rate limit: 60 chat messages per IP per 10 minutes; `{"action":"ratelimit_reset","ip":"..."}` clears one IP.
 - Number release: set `{"slug":"...","serviceEndsAt":"2026-01-01T00:00:00Z"}` by admin on a cancelled shop and run `{"action":"run_scheduler"}`.
-- Weekly email: `{"slug":"...","action":"weekly"}` returns it (`"send": true` emails it); `{"action":"run_scheduler","force_hour":8,"force_day":"Mon"}` runs the Monday send. The prompt at a given clock: `{"slug":"...","action":"prompt","channel":"test","at":"2026-10-23T23:00:00Z"}`.
+- Weekly email: `{"slug":"...","action":"weekly"}` returns it (`"send": true` emails it); `{"action":"run_scheduler","force_hour":8,"force_day":"Mon"}` runs the Monday send; `"all": true` runs the half-hourly scans on any minute. The prompt at a given clock: `{"slug":"...","action":"prompt","channel":"test","at":"2026-10-23T23:00:00Z"}`.
 
 ## First customer: go-live and the first week
 
