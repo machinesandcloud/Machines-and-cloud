@@ -4,6 +4,7 @@
 process.env.MC_MEMORY_STORE = "1";
 for (const k of ["ANTHROPIC_API_KEY", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_PRIMARY_PROFILE_SID", "VAPI_API_KEY", "RESEND_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY", "MC_TWILIO_NUMBER", "MC_MESSAGING_SERVICE_SID", "URL", "STEVE_PHONE"]) delete process.env[k];
 process.env.ADMIN_KEY = "smoke-key";
+process.env.VAPI_WEBHOOK_SECRET = "smoke-vapi-secret";
 import { readdirSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 const root = new URL("../netlify/functions/", import.meta.url);
@@ -41,6 +42,7 @@ res = await call("client.mjs", "/api/client?c=smoke-shop&k=k"); const own = awai
 res = await call("policy.mjs", "/policy?c=smoke-shop"); if (res.status !== 200) fail("policy");
 res = await call("sms.mjs", "/api/sms", { method: "POST", headers: { "x-admin-key": "smoke-key", "Content-Type": "application/x-www-form-urlencoded" }, body: "From=%2B12815550199&To=%2B17135550111&Body=help" }); if (!/Commands|alert names/.test(await res.text())) fail("sms help");
 res = await call("voice.mjs", "/api/voice", { method: "POST", headers: { "x-admin-key": "smoke-key", "Content-Type": "application/x-www-form-urlencoded" }, body: "From=%2B17135552009&To=%2B17135550111&CallSid=CA1" }); if (!/<Say/.test(await res.text())) fail("voice");
-res = await call("vapi.mjs", "/api/vapi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: { type: "end-of-call-report", phoneNumber: { number: "+17135550111" }, customer: { number: "+17135552010" }, startedAt: "2026-10-20T10:00:00Z", endedAt: "2026-10-20T10:01:00Z", endedReason: "customer-ended-call", artifact: { transcript: "" } } }) }); if (res.status !== 200) fail("vapi");
+res = await call("vapi.mjs", "/api/vapi", { method: "POST", headers: { "Content-Type": "application/json", "x-vapi-secret": "wrong-smoke-secret" }, body: "{}" }); if (res.status !== 403) fail("vapi rejects wrong secret");
+res = await call("vapi.mjs", "/api/vapi", { method: "POST", headers: { "Content-Type": "application/json", "x-vapi-secret": "smoke-vapi-secret" }, body: JSON.stringify({ message: { type: "end-of-call-report", phoneNumber: { number: "+17135550111" }, customer: { number: "+17135552010" }, startedAt: "2026-10-20T10:00:00Z", endedAt: "2026-10-20T10:01:00Z", endedReason: "customer-ended-call", artifact: { transcript: "" } } }) }); if (res.status !== 200) fail("vapi");
 res = await call("twilio-alert.mjs", "/api/twilio-alert", { method: "POST", headers: { "x-admin-key": "smoke-key", "Content-Type": "application/x-www-form-urlencoded" }, body: "Sid=NO1&Level=ERROR&Payload=" + encodeURIComponent(JSON.stringify({ error_code: "11200", webhook: { request: { url: "https://x/api/voice", parameters: { To: "+17135550111" } } } })) }); if (res.status !== 200) fail("twilio-alert");
 console.log(`SMOKE OK in ${Date.now() - t0} ms`);

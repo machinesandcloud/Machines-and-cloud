@@ -14,15 +14,19 @@ You are setting up the accounts that power the Machines & Cloud AI front desk (m
 
 | Field | Value |
 |---|---|
-| Legal business name (exactly as on the IRS EIN letter) | ______ |
-| EIN | ______ |
-| Business type (LLC, corporation, sole proprietor, partnership) | ______ |
-| Business address (as registered) | ______ (the public address used on the site is 5718 Westheimer Rd Suite 1000, Houston, TX 77057) |
+| Legal business name (exactly as on the IRS EIN letter) | Machines And Cloud LLC |
+| EIN | 92-1473514 |
+| Business type (LLC, corporation, sole proprietor, partnership) | LLC (Texas Limited Liability Company) |
+| Business address (as registered) | 5718 Westheimer Rd, Suite 1000, Houston, TX 77057 |
 | Website | https://www.machinesandcloud.com |
 | Contact name | Steve Ngoumnai |
-| Contact email | support@machinesandcloud.com |
-| Contact phone (Steve's cell) | ______ |
+| Provider contact email (temporary until the business inbox is set up) | ngoumnaisteve@gmail.com |
+| Public support email | support@machinesandcloud.com |
+| Contact phone (Steve's cell) | +16614956642 |
+| Personal email for usage alerts | ngoumnaisteve@gmail.com |
 | Industry / vertical | Technology (software for home service businesses) |
+
+**Temporary provider email override:** Until the business inbox is set up, use ngoumnaisteve@gmail.com for provider account signup and sign-in, contact and verification emails, and notification recipients throughout this script, even where a step specifies support@machinesandcloud.com. Keep public policy and customer-facing campaign wording exactly as written, including support@machinesandcloud.com. Keep `FROM_EMAIL` and the instructions not to change Netlify's `ADMIN_KEY` or `STEVE_EMAIL` exactly as written.
 
 ---
 
@@ -173,9 +177,9 @@ Site: https://console.anthropic.com
 
 Site: https://app.netlify.com, team "docteureminem's team".
 
-**6.1** Team settings, Billing (or Usage and billing): turn on **auto recharge** for credits (STOP for Steve to confirm the amount).
+**6.1** Keep **auto recharge disabled**. Steve explicitly chose this on 2026-10-21 after reviewing the Pro plan's fixed $10 / 1,500-credit recharge. Do not enable it without a new instruction from Steve; if he changes this decision, STOP for him to confirm the amount.
 
-**6.2** Same area, usage notifications: turn on emails at 50, 75, and 100 percent, to support@machinesandcloud.com and Steve's personal email.
+**6.2** Same area, usage notifications: turn on emails at 50, 75, and 100 percent, to support@machinesandcloud.com and ngoumnaisteve@gmail.com.
 
 ---
 
@@ -190,7 +194,7 @@ Site: https://uptimerobot.com (free plan).
 ## Task 8. Steve's own values
 
 Record:
-- `STEVE_PHONE`: Steve's cell in E.164 form (+1...).
+- `STEVE_PHONE`: `+16614956642` (Steve's cell in E.164 form).
 
 ---
 

@@ -2,17 +2,25 @@
 // records list by prefix. All reads/writes are JSON.
 import { getStore } from "@netlify/blobs";
 import { randomBytes } from "node:crypto";
+import { normalizeDate } from "./calendar.mjs";
 
 // Opened per call, never cached at module level: a warm function instance that outlives the Blobs
 // token would otherwise fail every write with "Token expired".
 // MC_MEMORY_STORE=1 (the deploy smoke test) swaps Blobs for an in-process Map with the same four calls.
 const memory = new Map();
+let memoryRevision = 0;
 function memStore(name) {
   if (!memory.has(name)) memory.set(name, new Map());
   const m = memory.get(name);
   return {
-    async get(key, opts) { const v = m.get(key); return v === undefined ? null : (opts?.type === "json" ? JSON.parse(v) : v); },
-    async setJSON(key, value) { m.set(key, JSON.stringify(value)); },
+    async get(key, opts) { const v = m.get(key); return v === undefined ? null : (opts?.type === "json" ? JSON.parse(v.value) : v.value); },
+    async getWithMetadata(key, opts) { const v = m.get(key); return v === undefined ? null : { data: opts?.type === "json" ? JSON.parse(v.value) : v.value, etag: v.etag, metadata: {} }; },
+    async setJSON(key, value, opts = {}) {
+      const current = m.get(key);
+      if ((opts.onlyIfNew && current) || (opts.onlyIfMatch && current?.etag !== opts.onlyIfMatch)) return { modified: false };
+      const etag = String(++memoryRevision); m.set(key, { value: JSON.stringify(value), etag });
+      return { modified: true, etag };
+    },
     async delete(key) { m.delete(key); },
     async list({ prefix = "" } = {}) { return { blobs: [...m.keys()].filter((k) => k.startsWith(prefix)).map((key) => ({ key })) }; },
   };
@@ -35,6 +43,26 @@ export async function get(kind, key) {
 export async function put(kind, key, value) {
   await store(kind).setJSON(safe(key), value);
   return value;
+}
+
+// Netlify's conditional writes arbitrate between function instances. Never turn a failed read into
+// an empty value here: capacity must fail closed when storage cannot be read.
+export async function atomicUpdate(kind, key, update) {
+  const s = store(kind), k = safe(key);
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const current = await s.getWithMetadata(k, { type: "json", consistency: "strong" });
+    const next = await update(current?.data ?? null);
+    if (!Object.hasOwn(next, "value")) return next.result;
+    if (current && !current.etag) throw new Error("Conditional storage read returned no ETag");
+    const written = await s.setJSON(k, next.value, current ? { onlyIfMatch: current.etag } : { onlyIfNew: true });
+    if (written.modified) {
+      // The installed SDK also returns modified:true for some failed conditional responses.
+      // A successful write must include its ETag; otherwise retain any prior claim and fail closed.
+      if (!written.etag) throw new Error("Conditional storage write returned no ETag");
+      return next.result;
+    }
+  }
+  throw new Error("Booking capacity changed too often; please retry");
 }
 export async function del(kind, key) {
   try { await store(kind).delete(safe(key)); } catch { /* ignore */ }
@@ -83,8 +111,103 @@ export async function addRecord(kind, slug, data) {
   return rec;
 }
 export const getRecord = (kind, slug, recId) => get(kind, `${slug}/${recId}`);
-export const saveRecord = (kind, rec) => put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
+export async function saveRecord(kind, rec, { capacityClaim } = {}) {
+  if (kind !== "bookings") return put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
+  const owned = !!capacityClaim;
+  const claim = capacityClaim || (ACTIVE_BOOKINGS.has(rec.status)
+    ? await reserveBookingWindow((await getClient(rec.slug)) || { slug: rec.slug }, rec.id, rec.date, rec.window, undefined, { requireExisting: true })
+    : await lockBookingWindow(rec.slug, rec.id));
+  if (claim.full) throw new Error("Booking window is full; reload it and retry");
+  // An internal reschedule keeps ownership until both record and reservation are committed.
+  await atomicUpdate("index", capacityKey(rec.slug), (state) => {
+    if (state?.mutations?.[rec.id] !== claim.token) throw new Error("Booking mutation ownership lost");
+    return {};
+  });
+  // Any write exception keeps the token and claims. SDK retries can commit an earlier attempt
+  // even when the final response is a 4xx, so the exception is never proof that rollback is safe.
+  const saved = await put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
+  if (!owned) await finishBookingWindow(rec.slug, rec.id, claim);
+  return saved;
+}
 export const listRecords = (kind, slug, limit) => listJSON(kind, slug + "/", limit);
+
+const ACTIVE_BOOKINGS = new Set(["booked", "confirmed", "on_the_way"]);
+// Match the existing calendar window interpretation while treating spacing, dashes and explicit
+// am/pm as equivalent. Keep custom named windows distinct.
+export function canonicalWindow(window) {
+  const text = String(window || "").trim().toLowerCase();
+  const m = text.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?\s*(?:to|[-–—])\s*(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?$/);
+  if (!m) return text.replace(/\s+/g, " ");
+  const minutes = (h, min, ap) => (ap ? (Number(h) % 12) + (/^p/.test(ap) ? 12 : 0) : Number(h)) * 60 + Number(min || 0);
+  let start = minutes(m[1], m[2], m[3]), end = minutes(m[4], m[5], m[6]);
+  if (!m[3] && start < 7 * 60) start += 12 * 60;
+  if (!m[6] && end <= start) end += 12 * 60;
+  return `${start}-${end}`;
+}
+const bookingSlot = (date, window) => date && window ? `${normalizeDate(date)}|${canonicalWindow(window)}` : "";
+const capacityKey = (slug) => `capacity:${slug}`;
+const capacityLimit = (c) => Math.max(1, Number(c.rules?.windowCapacity) || 1);
+async function initialCapacity(slug) {
+  const reservations = {};
+  // This is a one-time migration. Read every key, with strong reads that propagate errors; booking
+  // ids sort randomly, so a truncated history can exclude a current reservation.
+  for (const key of await list("bookings", slug + "/")) {
+    const b = await store("bookings").get(safe(key), { type: "json", consistency: "strong" });
+    if (b && ACTIVE_BOOKINGS.has(b.status)) { const slot = bookingSlot(b.date, b.window); if (slot) reservations[b.id] = [slot]; }
+  }
+  return { version: 1, reservations, mutations: {} };
+}
+export async function bookingWindowTaken(c, date, window) {
+  const slot = bookingSlot(date, window), capacity = capacityLimit(c);
+  if (!slot) return { full: false, count: 0, capacity };
+  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
+    const state = current || await initialCapacity(c.slug);
+    const count = Object.values(state.reservations).filter((slots) => slots.includes(slot)).length;
+    return { ...(!current ? { value: state } : {}), result: { full: count >= capacity, count, capacity } };
+  });
+}
+export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false } = {}) {
+  const slot = bookingSlot(date, window), capacity = capacityLimit(c), token = id(12);
+  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
+    const state = current || await initialCapacity(c.slug);
+    state.mutations ||= {};
+    if (state.mutations[bookingId]) throw new Error("Booking is being updated; reload it and retry");
+    const previous = state.reservations[bookingId] || [];
+    // Ordinary updates must not resurrect a booking whose cancellation completed after the
+    // caller read it. Only explicit creation/rescheduling may acquire a new reservation.
+    if (requireExisting && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
+    if (from && (previous.length !== 1 || previous[0] !== bookingSlot(from.date, from.window))) throw new Error("Booking changed during reschedule; reload it and retry");
+    if (!from && previous.length && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
+    const count = slot ? Object.entries(state.reservations).filter(([id, slots]) => id !== bookingId && slots.includes(slot)).length : 0;
+    if (slot && !previous.includes(slot) && count >= capacity) return { ...(!current ? { value: state } : {}), result: { full: true, count, capacity } };
+    // A move holds both windows until its booking write succeeds. A crash therefore blocks spare
+    // capacity instead of freeing a slot while an active booking still points at it.
+    const next = slot && !previous.includes(slot) ? [...previous, slot] : previous;
+    if (next.length) state.reservations[bookingId] = next;
+    state.mutations[bookingId] = token;
+    return { value: state, result: { token, slot, previous, next } };
+  });
+}
+export async function finishBookingWindow(slug, bookingId, claim) {
+  await atomicUpdate("index", capacityKey(slug), (state) => {
+    if (state?.mutations?.[bookingId] !== claim.token || JSON.stringify(state.reservations[bookingId] || []) !== JSON.stringify(claim.next)) throw new Error("Booking reservation changed before completion");
+    const slots = claim.release || !claim.slot ? [] : [claim.slot];
+    if (slots.length) state.reservations[bookingId] = slots; else delete state.reservations[bookingId];
+    delete state.mutations[bookingId];
+    return { value: state };
+  });
+}
+async function lockBookingWindow(slug, bookingId) {
+  const token = id(12);
+  return atomicUpdate("index", capacityKey(slug), async (current) => {
+    const state = current || await initialCapacity(slug);
+    state.mutations ||= {};
+    if (state.mutations[bookingId]) throw new Error("Booking is being updated; reload it and retry");
+    const previous = state.reservations[bookingId] || [];
+    state.mutations[bookingId] = token;
+    return { value: state, result: { token, release: true, previous, next: previous } };
+  });
+}
 
 // Per-phone index: "bookings:<slug>:<phone>" and "leads:<slug>:<phone>" hold the record ids for that number,
 // so the hot paths (every inbound text, every call) read a handful of records instead of listing the history.

@@ -1,11 +1,12 @@
 // What happens when the front desk books a visit or flags a lead for a real client:
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
-import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor } from "./store.mjs";
+import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow } from "./store.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
 import { getUsage, usageView } from "./usage.mjs";
+import { auditNeedsAttention, actionableAuditReasons } from "./audit-policy.mjs";
 
 const H = 3600 * 1000, D = 24 * H;
 const esc = (s) => String(s || "").trim();
@@ -204,14 +205,10 @@ export async function runVisitCheck(c, task) {
 
 // How many visits one arrival window holds (rules.windowCapacity, default 1: one crew).
 export async function windowTaken(c, date, window) {
-  if (!date || !window) return { full: false, count: 0, capacity: 1 };
-  const capacity = Math.max(1, Number(c.rules?.windowCapacity) || 1);
-  const day = normalizeDate(date);
-  const count = (await listRecords("bookings", c.slug, 500)).filter((x) => ["booked", "confirmed", "on_the_way"].includes(x.status) && x.date === day && String(x.window).trim().toLowerCase() === String(window).trim().toLowerCase()).length;
-  return { full: count >= capacity, count, capacity };
+  return bookingWindowTaken(c, date, window);
 }
 export function fullMessage(c, date, window) {
-  const others = (c.windows || []).filter((w) => String(w).toLowerCase() !== String(window).toLowerCase());
+  const others = (c.windows || []).filter((w) => canonicalWindow(w) !== canonicalWindow(window));
   return `That window (${date || "that day"}, ${window}) is already full. Nothing was booked. Offer ${others.length ? "the other window (" + others.join(" or ") + ") or " : ""}another day, then book again.`;
 }
 async function calendarFailed(c, b, err, op) {
@@ -221,20 +218,26 @@ async function calendarFailed(c, b, err, op) {
 
 export async function bookVisit(c, input, ctx = {}) {
   const phone = e164(input.phone) || esc(input.phone);
-  const taken = await windowTaken(c, esc(input.date), esc(input.window));
+  const bookingId = id(5), type = await customerType(c.slug, phone);
+  const taken = await reserveBookingWindow(c, bookingId, esc(input.date), esc(input.window));
   if (taken.full) { await logEvent(c.slug, "window_full", { date: normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity }); return { full: true, message: fullMessage(c, esc(input.date), esc(input.window)) }; }
   const b = await addRecord("bookings", c.slug, {
+    id: bookingId,
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     date: normalizeDate(esc(input.date)), dateSaid: esc(input.date), window: esc(input.window), urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
-    channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: await customerType(c.slug, phone),
+    channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: type,
   });
-  await addToIndex("bookings", c.slug, b.phone, b.id);
-  try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
-  await scheduleReminders(c, b);
-  // consent: told at booking, recorded on the booking
-  const { consentLine } = await import("./config.mjs");
-  b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
-  await saveRecord("bookings", b);
+  let canFinish = true;
+  try {
+    await addToIndex("bookings", c.slug, b.phone, b.id);
+    try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
+    await scheduleReminders(c, b);
+    // consent: told at booking, recorded on the booking
+    const { consentLine } = await import("./config.mjs");
+    b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
+    try { await saveRecord("bookings", b, { capacityClaim: taken }); }
+    catch (err) { canFinish = false; throw err; }
+  } finally { if (canFinish) await finishBookingWindow(c.slug, bookingId, taken); }
   if (b.phone && ctx.channel !== "sms") {
     await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
   }
@@ -485,13 +488,21 @@ export async function confirmVisit(c, b) {
 
 export async function rescheduleVisit(c, b, date, window) {
   const nd = normalizeDate(esc(date)) || b.date, nw = esc(window) || b.window;
-  if (nd !== b.date || nw !== b.window) { const t = await windowTaken(c, nd, nw); if (t.full) return { full: true, message: fullMessage(c, esc(date), nw) }; }
+  const from = ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date && b.window ? b : undefined;
+  const claim = await reserveBookingWindow(c, b.id, nd, nw, from);
+  if (claim.full) return { full: true, message: fullMessage(c, esc(date), nw) };
   const old = when(b);
-  b.date = normalizeDate(esc(date)) || b.date; b.window = esc(window) || b.window; b.status = "booked"; b.confirmedAt = null;
-  await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
-  await scheduleReminders(c, b);
-  try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
-  await saveRecord("bookings", b);
+  const moved = { ...b, date: nd, window: nw, status: "booked", confirmedAt: null };
+  await saveRecord("bookings", moved, { capacityClaim: claim });
+  Object.assign(b, moved);
+  let canFinish = true;
+  try {
+    await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
+    await scheduleReminders(c, b);
+    try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
+    try { await saveRecord("bookings", b, { capacityClaim: claim }); }
+    catch (err) { canFinish = false; throw err; }
+  } finally { if (canFinish) await finishBookingWindow(c.slug, b.id, claim); }
   await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
   await logEvent(c.slug, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
   return b;
@@ -547,8 +558,10 @@ export async function ownerCommand(c, text) {
   const blocked = b.phone ? await optedOut(b.phone) : false;
   if (cmd === "otw") {
     if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
-    const r = b.phone ? await sendSMS({ to: b.phone, client: c, type: "on_my_way", body: template("on_my_way", b)(c, b) }) : { ok: false };
+    // Persist under the booking's CAS ownership before sending; a competing move/cancel must
+    // reject before an on-the-way text can claim this operation succeeded.
     b.status = "on_the_way"; await saveRecord("bookings", b);
+    const r = b.phone ? await sendSMS({ to: b.phone, client: c, type: "on_my_way", body: template("on_my_way", b)(c, b) }) : { ok: false };
     return r.ok || r.logged ? `On-the-way text sent to ${b.customer_name || b.phone}. Reply "done ${b.id}" when the job is finished.` : `Could not text ${b.customer_name || b.phone} (${r.reason || r.error || "no number"}).`;
   }
   if (cmd === "done") {
@@ -650,7 +663,11 @@ export function lineHealth(c, events = [], pointer = null) {
 
 export async function dailyDigest(c, events) {
   const today = houstonDay(new Date().toISOString());
-  const autoToday = (events || (await listRecords("events", c.slug, 300))).filter((e) => e.type === "auto_flag" && !e.data?.test && houstonDay(e.at) === today);
+  // The nightly audit runs at 9 pm, after the 6 pm digest. Carry those findings into
+  // the next digest using Houston calendar days, including 23/25-hour DST days.
+  const previousDay = visitDate(today); previousDay.setDate(previousDay.getDate() - 1);
+  const auditSince = new Date(houstonISO(previousDay, 18)).getTime();
+  const auditFindings = (events || (await listRecords("events", c.slug, 300))).filter((e) => e.type === "auto_flag" && auditNeedsAttention(e.data) && new Date(e.at).getTime() > auditSince && new Date(e.at).getTime() <= Date.now());
   const sameDay = (r) => houstonDay(r.createdAt || r.at) === today;
   const bookings = (await listRecords("bookings", c.slug, 300)).filter(sameDay);
   const leads = (await listRecords("leads", c.slug, 300)).filter(sameDay);
@@ -663,7 +680,7 @@ export async function dailyDigest(c, events) {
   const wants = leads.filter((l) => l.outcome === "wants_call").length;
   const spam = leads.filter((l) => l.outcome === "spam").length;
   const name = c.business.name;
-  const steveNote = autoToday.length ? `\n\nNightly check flagged ${autoToday.length}: ${autoToday.map((e) => `${e.data.channel} ${e.data.contact} (${(e.data.reasons || []).join(", ")})`).join("; ")}` : "";
+  const steveNote = auditFindings.length ? `\n\nNightly check flagged ${auditFindings.length}: ${auditFindings.map((e) => `${e.data.channel} ${e.data.contact} (${(e.data.reasons || []).join(", ")})`).join("; ")}` : "";
   if (!bookings.length && !leads.length && !convs.length) return { empty: true, text: `${name}: nothing today. Line OK, last call ${t(h.lastInboundCall)}, errors ${h.errors24h}.`, email: `${name}: nothing today.\nLast call: ${t(h.lastInboundCall)}. Last text: ${t(h.lastInboundText)}. Errors: ${h.errors24h}.`, steveNote };
   const text = `${name}, today: ${bookings.length} booked${bookings.length ? " (" + bookings.map((b) => b.id).join(", ") + ")" : ""}, ${needs.length} leads need action${needs.length ? " (" + needs.map((l) => l.id).join(", ") + ")" : ""}, ${emergencies} emergencies, ${wants} wants a call, ${spam} spam. Flagged: ${convs.length}${convs.length ? " (" + (convs[0].flag.note || "").slice(0, 60) + ")" : ""}. Line: last call ${t(h.lastInboundCall)}, last text ${t(h.lastInboundText)}, errors ${h.errors24h}.`;
   const email = [`${name}: today's front desk`, "",
@@ -722,7 +739,7 @@ export async function autoFlagDay(c, debug = false) {
       const reasons = r.reasons;
       v.autoFlag = { at: new Date().toISOString(), day: today, reasons, test: v.channel === "test" };
       await (await import("./store.mjs")).saveConversation(v);
-      if (reasons.length) { await logEvent(c.slug, "auto_flag", { channel: v.channel, contact: v.contact, reasons, test: v.channel === "test" }); if (v.channel !== "test") n++; }
+      if (reasons.length) { const finding = { channel: v.channel, contact: v.contact, reasons, test: v.channel === "test" }; await logEvent(c.slug, "auto_flag", finding); if (auditNeedsAttention(finding)) n++; }
     } catch (err) { console.error("autoflag", err); if (debug) raws.push({ contact: v.contact, error: String(err?.message || err) }); }
   }
   return debug ? { n, raws } : n;
@@ -734,7 +751,7 @@ export async function day7Draft(c) {
   const w = await weeklyReport(c);
   const changes = events.filter((e) => e.type === "config_updated").length;
   const flags = events.filter((e) => e.type === "flagged").length;
-  const auto = events.filter((e) => e.type === "auto_flag").flatMap((e) => e.data?.reasons || []);
+  const auto = events.filter((e) => e.type === "auto_flag").flatMap((e) => actionableAuditReasons(e.data));
   const counts = {}; for (const r of auto) counts[r] = (counts[r] || 0) + 1;
   const first = (c.owner?.name || "").split(" ")[0] || "there";
   return [`To: ${c.owner?.email}`, `Subject: Your first week with the front desk`, "",

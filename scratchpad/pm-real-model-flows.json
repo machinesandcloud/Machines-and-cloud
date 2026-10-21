@@ -1,0 +1,1719 @@
+{
+  "startedAt": "2026-10-21T22:46:49.653Z",
+  "commit": "5662641650017112e0840fa800f5e6d7d095b82e",
+  "relevantCodeSha256": "115a9312d5f47fb3aecb2342ecb1731e3e0d06528c178b0f57a70f3bacd7e762",
+  "runnerSha256": "633a364a30fc57e2d922235e661b03d3f03c92a8984401fe45e114d819317b59",
+  "phase": "flows",
+  "base": "http://127.0.0.1:8891",
+  "modelMode": "real, confirmed from root server startup; no .env access by runner",
+  "providerDeliveryTested": false,
+  "maximumLogicalModelCalls": 10,
+  "logicalModelCalls": 10,
+  "checks": [
+    {
+      "name": "isolated synthetic shops present",
+      "pass": true,
+      "actual": [
+        {
+          "slug": "pm-real-model-growth",
+          "name": "PM Test growth HVAC"
+        },
+        {
+          "slug": "pm-real-model-rubric",
+          "name": "PM Test rubric HVAC"
+        }
+      ]
+    },
+    {
+      "name": "S7-03 clean real audit has no classifier errors",
+      "pass": true,
+      "actual": {
+        "ok": true,
+        "n": 0,
+        "raws": [
+          {
+            "contact": "pm-audit",
+            "out": "none"
+          }
+        ]
+      }
+    },
+    {
+      "name": "S7-03 clean thread stamped for today with no reasons",
+      "pass": true,
+      "actual": {
+        "at": "2026-10-21T22:46:51.959Z",
+        "day": "2026-10-21",
+        "reasons": [],
+        "test": false
+      }
+    },
+    {
+      "name": "S7-03 edited SMS and test thread real audits have no classifier errors",
+      "pass": true,
+      "actual": {
+        "ok": true,
+        "n": 1,
+        "raws": [
+          {
+            "contact": "pm-audit",
+            "out": "price_not_listed"
+          },
+          {
+            "contact": "pm-audit-test",
+            "out": "price_not_listed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "S7-03 pm-audit detects unpublished price",
+      "pass": true,
+      "actual": {
+        "at": "2026-10-21T22:46:54.069Z",
+        "day": "2026-10-21",
+        "reasons": [
+          "price_not_listed"
+        ],
+        "test": false
+      }
+    },
+    {
+      "name": "S7-03 pm-audit-test detects unpublished price",
+      "pass": true,
+      "actual": {
+        "at": "2026-10-21T22:46:55.823Z",
+        "day": "2026-10-21",
+        "reasons": [
+          "price_not_listed"
+        ],
+        "test": true
+      }
+    },
+    {
+      "name": "S7-03 test event marked and customer event separate",
+      "pass": true,
+      "actual": [
+        {
+          "id": "284fe81f",
+          "slug": "pm-real-model-rubric",
+          "type": "auto_flag",
+          "data": {
+            "channel": "sms",
+            "contact": "pm-audit",
+            "reasons": [
+              "price_not_listed"
+            ],
+            "test": false
+          },
+          "at": "2026-10-21T22:46:54.071Z"
+        },
+        {
+          "id": "c1de6d24",
+          "slug": "pm-real-model-rubric",
+          "type": "auto_flag",
+          "data": {
+            "channel": "test",
+            "contact": "pm-audit-test",
+            "reasons": [
+              "price_not_listed"
+            ],
+            "test": true
+          },
+          "at": "2026-10-21T22:46:55.824Z"
+        }
+      ]
+    },
+    {
+      "name": "S7-03 Needs-me count excludes test audit",
+      "pass": true
+    },
+    {
+      "name": "S7-03 Steve digest excludes test audit",
+      "pass": true,
+      "actual": "\n\nNightly check flagged 1: sms pm-audit (price_not_listed)"
+    },
+    {
+      "name": "S8-05 historical weak-only flag excluded from Needs-me count",
+      "pass": true
+    },
+    {
+      "name": "S8-05 historical weak-only flag excluded from actionable digest",
+      "pass": true,
+      "actual": "\n\nNightly check flagged 1: sms pm-audit (price_not_listed)"
+    },
+    {
+      "name": "S8-05 mixed strong+weak flag counts once",
+      "pass": true
+    },
+    {
+      "name": "S8-05 mixed flag remains in actionable digest",
+      "pass": true,
+      "actual": "\n\nNightly check flagged 2: sms pm-audit (price_not_listed); sms pm-mixed (no_address, price_not_listed)"
+    },
+    {
+      "name": "S7-05 real Growth chat records a booking tool event",
+      "pass": true,
+      "actual": {
+        "reply": "You're booked for an AC repair visit on Saturday, October 24, 2026, with the tech arriving between 8 and 12 at 12 Oak St, Katy. Your reference number is a01eeff0d8. We can't promise an exact time, but PM Test Owner or the tech will text you when they're on the way. The service call is $89, and that amount goes toward the repair.\n\nYou'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them.\n\nWhat's the AC doing? Is it not cooling, making noise or leaking? Knowing that helps the tech come prepared.",
+        "events": [
+          {
+            "type": "booking",
+            "id": "a01eeff0d8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "S7-05 one Growth booking stored for the customer",
+      "pass": true,
+      "actual": [
+        {
+          "id": "a01eeff0d8",
+          "slug": "pm-real-model-growth",
+          "createdAt": "2026-10-21T22:47:18.754Z",
+          "customer_name": "Lee Park",
+          "phone": "+17135550123",
+          "address": "12 Oak St, Katy, TX 77494",
+          "issue": "AC repair requested; specific problem not described.",
+          "date": "2026-10-24",
+          "dateSaid": "2026-10-24",
+          "window": "8 to 12",
+          "urgency": "flexible",
+          "language": "en",
+          "notes": "",
+          "unsure": "Specific AC problem not described.",
+          "channel": "test",
+          "status": "booked",
+          "outcome": "booked",
+          "customerType": "new",
+          "consent": {
+            "at": "2026-10-21T22:47:18.756Z",
+            "channel": "test",
+            "phone": "+17135550123",
+            "wording": "You'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them."
+          },
+          "updatedAt": "2026-10-21T22:47:18.756Z"
+        }
+      ]
+    },
+    {
+      "name": "S7-05 Growth has 24h, 1h and visit-check tasks on that booking",
+      "pass": true,
+      "actual": [
+        "reminder_24h",
+        "reminder_1h",
+        "visit_check"
+      ]
+    },
+    {
+      "name": "S8-09 done creates review-request task",
+      "pass": true,
+      "actual": [
+        {
+          "key": "2026-10-22T00:47:22.322Z_0f911c66aa",
+          "type": "review_request",
+          "dueAt": "2026-10-22T00:47:22.322Z",
+          "data": {
+            "bookingId": "a01eeff0d8"
+          },
+          "id": "0f911c66aa"
+        },
+        {
+          "key": "2026-10-24T00:47:22.322Z_b578d184bc",
+          "type": "review_nudge",
+          "dueAt": "2026-10-24T00:47:22.322Z",
+          "data": {
+            "bookingId": "a01eeff0d8"
+          },
+          "id": "b578d184bc"
+        },
+        {
+          "key": "2026-10-29T22:47:22.322Z_26248226e5",
+          "type": "referral_ask",
+          "dueAt": "2026-10-29T22:47:22.322Z",
+          "data": {
+            "bookingId": "a01eeff0d8"
+          },
+          "id": "26248226e5"
+        }
+      ]
+    },
+    {
+      "name": "S8-09 review request processed and timestamped in logged-send mode",
+      "pass": true,
+      "actual": {
+        "id": "a01eeff0d8",
+        "slug": "pm-real-model-growth",
+        "createdAt": "2026-10-21T22:47:18.754Z",
+        "customer_name": "Lee Park",
+        "phone": "+17135550123",
+        "address": "12 Oak St, Katy, TX 77494",
+        "issue": "AC repair requested; specific problem not described.",
+        "date": "2026-10-24",
+        "dateSaid": "2026-10-24",
+        "window": "8 to 12",
+        "urgency": "flexible",
+        "language": "en",
+        "notes": "",
+        "unsure": "Specific AC problem not described.",
+        "channel": "test",
+        "status": "done",
+        "outcome": "booked",
+        "customerType": "new",
+        "consent": {
+          "at": "2026-10-21T22:47:18.756Z",
+          "channel": "test",
+          "phone": "+17135550123",
+          "wording": "You'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them."
+        },
+        "updatedAt": "2026-10-21T22:47:22.330Z",
+        "doneAt": "2026-10-21T22:47:22.321Z",
+        "reviewAskedAt": "2026-10-21T22:47:22.330Z"
+      }
+    },
+    {
+      "name": "S8-09 real SMS classifier reaches asked booking through phone index",
+      "pass": true,
+      "actual": {
+        "sentiment": "positive",
+        "text": "Great job, thanks!",
+        "at": "2026-10-21T22:47:23.182Z"
+      }
+    },
+    {
+      "name": "S8-09 positive review cancels review nudge",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "at": "2026-10-21T22:46:49.696Z",
+      "path": "/api/admin",
+      "status": 200,
+      "response": {
+        "clients": [
+          {
+            "slug": "pm-real-model-growth",
+            "name": "PM Test growth HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-growth@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550102",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.688Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-growth&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-growth"
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-rubric@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550101",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.686Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-rubric&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-rubric"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:49.701Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "put_conversation",
+        "channel": "sms",
+        "contact": "pm-audit",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Book my AC visit for tomorrow 8 to 12 at 12 Oak St Katy. Lee Park, 713-555-0123."
+          },
+          {
+            "role": "assistant",
+            "content": "Booked for tomorrow, 8 to 12, at 12 Oak St Katy. The service call is $89 and goes toward the repair."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "messages": 2
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:51.961Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "autoflag",
+        "debug": true
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "n": 0,
+        "raws": [
+          {
+            "contact": "pm-audit",
+            "out": "none"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:51.967Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "records",
+        "kind": "conversations"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "slug": "pm-real-model-rubric",
+            "channel": "sms",
+            "contact": "pm-audit",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Book my AC visit for tomorrow 8 to 12 at 12 Oak St Katy. Lee Park, 713-555-0123.",
+                "at": "2026-10-21T22:46:49.700Z"
+              },
+              {
+                "role": "assistant",
+                "content": "Booked for tomorrow, 8 to 12, at 12 Oak St Katy. The service call is $89 and goes toward the repair.",
+                "at": "2026-10-21T22:46:49.700Z"
+              }
+            ],
+            "createdAt": "2026-10-21T22:46:49.700Z",
+            "autoFlag": {
+              "at": "2026-10-21T22:46:51.959Z",
+              "day": "2026-10-21",
+              "reasons": [],
+              "test": false
+            },
+            "updatedAt": "2026-10-21T22:46:51.959Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:51.989Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "put_conversation",
+        "channel": "sms",
+        "contact": "pm-audit",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Book my AC visit for tomorrow 8 to 12 at 12 Oak St Katy. Lee Park, 713-555-0123."
+          },
+          {
+            "role": "assistant",
+            "content": "Booked for tomorrow, 8 to 12, at 12 Oak St Katy. The service call is $89 and goes toward the repair."
+          },
+          {
+            "role": "user",
+            "content": "What does a capacitor replacement cost?"
+          },
+          {
+            "role": "assistant",
+            "content": "A capacitor replacement is $250 installed."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "messages": 4
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:51.991Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "put_conversation",
+        "channel": "test",
+        "contact": "pm-audit-test",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Book my AC visit for tomorrow 8 to 12 at 12 Oak St Katy. Lee Park, 713-555-0123."
+          },
+          {
+            "role": "assistant",
+            "content": "Booked for tomorrow, 8 to 12, at 12 Oak St Katy. The service call is $89 and goes toward the repair."
+          },
+          {
+            "role": "user",
+            "content": "What does a capacitor replacement cost?"
+          },
+          {
+            "role": "assistant",
+            "content": "A capacitor replacement is $250 installed."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "messages": 4
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.825Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "autoflag",
+        "debug": true
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "n": 1,
+        "raws": [
+          {
+            "contact": "pm-audit",
+            "out": "price_not_listed"
+          },
+          {
+            "contact": "pm-audit-test",
+            "out": "price_not_listed"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.830Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "records",
+        "kind": "conversations"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "slug": "pm-real-model-rubric",
+            "channel": "sms",
+            "contact": "pm-audit",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Book my AC visit for tomorrow 8 to 12 at 12 Oak St Katy. Lee Park, 713-555-0123.",
+                "at": "2026-10-21T22:46:51.988Z"
+              },
+              {
+                "role": "assistant",
+                "content": "Booked for tomorrow, 8 to 12, at 12 Oak St Katy. The service call is $89 and goes toward the repair.",
+                "at": "2026-10-21T22:46:51.988Z"
+              },
+              {
+                "role": "user",
+                "content": "What does a capacitor replacement cost?",
+                "at": "2026-10-21T22:46:51.988Z"
+              },
+              {
+                "role": "assistant",
+                "content": "A capacitor replacement is $250 installed.",
+                "at": "2026-10-21T22:46:51.988Z"
+              }
+            ],
+            "createdAt": "2026-10-21T22:46:49.700Z",
+            "autoFlag": {
+              "at": "2026-10-21T22:46:54.069Z",
+              "day": "2026-10-21",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": false
+            },
+            "updatedAt": "2026-10-21T22:46:54.069Z"
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "channel": "test",
+            "contact": "pm-audit-test",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Book my AC visit for tomorrow 8 to 12 at 12 Oak St Katy. Lee Park, 713-555-0123.",
+                "at": "2026-10-21T22:46:51.990Z"
+              },
+              {
+                "role": "assistant",
+                "content": "Booked for tomorrow, 8 to 12, at 12 Oak St Katy. The service call is $89 and goes toward the repair.",
+                "at": "2026-10-21T22:46:51.990Z"
+              },
+              {
+                "role": "user",
+                "content": "What does a capacitor replacement cost?",
+                "at": "2026-10-21T22:46:51.990Z"
+              },
+              {
+                "role": "assistant",
+                "content": "A capacitor replacement is $250 installed.",
+                "at": "2026-10-21T22:46:51.990Z"
+              }
+            ],
+            "createdAt": "2026-10-21T22:46:51.990Z",
+            "autoFlag": {
+              "at": "2026-10-21T22:46:55.823Z",
+              "day": "2026-10-21",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": true
+            },
+            "updatedAt": "2026-10-21T22:46:55.823Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.833Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "284fe81f",
+            "slug": "pm-real-model-rubric",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-audit",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": false
+            },
+            "at": "2026-10-21T22:46:54.071Z"
+          },
+          {
+            "id": "c1de6d24",
+            "slug": "pm-real-model-rubric",
+            "type": "auto_flag",
+            "data": {
+              "channel": "test",
+              "contact": "pm-audit-test",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": true
+            },
+            "at": "2026-10-21T22:46:55.824Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.837Z",
+      "path": "/api/admin?full=1",
+      "status": 200,
+      "response": {
+        "clients": [
+          {
+            "slug": "pm-real-model-growth",
+            "name": "PM Test growth HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-growth@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550102",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.688Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-growth&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-growth",
+            "health": {
+              "lastInboundCall": null,
+              "lastInboundText": null,
+              "lastOutboundText": null,
+              "errors24h": 0,
+              "sender": "own",
+              "tenDlc": "approved",
+              "forwardingVerified": false
+            },
+            "usage": {
+              "month": "2026-10",
+              "minutes": 0,
+              "texts": 0,
+              "calls": 0,
+              "included": {
+                "minutes": 600,
+                "texts": 1500
+              },
+              "overage": {
+                "minute": 0.35,
+                "text": 0.03
+              }
+            },
+            "waitingAlerts": 0,
+            "openFlags": 0,
+            "pendingCallbacks": 0,
+            "overdueCallbacks": 0,
+            "lastInbound": null,
+            "leads": {
+              "angiKey": "",
+              "thumbtackSecret": ""
+            },
+            "autoFlags7d": 0,
+            "healthAlerts7d": [],
+            "overdueOld": 0,
+            "testingDays": 0,
+            "forwardingUnverifiedDays": 0,
+            "spanishReviewPending": true,
+            "lifecycle": {},
+            "liveDays": 0,
+            "newShopDays": 0
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-rubric@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550101",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.686Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-rubric&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-rubric",
+            "health": {
+              "lastInboundCall": null,
+              "lastInboundText": null,
+              "lastOutboundText": null,
+              "errors24h": 0,
+              "sender": "own",
+              "tenDlc": "approved",
+              "forwardingVerified": false
+            },
+            "usage": {
+              "month": "2026-10",
+              "minutes": 0,
+              "texts": 0,
+              "calls": 0,
+              "included": {
+                "minutes": 600,
+                "texts": 1500
+              },
+              "overage": {
+                "minute": 0.35,
+                "text": 0.03
+              }
+            },
+            "waitingAlerts": 0,
+            "openFlags": 0,
+            "pendingCallbacks": 0,
+            "overdueCallbacks": 0,
+            "lastInbound": null,
+            "leads": {
+              "angiKey": "",
+              "thumbtackSecret": ""
+            },
+            "autoFlags7d": 1,
+            "healthAlerts7d": [],
+            "overdueOld": 0,
+            "testingDays": 0,
+            "forwardingUnverifiedDays": 0,
+            "spanishReviewPending": true,
+            "lifecycle": {},
+            "liveDays": 0,
+            "newShopDays": 0
+          }
+        ],
+        "events": [
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:55.824Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "test",
+              "contact": "pm-audit-test",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": true
+            }
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:54.071Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-audit",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": false
+            }
+          }
+        ],
+        "brake": {
+          "on": false
+        },
+        "lastRun": null
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.839Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "digest"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "empty": true,
+        "text": "PM Test rubric HVAC: nothing today. Line OK, last call none, errors 0.",
+        "email": "PM Test rubric HVAC: nothing today.\nLast call: none. Last text: none. Errors: 0.",
+        "steveNote": "\n\nNightly check flagged 1: sms pm-audit (price_not_listed)"
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.841Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "log_event",
+        "type": "auto_flag",
+        "data": {
+          "channel": "sms",
+          "contact": "pm-weak-only",
+          "reasons": [
+            "no_address"
+          ],
+          "test": false
+        }
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "event": {
+          "id": "4b592812",
+          "slug": "pm-real-model-rubric",
+          "type": "auto_flag",
+          "data": {
+            "channel": "sms",
+            "contact": "pm-weak-only",
+            "reasons": [
+              "no_address"
+            ],
+            "test": false
+          },
+          "at": "2026-10-21T22:46:55.841Z"
+        }
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.843Z",
+      "path": "/api/admin?full=1",
+      "status": 200,
+      "response": {
+        "clients": [
+          {
+            "slug": "pm-real-model-growth",
+            "name": "PM Test growth HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-growth@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550102",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.688Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-growth&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-growth",
+            "health": {
+              "lastInboundCall": null,
+              "lastInboundText": null,
+              "lastOutboundText": null,
+              "errors24h": 0,
+              "sender": "own",
+              "tenDlc": "approved",
+              "forwardingVerified": false
+            },
+            "usage": {
+              "month": "2026-10",
+              "minutes": 0,
+              "texts": 0,
+              "calls": 0,
+              "included": {
+                "minutes": 600,
+                "texts": 1500
+              },
+              "overage": {
+                "minute": 0.35,
+                "text": 0.03
+              }
+            },
+            "waitingAlerts": 0,
+            "openFlags": 0,
+            "pendingCallbacks": 0,
+            "overdueCallbacks": 0,
+            "lastInbound": null,
+            "leads": {
+              "angiKey": "",
+              "thumbtackSecret": ""
+            },
+            "autoFlags7d": 0,
+            "healthAlerts7d": [],
+            "overdueOld": 0,
+            "testingDays": 0,
+            "forwardingUnverifiedDays": 0,
+            "spanishReviewPending": true,
+            "lifecycle": {},
+            "liveDays": 0,
+            "newShopDays": 0
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-rubric@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550101",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.686Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-rubric&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-rubric",
+            "health": {
+              "lastInboundCall": null,
+              "lastInboundText": null,
+              "lastOutboundText": null,
+              "errors24h": 0,
+              "sender": "own",
+              "tenDlc": "approved",
+              "forwardingVerified": false
+            },
+            "usage": {
+              "month": "2026-10",
+              "minutes": 0,
+              "texts": 0,
+              "calls": 0,
+              "included": {
+                "minutes": 600,
+                "texts": 1500
+              },
+              "overage": {
+                "minute": 0.35,
+                "text": 0.03
+              }
+            },
+            "waitingAlerts": 0,
+            "openFlags": 0,
+            "pendingCallbacks": 0,
+            "overdueCallbacks": 0,
+            "lastInbound": null,
+            "leads": {
+              "angiKey": "",
+              "thumbtackSecret": ""
+            },
+            "autoFlags7d": 1,
+            "healthAlerts7d": [],
+            "overdueOld": 0,
+            "testingDays": 0,
+            "forwardingUnverifiedDays": 0,
+            "spanishReviewPending": true,
+            "lifecycle": {},
+            "liveDays": 0,
+            "newShopDays": 0
+          }
+        ],
+        "events": [
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:55.841Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-weak-only",
+              "reasons": [
+                "no_address"
+              ],
+              "test": false
+            }
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:55.824Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "test",
+              "contact": "pm-audit-test",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": true
+            }
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:54.071Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-audit",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": false
+            }
+          }
+        ],
+        "brake": {
+          "on": false
+        },
+        "lastRun": null
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.844Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "digest"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "empty": true,
+        "text": "PM Test rubric HVAC: nothing today. Line OK, last call none, errors 0.",
+        "email": "PM Test rubric HVAC: nothing today.\nLast call: none. Last text: none. Errors: 0.",
+        "steveNote": "\n\nNightly check flagged 1: sms pm-audit (price_not_listed)"
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.845Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "log_event",
+        "type": "auto_flag",
+        "data": {
+          "channel": "sms",
+          "contact": "pm-mixed",
+          "reasons": [
+            "no_address",
+            "price_not_listed"
+          ],
+          "test": false
+        }
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "event": {
+          "id": "3a594802",
+          "slug": "pm-real-model-rubric",
+          "type": "auto_flag",
+          "data": {
+            "channel": "sms",
+            "contact": "pm-mixed",
+            "reasons": [
+              "no_address",
+              "price_not_listed"
+            ],
+            "test": false
+          },
+          "at": "2026-10-21T22:46:55.845Z"
+        }
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.847Z",
+      "path": "/api/admin?full=1",
+      "status": 200,
+      "response": {
+        "clients": [
+          {
+            "slug": "pm-real-model-growth",
+            "name": "PM Test growth HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-growth@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550102",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.688Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-growth&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-growth",
+            "health": {
+              "lastInboundCall": null,
+              "lastInboundText": null,
+              "lastOutboundText": null,
+              "errors24h": 0,
+              "sender": "own",
+              "tenDlc": "approved",
+              "forwardingVerified": false
+            },
+            "usage": {
+              "month": "2026-10",
+              "minutes": 0,
+              "texts": 0,
+              "calls": 0,
+              "included": {
+                "minutes": 600,
+                "texts": 1500
+              },
+              "overage": {
+                "minute": 0.35,
+                "text": 0.03
+              }
+            },
+            "waitingAlerts": 0,
+            "openFlags": 0,
+            "pendingCallbacks": 0,
+            "overdueCallbacks": 0,
+            "lastInbound": null,
+            "leads": {
+              "angiKey": "",
+              "thumbtackSecret": ""
+            },
+            "autoFlags7d": 0,
+            "healthAlerts7d": [],
+            "overdueOld": 0,
+            "testingDays": 0,
+            "forwardingUnverifiedDays": 0,
+            "spanishReviewPending": true,
+            "lifecycle": {},
+            "liveDays": 0,
+            "newShopDays": 0
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-rubric@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550101",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.686Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-rubric&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-rubric",
+            "health": {
+              "lastInboundCall": null,
+              "lastInboundText": null,
+              "lastOutboundText": null,
+              "errors24h": 0,
+              "sender": "own",
+              "tenDlc": "approved",
+              "forwardingVerified": false
+            },
+            "usage": {
+              "month": "2026-10",
+              "minutes": 0,
+              "texts": 0,
+              "calls": 0,
+              "included": {
+                "minutes": 600,
+                "texts": 1500
+              },
+              "overage": {
+                "minute": 0.35,
+                "text": 0.03
+              }
+            },
+            "waitingAlerts": 0,
+            "openFlags": 0,
+            "pendingCallbacks": 0,
+            "overdueCallbacks": 0,
+            "lastInbound": null,
+            "leads": {
+              "angiKey": "",
+              "thumbtackSecret": ""
+            },
+            "autoFlags7d": 2,
+            "healthAlerts7d": [],
+            "overdueOld": 0,
+            "testingDays": 0,
+            "forwardingUnverifiedDays": 0,
+            "spanishReviewPending": true,
+            "lifecycle": {},
+            "liveDays": 0,
+            "newShopDays": 0
+          }
+        ],
+        "events": [
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:55.845Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-mixed",
+              "reasons": [
+                "no_address",
+                "price_not_listed"
+              ],
+              "test": false
+            }
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:55.841Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-weak-only",
+              "reasons": [
+                "no_address"
+              ],
+              "test": false
+            }
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:55.824Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "test",
+              "contact": "pm-audit-test",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": true
+            }
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "at": "2026-10-21T22:46:54.071Z",
+            "type": "auto_flag",
+            "data": {
+              "channel": "sms",
+              "contact": "pm-audit",
+              "reasons": [
+                "price_not_listed"
+              ],
+              "test": false
+            }
+          }
+        ],
+        "brake": {
+          "on": false
+        },
+        "lastRun": null
+      }
+    },
+    {
+      "at": "2026-10-21T22:46:55.849Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "digest"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "empty": true,
+        "text": "PM Test rubric HVAC: nothing today. Line OK, last call none, errors 0.",
+        "email": "PM Test rubric HVAC: nothing today.\nLast call: none. Last text: none. Errors: 0.",
+        "steveNote": "\n\nNightly check flagged 2: sms pm-audit (price_not_listed); sms pm-mixed (no_address, price_not_listed)"
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.309Z",
+      "path": "/api/chat",
+      "request": {
+        "client": "pm-real-model-growth",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pm-growth-booking",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Please book an AC repair visit for 2026-10-24, 8 to 12. My name is Lee Park, phone 713-555-0123, address 12 Oak St, Katy, TX 77494. I agree to receive the appointment texts."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "You're booked for an AC repair visit on Saturday, October 24, 2026, with the tech arriving between 8 and 12 at 12 Oak St, Katy. Your reference number is a01eeff0d8. We can't promise an exact time, but PM Test Owner or the tech will text you when they're on the way. The service call is $89, and that amount goes toward the repair.\n\nYou'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them.\n\nWhat's the AC doing? Is it not cooling, making noise or leaking? Knowing that helps the tech come prepared.",
+        "events": [
+          {
+            "type": "booking",
+            "id": "a01eeff0d8"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.314Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "a01eeff0d8",
+            "slug": "pm-real-model-growth",
+            "createdAt": "2026-10-21T22:47:18.754Z",
+            "customer_name": "Lee Park",
+            "phone": "+17135550123",
+            "address": "12 Oak St, Katy, TX 77494",
+            "issue": "AC repair requested; specific problem not described.",
+            "date": "2026-10-24",
+            "dateSaid": "2026-10-24",
+            "window": "8 to 12",
+            "urgency": "flexible",
+            "language": "en",
+            "notes": "",
+            "unsure": "Specific AC problem not described.",
+            "channel": "test",
+            "status": "booked",
+            "outcome": "booked",
+            "customerType": "new",
+            "consent": {
+              "at": "2026-10-21T22:47:18.756Z",
+              "channel": "test",
+              "phone": "+17135550123",
+              "wording": "You'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them."
+            },
+            "updatedAt": "2026-10-21T22:47:18.756Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.318Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "tasks"
+      },
+      "status": 200,
+      "response": {
+        "tasks": [
+          {
+            "key": "2026-10-23T13:00:00.000Z_cb5f9b39c6",
+            "type": "reminder_24h",
+            "dueAt": "2026-10-23T13:00:00.000Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "cb5f9b39c6"
+          },
+          {
+            "key": "2026-10-24T12:00:00.000Z_f3dea18724",
+            "type": "reminder_1h",
+            "dueAt": "2026-10-24T12:00:00.000Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "f3dea18724"
+          },
+          {
+            "key": "2026-10-25T14:00:00.000Z_378bc6f716",
+            "type": "visit_check",
+            "dueAt": "2026-10-25T14:00:00.000Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "378bc6f716"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.323Z",
+      "path": "/api/sms",
+      "request": {
+        "From": "+17135550199",
+        "To": "+17135550102",
+        "Body": "done a01eeff0d8"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Marked done. Review request goes out in 2 hours (inside 9 am to 9 pm), a nudge in 2 days if they do not reply. If they still owe you, text \"invoice a01eeff0d8 amount\" and reminders go out on day 3 and 7.</Message></Response>"
+    },
+    {
+      "at": "2026-10-21T22:47:22.326Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "tasks"
+      },
+      "status": 200,
+      "response": {
+        "tasks": [
+          {
+            "key": "2026-10-22T00:47:22.322Z_0f911c66aa",
+            "type": "review_request",
+            "dueAt": "2026-10-22T00:47:22.322Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "0f911c66aa"
+          },
+          {
+            "key": "2026-10-24T00:47:22.322Z_b578d184bc",
+            "type": "review_nudge",
+            "dueAt": "2026-10-24T00:47:22.322Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "b578d184bc"
+          },
+          {
+            "key": "2026-10-29T22:47:22.322Z_26248226e5",
+            "type": "referral_ask",
+            "dueAt": "2026-10-29T22:47:22.322Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "26248226e5"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.328Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "nudge_task",
+        "id": "0f911c66aa"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "nudged": 1
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.333Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "run_scheduler",
+        "force_hour": 12
+      },
+      "status": 200,
+      "response": {
+        "due": 1,
+        "results": [
+          [
+            "review_request",
+            "logged"
+          ]
+        ],
+        "digests": 0,
+        "weeklies": 0,
+        "monthlies": 0,
+        "released": 0,
+        "alerts": 0,
+        "lifecycles": 0,
+        "autoFlags": 0,
+        "fanouts": [],
+        "blocks": {
+          "tasks": {
+            "ok": true,
+            "ms": 1,
+            "due": 1
+          },
+          "tenDlc": {
+            "ok": true,
+            "ms": 1,
+            "skipped": "no keys"
+          },
+          "healthLifecycle": {
+            "ok": true,
+            "ms": 0,
+            "alerts": 0,
+            "lifecycles": 0
+          },
+          "release": {
+            "ok": true,
+            "ms": 0,
+            "released": 0
+          }
+        },
+        "ok": true
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:22.335Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "a01eeff0d8",
+            "slug": "pm-real-model-growth",
+            "createdAt": "2026-10-21T22:47:18.754Z",
+            "customer_name": "Lee Park",
+            "phone": "+17135550123",
+            "address": "12 Oak St, Katy, TX 77494",
+            "issue": "AC repair requested; specific problem not described.",
+            "date": "2026-10-24",
+            "dateSaid": "2026-10-24",
+            "window": "8 to 12",
+            "urgency": "flexible",
+            "language": "en",
+            "notes": "",
+            "unsure": "Specific AC problem not described.",
+            "channel": "test",
+            "status": "done",
+            "outcome": "booked",
+            "customerType": "new",
+            "consent": {
+              "at": "2026-10-21T22:47:18.756Z",
+              "channel": "test",
+              "phone": "+17135550123",
+              "wording": "You'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them."
+            },
+            "updatedAt": "2026-10-21T22:47:22.330Z",
+            "doneAt": "2026-10-21T22:47:22.321Z",
+            "reviewAskedAt": "2026-10-21T22:47:22.330Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:28.610Z",
+      "path": "/api/sms",
+      "request": {
+        "From": "+17135550123",
+        "To": "+17135550102",
+        "Body": "Great job, thanks!"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>"
+    },
+    {
+      "at": "2026-10-21T22:47:28.614Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "a01eeff0d8",
+            "slug": "pm-real-model-growth",
+            "createdAt": "2026-10-21T22:47:18.754Z",
+            "customer_name": "Lee Park",
+            "phone": "+17135550123",
+            "address": "12 Oak St, Katy, TX 77494",
+            "issue": "AC repair requested; specific problem not described.",
+            "date": "2026-10-24",
+            "dateSaid": "2026-10-24",
+            "window": "8 to 12",
+            "urgency": "flexible",
+            "language": "en",
+            "notes": "",
+            "unsure": "Specific AC problem not described.",
+            "channel": "test",
+            "status": "done",
+            "outcome": "booked",
+            "customerType": "new",
+            "consent": {
+              "at": "2026-10-21T22:47:18.756Z",
+              "channel": "test",
+              "phone": "+17135550123",
+              "wording": "You'll get appointment texts from PM Test growth HVAC at this number. Reply STOP any time to end them."
+            },
+            "updatedAt": "2026-10-21T22:47:23.182Z",
+            "doneAt": "2026-10-21T22:47:22.321Z",
+            "reviewAskedAt": "2026-10-21T22:47:22.330Z",
+            "reviewReply": {
+              "sentiment": "positive",
+              "text": "Great job, thanks!",
+              "at": "2026-10-21T22:47:23.182Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:47:28.618Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-growth",
+        "action": "tasks"
+      },
+      "status": 200,
+      "response": {
+        "tasks": [
+          {
+            "key": "2026-10-29T22:47:22.322Z_26248226e5",
+            "type": "referral_ask",
+            "dueAt": "2026-10-29T22:47:22.322Z",
+            "data": {
+              "bookingId": "a01eeff0d8"
+            },
+            "id": "26248226e5"
+          }
+        ]
+      }
+    }
+  ],
+  "evaluation": {},
+  "result": "requested local real-model checks passed; provider-keyed acceptance remains pending",
+  "finishedAt": "2026-10-21T22:47:28.619Z",
+  "finishedRelevantCodeSha256": "115a9312d5f47fb3aecb2342ecb1731e3e0d06528c178b0f57a70f3bacd7e762",
+  "relevantCodeChangedDuringRun": false
+}

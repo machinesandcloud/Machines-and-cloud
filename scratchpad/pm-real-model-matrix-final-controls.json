@@ -1,0 +1,1582 @@
+{
+  "startedAt": "2026-10-21T22:58:45.223Z",
+  "commit": "5662641650017112e0840fa800f5e6d7d095b82e",
+  "relevantCodeSha256": "9604fd105b1ebdab3e7f86e187473bb69864950c8af040bdad562a756dc9b344",
+  "runnerSha256": "741d4832e399113998b0798be97250f3733488109187adcfdf706b4cb4d6351f",
+  "base": "http://127.0.0.1:8891",
+  "selectedCases": [
+    2,
+    4,
+    8,
+    10,
+    11,
+    12,
+    13,
+    18
+  ],
+  "originalEvidence": "scratchpad/pm-real-model-matrix.json",
+  "realModelRehearsal": true,
+  "liveProviderAcceptance": false,
+  "maximumLogicalCalls": 30,
+  "logicalCallsReserved": 21,
+  "cases": [
+    {
+      "case": 2,
+      "checks": [
+        {
+          "name": "returning contact knows visit and no duplicate",
+          "pass": true,
+          "actual": "Your arrival window is 8 to 12 on 2026-10-24, and your reference is 061d43ee04. The tech will text you when they're on the way."
+        }
+      ],
+      "limitations": [
+        "The existing/new owner-alert distinction is verified in keyed booking flows; an information-only returning turn need not create a new alert."
+      ],
+      "modelCallForCase": true,
+      "events": [
+        {
+          "id": "257cd1ab",
+          "slug": "pm-matrix-01",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550131",
+            "type": "confirmation",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 1 HVAC: you're booked for Sat, Oct 24, 8 to 12. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out."
+          },
+          "at": "2026-10-21T22:56:17.353Z"
+        },
+        {
+          "id": "7e80158d",
+          "slug": "pm-matrix-01",
+          "type": "booking",
+          "data": {
+            "id": "061d43ee04",
+            "channel": "test"
+          },
+          "at": "2026-10-21T22:56:17.355Z"
+        },
+        {
+          "id": "9ab45ffb",
+          "slug": "pm-matrix-01",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550199",
+            "type": "owner_alert",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 1 HVAC front desk: BOOKED\nCustomer: PM Test Customer (new)\nPhone: +17135550131\nWhere: 12 Oak St, Katy, TX 77494\nIssue: AC is not cooling.\nUrgency: flexible\nWindow: Sat, Oct 24, 8 to 12\nAccess: Customer agreed to receive appointment texts.\nRef 061d43ee04. Reply \"otw 061d43ee04\" when yo"
+          },
+          "at": "2026-10-21T22:56:17.355Z"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case": 4,
+      "checks": [
+        {
+          "name": "only published windows offered",
+          "pass": true,
+          "actual": "Thanks! Katy is in our service area. We can't book an exact 9 to 11 slot, but for October 24, 2026 we have an 8 to 12 arrival window, which covers that time, and the tech will text you when they're on the way. The service call is $89, and that goes toward the repair.\n\nBefore I book it, what's going on with your AC?"
+        }
+      ],
+      "limitations": [],
+      "modelCallForCase": true,
+      "events": [],
+      "pass": true
+    },
+    {
+      "case": 8,
+      "checks": [
+        {
+          "name": "cancellation request preserves visit pending owner",
+          "pass": true,
+          "actual": "I've sent Dana your request to cancel your visit on October 24, 2026, for 12 Oak St in Katy. The reference number is c0507ea471. I can't change the calendar myself, so Dana will cancel the visit and confirm with you at +17135550138. If you'd like to book a new time instead, just let me know."
+        }
+      ],
+      "limitations": [],
+      "modelCallForCase": true,
+      "events": [
+        {
+          "id": "71f86f19",
+          "slug": "pm-matrix-08",
+          "type": "lead",
+          "data": {
+            "id": "c0507ea471",
+            "reason": "handoff",
+            "channel": "test"
+          },
+          "at": "2026-10-21T22:58:56.347Z"
+        },
+        {
+          "id": "ac860c65",
+          "slug": "pm-matrix-08",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550199",
+            "type": "owner_alert",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 8 HVAC front desk: NEEDS ACTION\nCustomer: PM Test Customer (new)\nPhone: +17135550138\nWhere: 12 Oak St, Katy, TX 77494\nIssue: Customer wants to cancel their visit scheduled for 2026-10-24.\nUrgency: flexible\nWants: Cancel visit on 2026-10-24\nUnsure about: I can't see the calendar, so I "
+          },
+          "at": "2026-10-21T22:58:56.347Z"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case": 10,
+      "checks": [
+        {
+          "name": "Spanish booking and Spanish consent",
+          "pass": true,
+          "actual": "¡Listo! Su visita está agendada para el 24 de octubre de 2026, con llegada entre las 8 y las 12, en 12 Oak St, Katy TX 77494, para revisar su aire que no enfría. Su número de referencia es eb008b318a. No le podemos dar una hora exacta, pero el técnico le enviará un mensaje cuando vaya en camino. La visita de servicio cuesta $89 y ese monto se aplica a la reparación.\n\nRecibirá mensajes de texto sobre su cita de PM Test Matrix 10 HVAC en este número. Responda STOP o ALTO cuando quiera para dejar de recibirlos."
+        }
+      ],
+      "limitations": [
+        "Local Spanish wording is not named-reviewer approval or a real Spanish voice call."
+      ],
+      "modelCallForCase": true,
+      "events": [
+        {
+          "id": "76e3c711",
+          "slug": "pm-matrix-10",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550140",
+            "type": "confirmation",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 10 HVAC: su visita queda agendada para sábado, 24 de octubre, 8 a 12. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP o ALTO para no recibir más mensajes."
+          },
+          "at": "2026-10-21T22:59:02.656Z"
+        },
+        {
+          "id": "a5d8bc55",
+          "slug": "pm-matrix-10",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550199",
+            "type": "owner_alert",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 10 HVAC front desk: BOOKED\nCustomer: PM Test Customer (new)\nPhone: +17135550140\nWhere: 12 Oak St, Katy TX 77494\nIssue: El aire acondicionado no enfría.\nUrgency: flexible\nWindow: Sat, Oct 24, 8 to 12\nLanguage: Spanish\nRef eb008b318a. Reply \"otw eb008b318a\" when you are on the way."
+          },
+          "at": "2026-10-21T22:59:02.656Z"
+        },
+        {
+          "id": "a3e00819",
+          "slug": "pm-matrix-10",
+          "type": "booking",
+          "data": {
+            "id": "eb008b318a",
+            "channel": "test"
+          },
+          "at": "2026-10-21T22:59:02.657Z"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case": 11,
+      "checks": [
+        {
+          "name": "on-site quote, no invented price",
+          "pass": true,
+          "actual": "I can't give a price for a full system replacement over text. It depends on your home, the equipment size and the install, so the tech or Dana will confirm it. The only set price is the $89 service call, and that amount goes toward the work.\n\nWhat's going on with your current system, and are you in Katy or Cypress?"
+        }
+      ],
+      "limitations": [],
+      "modelCallForCase": true,
+      "events": [],
+      "pass": true
+    },
+    {
+      "case": 12,
+      "checks": [
+        {
+          "name": "declines exact time and offers window",
+          "pass": true,
+          "actual": "I can't promise an exact time, but I can offer the 8 to 12 arrival window on Saturday, October 24, 2026, and the tech will text you when they're on the way. Katy is in our service area. The service call is $89, and that goes toward the repair.\n\nWhat's going on with your system?"
+        }
+      ],
+      "limitations": [],
+      "modelCallForCase": true,
+      "events": [],
+      "pass": true
+    },
+    {
+      "case": 13,
+      "checks": [
+        {
+          "name": "STOP recorded and scheduled customer sends cancelled",
+          "pass": true,
+          "actual": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>PM Test Matrix 13 HVAC: you're unsubscribed and will get no more texts from this number. Reply START to resume.</Message></Response>"
+        },
+        {
+          "name": "opted-out subsequent text silent",
+          "pass": true,
+          "actual": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>"
+        }
+      ],
+      "limitations": [],
+      "modelCallForCase": true,
+      "events": [
+        {
+          "id": "d15510bb",
+          "slug": "pm-matrix-13",
+          "type": "sms_inbound",
+          "data": {
+            "from": "+17135550143"
+          },
+          "at": "2026-10-21T22:59:10.590Z"
+        },
+        {
+          "id": "78900e48",
+          "slug": "pm-matrix-13",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550143",
+            "type": "reply",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "The $89 service call goes toward the cost of a repair. We haven't published a price for a tune-up, so Dana or the tech will confirm what that costs. Would you like to set up a maintenance visit?"
+          },
+          "at": "2026-10-21T22:59:13.461Z"
+        },
+        {
+          "id": "8415a3a1",
+          "slug": "pm-matrix-13",
+          "type": "sms_reply",
+          "data": {
+            "from": "+17135550143"
+          },
+          "at": "2026-10-21T22:59:13.462Z"
+        },
+        {
+          "id": "e18a00a5",
+          "slug": "pm-matrix-13",
+          "type": "opt_out",
+          "data": {
+            "from": "+17135550143",
+            "cancelled": 3,
+            "viaTwilio": false
+          },
+          "at": "2026-10-21T22:59:13.467Z"
+        },
+        {
+          "id": "fa1851f1",
+          "slug": "pm-matrix-13",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550199",
+            "type": "owner_note",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 13 HVAC front desk: +17135550143 opted out of texts. Nothing more will be sent to them."
+          },
+          "at": "2026-10-21T22:59:13.467Z"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case": 18,
+      "checks": [
+        {
+          "name": "Spanish unsubscribe once, opt-out and task cancellation",
+          "pass": true,
+          "actual": {
+            "first": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>PM Test Matrix 18 HVAC: ya no recibirá más mensajes de este número. Responda EMPEZAR para volver a recibirlos.</Message></Response>",
+            "second": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>"
+          }
+        }
+      ],
+      "limitations": [],
+      "modelCallForCase": false,
+      "events": [
+        {
+          "id": "2c61d587",
+          "slug": "pm-matrix-18",
+          "type": "opt_out",
+          "data": {
+            "from": "+17135550148",
+            "cancelled": 3,
+            "viaTwilio": false
+          },
+          "at": "2026-10-21T22:59:13.481Z"
+        },
+        {
+          "id": "a911b9e3",
+          "slug": "pm-matrix-18",
+          "type": "sms_sent",
+          "data": {
+            "to": "+17135550199",
+            "type": "owner_note",
+            "sender": "own",
+            "ok": false,
+            "logged": true,
+            "preview": "PM Test Matrix 18 HVAC front desk: +17135550148 opted out of texts. Nothing more will be sent to them."
+          },
+          "at": "2026-10-21T22:59:13.481Z"
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "at": "2026-10-21T22:58:45.263Z",
+      "path": "/api/admin",
+      "status": 200,
+      "response": {
+        "clients": [
+          {
+            "slug": "pm-matrix-01",
+            "name": "PM Test Matrix 1 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-1@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550121",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.683Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-01&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-01"
+          },
+          {
+            "slug": "pm-matrix-03",
+            "name": "PM Test Matrix 3 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-3@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550123",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.683Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-03&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-03"
+          },
+          {
+            "slug": "pm-matrix-04",
+            "name": "PM Test Matrix 4 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-4@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550124",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.684Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-04&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-04"
+          },
+          {
+            "slug": "pm-matrix-05",
+            "name": "PM Test Matrix 5 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-5@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550125",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.684Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-05&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-05"
+          },
+          {
+            "slug": "pm-matrix-06",
+            "name": "PM Test Matrix 6 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-6@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550126",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.684Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-06&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-06"
+          },
+          {
+            "slug": "pm-matrix-07",
+            "name": "PM Test Matrix 7 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-7@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550127",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.684Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-07&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-07"
+          },
+          {
+            "slug": "pm-matrix-08",
+            "name": "PM Test Matrix 8 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-8@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550128",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.684Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-08&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-08"
+          },
+          {
+            "slug": "pm-matrix-09",
+            "name": "PM Test Matrix 9 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-9@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550129",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-09&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-09"
+          },
+          {
+            "slug": "pm-matrix-10",
+            "name": "PM Test Matrix 10 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-10@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550130",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-10&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-10"
+          },
+          {
+            "slug": "pm-matrix-11",
+            "name": "PM Test Matrix 11 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-11@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550131",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-11&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-11"
+          },
+          {
+            "slug": "pm-matrix-12",
+            "name": "PM Test Matrix 12 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-12@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550132",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-12&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-12"
+          },
+          {
+            "slug": "pm-matrix-13",
+            "name": "PM Test Matrix 13 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-13@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550133",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-13&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-13"
+          },
+          {
+            "slug": "pm-matrix-14",
+            "name": "PM Test Matrix 14 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-14@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550134",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-14&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-14"
+          },
+          {
+            "slug": "pm-matrix-15",
+            "name": "PM Test Matrix 15 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-15@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550135",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-15&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-15"
+          },
+          {
+            "slug": "pm-matrix-16",
+            "name": "PM Test Matrix 16 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-16@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550136",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-16&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-16"
+          },
+          {
+            "slug": "pm-matrix-17",
+            "name": "PM Test Matrix 17 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-17@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550137",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-17&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-17"
+          },
+          {
+            "slug": "pm-matrix-18",
+            "name": "PM Test Matrix 18 HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "Dana",
+              "email": "pm-matrix-18@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+12815550138",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "pending",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:55:48.696Z",
+            "liveAt": "2026-10-21T22:55:48.682Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-matrix-18&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-matrix-18"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:47.188Z",
+      "path": "/api/chat",
+      "body": {
+        "client": "pm-matrix-01",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pmcase1",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "What is my visit's arrival window and reference?"
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "Your arrival window is 8 to 12 on 2026-10-24, and your reference is 061d43ee04. The tech will text you when they're on the way.",
+        "events": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:47.193Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-01",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "061d43ee04",
+            "slug": "pm-matrix-01",
+            "createdAt": "2026-10-21T22:56:17.352Z",
+            "customer_name": "PM Test Customer",
+            "phone": "+17135550131",
+            "address": "12 Oak St, Katy, TX 77494",
+            "issue": "AC is not cooling.",
+            "date": "2026-10-24",
+            "dateSaid": "2026-10-24",
+            "window": "8 to 12",
+            "urgency": "flexible",
+            "language": "en",
+            "notes": "Customer agreed to receive appointment texts.",
+            "unsure": "",
+            "channel": "test",
+            "status": "booked",
+            "outcome": "booked",
+            "customerType": "new",
+            "consent": {
+              "at": "2026-10-21T22:56:17.353Z",
+              "channel": "test",
+              "phone": "+17135550131",
+              "wording": "You'll get appointment texts from PM Test Matrix 1 HVAC at this number. Reply STOP any time to end them."
+            },
+            "updatedAt": "2026-10-21T22:56:17.353Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:47.197Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-01",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "257cd1ab",
+            "slug": "pm-matrix-01",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550131",
+              "type": "confirmation",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 1 HVAC: you're booked for Sat, Oct 24, 8 to 12. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out."
+            },
+            "at": "2026-10-21T22:56:17.353Z"
+          },
+          {
+            "id": "7e80158d",
+            "slug": "pm-matrix-01",
+            "type": "booking",
+            "data": {
+              "id": "061d43ee04",
+              "channel": "test"
+            },
+            "at": "2026-10-21T22:56:17.355Z"
+          },
+          {
+            "id": "9ab45ffb",
+            "slug": "pm-matrix-01",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550199",
+              "type": "owner_alert",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 1 HVAC front desk: BOOKED\nCustomer: PM Test Customer (new)\nPhone: +17135550131\nWhere: 12 Oak St, Katy, TX 77494\nIssue: AC is not cooling.\nUrgency: flexible\nWindow: Sat, Oct 24, 8 to 12\nAccess: Customer agreed to receive appointment texts.\nRef 061d43ee04. Reply \"otw 061d43ee04\" when yo"
+            },
+            "at": "2026-10-21T22:56:17.355Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:51.241Z",
+      "path": "/api/chat",
+      "body": {
+        "client": "pm-matrix-04",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pmcase4",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "I want an AC visit 2026-10-24, 9 to 11. My name is PM Test Customer, phone +17135550134, address 12 Oak St, Katy, TX 77494."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "Thanks! Katy is in our service area. We can't book an exact 9 to 11 slot, but for October 24, 2026 we have an 8 to 12 arrival window, which covers that time, and the tech will text you when they're on the way. The service call is $89, and that goes toward the repair.\n\nBefore I book it, what's going on with your AC?",
+        "events": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:51.246Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-04",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:51.249Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-04",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:59.454Z",
+      "path": "/api/chat",
+      "body": {
+        "client": "pm-matrix-08",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pmcase8",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "I need to cancel my visit on 2026-10-24. My name is PM Test Customer, phone +17135550138, address 12 Oak St, Katy, TX 77494."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "I've sent Dana your request to cancel your visit on October 24, 2026, for 12 Oak St in Katy. The reference number is c0507ea471. I can't change the calendar myself, so Dana will cancel the visit and confirm with you at +17135550138. If you'd like to book a new time instead, just let me know.",
+        "events": [
+          {
+            "type": "lead",
+            "id": "c0507ea471",
+            "reason": "handoff"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:59.455Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-08",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "pmseed8",
+            "slug": "pm-matrix-08",
+            "createdAt": "2026-10-21T22:55:48.682Z",
+            "customer_name": "PM Test Customer",
+            "phone": "+17135550138",
+            "address": "12 Oak St Katy TX 77494",
+            "issue": "AC not cooling",
+            "date": "2026-10-24",
+            "window": "8 to 12",
+            "urgency": "this_week",
+            "language": "en",
+            "status": "booked",
+            "notes": "",
+            "source": {
+              "channel": "sms",
+              "contact": "+17135550138"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:59.457Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-08",
+        "action": "records",
+        "kind": "leads"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "c0507ea471",
+            "slug": "pm-matrix-08",
+            "createdAt": "2026-10-21T22:58:56.346Z",
+            "customer_name": "PM Test Customer",
+            "phone": "+17135550138",
+            "address": "12 Oak St, Katy, TX 77494",
+            "issue": "Customer wants to cancel their visit scheduled for 2026-10-24.",
+            "reason": "handoff",
+            "urgency": "flexible",
+            "wanted": "Cancel visit on 2026-10-24",
+            "language": "en",
+            "unsure": "I can't see the calendar, so I haven't confirmed the 2026-10-24 booking exists or that it was cancelled. Dana needs to cancel it and confirm with the customer.",
+            "nobook_reason": "none",
+            "channel": "test",
+            "contact": "pmcase8",
+            "status": "open",
+            "outcome": "needs_action",
+            "customerType": "new",
+            "callbackPromise": "within 30 minutes",
+            "callbackDueAt": "2026-10-21T23:28:56.347Z",
+            "overdueAt": null,
+            "updatedAt": "2026-10-21T22:58:56.347Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:58:59.458Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-08",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "71f86f19",
+            "slug": "pm-matrix-08",
+            "type": "lead",
+            "data": {
+              "id": "c0507ea471",
+              "reason": "handoff",
+              "channel": "test"
+            },
+            "at": "2026-10-21T22:58:56.347Z"
+          },
+          {
+            "id": "ac860c65",
+            "slug": "pm-matrix-08",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550199",
+              "type": "owner_alert",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 8 HVAC front desk: NEEDS ACTION\nCustomer: PM Test Customer (new)\nPhone: +17135550138\nWhere: 12 Oak St, Katy, TX 77494\nIssue: Customer wants to cancel their visit scheduled for 2026-10-24.\nUrgency: flexible\nWants: Cancel visit on 2026-10-24\nUnsure about: I can't see the calendar, so I "
+            },
+            "at": "2026-10-21T22:58:56.347Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:05.560Z",
+      "path": "/api/chat",
+      "body": {
+        "client": "pm-matrix-10",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pmcase10",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola, mi aire no enfría. Estoy en Katy. Agéndeme para 2026-10-24, de 8 a 12. Soy PM Test Customer, teléfono +17135550140, dirección 12 Oak St, Katy TX 77494. Sí, acepto los mensajes sobre mi cita."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "¡Listo! Su visita está agendada para el 24 de octubre de 2026, con llegada entre las 8 y las 12, en 12 Oak St, Katy TX 77494, para revisar su aire que no enfría. Su número de referencia es eb008b318a. No le podemos dar una hora exacta, pero el técnico le enviará un mensaje cuando vaya en camino. La visita de servicio cuesta $89 y ese monto se aplica a la reparación.\n\nRecibirá mensajes de texto sobre su cita de PM Test Matrix 10 HVAC en este número. Responda STOP o ALTO cuando quiera para dejar de recibirlos.",
+        "events": [
+          {
+            "type": "booking",
+            "id": "eb008b318a"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:05.565Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-10",
+        "action": "records",
+        "kind": "bookings"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "eb008b318a",
+            "slug": "pm-matrix-10",
+            "createdAt": "2026-10-21T22:59:02.653Z",
+            "customer_name": "PM Test Customer",
+            "phone": "+17135550140",
+            "address": "12 Oak St, Katy TX 77494",
+            "issue": "El aire acondicionado no enfría.",
+            "date": "2026-10-24",
+            "dateSaid": "2026-10-24",
+            "window": "8 to 12",
+            "urgency": "flexible",
+            "language": "es",
+            "notes": "",
+            "unsure": "",
+            "channel": "test",
+            "status": "booked",
+            "outcome": "booked",
+            "customerType": "new",
+            "consent": {
+              "at": "2026-10-21T22:59:02.654Z",
+              "channel": "test",
+              "phone": "+17135550140",
+              "wording": "You'll get appointment texts from PM Test Matrix 10 HVAC at this number. Reply STOP any time to end them."
+            },
+            "updatedAt": "2026-10-21T22:59:02.654Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:05.568Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-10",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "76e3c711",
+            "slug": "pm-matrix-10",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550140",
+              "type": "confirmation",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 10 HVAC: su visita queda agendada para sábado, 24 de octubre, 8 a 12. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP o ALTO para no recibir más mensajes."
+            },
+            "at": "2026-10-21T22:59:02.656Z"
+          },
+          {
+            "id": "a5d8bc55",
+            "slug": "pm-matrix-10",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550199",
+              "type": "owner_alert",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 10 HVAC front desk: BOOKED\nCustomer: PM Test Customer (new)\nPhone: +17135550140\nWhere: 12 Oak St, Katy TX 77494\nIssue: El aire acondicionado no enfría.\nUrgency: flexible\nWindow: Sat, Oct 24, 8 to 12\nLanguage: Spanish\nRef eb008b318a. Reply \"otw eb008b318a\" when you are on the way."
+            },
+            "at": "2026-10-21T22:59:02.656Z"
+          },
+          {
+            "id": "a3e00819",
+            "slug": "pm-matrix-10",
+            "type": "booking",
+            "data": {
+              "id": "eb008b318a",
+              "channel": "test"
+            },
+            "at": "2026-10-21T22:59:02.657Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:08.034Z",
+      "path": "/api/chat",
+      "body": {
+        "client": "pm-matrix-11",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pmcase11",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "How much to replace the entire AC system?"
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "I can't give a price for a full system replacement over text. It depends on your home, the equipment size and the install, so the tech or Dana will confirm it. The only set price is the $89 service call, and that amount goes toward the work.\n\nWhat's going on with your current system, and are you in Katy or Cypress?",
+        "events": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:08.037Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-11",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:10.583Z",
+      "path": "/api/chat",
+      "body": {
+        "client": "pm-matrix-12",
+        "key": "pm-local-owner-key",
+        "channel": "test",
+        "contact": "pmcase12",
+        "stream": false,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Can you be here at exactly 9 on 2026-10-24? My name is PM Test Customer, phone +17135550142, address 12 Oak St, Katy, TX 77494."
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "reply": "I can't promise an exact time, but I can offer the 8 to 12 arrival window on Saturday, October 24, 2026, and the tech will text you when they're on the way. Katy is in our service area. The service call is $89, and that goes toward the repair.\n\nWhat's going on with your system?",
+        "events": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:10.587Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-12",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:13.464Z",
+      "path": "/api/sms",
+      "body": {
+        "From": "+17135550143",
+        "To": "+12815550133",
+        "Body": "Is an AC tune-up covered by the service call?"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>"
+    },
+    {
+      "at": "2026-10-21T22:59:13.469Z",
+      "path": "/api/sms",
+      "body": {
+        "From": "+17135550143",
+        "To": "+12815550133",
+        "Body": "STOP"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>PM Test Matrix 13 HVAC: you're unsubscribed and will get no more texts from this number. Reply START to resume.</Message></Response>"
+    },
+    {
+      "at": "2026-10-21T22:59:13.471Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-13",
+        "action": "records",
+        "kind": "optouts"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "key": "+17135550143",
+            "phone": "+17135550143",
+            "at": "2026-10-21T22:59:13.467Z",
+            "slug": "pm-matrix-13",
+            "words": "STOP"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:13.473Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-13",
+        "action": "tasks"
+      },
+      "status": 200,
+      "response": {
+        "tasks": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:13.476Z",
+      "path": "/api/sms",
+      "body": {
+        "From": "+17135550143",
+        "To": "+12815550133",
+        "Body": "Can you still hear me?"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>"
+    },
+    {
+      "at": "2026-10-21T22:59:13.479Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-13",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "d15510bb",
+            "slug": "pm-matrix-13",
+            "type": "sms_inbound",
+            "data": {
+              "from": "+17135550143"
+            },
+            "at": "2026-10-21T22:59:10.590Z"
+          },
+          {
+            "id": "78900e48",
+            "slug": "pm-matrix-13",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550143",
+              "type": "reply",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "The $89 service call goes toward the cost of a repair. We haven't published a price for a tune-up, so Dana or the tech will confirm what that costs. Would you like to set up a maintenance visit?"
+            },
+            "at": "2026-10-21T22:59:13.461Z"
+          },
+          {
+            "id": "8415a3a1",
+            "slug": "pm-matrix-13",
+            "type": "sms_reply",
+            "data": {
+              "from": "+17135550143"
+            },
+            "at": "2026-10-21T22:59:13.462Z"
+          },
+          {
+            "id": "e18a00a5",
+            "slug": "pm-matrix-13",
+            "type": "opt_out",
+            "data": {
+              "from": "+17135550143",
+              "cancelled": 3,
+              "viaTwilio": false
+            },
+            "at": "2026-10-21T22:59:13.467Z"
+          },
+          {
+            "id": "fa1851f1",
+            "slug": "pm-matrix-13",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550199",
+              "type": "owner_note",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 13 HVAC front desk: +17135550143 opted out of texts. Nothing more will be sent to them."
+            },
+            "at": "2026-10-21T22:59:13.467Z"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:13.483Z",
+      "path": "/api/sms",
+      "body": {
+        "From": "+17135550148",
+        "To": "+12815550138",
+        "Body": "ALTO"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>PM Test Matrix 18 HVAC: ya no recibirá más mensajes de este número. Responda EMPEZAR para volver a recibirlos.</Message></Response>"
+    },
+    {
+      "at": "2026-10-21T22:59:13.485Z",
+      "path": "/api/sms",
+      "body": {
+        "From": "+17135550148",
+        "To": "+12815550138",
+        "Body": "ALTO"
+      },
+      "status": 200,
+      "response": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>"
+    },
+    {
+      "at": "2026-10-21T22:59:13.486Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-18",
+        "action": "records",
+        "kind": "optouts"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "key": "+17135550148",
+            "phone": "+17135550148",
+            "at": "2026-10-21T22:59:13.481Z",
+            "slug": "pm-matrix-18",
+            "words": "ALTO"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:13.487Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-18",
+        "action": "tasks"
+      },
+      "status": 200,
+      "response": {
+        "tasks": []
+      }
+    },
+    {
+      "at": "2026-10-21T22:59:13.489Z",
+      "path": "/api/admin",
+      "body": {
+        "slug": "pm-matrix-18",
+        "action": "records",
+        "kind": "events"
+      },
+      "status": 200,
+      "response": {
+        "records": [
+          {
+            "id": "2c61d587",
+            "slug": "pm-matrix-18",
+            "type": "opt_out",
+            "data": {
+              "from": "+17135550148",
+              "cancelled": 3,
+              "viaTwilio": false
+            },
+            "at": "2026-10-21T22:59:13.481Z"
+          },
+          {
+            "id": "a911b9e3",
+            "slug": "pm-matrix-18",
+            "type": "sms_sent",
+            "data": {
+              "to": "+17135550199",
+              "type": "owner_note",
+              "sender": "own",
+              "ok": false,
+              "logged": true,
+              "preview": "PM Test Matrix 18 HVAC front desk: +17135550148 opted out of texts. Nothing more will be sent to them."
+            },
+            "at": "2026-10-21T22:59:13.481Z"
+          }
+        ]
+      }
+    }
+  ],
+  "unitReferences": [
+    {
+      "label": "Case19 capacity: offline only",
+      "evidencePath": "scratchpad/pm-capacity-check.txt",
+      "sha256": "c758d09208acce56f3234346c44f740fb236e023cf1851e9160cd6c7544314f4",
+      "realModel": false,
+      "providerDelivery": false
+    },
+    {
+      "label": "Calendar-failure scenarios: injected local faults only",
+      "evidencePath": "scratchpad/pm-calendar-failure-check.txt",
+      "sha256": "4920c98c95145050835ff323cce52b4a0a71ed1982dc14ffad24644e783a7fd7",
+      "realModel": false,
+      "providerDelivery": false
+    }
+  ],
+  "requiresIndependentPMReplyReview": true,
+  "result": "automated local checks passed; independent PM reply review required",
+  "finishedAt": "2026-10-21T22:59:13.490Z",
+  "finishedRelevantCodeSha256": "9604fd105b1ebdab3e7f86e187473bb69864950c8af040bdad562a756dc9b344",
+  "relevantCodeChangedDuringRun": false,
+  "independentPMReview": {
+    "completed": true,
+    "reviewedAt": "2026-10-21T23:01:03.118Z",
+    "casesPassed": [
+      2,
+      4,
+      8,
+      10,
+      11,
+      12,
+      13,
+      18
+    ],
+    "notes": "Every delivered reply read with state/events: returning visit reference, window refusal, cancellation handoff with unchanged booking, Spanish booking/consent, no invented replacement quote, exact-time refusal, STOP/ALTO task cancellation and silence. These are scoped local results; named-shop and provider receipts remain open.",
+    "providerAcceptance": false
+  }
+}

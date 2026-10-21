@@ -11,6 +11,7 @@ import { upcomingBookings, dailyDigest, weeklyReport, monthlyReport, lineHealth 
 import { getUsage, usageView } from "./lib/usage.mjs";
 import { run as runScheduler } from "./scheduler.mjs";
 import { releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
+import { auditNeedsAttention } from "./lib/audit-policy.mjs";
 
 export const config = { path: "/api/admin" };
 
@@ -37,7 +38,7 @@ export default async (req) => {
         row.lastInbound = [h.lastInboundCall, h.lastInboundText].filter(Boolean).sort().pop() || null;
         row.leads = { angiKey: c.leads?.angiKey || "", thumbtackSecret: c.leads?.thumbtackSecret || "" };
         const dayMs = 86400000;
-        row.autoFlags7d = events.filter((e) => e.type === "auto_flag" && !e.data?.test && Date.now() - new Date(e.at).getTime() < 7 * dayMs).length;
+        row.autoFlags7d = events.filter((e) => e.type === "auto_flag" && auditNeedsAttention(e.data) && Date.now() - new Date(e.at).getTime() < 7 * dayMs).length;
         row.healthAlerts7d = events.filter((e) => e.type === "health_alert" && Date.now() - new Date(e.at).getTime() < 7 * dayMs).map((e) => e.data?.reason);
         row.overdueOld = leads.filter((l) => l.status === "open" && l.overdueAt && !l.calledAt && Date.now() - new Date(l.overdueAt).getTime() > dayMs).length;
         row.testingDays = c.status === "testing" && c.build?.builtAt ? Math.floor((Date.now() - new Date(c.build.builtAt).getTime()) / dayMs) : 0;
@@ -144,6 +145,7 @@ export default async (req) => {
     for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await put("optouts", k, { ...o, slug: "", formerSlug: c.slug }); }
     for (const k of await list("index", "bridge:")) { const sl = await get("index", k); if (sl === c.slug) await del("index", k); }
     for (const prefix of [`bookings:${c.slug}:`, `leads:${c.slug}:`, `platform:${c.slug}:`]) for (const k of await list("index", prefix)) await del("index", k);
+    await del("index", "capacity:" + c.slug);
     await del("health", "lastInbound:" + c.slug);
     if (c.owner?.email) await del("index", "email:" + c.owner.email.toLowerCase());
     if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);

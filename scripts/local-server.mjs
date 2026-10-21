@@ -1,9 +1,10 @@
 // Local server for the whole product with zero Netlify usage: serves the static site and routes every
 // function by its config.path to the same modules production runs, against the in-memory store
 // (MC_MEMORY_STORE=1). Model calls go to Anthropic with ANTHROPIC_API_KEY from .env (gitignored);
-// without it, chat and the classifiers fail cleanly and everything else works.
+// without it, the deterministic fake model runs unless MC_FAKE_MODEL=0.
 //   node scripts/local-server.mjs            -> http://localhost:8888, admin key "local-admin"
 //   MC_MEMORY_FILE=.local-store.json         -> store snapshot saved on exit and restored on start
+// Provider APIs are disabled by default; MC_LOCAL_NO_KEYS=0 explicitly enables them for a keyed pass.
 import { createServer } from "node:http";
 import { readFileSync, existsSync, readdirSync, writeFileSync, statSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -12,14 +13,19 @@ import { extname, join, normalize } from "node:path";
 const root = new URL("../", import.meta.url).pathname;
 // .env: KEY=value lines, never committed.
 if (existsSync(join(root, ".env"))) for (const line of readFileSync(join(root, ".env"), "utf8").split("\n")) { const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/); if (m && m[2].replace(/(^|\s+)#.*$/, "") && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/(^|\s+)#.*$/, "").replace(/^["']|["']$/g, ""); }
-process.env.MC_MEMORY_STORE = process.env.MC_MEMORY_STORE || "1";
+// This server is always isolated from production storage and background dispatch.
+process.env.MC_MEMORY_STORE = "1";
 // Always the local key, never the production one that .env may hold.
 process.env.ADMIN_KEY = process.env.LOCAL_ADMIN_KEY || "local-admin";
 // No Anthropic key: the deterministic fake model stands in so every flow still runs (MC_FAKE_MODEL=0 to refuse instead).
 if (!process.env.ANTHROPIC_API_KEY && process.env.MC_FAKE_MODEL !== "0") process.env.MC_FAKE_MODEL = "1";
 const PORT = Number(process.env.PORT) || 8888;
-process.env.URL = process.env.URL || `http://localhost:${PORT}`;
-for (const k of ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "VAPI_API_KEY", "RESEND_API_KEY", "STRIPE_SECRET_KEY"]) if (process.env.MC_LOCAL_NO_KEYS === "1") delete process.env[k];
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error("PORT must be between 1 and 65535");
+process.env.URL = `http://127.0.0.1:${PORT}`;
+if (process.env.MC_LOCAL_NO_KEYS !== "0") {
+  for (const k of ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "VAPI_API_KEY", "RESEND_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY"]) delete process.env[k];
+  process.env.VAPI_WEBHOOK_SECRET = process.env.LOCAL_VAPI_WEBHOOK_SECRET || "local-vapi-secret";
+}
 
 const fnDir = join(root, "netlify/functions");
 const routes = []; const byName = {};
@@ -36,6 +42,7 @@ if (process.env.MC_MEMORY_FILE && existsSync(join(root, process.env.MC_MEMORY_FI
 const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".txt": "text/plain", ".json": "application/json", ".webp": "image/webp", ".ico": "image/x-icon", ".woff2": "font/woff2" };
 function staticFile(pathname) {
   let p = normalize(decodeURIComponent(pathname)).replace(/^\/+/, "");
+  if (p.split(/[\\/]/).some((part) => part.startsWith("."))) return null;
   if (!p || p.endsWith("/")) p += "index.html";
   let full = join(root, p);
   if (!full.startsWith(root)) return null;
@@ -66,6 +73,6 @@ const server = createServer(async (req, res) => {
     const nf = staticFile("/404.html"); res.writeHead(404, { "Content-Type": "text/html" }); res.end(nf ? nf.body : "not found");
   } catch (err) { console.error(req.method, url.pathname, err); res.writeHead(500, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: "local_server", message: String(err?.message || err) })); }
 });
-server.listen(PORT, () => console.log(`local front desk at ${process.env.URL} (${routes.length} routes, admin key ${process.env.ADMIN_KEY}, model ${process.env.MC_FAKE_MODEL === "1" ? "FAKE (deterministic rules; add ANTHROPIC_API_KEY to .env for the real one)" : process.env.ANTHROPIC_API_KEY ? "real" : "off"})`));
+server.listen(PORT, "127.0.0.1", () => console.log(`local front desk at ${process.env.URL} (${routes.length} routes, admin key ${process.env.ADMIN_KEY}, model ${process.env.MC_FAKE_MODEL === "1" ? "FAKE (deterministic rules; add ANTHROPIC_API_KEY to .env for the real one)" : process.env.ANTHROPIC_API_KEY ? "real" : "off"}, provider APIs ${process.env.MC_LOCAL_NO_KEYS === "0" ? "enabled" : "disabled"})`));
 async function snapshot() { if (!process.env.MC_MEMORY_FILE) return; const out = {}; for (const kind of ["clients", "index", "conversations", "bookings", "leads", "alerts", "events", "tasks", "usage", "customers", "optouts", "health"]) { out[kind] = {}; for (const k of await store.list(kind, "")) out[kind][k] = await store.get(kind, k); } writeFileSync(join(root, process.env.MC_MEMORY_FILE), JSON.stringify(out)); console.log("store saved"); }
 for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, async () => { await snapshot(); process.exit(0); });

@@ -1,0 +1,304 @@
+{
+  "startedAt": "2026-10-21T22:37:36.179Z",
+  "commit": "5662641650017112e0840fa800f5e6d7d095b82e",
+  "trackedDirtyDiffSha256": "7b24bf0dee3f001c1167ae7c902366206989097173468cf39d7b73fffd9453ad",
+  "runnerSha256": "c51e8c8971183dc3ae61d374ef001893bda1a68bb261daae833c1481cfe0d037",
+  "phase": "preflight",
+  "base": "http://127.0.0.1:8891",
+  "modelMode": "real, confirmed from root server startup; no .env access by runner",
+  "providerDeliveryTested": false,
+  "maximumLogicalModelCalls": 1,
+  "logicalModelCalls": 1,
+  "checks": [
+    {
+      "name": "isolated synthetic shops present",
+      "pass": true,
+      "actual": [
+        {
+          "slug": "pm-real-model-growth",
+          "name": "PM Test growth HVAC"
+        },
+        {
+          "slug": "pm-real-model-rubric",
+          "name": "PM Test rubric HVAC"
+        }
+      ]
+    },
+    {
+      "name": "ONE real-model classifier preflight: positive price flag, usage present and no API error",
+      "pass": true,
+      "actual": {
+        "exact": 1,
+        "of": 1,
+        "perReason": {
+          "price_not_listed": {
+            "precision": 100,
+            "recall": 100,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "exact_time_promised": {
+            "precision": null,
+            "recall": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "tier0_missed": {
+            "precision": null,
+            "recall": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "no_callback_window": {
+            "precision": null,
+            "recall": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "spanish_mishandled": {
+            "precision": null,
+            "recall": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "no_address": {
+            "precision": null,
+            "recall": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "question_unanswered": {
+            "precision": null,
+            "recall": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "inputTokens": 377,
+        "outputTokens": 53,
+        "errors": 0,
+        "misses": []
+      }
+    }
+  ],
+  "requests": [
+    {
+      "at": "2026-10-21T22:37:36.240Z",
+      "path": "/api/admin",
+      "status": 200,
+      "response": {
+        "clients": [
+          {
+            "slug": "pm-real-model-growth",
+            "name": "PM Test growth HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-growth@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550102",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.688Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-growth&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-growth"
+          },
+          {
+            "slug": "pm-real-model-rubric",
+            "name": "PM Test rubric HVAC",
+            "status": "live",
+            "plan": "growth",
+            "owner": {
+              "name": "PM Test Owner",
+              "email": "pm-rubric@example.test",
+              "phone": "+17135550199",
+              "backupPhone": ""
+            },
+            "phone": {
+              "businessNumber": "+17135550100",
+              "twilioNumber": "+17135550101",
+              "forwarding": "none",
+              "carrier": "other",
+              "transferTo": "",
+              "voiceForwardTo": "",
+              "textBack": true,
+              "tenDlc": "approved"
+            },
+            "build": "done",
+            "provision": "pending",
+            "createdAt": "2026-10-21T22:36:14.686Z",
+            "liveAt": "2026-10-21T22:36:14.688Z",
+            "portal": "http://127.0.0.1:8891/desk?c=pm-real-model-rubric&k=pm-local-owner-key",
+            "policy": "http://127.0.0.1:8891/policy?c=pm-real-model-rubric"
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-21T22:37:39.176Z",
+      "path": "/api/admin",
+      "request": {
+        "slug": "pm-real-model-rubric",
+        "action": "classifier_eval",
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "set": 1,
+        "from": 10,
+        "to": 11
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "results": {
+          "claude-opus-5-5": {
+            "exact": 1,
+            "of": 1,
+            "perReason": {
+              "price_not_listed": {
+                "precision": 100,
+                "recall": 100,
+                "tp": 1,
+                "fp": 0,
+                "fn": 0
+              },
+              "exact_time_promised": {
+                "precision": null,
+                "recall": null,
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "tier0_missed": {
+                "precision": null,
+                "recall": null,
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "no_callback_window": {
+                "precision": null,
+                "recall": null,
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "spanish_mishandled": {
+                "precision": null,
+                "recall": null,
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "no_address": {
+                "precision": null,
+                "recall": null,
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "question_unanswered": {
+                "precision": null,
+                "recall": null,
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              }
+            },
+            "inputTokens": 377,
+            "outputTokens": 53,
+            "errors": 0,
+            "misses": []
+          }
+        }
+      }
+    }
+  ],
+  "evaluation": {},
+  "preflight": {
+    "model": "claude-opus-5-5",
+    "result": {
+      "exact": 1,
+      "of": 1,
+      "perReason": {
+        "price_not_listed": {
+          "precision": 100,
+          "recall": 100,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "exact_time_promised": {
+          "precision": null,
+          "recall": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tier0_missed": {
+          "precision": null,
+          "recall": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "no_callback_window": {
+          "precision": null,
+          "recall": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "spanish_mishandled": {
+          "precision": null,
+          "recall": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "no_address": {
+          "precision": null,
+          "recall": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "question_unanswered": {
+          "precision": null,
+          "recall": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "inputTokens": 377,
+      "outputTokens": 53,
+      "errors": 0,
+      "misses": []
+    }
+  },
+  "result": "requested local real-model checks passed; provider-keyed acceptance remains pending",
+  "finishedAt": "2026-10-21T22:37:39.178Z",
+  "finishedTrackedDirtyDiffSha256": "7b24bf0dee3f001c1167ae7c902366206989097173468cf39d7b73fffd9453ad",
+  "workingTreeChangedDuringRun": false
+}

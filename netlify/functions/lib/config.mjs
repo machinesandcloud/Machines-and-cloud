@@ -223,12 +223,12 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
   const fees = c.fees?.length ? c.fees.map((f) => `${f.label}: ${f.amount}${f.note ? " (" + f.note + ")" : ""}`).join("; ") : "no published prices; every price is confirmed on site";
   const faq = c.faq?.length ? c.faq.map((x) => `Q: ${x.q}\nA: ${x.a}`).join("\n") : "";
   const channelNote = channel === "sms"
-    ? "You are texting. The customer's phone number is the number they are texting from, so never ask for it; pass it to the tools as given in the conversation or leave it empty and it is filled in. Keep every message under 300 characters, one question at a time, no formatting, no links unless asked. Never write notes to yourself; every sentence you write is sent to the customer. Never narrate what you still need; just ask the next question."
+    ? "You are texting. The customer's phone number is the number they are texting from, so never ask for it; pass it to the tools as given in the conversation or leave it empty and it is filled in. Keep every message under 300 characters, one question at a time, no formatting, no links unless asked. Never write notes to yourself; your final customer reply is sent as the text message. Never narrate what you still need; just ask the next question."
     : channel === "voice"
     ? "You are answering the phone. Short spoken sentences, one question at a time, no formatting."
     : channel === "test"
-    ? "This is the owner's private test line. Behave exactly as you would with a real customer. Never write notes to yourself or narrate what you are about to do; every sentence you write is shown to the customer."
-    : "You are the chat on the company website. Keep replies to one to three short sentences, one question at a time. Never write notes to yourself or narrate what you are about to do; every sentence you write is shown to the customer.";
+    ? "This is the owner's private test line. Behave exactly as you would with a real customer. Never write notes to yourself or narrate what you are about to do; your final customer reply is shown in the chat."
+    : "You are the chat on the company website. Keep replies to one to three short sentences, one question at a time. Never write notes to yourself or narrate what you are about to do; your final customer reply is shown in the chat.";
   const upcoming = extra.bookings?.length
     ? `\nThis customer's upcoming visit(s): ${extra.bookings.map((v) => `ref ${v.id}, ${v.date || "date not set"}, ${v.window}, ${v.issue}`).join("; ")}.\nReminder texts say "Reply C to confirm or R to reschedule". If they reply R or ask to reschedule: offer the arrival windows and call update_visit with action "reschedule" once they pick a day and window. If they reply C or confirm: call update_visit with action "confirm". If they want to cancel: call update_visit with action "cancel_request"; you do not cancel visits yourself, ${owner} does.\n`
     : "";
@@ -277,7 +277,7 @@ function emergencyBlock(c) {
   const e = normalizeEmergencies(c.rules?.emergencies, c.business?.trade);
   const fee = c.business?.afterHours ? ` Outside business hours, say what the owner published about after-hours work before booking a Tier 1: "${c.business.afterHours}".` : "";
   return `Emergency table from the owner:
-- Tier 0, life safety (stop everything, give the safety script, take only a phone number and an address, then notify_owner with reason "emergency", urgency "emergency", and do not book): ${e.tier0.length ? e.tier0.join("; ") : "none listed"}.${e.script ? ` Safety script in the owner's words: "${e.script}"` : ' Safety script: "Leave the area now, call 911 if there is any danger, then call us back."'}
+- Tier 0, life safety (stop everything, begin the customer-facing reply with the safety script before callback promises, fees, tool outcomes, or questions; take only a phone number and an address, then notify_owner with reason "emergency", urgency "emergency", and do not book): ${e.tier0.length ? e.tier0.join("; ") : "none listed"}.${e.script ? ` Safety script in the owner's words: "${e.script}"` : ' Safety script: "Leave the area now, call 911 if there is any danger, then call us back."'} Use this script without adding medical advice or symptom lists.
 - Tier 1, same day (urgency "today"; book today's window if one is open, otherwise notify_owner with urgency "today"; treat as Tier 0 when an infant, elderly, or medically dependent person is in the home): ${e.tier1.length ? e.tier1.join("; ") : "none listed; use Tier 2"}.${fee}
 - Tier 2: ${e.tier2}
 `;

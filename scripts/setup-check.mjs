@@ -2,6 +2,7 @@
 // cheap call to its provider, and prints what is missing with the console path to fix it. Nothing is written
 // anywhere and nothing touches Netlify. Run: node scripts/setup-check.mjs
 import { readFileSync, existsSync } from "node:fs";
+import { createHmac } from "node:crypto";
 const root = new URL("../", import.meta.url).pathname;
 const env = {};
 if (existsSync(root + ".env")) for (const line of readFileSync(root + ".env", "utf8").split("\n")) { const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/); if (m) env[m[1]] = m[2].replace(/(^|\s+)#.*$/, "").replace(/^["']|["']$/g, ""); }
@@ -11,6 +12,17 @@ const add = (name, status, note, fix) => rows.push({ name, status, note, fix });
 const b64 = (s) => Buffer.from(s).toString("base64");
 const get = async (url, headers = {}) => { const r = await fetch(url, { headers }); let d = null; try { d = await r.json(); } catch { d = await r.text().catch(() => ""); } return { ok: r.ok, status: r.status, d }; };
 const twAuth = () => ({ Authorization: "Basic " + b64(`${E("TWILIO_ACCOUNT_SID")}:${E("TWILIO_AUTH_TOKEN")}`) });
+const renderTwimlBin = async (url) => {
+  const params = { AccountSid: E("TWILIO_ACCOUNT_SID") };
+  const signed = url + Object.keys(params).sort().map((key) => key + params[key]).join("");
+  const signature = createHmac("sha1", E("TWILIO_AUTH_TOKEN")).update(signed).digest("base64");
+  try {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Twilio-Signature": signature }, body: new URLSearchParams(params).toString() });
+    return { ok: r.ok, status: r.status, text: await r.text() };
+  } catch { return { ok: false, status: 0, text: "" }; }
+};
+const renderedTwimlMatches = (text, expected) => !text.includes("{{") && !text.includes("}}") && text.replace(/^\s*<\?xml\b[^>]*\?>\s*/i, "").replace(/>\s+</g, "><").trim() === expected;
+const voiceFallbackSay = '<Say voice="Polly.Joanna">We are having trouble connecting right now. Please call back in a few minutes.</Say>';
 const FIX = {
   twilio: "Twilio console, Account, API keys and tokens: copy the Account SID and Auth Token into .env and into Netlify (site env vars, Functions scope).",
   profile: "Twilio console, Trust Hub, Customer Profiles: create the Primary Customer Profile as ISV Reseller or Partner, submit, and copy its SID (BU...) once approved.",
@@ -56,11 +68,21 @@ async function main() {
   else { const r = await get("https://api.resend.com/domains", { Authorization: `Bearer ${E("RESEND_API_KEY")}` }); const dom = r.ok && (r.d.data || []).find((d) => /machinesandcloud/.test(d.name)); add("Resend key and domain", r.ok ? (dom?.status === "verified" ? "ok" : "domain not verified") : "invalid", r.ok ? (dom ? `${dom.name} ${dom.status}` : "no machinesandcloud.com domain") : `${r.status}`, r.ok && dom?.status === "verified" ? "" : FIX.resend); }
   // Google
   add("Google OAuth client", E("GOOGLE_CLIENT_ID") && E("GOOGLE_CLIENT_SECRET") ? "ok" : "missing", "", E("GOOGLE_CLIENT_ID") && E("GOOGLE_CLIENT_SECRET") ? "" : FIX.google);
-  // TwiML bins
-  for (const [k, label, must, fix] of [["VOICE_FALLBACK_TWIML_URL", "Voice fallback bin", "{{#cell}}", FIX.binVoice], ["SMS_FALLBACK_TWIML_URL", "SMS fallback bin", "<Message>", FIX.binSms]]) {
+  // Render TwiML only: these requests do not place a call or deliver an SMS.
+  for (const [k, label, expected, fix] of [["VOICE_FALLBACK_TWIML_URL", "Voice fallback bin", `<Response>${voiceFallbackSay}</Response>`, FIX.binVoice], ["SMS_FALLBACK_TWIML_URL", "SMS fallback bin", "<Response><Message>We got your text and will reply shortly.</Message></Response>", FIX.binSms]]) {
     if (!E(k)) { add(label, "missing", "", fix); continue; }
-    const r = await fetch(E(k), { method: "POST" }).then(async (x) => ({ ok: x.ok, text: await x.text() })).catch(() => ({ ok: false, text: "" }));
-    add(label, r.ok && r.text.includes(must) ? "ok" : "wrong content", r.ok ? r.text.replace(/\s+/g, " ").slice(0, 80) : "unreachable", r.ok && r.text.includes(must) ? "" : fix);
+    if (!E("TWILIO_ACCOUNT_SID") || !E("TWILIO_AUTH_TOKEN")) { add(label, "needs Twilio keys", "signed rendering requires the account SID and auth token", FIX.twilio); continue; }
+    const r = await renderTwimlBin(E(k));
+    if (!r.ok || !renderedTwimlMatches(r.text, expected)) { add(label, "wrong content", r.ok ? "unexpected rendered TwiML" : r.status ? `HTTP ${r.status}` : "unreachable", fix); continue; }
+    if (k === "VOICE_FALLBACK_TWIML_URL") {
+      const cell = E("STEVE_PHONE");
+      if (!/^\+[1-9]\d{7,14}$/.test(cell)) { add(label, "pending", "recording renders; cell rendering needs STEVE_PHONE in E.164 form", FIX.steve); continue; }
+      const url = new URL(E(k));
+      url.searchParams.set("cell", cell);
+      const withCell = await renderTwimlBin(url.toString());
+      const matches = withCell.ok && renderedTwimlMatches(withCell.text, `<Response><Dial timeout="25">${cell}</Dial>${voiceFallbackSay}</Response>`);
+      add(label, matches ? "ok" : "wrong content", matches ? "recording and cell TwiML render; no call placed" : withCell.ok ? "unexpected cell-rendered TwiML" : withCell.status ? `cell rendering HTTP ${withCell.status}` : "cell rendering unreachable", matches ? "" : fix);
+    } else add(label, "ok", "exact message TwiML renders; no SMS sent", "");
   }
   add("Debugger webhook and email alerts", "check in console", "cannot be read by API", FIX.debugger);
   add("Steve's phone, email, admin key", E("STEVE_PHONE") && E("STEVE_EMAIL") && E("ADMIN_KEY") ? "ok" : "missing", [!E("STEVE_PHONE") && "STEVE_PHONE", !E("STEVE_EMAIL") && "STEVE_EMAIL", !E("ADMIN_KEY") && "ADMIN_KEY"].filter(Boolean).join(", "), E("STEVE_PHONE") && E("STEVE_EMAIL") && E("ADMIN_KEY") ? "" : FIX.steve);
