@@ -81,6 +81,7 @@ async function handle(req) {
       ackMinutes: ACK_MINUTES.includes(Number(b.rules.ackMinutes)) ? Number(b.rules.ackMinutes) : (c.rules.ackMinutes || 10),
       callbackHours: s(b.rules.callbackHours, 80) || c.rules.callbackHours || "within 30 minutes",
       callbackAfterHours: s(b.rules.callbackAfterHours, 80) || c.rules.callbackAfterHours || "by 8 am tomorrow",
+      windowCapacity: b.rules.windowCapacity !== undefined ? Math.min(20, Math.max(1, parseInt(b.rules.windowCapacity, 10) || 1)) : (c.rules.windowCapacity || 1),
       consentAsk: b.rules.consentAsk !== undefined ? !!b.rules.consentAsk : !!c.rules.consentAsk,
       avgTicket: b.rules.avgTicket !== undefined ? (Math.max(0, Math.round(Number(String(b.rules.avgTicket).replace(/[^\d.]/g, "")) || 0)) || 0) : (c.rules.avgTicket || 0),
       emergency247: b.rules.emergency247 !== undefined ? !!b.rules.emergency247 : (b.business?.hours !== undefined ? emergency247(s(b.business.hours, 300)) : !!c.rules.emergency247),

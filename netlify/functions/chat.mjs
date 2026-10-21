@@ -155,7 +155,7 @@ export default async (req, context) => {
     const system = buildSystemPrompt(c, channel);
     const tools = [BOOK_VISIT, NOTIFY_OWNER];
     const execTool = async (name, input) => {
-      if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); return { content: `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
+      if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
       if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
       return { content: "Unknown tool.", is_error: true };
     };

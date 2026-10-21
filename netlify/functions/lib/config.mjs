@@ -159,7 +159,7 @@ export function newClient({ slug, ownerKey, owner, business }) {
     owner: { name: "", email: "", phone: "", backupPhone: "", ...owner },
     business: { name: "", website: "", trade: "", city: "Houston", serviceArea: [], notServed: [], hours: "", afterHours: "", spanish: true, licenses: "", legal: {}, ...business },
     services: [], fees: [], windows: DEFAULT_WINDOWS.slice(),
-    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), hours: parseHours(business?.hours) || null, emergency247: emergency247(business?.hours), consentAsk: false, ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
+    rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), hours: parseHours(business?.hours) || null, emergency247: emergency247(business?.hours), consentAsk: false, windowCapacity: 1, ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
     digest: { text: true },
     faq: [], leadSources: [], leads: { angiKey: "", thumbtackSecret: "" }, software: "google",
     phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },

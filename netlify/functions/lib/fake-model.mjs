@@ -79,8 +79,10 @@ export function fakeClient() {
     let text, tool = null;
     if (lastIsToolResult) {
       // After the tool: say the sentence that went with the tool call (the real model writes it after the result).
+      const res = String(messages[messages.length - 1].content.find((b) => b.type === "tool_result")?.content || "");
       const prev = [...messages].reverse().find((m) => m.role === "assistant" && Array.isArray(m.content));
-      text = (prev?.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ") || "Done.";
+      // A refused booking: say so and offer the other window, as the real model would from the tool result.
+      text = /already full|Nothing was booked/.test(res) ? "That window just filled up. " + (res.match(/Offer ([^.]+)/)?.[1] ? "I can do " + res.match(/Offer ([^.]+)/)[1].replace(/^the other window \(([^)]+)\)/, "$1") + " instead. Which works?" : "Which other time works?") : ((prev?.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ") || "Done.");
     }
     else ({ text, tool } = desk(sys, messages));
     const content = []; if (text) content.push({ type: "text", text }); if (tool) content.push({ type: "tool_use", id: id(), name: tool.name, input: tool.input });

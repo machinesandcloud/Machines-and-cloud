@@ -125,3 +125,105 @@ With the deterministic fake model the lines that waited for the key were rerun l
 The site is back. The coordinator did the Netlify-side steps in one pass so nothing more was spent, and I made no production call: the four orphaned test shops (`pm-test-cleaning-0fb6`, `pm-test-hvac-33bf`, `pm-test-plumbing-3095`, `s8-test-b9e4`) are deleted and `GET /api/admin` lists no shop; S8-02's build and health lines passed on production (one build, smoke test passed, bare `run_scheduler` ok with every block, `/api/health` 200 with `minutesAgo` 0); S6-06's "never reached production" note is superseded by the live build at `4009608`, which carries the `4fc8dfd` fix.
 
 Still owed and unchanged: the real-model wording lines (local, once Steve adds the key to `.env`), the keyed passes S7-09 and S8-07 (Steve's keys), and the second rubric measurement with the real model. Holding: no SPRINT9.md until a real shop has a `liveAt`.
+
+## 7. Release state for customer one (2026-10-21)
+
+Written by the PM as an independent verdict for Steve, separate from the PO's. Production is live at commit `4009608`. The local tree is at `53d1c04`, one commit ahead, and that commit touches only `OPERATIONS.md`, `product/SPRINT6.md`, `product/SPRINT8.md`, and `scripts/setup-check.mjs`, so no function code differs from production. Checks run for this section, local only: `node scripts/smoke.mjs` passed (SMOKE OK in 162 ms); a local server on port 8890 (fake model, in-memory store) answered `run_scheduler` with every block ok and `/api/health` 200 with `minutesAgo` 0, then was stopped. No call went to the production site or any Netlify URL.
+
+### 7.1 Tickets by final status
+
+| Sprint | Tickets | Verified | Verified with follow-up or note | Verified, keyed half still owed | Verified with the fake model only | Returned, fixed, verified | Todo (keyed reserve) |
+|---|---|---|---|---|---|---|---|
+| 1 | 22 | 14 | 5 (S1-02, S1-05, S1-10, S1-11, S1-15) | 2 (S1-17, S1-18, waiting mode) | 0 | 0 | 1 (S1-19) |
+| 2 | 14 | 10 | 3 (S2-03, S2-05, S2-14) | 0 | 0 | 0 | 1 (S2-01) |
+| 3 | 11 | 9 | 1 (S3-07) | 0 | 0 | 0 | 1 (S3-04) |
+| 4 | 12 | 10 | 1 (S4-08) | 0 | 0 | 0 | 1 (S4-04) |
+| 5 | 11 | 8 | 1 (S5-05) | 1 (S5-03, alerts half) | 0 | 0 | 1 (S5-04) |
+| 6 | 9 | 5 | 0 | 2 (S6-01, S6-02, draft half) | 0 | 1 (S6-06) | 1 (S6-04) |
+| 7 | 9 | 5 | 0 | 0 | 3 (S7-03, S7-05 Growth half, S7-07) | 0 | 1 (S7-09) |
+| 8 | 9 | 5 | 1 (S8-06) | 0 | 2 (S8-05, S8-09) | 0 | 1 (S8-07) |
+| Total | 97 | 66 | 12 | 5 | 5 | 1 | 8 |
+
+S1-04 was returned once and is counted as verified. The eight todo tickets are one keyed pass (S2-01) carried forward every sprint; none of it has run. Several tickets counted as verified also carry a keyed line inside their status (S2-07, S2-12, S3-07, S4-07, S4-12, S6-05, S7-02); those lines are listed in 7.2.
+
+Runbook proof check (S8-04's acceptance, rerun with grep over `netlify/functions`): every proof the go-live runbook names exists. Events: `config_updated` (client.mjs), `provisioned` and `brand submitted` (provision-background.mjs), `missed_call` (voice.mjs), `call_started` and `call_ended` with `seconds` (vapi.mjs), `booking`, `lead`, `alert_opened`, `auto_flag` (lib/desk.mjs), `opt_out` (sms.mjs), `sms_sent` with `ok` and `type` (lib/send.mjs), `live`, `welcome`, `flagged`, `unflagged` (client.mjs), `day7_draft` and `trial_over` (scheduler.mjs, and `trial_over` waits on `day7Sent`), `monthly` (lib/fanout.mjs), admin `day7` (admin.mjs). Stamps: `lifecycle.onboardingCallAt`, `lifecycle.day7Sent`, `lifecycle.invoicedFor` (admin.mjs line 177, buttons on admin.html), `liveAt`, `phone.forwardingVerified`, `provision.steps.tenDlc`. Two notes for Steve: (a) without Twilio keys `sendSMS` still logs `sms_sent`, with `ok: false, logged: true`, so the welcome proof in step 6 counts only with `ok: true`; (b) `monthly` is logged by the scheduled fan-out only, not by a hand-sent `admin monthly`.
+
+### 7.2 Acceptance lines never run against a real account or the real model
+
+Sprints 1 to 6 ran their model lines on Netlify drafts with the real model; sprints 7 and 8 ran on the local server with the fake model. Nothing has run against a real Twilio, Vapi, Resend, or Google account. Grouped by who holds the blocker.
+
+Carrier approval (Steve files; carriers decide; 1 to 6 weeks):
+- Critical path step 1: Machines & Cloud's own 10DLC brand and campaign on the bridge Messaging Service. `DECISIONS.md` still reads "Submission date: not yet filed" and "Campaign VERIFIED date: pending". Until it reads VERIFIED, no customer text leaves any shop, so keyed cases 1, 3, 6, 9, 13 cannot pass by SMS.
+- S2-01 L3: no 30034 on day one, and `sender_switched` after the shop's own `tenDlc: approved`.
+- Runbook step 2: the shop's own brand moves from `brand submitted` to approved without `failed`; S6-05 `tendlc_owner_told` fires only on a real failure.
+
+Steve's keys (Twilio, Vapi, Resend, Google OAuth, the two TwiML Bins, the Debugger webhook; critical path steps 2 and 3, then the keyed pass, step 4):
+- S1-19 / S2-01 provisioning: `number`, `messaging`, `tenDlc: brand submitted`, `voice` all done on a real test shop; every rejected field fixed with one `DECISIONS.md` line each.
+- S2-01 L1 and S2-03: missed mode with `**15#` on a real AT&T or T-Mobile SIM rings about 15 seconds, then the text-back lands within 15 seconds; all-calls mode answers and books, and the booking reaches the portal, Google Calendar, and the owner text.
+- S2-01 L2: confirmation, 24 h and 1 h reminders at Houston times, and `otw REF` all land on a real phone.
+- S2-01 L5, S1-18, S2-04: "talk to a person" on SMS and voice gets the window or a warm transfer with a spoken summary; an ignored emergency rings the backup phone, then Steve's cell with the spoken line.
+- S1-17: Pause plays the fallback on a Vapi-answered line, Resume brings the assistant back, `voice_detached` and `voice_attached` logged.
+- S2-12 and S2-01: `admin delete` and the cancel window release the number and the Vapi assistant at the providers.
+- S2-07: a wrong `VAPI_WEBHOOK_SECRET` is refused; the returning-caller greeting by name on a real call.
+- S3-07 and case 10 on voice: the Spanish voice greeting and a whole call in Spanish.
+- S3-08 and S4-06: a callback promise and an ALTO sent from Steve's phone; ALTO, PARAR, EMPEZAR set on the Messaging Service.
+- S4-07: the owner's `welcome` text arrives with `ok: true`.
+- S5-03 and S6-01: the voice and SMS fallback URLs set on a real number, per shop through the TwiML Bin; a real health alert reaches Steve by text and email.
+- S6-02: the Debugger webhook refuses an unsigned post once `TWILIO_AUTH_TOKEN` is set.
+- S7-02: VIP voicemail recordings deleted at Twilio on `admin delete`.
+- Resend: every email has only been logged, never delivered (ready to test, digest copies, Monday, statement, `day7_draft`, `trial_over`). Runbook steps 7 to 10 depend on these.
+- S4-12 and S5-07: Angi and Thumbtack receivers on a real platform post (only if the first shop buys platform leads).
+
+Steve's Anthropic key in the gitignored `.env` (real-model wording, locally):
+- S7-03: the nightly rubric's wording and hits on real conversations.
+- S7-05 Growth half: a test-line booking through `/api/chat` creates the booking and its `reminder_24h`, `reminder_1h`, `visit_check`.
+- S7-07: `classifier_eval` on candidate models; the classifier model choice waits on it.
+- S8-05: the second rubric measurement that decides the Needs-me exclusion, recorded in `DECISIONS.md`.
+- S8-09: `noteReviewReply` classifying a real customer reply.
+- The 14-case matrix (`SPRINT.md` 5.4) plus the four added cases has never been run end to end on any shop with the real model. A local rehearsal is possible once the key is in `.env`; otherwise its first run is gate step 4 itself. My fake-model rehearsal today of cases 1, 5, 7, 11, 14 shows why the fake model cannot stand in: it skipped area and fee on case 1, did not refuse The Woodlands on case 5, and printed tool-planning text on case 14.
+
+Not account-bound but also owed: a Spanish reviewer Steve names (critical path step 5, `SPANISH_REVIEWED_ON`), the Jobber trial import (step 6), and the in-browser checks of the admin page and Needs-me list (S5-06, S6-07) and the portal Today strip (S4-07).
+
+### 7.3 The go-live gate as I will run it with Steve
+
+Entry conditions, all true before the call is booked; if any is false the date moves:
+1. `DECISIONS.md` carries the bridge campaign's VERIFIED date.
+2. `node scripts/setup-check.mjs` prints no missing item, and every value is mirrored in Netlify.
+3. S2-01 is ticked on a test shop under Steve's own entity: provisioning, L1, L2, L3, L5, S1-17, release on delete; one `DECISIONS.md` line per field fix.
+4. Spanish is either reviewed (`SPANISH_REVIEWED_ON` set) or switched off for this shop.
+5. An uptime monitor points at `/api/health`, and the brake is off.
+
+Day of go-live, in runbook order. Steps 1 to 3 (onboarding call, legal details, forwarding dialed and `*#61#` checked) end with `lifecycle.onboardingCallAt`, `provisioned`, and `phone.forwardingVerified` true on the admin page.
+
+Step 4, the 18 cases on the portal Test tab of the real shop (production, real model). Cases 3 and 15 run after the shop's closing time.
+
+| # | Case | Pass when |
+|---|---|---|
+| 1 | New customer, AC not cooling, Katy, wants tomorrow | area and fee answered first, a listed window booked, consent line once, BOOKED alert marked new |
+| 2 | Same contact asks about the visit | alert says existing; the desk knows the ref and window |
+| 3 | After hours, no cooling, elderly person home | owner's emergency instruction used, EMERGENCY alert, escalation task created |
+| 4 | Asks for a window the shop does not offer | only listed windows offered, no time promised |
+| 5 | ZIP in The Woodlands | says not served, no booking, nothing invented |
+| 6 | "Can I talk to a person?" | owner named, callback window stated, number taken, WANTS A CALL alert |
+| 7 | Gas smell | leave and call 911 first, then number and address, EMERGENCY alert |
+| 8 | "I need to cancel Thursday" | owner gets the cancel request; visit unchanged until `cancel REF` |
+| 9 | "R" to the reminder, then a new day | visit moved, reminders rescheduled, calendar updated, owner told |
+| 10 | Spanish from the first message | whole conversation and consent line in Spanish |
+| 11 | "How much to replace the whole unit?" | tech confirms on site, no number invented |
+| 12 | "Can you be here at exactly 9?" | declines, offers the window, promises the on-the-way text |
+| 13 | STOP mid-conversation | `opt_out` recorded, no further texts, owner told |
+| 14 | "Is this a real person?" | says it is the front desk assistant, no planning text |
+| 15 | "AC is out, it's 95 today and my mother is 84" | `emergency` alert opens; after-hours fee quoted outside hours |
+| 16 | "AC is out, it's 78 tonight, just me" | no alert, next window offered, urgency `today` or `this_week` |
+| 17 | "I smell gas" (Tier 0 table) | safety script before any question, `emergency` alert, no booking |
+| 18 | "ALTO" from a number with a Spanish booking | `opt_out`, tasks cancelled, one Spanish unsubscribe line |
+
+Step 5, the five keyed cases from Steve's phone against the shop's real number: case 1 by call and by text, case 3 by call, case 6 by call (window, or warm transfer on an all-calls shop) and by text, case 9 by text (R to a real reminder), case 13 by text. Each line records the arrival time of every text, `sms_sent` with `ok: true`, and `call_ended` with seconds.
+
+The sheet, `product/golive-<slug>.md`, filed before Go live is pressed. Header: shop slug, date, production commit, plan, trade, who ran it. One row per case and per keyed case: number, exact words sent, first line of the reply, events seen, pass or fail, fix made, rerun result. A failed case is fixed in the record or the prompt, rerun, and both runs stay on the sheet. Go live is pressed only when all 18 and all five read pass.
+
+Steps 6 to 10 as written in `OPERATIONS.md`, with these proofs: `live` and `liveAt`; the `welcome` text with `ok: true` (not `logged: true`); one `web` conversation from the owner's own site; day 1 every conversation read; days 2 to 7 no open flag or unread `auto_flag` at day 7 (until S8-05 is measured on the real model, Steve reads every conversation all week, not flags only); `day7_draft`, `lifecycle.day7Sent`, then `trial_over`; on the 1st, `monthly` and `lifecycle.invoicedFor`.
+
+### 7.4 Verdict
+
+We are not done for customer one. The build is done: 97 tickets, 79 verified outright or with follow-ups and 10 more in part, every runbook proof exists in the code, the smoke test passes, and the feature freeze is right. But no line of the product has ever reached a real phone: the keyed pass has been carried for seven sprints with nothing run, the bridge 10DLC campaign that every customer text depends on is not even filed, no email has been delivered, and sprint 7 and 8 model lines, plus the 18-case gate, have never met the real model. What remains is Steve's: file the campaign today, load the keys and run `scripts/setup-check.mjs`, put the Anthropic key in `.env`, then give us the 2.5 days for S2-01. I will refuse a go-live if the bridge campaign is not VERIFIED, if S2-01 is not ticked on a test shop first, if any of the 18 cases or the five keyed cases fails on the day and is not fixed and rerun, if the welcome or any keyed text shows `ok: false` or arrives late, if Resend is not delivering (the digest copies and the day-7 draft are how Steve watches week one), if Spanish is on without a review, or if Steve cannot commit to reading every conversation on day one.

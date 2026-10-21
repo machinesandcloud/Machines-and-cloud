@@ -17,13 +17,13 @@ export default async (req) => {
   const history = toApiMessages(conv.messages);
   const tools = bookings.length ? [BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT] : [BOOK_VISIT, NOTIFY_OWNER];
   const execTool = async (tool, input) => {
-    if (tool === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); return { content: `Booked. Ref ${b.id}.`, event: { type: "booking", id: b.id } }; }
+    if (tool === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}.`, event: { type: "booking", id: b.id } }; }
     if (tool === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); return { content: l.status === "spam" ? "Noted as spam." : `Owner texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
     if (tool === "update_visit") {
       const b = bookings.find((x) => x.id === input.booking_id) || bookings[0];
       if (!b) return { content: "No upcoming visit found for this number.", is_error: true };
       if (input.action === "confirm") { await confirmVisit(c, b); return { content: `Confirmed ref ${b.id}.`, event: { type: "confirmed", id: b.id } }; }
-      if (input.action === "reschedule") { await rescheduleVisit(c, b, input.date, input.window); return { content: `Moved ref ${b.id} to ${b.date} ${b.window}. The owner has been told.`, event: { type: "rescheduled", id: b.id, date: b.date, window: b.window } }; }
+      if (input.action === "reschedule") { const r = await rescheduleVisit(c, b, input.date, input.window); if (r?.full) return { content: r.message }; return { content: `Moved ref ${b.id} to ${b.date} ${b.window}. The owner has been told.`, event: { type: "rescheduled", id: b.id, date: b.date, window: b.window } }; }
       await cancelRequest(c, b); return { content: `Cancel request sent to the owner for ref ${b.id}; the visit stays until they confirm.`, event: { type: "cancel_request", id: b.id } };
     }
     return { content: "Unknown tool.", is_error: true };

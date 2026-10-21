@@ -100,7 +100,7 @@ export async function createEvent(client, booking) {
     method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
   const d = await res.json().catch(() => ({}));
-  if (!res.ok) { console.error("calendar insert failed", res.status, d); return null; }
+  if (!res.ok) throw new Error(`calendar insert failed ${res.status}: ${(d && d.error && d.error.message) || ""}`.trim());
   return { id: d.id, link: d.htmlLink };
 }
 
@@ -115,6 +115,6 @@ export async function updateEvent(client, booking) {
     method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ start: { dateTime: houstonISO(date, start), timeZone: "America/Chicago" }, end: { dateTime: houstonISO(date, end), timeZone: "America/Chicago" } }),
   });
-  if (!res.ok) { console.error("calendar patch failed", res.status); return null; }
+  if (!res.ok) throw new Error(`calendar update failed ${res.status}`);
   return await res.json();
 }

@@ -20,7 +20,7 @@ const FIX = {
   vapi: "Vapi dashboard, Settings, API keys: create a private key; put it in .env as VAPI_API_KEY and in Netlify.",
   vapiSecret: "Vapi dashboard, Settings, Server URL secret: set any long random string; put the same value in .env and Netlify as VAPI_WEBHOOK_SECRET.",
   resend: "Resend dashboard, API keys: create a key; Domains: add machinesandcloud.com and set the DNS records it shows until it reads Verified.",
-  google: "Google Cloud console, APIs and services, Credentials: an OAuth client (web) with redirect URI https://machinesandcloud.com/api/google/callback; copy the client id and secret.",
+  google: "Google Cloud console, APIs and services, Credentials: an OAuth client (web) with redirect URI https://machinesandcloud.com/api/google/callback; copy the client id and secret. Then OAuth consent screen, Publishing status: press Publish app (Production); an app left in Testing has its refresh tokens expire after 7 days, so bookings would silently stop reaching owners' calendars.",
   anthropic: "Anthropic console, API keys: create a key; put it in .env (local tests) and confirm it is set at the Netlify team level.",
   binVoice: "Twilio console, Developer tools, TwiML Bins: create a bin named 'Front desk voice fallback' with exactly: <Response>{{#cell}}<Dial timeout=\"25\">{{cell}}</Dial>{{/cell}}<Say voice=\"Polly.Joanna\">We are having trouble connecting right now. Please call back in a few minutes.</Say></Response> and copy its URL (https://handler.twilio.com/twiml/EH...).",
   binSms: "Twilio console, TwiML Bins: a second bin 'Front desk SMS fallback' with <Response><Message>We got your text and will reply shortly.</Message></Response>; copy its URL.",

@@ -1,6 +1,63 @@
 # Backlog: Machines & Cloud front desk
 
-Owner: Product Owner. Round 9 is at the top, then rounds 8, 7, 6, 5, 4, 3, 2, and 1 (2026-10-19, the launch definition and epics), each unchanged from when it was written. Evidence shorthand is the same in both: `S#n` = RESEARCH-servicing.md ranked item n, `W§n` = RESEARCH-customer-workflow.md section n, `code:` = read in the repo, `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+Owner: Product Owner. Round 10 is at the top, then rounds 9, 8, 7, 6, 5, 4, 3, 2, and 1 (2026-10-19, the launch definition and epics), each unchanged from when it was written. Evidence shorthand is the same in both: `S#n` = RESEARCH-servicing.md ranked item n, `W§n` = RESEARCH-customer-workflow.md section n, `code:` = read in the repo, `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+
+---
+
+# Round 10 (2026-10-21): done or not
+
+Production is live at commit 4009608 (smoke test passed on the build, `/api/health` 200); one local commit adds `scripts/setup-check.mjs`. I re-read rounds 1 to 9, SPRINT.md to SPRINT8.md, DECISIONS.md, OPERATIONS.md, and CLAUDE.md, ran `node scripts/smoke.mjs` (SMOKE OK in 117 ms) and `node scratchpad/hours-test.mjs` (23 of 23), checked the Houston time math across the 1 November DST change (08:00 maps to 13:00Z on 31 October and 14:00Z on 2 November, correct), and read `bookVisit`, `lib/calendar.mjs`, and the plans section of `index.html` to confirm the claims below. Nothing was sent to Netlify.
+
+## R10.1 Every round's items, by state
+
+| State | Items |
+|---|---|
+| **Built and verified** (draft or local server, fake model where noted) | R1 Epics 1 to 6 code (policy URLs on the campaign filing, line health, bridge sender, STOP, escalation chain, pause and cancel, data policy, job-ticket alerts, digest, flags, reschedule by reply, test matrix); R2 items 1 to 10; R3 items 1 to 9; R4 items 1 to 11; R5 items 1 to 10; R6 items 1 to 8; R7 items 1 to 8; R8 items 1 to 4 and 6; R9 items 1(c), 3, and 5 |
+| **Built, one line still owed** | R8 item 5 (rubric re-measured with the fake model only; the real-model run decides the Needs-me exclusion); R9 item 4 (the cadence stands; a week of per-block medians needs a live week); every model-wording line since 2026-10-20 (fake model locally) |
+| **Parked by rule or the freeze** | Billing, pre-conversion text, blocklist, call spam tagging, pause-at-limit (Steve's billing rule); Pro multi-number routing, in-thread Thumbtack and LSA replies, LSA source tagging, per-call latency, per-action toggles, Jobber and Housecall Pro APIs, further admin polish (R8 item 7 freeze, until a shop has a `liveAt`); R9 item 6 (another host) |
+| **Needs Steve** | The keyed pass (S1-19, carried as S2-01 through S8-07, never run); the bridge-sender 10DLC brand and campaign (not filed); Twilio, Vapi, Resend, Google keys and console steps; the Spanish reviewer; the Jobber trial import; Netlify auto recharge and threshold emails (R9 item 1 a and b, no date in DECISIONS.md); the uptime monitor (R8 Q1); R9 item 2 (static host, www versus apex); the Pro card line; the consent sentence; a local `ANTHROPIC_API_KEY`; and the first customer's name, trade, carrier, and LSA status (R1 Q4, open since round 1) |
+
+## R10.2 Launch conditions
+
+| # | State today | What closes it |
+|---|---|---|
+| L1 forwarded call answered or texted back | Code complete; never run on a real carrier or Vapi | Keyed pass cases 1, 3, 6 from Steve's cell with the Vapi key and a bought number; text-back under 15 s on a missed call |
+| L2 book by text, every scheduled text arrives | Code complete; texts only logged | Bridge campaign VERIFIED, then keyed case 9 with arrival times for confirmation, 24 h, 1 h, on-the-way |
+| L3 legal texting on day one | Filing code includes the policy URLs; the bridge brand is not filed | Machines & Cloud brand and campaign VERIFIED (1 to 6 weeks), test shop filing accepted, no 30034 on day one; both dates in DECISIONS.md |
+| L4 STOP end to end | Verified in our webhook, English and Spanish | ALTO, PARAR, EMPEZAR on the Messaging Service, then keyed case 13 on a real phone |
+| L5 a person or a callback time, with escalation | Verified in waiting mode; warm transfer and the escalation call untested | Keyed case 6 on voice and SMS, owner alert ignored, escalation call reaches Steve's phone |
+| L6 one-tap pause falls back to the owner | Verified with logged paths | Keyed pass: Pause detaches Vapi, the call rings the owner, the off code arrives by text |
+| L7 the site promises only what works | Closed for Starter and Growth (S8-03) | Pro card still says "several numbers" (not built): Steve drops the phrase or does not sell Pro to customer one |
+| L8 Steve reads day one, digest daily, owner flags | Built (flags, digest copy, nightly audit, Needs-me) | Resend domain verified, then runbook steps 7 and 8 on the first live shop |
+
+None of L1 to L6 or L8 can close in code. Every one closes on Steve's accounts and then the keyed pass.
+
+## R10.3 What remains, and who holds it
+
+1. File the Machines & Cloud 10DLC brand and campaign on the bridge Messaging Service (Trust Hub ISV profile first). Steve. Long pole, 1 to 6 weeks; start today.
+2. Twilio keys, `TWILIO_PRIMARY_PROFILE_SID`, bridge number, Messaging Service with ALTO, PARAR, EMPEZAR, both TwiML Bins, Debugger webhook. Steve, about 2 hours; `node scripts/setup-check.mjs` is the proof.
+3. Vapi key and webhook secret, Resend key with machinesandcloud.com verified, Google OAuth client published (see R10.4 b). Steve, about 1 hour.
+4. Local `ANTHROPIC_API_KEY` in `.env`, then the real-model wording lines and the S8-05 rubric run. Steve adds the key; PM runs.
+5. The keyed pass (S8-07, 2.5 days reserved), including the two fixes in R10.4. Engineer and PM, once items 2 and 3 are in.
+6. Spanish reviewer reads `TEMPLATES_ES` and `STRINGS.es`; `SPANISH_REVIEWED_ON` set. Steve names the reviewer.
+7. Jobber trial import of the customers export. Steve, 30 minutes.
+8. Netlify auto recharge on, threshold emails routed, uptime monitor on `/api/health`; dates in DECISIONS.md. Steve, 15 minutes.
+9. Pro card "several numbers": drop the phrase or hold Pro. Steve, one line.
+10. A named first shop: trade, carrier, whether it runs LSA, and a go-live date. Steve. Nothing else on this list has a deadline until this exists.
+
+Optional before customer one: R9 item 2 (static host and the www versus apex choice), Steve's decision.
+
+## R10.4 What a first customer would hit in week one that nobody has covered
+
+a. **Double booking.** `bookVisit` stores whatever window the customer picks; nothing counts existing bookings or reads the owner's calendar (the `calendar.readonly` scope is requested and never used). The prompt says "offer the next available window" but the desk only knows the static window list, and the site's rules band promises "your next window". No round, ticket, or matrix case covers two customers asking for the same window. A one-truck shop will get two 8 to 12 bookings on a busy morning in week one, and the owner finds out from two BOOKED texts after both customers were told yes. Smallest fix: an owner-set jobs-per-window number (default 1) counted from stored bookings for that date, with the desk offering the next open window; add a 19th gate case. Size S, fits the keyed-pass reserve as launch fallout rather than new feature work.
+
+b. **The calendar can fail silently on day 7.** `createEvent` and `updateEvent` errors are caught with `console.error` only: no event, no line-health count, no alert. A Google OAuth client left in Testing status (the default for a new client with sensitive calendar scopes) shows the owner an unverified-app warning and Google expires its refresh tokens after 7 days, so bookings would stop reaching the owner's calendar at the end of the free week with nobody told. Fix: log `calendar_failed` and count it in line health and the health alert (size S, keyed-pass reserve), and Steve publishes the OAuth app (or submits it for verification) before the first connect.
+
+Everything else I looked for is covered: bridge-sender texts in week one (by design, and the site says own-number texting takes 1 to 6 weeks), DST on 1 November, quiet hours, STOP across shops, Spanish (pending the reviewer, flagged on Needs-me), the trial email ordering, the hand invoice, and the credit brake.
+
+## R10.5 To Steve
+
+We are done building features for customer one, and we are not ready for customer one. Nine rounds and eight sprints shipped everything the research asked for, the freeze is right, and the code has run end to end only against an in-memory store, a fake model, and logged sends; not one of L1 to L6 has passed on a real carrier, because the accounts that would prove them do not exist yet and the bridge-sender campaign, the one step that takes weeks, has not been filed. Two small defects belong in the keyed pass before any owner presses Go live: the desk can double-book a window, and a calendar failure is invisible. So the next evidence is not more code: it is the bridge campaign's submission date in DECISIONS.md this week, a clean `node scripts/setup-check.mjs`, the keyed pass ticking cases 1, 3, 6, 9, and 13 from your own phone with arrival times, and a named shop with a go-live date. When those exist, the round after this one is written from that shop's first seven days of conversations.
 
 ---
 

@@ -202,15 +202,34 @@ export async function runVisitCheck(c, task) {
   return "asked";
 }
 
+// How many visits one arrival window holds (rules.windowCapacity, default 1: one crew).
+export async function windowTaken(c, date, window) {
+  if (!date || !window) return { full: false, count: 0, capacity: 1 };
+  const capacity = Math.max(1, Number(c.rules?.windowCapacity) || 1);
+  const day = normalizeDate(date);
+  const count = (await listRecords("bookings", c.slug, 500)).filter((x) => ["booked", "confirmed", "on_the_way"].includes(x.status) && x.date === day && String(x.window).trim().toLowerCase() === String(window).trim().toLowerCase()).length;
+  return { full: count >= capacity, count, capacity };
+}
+export function fullMessage(c, date, window) {
+  const others = (c.windows || []).filter((w) => String(w).toLowerCase() !== String(window).toLowerCase());
+  return `That window (${date || "that day"}, ${window}) is already full. Nothing was booked. Offer ${others.length ? "the other window (" + others.join(" or ") + ") or " : ""}another day, then book again.`;
+}
+async function calendarFailed(c, b, err, op) {
+  console.error("calendar", op, err);
+  await logEvent(c.slug, "calendar_failed", { id: b.id, op, error: String(err?.message || err).slice(0, 200) });
+}
+
 export async function bookVisit(c, input, ctx = {}) {
   const phone = e164(input.phone) || esc(input.phone);
+  const taken = await windowTaken(c, esc(input.date), esc(input.window));
+  if (taken.full) { await logEvent(c.slug, "window_full", { date: normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity }); return { full: true, message: fullMessage(c, esc(input.date), esc(input.window)) }; }
   const b = await addRecord("bookings", c.slug, {
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     date: normalizeDate(esc(input.date)), dateSaid: esc(input.date), window: esc(input.window), urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: await customerType(c.slug, phone),
   });
   await addToIndex("bookings", c.slug, b.phone, b.id);
-  try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { console.error("calendar", e); }
+  try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
   await scheduleReminders(c, b);
   // consent: told at booking, recorded on the booking
   const { consentLine } = await import("./config.mjs");
@@ -465,11 +484,13 @@ export async function confirmVisit(c, b) {
 }
 
 export async function rescheduleVisit(c, b, date, window) {
+  const nd = normalizeDate(esc(date)) || b.date, nw = esc(window) || b.window;
+  if (nd !== b.date || nw !== b.window) { const t = await windowTaken(c, nd, nw); if (t.full) return { full: true, message: fullMessage(c, esc(date), nw) }; }
   const old = when(b);
   b.date = normalizeDate(esc(date)) || b.date; b.window = esc(window) || b.window; b.status = "booked"; b.confirmedAt = null;
   await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
   await scheduleReminders(c, b);
-  try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { console.error("calendar update", e); }
+  try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
   await saveRecord("bookings", b);
   await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
   await logEvent(c.slug, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
@@ -616,7 +637,7 @@ const houstonDay = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: "Americ
 export function lineHealth(c, events = [], pointer = null) {
   const latest = (types, kind) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); const p = pointer?.[kind] || null; return [e, p].filter(Boolean).sort().pop() || null; };
   const since = Date.now() - D;
-  const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
+  const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed", "calendar_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
   const own = c.phone?.twilioNumber && c.phone?.tenDlc === "approved";
   const sender = own ? "own" : (process.env.MC_MESSAGING_SERVICE_SID || process.env.MC_TWILIO_NUMBER) ? "bridge" : "none";
   return {
