@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow">
 <title>Front desk admin</title>
 <link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="styles.css">
 <style>
@@ -31,12 +31,13 @@
 <div class="toast" id="toast"></div>
 <script>
 (function () {
+  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var $ = function (id) { return document.getElementById(id); };
   var key = ''; try { key = sessionStorage.getItem('mc_admin_key') || ''; } catch (e) { /* ignore */ }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function rel(iso) { if (!iso) return 'none'; var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; }
-  function api(body, method) { return fetch('/api/admin' + (method === 'GET' ? '?full=1' : ''), { method: method || 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: method === 'GET' ? undefined : JSON.stringify(body) }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || r.status); return d; }); }); }
+  function api(body, method) { return fetch(API_BASE + '/api/admin' + (method === 'GET' ? '?full=1' : ''), { method: method || 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: method === 'GET' ? undefined : JSON.stringify(body) }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || r.status); return d; }); }); }
   function load() {
     if (!key) return;
     $('msg').textContent = 'loading';

@@ -17,12 +17,15 @@ function slugify(name, site) {
 }
 function hostOf(u) { try { return new URL(u.startsWith("http") ? u : "https://" + u).hostname.replace(/^www\./, "").split(".")[0]; } catch { return ""; } }
 
+const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", Vary: "Origin" } : {});
 export default async (req) => {
   const url = new URL(req.url);
+  const origin = req.headers.get("origin") || "";
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS(origin) });
   if (req.method === "GET") {
     const c = await getClient(url.searchParams.get("c") || "");
     if (!c || c.ownerKey !== url.searchParams.get("k")) return json({ error: "not_found" }, 404);
-    return json({ status: c.status, build: c.build, slug: c.slug });
+    return json({ status: c.status, build: c.build, slug: c.slug }, 200, CORS(origin));
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   let b;
@@ -78,5 +81,5 @@ export default async (req) => {
   const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
   await notifySteve(`New front desk: ${c.business.name || c.slug} (${c.plan})`, `${c.owner.name} <${c.owner.email}> ${c.owner.phone || ""}\n${website}\nPortal: ${portal}`);
   await sendEmail({ to: c.owner.email, subject: `Your front desk is being built, ${c.owner.name.split(" ")[0]}`, text: `Thanks. We are ${website ? "reading " + website + " and " : ""}drafting your front desk from your answers now. Your private portal and test line:\n${portal}\n\nKeep that link; it is your login. Steve will reach out within one business day.` });
-  return json({ ok: true, slug: c.slug, key: c.ownerKey, portal, client: ownerView(c) });
+  return json({ ok: true, slug: c.slug, key: c.ownerKey, portal, client: ownerView(c) }, 200, CORS(origin));
 };

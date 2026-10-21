@@ -8,7 +8,8 @@
   var me = document.currentScript || (function () { var s = document.getElementsByTagName('script'); return s[s.length - 1]; })();
   var slug = me && me.getAttribute('data-client');
   if (!slug || document.getElementById('mcDesk')) return;
-  var BASE = (me.src || '').replace(/\/embed\.js.*$/, '') || 'https://www.machinesandcloud.com';
+  // data-api on the script tag overrides the API origin (for when embed.js is served from a static host).
+  var BASE = (me && me.getAttribute('data-api')) || (me.src || '').replace(/\/embed\.js.*$/, '') || 'https://www.machinesandcloud.com';
   var ENDPOINT = BASE + '/api/chat';
   var STORE = 'mc_desk_' + slug;
   var state = { contact: null, transcript: [] };

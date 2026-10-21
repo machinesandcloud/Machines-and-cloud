@@ -85,7 +85,7 @@ const SITE_ORIGIN = /^https:\/\/(www\.)?machinesandcloud\.com$/;
 const PREVIEW_ORIGIN = /^https:\/\/([a-z0-9-]+--)?machines-and-cloud\.netlify\.app$/;
 function siteOrigin(origin) {
   if (!origin) return true;
-  const allowed = [process.env.URL, process.env.DEPLOY_PRIME_URL, process.env.DEPLOY_URL, "http://localhost:8888", "http://127.0.0.1:8888", "http://localhost:8787"].filter(Boolean);
+  const allowed = [process.env.URL, process.env.DEPLOY_PRIME_URL, process.env.DEPLOY_URL, "http://localhost:8888", "http://127.0.0.1:8888", "http://localhost:8787", ...String(process.env.SITE_ORIGINS || "").split(",").map((x) => x.trim()).filter(Boolean)].filter(Boolean);
   return allowed.includes(origin) || SITE_ORIGIN.test(origin) || PREVIEW_ORIGIN.test(origin);
 }
 function hostOf(u) { try { return new URL(u.startsWith("http") ? u : "https://" + u).hostname.replace(/^www\./, ""); } catch { return ""; } }

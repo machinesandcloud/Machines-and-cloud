@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your front desk | Machines &amp; Cloud</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="assets/favicon.png">
@@ -139,7 +139,8 @@
 (function () {
   var q = new URLSearchParams(location.search), slug = q.get('c'), key = q.get('k');
   if (!slug || !key) { document.getElementById('title').textContent = 'Missing link'; document.getElementById('status').textContent = 'Use the link from your email.'; return; }
-  var API = '/api/client?c=' + encodeURIComponent(slug) + '&k=' + encodeURIComponent(key);
+  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
+  var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + '&k=' + encodeURIComponent(key);
   var data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
   var $ = function (id) { return document.getElementById(id); };
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
@@ -265,7 +266,7 @@
   $('chatForm').addEventListener('submit', function (e) {
     e.preventDefault(); var t = $('chatIn').value.trim(); if (!t) return; $('chatIn').value = '';
     transcript.push({ role: 'user', content: t }); add('user', t); var bubble = null, full = '';
-    fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, key: key, channel: 'test', contact: contact, messages: transcript.slice(-20), stream: true }) })
+    fetch(API_BASE + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, key: key, channel: 'test', contact: contact, messages: transcript.slice(-20), stream: true }) })
       .then(function (res) {
         var reader = res.body.getReader(), dec = new TextDecoder(), buf = '';
         return (function pump() { return reader.read().then(function (r) {

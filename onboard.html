@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Set up your front desk | Machines &amp; Cloud</title>
   <meta name="description" content="Ten minutes of answers and your front desk is built from your website.">
   <meta name="robots" content="noindex, nofollow">
@@ -148,6 +148,7 @@
 </main>
 <script>
 (function () {
+  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var form = document.getElementById('ob'), steps = [].slice.call(form.querySelectorAll('fieldset')), pills = [].slice.call(document.querySelectorAll('.ob-steps span'));
   var i = 0, back = document.getElementById('back'), next = document.getElementById('next'), err = document.getElementById('err');
   var q = new URLSearchParams(location.search);
@@ -182,7 +183,7 @@
     next.disabled = true; next.textContent = 'Building...';
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     var data = {}; new FormData(form).forEach(function (v, k) { if (k === 'leadSources') { (data.leadSources = data.leadSources || []).push(v); } else data[k] = v; });
-    fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    fetch(API_BASE + '/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (r) {
         if (!r.ok && r.d.error === 'loop') { var fld = form.elements[(r.d.field || '').split('.').pop()] || form.elements['phone']; fld.classList.add('error'); err.textContent = r.d.message; next.disabled = false; next.textContent = 'Build my front desk'; return; }
@@ -191,7 +192,7 @@
         var done = document.getElementById('done'); done.classList.add('on');
         document.getElementById('portalLink').textContent = r.d.portal; document.getElementById('portalLink').href = r.d.portal; document.getElementById('goPortal').href = r.d.portal;
         var st = document.getElementById('buildStatus'), tries = 0;
-        (function poll() { tries++; fetch('/api/onboard?c=' + r.d.slug + '&k=' + r.d.key).then(function (x) { return x.json(); }).then(function (s) {
+        (function poll() { tries++; fetch(API_BASE + '/api/onboard?c=' + r.d.slug + '&k=' + r.d.key).then(function (x) { return x.json(); }).then(function (s) {
           if (s.status === 'testing') { st.textContent = 'Built. ' + (s.build && s.build.notes ? 'Your website is missing: ' + s.build.notes + '. We filled in what we could from your answers.' : 'Open your portal to test it.'); return; }
           if (s.build && s.build.status === 'failed') { st.textContent = 'We could not read your website automatically. Your answers are loaded; Steve will finish the rest by hand today.'; return; }
           if (tries < 60) setTimeout(poll, 5000);

@@ -9,7 +9,8 @@
   if (document.getElementById('mcAgent')) return;
   if (document.body && document.body.hasAttribute('data-no-widget')) return;
 
-  var ENDPOINT = '/api/chat';
+  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
+  var ENDPOINT = API_BASE + '/api/chat';
   var STORE_KEY = 'mc_agent_transcript_v2';
   var GREETING = "Hi, I'm the Machines & Cloud front desk. I'm an AI, the same one we set up for your shop. Ask me about plans, the phone, or how it would work for your business.";
   var OFFLINE = 'The front desk is offline right now. Email support@machinesandcloud.com or call (346) 248-8359 and a person will reply within one business day.';

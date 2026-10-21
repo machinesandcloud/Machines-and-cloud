@@ -15,11 +15,17 @@ import { forwardingInstructions } from "./lib/forwarding.mjs";
 
 export const config = { path: "/api/client" };
 
-const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", Vary: "Origin" } : {});
+const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", Vary: "Origin" } : {});
 const s = (v, n = 300) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 const arr = (v, n = 40) => (Array.isArray(v) ? v : String(v || "").split(/[\n;]+/)).map((x) => s(x, 160)).filter(Boolean).slice(0, n);
 
 export default async (req) => {
+  const out = await handle(req);
+  const origin = req.headers.get("origin") || "";
+  if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
+  return out;
+};
+async function handle(req) {
   const url = new URL(req.url);
   const origin = req.headers.get("origin") || "";
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS(origin) });
