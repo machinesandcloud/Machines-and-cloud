@@ -21,7 +21,8 @@
 <main class="ad">
   <h1>Front desk admin</h1>
   <p class="muted" id="keyRow">Admin key: <input class="key" id="key" type="password" placeholder="paste the admin key once"> <button class="btn" id="keyGo">Load</button> <span id="msg"></span></p>
-  <p><button class="btn" id="runNow">Run the scheduler now</button> <button class="btn" id="lastRun">Last run</button> <span class="muted" id="runMsg"></span></p>
+  <p><button class="btn" id="runNow">Run the scheduler now</button> <button class="btn" id="lastRun">Last run</button> <button class="btn" id="brakeBtn">Brake: off</button> <span class="muted" id="runMsg"></span></p>
+  <p class="muted">Brake: press it when Netlify's 75 percent credit email arrives. The nightly audit and the half-hour scans stop; customer texts, webhooks, reminders, and the digest keep going. Press again to release.</p>
   <h2>Needs me</h2><div id="needs" class="muted">Load with the key.</div>
   <div id="shops"></div>
   <h2>Events, last 24 hours, every shop</h2>
@@ -41,7 +42,8 @@
     $('msg').textContent = 'loading';
     api(null, 'GET').then(function (d) {
       try { sessionStorage.setItem('mc_admin_key', key); } catch (e) { /* ignore */ }
-      $('msg').textContent = d.clients.length + ' shop' + (d.clients.length === 1 ? '' : 's');
+      $('msg').textContent = d.clients.length + ' shop' + (d.clients.length === 1 ? '' : 's') + (d.lastRun ? ', scheduler ran ' + rel(d.lastRun.at) + (d.lastRun.ok ? '' : ' WITH ERRORS') : ', scheduler has not run');
+      window.__brake = !!(d.brake && d.brake.on); $('brakeBtn').textContent = 'Brake: ' + (window.__brake ? 'ON' : 'off'); $('brakeBtn').style.background = window.__brake ? '#FEE2E2' : '';
       var needs = []; var dow = new Date().getDay(), dom = new Date().getDate();
       d.clients.forEach(function (c) { var link = '<a href="' + esc(c.portal) + '" target="_blank" rel="noopener">' + esc(c.name || c.slug) + '</a>';
         if (c.openFlags) needs.push(link + ': ' + c.openFlags + ' flagged conversation' + (c.openFlags > 1 ? 's' : '') + ' to read');
@@ -91,6 +93,7 @@
     api({ slug: slug, action: a }).then(function (r) { toast(a + ': ' + (r.status || (r.ok ? 'ok' : JSON.stringify(r)))); load(); }).catch(function (e) { toast(e.message); });
   });
   $('runNow').addEventListener('click', function () { $('runMsg').textContent = 'running'; api({ action: 'run_scheduler' }).then(function (r) { $('runMsg').textContent = (r.ok ? 'ok' : 'with errors') + ': ' + Object.keys(r.blocks || {}).map(function (k) { return k + (r.blocks[k].ok ? '' : ' FAILED'); }).join(', '); load(); }).catch(function (e) { $('runMsg').textContent = e.message; }); });
+  $('brakeBtn').addEventListener('click', function () { var on = !window.__brake; if (!confirm((on ? 'Put the brake on? ' : 'Release the brake? ') + 'Customer sends are never affected.')) return; api({ action: 'brake', on: on }).then(function () { toast(on ? 'Brake on' : 'Brake released'); load(); }).catch(function (e) { toast(e.message); }); });
   $('lastRun').addEventListener('click', function () { api({ action: 'last_run' }).then(function (r) { alert(JSON.stringify(r.lastRun, null, 2)); }).catch(function (e) { toast(e.message); }); });
   $('keyGo').addEventListener('click', function () { key = $('key').value.trim(); load(); });
   $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') { key = $('key').value.trim(); load(); } });

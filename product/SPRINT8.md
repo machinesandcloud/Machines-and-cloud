@@ -11,7 +11,7 @@ Make the scheduled function safe to change (recorded blocks, background fan-outs
 ## 2. Tickets
 
 ### S8-01 The scheduler as recorded blocks with background fan-outs
-Status: verified by code read only 2026-10-20: `run()` wraps each block and writes `health/scheduler:lastRun` with per-block ok, error, or skipped (`scheduler.mjs` lines 130 to 236), the four fan-outs live in `lib/fanout.mjs`, a scheduled run claims the day once (`claimFanout`) and hands off to `scheduler-fanout-background.mjs`, and `force_hour` runs them inline; the smoke test exercises every gate locally. The live lines (`last_run` under a minute old, the inline forced run) were refused with `usage_exceeded` on draft `6ad7bf5e17242792b323e060` and wait for the unfreeze.
+Status: verified 2026-10-21 on the local server at commit 00a1b0a, in-memory store: a bare `run_scheduler` returned 200 with every counter and `blocks` (tasks, tenDlc skipped "no keys", healthLifecycle, release); `last_run` showed a record seconds old with no block in error; at minute 59 the per-shop scans were skipped with "runs at :00 and :30" and `"all": true` ran them; a forced hour ran the digest fan-out inline (`fanouts: ["digest"]`, `digests: 1`). The claim-once-a-day handoff to the background function is by code (`claimFanout`).
 Size and scope: Size: M. Implements: Round 8 item 1 (MUST).
 
 Engineer note: `run()` is recorded blocks (`admin last_run` returns `health/scheduler:lastRun` with per-block ok, error, or skipped); the four shop-wide sends (audit, statement, weekly, digest) live in `lib/fanout.mjs` and run in `scheduler-fanout-background.mjs` at their hour, claimed once per Houston day, while `force_hour` runs them inline so tests see the events as before.
@@ -19,7 +19,7 @@ Engineer note: `run()` is recorded blocks (`admin last_run` returns `health/sche
 Acceptance (now, draft): a bare `run_scheduler` returns 200 and `admin last_run` shows a record under a minute old with every block `ok`; a forced hour runs the fan-out inline and the events appear as before (digest, weekly, monthly, auto-flag); by code, a scheduled (unforced) run claims the day once and hands off to the background function, so a second claim the same day is skipped; a throw in one block is recorded on that block and the next block still runs (by code).
 
 ### S8-02 A smoke test on deploy and a dead-man switch
-Status: verified 2026-10-20 for the local half: `node scripts/smoke.mjs` passes in about 110 ms, `netlify.toml` runs it as the build command, and injecting a read-before-declaration into `run()` on a local copy made it exit 1 naming "ReferenceError: Cannot access 'tdzProbe' before initialization" (the copy was restored). `/api/health` on draft `6ad7bf5e17242792b323e060` answered 503, but with the platform's `usage_exceeded` body rather than the function's own record, so the 503-then-200 lines and the draft build log wait for the unfreeze; OPERATIONS.md names the external monitor.
+Status: verified 2026-10-21: locally `node scripts/smoke.mjs` passes in about 110 ms and `netlify.toml` runs it as the build command; an injected read-before-declaration in `run()` on a local copy made it exit 1 naming "ReferenceError: Cannot access 'tdzProbe' before initialization" (copy restored); on the local server at commit 00a1b0a, in-memory store a fresh store answered `/api/health` 503 with `lastRunAt` null and, right after `run_scheduler`, 200 with `minutesAgo` 0 and no failing blocks; OPERATIONS.md names the external monitor. The draft build log is a Netlify-side check for after the unfreeze.
 Size and scope: Size: M. Implements: Round 8 item 2 (MUST); assumption 1.
 
 Engineer note: `scripts/smoke.mjs` is the Netlify build command (imports every module, seeds a shop in an in-memory store, runs every scheduler gate, calls the handlers; fails the deploy on a throw; about 150 ms locally); `/api/health` returns 200 when the last run is under 25 minutes old with every block ok, 503 otherwise.
@@ -35,17 +35,20 @@ Engineer note: 6 pm summary on days with activity, payment reminders once an inv
 Acceptance (repo): `grep -c "every day\|comes daily\|summary of the day" index.html netlify/functions/client.mjs` returns 0 for those phrases; the Starter card says the summary comes on days it handled something; the Growth card says "when you log an invoice"; FAQ 10 and its JSON-LD entry match; the welcome text matches; CLAUDE.md has one "not built" list; the runbook's step 8 reads flags and auto-flags; prices unchanged; `sitecheck.py` passes; no em dashes.
 
 ### S8-04 The go-live runbook rewritten to the product as built
-Status: in progress (engineer). Size: S. Implements: Round 8 item 4 (SHOULD).
+Status: verified 2026-10-21 (repo): the runbook is rewritten to the product as built: step 1 reviews hours rows, the emergency table, prices and windows, the handoff list, the review link, the always-ring-through list, Spanish, backup phone, the consent switch, and the platform keys, with the Called stamp as proof; step 4 is the 18-case gate; step 8 clears flags and auto-flags; step 9 names the `day7_draft`, the Sent stamp, and the `trial_over` it releases; step 10 the Invoiced stamp; every proof named (`welcome`, `provisioned`, `live`, `monthly`, `day7_draft`, `auto_flag`, `flagged`, `unflagged`, `config_updated`, `call_started`, `missed_call`, `lead_closed`, `alert_opened`, the three stamps) exists in the functions.
+Size and scope: Size: S. Implements: Round 8 item 4 (SHOULD).
 
 Acceptance: every proof named in the runbook is an event type or stamp that exists in the code (one grep per proof), the matrix count reads 18, step 1 checks hours rows, the emergency table, the review link, the VIP list, Spanish, and the platform keys, and the day-7 step names the admin page's Sent stamp.
 
 ### S8-05 Re-measure the rubric after the tightening
-Status: in progress (engineer). Size: S. Implements: Round 8 item 5 (SHOULD); assumption 3.
+Status: verified in part 2026-10-21: the second labelled set exists and `classifier_eval` accepts `"set": 2` (on the local server at commit 00a1b0a, in-memory store it answers cleanly with null precision without the model); the second measurement itself and the Needs-me exclusion decision wait for the local Anthropic key and are recorded in DECISIONS.md once run.
+Size and scope: Size: S. Implements: Round 8 item 5 (SHOULD); assumption 3.
 
 Acceptance: DECISIONS.md carries a second measurement dated after commit `426c051` with precision and recall per reason on a set that adds ten clean no-booking threads and ten late-answer threads, and the Needs-me count excludes any reason under 80 percent precision on that run.
 
 ### S8-06 What the admin page still cannot do that curl can
-Status: in progress (engineer). Size: S. Implements: Round 8 item 6 (SHOULD).
+Status: verified with a note 2026-10-21 on the local server at commit 00a1b0a, in-memory store: `tasks` lists a shop's scheduled sends and `cancel_task` removes one; `prompt` returns the current SMS prompt; `nextMonthNote` set by admin shows in the statement; `run_scheduler` from the page returns the counters; `admin.html` carries the tasks, prompt, reactivate, and note actions. Note: `reactivate` returns a cancelled shop to `paused` with a note that the owner presses Resume (or admin `resume`) to go live, rather than straight to live; a deliberate safety choice, accepted.
+Size and scope: Size: S. Implements: Round 8 item 6 (SHOULD).
 
 Acceptance: from the admin page Steve can list a shop's scheduled sends and cancel one, open the current SMS prompt, reactivate a cancelled shop, run the scheduler now, and set the next-month note, each reflected on reload (page code plus the engineer's render; API actions checked by curl).
 
@@ -82,3 +85,7 @@ Keyed pass (S8-07): everything from the earlier sprints, after the account is un
 Repo-level lines passed (S8-03 copy, the smoke test and its failure on an injected read-before-declaration, the CLAUDE.md lists, the runbook step). Every function call on the draft returned `usage_exceeded`, so S8-01's `last_run` and inline fan-out lines and S8-02's `/api/health` 503-then-200 lines are not run; they stand on code read until Steve restores the account's credits. Note recorded on S6-06: because production has been frozen at `b29aec9` since 9:24 am, the scheduler fault of commit `df36c03` never reached production and there was no outage.
 
 Results: S8-03 verified; S8-02 verified for the local half; S8-01 verified by code read; S8-04 to S8-06 in progress; S8-07 keyed pass todo.
+
+### Local pass, 2026-10-21, local server at commit 00a1b0a, in-memory store
+
+Rerun under Steve's local-only rule with `scratchpad/verify20.py`: S8-01 and S8-02 verified (the draft build log stays a Netlify-side check), S8-04 verified from the repo, S8-06 verified with the `reactivate` note, S8-05 partly (the hook and set exist; the measurement waits for the local model key). Results: S8-01, S8-02, S8-03, S8-04, S8-06 verified; S8-05 verified in part; S8-07 keyed pass todo. Sprint 8 is complete except the keyed pass and the one measurement, and per Round 8 item 7 no `SPRINT9.md` is cut until a real shop has a `liveAt`.

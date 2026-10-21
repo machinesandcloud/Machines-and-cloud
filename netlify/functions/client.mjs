@@ -33,7 +33,7 @@ export default async (req) => {
   if (req.method === "GET") {
     if (!isOwner) {
       if (url.searchParams.get("export")) return json({ error: "forbidden" }, 403);
-      return json(publicView(c), 200, CORS(origin));
+      return json(publicView(c), 200, { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
     }
     const exp = url.searchParams.get("export");
     if (exp) return exportCSV(c, exp);

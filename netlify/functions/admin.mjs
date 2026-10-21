@@ -46,17 +46,20 @@ export default async (req) => {
         row.lifecycle = c.lifecycle || {};
         row.liveDays = c.liveAt ? Math.floor((Date.now() - new Date(c.liveAt).getTime()) / dayMs) : null;
         row.newShopDays = Math.floor((Date.now() - new Date(c.createdAt).getTime()) / dayMs);
-        for (const e of events) if (Date.now() - new Date(e.at).getTime() < 86400000) stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type, data: e.data });
+        let pushed = 0;
+        for (const e of [...events].reverse()) { if (pushed >= 50) break; if (Date.now() - new Date(e.at).getTime() < 86400000) { stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type, data: e.data }); pushed++; } }
       }
       out.push(row);
     }
     stream.sort((a, b) => b.at.localeCompare(a.at));
-    return json({ clients: out, ...(full ? { events: stream.slice(0, 300) } : {}) });
+    const brake = full ? (await get("health", "brake")) || { on: false } : undefined;
+    return json({ clients: out, ...(full ? { events: stream.slice(0, 150), brake, lastRun: await get("health", "scheduler:lastRun") } : {}) });
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
   if (b.action === "run_scheduler") return json(await runScheduler({ forceHour: b.force_hour !== undefined ? Number(b.force_hour) : undefined, forceDay: b.force_day ? String(b.force_day) : undefined, all: !!b.all }));
   if (b.action === "fanout") { const { fanout, KINDS } = await import("./lib/fanout.mjs"); if (!KINDS.includes(String(b.kind))) return json({ error: "unknown_kind" }, 400); return json({ ok: true, ...(await fanout(String(b.kind))) }); }
+  if (b.action === "brake") { const on = !!b.on; await put("health", "brake", { on, at: new Date().toISOString(), by: "admin" }); return json({ ok: true, brake: on }); }
   if (b.action === "last_run") return json({ ok: true, lastRun: await get("health", "scheduler:lastRun") });
   if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", ip + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }
   const c = await getClient(b.slug || "");

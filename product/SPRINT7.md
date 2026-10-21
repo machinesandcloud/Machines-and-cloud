@@ -28,7 +28,7 @@ Acceptance (now, draft): a STOP recorded on shop A survives `admin delete` of sh
 Acceptance (keyed): delete removes the shop's VIP recordings at Twilio.
 
 ### S7-03 The nightly rubric audits what happened today
-Status: verified by code read only 2026-10-20: `autoFlag` carries `day` and `test` (`desk.mjs` lines 695 to 697), the stamp is re-audited when its day is not today, test-channel hits log `auto_flag` with `test: true`, and the Needs-me count and the digest note filter them (line 626). The live lines were not run: the Netlify account freeze reached function execution (`usage_exceeded` on every call) before the run got there.
+Status: verified by code read (2026-10-20); the live lines wait for the local Anthropic key: the audit needs the model, and on the local server at commit 00a1b0a, in-memory store the test-line chat answers 503 offline cleanly. By code, `autoFlag` carries `day` and `test`, a stamp from another day is re-audited, test-channel hits log `auto_flag` with `test: true`, and the Needs-me count and the digest note exclude them.
 Size and scope: Size: S. Implements: Round 7 item 3 (MUST).
 
 Engineer note: `autoFlag` carries `day` and `test`; a thread stamped on an earlier day is audited again; test-line hits log `auto_flag` with `test: true` and are excluded from the Needs-me count and Steve's digest note; `put_conversation` clears the stamp for tests.
@@ -36,7 +36,7 @@ Engineer note: `autoFlag` carries `day` and `test`; a thread stamped on an earli
 Acceptance (now, draft): a conversation audited clean today carries a stamp with `day` and empty reasons; the same thread with an unlisted price added is audited again and flagged; a test-channel conversation quoting one produces an `auto_flag` event with `test: true` that the `?full=1` `autoFlags7d` count and the digest `steveNote` exclude; by code, a stamp whose `day` is not today is re-audited.
 
 ### S7-04 The month reads in order; the first promise is tracked
-Status: verified by code read only 2026-10-20: `trial_over` requires `lifecycle.day7Sent` (`scheduler.mjs` line 64); the admin update accepts the stamps and `?full=1` carries `newShopDays`, `liveDays`, `lifecycle`; the loaded admin render shows the "onboarding call promised within one business day" line with its Called button. The live lines were not run (account freeze).
+Status: verified 2026-10-21 on the local server at commit 00a1b0a, in-memory store: a shop live eight days with no `day7Sent` got no `trial_over` across a run; after `day7Sent` was set it got exactly one across two runs; `?full=1` carries `newShopDays`, `liveDays` (8), and `lifecycle`; the loaded admin render shows the "call promised within one business day" line with its Called button.
 Size and scope: Size: S. Implements: Round 7 item 4 (SHOULD).
 
 Engineer note: `trial_over` requires `lifecycle.day7Sent` (admin update `{"lifecycle":{"day7Sent":"..."}}` or the Needs-me "Sent" button); `GET ?full=1` carries `newShopDays`, `liveDays`, `lifecycle`.
@@ -44,7 +44,7 @@ Engineer note: `trial_over` requires `lifecycle.day7Sent` (admin update `{"lifec
 Acceptance (now, draft): a shop live eight days with no `day7Sent` gets no `trial_over` on a run; after `day7Sent` is set it gets exactly one; `?full=1` rows carry `newShopDays`, `liveDays`, and `lifecycle`; the page shows "call promised within one business day" from `createdAt` until `onboardingCallAt` (page code).
 
 ### S7-05 Two defaults a one-truck Starter shop should not get
-Status: verified with a note 2026-10-20 6ad7bc94dc1c8c61db6b1c10: a Starter booking created no `visit_check`; a manual check on Starter returned "nothing waits on done"; a quiet Starter day logged `digest` with `empty: true`, `emailed: false`, `texted: false` and sent the owner nothing. Note: on Starter `invoice REF` answers "Payment reminders are on the Growth and Pro plans", so the "Starter booking with an invoice" case is unreachable and the nudge never fires on Starter, which matches the intent. "Quiet days: N" in the Monday email and the Growth-still-creates-the-check line were not completed (the weekly call returned `usage_exceeded`; Growth `visit_check` tasks were seen in the sprint 6 runs).
+Status: verified 2026-10-21 on the local server at commit 00a1b0a, in-memory store (the first three lines on 2026-10-20 before the outage): a Starter booking creates no `visit_check`; a manual check on Starter returns "nothing waits on done" (and `invoice REF` on Starter answers that payment reminders are Growth and Pro, so the Starter-invoice case is unreachable and the nudge never fires on Starter, as intended); a quiet Starter day logs `digest` with `empty: true`, `emailed: false`, `texted: false` and sends the owner nothing; the Monday email reads "Quiet days: 6 (no calls, texts, or bookings)" for a week with one active day, and "nothing this week" when the whole week was quiet. Growth `visit_check` tasks were seen in the sprint 6 runs; a fresh Growth booking needs the model key.
 Size and scope: Size: S. Implements: Round 7 item 5 (SHOULD); assumption 3.
 
 Engineer note: a quiet day logs `digest` with `emailed: false` and sends the owner nothing; the Monday email adds "Quiet days: N"; `scheduleReminders` creates `visit_check` only on Growth and Pro, and `runVisitCheck` returns "nothing waits on done" on Starter without an invoice.
@@ -60,7 +60,7 @@ Engineer note: tabs `nowrap` with `overflow-x: auto`, chat `min(520px, 60vh)`, `
 Acceptance: the CSS rules are in `desk.html`; the engineer's 390 px renders (`scratchpad/shots/desk-390-leads.png`, `desk-390-test.png`) show one tab row, the table scrolling inside its card with no page-level horizontal scroll, and the chat input visible.
 
 ### S7-07 Measure the two classifiers before choosing a model
-Status: verified 2026-10-20 (repo): `lib/rubric-eval.mjs` holds the 50 labelled conversations, `admin classifier_eval` exists with `models`, `from`, `to`, `RUBRIC_MODEL` overrides, and DECISIONS.md records precision and recall per reason for both models with the decision to keep `claude-opus-5-5`. The five-item live call was not run (account freeze); re-measurement after the tightening is sprint 8's S8-05.
+Status: verified (repo) 2026-10-20 as before; the five-item `classifier_eval` call waits for the local key (on the local server at commit 00a1b0a, in-memory store the action answers cleanly with `exact: 0 of 1` and null precision when the model is unavailable).
 Size and scope: Size: M. Implements: Round 7 item 7 (SHOULD); assumption 2.
 
 Engineer note: `lib/rubric-eval.mjs` (50 labelled conversations) and `admin classifier_eval` with `models`, `from`, `to` in chunks of five; results in DECISIONS.md: Opus 41 of 50 exact with recall 100 everywhere and precision 100 on five reasons, Haiku 32 of 50 with precision 28 to 44; decision keep Opus (about $0.003 per audited conversation measured, not the PO's $0.02), two definitions tightened. `RUBRIC_MODEL` overrides.
@@ -68,7 +68,7 @@ Engineer note: `lib/rubric-eval.mjs` (50 labelled conversations) and `admin clas
 Acceptance (now, draft): `admin classifier_eval` on five items returns per-item predictions and a summary; DECISIONS.md records precision and recall per reason for both models and the decision; the rubric file holds 50 items; the classifier calls use the decided model unless `RUBRIC_MODEL` is set.
 
 ### S7-08 Needs-me lines that clear themselves
-Status: verified 2026-10-20 at the page-code and API-code level: the admin update accepts `invoicedFor`, `day7Sent`, `onboardingCallAt`, and the loaded admin render shows the Needs-me lines with their Called and Sent buttons; the live echo of the stamps was not run (account freeze).
+Status: verified 2026-10-21 on the local server at commit 00a1b0a, in-memory store: the admin update accepts `day7Sent`, `onboardingCallAt`, and `invoicedFor` and `?full=1` echoes them under `lifecycle`; `liveDays` 6 is the "day-7 email tomorrow" case; the loaded admin render shows the Needs-me lines with their Called and Sent buttons.
 Size and scope: Size: S. Implements: Round 7 item 8 (SHOULD).
 
 Engineer note: `invoicedFor`, `day7Sent`, `onboardingCallAt` set from the page buttons or the admin update; the statement line shows only until `invoicedFor` matches last month; "day-7 email tomorrow" at six live days; "day-7 email due" from seven until `day7Sent`.
@@ -109,3 +109,9 @@ Keyed pass (S7-09): everything from the earlier sprints plus the VIP recording d
 `scratchpad/verify17.py` (three launches; two crashed on my own scenario errors, a plumbing desk asked for an HVAC job and an index on an empty list), `verify18.py` and `verify19.py` (the S7-02 record lines on fresh numbers), the repo statics, and the engineer's renders. Midway through the third launch the Netlify account freeze (production frozen at `b29aec9` since 9:24 am Houston) reached function execution: every call returned `usage_exceeded`, so S7-03, S7-04, the last two S7-05 lines, S7-07's live call, and S7-08's live echo were not run and stand on code read. Cleanup was refused by the same error: three shops are orphaned in the shared store and must be deleted once the account is unfrozen: `pm-test-hvac-33bf`, `pm-test-plumbing-3095`, and the "PM Test Cleaning" shop from the same run; the test opt-outs `+17135550141`, `142`, `143` were cleared before the freeze.
 
 Results: S7-01, S7-02, S7-06, S7-07 verified; S7-05 verified with a note; S7-03, S7-04, S7-08 verified by code read and renders with their live lines pending the unfreeze; S7-09 keyed pass todo. The owed admin-page browser check (S5-06, S6-07) is closed by `admin-loaded.png` (three shops, the Needs-me list with its buttons, the full table, the cross-shop event stream).
+
+### Local pass, 2026-10-21, local server at commit 00a1b0a, in-memory store (`node scripts/local-server.mjs`, admin key `local-admin`)
+
+Under Steve's new rule (no deploys and no Netlify function calls except one git push per verified sprint; the account is still frozen), the blocked lines were rerun locally with `scratchpad/verify20.py` and two follow-up checks: S7-04, S7-05, and S7-08 are now verified; S7-03's audit and S7-07's `classifier_eval` need the model and wait for `ANTHROPIC_API_KEY` in the repo's gitignored `.env`. The in-memory store resets on restart, so no local cleanup is owed; the three orphaned shops in the Netlify store (`pm-test-hvac-33bf`, `pm-test-plumbing-3095`, the "PM Test Cleaning" shop) still wait for the unfreeze.
+
+Results: S7-01, S7-02, S7-04, S7-05, S7-06, S7-07, S7-08 verified; S7-03 by code read with the live audit waiting for the local key; S7-09 keyed pass todo.

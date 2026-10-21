@@ -174,7 +174,10 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     return { polled };
   });
   const minuteNow = forceHour !== undefined ? 0 : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", minute: "numeric" }).formatToParts(new Date()).find((p) => p.type === "minute")?.value);
-  const halfHour = all || minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40);
+  const brake = !!(await get("health", "brake"))?.on;
+  record.brake = brake;
+  // The brake (admin page, or Steve after Netlify's 75 percent email): the scans and the nightly audit stop; due customer texts, webhooks, and the digest never do.
+  const halfHour = !brake && (all || minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40));
   let alerts = 0, lifecycles = 0;
   await block(record, "healthLifecycle", async () => {
     if (!halfHour) return { skipped: "runs at :00 and :30" };
@@ -220,7 +223,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
   const forced = forceHour !== undefined;
   const wanted = [];
   if (hour === 18) wanted.push("digest");
-  if (hour === 21) wanted.push("autoflag");
+  if (hour === 21 && !brake) wanted.push("autoflag");
   if (day === "Mon" && hour === 8) wanted.push("weekly");
   if (dom === 1 && hour === 9) wanted.push("monthly");
   const fanouts = {};
