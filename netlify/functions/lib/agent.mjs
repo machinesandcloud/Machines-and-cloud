@@ -15,11 +15,22 @@ export function makeClient() {
 }
 
 export function classifyError(err) {
+  // SDK errors also carry headers, request metadata and raw bodies. Keep diagnostics to
+  // bounded text fields; never hand the complete error object to the logger.
+  const rawMessage = err?.error?.error?.message ?? err?.error?.message ?? err?.message;
+  const message = (typeof rawMessage === "string" ? rawMessage : "No error message")
+    .replace(/\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+\/-]+=*/gi, "[redacted authorization]")
+    .replace(/\bsk-[A-Za-z0-9_-]+\b/g, "[redacted key]")
+    .replace(/((?:["']?)(?:x[-_]api[-_]key|api[-_ ]?key|authorization|access[-_]token|refresh[-_]token|password|secret)(?:["']?)\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;]+)/gi, "$1[redacted]")
+    .replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 800);
+  console.error(err instanceof Anthropic.APIError ? "agent API error" : "agent error", {
+    name: String(err?.constructor?.name || "Error").replace(/[^A-Za-z0-9_]/g, "").slice(0, 80),
+    status: Number.isInteger(err?.status) ? err.status : null,
+    message,
+  });
   if (err instanceof Anthropic.RateLimitError) return { error: "busy", status: 429 };
   if (err instanceof Anthropic.AuthenticationError) return { error: "offline", status: 503 };
-  if (err instanceof Anthropic.APIStatusError) return { error: "upstream", status: 502 };
-  if (err instanceof Anthropic.APIConnectionError) return { error: "upstream", status: 502 };
-  console.error("agent error", err);
+  if (err instanceof Anthropic.APIError) return { error: "upstream", status: 502 };
   return { error: "internal", status: 500 };
 }
 

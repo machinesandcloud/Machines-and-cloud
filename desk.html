@@ -38,6 +38,13 @@
     pre.snip { background: #1E2433; color: #E5E7EB; padding: 12px; border-radius: 10px; font-size: 12px; overflow-x: auto; }
     .conv { border: 1px solid #F3F4F6; border-radius: 12px; padding: 10px; margin-bottom: 10px; font-size: 13px; } .conv b { display: block; margin-bottom: 4px; } .conv div { margin: 3px 0; } .conv .u { color: #1E2433; } .conv .a { color: #5B6273; }
     .btn-sm { padding: 8px 14px; font-size: 13px; }
+    .availability-form { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto; gap: 12px; align-items: end; margin-top: 18px; }
+    .availability-form .form-group { margin: 0; min-width: 0; }
+    .availability-form input, .availability-form select { width: 100%; min-width: 0; box-sizing: border-box; }
+    .availability-row { display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+    .availability-row button, .availability-form button { min-height: 44px; flex: none; }
+    .availability-message { min-height: 20px; margin-top: 12px; }
+    @media (max-width: 600px) { .availability-form { grid-template-columns: 1fr; } .availability-form button { justify-self: start; } .availability-row { align-items: flex-start; flex-wrap: wrap; } }
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1E2433; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; display: none; }
   </style>
 </head>
@@ -45,7 +52,7 @@
 <nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
 <main class="dk">
   <div class="dk-head"><div><h1 id="title">Your front desk</h1><span class="st" id="status">loading</span></div><div id="liveBtns"></div></div>
-  <div class="tabs"><button data-t="today" id="tabToday" style="display:none">Today</button><button class="on" data-t="test" id="tabTest">Test it</button><button data-t="leads">Leads and bookings</button><button data-t="convs">Conversations</button><button data-t="know">What it knows</button><button data-t="setup">Setup</button><button data-t="account">Account</button></div>
+  <div class="tabs"><button data-t="today" id="tabToday" style="display:none">Today</button><button class="on" data-t="test" id="tabTest">Test it</button><button data-t="leads">Leads and bookings</button><button data-t="availability">Availability</button><button data-t="convs">Conversations</button><button data-t="know">What it knows</button><button data-t="setup">Setup</button><button data-t="account">Account</button></div>
 
   <section class="pane" id="p-today">
     <div class="card2"><h3>Today</h3><div class="grid2" id="today"></div></div>
@@ -67,6 +74,22 @@
   <section class="pane" id="p-leads">
     <div class="card2"><h3>Bookings</h3><div id="bookings"></div></div>
     <div class="card2"><h3>Leads handed to you</h3><div id="leads"></div></div>
+  </section>
+
+  <section class="pane" id="p-availability">
+    <div class="card2">
+      <h3>Time you are unavailable</h3>
+      <p class="muted">Block a day or arrival window for other jobs, time off or a closure. Keep work booked elsewhere up to date here.</p>
+      <p class="muted">Existing visits stay booked. Emergency requests still reach you.</p>
+      <form id="availabilityForm" class="availability-form">
+        <div class="form-group"><label class="form-label" for="availabilityDate">Date (Houston time)</label><input id="availabilityDate" class="form-input" type="date" required></div>
+        <div class="form-group"><label class="form-label" for="availabilityWindow">Time to block</label><select id="availabilityWindow" class="form-input"><option value="">Whole day</option></select></div>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="availabilitySubmit">Block time</button>
+      </form>
+      <p id="availabilityMessage" class="muted availability-message" role="status" aria-live="polite"></p>
+      <h3 style="margin-top:20px">Blocked time</h3>
+      <div id="availabilityBlocks" class="muted">Loading availability…</div>
+    </div>
   </section>
 
   <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><div id="convs"></div></div></section>
@@ -146,6 +169,27 @@
   var $ = function (id) { return document.getElementById(id); };
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function availabilityDateLabel(date) { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date + 'T12:00:00Z')); }
+  function renderAvailability(blocks) {
+    $('availabilityBlocks').innerHTML = blocks.length ? blocks.map(function (b) {
+      var label = availabilityDateLabel(b.date) + ' · ' + (b.window || 'Whole day');
+      return '<div class="availability-row"><div><b>' + esc(label) + '</b>' + (b.existingBookings ? '<div>' + esc(b.existingBookings) + ' visit' + (b.existingBookings === 1 ? ' is' : 's are') + ' already reserved and unchanged.</div>' : '') + '</div><button type="button" class="btn-pill btn-pill-dark btn-sm availability-remove" data-date="' + esc(b.date) + '" data-window="' + esc(b.window) + '" aria-label="Remove block for ' + esc(label) + '">Remove block</button></div>';
+    }).join('') : '<p>No time blocked.</p>';
+  }
+  var availabilityBusy = false;
+  function availabilityChange(actionName, date, window, button) {
+    if (availabilityBusy) return Promise.resolve();
+    availabilityBusy = true;
+    document.querySelectorAll('#availabilityForm button, #availabilityBlocks button').forEach(function (b) { b.disabled = true; });
+    $('availabilityMessage').textContent = 'Saving…';
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: actionName, date: date, window: window }) })
+      .then(function (res) { return res.json().then(function (r) { if (!res.ok || !r.ok) { var messages = { invalid_date: 'Choose a valid date in Houston time.', invalid_window: 'Choose one of your saved arrival windows.', too_many_blocks: 'Remove an old block before adding another.', availability_unavailable: 'Availability could not be saved. Refresh to check it before trying again.' }; var err = new Error('Availability request failed'); err.availabilityMessage = messages[r.error] || 'Could not save availability. Refresh and try again.'; throw err; } if (!Array.isArray(r.availabilityBlocks)) throw new Error('Availability response incomplete'); return r; }); })
+      .then(function (r) { renderAvailability(r.availabilityBlocks); $('availabilityMessage').textContent = (actionName === 'availability_block' ? 'Time blocked.' : 'Block removed.') + (r.existingBookings ? ' ' + r.existingBookings + ' existing visit' + (r.existingBookings === 1 ? ' remains' : 's remain') + ' booked.' : ''); })
+      .catch(function (err) { $('availabilityMessage').textContent = err.availabilityMessage || 'Availability could not be saved. Refresh to check it before trying again.'; })
+      .finally(function () { availabilityBusy = false; document.querySelectorAll('#availabilityForm button, #availabilityBlocks button').forEach(function (b) { b.disabled = false; }); });
+  }
+  $('availabilityForm').addEventListener('submit', function (e) { e.preventDefault(); availabilityChange('availability_block', $('availabilityDate').value, $('availabilityWindow').value, $('availabilitySubmit')); });
+  $('availabilityBlocks').addEventListener('click', function (e) { var button = e.target.closest('button.availability-remove'); if (button) availabilityChange('availability_unblock', button.dataset.date, button.dataset.window, button); });
   var ref = { calendar: q.get('calendar'), billing: q.get('billing') };
   if (ref.calendar === 'ok') toast('Calendar connected.');
 
@@ -155,8 +199,14 @@
 
   function load() {
     return fetch(API).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.error) { $('title').textContent = 'Not found'; $('status').textContent = 'Check your link.'; return; }
+      if (d.error) { if (d.error === 'availability_unavailable') { $('status').textContent = 'Could not load availability.'; $('availabilityMessage').textContent = 'Availability could not be loaded. Refresh to try again.'; } else { $('title').textContent = 'Not found'; $('status').textContent = 'Check your link.'; } return; }
       data = d; var c = d.client;
+      var windowChoice = $('availabilityWindow').value;
+      $('availabilityWindow').innerHTML = '<option value="">Whole day</option>' + (c.windows || []).map(function (w) { return '<option value="' + esc(w) + '">' + esc(w) + '</option>'; }).join('');
+      if ((c.windows || []).indexOf(windowChoice) >= 0) $('availabilityWindow').value = windowChoice;
+      var houstonToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      $('availabilityDate').min = houstonToday; if (!$('availabilityDate').value) $('availabilityDate').value = houstonToday;
+      renderAvailability(d.availabilityBlocks || []);
       $('title').textContent = (c.business.name || 'Your front desk');
       var st = $('status'); st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status; st.className = 'st' + (c.status === 'live' ? ' live' : '');
       st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;

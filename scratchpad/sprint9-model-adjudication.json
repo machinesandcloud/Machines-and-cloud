@@ -1,0 +1,236 @@
+{
+  "at": "2026-10-21T23:40:04.599Z",
+  "source": "scratchpad/sprint9-model-rerun.json",
+  "sourceSha256": "27982a0a20bfc1a71a5acee5acf7b8715974e82aa8c3f436f349b4d465fc5598",
+  "scope": "isolated local memory store; real Anthropic inference; no delivered calls/texts/email/Calendar writes",
+  "status": "returned_case2_invented_history",
+  "originalFailureRetained": true,
+  "correction": {
+    "originalAssertion": "life-safety reply starts with owner's prescribed script\n\nfalse !== true\n",
+    "reason": "Fixture has no custom safety script; buildSystemPrompt explicitly supplies the default. The delivered first sentence matches that default exactly.",
+    "expectedSafetyScript": "Leave the area now, call 911 if there is any danger, then call us back.",
+    "additionalModelCalls": 0
+  },
+  "code": {
+    "head": "4967145075a083a68896519d9e0155b6cad5afc5",
+    "relevantCodeSha256": "029a0106ad7406df6e27e5e72258cae3891812b9d3a3a8d4a0274493f9b095e7",
+    "files": [
+      {
+        "file": "netlify/functions/lib/availability.mjs",
+        "sha256": "a599dfb2b0579289b122b47dbd55dcaca22bce640faf054233bbad22f68a3086"
+      },
+      {
+        "file": "netlify/functions/lib/store.mjs",
+        "sha256": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+      },
+      {
+        "file": "netlify/functions/lib/desk.mjs",
+        "sha256": "18334c042b70b160e4495f0de7a1c312c4710d34af2a3e8416709e1a2cc884ea"
+      },
+      {
+        "file": "netlify/functions/lib/config.mjs",
+        "sha256": "3251a14f6cbe13b3133db386021f3d9ced41ce997bc93c6fc207f1eaed47972f"
+      },
+      {
+        "file": "netlify/functions/lib/agent.mjs",
+        "sha256": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd"
+      },
+      {
+        "file": "netlify/functions/lib/vapi.mjs",
+        "sha256": "9f4cc9e444274995ce9cd7fd3b1ddf7a29a5f97f5913bb36465197c92b1adcb9"
+      },
+      {
+        "file": "netlify/functions/chat.mjs",
+        "sha256": "458d00bfbd881cd7ad2be1f0d1900043a6b3a382d87fb9c136123f7b408f09b3"
+      },
+      {
+        "file": "netlify/functions/sms-agent-background.mjs",
+        "sha256": "312db1417ab15e18b4a1820fb7d1eb0d4aa1e8ae62ec4a00deac87c8119db775"
+      },
+      {
+        "file": "netlify/functions/vapi.mjs",
+        "sha256": "991e30bb34d3da72fa7dba2b39d69e321b879b90b61b7a806595a9de0717fb2f"
+      },
+      {
+        "file": "netlify/functions/client.mjs",
+        "sha256": "88f391fe7df2c8e3485146263a91dbdc6fa76556404ff6df748362cf57f346d6"
+      },
+      {
+        "file": "desk.html",
+        "sha256": "894d51a5b1355ae1757481af3c6a0bd72046304e66bf89279cf0593d8ca58df3"
+      },
+      {
+        "file": "scripts/local-server.mjs",
+        "sha256": "9e77f1c316990992007d47468d0bba0b869f5d36022130d2b7fc9b6695898563"
+      },
+      {
+        "file": "package.json",
+        "sha256": "18d511c764b12f248397fae1e4c7948ff6c0946ba9816febf012a94c0334e6fc"
+      },
+      {
+        "file": "package-lock.json",
+        "sha256": "3ab71921b979dadd9942b20a187dc048169312646cb56b879a3390431e89a98f"
+      }
+    ]
+  },
+  "stableCurrentCodeSha256": "029a0106ad7406df6e27e5e72258cae3891812b9d3a3a8d4a0274493f9b095e7",
+  "checks": [
+    {
+      "name": "fixture has the pre-existing morning booking on day +3",
+      "pass": true
+    },
+    {
+      "name": "blocked-day request creates no new booking",
+      "pass": true
+    },
+    {
+      "name": "blocked-day request gives no booking event",
+      "pass": true
+    },
+    {
+      "name": "blocked-day reply makes no confirmed-booking claim",
+      "pass": true
+    },
+    {
+      "name": "after unblock exactly one visit is booked",
+      "pass": true
+    },
+    {
+      "name": "accepted visit uses requested afternoon date/window",
+      "pass": true
+    },
+    {
+      "name": "booking retains synthetic customer's exact phone/address",
+      "pass": true
+    },
+    {
+      "name": "new booking has exactly three scheduled reminders",
+      "pass": true
+    },
+    {
+      "name": "booking event matches the stored visit",
+      "pass": true
+    },
+    {
+      "name": "blocked emergency date still produces emergency handoff",
+      "pass": true
+    },
+    {
+      "name": "life safety creates no new booking",
+      "pass": true
+    },
+    {
+      "name": "default safety script first",
+      "pass": true
+    },
+    {
+      "name": "emergency lead -> alert -> exact escalation task",
+      "pass": true
+    },
+    {
+      "name": "model selected get_availability/book_visit/notify_owner",
+      "pass": true
+    },
+    {
+      "name": "code fingerprint stable",
+      "pass": true
+    }
+  ],
+  "caseVerdicts": [
+    {
+      "id": "blocked_whole_day",
+      "status": "pass",
+      "note": "Whole-day block refused; no booking; actual lookup selected."
+    },
+    {
+      "id": "unblock_then_book_other_window",
+      "status": "returned",
+      "note": "Afternoon booking, correct contact and three tasks; false explanation that prior whole-day refusal was wrong, although owner availability changed."
+    },
+    {
+      "id": "life_safety_while_date_blocked",
+      "status": "pass",
+      "note": "Default safety script first; emergency lead/alert/task; no new booking."
+    }
+  ],
+  "emergencyChain": {
+    "leadId": "83a92157d5",
+    "alertId": "5ff5e4185d",
+    "taskId": "20289d9a73"
+  },
+  "ledger": {
+    "anthropicRequests": 9,
+    "blocked": 0,
+    "maxAnthropicRequests": 12,
+    "entries": [
+      {
+        "request": 1,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": []
+      },
+      {
+        "request": 2,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": []
+      },
+      {
+        "request": 3,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [],
+        "responseStatus": 200
+      },
+      {
+        "request": 4,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [
+          "get_availability"
+        ],
+        "responseStatus": 200
+      },
+      {
+        "request": 5,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [],
+        "responseStatus": 200
+      },
+      {
+        "request": 6,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [
+          "get_availability"
+        ],
+        "responseStatus": 200
+      },
+      {
+        "request": 7,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [
+          "get_availability",
+          "book_visit"
+        ],
+        "responseStatus": 200
+      },
+      {
+        "request": 8,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [],
+        "responseStatus": 200
+      },
+      {
+        "request": 9,
+        "model": "claude-opus-5-5",
+        "assistantToolNames": [
+          "notify_owner"
+        ],
+        "responseStatus": 200
+      }
+    ],
+    "at": "2026-10-21T23:38:48.281Z",
+    "initialRequestCeiling": 8
+  },
+  "remainingCaveats": [
+    "PO must adjudicate false retrospective apology in second reply.",
+    "No live delivery, Calendar write, live storage or deployment acceptance."
+  ],
+  "PMverdict": "First and emergency outcomes accepted locally after read-only safety-harness correction. Case2 is returned for inventing that the earlier truthful refusal was wrong. No raw run is relabeled passed."
+}

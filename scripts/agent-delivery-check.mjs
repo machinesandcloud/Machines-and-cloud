@@ -90,12 +90,15 @@ assert.equal(requests[0].system[0].text, "Ordinary streaming mode.");
 assert.equal(requests[1].messages.at(-1).content[0].content, "Done.");
 
 const c = newClient({ slug: "offline-delivery", ownerKey: "offline-owner", owner: { name: "Dana", email: "owner@example.com" }, business: { name: "Offline desk", trade: "HVAC" } });
-for (const channel of ["sms", "test", "web"]) {
+for (const channel of ["sms", "test", "web", "voice"]) {
   const prompt = buildSystemPrompt(c, channel);
-  assert.match(prompt, /your final customer reply/);
+  if (channel !== "voice") assert.match(prompt, /your final customer reply/);
   assert.doesNotMatch(prompt, /every sentence you write is (?:sent|shown)/);
   assert.match(prompt, /begin the customer-facing reply with the safety script before callback promises, fees, tool outcomes, or questions/);
+  assert.match(prompt, /Each successful get_availability result is a snapshot at that moment; availability may change between checks/);
+  assert.match(prompt, /Do not call an earlier successful lookup wrong, reinterpret its result, or claim the owner changed the schedule unless you have explicit evidence/);
 }
 assert.match(voicePrompt(c), /begin the customer-facing reply with the safety script before callback promises, fees, tool outcomes, or questions/);
+assert.match(voicePrompt(c), /State the current result without inventing why it changed/);
 assert.equal(queue.length, 0); assert.equal(unexpected, 0);
-console.log("AGENT DELIVERY OK: withheld preambles, preserved tool history, delivery contract/reminders, error results and shared prompts (offline SDK fixtures)");
+console.log("AGENT DELIVERY OK: withheld preambles, preserved tool history, delivery contract/reminders, error results and all-channel safety/snapshot rules (offline SDK fixtures; model semantics unproven)");

@@ -3,7 +3,7 @@
 // Needs VAPI_API_KEY plus the Twilio keys. Optional: VAPI_MODEL (default claude-sonnet-5),
 // VAPI_VOICE_PROVIDER and VAPI_VOICE_ID. Field names follow the Vapi docs as of 2026-10 and are
 // expected to need small fixes on the first real run (see product/DECISIONS.md).
-import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, loopCheck } from "./config.mjs";
+import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY, loopCheck } from "./config.mjs";
 import { getNumber, setNumberWebhooks, setVoiceFallback, twilioEnabled, voiceFallbackFor } from "./twilio.mjs";
 import { logEvent } from "./store.mjs";
 
@@ -68,7 +68,7 @@ function modelBlock(client, toolIds) {
 export async function provisionVoice(client, site) {
   const serverUrl = `${site}/api/vapi`;
   const toolIds = [];
-  for (const t of [BOOK_VISIT, NOTIFY_OWNER]) toolIds.push((await vapi("/tool", toolDef(t, serverUrl))).id);
+  for (const t of [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY]) toolIds.push((await vapi("/tool", toolDef(t, serverUrl))).id);
   let transferToolId = null;
   if (client.phone?.forwarding === "all" && client.phone?.transferTo && !loopCheck(client)) { transferToolId = (await vapi("/tool", transferDef(client))).id; toolIds.push(transferToolId); }
   const assistant = await vapi("/assistant", {
@@ -98,9 +98,14 @@ export async function updateVoicePrompt(client) {
   if (!vapiEnabled() || !client.voice?.assistantId) return;
   const site = process.env.URL || "https://machinesandcloud.com";
   const serverUrl = `${site}/api/vapi`;
-  const fn = client.voice.functionToolIds || client.voice.toolIds || [];
-  const defs = [BOOK_VISIT, NOTIFY_OWNER];
-  for (let i = 0; i < fn.length && i < defs.length; i++) { try { await vapi(`/tool/${fn[i]}`, toolDef(defs[i], serverUrl), "PATCH"); } catch (e) { console.error("tool patch", e); } }
+  const fn = [...(client.voice.functionToolIds || client.voice.toolIds || [])].filter((id) => id !== client.voice.transferToolId);
+  const defs = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
+  // Existing assistants have two function tools. Add the availability tool instead of silently
+  // leaving their prompt with a tool it cannot call; provider acceptance remains a keyed check.
+  for (let i = 0; i < defs.length; i++) {
+    if (fn[i]) await vapi(`/tool/${fn[i]}`, toolDef(defs[i], serverUrl), "PATCH");
+    else fn.push((await vapi("/tool", toolDef(defs[i], serverUrl))).id);
+  }
   const wantTransfer = client.phone?.forwarding === "all" && !!client.phone?.transferTo && !loopCheck(client);
   let transferToolId = client.voice.transferToolId || null;
   if (wantTransfer && !transferToolId) transferToolId = (await vapi("/tool", transferDef(client))).id;

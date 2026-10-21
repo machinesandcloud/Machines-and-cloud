@@ -3,6 +3,8 @@
 import { getStore } from "@netlify/blobs";
 import { randomBytes } from "node:crypto";
 import { normalizeDate } from "./calendar.mjs";
+import { canonicalWindow, listedWindows, listedWindow, requestedDate, addDays, isoDateValid, isElapsedWindow, AvailabilityInputError } from "./availability.mjs";
+export { canonicalWindow } from "./availability.mjs";
 
 // Opened per call, never cached at module level: a warm function instance that outlives the Blobs
 // token would otherwise fail every write with "Token expired".
@@ -132,18 +134,6 @@ export async function saveRecord(kind, rec, { capacityClaim } = {}) {
 export const listRecords = (kind, slug, limit) => listJSON(kind, slug + "/", limit);
 
 const ACTIVE_BOOKINGS = new Set(["booked", "confirmed", "on_the_way"]);
-// Match the existing calendar window interpretation while treating spacing, dashes and explicit
-// am/pm as equivalent. Keep custom named windows distinct.
-export function canonicalWindow(window) {
-  const text = String(window || "").trim().toLowerCase();
-  const m = text.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?\s*(?:to|[-–—])\s*(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?$/);
-  if (!m) return text.replace(/\s+/g, " ");
-  const minutes = (h, min, ap) => (ap ? (Number(h) % 12) + (/^p/.test(ap) ? 12 : 0) : Number(h)) * 60 + Number(min || 0);
-  let start = minutes(m[1], m[2], m[3]), end = minutes(m[4], m[5], m[6]);
-  if (!m[3] && start < 7 * 60) start += 12 * 60;
-  if (!m[6] && end <= start) end += 12 * 60;
-  return `${start}-${end}`;
-}
 const bookingSlot = (date, window) => date && window ? `${normalizeDate(date)}|${canonicalWindow(window)}` : "";
 const capacityKey = (slug) => `capacity:${slug}`;
 const capacityLimit = (c) => Math.max(1, Number(c.rules?.windowCapacity) || 1);
@@ -155,19 +145,78 @@ async function initialCapacity(slug) {
     const b = await store("bookings").get(safe(key), { type: "json", consistency: "strong" });
     if (b && ACTIVE_BOOKINGS.has(b.status)) { const slot = bookingSlot(b.date, b.window); if (slot) reservations[b.id] = [slot]; }
   }
-  return { version: 1, reservations, mutations: {} };
+  return { version: 1, reservations, mutations: {}, blocks: [] };
+}
+const blockedWindow = (state, date, window) => (state.blocks || []).some((b) => b.date === date && (!b.windowKey || b.windowKey === canonicalWindow(window)));
+const reservedCount = (state, slot) => Object.values(state.reservations).filter((slots) => slots.includes(slot)).length;
+function blockCount(state, date, windowKey) {
+  return Object.values(state.reservations).filter((slots) => slots.some((slot) => windowKey ? slot === `${date}|${windowKey}` : slot.startsWith(date + "|"))).length;
+}
+function blockViews(state) {
+  return (state.blocks || []).map((b) => ({ date: b.date, window: b.window, existingBookings: blockCount(state, b.date, b.windowKey) })).sort((a, b) => a.date.localeCompare(b.date) || a.window.localeCompare(b.window));
+}
+function openingsFromState(c, state, date, days) {
+  const dates = Array.from({ length: days }, (_, n) => addDays(date, n)).filter(isoDateValid);
+  return { timezone: "America/Chicago", from: date, days: dates.length, openings: dates.map((day) => {
+    return { date: day, windows: listedWindows(c).filter((window) => !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && reservedCount(state, bookingSlot(day, window)) < capacityLimit(c)) };
+  }) };
+}
+export async function getAvailability(c, date, days) {
+  const from = requestedDate(date);
+  if (!Number.isInteger(days) || days < 1 || days > 14) throw new AvailabilityInputError("invalid_days", "Check from 1 to 14 consecutive dates.");
+  if (!isoDateValid(addDays(from, days - 1))) throw new AvailabilityInputError("invalid_days", "The entire checked range must use real YYYY-MM-DD dates.");
+  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
+    const state = current || await initialCapacity(c.slug);
+    return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days) };
+  });
+}
+export async function getAvailabilityBlocks(c) {
+  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
+    const state = current || await initialCapacity(c.slug);
+    return { ...(!current ? { value: state } : {}), result: blockViews(state) };
+  });
+}
+export async function setAvailabilityBlock(c, date, window = "", blocked = true) {
+  const day = requestedDate(date, { isoOnly: true, allowPast: !blocked });
+  if (typeof window !== "string") throw new AvailabilityInputError("invalid_window", "Choose a listed window or the whole date.");
+  const wholeDay = window === "";
+  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
+    const state = current || await initialCapacity(c.slug);
+    const blocks = state.blocks || [];
+    const key = wholeDay ? "" : canonicalWindow(window);
+    const existing = blocks.find((b) => b.date === day && b.windowKey === key);
+    const label = wholeDay ? "" : listedWindow(c, window) || (!blocked && existing ? existing.window : "");
+    if (!wholeDay && !label) throw new AvailabilityInputError("invalid_window", "Choose one of the shop's listed arrival windows.");
+    let changed = false;
+    if (blocked && !existing) {
+      // Count all retained blocks, including past ones. Past blocks remain removable; nothing
+      // expires or frees a reservation behind an owner's back.
+      if (blocks.length >= 100) throw new AvailabilityInputError("too_many_blocks", "Remove an old block before adding another (100 maximum).");
+      state.blocks = [...blocks, { date: day, window: label, windowKey: key }]; changed = true;
+    } else if (!blocked && existing) { state.blocks = blocks.filter((b) => b !== existing); changed = true; }
+    const existingBookings = blockCount(state, day, key);
+    const notice = blocked && existingBookings ? `${existingBookings} already reserved visit${existingBookings === 1 ? " remains" : "s remain"} unchanged. This block stops new reservations.` : "";
+    return { ...(changed || !current ? { value: state } : {}), result: { ok: true, availabilityBlocks: blockViews(state), existingBookings, notice } };
+  });
 }
 export async function bookingWindowTaken(c, date, window) {
   const slot = bookingSlot(date, window), capacity = capacityLimit(c);
   if (!slot) return { full: false, count: 0, capacity };
   return atomicUpdate("index", capacityKey(c.slug), async (current) => {
     const state = current || await initialCapacity(c.slug);
-    const count = Object.values(state.reservations).filter((slots) => slots.includes(slot)).length;
-    return { ...(!current ? { value: state } : {}), result: { full: count >= capacity, count, capacity } };
+    const count = reservedCount(state, slot), blocked = blockedWindow(state, normalizeDate(date), window);
+    return { ...(!current ? { value: state } : {}), result: { full: blocked || count >= capacity, count, capacity, ...(blocked ? { blocked: true } : {}) } };
   });
 }
 export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false } = {}) {
-  const slot = bookingSlot(date, window), capacity = capacityLimit(c), token = id(12);
+  let targetDate = date, targetWindow = window;
+  if (!requireExisting) {
+    try { targetDate = requestedDate(date); }
+    catch (err) { if (!(err instanceof AvailabilityInputError)) throw err; return { full: true, reason: err.code, message: `Nothing was booked. ${err.message}` }; }
+    targetWindow = listedWindow(c, window);
+    if (!targetWindow) return { full: true, reason: "invalid_window", message: "Nothing was booked. That is not a listed arrival window. Check availability for a listed window." };
+  }
+  const slot = bookingSlot(targetDate, targetWindow), capacity = capacityLimit(c), token = id(12);
   return atomicUpdate("index", capacityKey(c.slug), async (current) => {
     const state = current || await initialCapacity(c.slug);
     state.mutations ||= {};
@@ -178,14 +227,16 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     if (requireExisting && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
     if (from && (previous.length !== 1 || previous[0] !== bookingSlot(from.date, from.window))) throw new Error("Booking changed during reschedule; reload it and retry");
     if (!from && previous.length && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
+    if (!previous.includes(slot) && isElapsedWindow(targetDate, targetWindow)) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "elapsed", availability: openingsFromState(c, state, targetDate, 7) } };
+    if (!previous.includes(slot) && blockedWindow(state, targetDate, targetWindow)) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "blocked", message: "Nothing was booked. That date or window is unavailable. Check availability for another option.", availability: openingsFromState(c, state, targetDate, 7) } };
     const count = slot ? Object.entries(state.reservations).filter(([id, slots]) => id !== bookingId && slots.includes(slot)).length : 0;
-    if (slot && !previous.includes(slot) && count >= capacity) return { ...(!current ? { value: state } : {}), result: { full: true, count, capacity } };
+    if (slot && !previous.includes(slot) && count >= capacity) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "full", count, capacity, availability: openingsFromState(c, state, targetDate, 7) } };
     // A move holds both windows until its booking write succeeds. A crash therefore blocks spare
     // capacity instead of freeing a slot while an active booking still points at it.
     const next = slot && !previous.includes(slot) ? [...previous, slot] : previous;
     if (next.length) state.reservations[bookingId] = next;
     state.mutations[bookingId] = token;
-    return { value: state, result: { token, slot, previous, next } };
+    return { value: state, result: { token, slot, previous, next, date: targetDate, window: targetWindow } };
   });
 }
 export async function finishBookingWindow(slug, bookingId, claim) {

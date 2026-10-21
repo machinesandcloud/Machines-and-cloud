@@ -1,7 +1,7 @@
 // Vapi server webhook: picks the assistant for an incoming call (with what we know about the caller),
 // runs our tools during the call, and files the transcript and the minutes when the call ends.
 import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, listRecords, noteInbound } from "./lib/store.mjs";
-import { bookVisit, flagLead, callerContext, cellIsForwardedLine } from "./lib/desk.mjs";
+import { bookVisit, flagLead, callerContext, cellIsForwardedLine, availabilityToolResult } from "./lib/desk.mjs";
 import { json } from "./lib/agent.mjs";
 import { e164 } from "./lib/send.mjs";
 import { addUsage } from "./lib/usage.mjs";
@@ -61,7 +61,8 @@ export default async (req) => {
       const name = t.function?.name || t.name; let input = t.function?.arguments ?? t.arguments ?? {};
       if (typeof input === "string") { try { input = JSON.parse(input); } catch { input = {}; } }
       try {
-        if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); if (b.full) { results.push({ toolCallId: t.id, result: b.message }); continue; } results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. The owner has the details and the customer will get a text reminder.` }); }
+        if (name === "get_availability") { const r = await availabilityToolResult(c, input); results.push({ toolCallId: t.id, ...(r.is_error ? { error: r.content } : { result: r.content }) }); }
+        else if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); if (b.full) { results.push({ toolCallId: t.id, result: b.message }); continue; } results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. The owner has the details and the customer will get a text reminder.` }); }
         else if (name === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `The owner has been texted, reference ${l.id}.` }); }
         else results.push({ toolCallId: t.id, error: "Unknown tool." });
       } catch (err) { console.error("vapi tool", name, err); await logEvent(c.slug, "vapi_tool_failed", { name, error: String(err?.message || err).slice(0, 200) }); results.push({ toolCallId: t.id, error: "The tool failed. Apologize and take the caller's number for a callback." }); }

@@ -1,0 +1,190 @@
+{
+  "clients": {
+    "pm-availability-ui": {
+      "slug": "pm-availability-ui",
+      "ownerKey": "local-availability-owner",
+      "status": "live",
+      "plan": "growth",
+      "createdAt": "2026-10-21T23:34:47.868Z",
+      "owner": {
+        "name": "Test Owner",
+        "email": "owner@example.test",
+        "phone": "+17135550199",
+        "backupPhone": ""
+      },
+      "business": {
+        "name": "Test HVAC",
+        "website": "",
+        "trade": "HVAC",
+        "city": "Houston",
+        "serviceArea": [
+          "Katy"
+        ],
+        "notServed": [],
+        "hours": "Monday to Friday 7 am to 7 pm",
+        "afterHours": "",
+        "spanish": true,
+        "licenses": "",
+        "legal": {}
+      },
+      "services": [],
+      "fees": [],
+      "windows": [
+        "8 to 12",
+        "12 to 5"
+      ],
+      "rules": {
+        "never": [
+          "Quote a price the owner has not published",
+          "Promise an exact arrival time; offer the arrival windows only",
+          "Pretend to be a person",
+          "Give advice on gas, electrical, or safety beyond: leave the area if there is a gas smell or fire, call 911, then call us"
+        ],
+        "handoff": [
+          "Complaints about past work",
+          "Warranty questions",
+          "Anything about a bill or refund",
+          "Commercial or large projects"
+        ],
+        "emergencies": {
+          "tier0": [
+            "Gas smell",
+            "Carbon monoxide alarm",
+            "Smoke or fire",
+            "Sparks or a burning smell from the panel or an outlet",
+            "Sewage flooding a living space"
+          ],
+          "tier1": [
+            "No cooling when the forecast high is 90\u00b0F or more",
+            "No cooling with an infant, elderly, or medically dependent person in the home",
+            "No heat when it is at or below freezing outside",
+            "Water pouring from the air handler"
+          ],
+          "tier2": "Everything else: offer the next available window.",
+          "script": ""
+        },
+        "hours": {
+          "mon": {
+            "open": "07:00",
+            "close": "19:00"
+          },
+          "tue": {
+            "open": "07:00",
+            "close": "19:00"
+          },
+          "wed": {
+            "open": "07:00",
+            "close": "19:00"
+          },
+          "thu": {
+            "open": "07:00",
+            "close": "19:00"
+          },
+          "fri": {
+            "open": "07:00",
+            "close": "19:00"
+          },
+          "sat": null,
+          "sun": null
+        },
+        "emergency247": false,
+        "consentAsk": false,
+        "windowCapacity": 1,
+        "ackMinutes": 10,
+        "callbackHours": "within 30 minutes",
+        "callbackAfterHours": "by 8 am tomorrow",
+        "bypass": []
+      },
+      "digest": {
+        "text": true
+      },
+      "faq": [],
+      "leadSources": [],
+      "leads": {
+        "angiKey": "",
+        "thumbtackSecret": ""
+      },
+      "software": "google",
+      "phone": {
+        "businessNumber": "",
+        "twilioNumber": "",
+        "forwarding": "none",
+        "carrier": "other",
+        "transferTo": "",
+        "voiceForwardTo": "",
+        "textBack": true,
+        "tenDlc": "not_started"
+      },
+      "provision": {
+        "status": "pending",
+        "steps": {}
+      },
+      "build": {
+        "status": "pending",
+        "notes": "",
+        "sourcePages": []
+      },
+      "widget": {
+        "greeting": "",
+        "allowedOrigins": []
+      },
+      "summary": "",
+      "liveAt": "2026-10-21T23:34:47.870Z",
+      "calendar": {
+        "provider": "none",
+        "connected": false
+      },
+      "billing": {
+        "status": "none",
+        "plan": "growth",
+        "trialEnd": null
+      },
+      "voice": {
+        "provider": "none",
+        "ready": false,
+        "detached": false
+      }
+    }
+  },
+  "bookings": {
+    "pm-availability-ui/abc123abcd": {
+      "id": "abc123abcd",
+      "slug": "pm-availability-ui",
+      "createdAt": "2026-10-21T23:34:47.870Z",
+      "customer_name": "Test Customer",
+      "phone": "+17135550123",
+      "address": "12 Oak St, Katy",
+      "date": "2026-10-24",
+      "window": "8 to 12",
+      "issue": "AC repair",
+      "status": "booked"
+    }
+  },
+  "conversations": {
+    "pm-availability-ui/test/availability-model-main": {
+      "channel": "test",
+      "contact": "availability-model-main",
+      "updatedAt": "2026-10-21T23:38:31.075Z",
+      "flag": null,
+      "messages": [
+        {
+          "role": "user",
+          "content": "I need an AC service visit on Saturday, October 24, 2026 (2026-10-24), in the 8 to 12 arrival window. I am Nora Fixture, +1 713-555-0151, at 12 Oak St, Katy, TX 77494. The AC is rattling. Please book that visit.",
+          "at": "2026-10-21T23:37:59.050Z"
+        },
+        {
+          "role": "assistant",
+          "content": "Hi Nora, thanks for the details. I'm sorry, but Saturday, October 24 has no openings. The closest open dates are:\n\n- **Sunday, October 25:** 8 to 12 or 12 to 5\n- **Monday, October 26:** 8 to 12 or 12 to 5\n\nOther days that week are also open in either window. Would one of these work for the rattling AC at 12 Oak St? The tech will text you when they're on the way, and they'll confirm the price on site.",
+          "at": "2026-10-21T23:38:31.075Z"
+        }
+      ],
+      "slug": "pm-availability-ui",
+      "createdAt": "2026-10-21T23:37:59.034Z"
+    }
+  },
+  "index": {
+    "bookings:pm-availability-ui:+17135550123": [
+      "abc123abcd"
+    ]
+  }
+}

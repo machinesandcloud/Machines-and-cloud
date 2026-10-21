@@ -2,8 +2,8 @@
 // Started by sms.mjs after it has already answered Twilio's webhook.
 import { getClient, getConversation, saveConversation, logEvent } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
-import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT } from "./lib/config.mjs";
-import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest } from "./lib/desk.mjs";
+import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY } from "./lib/config.mjs";
+import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, availabilityToolResult } from "./lib/desk.mjs";
 import { sendSMS, e164, optedOut } from "./lib/send.mjs";
 
 export default async (req) => {
@@ -15,8 +15,9 @@ export default async (req) => {
   const conv = await getConversation(c.slug, "sms", from);
   const bookings = await upcomingBookings(c, from);
   const history = toApiMessages(conv.messages);
-  const tools = bookings.length ? [BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT] : [BOOK_VISIT, NOTIFY_OWNER];
+  const tools = bookings.length ? [BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY] : [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
   const execTool = async (tool, input) => {
+    if (tool === "get_availability") return availabilityToolResult(c, input);
     if (tool === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}.`, event: { type: "booking", id: b.id } }; }
     if (tool === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); return { content: l.status === "spam" ? "Noted as spam." : `Owner texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
     if (tool === "update_visit") {

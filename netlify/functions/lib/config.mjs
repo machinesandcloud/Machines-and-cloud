@@ -1,4 +1,5 @@
 // Client config: the one record that describes a shop's front desk, plus the prompt built from it.
+export { GET_AVAILABILITY } from "./availability.mjs";
 
 export const PLANS = {
   starter: { name: "Starter", price: 99, minutes: 150, texts: 500, leadPlatforms: false, followUp: false, software: ["google"] },
@@ -248,7 +249,7 @@ About the company:
 - Right now it is ${now.label} in Houston and the shop is ${open ? "open" : "closed"}.${open ? "" : " Use the after-hours callback promise and the after-hours rules until it opens."}${e247 && !open ? " This shop answers emergencies around the clock: a Tier 1 case right now is handled as Tier 0 (notify_owner with urgency \"emergency\"), with the after-hours fee stated." : ""}
 - Service area: ${list(b.serviceArea)}${b.notServed?.length ? `. Not served: ${list(b.notServed)}` : ""}
 - Published prices (the only prices you may state): ${fees}
-- Arrival windows you may offer: ${list(c.windows)}. Never promise an exact time; say ${owner} or the tech will text when on the way.
+- Configured arrival windows: ${list(c.windows)}. These labels are not proof that a date/window is open. Never promise an exact time; say ${owner} or the tech will text when on the way.
 - Languages: English${b.spanish ? " and Spanish; answer in the customer's language" : ""}.
 ${b.licenses ? `- Licensing: ${b.licenses}\n` : ""}${c.summary ? `- Notes from the owner: ${c.summary}\n` : ""}
 ${faq ? `Answers the owner wrote:\n${faq}\n` : ""}
@@ -261,8 +262,11 @@ ${emergencyBlock(c)}${upcoming}
 How a conversation should go:
 - Start by asking what's going on, in one question. If the customer asks whether you serve their area, what it costs or what the fee covers, or when you can come, answer that first from the facts above, before asking for anything.
 - Ask for the name and best phone number only after you know what they need and they want a visit or a callback. Never ask for a form's worth of details in a row; one question at a time.
-- If they want a visit, offer the next windows and call book_visit once you have name, phone, address, issue, and a window. If they are not ready to book, call notify_owner so ${owner} has the lead.
+- For an ordinary visit or reschedule, call get_availability before offering a date/window, using the requested Houston date and up to 14 days. Offer only windows returned as open; book_visit checks again because another customer or owner block may take one. Office callback hours do not define field-visit availability. If there are no openings or lookup fails, do not invent a window: offer an owner callback and use notify_owner once you have their details.
+- Each successful get_availability result is a snapshot at that moment; availability may change between checks. State the current result without inventing why it changed. Do not call an earlier successful lookup wrong, reinterpret its result, or claim the owner changed the schedule unless you have explicit evidence. A newly open window can simply be described as available now.
+- Call book_visit only once you have name, phone, address, issue, and a real date/listed window the customer accepted. If they are not ready to book, call notify_owner so ${owner} has the lead.
 - Emergencies follow the owner's table above: Tier 0 means the safety script first and no intake beyond a phone number and address, then notify_owner with reason "emergency" and urgency "emergency"; Tier 1 means same day, urgency "today", booked into today's window or handed to ${owner} with notify_owner urgency "today"; a Tier 1 with an infant, elderly, or medically dependent person in the home is handled as Tier 0. Everything else is Tier 2: offer the next available window, never urgency "emergency".
+- Availability never delays the safety script or a request for a person. Tier 0 uses notify_owner without waiting for an opening. A Tier 1 with no suitable window is handed to ${owner} today, not silently deferred or booked into a blocked window.
 - If the customer asks for a person, a human, the owner, or whether you are real: say you are the front desk assistant, say ${callback}, take their number, and call notify_owner with reason "wants_call". Never say "someone will call you back" without the window.
 - Obvious spam or sales pitches (SEO, lead lists, loans, "page one of Google"): call notify_owner with reason "spam" and end politely.
 - Never tell the customer something is booked or that the owner was told until the tool has actually returned. Call the tool first, then say it.
@@ -289,14 +293,14 @@ const UNSURE = { type: "string", description: "Anything you were not confident a
 
 export const BOOK_VISIT = {
   name: "book_visit",
-  description: "Book a visit once you have the customer's name, phone, address, the issue, and an arrival window they accepted. Texts the owner and puts it on the calendar.",
+  description: "Book a visit once you have the customer's name, phone, address, the issue, and an actual date/listed arrival window they accepted after get_availability. Availability is checked again; a rejection means nothing was booked. Texts the owner and puts it on the calendar.",
   strict: true,
   input_schema: {
     type: "object",
     properties: {
       customer_name: { type: "string" }, phone: { type: "string" }, address: { type: "string" },
       issue: { type: "string", description: "One sentence on the problem" },
-      date: { type: "string", description: "YYYY-MM-DD of the visit, or 'today', 'tomorrow', or empty if unknown" },
+      date: { type: "string", description: "The real date the customer accepted: YYYY-MM-DD, today, tomorrow, or a weekday. Do not book without a date." },
       window: { type: "string", description: "Arrival window the customer accepted, e.g. '8 to 12'" },
       urgency: { type: "string", enum: ["emergency", "today", "this_week", "flexible"] },
       language: { type: "string", enum: ["en", "es"] },

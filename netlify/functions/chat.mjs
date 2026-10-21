@@ -4,8 +4,8 @@
 // the named personas are the homepage example companies.
 import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
 import { getClient, getConversation, saveConversation, get, put } from "./lib/store.mjs";
-import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER } from "./lib/config.mjs";
-import { bookVisit, flagLead } from "./lib/desk.mjs";
+import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
+import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
 
 export const config = { path: "/api/chat" };
 
@@ -153,8 +153,9 @@ export default async (req, context) => {
     conv.messages.push({ role: "user", content: last.content, at: new Date().toISOString() });
     const history = toApiMessages(conv.messages);
     const system = buildSystemPrompt(c, channel);
-    const tools = [BOOK_VISIT, NOTIFY_OWNER];
+    const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
     const execTool = async (name, input) => {
+      if (name === "get_availability") return availabilityToolResult(c, input);
       if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
       if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
       return { content: "Unknown tool.", is_error: true };

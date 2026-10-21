@@ -1,7 +1,8 @@
 // What happens when the front desk books a visit or flags a lead for a real client:
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
-import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow } from "./store.mjs";
+import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability } from "./store.mjs";
+import { AvailabilityInputError } from "./availability.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
@@ -207,9 +208,19 @@ export async function runVisitCheck(c, task) {
 export async function windowTaken(c, date, window) {
   return bookingWindowTaken(c, date, window);
 }
-export function fullMessage(c, date, window) {
+export function fullMessage(c, date, window, availability, reason = "full") {
+  if (availability) {
+    const choices = availability.openings.flatMap((day) => day.windows.map((w) => `${day.date}, ${w}`)).slice(0, 4);
+    return `Nothing was booked. That date/window is ${reason === "blocked" ? "unavailable" : reason === "elapsed" ? "no longer open" : "already full"}. ${choices.length ? `Offer one of these available windows: ${choices.join("; ")}. Check again before booking.` : `No listed window is open in the checked ${availability.days} dates. Offer to take the customer's details for an owner callback; do not invent an opening.`}`;
+  }
   const others = (c.windows || []).filter((w) => canonicalWindow(w) !== canonicalWindow(window));
   return `That window (${date || "that day"}, ${window}) is already full. Nothing was booked. Offer ${others.length ? "the other window (" + others.join(" or ") + ") or " : ""}another day, then book again.`;
+}
+export async function availabilityToolResult(c, input) {
+  try { return { content: JSON.stringify(await getAvailability(c, input?.date, input?.days)) }; }
+  catch (err) {
+    return { content: JSON.stringify(err instanceof AvailabilityInputError ? { error: err.code, message: err.message } : { error: "availability_unavailable", message: "Availability could not be checked. Do not say there are no openings or promise a window. Offer an owner callback instead; emergency safety and handoff still take priority." }), is_error: true };
+  }
 }
 async function calendarFailed(c, b, err, op) {
   console.error("calendar", op, err);
@@ -219,12 +230,15 @@ async function calendarFailed(c, b, err, op) {
 export async function bookVisit(c, input, ctx = {}) {
   const phone = e164(input.phone) || esc(input.phone);
   const bookingId = id(5), type = await customerType(c.slug, phone);
-  const taken = await reserveBookingWindow(c, bookingId, esc(input.date), esc(input.window));
-  if (taken.full) { await logEvent(c.slug, "window_full", { date: normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity }); return { full: true, message: fullMessage(c, esc(input.date), esc(input.window)) }; }
+  const taken = await reserveBookingWindow(c, bookingId, input.date, input.window);
+  if (taken.full) {
+    if (taken.reason === "full") await logEvent(c.slug, "window_full", { date: taken.availability?.from || normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity });
+    return { full: true, reason: taken.reason, message: taken.availability ? fullMessage(c, esc(input.date), esc(input.window), taken.availability, taken.reason) : taken.message || fullMessage(c, esc(input.date), esc(input.window)) };
+  }
   const b = await addRecord("bookings", c.slug, {
     id: bookingId,
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
-    date: normalizeDate(esc(input.date)), dateSaid: esc(input.date), window: esc(input.window), urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
+    date: taken.date, dateSaid: esc(input.date), window: taken.window, urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: type,
   });
   let canFinish = true;
@@ -487,12 +501,13 @@ export async function confirmVisit(c, b) {
 }
 
 export async function rescheduleVisit(c, b, date, window) {
-  const nd = normalizeDate(esc(date)) || b.date, nw = esc(window) || b.window;
+  const nd = date === undefined ? b.date : date;
+  const nw = window === undefined ? b.window : window;
   const from = ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date && b.window ? b : undefined;
   const claim = await reserveBookingWindow(c, b.id, nd, nw, from);
-  if (claim.full) return { full: true, message: fullMessage(c, esc(date), nw) };
+  if (claim.full) return { full: true, reason: claim.reason, message: claim.availability ? fullMessage(c, nd, nw, claim.availability, claim.reason) : claim.message || fullMessage(c, nd, nw) };
   const old = when(b);
-  const moved = { ...b, date: nd, window: nw, status: "booked", confirmedAt: null };
+  const moved = { ...b, date: claim.date, window: claim.window, status: "booked", confirmedAt: null };
   await saveRecord("bookings", moved, { capacityClaim: claim });
   Object.assign(b, moved);
   let canFinish = true;

@@ -2,7 +2,8 @@
 // records, health, and forwarding instructions. PUT with the key updates the editable config (loop-checked).
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
-import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound } from "./lib/store.mjs";
+import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock } from "./lib/store.mjs";
+import { AvailabilityInputError } from "./lib/availability.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
@@ -43,6 +44,9 @@ async function handle(req) {
     }
     const exp = url.searchParams.get("export");
     if (exp) return exportCSV(c, exp);
+    let availabilityBlocks;
+    try { availabilityBlocks = await getAvailabilityBlocks(c); }
+    catch { return json({ error: "availability_unavailable", message: "The visit schedule could not be read. Try again before changing availability." }, 503); }
     const [bookings, leads, convs, events, alerts, usage] = await Promise.all([
       listRecords("bookings", c.slug, 100), listRecords("leads", c.slug, 100), listJSON("conversations", c.slug + "/", 60), listJSON("events", c.slug + "/", 300), listRecords("alerts", c.slug, 100), getUsage(c.slug),
     ]);
@@ -53,6 +57,7 @@ async function handle(req) {
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, bookings, leads, events),
       health: lineHealth(c, events, await lastInbound(c.slug)),
+      availabilityBlocks,
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
       forwarding: forwardingInstructions(c),
       policy: policyUrls(c.slug, site), dataPolicy: DATA_POLICY, ackMinutesOptions: ACK_MINUTES,
@@ -100,13 +105,18 @@ async function handle(req) {
     if (loop) { Object.assign(c, JSON.parse(before)); return json({ error: "loop", ...loop }, 400); }
     await saveClient(c); await indexClient(c);
     await logEvent(c.slug, "config_updated", {});
-    try { await updateVoicePrompt(c); } catch (e) { console.error("voice prompt update", e); }
+    const priorVoice = JSON.stringify(c.voice);
+    try { await updateVoicePrompt(c); if (JSON.stringify(c.voice) !== priorVoice) await saveClient(c); } catch (e) { console.error("voice prompt update", e); }
     try { const { syncVoiceFallback } = await import("./lib/twilio.mjs"); await syncVoiceFallback(c); } catch (e) { console.error("voice fallback sync", e); }
     return json({ ok: true, client: ownerView(c) });
   }
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if (b.action === "availability_block" || b.action === "availability_unblock") {
+      try { return json(await setAvailabilityBlock(c, b.date, b.window, b.action === "availability_block")); }
+      catch (err) { return err instanceof AvailabilityInputError ? json({ error: err.code, message: err.message }, 400) : json({ error: "availability_unavailable", message: "The schedule change could not be confirmed. Reload availability before trying again." }, 503); }
+    }
     const fw = forwardingInstructions(c);
     const name = c.business.name || "Your front desk";
     if (b.action === "go_live" || b.action === "resume") {

@@ -1,6 +1,74 @@
 # Backlog: Machines & Cloud front desk
 
-Owner: Product Owner. Round 10 is at the top, then rounds 9, 8, 7, 6, 5, 4, 3, 2, and 1 (2026-10-19, the launch definition and epics), each unchanged from when it was written. Evidence shorthand is the same in both: `S#n` = RESEARCH-servicing.md ranked item n, `W§n` = RESEARCH-customer-workflow.md section n, `code:` = read in the repo, `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+Owner: Product Owner. Round 11 is current; rounds 10 through 1 below are preserved historical records. Round 11 explicitly supersedes their blanket feature-freeze instructions. Evidence shorthand: `F#` = RESEARCH-stakeholder-forums.md source register; `S#n` = RESEARCH-servicing.md ranked item n; `W§n` = RESEARCH-customer-workflow.md section n; `code:` = read in the repo; `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+
+---
+
+# Round 11 (2026-10-21): own the outcome and keep improving the product
+
+## R11.1 Current mandate and accountability
+
+Steve's renewed mandate is to deliver a working final product and continuously identify useful new features from public operator discussions and competitor research. **The blanket freeze in Rounds 8–10 and SPRINT8 is superseded.** Feature delivery can proceed while provider approvals remain open. **Billing remains parked.** Existing local-testing, purchase and deploy boundaries remain in force.
+
+The PO owns the product outcome: choosing the job to solve, rejecting weak or duplicate ideas, defining the customer-visible result and independently accepting the complete workflow. Research notes and passing helper tests alone do not satisfy that role. PM owns scoped tickets and independent verification. Engineering owns implementation, failure evidence and fixes. The first paying Houston shop must still be safe to put on the line; new work does not close an unfinished provider gate.
+
+Current inputs are [public stakeholder discussions](../RESEARCH-stakeholder-forums.md) and the PM's [official competitor workflow research](../RESEARCH-competitors.md), both dated October 21. Public authors are not our interviewed customers; vendor documentation describes claimed capabilities, not trials we performed. Fleet sizes, locations, spending preferences and reported losses are used only where the source states them. Revisited sources are identified. No one was contacted.
+
+## R11.2 Where the product actually stands
+
+The resumed local baseline is accepted: all 18 customer scenarios, capacity case 19, Calendar failure handling, the real-model workflow checks and the measured audit policy have evidence in SPRINT8 section 8 and DECISIONS.md. Original failures and targeted reruns remain recorded. Local baseline commit before this new feature slice is `4967145`.
+
+That establishes local behavior with synthetic shops, in-memory/test-double storage, logged sends and explicitly controlled Anthropic inference. It does not establish deployed storage behavior, delivered calls/texts/emails, real Calendar writes or a live first shop. The bridge brand is in review and its campaign is not filed; Google verification, the named Spanish reviewer and the controlled real-provider pass remain open. Netlify auto recharge remains disabled at Steve's request. Do not turn a new feature's local acceptance into a production-ready claim.
+
+The current outcome dashboard is [PRODUCT-STATUS.md](PRODUCT-STATUS.md). It assigns every remaining gate a PO-accountable outcome, an Engineer/PM driver and a concrete next artifact. Its provider facts are last-observed October 21 setup, not fresh live checks.
+
+## R11.3 Ranked work and the first delivery decision
+
+| Rank | Priority and state | Customer job and resulting behavior | Evidence and why it ranks here |
+|---|---|---|---|
+| 1 | **MUST, accepted locally in Sprint 9** | **Owner-declared unavailable dates/windows and shared stored-availability lookup.** An owner can block a date or listed window for external work, time off or a closure. Every channel offers and books from the remaining stored openings. | F2's solo electrician needs to organize existing work around another job; F3's crews cannot honor self-selected times; F5 reserves spare capacity; F6 is an explicit Houston closure with emergency service preserved. This closes a tangible control gap without new provider credentials. Jobber and Avoca already describe availability/capacity controls: this is a useful small-shop delivery slice, not a claim of unique functionality. |
+| 2 | **MUST next; scope separately after rank 1 acceptance** | **Explicit follow-up commitments with honest completion.** Record call versus visit versus quote, who owns it and the agreed due time. Acknowledgment cannot stand in for reported customer contact or inflate kept-callback metrics. | F1 is a four-tech plumbing shop reporting phone-versus-visit confusion. Existing `runCallbackCheck` skips on `ackedAt`, and weekly/monthly kept-call metrics accept acknowledgment. A generic new callback queue would duplicate existing work; fixing the actual commitment/completion distinction has a measurable outcome. |
+| 3 | **SHOULD** | **Confirm customer/property before changing a returning caller's visit.** Resolve multiple visits/properties and retain the chosen reference and action history. | F4 reports wrong client matching and strange tasks. This is a previously researched anecdote and a risk to test, not a reproduced wrong-customer defect in our product. Preserve simple routine conversations rather than repeating a form every time. |
+| 4 | **SHOULD, hypothesis before implementation** | **Owner-approved offers to a requested waitlist after a cancellation.** Fill a released opening without double booking or unsolicited bulk messages. | F7 reports late cancellations disrupting a small plumber's schedule. Older, limited evidence supports the job but does not validate this specific design. Keep owner approval, requested earlier-slot consent, STOP and safe reservation semantics; no deposits or cancellation charges while billing is parked. |
+| 5 | **SHOULD** | **Dated on-call roster and explicit acceptance/fallback.** Reach today's designated person and a known backup instead of a stale static destination. | F8 describes changing duty rotations and service cutoffs. Earlier research already identified competitor on-call calendars; this is a known implementation opportunity. Existing owner/backup/Steve escalation is retained until the new workflow is accepted. |
+| 6 | **SHOULD, competitor-led hypothesis** | **Visible failed-transfer recovery with a named owner and deadline.** Preserve context and distinguish answered transfer, no answer, voicemail, rejection and provider failure from completed recovery. | The PM documents Rosie's return-to-message fallback and Avoca's assigned recovery versus verified outcomes. F4 offers general human-interaction friction, not direct validation of this exact design. Provider calls, fallback and actual customer recovery require live evidence. |
+
+Rank 1 is preferred to rank 2 for the immediate slice because several distinct operator situations point to a missing availability control. Rank 2 has a strong specific account and a concrete code gap; it remains next. Neither choice justifies delaying the existing provider acceptance work.
+
+## R11.4 Rank 1: acceptance owned by the PO
+
+This is **manual owner availability plus our stored reservations**. It does not read Google/FSM busy time and must not be labeled a synchronized calendar. Owner maintenance of external-work blocks is a visible limitation. Route optimization, drive-time predictions, a complete dispatch board and billing are outside this slice.
+
+The complete acceptance workflow is:
+
+1. On a synthetic shop's owner portal, save a whole Houston date as unavailable, and separately save a selected listed window on another date. Reload and verify the saved state. Validate real calendar dates and canonical window equivalents; reject malformed/cross-shop changes.
+2. Through the customer's shared availability lookup, verify that only listed, unblocked windows below stored capacity are offered. A full window is unavailable. A failed lookup is reported as a failure, not as an empty calendar or fabricated opening.
+3. Attempt a direct booking and reschedule into a blocked target, including a stale model recommendation and a window alias. They create no successful appointment, confirmation or changed visit. Existing visits on a newly blocked date remain visible and unchanged; blocking is not cancellation.
+4. Remove the relevant block through the owner portal, reload, look up openings and book successfully. The visit, reminders and owner details agree. Recheck capacity after the successful booking; a second attempt cannot bypass the existing concurrency protection.
+5. Confirm the shared behavior across chat, SMS and voice tool paths. A date with no ordinary openings still preserves emergency safety instructions and human handoff. Test Houston midnight/DST, full and partial blocks, removal, shop isolation, existing visits, no-opening fallback and concurrent capacity changes.
+
+PM supplies independent acceptance evidence and engineering fixes failures. The PO must read the rendered owner flow and resulting customer responses/records before marking this delivered workflow accepted. A saved setting, a code review or a regex on the word “unavailable” is insufficient.
+
+**PO verdict, October 21: accepted locally.** The owner portal saves partial/whole-day blocks, retains existing visits, survives reload, exposes save failure truthfully and removes blocks on mobile. Root executed the isolated browser; PM/PO independently reviewed its 12 checks, harness and rendered image. PO independently reran all 35 offline groups (17 SDK CAS conflicts), covering the shared channel routes, storage faults, races, invalid/full/blocked/ended-window refusal and unchanged rejected moves. Same-day numeric windows close at their known Houston end, with midnight/DST coverage; office weekdays and named/overnight times are not inferred.
+
+The scoped real-model evidence correctly refuses a whole-day block, then books one now-open afternoon visit after unblock, retaining the original morning visit, exact contact details and three tasks. A blocked ordinary date does not stop the safety-first emergency lead/alert/escalation chain. Independent review returned an invented retrospective explanation (“the earlier result was wrong”) even though the owner had changed availability. The shared snapshot rule fixes that defect; the final targeted replay retains the actual prior refusal and confirms the new booking without inventing an error or cause. The original server failure, returned reply and corrected replay remain separate artifacts.
+
+Final targeted source fingerprint: `564ed0ee23b1b735f2098b4bcecb37b5c3c968046e8d98c496a47cf7da5c74f6`, based on HEAD `4967145` plus Sprint 9 working changes; 14 targeted checks, cumulative 12/12 Anthropic requests and zero blocked. Earlier blocked-day/emergency replies were not repeated after the final prompt addition; shared safety/route behavior was rechecked offline. SMS/voice paths use scripted/protocol fixtures, not delivered provider calls. [SPRINT9](SPRINT9.md) and [PRODUCT-STATUS](PRODUCT-STATUS.md) contain the evidence and remaining deployment/provider/live-shop gates. This acceptance does not approve go-live or establish external-calendar synchronization.
+
+## R11.5 What the evidence rules out or leaves open
+
+- F5's October 21 update says the quiet property-management account simply had no recent repairs. Do not build automatic churn labels or unsolicited reactivation from silence alone.
+- F2 explicitly needs organization of existing work, not more incoming leads. Success is honored commitments and less owner rework, not raw call counts.
+- F6's owner preserved emergency coverage while ordinary crews stayed home. An unavailable booking date must not suppress the emergency chain or invent operational safety decisions.
+- Existing consent/STOP, reminders, real-slot booking, human handoff, alerts and callback tracking are baseline capabilities. New names for them are not new features.
+- Competitors already document useful availability, takeover and recovery behavior. We can claim improvement only against an explicit tested workflow and, later, observed shop outcomes. We cannot claim superior booking accuracy, voice quality or conversion from public documentation.
+- Forums do not supply our first customer's identity, carrier, permissions, Spanish approval or real-provider delivery evidence. Those remain explicit acceptance requirements.
+
+## R11.6 Continuous discovery and closure
+
+Each subsequent product round should retain source URLs/dates, identify self-promotion and counterevidence, map the request to what exists and specify the outcome to test. Public discussion can initiate a feature experiment; first-shop conversations and owner behavior must later confirm or change it. No automatic posting, outreach or recurring research schedule is authorized by this record.
+
+Rank 1's local owner-block → customer lookup/rejection → unblock → successful booking workflow is accepted above. PM now cuts the bounded rank 2 commitment/completion slice; PO continues reviewing the other operator jobs and owns the release outcomes in PRODUCT-STATUS through provider and named-shop acceptance. Discovery continues when the team resumes this work; no background schedule is implied.
 
 ---
 
