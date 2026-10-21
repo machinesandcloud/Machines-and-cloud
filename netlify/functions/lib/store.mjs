@@ -101,8 +101,12 @@ export async function recordsFor(kind, slug, phone) {
   return recs.filter(Boolean);
 }
 // The latest customer contact per shop, written by the webhooks, read by the health alerts.
-export const noteInbound = (slug) => put("health", "lastInbound:" + slug, { at: now() });
-export const lastInbound = async (slug) => (await get("health", "lastInbound:" + slug))?.at || null;
+export async function noteInbound(slug, kind = "text") {
+  const cur = (await get("health", "lastInbound:" + slug)) || {};
+  const at = now(); cur.at = at; cur[kind === "call" ? "call" : "text"] = at;
+  await put("health", "lastInbound:" + slug, cur);
+}
+export const lastInbound = async (slug) => (await get("health", "lastInbound:" + slug)) || null;
 
 // Tasks are keyed by due time so the scheduler can list what is due.
 export async function scheduleTask(slug, dueAt, type, data) {

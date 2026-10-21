@@ -72,7 +72,7 @@ export default async (req) => {
   if (c.phone?.voiceForwardTo) {
     const dest = c.phone.voiceForwardTo;
     const inner = dest.startsWith("sip:") ? `<Dial timeout="25"><Sip>${esc(dest)}</Sip></Dial>` : `<Dial timeout="25">${esc(dest)}</Dial>`;
-    await logEvent(c.slug, "call_forwarded", { from }); await noteInbound(c.slug);
+    await logEvent(c.slug, "call_forwarded", { from }); await noteInbound(c.slug, "call");
     return xml(inner);
   }
 
@@ -99,6 +99,6 @@ export default async (req) => {
     }
   }
   await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${textBack === "sent" || textBack === "logged" ? "Text-back sent; I will take it from here and text you the lead." : textBack === "skipped" ? "They were texted recently or opted out, so no text-back." : "No texting sender yet, so no text-back."}`, { type: "owner_note" });
-  await logEvent(c.slug, "missed_call", { from, textBack }); await noteInbound(c.slug);
+  await logEvent(c.slug, "missed_call", { from, textBack }); await noteInbound(c.slug, "call");
   return xml(`${say}<Hangup/>`);
 };

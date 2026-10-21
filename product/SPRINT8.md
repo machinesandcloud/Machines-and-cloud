@@ -62,6 +62,13 @@ Engineer note: `admin {"action":"brake","on":true}` stops the half-hour scans an
 
 Acceptance (local, verified): with the brake on, `run_scheduler` with `all: true` and `force_hour` 21 skipped `healthLifecycle` and ran no autoflag fan-out while the tasks block ran; `force_hour` 18 still ran the digest fan-out (`digests: 1`); `?full=1` carried `brake { on, at, by }` and `lastRun`; with the brake off the scans ran again and the autoflag fan-out was attempted; after 60 Angi posts the stream held exactly 50 events for the shop; the public GET carried `cache-control: public, max-age=60` and `netlify-cdn-cache-control: public, max-age=60, durable` while the owner GET stayed uncacheable; `admin.html` carries the Brake button and the last-run display; OPERATIONS.md carries the credit section, the account steps, and the monitor; no em dashes.
 
+### S8-09 Storage sized for the request (Round 9 item 3)
+Status: verified with a note 2026-10-21 on the local server at commit 7caf297 (in-memory store, no Netlify calls). Size: M. Implements: Round 9 item 3 as built by the engineer (DECISIONS.md "round 9 item 3"); a change to hot paths, so every read path was exercised.
+
+Engineer note: per-phone indexes in the index store (`bookings:<slug>:<phone>`, `leads:<slug>:<phone>`) written on every booking, lead, and platform lead; `upcomingBookings`, `customerType`, `callerContext`, `recentOpenLead`, `noteReviewReply`, and the lead-closing step in `bookVisit` read through them; platform duplicates use `platform:<slug>:<source>:<id>` keys; the webhooks write `health/lastInbound:<slug>`, which the `no_inbound` alert and the portal line-health card read first; the half-hour scan reads 150 events; `admin delete` removes the index keys and the pointer.
+
+Acceptance (local, verified): a booking made through the Vapi tool-calls path was stored for the caller and `C` from that number confirmed inline ("confirmed for tomorrow, 8 to 12"); `assistant-request` for that number greeted "Tom" and knew the visit; a repeat callback request from one number within 30 minutes merged into the open lead (one lead, a `lead_updated` event); a second Angi post with the same lead id returned `duplicate: true` with one lead; a booking from a number with an open lead set the lead to `booked` with `lead_closed`; an inbound text set `lastInboundText` on the line-health card; after `admin delete`, a new shop reusing the number started clean (unknown caller, no inline confirm, the same Angi id not a duplicate). `noteReviewReply` through the index waits for the local model key. Note: the single `lastInbound` pointer does not distinguish calls from texts, so after an inbound text the card's "last inbound call" shows that time too; cosmetic, worth a two-field pointer when the hot paths are next touched.
+
 ## 3. Assumptions (Steve can overturn any; each is one line to change)
 
 1. Round 8 question 1: the external uptime monitor for `/api/health` is a one-time sign-up under Steve's email (the stronger choice: a watcher on the same platform shares its failures).
@@ -101,3 +108,7 @@ Rerun under Steve's local-only rule with `scratchpad/verify20.py`: S8-01 and S8-
 ### Local pass for S8-08, 2026-10-21, local server at commit 8838d64
 
 Every S8-08 line passed locally (the brake, the digest that keeps running under it, the stream cap, the cache headers, the admin page and OPERATIONS statics). Nothing was sent to Netlify. Holding as instructed: no SPRINT9.md, no deploys, no production calls, until the site is up and the freeze is lifted.
+
+### Local pass for S8-09, 2026-10-21, local server at commit 7caf297
+
+Eight of eight lines passed locally through the Vapi, SMS, Angi, portal, and admin paths; one cosmetic note on the shared last-inbound pointer. Nothing was sent to Netlify. Holding as instructed.

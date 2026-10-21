@@ -115,7 +115,7 @@ async function healthAlerts(c) {
   const voice = since(15 * 60 * 1000).filter((e) => ["vapi_tool_failed", "assistant_request_failed", "voice_attach_failed", "voice_detach_failed", "voice_failed"].includes(e.type) || (e.type === "twilio_error" && e.data?.kind === "voice"));
   if (voice.length && (await alertOnce(c, "voice_failures", 1, `Voice failing: ${c.business.name}`, `${voice.length} voice failure(s) in the last 15 minutes: ${voice.map((e) => e.type + " " + (e.data?.error || e.data?.reason || e.data?.code || e.data?.name || "")).join("; ").slice(0, 400)}.`))) n++;
   if (c.status === "live" && c.phone?.forwardingVerified && c.phone?.forwarding !== "none") {
-    const inbound = (await lastInbound(c.slug)) || events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
+    const inbound = (await lastInbound(c.slug))?.at || events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
     if (inbound && businessDaysSince(inbound) >= 5 && (await alertOnce(c, "no_inbound", 5 * 24, `Line silent: ${c.business.name}`, `No call or text has reached the front desk for ${businessDaysSince(inbound)} business days (last at ${inbound}). Forwarding may have dropped: ask the owner to dial *#61# and check Live Voicemail, then call the business number from another phone.`))) n++;
   }
   return n;

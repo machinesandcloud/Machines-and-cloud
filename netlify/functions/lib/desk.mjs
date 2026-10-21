@@ -614,14 +614,14 @@ export async function noteReviewReply(c, phone, text) {
 const houstonDay = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso));
 
 export function lineHealth(c, events = [], pointer = null) {
-  const latest = (types) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); return e || pointer || null; };
+  const latest = (types, kind) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); const p = pointer?.[kind] || null; return [e, p].filter(Boolean).sort().pop() || null; };
   const since = Date.now() - D;
   const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
   const own = c.phone?.twilioNumber && c.phone?.tenDlc === "approved";
   const sender = own ? "own" : (process.env.MC_MESSAGING_SERVICE_SID || process.env.MC_TWILIO_NUMBER) ? "bridge" : "none";
   return {
-    lastInboundCall: latest(["missed_call", "call_forwarded", "call_ended", "call_while_paused", "call_passthrough"]),
-    lastInboundText: latest(["sms_inbound", "sms_reply"]),
+    lastInboundCall: latest(["missed_call", "call_forwarded", "call_ended", "call_while_paused", "call_passthrough"], "call"),
+    lastInboundText: latest(["sms_inbound", "sms_reply"], "text"),
     lastOutboundText: events.filter((x) => x.type === "sms_sent" && x.data?.ok).map((x) => x.at).sort().pop() || null,
     errors24h, sender, tenDlc: c.phone?.tenDlc || "not_started", forwardingVerified: !!c.phone?.forwardingVerified,
   };
