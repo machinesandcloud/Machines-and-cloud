@@ -67,7 +67,7 @@ const PROFILE_TOOL = {
 };
 
 async function draftProfile(pages, c) {
-  const client = new Anthropic({ maxRetries: 2, timeout: 120_000 });
+  const client = process.env.MC_FAKE_MODEL === "1" ? (await import("./lib/fake-model.mjs")).fakeClient() : new Anthropic({ maxRetries: 2, timeout: 120_000 });
   const corpus = pages.map((p) => `=== ${p.url} ===\n${p.text}`).join("\n\n").slice(0, 60000);
   const owner = `Owner's questionnaire (these win over the website when they conflict): name ${c.business.name || "-"}; trade ${c.business.trade || "-"}; hours ${c.business.hours || "-"}; area ${(c.business.serviceArea || []).join(", ") || "-"}; fees ${(c.fees || []).map((f) => f.label + " " + f.amount).join(", ") || "-"}; services ${(c.services || []).join(", ") || "-"}; notes ${c.summary || "-"}`;
   const res = await client.beta.messages.create({

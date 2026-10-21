@@ -1,5 +1,6 @@
 // The agent loop shared by every mode: streams text, runs tools through execTool, returns the reply.
 import Anthropic from "@anthropic-ai/sdk";
+import { fakeClient } from "./fake-model.mjs";
 
 export const MODEL = "claude-opus-5-5";
 export const MAX_MESSAGES = 20;
@@ -7,6 +8,7 @@ export const MAX_CHARS = 1500;
 const MAX_ITERATIONS = 3;
 
 export function makeClient() {
+  if (process.env.MC_FAKE_MODEL === "1") return fakeClient();
   return new Anthropic({ maxRetries: 1, timeout: 25_000 });
 }
 

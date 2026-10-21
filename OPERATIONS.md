@@ -113,10 +113,11 @@ Netlify meters compute (10 credits per GB-hour), requests (2 per 10,000), bandwi
 Every draft deploy, function call, and storage operation on Netlify costs credits, and a day of test loops exhausted the plan on 2026-10-20. The rule since then: verification runs locally and nothing goes to Netlify except one git push per verified sprint.
 
 - `node scripts/local-server.mjs` serves the site and every function at `http://localhost:8888` from the same modules production runs, against an in-memory store (`MC_MEMORY_STORE=1`); admin key `local-admin`; `MC_MEMORY_FILE=.local-store.json` keeps the store across restarts. Model calls need `ANTHROPIC_API_KEY=` in a gitignored `.env` at the repo root (the site's key lives at the Netlify team level and is not readable from the CLI); without it chat and the two classifiers fail cleanly and everything else works.
+- Without a key the local server runs the deterministic fake model (`lib/fake-model.mjs`, `MC_FAKE_MODEL=1`): rule-based replies that call the same tools (book, notify, emergency, callback, spam), a keyword review-reply classifier, a keyword rubric, and a stub website profile, so every flow including the SMS background agent and the nightly audit can be verified with no Anthropic spend. It is test-only and never set in production; lines about the real model's wording wait for the key.
 - Every check script that took a draft URL takes `http://localhost:8888` instead; the background functions are routed too (`/.netlify/functions/<name>`).
 - `node scripts/smoke.mjs` is the deploy gate and runs locally in under a second.
 - Draft deploys (`netlify deploy --dir=.`) are for one final look per sprint at most, and never for loops. The two-model classifier evaluation is run locally, never through Netlify.
-- Production: `git push` builds `main` once; the scheduler runs every 10 minutes and does its per-shop scans only at :00 and :30 to keep storage reads down; the uptime monitor polls `/api/health` every 10 minutes.
+- Production: every `git push` is a build and a build is 15 credits, so commits are batched and pushed once per verified batch (at most once a day), never per commit; the scheduler runs every 10 minutes and does its per-shop scans only at :00 and :30 to keep storage reads down; the uptime monitor polls `/api/health` every 10 minutes.
 
 ## Testing without real accounts
 

@@ -122,7 +122,7 @@ export default async (req, context) => {
   const origin = req.headers.get("origin") || "";
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-  if (!process.env.ANTHROPIC_API_KEY) return json({ error: "offline" }, 503);
+  if (!process.env.ANTHROPIC_API_KEY && process.env.MC_FAKE_MODEL !== "1") return json({ error: "offline" }, 503);
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
