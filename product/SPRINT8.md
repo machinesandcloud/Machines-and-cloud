@@ -41,7 +41,7 @@ Size and scope: Size: S. Implements: Round 8 item 4 (SHOULD).
 Acceptance: every proof named in the runbook is an event type or stamp that exists in the code (one grep per proof), the matrix count reads 18, step 1 checks hours rows, the emergency table, the review link, the VIP list, Spanish, and the platform keys, and the day-7 step names the admin page's Sent stamp.
 
 ### S8-05 Re-measure the rubric after the tightening
-Status: verified in part 2026-10-21: the second labelled set exists and `classifier_eval` accepts `"set": 2` (on the local server at commit 00a1b0a, in-memory store it answers cleanly with null precision without the model); the second measurement itself and the Needs-me exclusion decision wait for the local Anthropic key and are recorded in DECISIONS.md once run.
+Status: verified with the fake model 2026-10-21 on the local server at commit 1835317 (in-memory store), real-model wording still owed: `{"action":"classifier_eval","models":["fake"],"from":0,"to":50,"set":2}` runs the second labelled set and answers `exact: 19 of 20` with per-reason numbers; set 1 answers `exact: 44 of 50`. These measure the fake model, so the second measurement that decides the Needs-me exclusion still waits for a real run and is recorded in DECISIONS.md once made.
 Size and scope: Size: S. Implements: Round 8 item 5 (SHOULD); assumption 3.
 
 Acceptance: DECISIONS.md carries a second measurement dated after commit `426c051` with precision and recall per reason on a set that adds ten clean no-booking threads and ten late-answer threads, and the Needs-me count excludes any reason under 80 percent precision on that run.
@@ -63,7 +63,8 @@ Engineer note: `admin {"action":"brake","on":true}` stops the half-hour scans an
 Acceptance (local, verified): with the brake on, `run_scheduler` with `all: true` and `force_hour` 21 skipped `healthLifecycle` and ran no autoflag fan-out while the tasks block ran; `force_hour` 18 still ran the digest fan-out (`digests: 1`); `?full=1` carried `brake { on, at, by }` and `lastRun`; with the brake off the scans ran again and the autoflag fan-out was attempted; after 60 Angi posts the stream held exactly 50 events for the shop; the public GET carried `cache-control: public, max-age=60` and `netlify-cdn-cache-control: public, max-age=60, durable` while the owner GET stayed uncacheable; `admin.html` carries the Brake button and the last-run display; OPERATIONS.md carries the credit section, the account steps, and the monitor; no em dashes.
 
 ### S8-09 Storage sized for the request (Round 9 item 3)
-Status: verified with a note 2026-10-21 on the local server at commit 7caf297 (in-memory store, no Netlify calls). Size: M. Implements: Round 9 item 3 as built by the engineer (DECISIONS.md "round 9 item 3"); a change to hot paths, so every read path was exercised.
+Status: verified 2026-10-21 on the local server at commit 7caf297 with a note (in-memory store, no Netlify calls); the `noteReviewReply` line closed with the fake model at commit 1835317, real-model wording still owed: after `done REF` and a nudged `review_request`, a customer reply of "Great job, thanks!" on the SMS line was stored as `reviewReply` with `sentiment: positive` on the asked booking through the per-phone index. Size: M. Implements: Round 9 item 3 as built by the engineer (DECISIONS.md "round 9 item 3"); a change to hot paths, so every read path was exercised.
+Size and scope: Size: M. Implements: Round 9 item 3 as built by the engineer (DECISIONS.md "round 9 item 3"); a change to hot paths, so every read path was exercised.
 
 Engineer note: per-phone indexes in the index store (`bookings:<slug>:<phone>`, `leads:<slug>:<phone>`) written on every booking, lead, and platform lead; `upcomingBookings`, `customerType`, `callerContext`, `recentOpenLead`, `noteReviewReply`, and the lead-closing step in `bookVisit` read through them; platform duplicates use `platform:<slug>:<source>:<id>` keys; the webhooks write `health/lastInbound:<slug>`, which the `no_inbound` alert and the portal line-health card read first; the half-hour scan reads 150 events; `admin delete` removes the index keys and the pointer.
 
@@ -93,6 +94,8 @@ Setup as in `SPRINT.md` section 5.1 and `SPRINT2.md` section 5 on a draft deploy
 
 Keyed pass (S8-07): everything from the earlier sprints, after the account is unfrozen.
 
+Two standing rules from Steve, kept here so no session forgets them: no push per commit (each push is a 15-credit build; `main` is pushed once per verified batch), and no draft deploys at all. All verification runs on the local server (`node scripts/local-server.mjs`, http://localhost:8888, admin key `local-admin`, in-memory store); with no Anthropic key present the server uses the deterministic fake model (`lib/fake-model.mjs`, `MC_FAKE_MODEL=1`), so model lines close as "verified with the fake model, real-model wording still owed" and the real-model wording is rechecked once a key is in the gitignored `.env`.
+
 ## 6. Verification record
 
 ### Pre-key pass, 2026-10-20, draft `6ad7bf5e17242792b323e060` (built by the PM from `main` at `304d33e`), blocked by the account freeze
@@ -112,3 +115,7 @@ Every S8-08 line passed locally (the brake, the digest that keeps running under 
 ### Local pass for S8-09, 2026-10-21, local server at commit 7caf297
 
 Eight of eight lines passed locally through the Vapi, SMS, Angi, portal, and admin paths; one cosmetic note on the shared last-inbound pointer. Nothing was sent to Netlify. Holding as instructed.
+
+### Fake-model pass, 2026-10-21, local server at commit 1835317
+
+With the deterministic fake model the lines that waited for the key were rerun locally: S8-05's `classifier_eval` on sets 1 and 2, and S8-09's `noteReviewReply` through the per-phone index. Both passed. Nothing was sent to Netlify. Real-model wording still owed. The test shop was deleted and `GET /api/admin` lists no shop. Holding as instructed: no SPRINT9.md, no deploys, no production calls, until the site is up and the freeze is lifted.
