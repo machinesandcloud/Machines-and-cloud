@@ -67,7 +67,7 @@ Provisioning appends `?cell=%2B1...` for a shop whose owner cell is not the forw
 
 ## Deploys
 
-Netlify builds `main` on every push and runs `scripts/smoke.mjs` first; a throw fails the deploy and the previous build stays live. If the Netlify dashboard shows "Skipped due to account credit usage exceeded" (seen 2026-10-20), no production deploy of any kind goes out until the team's credits are restored under Billing; draft deploys (`netlify deploy --dir=. --functions=netlify/functions`) keep working for verification. Check what is live with `netlify api getSite --data '{"site_id":"f87916f1-bcc4-4171-a96f-2900cbf0b6dc"}'` (`published_deploy.commit_ref`).
+Netlify builds `main` on every push and runs `scripts/smoke.mjs` first; a throw fails the deploy and the previous build stays live. If the Netlify dashboard shows "Skipped due to account credit usage exceeded" (seen 2026-10-20), no production deploy of any kind goes out until the team's credits are restored under Billing; draft deploys (`netlify deploy --dir=. --functions=netlify/functions`) keep working for verification. After the site was disabled and re-enabled on 2026-10-21, a git push no longer started a build; `netlify api createSiteBuild --data '{"site_id":"f87916f1-bcc4-4171-a96f-2900cbf0b6dc"}'` builds the latest `main` once (same cost as a push build). Check what is live with `netlify api getSite --data '{"site_id":"f87916f1-bcc4-4171-a96f-2900cbf0b6dc"}'` (`published_deploy.commit_ref`).
 
 ## The critical path to customer one (dated, longest lead time first)
 
