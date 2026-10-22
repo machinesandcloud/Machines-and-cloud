@@ -48,47 +48,54 @@ Site: https://console.twilio.com
 
 On that number's configuration page set:
 - A call comes in: Webhook, `https://machinesandcloud.com/api/voice`, HTTP POST.
-- A message comes in: Webhook, `https://machinesandcloud.com/api/sms`, HTTP POST.
+- A message comes in: Webhook, `https://machinesandcloud.com/api/platform-sms`, HTTP POST, only after that platform handler is published. Keep `MC_PLATFORM_SMS_ENABLED=false` until the matched carrier approval and handler acceptance pass. Do not use the legacy shared-shop `/api/sms` route for this platform number.
 (Save. You will add fallback URLs in Task 1.7.)
 
 **1.5 Messaging Service.** Messaging, Services, Create Messaging Service.
 - Name: `Machines & Cloud front desk`.
 - Use case: "Notify my users" or "Mixed".
 - Sender pool: add the number from 1.4.
-- Integration: "Send a webhook", incoming message webhook `https://machinesandcloud.com/api/sms`, POST.
+- Integration: "Send a webhook", incoming message webhook `https://machinesandcloud.com/api/platform-sms`, POST, after that handler is published. Keep the platform reply gate off while awaiting approval; do not restore the legacy shared-shop route.
 - **Opt-Out Management** (in the service's settings, sometimes under "Advanced Opt-Out"): keep the default STOP keywords and add the custom opt-out keywords **ALTO** and **PARAR**, and the custom opt-in keyword **EMPEZAR**.
 
 Record:
 - `MC_MESSAGING_SERVICE_SID` (starts with MG).
 
-**1.6 Register the brand and campaign (A2P 10DLC).** This is the step that takes the longest (carriers take 1 to 6 weeks), so do it now even if the profile from 1.2 is still pending; Twilio will queue it.
+**1.6 Register the Machines & Cloud Customer Care campaign (A2P 10DLC).** The owner approved this program on October 22, 2026. Use the paid **Zari AI** account, the existing approved **Machines And Cloud LLC** Standard brand, the existing platform Messaging Service and the existing **+13464853328** number. Keep the Primary Customer Profile's **ISV Reseller or Partner** role. Do not create a duplicate brand or buy another number. If the existing brand is absent or does not identify Machines And Cloud LLC, stop and report the discrepancy rather than filing another business identity.
 
-Go to Messaging, Regulatory Compliance (or "A2P 10DLC"), register a **Standard** brand using the profile from 1.2 (STOP for Steve: confirm the brand fee and attestation). Then create a campaign on the Messaging Service from 1.5 with these exact values:
+This campaign is only for Machines & Cloud's own product questions, onboarding guidance and account-support directions. A person must first text the platform number. It does not carry messages for shops or their homeowners, recurring notifications, marketing or automatic missed-call texts. Calls, emails, signup, booking and phone fields do not give SMS permission. Each supported shop registers its own business, brand, campaign and number; the former shared-homeowner bridge is retired. An existing primary ISV profile does not authorize combining customer brands into this platform campaign.
+
+The machine-readable copy source is [PLATFORM-SMS-CAMPAIGN.md](PLATFORM-SMS-CAMPAIGN.md). Before submission, verify the public terms and privacy URLs are accessible without signing in and show the same program and number. Local files are not public evidence. The public page must still say **awaiting carrier approval** while the filing is pending. If those disclosures have not been published, fill and save the draft, then hand control back without submitting.
+
+Go to Messaging, Regulatory Compliance (or "A2P 10DLC"), select the existing approved brand and create the campaign on the platform Messaging Service. Enter these exact values:
 
 | Field | Value |
 |---|---|
-| Use case | Mixed (or "Customer Care" with "Account Notification" if Mixed is unavailable) |
-| Campaign description | Machines & Cloud operates an AI front desk for home service businesses (HVAC, plumbing, electrical, roofing, cleaning) in Houston. This number texts customers who contacted one of those businesses about service: replies to their questions, appointment confirmations and reminders, on-the-way notices, follow-up on open estimates, and one review request after a completed job. Every message carries the business's name. One-to-one conversational messaging; no marketing blasts. |
-| How do end users consent (message flow) | Customers opt in by calling, texting, or chatting with a business that uses the Machines & Cloud front desk, or by booking a visit. At booking the front desk tells them they will get appointment texts at this number and can reply STOP. Terms: https://www.machinesandcloud.com/sms-terms.html. Privacy: https://www.machinesandcloud.com/privacy-policy.html#sms. |
-| Privacy policy URL | https://www.machinesandcloud.com/privacy-policy.html |
+| Use case | Customer Care |
+| Campaign description | Machines And Cloud LLC (Machines & Cloud) replies to people who text +13464853328 with questions about its own AI front desk software, onboarding or account access. Replies provide product information, setup guidance or links to secure account support. This campaign does not send on behalf of home-service shops or their homeowners. No recurring, proactive, promotional or missed-call texts are sent. |
+| Primary opt-in method | Via text (keyword campaign) |
+| Opt-in proof | Public CTA: https://www.machinesandcloud.com/sms-terms.html#platform-sms. It invites HELP or a question to +13464853328 for direct M&C support, not recurring enrollment. User: HELP. Reply: Machines & Cloud product help: https://machinesandcloud.com/#pilot. Sign in: https://machinesandcloud.com/desk. Reply STOP, ALTO or PARAR to stop texts. Calling or signup is not SMS consent. |
+| How do end users consent (message flow) | A person starts by texting HELP or their own question to +13464853328. The public invitation and disclosures are at https://www.machinesandcloud.com/sms-terms.html#platform-sms. Only direct replies about that person's Machines & Cloud product, onboarding or account-support question are permitted. The inbound message is retained as consent evidence for that exchange; it does not authorize recurring engagement. Calling, emailing, signup, booking or providing a phone number is not SMS consent. No website checkbox, purchased list or verbal opt-in is used. Message frequency varies with the messages the person sends. Message and data rates may apply. HELP or AYUDA provides help; STOP, ALTO or PARAR ends texts. START, UNSTOP or EMPEZAR only removes an earlier block and does not subscribe the person to recurring texts. Terms: https://www.machinesandcloud.com/sms-terms.html. Privacy: https://www.machinesandcloud.com/privacy-policy.html#sms. |
+| Privacy policy URL | https://www.machinesandcloud.com/privacy-policy.html#sms |
 | Terms and conditions URL | https://www.machinesandcloud.com/sms-terms.html |
-| Sample message 1 | Bayou Air: you're booked for tomorrow, 8 to 12. We'll text a reminder and again when the tech is on the way. Reply STOP to opt out. |
-| Sample message 2 | Bayou Air: Hi, this is Bayou Air. Sorry we missed your call. What can we help with, and is it urgent? Reply here and we'll get you scheduled. Reply STOP to opt out. |
-| Sample message 3 | Bayou Air: thanks for choosing us. How did we do? A quick Google review helps a small shop a lot: (link). Reply here if anything was not right. |
-| Opt-in message | You're booked. We'll text appointment reminders to this number. Reply STOP to opt out, HELP for help. |
-| Opt-out message | You're unsubscribed and will get no more texts from this number. Reply START to resume. |
-| Help message | Machines & Cloud front desk. For help call (346) 248-8359 or email support@machinesandcloud.com. Reply STOP to opt out. Msg and data rates may apply. |
-| Opt-out keywords | STOP, STOPALL, UNSUBSCRIBE, END, QUIT, CANCEL, ALTO, PARAR |
+| Sample message 1 | Machines & Cloud: explore our AI front desk at https://machinesandcloud.com/#demo-wrap. Product and setup help: https://machinesandcloud.com/#pilot. Reply STOP to stop texts. |
+| Sample message 2 | Machines & Cloud: start your front desk setup at https://machinesandcloud.com/#pilot. Already started? https://machinesandcloud.com/desk. Reply STOP to stop texts. |
+| Sample message 3 | Machines & Cloud: sign in securely at https://machinesandcloud.com/desk. Request a fresh email link there. Never text a password or sign-in code. Reply STOP to stop texts. |
+| Opt-in message | Machines & Cloud: your texting block is removed. We only reply to messages you send; no recurring texts. Reply HELP for help or STOP to stop. |
+| Opt-out message | Machines & Cloud: texts stopped. Reply START or EMPEZAR to remove the block. |
+| Help message | Machines & Cloud product help: https://machinesandcloud.com/#pilot. Sign in: https://machinesandcloud.com/desk. Reply STOP, ALTO or PARAR to stop texts. |
+| Opt-out keywords | STOP, STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT, REVOKE, OPTOUT, ALTO, PARAR |
 | Opt-in keywords | START, UNSTOP, EMPEZAR |
-| Help keywords | HELP, AYUDA |
+| Help keywords | HELP, INFO, AYUDA |
 | Embedded links | Yes |
-| Embedded phone numbers | Yes |
+| Embedded phone numbers | No |
 | Age-gated content | No |
 | Direct lending | No |
 | Number pooling | No |
 
-Submit (STOP for Steve: final confirm). Record:
-- The brand SID (BN...) and the campaign SID (CM... or QE...) and the date submitted, under "Notes for DECISIONS.md".
+Keep all standard Advanced Opt-Out keywords and add ALTO/PARAR, EMPEZAR and AYUDA. Set its STOP, START and HELP responses to the table's exact messages. START is a restart acknowledgment only. If Twilio already replies and sends `OptOutType`, the application must not send a second keyword acknowledgment.
+
+STOP for Steve before any fee acknowledgment, legal attestation or final submission. Do not choose a fee or certify the filing for him. Once he submits, record the existing brand SID (BN...), the actual campaign SID (CM... or QE...), the submission date and returned review status under "Notes for DECISIONS.md". Do not treat draft creation or submission as approval. Do not enable the platform reply handler, buy numbers or change any managed shop execution gate as part of this filing.
 
 **1.7 Two TwiML Bins (what callers and texters get if our site is down).** Develop (or Explore Products), TwiML Bins, Create new.
 

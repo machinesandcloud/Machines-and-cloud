@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual, randomBytes, createHash } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
 import { strictRead } from "./accounts.mjs";
-import { recordManagedInbound, managedSMSConsent, deliveryTenant } from "./managed-consent.mjs";
+import { recordManagedInbound, managedSMSConsent, managedAppointmentConsentQuestion, deliveryTenant } from "./managed-consent.mjs";
 import { managedDeliveryEnabled, queueManagedMessage, recordManagedSMSReceipt, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
 import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, pendingMessagingProbe, recordMessagingProbe } from "./messaging-activation.mjs";
 import { getAcquiredPhoneResource } from "./phone-activation.mjs";
@@ -56,9 +56,9 @@ export async function handleManagedSMS(req) {
     const verified = await verifyMessage(fields,binding); if (!verified) return new Response("Unverified message",{status:403});
     const consent = await recordManagedInbound(c,{phone:fields.From,text:fields.Body,messageSid:fields.MessageSid,providerOptOutType:fields.OptOutType,providerDate:verified.date_created});
     if (consent.duplicate && consent.keyword !== "message") return twiml();
-    if (consent.keyword === "stop") return fields.OptOutType === "STOP" ? twiml() : twiml(`${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
+    if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(`${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
     if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
-    if (consent.keyword === "help") return fields.OptOutType === "HELP" ? twiml() : twiml(`${c.business.name}: for help contact ${c.phone?.businessNumber || c.owner.email}. Reply STOP, ALTO or PARAR to stop texts.`);
+    if (consent.keyword === "help") return consent.suppressed || fields.OptOutType === "HELP" ? twiml() : twiml(`${c.business.name}: for help contact ${c.phone?.businessNumber || c.owner.email}. Reply STOP, ALTO or PARAR to stop texts.`);
     if (consent.suppressed || !managedDeliveryEnabled()) return twiml();
     const probe = await pendingMessagingProbe(c);
     const kind = probe && probe.to===fields.From && String(fields.Body).trim()===probe.nonce ? "probe" : "conversation";
@@ -135,7 +135,7 @@ export async function processManagedSMS(id) {
       return {content};
     }});
     if (!await freshAuthority()) { await updateInbound(id,row=>({...row,state:"suppressed",claim:null,reasonCode:"authority_changed"})); return {ok:true,suppressed:true}; }
-    const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?`\n${c.business.name}: want appointment texts for this visit? Reply YES to agree. Frequency varies. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end. Booking is available without texts.`:"");
+    const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c):"");
     const planned=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:ask?"consent_ask":"reply"}:null);
     if (planned.claim?.token!==token || !planned.reply) return {ok:true,busy:true};
     await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:planned.replyPurpose,to:job.from,body:planned.reply,consentAsk:planned.replyPurpose==="consent_ask"});

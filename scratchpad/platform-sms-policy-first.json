@@ -1,0 +1,82 @@
+{
+  "at": "2026-10-22T15:53:14.431Z",
+  "mode": "actual policy and signed platform SMS handlers; synthetic memory store; all provider HTTP intercepted; physical networking disabled",
+  "before": {
+    "sms-terms.html": "450df0107f4b3e7766adf31a3dfe647a5281b2ec7ccaa100fdd25d3402ba92f4",
+    "privacy-policy.html": "fc670cbb415d05a9587cbb15d9b2317ac0ee6cc45a8dab2403276953100296e2",
+    "netlify/functions/policy.mjs": "2e8b4680089335fc688c23a60ec9d6f9aee108fa8b741720f9006a6622ddd4dc",
+    "product/SETUP-FOR-BROWSER-AGENT.md": "5be2db4c25b890f54be0797884dae6a8afc416d9784726acc453de365a0553a3",
+    "product/PLATFORM-SMS-CAMPAIGN.md": "803fddd2be2c86d559e8c3fdaa443f4734c41a4f5e15ad042b4f926a6759d259",
+    "netlify/functions/lib/platform-sms.mjs": "c455acccec0aa5ded2c38dfb7e8f27d97ff28857fbf82a2eda78fe50242038c0",
+    "netlify/functions/platform-sms.mjs": "af7fc6eb2c98fd02e734d393bb9fc444f87d829c19c87606ab82fb3349cf487c",
+    "netlify/functions/lib/messaging-activation.mjs": "e17f49781db94fec819b7f47b3ed56d90ad84467f155af43d55d09176c93a910"
+  },
+  "checks": [
+    {
+      "name": "The exact campaign draft fits the observed form limits and names only the platform sender",
+      "pass": true
+    },
+    {
+      "name": "Every filed copy field and keyword is identical in the browser script and JSON",
+      "pass": true
+    },
+    {
+      "name": "The public opt-in proof is a real SMS invitation with a visible prelaunch status",
+      "pass": true
+    },
+    {
+      "name": "The exact wizard-required legal headings, brand and no-marketing-sharing statement are public",
+      "pass": false,
+      "error": "The input did not match the regular expression /Privacy Policy/. Input:\n\n'Privacy policy'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Privacy Policy/. Input:\n\n'Privacy policy'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/sms-policy-check.mjs:29:337\n    at check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/sms-policy-check.mjs:16:40)\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/sms-policy-check.mjs:29:7"
+    },
+    {
+      "name": "The public terms separate direct replies, restart and shop programs without implied signup consent",
+      "pass": true
+    },
+    {
+      "name": "The actual supported shop policy requires written YES after its inbound appointment ask",
+      "pass": true
+    },
+    {
+      "name": "The actual legacy policy stays distinct and does not claim v1 consent enforcement",
+      "pass": true
+    },
+    {
+      "name": "Unknown onboarding versions and missing shops cannot fall into the public legacy policy",
+      "pass": true
+    },
+    {
+      "name": "The actual public policy escapes tenant text and exposes no permanent owner credentials",
+      "pass": true
+    },
+    {
+      "name": "The campaign keywords exactly match the real platform receiver",
+      "pass": true
+    },
+    {
+      "name": "Each campaign sample is a byte-identical response from the actual signed inbound handler",
+      "pass": true
+    },
+    {
+      "name": "The exact campaign HELP proof and restart/stop acknowledgments match real signed exchanges",
+      "pass": true
+    }
+  ],
+  "providerReceiptReads": 7,
+  "after": {
+    "sms-terms.html": "450df0107f4b3e7766adf31a3dfe647a5281b2ec7ccaa100fdd25d3402ba92f4",
+    "privacy-policy.html": "fc670cbb415d05a9587cbb15d9b2317ac0ee6cc45a8dab2403276953100296e2",
+    "netlify/functions/policy.mjs": "2e8b4680089335fc688c23a60ec9d6f9aee108fa8b741720f9006a6622ddd4dc",
+    "product/SETUP-FOR-BROWSER-AGENT.md": "5be2db4c25b890f54be0797884dae6a8afc416d9784726acc453de365a0553a3",
+    "product/PLATFORM-SMS-CAMPAIGN.md": "803fddd2be2c86d559e8c3fdaa443f4734c41a4f5e15ad042b4f926a6759d259",
+    "netlify/functions/lib/platform-sms.mjs": "c455acccec0aa5ded2c38dfb7e8f27d97ff28857fbf82a2eda78fe50242038c0",
+    "netlify/functions/platform-sms.mjs": "af7fc6eb2c98fd02e734d393bb9fc444f87d829c19c87606ab82fb3349cf487c",
+    "netlify/functions/lib/messaging-activation.mjs": "e17f49781db94fec819b7f47b3ed56d90ad84467f155af43d55d09176c93a910"
+  },
+  "sourceStable": true,
+  "passed": 11,
+  "total": 12,
+  "ok": false,
+  "physicalExternalRequests": 0
+}

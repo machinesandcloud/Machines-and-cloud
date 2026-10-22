@@ -6,7 +6,7 @@ import { syncBuiltinESMExports } from "node:module";
 import net from "node:net"; import http from "node:http"; import https from "node:https";
 const index = process.argv.indexOf("--output"), output = index < 0 ? null : process.argv[index + 1];
 if (output && (!/^scratchpad\/[a-z0-9-]+\.json$/.test(output) || existsSync(output))) throw new Error("Choose a new scratchpad receipt");
-const hash = value => createHash("sha256").update(value).digest("hex"), sourceFiles = ["netlify/functions/lib/messaging-activation.mjs", "netlify/functions/lib/messaging-provider.mjs", "netlify/functions/messaging-activation-scheduler.mjs"];
+const hash = value => createHash("sha256").update(value).digest("hex"), sourceFiles = ["netlify/functions/lib/messaging-activation.mjs", "netlify/functions/lib/messaging-provider.mjs", "netlify/functions/messaging-activation-scheduler.mjs", "netlify/functions/lib/managed-consent.mjs"];
 const sourceHashes = () => Object.fromEntries(sourceFiles.map(file => [file, hash(readFileSync(file))]));
 const result = { at: new Date().toISOString(), mode: "actual messaging engine, actual Twilio adapter, memory and installed SDK intercepted HTTP; zero real network", sourceBefore: sourceHashes(), checks: [], conflicts: 0, providerWrites: [], blockedNetwork: [] };
 for (const key of Object.keys(process.env)) if (/^(TWILIO_|VAPI_|ANTHROPIC_|RESEND_|GOOGLE_|STRIPE_|PHONE_|MESSAGING_|SERVICE_|PLATFORM_DATA_|CALENDAR_TOKEN_)/.test(key)) delete process.env[key];
@@ -70,6 +70,7 @@ globalThis.fetch = async (input, init = {}) => {
 };
 const { setEnvironmentContext } = await import("@netlify/blobs"); setEnvironmentContext({ siteID: "messaging-site", token: "fixture-token", edgeURL: "https://messaging-eventual.invalid", uncachedEdgeURL: "https://messaging-blobs.invalid" });
 const store = await import("../netlify/functions/lib/store.mjs"), { strictRead } = await import("../netlify/functions/lib/accounts.mjs"), sms = await import("../netlify/functions/lib/messaging-activation.mjs"), { createTwilioMessagingAdapter } = await import("../netlify/functions/lib/messaging-provider.mjs"), { configurationRevision } = await import("../netlify/functions/lib/setup.mjs"), { newClient } = await import("../netlify/functions/lib/config.mjs");
+const consent = await import("../netlify/functions/lib/managed-consent.mjs");
 const check = async (name, fn) => { try { await fn(); result.checks.push({ name, pass: true }); } catch (error) { lose = null; rejectBefore = null; rejectReceiptKey = null; pagination = false; blockedWrite = null; result.checks.push({ name, pass: false, error: error.message, stack: error.stack }); } };
 const offer = () => ({ version: "fixture_sms_v1", scope: "a2p_customer_care", country: "US", currency: "USD", brandRegistrationCents: 4400, campaignRegistrationCents: 1500, campaignMonthlyCents: 1000, resubmissionCents: 1500, maxResubmissions: 1, usageDisclosure: "Fixture pricing only. Existing accepted product plan controls usage; no unlimited sending.", authorityText: "I am authorized by this business to file the reviewed customer-care texting registration and accept all disclosed fees and ongoing usage terms.", feeScheduleUrl: "https://example.test/fixture-fees", expiresAt: new Date(clock + 14 * 86400000).toISOString() });
 const legal = () => ({ legalName: "Fixture Service LLC", ein: "92-1234567", businessType: "llc", street: "123 Example Street", street2: "Suite 1", city: "Houston", state: "TX", zip: "77057", website: "https://example.test", representative: { firstName: "Alex", lastName: "Fixture", email: "alex@example.test", phone: mobile, title: "Owner", jobPosition: "Other" } });
@@ -93,6 +94,27 @@ async function suite(mode) {
     await store.put("clients", f.c.slug, { ...f.c, setupProof: { ...f.c.setupProof, testMode: "fake" } }); await assert.rejects(() => f.engine.request(f.c, f.body()), error => error.code === "desk_review_required"); await store.put("clients", f.c.slug, f.c);
     const row = await f.engine.request(f.c, f.body()), raw = await strictRead("messaging_activation", row.id); assert.equal(raw.legal, undefined); assert.equal(raw.program, undefined); assert.ok(!JSON.stringify(raw).includes("921234567")); assert.ok(!JSON.stringify(row).includes("alex@example.test")); assert.ok(!JSON.stringify(row).includes("BU" + "2".repeat(32))); assert.equal(raw.privateData.version, 1); assert.equal(row.active, false); assert.equal(f.controls.claimed, 0);
     await assert.rejects(() => f.engine.request(f.c, f.body({ legal: { ...legal(), ein: "00" } })), error => error.status === 400); await assert.rejects(() => f.engine.request(f.c, f.body({ legal: { ...legal(), state: "ZZ" } })), error => error.status === 400);
+  });
+  await check(mode + ": filed customer program matches actual inbound-only conversation and written YES appointment authority", async () => {
+    const f = await fixture(mode, "consent-contract"), program = sms.buildMessagingProgram(f.c), phone = "+17135550191";
+    const permits = purpose => consent.mayDeliverManagedSMS(f.c, phone, purpose);
+    assert.equal(await permits("reply"), false); assert.equal(await permits("confirmation"), false);
+    const incoming = "SM" + hash(f.c.slug + ":question").slice(0, 32);
+    await consent.recordManagedInbound(f.c, { phone, text: "Can you save a plumbing visit?", messageSid: incoming, providerDate: isoAt(clock) });
+    assert.equal(await permits("reply"), true); assert.equal(await permits("confirmation"), false);
+    const question = "SM" + hash(f.c.slug + ":ask").slice(0, 32);
+    await consent.saveManagedConsentAsk(f.c, phone, { messageSid: question, sentAt: isoAt(clock), wording: consent.managedAppointmentConsentQuestion(f.c) });
+    clock += 1000;
+    await consent.recordManagedInbound(f.c, { phone, text: "YES", messageSid: "SM" + hash(f.c.slug + ":yes").slice(0, 32), providerDate: isoAt(clock) });
+    for (const purpose of ["confirmation", "reminder_24h", "reminder_1h", "cancelled"]) assert.equal(await permits(purpose), true);
+    for (const purpose of ["on_the_way", "review_request", "marketing"]) assert.equal(await permits(purpose), false);
+    assert.match(program.messageFlow, /Customers first text/); assert.match(program.messageFlow, /direct replies in that conversation only/); assert.match(program.messageFlow, /separate written YES/i); assert.match(program.messageFlow, /including future visits/); assert.match(program.messageFlow, /ongoing_appointments_v2/); assert.match(program.messageFlow, /No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number/);
+    assert.match(program.messageSamples[0], /saved/); assert.match(program.messageSamples[1], /reminder/); assert.match(program.messageSamples[2], /cancelled/); assert.ok(program.messageSamples.every(text => !/on the way|review|estimate|invoice/i.test(text)));
+    const status = await advance(f), row = await strictRead("messaging_activation", status.id), campaign = remote.get(`https://messaging.twilio.com/v1/Services/${row.resources.service.sid}/Compliance/Usa2p/${row.resources.campaign.sid}`);
+    assert.equal(campaign.us_app_to_person_usecase, "CUSTOMER_CARE"); assert.equal(campaign.message_flow, program.messageFlow); assert.deepEqual(campaign.message_samples, program.messageSamples); assert.equal(campaign.description, program.description);
+    clock += 1000; await consent.recordManagedInbound(f.c, { phone, text: "STOP", messageSid: "SM" + hash(f.c.slug + ":stop").slice(0, 32), providerDate: isoAt(clock) });
+    clock += 1000; await consent.recordManagedInbound(f.c, { phone, text: "START", messageSid: "SM" + hash(f.c.slug + ":restart").slice(0, 32), providerDate: isoAt(clock) });
+    assert.equal(await permits("confirmation"), false); assert.match(program.optInMessage, /Appointment updates need a separate YES/);
   });
   await check(mode + ": duplicate tabs and concurrent workers create exactly one service and registration chain", async () => {
     const f = await fixture(mode, "once"), writes = result.providerWrites.length, rows = await Promise.all(Array.from({ length: 5 }, () => f.engine.request(f.c, f.body()))); assert.ok(rows.every(row => row.id === rows[0].id)); await Promise.all([f.engine.run(rows[0].id), f.engine.run(rows[0].id)]); assert.equal(result.providerWrites.slice(writes).filter(row => row.path === "/v1/Services").length, 1);

@@ -26,7 +26,7 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error("PORT m
 process.env.URL = `http://127.0.0.1:${PORT}`;
 if (process.env.MC_LOCAL_NO_KEYS !== "0") {
   for(const key of ["SERVICE_WORKER_KEY","PLATFORM_DATA_ENCRYPTION_KEY","CALENDAR_TOKEN_ENCRYPTION_KEY"])delete process.env[key];
-  for(const flag of ["PHONE_ACQUISITION_ENABLED","SERVICE_DELIVERY_ENABLED","CALENDAR_CONNECTION_ENABLED","CALENDAR_DELIVERY_ENABLED","VOICE_ACTIVATION_ENABLED","MESSAGING_ACTIVATION_ENABLED"])process.env[flag]="false";
+  for(const flag of ["PHONE_ACQUISITION_ENABLED","SERVICE_DELIVERY_ENABLED","CALENDAR_CONNECTION_ENABLED","CALENDAR_DELIVERY_ENABLED","VOICE_ACTIVATION_ENABLED","MESSAGING_ACTIVATION_ENABLED","MC_PLATFORM_SMS_ENABLED"])process.env[flag]="false";
   for (const k of ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "VAPI_API_KEY", "VAPI_PUBLIC_KEY", "RESEND_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY"]) {
     // Narrow opt-in for an explicitly bounded browser-voice rehearsal. No other provider is enabled.
     if (["VAPI_API_KEY", "VAPI_PUBLIC_KEY"].includes(k) && process.env.MC_LOCAL_VOICE === "1") continue;

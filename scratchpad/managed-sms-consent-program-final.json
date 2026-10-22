@@ -1,0 +1,97 @@
+{
+  "at": "2026-10-22T15:45:57.217Z",
+  "mode": "independent real handler/provider protocol/installed SDK fixtures; fake model only; synthetic common review proof; zero external network",
+  "before": {
+    "netlify/functions/lib/managed-sms.mjs": "5c4c6308d88352e094752bab34c2dbcb52ad90b7c6e8ff924ab962595986f847",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "a0b50d3d6b245759af4c6f40895916a9cbc52e5195e1822779a89e11b19b48f8",
+    "netlify/functions/lib/managed-consent.mjs": "7f60918474f6570659a1e3b917351729891259d80f8b10030a776993de2f426f",
+    "netlify/functions/lib/managed-history.mjs": "f8dbf15321ee419db29fb8ca876b8a669f79182b7890b93a8513ffb3a782a51f",
+    "netlify/functions/client.mjs": "22d19c15c795af627bd6e52c1289cc1d9a5c425318662a721affdf073dd431c8"
+  },
+  "checks": [
+    {
+      "name": "invalid signatures/accounts/duplicate fields/provider identities are rejected before consent or queue",
+      "pass": true
+    },
+    {
+      "name": "old and future provider messages do not refresh reply authority",
+      "pass": true
+    },
+    {
+      "name": "current service and registration epoch prevent old or foreign service messages entering a reused number's tenant",
+      "pass": true
+    },
+    {
+      "name": "Spanish STOP persists before AI even while paused; duplicate is harmless; START grants no recurring consent",
+      "pass": true
+    },
+    {
+      "name": "provider-verified normal inbound recovers after consent committed but queue projection failed",
+      "pass": true
+    },
+    {
+      "name": "background endpoint requires exact worker key and strict body",
+      "pass": true
+    },
+    {
+      "name": "parallel processors produce one reply and a STOP racing model reservation prevents delivery",
+      "pass": true
+    },
+    {
+      "name": "reply recovery after conversation-history projection failure restores both conversation turns",
+      "pass": true
+    },
+    {
+      "name": "callback cannot bind queued intent or wrong-account/direction/service/old receipt",
+      "pass": true
+    },
+    {
+      "name": "two-way setup proof waits for actual delivered GET and matching inbound nonce",
+      "pass": true
+    },
+    {
+      "name": "phone-only testing customer can book through SMS and deliver its reply and owner alert with website chat inactive",
+      "pass": true
+    },
+    {
+      "name": "common rules edits pause SMS readiness and fresh review restores existing resources without a new registration",
+      "pass": true
+    },
+    {
+      "name": "owner resume restores testing phone-only state, requires current review/test/revision and does not activate website or purchase resources",
+      "pass": true
+    },
+    {
+      "name": "owner SMS history includes queued/failed requests, deduplicates projections and never crosses tenant incarnations",
+      "pass": true
+    },
+    {
+      "name": "owner history orders real RFC-2822 Twilio timestamps chronologically and returns canonical dates",
+      "pass": true
+    },
+    {
+      "name": "customer activation HTTP actions require owner scope, same origin, exact fields and current revision",
+      "pass": true
+    }
+  ],
+  "conflicts": 4,
+  "blocked": [],
+  "dispatches": 19,
+  "providerSends": 5,
+  "emailSends": 1,
+  "after": {
+    "netlify/functions/lib/managed-sms.mjs": "5c4c6308d88352e094752bab34c2dbcb52ad90b7c6e8ff924ab962595986f847",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "a0b50d3d6b245759af4c6f40895916a9cbc52e5195e1822779a89e11b19b48f8",
+    "netlify/functions/lib/managed-consent.mjs": "7f60918474f6570659a1e3b917351729891259d80f8b10030a776993de2f426f",
+    "netlify/functions/lib/managed-history.mjs": "f8dbf15321ee419db29fb8ca876b8a669f79182b7890b93a8513ffb3a782a51f",
+    "netlify/functions/client.mjs": "22d19c15c795af627bd6e52c1289cc1d9a5c425318662a721affdf073dd431c8"
+  },
+  "sourceStable": true,
+  "passed": 16,
+  "total": 16,
+  "ok": true
+}

@@ -4,6 +4,7 @@ import { voiceRecoveryHealth } from "./voice-activation.mjs";
 import { messagingRecoveryHealth } from "./messaging-activation.mjs";
 import { calendarDeliveryEnabled } from "./calendar-delivery.mjs";
 import { managedDeliveryEnabled } from "./managed-delivery.mjs";
+import { platformSMSHealth } from "./platform-sms.mjs";
 async function reconciliationHealth() {
   const [ledger,queue,last]=await Promise.all([
     strictRead("service_reconciliation_health","active_v1"),
@@ -20,7 +21,7 @@ async function reconciliationHealth() {
     reasonCode:failures ? "service_checks_unresolved" : last?.ok===false ? "service_check_recovery_failed" : pending && (!fresh || last?.ok!==true) ? "service_check_recovery_stale" : null};
 }
 export async function serviceDeliveryHealth() {
-  const [voice,messaging,serviceChecks]=await Promise.all([voiceRecoveryHealth(),messagingRecoveryHealth(),reconciliationHealth()]);
+  const [voice,messaging,serviceChecks,platformSMS]=await Promise.all([voiceRecoveryHealth(),messagingRecoveryHealth(),reconciliationHealth(),platformSMSHealth()]);
   const workers={};
   for(const [name,enabled,store] of [["calendarDelivery",calendarDeliveryEnabled(),"calendar_deliveries"],["managedDelivery",managedDeliveryEnabled(),"managed_deliveries"]]){
     const rows=(await Promise.all((await list(store,"")).map(key=>strictRead(store,key)))).filter(Boolean);
@@ -31,5 +32,5 @@ export async function serviceDeliveryHealth() {
   }
   const sms=(await Promise.all((await list("managed_sms_inbound","")).map(key=>strictRead("managed_sms_inbound",key)))).filter(Boolean);
   const failedInbound=sms.filter(row=>row.state==="failed").length;
-  return {ok:voice.ok && messaging.ok && serviceChecks.ok && Object.values(workers).every(row=>row.ok) && failedInbound===0,voice,messaging,serviceChecks,...workers,failedInbound};
+  return {ok:voice.ok && messaging.ok && serviceChecks.ok && platformSMS.ok && Object.values(workers).every(row=>row.ok) && failedInbound===0,voice,messaging,serviceChecks,platformSMS,...workers,failedInbound};
 }

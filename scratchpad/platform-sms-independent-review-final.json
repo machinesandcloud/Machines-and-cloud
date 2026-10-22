@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-22T15:58:29.125Z",
+  "mode": "independent actual HTTP handlers and installed SDK CAS; synthetic Twilio GET receipts; no external network, model, SMS or email",
+  "before": {
+    "netlify/functions/lib/platform-sms.mjs": "56b03aed583515572b3508d286a87b8102ccca74185fe2c9e45d55017be56ee8",
+    "netlify/functions/platform-sms.mjs": "af7fc6eb2c98fd02e734d393bb9fc444f87d829c19c87606ab82fb3349cf487c",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a"
+  },
+  "checks": [
+    {
+      "name": "gate starts closed; verified inquiry is retained without a reply or any proactive send",
+      "pass": true
+    },
+    {
+      "name": "signature, canonical URL, account, service, number, duplicate parameters and media fail closed",
+      "pass": true
+    },
+    {
+      "name": "authenticated Message GET must match each signed receipt field and bounded creation time",
+      "pass": true
+    },
+    {
+      "name": "same-SID races reserve exactly one reply; discarded first response remains delivery unknown and is not replayed",
+      "pass": true
+    },
+    {
+      "name": "same-SID changed contents are held rather than overwriting consent or generating another response",
+      "pass": true
+    },
+    {
+      "name": "delayed duplicate finalization cannot downgrade an archived primary reply receipt",
+      "pass": true
+    },
+    {
+      "name": "STOP wins equal/older START; ordinary messages never remove suppression; newer START grants replies only",
+      "pass": true
+    },
+    {
+      "name": "repeat distinct stop receipts are retained silently; gate-off stop persistence is still permitted",
+      "pass": true
+    },
+    {
+      "name": "provider-managed keyword acknowledgments are never duplicated by the application",
+      "pass": true
+    },
+    {
+      "name": "M&C inquiry never resolves a legacy customer or shared homeowner bridge",
+      "pass": true
+    },
+    {
+      "name": "private history omits provider references, configured secrets, tax identifiers and common sign-in credentials",
+      "pass": true
+    },
+    {
+      "name": "only authorized operator sessions can retrieve platform inquiries through the actual management handler",
+      "pass": true
+    },
+    {
+      "name": "projection failure retains the primary receipt; retries recover STOP and history without a second reply",
+      "pass": true
+    },
+    {
+      "name": "recent history archives automatically; per-SID fences survive eviction and the daily reply budget renews without clearing STOP",
+      "pass": true
+    }
+  ],
+  "conflicts": 36,
+  "providerReads": 554,
+  "blocked": [],
+  "after": {
+    "netlify/functions/lib/platform-sms.mjs": "56b03aed583515572b3508d286a87b8102ccca74185fe2c9e45d55017be56ee8",
+    "netlify/functions/platform-sms.mjs": "af7fc6eb2c98fd02e734d393bb9fc444f87d829c19c87606ab82fb3349cf487c",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a"
+  },
+  "sourceStable": true,
+  "passed": 14,
+  "total": 14,
+  "ok": true
+}

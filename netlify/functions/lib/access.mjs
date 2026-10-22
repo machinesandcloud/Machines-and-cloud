@@ -82,10 +82,11 @@ export async function exchangeAccessToken(token, ip, purpose = "onboarding") {
     return { value: { ...row, status: "consumed", consumedAt: stamp(), sessionHash }, result: { email: row.email, intakeHash: row.intakeHash } };
   });
   if (!claim) throw new AccessError("invalid_link", "This sign-in link expired or was already used. Request a new one.", 410);
-  const expiresAt = new Date(Date.now() + (purpose === "operator" ? 8 : 24) * 3600000).toISOString();
+  const issuedAt = Date.now(), createdAt = new Date(issuedAt).toISOString();
+  const expiresAt = new Date(issuedAt + (purpose === "operator" ? 8 : 24) * 3600000).toISOString();
   await atomicUpdate("access_sessions", sessionHash, row => {
     if (row) throw new Error("Access session collision");
-    return { value: { email: claim.email, scope: purpose, status: "active", createdAt: stamp(), expiresAt, ...(claim.intakeHash ? { intakeHash: claim.intakeHash } : {}) } };
+    return { value: { email: claim.email, scope: purpose, status: "active", createdAt, expiresAt, ...(claim.intakeHash ? { intakeHash: claim.intakeHash } : {}) } };
   });
   return { ok: true, session, email: claim.email, expiresAt };
 }
