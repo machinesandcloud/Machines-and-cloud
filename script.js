@@ -40,12 +40,8 @@
     backdrop.setAttribute('aria-hidden', 'true');
     document.body.appendChild(backdrop);
 
-    const closeButton = document.createElement('button');
-    closeButton.type = 'button';
-    closeButton.className = 'nav-menu-close';
-    closeButton.textContent = 'Close menu';
-    navMenu.prepend(closeButton);
-
+    const originalNavRole = navbar.getAttribute('role');
+    const originalNavLabel = navbar.getAttribute('aria-label');
     navToggle.type = 'button';
     navToggle.setAttribute('aria-controls', navMenu.id);
     navMenu.tabIndex = -1;
@@ -68,7 +64,7 @@
     }
 
     function focusableLinks() {
-      return [...navMenu.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+      return [navToggle, ...navMenu.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')]
         .filter(element => !element.hidden && !element.inert && element.getClientRects().length);
     }
 
@@ -90,20 +86,19 @@
         scrollPosition = null;
       }
       const mobile = mobileNav.matches;
-      const hidingDesktopFocus = !mobile && (document.activeElement === closeButton || document.activeElement === navToggle);
-      closeButton.hidden = !mobile;
+      const hidingDesktopFocus = !mobile && document.activeElement === navToggle;
       navMenu.hidden = mobile;
       navMenu.inert = mobile;
       if (mobile) {
         navMenu.setAttribute('aria-hidden', 'true');
-        navMenu.setAttribute('role', 'dialog');
-        navMenu.setAttribute('aria-label', 'Site navigation');
       } else {
         navMenu.removeAttribute('aria-hidden');
-        navMenu.removeAttribute('role');
-        navMenu.removeAttribute('aria-label');
       }
-      navMenu.removeAttribute('aria-modal');
+      if (originalNavRole === null) navbar.removeAttribute('role');
+      else navbar.setAttribute('role', originalNavRole);
+      if (originalNavLabel === null) navbar.removeAttribute('aria-label');
+      else navbar.setAttribute('aria-label', originalNavLabel);
+      navbar.removeAttribute('aria-modal');
       if (wasOpen && restoreFocus && mobile && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
       else if (wasOpen && restoreFocus && hidingDesktopFocus) navMenu.querySelector('a[href]')?.focus({ preventScroll: true });
       returnFocus = null;
@@ -121,7 +116,10 @@
       navMenu.hidden = false;
       navMenu.inert = false;
       navMenu.removeAttribute('aria-hidden');
-      navMenu.setAttribute('aria-modal', 'true');
+      // The header X and menu links belong to the same accessible modal boundary.
+      navbar.setAttribute('role', 'dialog');
+      navbar.setAttribute('aria-label', 'Site navigation');
+      navbar.setAttribute('aria-modal', 'true');
       navMenu.classList.add('is-open');
       navToggle.classList.add('is-active');
       navToggle.setAttribute('aria-expanded', 'true');
@@ -129,11 +127,10 @@
       document.body.classList.add('nav-open');
       backdrop.hidden = false;
       backgroundInert();
-      closeButton.focus({ preventScroll: true });
+      navToggle.focus({ preventScroll: true });
     }
 
     navToggle.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
-    closeButton.addEventListener('click', () => closeMenu());
     backdrop.addEventListener('click', () => closeMenu());
     navMenu.addEventListener('click', event => { if (event.target.closest('a[href]')) closeMenu(); });
     document.addEventListener('keydown', event => {
@@ -143,21 +140,21 @@
       const items = focusableLinks();
       const first = items[0] || navMenu;
       const last = items.at(-1) || navMenu;
-      if (event.shiftKey && (document.activeElement === first || !navMenu.contains(document.activeElement))) {
+      if (event.shiftKey && (document.activeElement === first || !items.includes(document.activeElement))) {
         event.preventDefault(); last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || !navMenu.contains(document.activeElement))) {
+      } else if (!event.shiftKey && (document.activeElement === last || !items.includes(document.activeElement))) {
         event.preventDefault(); first.focus();
       }
     });
     document.addEventListener('focusin', event => {
       if (navMenu.contains(event.target)) lastMenuFocus = event.target;
       else if (event.target !== document.body) lastMenuFocus = null;
-      if (isOpen && !navMenu.contains(event.target)) closeButton.focus({ preventScroll: true });
+      if (isOpen && event.target !== navToggle && !navMenu.contains(event.target)) navToggle.focus({ preventScroll: true });
     });
     mobileNav.addEventListener('change', () => {
       // Responsive CSS can hide the focused link before the media-query event arrives.
       const hidingFocusedMenu = mobileNav.matches && (navMenu.contains(document.activeElement) || (document.activeElement === document.body && lastMenuFocus));
-      const hidingFocusedButton = !mobileNav.matches && (document.activeElement === closeButton || document.activeElement === navToggle);
+      const hidingFocusedButton = !mobileNav.matches && document.activeElement === navToggle;
       closeMenu({ restoreFocus: false });
       if (hidingFocusedMenu) navToggle.focus({ preventScroll: true });
       else if (hidingFocusedButton) navMenu.querySelector('a[href]')?.focus({ preventScroll: true });

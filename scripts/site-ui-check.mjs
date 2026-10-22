@@ -80,7 +80,7 @@ async function scrollThrough(page) {
   await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(80);
 }
 async function menuContrast(page) {
-  return page.locator("#navMenu a,.nav-menu-close").evaluateAll(elements => {
+  return page.locator("#navMenu a").evaluateAll(elements => {
     const parse = color => (color.match(/[\d.]+/g) || []).map(Number);
     const luminance = color => color.slice(0, 3).map(n => n / 255).map(n => n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4).reduce((sum, n, i) => sum + n * [.2126, .7152, .0722][i], 0);
     return elements.filter(el => el.getClientRects().length).map(el => {
@@ -107,23 +107,21 @@ async function navAcceptance(page, path, width) {
   check(`${label}: hidden menu cannot receive focus`, !await menu.evaluate(el => el.contains(document.activeElement)));
   await toggle.focus(); await page.keyboard.press("Enter");
   await menu.waitFor({ state: "visible" });
-  check(`${label}: keyboard opens dialog and focuses close`, await toggle.getAttribute("aria-expanded") === "true" && await menu.getAttribute("aria-modal") === "true" && await page.locator(".nav-menu-close").evaluate(el => document.activeElement === el));
+  check(`${label}: keyboard opens dialog and focuses header X`, await toggle.getAttribute("aria-expanded") === "true" && await page.locator("#navbar").getAttribute("aria-modal") === "true" && await toggle.evaluate(el => document.activeElement === el));
   const contrast = await menuContrast(page);
   check(`${label}: menu text contrast at least 4.5:1`, contrast.every(x => x.ratio >= 4.5), contrast);
   const inert = await page.evaluate(() => [...document.body.children].filter(el => !el.contains(document.querySelector("#navbar")) && !el.classList.contains("nav-backdrop") && !["SCRIPT", "STYLE"].includes(el.tagName)).every(el => el.inert));
   check(`${label}: page background is inert while open`, inert);
   const focusables = menu.locator("a[href],button:not([hidden])");
   await focusables.last().focus(); await page.keyboard.press("Tab");
-  check(`${label}: Tab wraps to first menu control`, await page.locator(".nav-menu-close").evaluate(el => document.activeElement === el));
+  check(`${label}: Tab wraps to header X`, await toggle.evaluate(el => document.activeElement === el));
   await page.keyboard.press("Shift+Tab");
   check(`${label}: Shift+Tab wraps to final menu link`, await focusables.last().evaluate(el => document.activeElement === el));
   if ([390, 865, 1024].includes(width) && path === "/") await screenshot(page, `${width}-menu-open`);
   await page.keyboard.press("Escape");
   check(`${label}: Escape closes and restores toggle focus`, !await menu.isVisible() && await toggle.evaluate(el => document.activeElement === el));
-  await toggle.click(); await page.locator(".nav-menu-close").click();
-  check(`${label}: explicit close works`, !await menu.isVisible() && await toggle.evaluate(el => document.activeElement === el));
   await toggle.click(); await toggle.click();
-  check(`${label}: toggle closes an open menu`, !await menu.isVisible());
+  check(`${label}: header X closes and restores focus`, !await menu.isVisible() && await toggle.evaluate(el => document.activeElement === el));
   await toggle.click(); await page.locator(".nav-backdrop").click({ position: { x: 2, y: page.viewportSize().height - 2 } });
   check(`${label}: backdrop closes and restores focus`, !await menu.isVisible() && await toggle.evaluate(el => document.activeElement === el));
   check(`${label}: background inert state restored`, await page.evaluate(() => [...document.body.children].filter(el => !el.classList.contains("nav-backdrop")).every(el => !el.inert)));

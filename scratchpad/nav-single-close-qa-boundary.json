@@ -1,0 +1,145 @@
+{
+  "scope": "Targeted correction of collector that counted hidden sales dialog as open; actual visible modal boundary only",
+  "original": "scratchpad/nav-single-close-qa.json",
+  "checks": [
+    {
+      "name": "/ 320: exactly one VISIBLE modal contains sole header X and navigation links",
+      "pass": true
+    },
+    {
+      "name": "/ 390: exactly one VISIBLE modal contains sole header X and navigation links",
+      "pass": true
+    },
+    {
+      "name": "/ 1024: exactly one VISIBLE modal contains sole header X and navigation links",
+      "pass": true
+    },
+    {
+      "name": "/anaheim.html 390: exactly one VISIBLE modal contains sole header X and navigation links",
+      "pass": true
+    },
+    {
+      "name": "Source matches original run and remained frozen",
+      "pass": true
+    },
+    {
+      "name": "No JavaScript, API, model or external calls",
+      "pass": true
+    }
+  ],
+  "details": [
+    {
+      "path": "/",
+      "width": 320,
+      "all": [
+        {
+          "id": "navbar",
+          "hidden": false,
+          "inert": false,
+          "visible": true
+        },
+        {
+          "id": "mcAgentPanel",
+          "hidden": true,
+          "inert": false,
+          "visible": false
+        }
+      ],
+      "visibleIDs": [
+        "navbar"
+      ],
+      "expected": true,
+      "xCount": 1,
+      "duplicateClose": 0
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "all": [
+        {
+          "id": "navbar",
+          "hidden": false,
+          "inert": false,
+          "visible": true
+        },
+        {
+          "id": "mcAgentPanel",
+          "hidden": true,
+          "inert": false,
+          "visible": false
+        }
+      ],
+      "visibleIDs": [
+        "navbar"
+      ],
+      "expected": true,
+      "xCount": 1,
+      "duplicateClose": 0
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "all": [
+        {
+          "id": "navbar",
+          "hidden": false,
+          "inert": false,
+          "visible": true
+        },
+        {
+          "id": "mcAgentPanel",
+          "hidden": true,
+          "inert": false,
+          "visible": false
+        }
+      ],
+      "visibleIDs": [
+        "navbar"
+      ],
+      "expected": true,
+      "xCount": 1,
+      "duplicateClose": 0
+    },
+    {
+      "path": "/anaheim.html",
+      "width": 390,
+      "all": [
+        {
+          "id": "navbar",
+          "hidden": false,
+          "inert": false,
+          "visible": true
+        },
+        {
+          "id": "mcAgentPanel",
+          "hidden": true,
+          "inert": false,
+          "visible": false
+        }
+      ],
+      "visibleIDs": [
+        "navbar"
+      ],
+      "expected": true,
+      "xCount": 1,
+      "duplicateClose": 0
+    }
+  ],
+  "browserErrors": [],
+  "apiRequests": 0,
+  "actualExternalRequests": 0,
+  "actualModelRequests": 0,
+  "source": {
+    "script.js": "6001abb6822a4f4821cb8ccfbbb6e62900effd565b985059b6d26928e87ca7b2",
+    "styles.css": "a031732b6748ee7fec0c0077c53e205d7a891db5edd88563abc219b0198bbd5c",
+    "site-refresh.css": "1eb9cc5181786bc29b8ae348f0dd8cc807fad970893ae7d513f73186840dad2c",
+    "index.html": "b1e97eaef8586ff9fd3008634742a13c068c44c3ab65cb0a0f829a1665a9e2dc",
+    "anaheim.html": "3fd29db0e21d560d856f17f4ff95072fe283e428c102b3c32faf1c14197e55a6",
+    "scripts/site-ui-check.mjs": "0dad6f2e08cc2654d8792716b5db7965b7ae363fd0a007f849d2253d5197d735"
+  },
+  "summary": {
+    "checks": 6,
+    "passed": 6,
+    "failed": 0
+  }
+}

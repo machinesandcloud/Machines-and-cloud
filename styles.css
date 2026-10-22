@@ -9083,11 +9083,10 @@ body.theme-light::before { opacity: 0.025; }
    Shared navigation repair (2026-10-21)
    Explicit mobile visibility and an opaque, readable dialog on either page theme.
    ============================================ */
-.navbar-menu[hidden], .nav-backdrop[hidden], .nav-menu-close[hidden] { display: none !important; }
+.navbar-menu[hidden], .nav-backdrop[hidden] { display: none !important; }
 .navbar::after { display: none; }
 .nav-backdrop { position: fixed; inset: 0; z-index: 10010; background: rgba(15,23,42,0.48); }
-.nav-menu-close { display: none; }
-.navbar-toggle:focus-visible, .nav-menu-close:focus-visible, .navbar a:focus-visible { outline: 3px solid #2563EB; outline-offset: 4px; }
+.navbar-toggle:focus-visible, .navbar a:focus-visible { outline: 3px solid #2563EB; outline-offset: 4px; }
 
 @media (max-width: 1024px) {
   body.nav-open { position: fixed; top: var(--nav-scroll-top, 0px); left: 0; right: 0; width: 100%; height: 100%; overflow: hidden; }
@@ -9109,8 +9108,6 @@ body.theme-light::before { opacity: 0.025; }
     overflow-y: auto; overscroll-behavior: contain;
   }
   .navbar .navbar-menu.is-open:not([hidden]) { display: flex; visibility: visible; pointer-events: auto; }
-  .nav-menu-close { display: inline-flex; align-self: flex-end; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid #D8DFE9; border-radius: 10px; background: #FFFFFF; color: #17243B; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .nav-menu-close:hover { background: #F1F5F9; }
   .navbar .navbar-links { align-items: stretch; gap: 4px; }
   .navbar .navbar-menu .navbar-links a,
   .theme-light.hero-photo .navbar:not(.scrolled) .navbar-menu .navbar-links a { display: flex; align-items: center; min-height: 48px; padding: 12px; color: #17243B; text-shadow: none; font-size: 17px; line-height: 1.4; }
@@ -9132,7 +9129,7 @@ body.theme-light::before { opacity: 0.025; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .navbar, .navbar-toggle span, .nav-backdrop, .nav-menu-close { transition: none; animation: none; }
+  .navbar, .navbar-toggle span, .nav-backdrop { transition: none; animation: none; }
 }
 .footer-simple-bottom { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid rgba(255,255,255,0.08); font-size: var(--text-xs); color: var(--color-neutral-500); }
 .footer-simple-links { display: flex; gap: var(--space-4); flex-wrap: wrap; }

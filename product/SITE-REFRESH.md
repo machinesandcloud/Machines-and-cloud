@@ -74,3 +74,11 @@ node scripts/site-ui-check.mjs --base http://127.0.0.1:8893 --output-prefix scra
 ```
 
 This is local rendered acceptance and a bounded accessibility check. No deployment, external form/chat delivery, provider/model evaluation or complete accessibility audit was performed. Public production has not changed as part of this verification.
+
+## October 21 Houston / October 22 UTC: one menu close control (local)
+
+Steve returned the redundant visible “Close menu” button beside the header X. The generated text button and its CSS are removed. The header X remains the single close button; Escape, backdrop and selected navigation links still dismiss the menu. Keyboard focus includes the X and menu links. The open dialog boundary now encloses both controls and restores the navigation's original role/name on close or desktop resize.
+
+The required Netlify build command passes in [the local build receipt](../scratchpad/menu-single-close-build.json); syntax checks and [all182-page site references](../scratchpad/menu-single-close-sitecheck.txt) pass. Independent QA reused only the existing menu acceptance function on320/390/1024/1440 homepage and390 legacy navigation, with networking and API/model calls blocked. Its [raw receipt](../scratchpad/nav-single-close-qa.json) preserves an extra collector's hidden-sales-dialog mismatch separately from the passing navigation behavior; the [targeted visibility-aware boundary receipt](../scratchpad/nav-single-close-qa-boundary.json) passes6/6 and resolves that observation without claiming the full matrix was rerun. This is local browser/DOM proof, not a complete screen-reader audit or deployment.
+
+The pending, unopened sales-model plan is refreshed for the navigation-only CSS change. Its request caps and provider guard are unchanged; no model call or publication is created by this UI fix.
