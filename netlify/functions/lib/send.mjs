@@ -1,5 +1,6 @@
 // Outbound messages: SMS through Twilio, email through Resend. Each degrades to a
 // console log when its keys are missing, so the rest of the system keeps working.
+import { isSelfServiceClient } from "./setup.mjs";
 import { createHmac } from "node:crypto";
 import { get, put, del, logEvent } from "./store.mjs";
 
@@ -36,6 +37,7 @@ export async function clearOptOut(to) { await del("optouts", e164(to)); }
  *   business name prefixed, so day-one texts are legal and deliverable.
  */
 export async function sendSMS({ to, from, body, client, messagingServiceSid, force, type = "sms" }) {
+  if (isSelfServiceClient(client)) return { ok: false, reason: "channel_not_active" };
   to = e164(to);
   if (!to || !body) return { ok: false, reason: "missing" };
   if (!force && (await optedOut(to))) { if (client) await logEvent(client.slug, "sms_blocked", { to, type }); return { ok: false, reason: "opted_out" }; }
@@ -118,7 +120,8 @@ export function twilioSignatureValid(url, params, signature) {
 }
 
 // A plain phone call with a spoken line (no AI voice): used to escalate an unacknowledged alert.
-export async function placeCall({ to, from, say }) {
+export async function placeCall({ to, from, say, client }) {
+  if (isSelfServiceClient(client)) return { ok: false, reason: "channel_not_active" };
   to = e164(to); from = from || process.env.MC_TWILIO_NUMBER;
   if (!to || !say) return { ok: false, reason: "missing" };
   if (!smsEnabled() || !from) { console.log(`[call:disabled] to=${to} :: ${say}`); return { ok: false, reason: "disabled", logged: true }; }

@@ -1,3 +1,4 @@
+import { isSelfServiceClient } from "./lib/setup.mjs";
 // Provisioning, run after the build: a local number with our webhooks, a messaging service, the
 // 10DLC registration, the voice assistant, and the owner's forwarding instructions. Every step that
 // lacks a key is recorded as "waiting" instead of failing, and Steve is told what is missing.
@@ -11,6 +12,7 @@ export default async (req) => {
   let body; try { body = await req.json(); } catch { return new Response("bad", { status: 400 }); }
   const c = await getClient(body?.slug || "");
   if (!c || c.ownerKey !== body?.key) return new Response("forbidden", { status: 403 });
+  if (isSelfServiceClient(c)) return Response.json({ error: "channel_setup_unavailable", message: "Your draft uses saved owner answers. Website import and paid provider setup are not enabled." }, { status: 409 });
   const site = process.env.URL || new URL(req.url).origin;
   const notes = [];
   c.phone = c.phone || {};

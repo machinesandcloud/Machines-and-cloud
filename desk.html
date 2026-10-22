@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your front desk | Machines &amp; Cloud</title>
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
   <link rel="icon" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -46,12 +46,42 @@
     .availability-message { min-height: 20px; margin-top: 12px; }
     @media (max-width: 600px) { .availability-form { grid-template-columns: 1fr; } .availability-form button { justify-self: start; } .availability-row { align-items: flex-start; flex-wrap: wrap; } }
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1E2433; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; display: none; }
+    [hidden] { display:none !important; }
+    .workspace-guide { background:#f5f8ff; border-color:#d5e2fb; }
+    .workspace-guide-head { display:flex; align-items:start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .workspace-guide h2 { margin:0 0 8px; font-size:1.3rem; }
+    .workspace-guide p { margin:8px 0; }
+    .channel-states { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+    .channel-state { padding:7px 12px; border:1px solid #d5e2fb; background:#fff; border-radius:8px; font-size:13px; }
+    .setup-step { display:flex; gap:12px; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid #d5e2fb; }
+    .setup-step p { margin:4px 0; font-size:13px; color:#475569; }
+    .setup-step button { flex:none; }
+    .review-card { border:1px solid #d5e2fb; padding:18px; border-radius:16px; background:#f5f8ff; margin-bottom:18px; }
+    .review-card p { margin:0 0 12px; }
+    #testPreview { white-space:pre-wrap; overflow-wrap:anywhere; background:#f5f8ff; padding:16px; border-radius:12px; font-size:14px; }
+    dialog.walkthrough { margin:auto; width:min(540px,calc(100% - 28px)); max-height:calc(100dvh - 32px); overflow:auto; padding:26px; border:1px solid #d5e2fb; border-radius:22px; color:#16263f; box-sizing:border-box; }
+    dialog.walkthrough::backdrop { background:rgba(17,35,60,.48); }
+    .walkthrough h2 { margin:14px 0; font-size:1.55rem; }
+    .walkthrough p { line-height:1.65; }
+    .walkthrough-head,.walkthrough-actions { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .walkthrough-actions { border-top:1px solid #e1e7f0; padding-top:18px; margin-top:20px; }
+    .walkthrough button,.workspace-guide button,.review-card button { min-height:44px; }
+    .walkthrough-dismiss { border:0; background:transparent; text-decoration:underline; color:#475569; cursor:pointer; padding:8px; }
+    .guide-target { outline:3px solid #93b4ff; outline-offset:4px; }
+    @media(max-width:600px) { .setup-step { align-items:flex-start; flex-wrap:wrap; } dialog.walkthrough { padding:20px; } }
   </style>
 </head>
 <body class="theme-light" data-no-widget>
 <nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
 <main class="dk">
-  <div class="dk-head"><div><h1 id="title">Your front desk</h1><span class="st" id="status">loading</span></div><div id="liveBtns"></div></div>
+  <div class="dk-head"><div><h1 id="title">Your front desk</h1><span class="st" id="status">loading</span></div><div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="deskSignOut" hidden>Sign out</button><div id="liveBtns" style="display:inline-block;margin-left:8px"></div></div></div>
+  <div id="portalRecovery" class="card2" hidden><h2>Open your workspace securely</h2><p id="recoveryMessage">Sign in with the email you used during setup.</p><a class="btn-pill btn-pill-blue" href="onboard.html?signin=1">Email me a sign-in link</a> <button type="button" class="btn-pill btn-pill-dark" id="retryLoad">Try again</button></div>
+  <div id="portalContent" hidden>
+  <section class="card2 workspace-guide" id="workspaceGuide" hidden aria-labelledby="guideTitle">
+    <div class="workspace-guide-head"><div><h2 id="guideTitle">Set up your front desk</h2><p id="guideIntro">Review your rules, try a private conversation, then activate website chat.</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="openGuide">Show me around</button></div>
+    <div class="channel-states" id="channelStates" aria-label="Channel status"></div>
+    <p class="muted" id="aiAllowance" role="status"></p><div id="setupSteps"></div><p class="muted" id="setupMessage" role="status" aria-live="polite"></p>
+  </section>
   <div class="tabs"><button data-t="today" id="tabToday" style="display:none">Today</button><button class="on" data-t="test" id="tabTest">Test it</button><button data-t="leads">Leads and bookings</button><button data-t="availability">Availability</button><button data-t="convs">Conversations</button><button data-t="know">What it knows</button><button data-t="setup">Setup</button><button data-t="account">Account</button></div>
 
   <section class="pane" id="p-today">
@@ -62,12 +92,12 @@
 
   <section class="pane on" id="p-test">
     <div class="grid2">
-      <div class="card2"><h3>Talk to it as a customer</h3><p class="muted">Try the hard ones: ask for a discount, an exact time, something you do not do, a gas smell, Spanish. Anything it gets wrong, fix it under What it knows.</p>
-        <div class="chat"><div class="m" id="msgs"></div><form id="chatForm"><textarea id="chatIn" rows="1" placeholder="Type like a customer would"></textarea><button type="submit" class="btn-pill btn-pill-blue btn-sm">Send</button></form></div>
+      <div class="card2"><h3>Talk to it as a customer</h3><p class="muted">This is a private practice conversation. It does not reserve real visits, contact anyone, or change your calendar. Try a booking request, a service you do not offer, or Spanish; fix any wrong answer under What it knows.</p>
+        <div class="chat"><div class="m" id="msgs"></div><form id="chatForm"><textarea id="chatIn" aria-label="Practice customer message" rows="1" placeholder="Type like a customer would"></textarea><button type="submit" class="btn-pill btn-pill-blue btn-sm">Send</button></form></div>
         <p class="muted" style="margin-top:8px"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="newChat">New customer</button></p>
       </div>
-      <div class="card2"><h3>What happens when it books or flags something</h3><p class="muted">Every booking and lead shows up here and goes to your cell as a text (once texting is on). Bookings go on your calendar when it is connected.</p><div id="liveEvents" class="muted">Nothing yet. Book a test visit on the left.</div>
-        <h3 style="margin-top:18px">Your website missed these</h3><div id="missing" class="muted"></div></div>
+      <div class="card2"><h3>Your practice result</h3><p class="muted">A preview of the details your desk would collect. Practice results stay separate from customer leads and bookings.</p><div id="testPreview" role="status" aria-live="polite">Send a practice message to see the result here.</div><h3 style="margin-top:18px">Recent service activity</h3><div id="liveEvents" class="muted">No service activity yet.</div>
+        <h3 style="margin-top:18px">Draft notes</h3><div id="missing" class="muted"></div></div>
     </div>
   </section>
 
@@ -80,7 +110,7 @@
     <div class="card2">
       <h3>Time you are unavailable</h3>
       <p class="muted">Block a day or arrival window for other jobs, time off or a closure. Keep work booked elsewhere up to date here.</p>
-      <p class="muted">Existing visits stay booked. Emergency requests still reach you.</p>
+      <p class="muted">Existing visits stay booked. This changes the availability offered to new customers.</p>
       <form id="availabilityForm" class="availability-form">
         <div class="form-group"><label class="form-label" for="availabilityDate">Date (Houston time)</label><input id="availabilityDate" class="form-input" type="date" required></div>
         <div class="form-group"><label class="form-label" for="availabilityWindow">Time to block</label><select id="availabilityWindow" class="form-input"><option value="">Whole day</option></select></div>
@@ -95,6 +125,7 @@
   <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><div id="convs"></div></div></section>
 
   <section class="pane" id="p-know">
+    <div class="review-card" id="reviewCard" hidden><h3>Check your business rules</h3><p>Confirm your services, prices, service area, hours, arrival windows and safety instructions below. Save any edits first. Your review and practice check apply to the saved version; changes require a new check.</p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="reviewRules">I reviewed these saved rules</button> <span id="reviewMessage" class="muted" role="status"></span></div>
     <form id="cfg">
       <div class="grid2">
         <div class="card2"><h3>Shop</h3>
@@ -120,17 +151,17 @@
           <div class="form-group"><label class="form-label">Everything else</label><input class="form-input" name="rules.emergencies.tier2"></div>
           <div class="form-group"><label class="form-label">Your safety script, in your words</label><textarea class="form-input" name="rules.emergencies.script" placeholder="Gas smell: leave the house, call CenterPoint or 911, then us."></textarea></div>
           <div class="form-group"><label class="form-label">Notes for the front desk</label><textarea class="form-input" name="summary"></textarea></div>
-          <div class="form-group"><label class="form-label">Website chat greeting</label><input class="form-input" name="widget.greeting"></div>
+          <div class="form-group"><label class="form-label" for="allowedOrigins">Websites allowed to use your chat (one full address per line)</label><textarea class="form-input" id="allowedOrigins" name="widget.allowedOrigins" placeholder="https://yourshop.com"></textarea><p class="muted">Include your website before installing the chat there. This does not import or change your website.</p></div><div class="form-group"><label class="form-label">Website chat greeting</label><input class="form-input" name="widget.greeting"></div>
         </div>
       </div>
-      <div class="card2"><h3>Questions and answers</h3><p class="muted">One per line: Question? Answer. Drafted from your website; lines marked ASK OWNER need your answer or should be deleted.</p><textarea class="form-input" name="faq" style="min-height:220px"></textarea></div>
-      <div class="card2"><h3>You</h3><div class="grid2"><div class="form-group"><label class="form-label">Your name</label><input class="form-input" name="owner.name"></div><div class="form-group"><label class="form-label">Your cell (alerts go here)</label><input class="form-input" name="owner.phone"></div><div class="form-group"><label class="form-label">Backup number for urgent alerts</label><input class="form-input" name="owner.backupPhone" placeholder="A second phone, not your cell"></div><div class="form-group" id="transferGroup"><label class="form-label">Transfer calls that need you to</label><input class="form-input" name="phone.transferTo" placeholder="Your cell"></div><div class="form-group"><label class="form-label">Acknowledge urgent alerts within</label><select class="form-input" name="rules.ackMinutes"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select></div><div class="form-group"><label class="form-label">Which calls the front desk takes</label><select class="form-input" name="phone.forwarding"><option value="missed">Only the ones I miss</option><option value="all">All of them, transfer the ones that need me</option><option value="none">None, texts and chat only</option></select></div><div class="form-group"><label class="form-label">Callback promise during hours</label><input class="form-input" name="rules.callbackHours" placeholder="within 30 minutes"></div><div class="form-group"><label class="form-label">Callback promise after hours</label><input class="form-input" name="rules.callbackAfterHours" placeholder="by 8 am tomorrow"></div><div class="form-group"><label class="form-label">Google review link</label><input class="form-input" name="business.reviewLink"></div><div class="form-group"><label class="form-label">Payment link</label><input class="form-input" name="business.payLink"></div><div class="form-group"><label class="form-label">Maintenance reminders</label><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="rules.consentAsk"> After a happy review reply, ask the customer once whether they want a text when their next tune-up is due (they must reply YES before any such text goes out)</label></div><div class="form-group"><label class="form-label">Daily digest by text</label><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="digest.text"> Text me the 6 pm summary (the email always comes; quiet days are email only)</label></div></div><p class="muted" style="margin:10px 0 0">Emergencies: backup text, then a call to your cell, then Steve.<br>Callback requests: backup text, then the customer is told the window.</p></div>
+      <div class="card2"><h3>Questions and answers</h3><p class="muted">One per line: Question? Answer. Your saved answers are the source. Review or remove any unanswered question before using it with customers.</p><textarea class="form-input" name="faq" style="min-height:220px"></textarea></div>
+      <div class="card2"><h3>You</h3><div class="grid2"><div class="form-group"><label class="form-label">Your name</label><input class="form-input" name="owner.name"></div><div class="form-group"><label class="form-label">Your contact cell</label><input class="form-input" name="owner.phone"></div><div class="form-group"><label class="form-label">Backup number for urgent alerts</label><input class="form-input" name="owner.backupPhone" placeholder="A second phone, not your cell"></div><div class="form-group" id="transferGroup"><label class="form-label">Transfer calls that need you to</label><input class="form-input" name="phone.transferTo" placeholder="Your cell"></div><div class="form-group"><label class="form-label">Acknowledge urgent alerts within</label><select class="form-input" name="rules.ackMinutes"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select></div><div class="form-group"><label class="form-label">Which calls the front desk takes</label><select class="form-input" name="phone.forwarding"><option value="missed">Only the ones I miss</option><option value="all">All of them, transfer the ones that need me</option><option value="none">None, texts and chat only</option></select></div><div class="form-group"><label class="form-label">Callback promise during hours</label><input class="form-input" name="rules.callbackHours" placeholder="within 30 minutes"></div><div class="form-group"><label class="form-label">Callback promise after hours</label><input class="form-input" name="rules.callbackAfterHours" placeholder="by 8 am tomorrow"></div><div class="form-group"><label class="form-label">Google review link</label><input class="form-input" name="business.reviewLink"></div><div class="form-group"><label class="form-label">Payment link</label><input class="form-input" name="business.payLink"></div><div class="form-group"><label class="form-label">Maintenance reminders</label><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="rules.consentAsk"> After a happy review reply, ask the customer once whether they want a text when their next tune-up is due (they must reply YES before any such text goes out)</label></div><div class="form-group"><label class="form-label">Daily digest by text</label><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="digest.text"> Text me the 6 pm summary (the email always comes; quiet days are email only)</label></div></div><p class="muted" id="handoffNote" style="margin:10px 0 0">Contact methods depend on the channels shown as active under Setup.</p></div>
       <p><button type="submit" class="btn-pill btn-pill-blue">Save changes</button> <span class="muted" id="saveMsg"></span></p>
     </form>
   </section>
 
   <section class="pane" id="p-setup">
-    <div class="grid2" style="grid-template-columns:1.1fr 1.4fr">
+    <div class="grid2">
       <div class="card2"><h3>Line health</h3><div id="health" class="muted"></div></div>
       <div class="card2"><h3>Checklist</h3><div id="checklist"></div>
         <h3 style="margin-top:18px">Your front desk number</h3><p id="numberText" class="muted"></p>
@@ -139,7 +170,7 @@
         <div id="legalForm" style="display:none"><form id="legal"><div class="grid2"><div class="form-group"><label class="form-label">Legal business name</label><input class="form-input" name="legalName"></div><div class="form-group"><label class="form-label">EIN</label><input class="form-input" name="ein"></div><div class="form-group"><label class="form-label">Business type</label><select class="form-input" name="businessType"><option value="llc">LLC</option><option value="corp">Corporation</option><option value="sole">Sole proprietorship</option><option value="partnership">Partnership</option><option value="nonprofit">Non-profit</option></select></div><div class="form-group"><label class="form-label">Street address</label><input class="form-input" name="street"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" name="city"></div><div class="form-group"><label class="form-label">State and ZIP</label><div style="display:flex;gap:8px"><input class="form-input" name="state" maxlength="2" style="width:70px"><input class="form-input" name="zip"></div></div></div><button type="submit" class="btn-pill btn-pill-blue btn-sm">Save and file registration</button> <span class="muted" id="legalMsg"></span></form></div>
         <h3 style="margin-top:18px">Phone answering</h3><p id="voiceText" class="muted"></p>
       </div>
-      <div class="card2"><h3>Add the chat to your website</h3><p class="muted">Paste this one line before <code>&lt;/body&gt;</code> on every page, or send it to whoever runs your site. It only works on your domain.</p><pre class="snip" id="snippet"></pre>
+      <div class="card2"><h3>Add the chat to your website</h3><p id="installStatus" class="muted"></p><p class="muted">Paste this one line before <code>&lt;/body&gt;</code> on every page, or send it to whoever runs your site. It only works on your domain.</p><pre class="snip" id="snippet"></pre><button type="button" class="btn-pill btn-pill-dark btn-sm" id="copySnippet">Copy installation code</button> <span class="muted" id="copyMessage" role="status"></span>
         <h3 style="margin-top:18px">Paste this on your website too</h3><p class="muted">Most trade websites are missing hours, a service area, and answers to the first five questions. Here is yours, written from what your front desk knows. Copy it onto your contact or FAQ page.</p><pre class="snip" id="siteBlock" style="white-space:pre-wrap"></pre>
         <h3 style="margin-top:18px">Calendar</h3><p><a class="btn-pill btn-pill-dark btn-sm" id="calBtn" href="#">Connect Google Calendar</a> <span class="muted" id="calText"></span></p>
         <h3 style="margin-top:18px">Texts to your cell</h3><p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="testSms">Send me a test text</button> <span class="muted" id="smsText"></span></p>
@@ -150,190 +181,22 @@
     <div class="grid2">
       <div class="card2"><h3>This month</h3><p class="muted" id="usage"></p>
         <form id="acct"><div class="form-group"><label class="form-label">Your average job value (optional)</label><div style="display:flex;gap:8px;align-items:center"><input class="form-input" name="rules.avgTicket" placeholder="450" style="max-width:140px"> <button type="submit" class="btn-pill btn-pill-dark btn-sm">Save</button> <span class="muted" id="acctMsg"></span></div><p class="muted" style="margin:6px 0 0">With it, your monthly statement says what the jobs that would have gone to voicemail were worth, and compares with last month.</p></div></form>
-        <h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every alert names the one reply it needs: <code>ok REF</code> to acknowledge, <code>called REF</code> when you have reached someone who asked for a call, <code>otw REF</code> on the way, <code>done REF</code> when the job is finished, <code>cancel REF</code>. A bare <code>ok</code>, <code>called</code>, <code>otw</code>, or <code>done</code> works when only one job fits. Also <code>invoice REF 450</code> if they still owe you (payment reminders on day 3 and 7), <code>paid REF</code> to stop them, <code>quote REF 1450</code> when you sent a quote. Follow-up texts only go out between 9 am and 9 pm (noon to 9 pm on Sunday).</p>
+        <div id="textCommands"><h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every alert names the one reply it needs: <code>ok REF</code> to acknowledge, <code>called REF</code> when you have reached someone who asked for a call, <code>otw REF</code> on the way, <code>done REF</code> when the job is finished, <code>cancel REF</code>. A bare <code>ok</code>, <code>called</code>, <code>otw</code>, or <code>done</code> works when only one job fits. Also <code>invoice REF 450</code> if they still owe you (payment reminders on day 3 and 7), <code>paid REF</code> to stop them, <code>quote REF 1450</code> when you sent a quote. Follow-up texts only go out between 9 am and 9 pm (noon to 9 pm on Sunday).</p></div>
       </div>
       <div class="card2"><h3>Your data</h3><p class="muted" id="dataPolicy"></p><p class="muted">Download: <a id="expBookings" href="#">bookings</a>, <a id="expLeads" href="#">leads</a>, <a id="expConvs" href="#">conversations</a> (CSV, opens in Excel or Sheets), or <a id="expCustomers" href="#">customers</a> in the column names Jobber and Housecall Pro import.</p><p class="muted">Texting terms your customers can read: <a id="policyLink" href="#" target="_blank" rel="noopener"></a></p>
         <h3 style="margin-top:18px">Service</h3><p class="muted">Pause or resume from the buttons at the top. To end the service: <button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelBtn2">Cancel service</button></p>
       </div>
     </div>
   </section>
+  </div>
 </main>
+<dialog class="walkthrough" id="guideDialog" aria-labelledby="tourTitle" aria-describedby="tourBody">
+  <div class="walkthrough-head"><span class="muted" id="tourCount"></span><button type="button" class="walkthrough-dismiss" id="closeGuide">Close walkthrough</button></div>
+  <h2 id="tourTitle"></h2><p id="tourBody"></p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourAction"></button>
+  <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="tourBack">Back</button><button type="button" class="walkthrough-dismiss" id="skipGuide">Skip for now</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourNext">Next</button></div>
+</dialog>
 <div class="toast" id="toast"></div>
-<script>
-(function () {
-  var q = new URLSearchParams(location.search), slug = q.get('c'), key = q.get('k');
-  if (!slug || !key) { document.getElementById('title').textContent = 'Missing link'; document.getElementById('status').textContent = 'Use the link from your email.'; return; }
-  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
-  var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + '&k=' + encodeURIComponent(key);
-  var data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
-  var $ = function (id) { return document.getElementById(id); };
-  function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function availabilityDateLabel(date) { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date + 'T12:00:00Z')); }
-  function renderAvailability(blocks) {
-    $('availabilityBlocks').innerHTML = blocks.length ? blocks.map(function (b) {
-      var label = availabilityDateLabel(b.date) + ' · ' + (b.window || 'Whole day');
-      return '<div class="availability-row"><div><b>' + esc(label) + '</b>' + (b.existingBookings ? '<div>' + esc(b.existingBookings) + ' visit' + (b.existingBookings === 1 ? ' is' : 's are') + ' already reserved and unchanged.</div>' : '') + '</div><button type="button" class="btn-pill btn-pill-dark btn-sm availability-remove" data-date="' + esc(b.date) + '" data-window="' + esc(b.window) + '" aria-label="Remove block for ' + esc(label) + '">Remove block</button></div>';
-    }).join('') : '<p>No time blocked.</p>';
-  }
-  var availabilityBusy = false;
-  function availabilityChange(actionName, date, window, button) {
-    if (availabilityBusy) return Promise.resolve();
-    availabilityBusy = true;
-    document.querySelectorAll('#availabilityForm button, #availabilityBlocks button').forEach(function (b) { b.disabled = true; });
-    $('availabilityMessage').textContent = 'Saving…';
-    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: actionName, date: date, window: window }) })
-      .then(function (res) { return res.json().then(function (r) { if (!res.ok || !r.ok) { var messages = { invalid_date: 'Choose a valid date in Houston time.', invalid_window: 'Choose one of your saved arrival windows.', too_many_blocks: 'Remove an old block before adding another.', availability_unavailable: 'Availability could not be saved. Refresh to check it before trying again.' }; var err = new Error('Availability request failed'); err.availabilityMessage = messages[r.error] || 'Could not save availability. Refresh and try again.'; throw err; } if (!Array.isArray(r.availabilityBlocks)) throw new Error('Availability response incomplete'); return r; }); })
-      .then(function (r) { renderAvailability(r.availabilityBlocks); $('availabilityMessage').textContent = (actionName === 'availability_block' ? 'Time blocked.' : 'Block removed.') + (r.existingBookings ? ' ' + r.existingBookings + ' existing visit' + (r.existingBookings === 1 ? ' remains' : 's remain') + ' booked.' : ''); })
-      .catch(function (err) { $('availabilityMessage').textContent = err.availabilityMessage || 'Availability could not be saved. Refresh to check it before trying again.'; })
-      .finally(function () { availabilityBusy = false; document.querySelectorAll('#availabilityForm button, #availabilityBlocks button').forEach(function (b) { b.disabled = false; }); });
-  }
-  $('availabilityForm').addEventListener('submit', function (e) { e.preventDefault(); availabilityChange('availability_block', $('availabilityDate').value, $('availabilityWindow').value, $('availabilitySubmit')); });
-  $('availabilityBlocks').addEventListener('click', function (e) { var button = e.target.closest('button.availability-remove'); if (button) availabilityChange('availability_unblock', button.dataset.date, button.dataset.window, button); });
-  var ref = { calendar: q.get('calendar'), billing: q.get('billing') };
-  if (ref.calendar === 'ok') toast('Calendar connected.');
+<script src="desk.js" defer></script>
 
-  function showTab(t) { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); }); }
-  if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
-  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { window.__tabPicked = true; document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + b.dataset.t); }); }); });
-
-  function load() {
-    return fetch(API).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.error) { if (d.error === 'availability_unavailable') { $('status').textContent = 'Could not load availability.'; $('availabilityMessage').textContent = 'Availability could not be loaded. Refresh to try again.'; } else { $('title').textContent = 'Not found'; $('status').textContent = 'Check your link.'; } return; }
-      data = d; var c = d.client;
-      var windowChoice = $('availabilityWindow').value;
-      $('availabilityWindow').innerHTML = '<option value="">Whole day</option>' + (c.windows || []).map(function (w) { return '<option value="' + esc(w) + '">' + esc(w) + '</option>'; }).join('');
-      if ((c.windows || []).indexOf(windowChoice) >= 0) $('availabilityWindow').value = windowChoice;
-      var houstonToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-      $('availabilityDate').min = houstonToday; if (!$('availabilityDate').value) $('availabilityDate').value = houstonToday;
-      renderAvailability(d.availabilityBlocks || []);
-      $('title').textContent = (c.business.name || 'Your front desk');
-      var st = $('status'); st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status; st.className = 'st' + (c.status === 'live' ? ' live' : '');
-      st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;
-      var offBtns = (d.forwarding && d.forwarding.off && d.forwarding.off.length && (c.status === 'paused' || c.status === 'cancelled')) ? '<div class="muted" style="margin-top:8px">Send calls back to your phone: ' + d.forwarding.off.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') + '<br>' + esc(d.forwarding.offLong || '') + '</div>' : '';
-      document.querySelector('.tabs button[data-t="test"]').style.display = c.status === 'cancelled' ? 'none' : '';
-      var live = c.status === 'live'; $('tabToday').style.display = live ? '' : 'none'; $('tabTest').style.display = live || c.status === 'cancelled' ? 'none' : '';
-      if (live && !location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
-
-      $('needsYou').innerHTML = (function () { var rows = d.leads.filter(function (l) { return l.status === 'open' && (l.alertWaiting || l.overdueAt || l.outcome === 'needs_action' || l.outcome === 'wants_call'); }); return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(l.id) + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : 'Nothing waiting on you.'; })();
-      $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || 'Quiet so far.';
-      (function () { var dayOf = function (iso) { return iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }) : ''; }; var today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
-        var t = d.today || {}; var calls = t.calls || 0, texts = t.texts || 0, booked = t.bookings || 0, need = t.needsYou || 0; var h = d.health || {};
-        document.getElementById('today').innerHTML = '<div><b>' + calls + '</b> calls</div><div><b>' + texts + '</b> texts in</div><div><b>' + booked + '</b> booked today</div><div><b>' + need + '</b> need you</div><div class="muted">Line: ' + (h.errors24h ? h.errors24h + ' errors in 24 h' : 'OK') + '</div>'; })();
-      $('liveBtns').innerHTML = (c.status === 'cancelled' ? '<span class="muted">line rings through until ' + esc((c.serviceEndsAt || '').slice(0, 10)) + '</span>' : c.status === 'paused'
-        ? '<button class="btn-pill btn-pill-blue btn-sm" id="resume">Resume</button> <button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn">Cancel service</button>'
-        : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7' + (c.status === 'live' ? ';display:none' : '') + '">Cancel service</button>') + offBtns;
-      if (c.status === 'live') { var tl = document.createElement('a'); tl.id = 'testLink'; tl.href = '#test'; tl.className = 'muted'; tl.style.marginLeft = '10px'; tl.textContent = 'Test it'; tl.addEventListener('click', function (ev) { ev.preventDefault(); window.__tabPicked = true; $('tabTest').style.display = ''; showTab('test'); }); $('liveBtns').appendChild(tl); }
-      var go = $('golive'), pa = $('pause'), re = $('resume'), ca = $('cancelBtn') || $('cancelBtn2');
-      if ($('cancelBtn') && $('cancelBtn2')) $('cancelBtn2').addEventListener('click', function () { $('cancelBtn').click(); });
-      if (go) go.addEventListener('click', function () { action('go_live').then(function () { toast('Live. Your website chat and texting number are answering.'); load(); }); });
-      if (pa) pa.addEventListener('click', function () { action('pause').then(function () { toast('Paused. Calls to your front desk number now ring your own phone.'); load(); }); });
-      if (re) re.addEventListener('click', function () { action('resume').then(function () { toast('Back on.'); load(); }); });
-      if (ca) ca.addEventListener('click', function () {
-        var box = document.getElementById('cancelBox'); if (box) { box.remove(); return; }
-        box = document.createElement('div'); box.id = 'cancelBox'; box.className = 'card2'; box.style.marginTop = '12px';
-        box.innerHTML = '<h3>Cancel the front desk</h3><p class="muted">Effective today. You get a text with the code to turn off call forwarding, calls to the front desk number ring straight to your phone for 30 days, and there are no further charges. Your data stays exportable for 30 days.</p><div class="form-group"><label class="form-label">Anything we should know? (optional)</label><input class="form-input" id="cancelReason"></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelGo">Yes, cancel today</button> <button type="button" class="btn-pill btn-pill-blue btn-sm" id="cancelNo">Keep it</button>';
-        document.querySelector('.dk-head').after(box);
-        document.getElementById('cancelNo').addEventListener('click', function () { box.remove(); });
-        document.getElementById('cancelGo').addEventListener('click', function () { fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cancel', reason: document.getElementById('cancelReason').value }) }).then(function (r) { return r.json(); }).then(function () { box.remove(); toast('Cancelled. Check your texts for the forwarding-off code.'); load(); }); });
-      });
-      $('missing').textContent = (c.build && c.build.notes) ? c.build.notes : 'Nothing major.';
-      // records
-      $('bookings').innerHTML = d.bookings.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Visit</th><th>Status</th><th>Ref</th></tr>' + d.bookings.map(function (b) { return '<tr><td>' + esc((b.createdAt || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(b.customer_name) + ' <span class="muted">(' + (b.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(b.phone) + '</span>' + (b.unsure ? '<br><span class="muted">Unsure: ' + esc(b.unsure) + '</span>' : '') + '</td><td>' + esc(b.issue) + '<br><span class="muted">' + esc(b.address) + '</span></td><td>' + esc(b.date) + ' ' + esc(b.window) + '</td><td>' + esc(b.status) + '</td><td>' + esc(b.id) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="muted">No bookings yet.</p>';
-      $('leads').innerHTML = d.leads.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Outcome</th><th>Status</th><th>Ref</th></tr>' + d.leads.map(function (l) { return '<tr><td>' + esc((l.createdAt || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(l.customer_name || 'no name') + ' <span class="muted">(' + (l.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(l.phone) + '</span></td><td>' + esc(l.issue) + (l.unsure ? '<br><span class="muted">Unsure: ' + esc(l.unsure) + '</span>' : '') + '</td><td>' + esc((l.outcome || l.reason || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ' <b>EMERGENCY</b>' : '') + (l.overdueAt && l.status === 'open' ? '<span class="tag-overdue">overdue callback</span>' : '') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</td><td>' + esc(l.status) + '</td><td>' + esc(l.id) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="muted">No leads yet.</p>';
-      document.querySelectorAll('button.ack').forEach(function (b) { b.addEventListener('click', function () { fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'ack', leadId: b.dataset.id }) }).then(function () { toast('Acknowledged.'); load(); }); }); });
-      $('convs').innerHTML = d.conversations.length ? d.conversations.map(function (v) { return '<div class="conv"><b>' + esc(v.channel) + ' · ' + esc(v.contact) + ' · ' + esc((v.updatedAt || '').slice(0, 16).replace('T', ' ')) + ' ' + (v.flag ? '<span class="muted">Flagged: ' + esc(v.flag.note || '') + '</span> <a href="#" class="unflag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Unflag</a>' : '<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Flag</button>') + '</b>' + v.messages.map(function (m) { return '<div class="' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.role === 'user' ? 'Customer: ' : 'Desk: ') + esc(m.content) + '</div>'; }).join('') + '</div>'; }).join('') : '<p class="muted">No conversations yet.</p>';
-      document.querySelectorAll('button.flag').forEach(function (b) { b.addEventListener('click', function () { var note = window.prompt('What went wrong? One line is enough.') || ''; fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'flag', channel: b.dataset.ch, contact: b.dataset.ct, note: note }) }).then(function () { toast('Flagged. Steve gets it today.'); load(); }); }); });
-      document.querySelectorAll('a.unflag').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'unflag', channel: a.dataset.ch, contact: a.dataset.ct }) }).then(function () { load(); }); }); });
-      // config form
-      var f = $('cfg'), lines = function (a) { return (a || []).join('\n'); };
-      f.elements['business.name'].value = c.business.name || ''; f.elements['business.trade'].value = c.business.trade || ''; f.elements['business.hours'].value = c.business.hours || ''; var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; var hr = document.getElementById('hoursRows'); if (!hr.children.length) hr.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" data-d="' + d + '" data-k="close"></div>'; }).join(''); var hrs = c.rules.hours || {}; hr.querySelectorAll('input').forEach(function (inp) { var v = hrs[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); document.getElementById('hoursNote').textContent = c.rules.hours ? 'The front desk uses these for the callback promise and after-hours rules.' : 'We could not read your hours; using 7 am to 7 pm until you fill in the rows.'; f.elements['business.afterHours'].value = c.business.afterHours || '';
-      f.elements['business.serviceArea'].value = lines(c.business.serviceArea); f.elements['business.notServed'].value = lines(c.business.notServed); f.elements['business.spanish'].value = c.business.spanish ? 'yes' : 'no'; f.elements['business.licenses'].value = c.business.licenses || '';
-      f.elements['services'].value = lines(c.services); f.elements['fees'].value = (c.fees || []).map(function (x) { return x.label + ': ' + x.amount + (x.note ? ' (' + x.note + ')' : ''); }).join('\n'); f.elements['windows'].value = lines(c.windows);
-      f.elements['rules.handoff'].value = lines(c.rules.handoff); f.elements['rules.never'].value = lines(c.rules.never); var em = (c.rules.emergencies && typeof c.rules.emergencies === 'object') ? c.rules.emergencies : { tier0: [], tier1: [], tier2: '', script: c.rules.emergencies || '' }; f.elements['rules.emergencies.tier0'].value = lines(em.tier0); f.elements['rules.emergencies.tier1'].value = lines(em.tier1); f.elements['rules.emergencies.tier2'].value = em.tier2 || ''; f.elements['rules.emergencies.script'].value = em.script || ''; f.elements['summary'].value = c.summary || ''; f.elements['widget.greeting'].value = c.widget.greeting || '';
-      f.elements['faq'].value = (c.faq || []).map(function (x) { return x.q + ' ' + x.a; }).join('\n'); f.elements['owner.name'].value = c.owner.name || ''; f.elements['owner.phone'].value = c.owner.phone || ''; f.elements['owner.backupPhone'].value = c.owner.backupPhone || ''; f.elements['phone.transferTo'].value = c.phone.transferTo || ''; f.elements['rules.ackMinutes'].value = String(c.rules.ackMinutes || 10); f.elements['phone.forwarding'].value = c.phone.forwarding || 'missed'; f.elements['rules.callbackHours'].value = c.rules.callbackHours || ''; f.elements['rules.callbackAfterHours'].value = c.rules.callbackAfterHours || ''; document.getElementById('transferGroup').style.display = (c.phone.forwarding === 'all') ? 'block' : 'none'; f.elements['business.reviewLink'].value = c.business.reviewLink || ''; f.elements['business.payLink'].value = c.business.payLink || ''; f.elements['rules.bypass'].value = lines(c.rules.bypass || []); f.elements['digest.text'].checked = !(c.digest && c.digest.text === false); f.elements['rules.consentAsk'].checked = !!c.rules.consentAsk; f.elements['rules.windowCapacity'].value = c.rules.windowCapacity || 1; $('acct').elements['rules.avgTicket'].value = c.rules.avgTicket || '';
-      var u = d.usage || {}; $('usage').textContent = u.month ? (u.minutes || 0) + ' of ' + (u.included && u.included.minutes) + ' call minutes, ' + (u.texts || 0) + ' of ' + (u.included && u.included.texts) + ' texts to customers (' + u.month + '). Past the plan it is $0.35 a minute and $0.03 a text; nothing changes on the line.' : '';
-      $('expBookings').href = API + '&export=bookings'; $('expLeads').href = API + '&export=leads'; $('expConvs').href = API + '&export=conversations'; $('expCustomers').href = API + '&export=customers';
-      // setup
-      $('snippet').textContent = '<script src="' + d.site + '/embed.js" data-client="' + c.slug + '" async><\/script>';
-      $('calBtn').href = '/api/google/auth?c=' + c.slug + '&k=' + key; $('calText').textContent = c.calendar.connected ? 'Connected.' : (d.integrations.google ? 'Bookings go on your Google Calendar once connected.' : 'Coming online; bookings are texted to you meanwhile.'); if (!d.integrations.google) $('calBtn').addEventListener('click', function (e) { e.preventDefault(); toast('Calendar connection is being switched on. Bookings are texted to you meanwhile.'); });
-      var ph = c.phone || {}, fw = d.forwarding || {}, dlc = ph.tenDlc || 'not_started';
-      var dlcText = { not_started: 'Not filed yet.', waiting_keys: 'Being filed by Machines & Cloud.', needs_business_details: 'We need your legal business name, EIN, and address to file it. Add them below.', brand_pending: 'Filed. Carriers are reviewing your business (usually 1 to 2 weeks). Your front desk texts from Machines & Cloud\'s registered number until then, with your name on every message.', campaign_pending: 'Business approved. Carriers are reviewing the texting use case (one to six weeks). Same bridge until then.', approved: 'Approved. Your front desk texts customers from your number.', failed: 'The carriers rejected the filing. Steve has been notified and will fix it with you.' }[dlc] || dlc;
-      $('numberText').textContent = ph.twilioNumber ? ph.twilioNumber + ' (calls you forward and all customer texts go here; you keep your main number).' : (c.provision && c.provision.status === 'running' ? 'Being set up now.' : 'Being assigned. You will get it by text and email.');
-      $('fwd').innerHTML = ph.twilioNumber ? ('<p>' + esc(fw.carrier || 'Your carrier') + ': ' + (fw.codes && fw.codes.length ? fw.codes.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') : esc(fw.note || '')) + '</p><p>' + esc(fw.long || '') + '</p><p>' + (ph.forwardingVerified ? 'Verified: a forwarded call reached the front desk.' : 'Not verified yet. Call your own number from another phone, do not answer, and the front desk should pick up.') + ' <button type="button" class="btn-pill btn-pill-dark btn-sm" id="fwOk">I did this</button></p>') : '<p>Available once your number is assigned.</p>';
-      var fwOk = $('fwOk'); if (fwOk) fwOk.addEventListener('click', function () { action('forwarding_verified').then(function () { toast('Thanks. We will confirm it on the first forwarded call.'); load(); }); });
-      $('tenDlc').textContent = dlcText;
-      var h = d.health || {}; var rel = function (iso) { if (!iso) return 'none yet'; var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; };
-      $('health').innerHTML = '<div>Last inbound call: ' + rel(h.lastInboundCall) + '</div><div>Last inbound text: ' + rel(h.lastInboundText) + '</div><div>Last text delivered: ' + rel(h.lastOutboundText) + '</div><div style="color:' + (h.errors24h > 0 ? '#B91C1C' : 'inherit') + '">Errors in the last 24 h: ' + (h.errors24h || 0) + '</div><div>Texting from: ' + (h.sender === 'own' ? 'your number' : h.sender === 'bridge' ? 'Machines & Cloud\'s registered number until carriers approve yours' : 'not yet') + '</div>';
-      $('dataPolicy').textContent = d.dataPolicy || ''; $('policyLink').textContent = (d.policy && d.policy.privacy) || ''; $('policyLink').href = (d.policy && d.policy.privacy) || '#';
-      var lg = (c.business && c.business.legal) || {}; var lf = $('legal');
-      $('legalForm').style.display = (dlc === 'needs_business_details' || dlc === 'not_started' || dlc === 'failed') ? 'block' : 'none';
-      lf.elements['legalName'].value = lg.legalName || ''; lf.elements['ein'].value = lg.ein || ''; lf.elements['businessType'].value = lg.businessType || 'llc'; lf.elements['street'].value = lg.street || ''; lf.elements['city'].value = lg.city || ''; lf.elements['state'].value = lg.state || 'TX'; lf.elements['zip'].value = lg.zip || '';
-      $('voiceText').textContent = c.voice && c.voice.ready ? 'On. Forwarded calls are answered by your front desk, which books visits and texts you the details.' : (ph.twilioNumber ? 'Forwarded calls hear a short message and get a text back within seconds; the front desk continues by text. Live phone answering is being switched on.' : 'Available once your number is assigned.');
-      $('siteBlock').textContent = ['Hours: ' + (c.business.hours || '[your hours]') + (c.business.afterHours && !/ASK OWNER/i.test(c.business.afterHours) ? '. After hours: ' + c.business.afterHours : ''), 'Service area: ' + ((c.business.serviceArea || []).join(', ') || '[your area]'), (c.fees || []).length ? 'Pricing: ' + c.fees.map(function (x) { return x.label + ' ' + x.amount + (x.note ? ' (' + x.note + ')' : ''); }).join('; ') : '', '', (c.faq || []).filter(function (x) { return !/ASK OWNER/i.test(x.a); }).slice(0, 6).map(function (x) { return x.q + '\n' + x.a; }).join('\n\n')].filter(Boolean).join('\n');
-      $('checklist').innerHTML = [
-        ['ok', 'Front desk built from your website and answers'],
-        [c.faq.some(function (x) { return /ASK OWNER/i.test(x.a); }) ? 'wait' : 'ok', 'Answers checked under What it knows'],
-        [c.owner.phone ? 'ok' : 'wait', 'Your cell on file for lead texts'],
-        [ph.twilioNumber ? 'ok' : 'wait', 'Front desk number assigned'],
-        [ph.forwarding === 'none' ? 'ok' : (ph.forwardingVerified ? 'ok' : 'wait'), ph.forwarding === 'none' ? 'Phone: texts and chat only for now' : 'Call forwarding turned on from your cell (' + (ph.forwarding === 'all' ? 'all calls' : 'missed calls') + ')'],
-        [dlc === 'approved' ? 'ok' : 'wait', 'Texting registration approved by carriers'],
-        [(c.business.reviewLink || c.business.googlePlaceId) ? 'ok' : 'wait', 'Google review link added (review requests start only once it is there; the field is under You)'],
-        [c.calendar.connected ? 'ok' : 'wait', 'Calendar connected (optional; bookings are texted to you either way)'],
-        [c.status === 'live' ? 'ok' : 'wait', 'Live on your website'],
-      ].map(function (x) { return '<div class="check"><span class="dot ' + x[0] + '"></span><span>' + x[1] + '</span></div>'; }).join('');
-      $('liveEvents').innerHTML = d.events.length ? d.events.slice(0, 8).map(function (e) { return '<div>' + esc((e.at || '').slice(5, 16).replace('T', ' ')) + ' ' + esc(e.type) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') : 'Nothing yet. Book a test visit on the left.';
-    });
-  }
-  function action(a) { return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: a }) }).then(function (r) { return r.json(); }); }
-  $('testSms').addEventListener('click', function () { action('test_sms').then(function (r) { $('smsText').textContent = r.ok ? 'Sent.' : (r.logged ? 'Texting is not switched on yet; it will be before you go live.' : 'Could not send: ' + (r.error || 'add your cell first')); }); });
-
-  $('cfg').elements['phone.forwarding'].addEventListener('change', function (ev) { document.getElementById('transferGroup').style.display = ev.target.value === 'all' ? 'block' : 'none'; });
-  $('cfg').addEventListener('submit', function (e) {
-    e.preventDefault(); var f = e.target, L = function (n) { return f.elements[n].value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); };
-    var body = { business: { name: f.elements['business.name'].value, trade: f.elements['business.trade'].value, hours: f.elements['business.hours'].value, afterHours: f.elements['business.afterHours'].value, serviceArea: L('business.serviceArea'), notServed: L('business.notServed'), spanish: f.elements['business.spanish'].value === 'yes', licenses: f.elements['business.licenses'].value, reviewLink: f.elements['business.reviewLink'].value, payLink: f.elements['business.payLink'].value, city: data.client.business.city, googlePlaceId: data.client.business.googlePlaceId },
-      owner: { name: f.elements['owner.name'].value, phone: f.elements['owner.phone'].value, backupPhone: f.elements['owner.backupPhone'].value }, phone: { businessNumber: data.client.phone.businessNumber, forwarding: f.elements['phone.forwarding'].value, carrier: data.client.phone.carrier, transferTo: f.elements['phone.transferTo'].value }, services: L('services'),
-      fees: L('fees').map(function (line) { var m = line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/); return m ? { label: m[1].trim(), amount: m[2].trim(), note: (m[3] || '').trim() } : { label: line, amount: '', note: '' }; }),
-      windows: L('windows'), rules: { handoff: L('rules.handoff'), never: L('rules.never'), emergencies: { tier0: L('rules.emergencies.tier0'), tier1: L('rules.emergencies.tier1'), tier2: f.elements['rules.emergencies.tier2'].value, script: f.elements['rules.emergencies.script'].value }, ackMinutes: Number(f.elements['rules.ackMinutes'].value), callbackHours: f.elements['rules.callbackHours'].value, callbackAfterHours: f.elements['rules.callbackAfterHours'].value, bypass: L('rules.bypass'), consentAsk: f.elements['rules.consentAsk'].checked, windowCapacity: Number(f.elements['rules.windowCapacity'].value) || 1, hours: (function () { var t = {}; document.querySelectorAll('#hoursRows input[data-k="open"]').forEach(function (o) { var c2 = document.querySelector('#hoursRows input[data-d="' + o.dataset.d + '"][data-k="close"]'); t[o.dataset.d] = o.value && c2.value ? { open: o.value, close: c2.value } : null; }); return t; })() }, digest: { text: f.elements['digest.text'].checked }, summary: f.elements['summary'].value, widget: { greeting: f.elements['widget.greeting'].value, allowedOrigins: data.client.widget.allowedOrigins || [] },
-      faq: L('faq').map(function (line) { var i = line.indexOf('?'); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : null; }).filter(Boolean) };
-    fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (r) { $('saveMsg').textContent = r.ok ? 'Saved. The front desk uses it on the next message.' : (r.error === 'loop' ? r.message : 'Could not save.'); if (r.ok) load(); });
-  });
-
-  $('acct').addEventListener('submit', function (e) {
-    e.preventDefault(); fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rules: { avgTicket: e.target.elements['rules.avgTicket'].value } }) }).then(function (r) { return r.json(); }).then(function (r) { $('acctMsg').textContent = r.ok ? 'Saved.' : 'Could not save.'; });
-  });
-  $('legal').addEventListener('submit', function (e) {
-    e.preventDefault(); var f = e.target;
-    fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legal: { legalName: f.elements['legalName'].value, ein: f.elements['ein'].value, businessType: f.elements['businessType'].value, street: f.elements['street'].value, city: f.elements['city'].value, state: f.elements['state'].value, zip: f.elements['zip'].value } }) })
-      .then(function (r) { return r.json(); }).then(function () { return action('provision'); }).then(function () { $('legalMsg').textContent = 'Saved. Filing now; check back in a day.'; setTimeout(load, 4000); });
-  });
-
-  // test chat
-  var msgs = $('msgs');
-  function add(role, text) { var el = document.createElement('div'); el.className = 'b ' + (role === 'user' ? 'u' : role === 'sys' ? 's' : 'a'); el.textContent = text; msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight; return el; }
-  function greet() { msgs.innerHTML = ''; add('a', (data && data.client.widget.greeting) || 'Hi, what can we help with today?'); }
-  $('newChat').addEventListener('click', function () { contact = 't' + Math.random().toString(36).slice(2, 10); transcript = []; greet(); });
-  $('chatIn').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatForm').requestSubmit(); } });
-  $('chatForm').addEventListener('submit', function (e) {
-    e.preventDefault(); var t = $('chatIn').value.trim(); if (!t) return; $('chatIn').value = '';
-    transcript.push({ role: 'user', content: t }); add('user', t); var bubble = null, full = '';
-    fetch(API_BASE + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, key: key, channel: 'test', contact: contact, messages: transcript.slice(-20), stream: true }) })
-      .then(function (res) {
-        var reader = res.body.getReader(), dec = new TextDecoder(), buf = '';
-        return (function pump() { return reader.read().then(function (r) {
-          if (r.done) return;
-          buf += dec.decode(r.value, { stream: true }); var lines = buf.split('\n'); buf = lines.pop();
-          lines.forEach(function (l) { if (!l.trim()) return; try { var o = JSON.parse(l);
-            if (o.t === 'delta') { if (!bubble) bubble = add('a', ''); full += o.text; bubble.textContent = full; msgs.scrollTop = msgs.scrollHeight; }
-            else if (o.t === 'done') { transcript.push({ role: 'assistant', content: o.reply }); (o.events || []).forEach(function (ev) { add('sys', ev.type === 'booking' ? 'Booked, ref ' + ev.id + '. You would get a text now.' : 'Lead sent to you, ref ' + ev.id + '.'); }); if (o.events && o.events.length) load(); }
-            else if (o.t === 'error') add('sys', 'Error: ' + o.error);
-          } catch (x) { /* ignore */ } });
-          return pump();
-        }); })();
-      }).catch(function () { add('sys', 'Could not reach the front desk.'); });
-  });
-  load().then(greet);
-})();
-</script>
 </body>
 </html>

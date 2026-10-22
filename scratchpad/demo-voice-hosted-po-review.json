@@ -1,0 +1,75 @@
+{
+  "reviewedAt": "2026-10-22",
+  "reviewerRole": "Independent Product Owner",
+  "method": "Read saved complete final assistant transcript, structured owner event, rendered summary, audio counters and cleanup. No network, model, provider or microphone request by reviewer; no saved audio recording listened to.",
+  "rawEvidence": "scratchpad/demo-voice-hosted-first.json",
+  "rawSha256": "b8c49fd209d8e61610a9f0709b96ff7a8a68435919edf3eb727e0a6cf0903009",
+  "recordedCommit": "bb8d515b19acfa116f1ca2d267147d9033a9d6ea",
+  "recordedDeploy": "6ad97c7d627896508d5eff6e",
+  "finalAssistantUtterances": [
+    "Thanks for calling Katie Pipeworks. I'm the front desk assistant.",
+    "How can I help?",
+    "Got it, Sam. This is flagged as urgent since it's an active leak after hours,",
+    "I've logged your info for a callback, not a dispatched visit.",
+    "And someone will call you back as soon as possible.",
+    "Just a heads up,",
+    "there's a 150 dollars after hours emergency fee if a plumber is dispatched."
+  ],
+  "ownerData": {
+    "customer_name": "Sam Demo",
+    "phone": "713 555 0151",
+    "address": "24 Pine Street, Fulshear",
+    "issue": "Active water leak at home, after hours",
+    "requested_window": "",
+    "urgency": "emergency",
+    "language": "en",
+    "requested_action": "callback"
+  },
+  "ownerRenderedSummary": "Job\nActive water leak at home, after hours\nWhere\n24 Pine Street, Fulshear\nTiming\nNot confirmed\nContact\nSam Demo · 713 555 0151\nPriority\nUrgent\nLanguage\nEnglish\nNext\nReview urgent callback request",
+  "acceptedOutcomes": [
+    "Synthetic English caller reaches real hosted browser AI and receives remote audio with nonzero energy.",
+    "Caller name Sam Demo, phone 713 555 0151 and supplied 24 Pine Street, Fulshear retained.",
+    "Active after-hours leak is urgent; requested_action callback preserves callback-only/no-visit instruction.",
+    "requested_window remains empty and rendered Timing is Not confirmed.",
+    "Reply states callback rather than a dispatched visit and makes published $150 fee conditional on plumber dispatch.",
+    "Explicit End ends microphone tracks/closes peers and restores typed chat."
+  ],
+  "returnedOutcome": {
+    "id": "DEMO-CALL-COMMITMENT",
+    "severity": "P0 acceptance return for truthful human handoff in this demo",
+    "exactFinalQuote": "And someone will call you back as soon as possible.",
+    "reason": "No caller-stated callback time, human acceptance, delivery or actual callback tool exists. Future human action and ASAP timing are promised despite a request-only on-page card and Not confirmed timing. Correct structured data does not repair misleading speech.",
+    "requiredBehavior": "Describe an urgent callback request only; make response time unconfirmed; no claim a human will call or has been notified."
+  },
+  "narrowPromptProposal": "A callback is a request, not a commitment by a person. In customer replies, describe the recorded request; never promise that anyone will call, dispatch or act, including as soon as possible, shortly or a deadline. Urgent priority does not establish human availability or response timing. Say the callback time is not confirmed.",
+  "verificationNeeded": "Offline fixture/protocol and shared-prompt propagation can verify the local correction and its scope. They cannot prove actual-model closing compliance. No additional hosted call or publication is authorized; any live recheck needs a separately approved bound.",
+  "overallDecision": "Partial hosted capability accepted; full closing semantics returned. No actual callback/dispatch/provider delivery or first-shop readiness accepted.",
+  "remainingLimits": [
+    "Synthetic input, not natural-accent recognition",
+    "No saved audio listening/naturalness judgment",
+    "No interrupt or multi-turn closing acceptance",
+    "No gas voice or Spanish voice acceptance",
+    "No actual customer callback, shop telephone, text/email, Calendar/FSM or live-shop acceptance"
+  ],
+  "reviewerExternalRequests": 0,
+  "localCorrection": {
+    "status": "Implemented locally; unpublished and actual-model behavior unverified",
+    "scope": "Exactly one paragraph added to shared practice prompt; no tool/schema/provider/browser changes",
+    "beforeSource": "scratchpad/practice-personas-before-callback-commitment.mjs",
+    "beforeSha256": "6412ce21bf464a6abede160fe4f78eec5148db4cfd2031ad4c78bbf60b70f1c0",
+    "afterSource": "netlify/functions/lib/practice-personas.mjs",
+    "afterSha256": "6ed8236d906f9277de03d86f67eabe4964328101231c4beea31be2d1e3416ca8",
+    "exactDiff": "scratchpad/practice-personas-callback-commitment.diff",
+    "typedVerification": {
+      "artifact": "scratchpad/persona-callback-commitment-final.txt",
+      "result": "PASS:18 progressive turns +12 customer jobs; actual typed SDK request includes shared commitment rule; fake result keeps unknown urgent timing empty; zero external attempts/business writes",
+      "limits": "Scripted SDK/fake output cannot establish actual model compliance"
+    },
+    "voiceVerification": {
+      "artifact": "scratchpad/practice-voice-callback-commitment-final.txt",
+      "result": "PASS:47 groups,7 SDK-double CAS conflicts; outgoing voice request receives shared commitment rule for all tested personas/languages; zero live requests",
+      "limits": "Provider protocol fixture, no repeated call/actual-model output"
+    },
+    "sourceBoundary": "The returned hosted call used the recorded published commit. Its original result is unchanged; this new local prompt has no paid replay."
+  }
+}

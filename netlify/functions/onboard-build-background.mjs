@@ -1,3 +1,4 @@
+import { isSelfServiceClient } from "./lib/setup.mjs";
 // Background build: reads the client's website, drafts the knowledge base with Claude, merges it
 // into the config (owner answers win), and moves the client to "testing".
 import Anthropic from "@anthropic-ai/sdk";
@@ -86,6 +87,7 @@ export default async (req) => {
   let body; try { body = await req.json(); } catch { return new Response("bad", { status: 400 }); }
   const c = await getClient(body?.slug || "");
   if (!c || c.ownerKey !== body?.key) return new Response("forbidden", { status: 403 });
+  if (isSelfServiceClient(c)) return Response.json({ error: "channel_setup_unavailable", message: "Your draft uses saved owner answers. Website import and paid provider setup are not enabled." }, { status: 409 });
   c.build = { ...c.build, status: "running", startedAt: new Date().toISOString() };
   await saveClient(c);
   try {
@@ -124,7 +126,7 @@ export default async (req) => {
   } catch (err) {
     console.error("build failed", err);
     c.build = { ...c.build, status: "failed", notes: String(err?.message || err).slice(0, 300) };
-    c.status = "testing";
+    c.status = "build_failed";
     await saveClient(c);
     await notifySteve(`Build failed: ${c.slug}`, String(err?.message || err));
   }

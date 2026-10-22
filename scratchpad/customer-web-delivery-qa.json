@@ -1,0 +1,119 @@
+{
+  "at": "2026-10-22T03:46:31.740Z",
+  "sourceBefore": {
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/lib/desk.mjs": "a0e35e861e8b5e89b60168287022f64aa80c7b6c1539111ebe76a14d52a8de48",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "mode": "memory + installed SDK HTTP fixtures; no live model/provider",
+  "checks": [
+    {
+      "name": "Public API delivers final fixture reply and withholds tool preamble: visit",
+      "pass": true
+    },
+    {
+      "name": "Model tool loop consumed the exact expected two fixtures: visit",
+      "pass": true
+    },
+    {
+      "name": "Actual customer API creates one real portal booking",
+      "pass": true
+    },
+    {
+      "name": "Booking records portal-only delivery without fabricated consent/calendar",
+      "pass": true
+    },
+    {
+      "name": "Tool result explicitly refuses outside confirmation claims",
+      "pass": true
+    },
+    {
+      "name": "Booking reserves capacity with no mutation left held",
+      "pass": true
+    },
+    {
+      "name": "Public API delivers final fixture reply and withholds tool preamble: callback",
+      "pass": true
+    },
+    {
+      "name": "Model tool loop consumed the exact expected two fixtures: callback",
+      "pass": true
+    },
+    {
+      "name": "Actual customer API saves callback intent without promising contact",
+      "pass": true
+    },
+    {
+      "name": "Callback tool result does not invent owner texts",
+      "pass": true
+    },
+    {
+      "name": "Public API delivers final fixture reply and withholds tool preamble: emergency",
+      "pass": true
+    },
+    {
+      "name": "Model tool loop consumed the exact expected two fixtures: emergency",
+      "pass": true
+    },
+    {
+      "name": "Emergency creates a portal request without dispatch receipt",
+      "pass": true
+    },
+    {
+      "name": "No customer/owner SMS, email, Calendar, purchase or provider HTTP attempted",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No reminder, escalation, callback or followup task scheduled",
+      "pass": true
+    },
+    {
+      "name": "No alert or opted-in customer profile was fabricated",
+      "pass": true
+    },
+    {
+      "name": "Stored history records portal outcomes, never owner-notified receipt",
+      "pass": true
+    },
+    {
+      "name": "Installed Anthropic SDK handled six intercepted model HTTP requests only",
+      "pass": true
+    },
+    {
+      "name": "Public delivery source stayed unchanged during QA",
+      "pass": true
+    }
+  ],
+  "toolResults": [
+    {
+      "contact": "visit",
+      "status": 200,
+      "content": "Visit saved in the shop portal. Ref 57bcbd1b60. No text reminder or phone call was sent. Do not claim email delivery or an arrival notification. The shop must confirm arrival details directly.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "contact": "callback",
+      "status": 200,
+      "content": "Request saved in the shop portal. Ref a0a3c6ea40. No phone call or text was sent; human response and timing are not confirmed. Do not claim email delivery.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "contact": "emergency",
+      "status": 200,
+      "content": "Request saved in the shop portal. Ref a0a3c6ea40. No phone call or text was sent; human response and timing are not confirmed. Do not claim email delivery.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/lib/desk.mjs": "a0e35e861e8b5e89b60168287022f64aa80c7b6c1539111ebe76a14d52a8de48",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "summary": {
+    "checks": 19,
+    "passed": 19,
+    "failed": 0
+  }
+}

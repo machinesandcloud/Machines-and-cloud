@@ -207,6 +207,7 @@ export function publicView(c) {
 // What the owner portal sees (no secrets beyond their own key).
 export function ownerView(c) {
   const { calendar, billing, voice, ...rest } = c;
+  if (c.onboarding?.version === 1) delete rest.ownerKey;
   rest.rules = { ...(c.rules || {}), emergencies: normalizeEmergencies(c.rules?.emergencies, c.business?.trade) };
   return { ...rest, calendar: { provider: calendar?.provider || "none", connected: !!calendar?.google?.refreshToken }, billing: { status: billing?.status || "none", plan: c.plan, trialEnd: billing?.trialEnd || null }, voice: { provider: voice?.provider || "none", ready: !!voice?.assistantId, detached: !!voice?.detached } };
 }
@@ -236,12 +237,13 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
   const open = isBusinessHours(c, extra.at);
   const now = houstonNow(extra.at);
   const later = open ? null : opensLaterToday(c, extra.at);
-  const callback = open ? `${owner} will call them ${r.callbackHours || "within 30 minutes"}` : later ? `${owner} will call them when the shop opens at ${later.label} this morning` : `${owner} will call them ${r.callbackAfterHours || "by 8 am tomorrow"} (the shop is closed right now)`;
+  const callback = c.onboarding?.version === 1 ? "the callback request can be saved for the shop, but whether or when a person will respond is not confirmed" : open ? `${owner} will call them ${r.callbackHours || "within 30 minutes"}` : later ? `${owner} will call them when the shop opens at ${later.label} this morning` : `${owner} will call them ${r.callbackAfterHours || "by 8 am tomorrow"} (the shop is closed right now)`;
   const e247 = r.emergency247 || emergency247(b.hours);
   const structured = hoursText(c);
   return `You are the front desk for ${b.name || "this company"}, a ${b.trade || "home service"} company in ${b.city || "Houston"}, run by ${owner}. You are an AI and you say so if asked; you never claim to be a person. Your job is to answer the customer, find out what they need, and book or request the visit on the owner's rules, then make sure ${owner} gets the details.
 
 ${channelNote}
+${c.onboarding?.version === 1 ? "\nChannel limits: this workspace operates website chat only. Phone answering, SMS, automatic alerts and calendar sync are not active. Tools save records in the shop portal only. Never claim anyone was contacted or promise text confirmations, reminders, on-the-way texts, a callback, dispatch, human arrival confirmation or a response deadline. Say the shop needs to confirm arrival details; a saved request is not a commitment that a person will act. Requested timing is a customer preference, never a confirmed callback. These limits override every generic contact, emergency handoff and callback instruction below." : ""}
 
 About the company:
 - Services: ${list(c.services)}
@@ -249,7 +251,7 @@ About the company:
 - Right now it is ${now.label} in Houston and the shop is ${open ? "open" : "closed"}.${open ? "" : " Use the after-hours callback promise and the after-hours rules until it opens."}${e247 && !open ? " This shop answers emergencies around the clock: a Tier 1 case right now is handled as Tier 0 (notify_owner with urgency \"emergency\"), with the after-hours fee stated." : ""}
 - Service area: ${list(b.serviceArea)}${b.notServed?.length ? `. Not served: ${list(b.notServed)}` : ""}
 - Published prices (the only prices you may state): ${fees}
-- Configured arrival windows: ${list(c.windows)}. These labels are not proof that a date/window is open. Never promise an exact time; say ${owner} or the tech will text when on the way.
+- Configured arrival windows: ${list(c.windows)}. These labels are not proof that a date/window is open. Never promise an exact time; ${c.onboarding?.version === 1 ? "say the shop needs to confirm arrival details directly" : `say ${owner} or the tech will text when on the way`}.
 - Languages: English${b.spanish ? " and Spanish; answer in the customer's language" : ""}.
 ${b.licenses ? `- Licensing: ${b.licenses}\n` : ""}${c.summary ? `- Notes from the owner: ${c.summary}\n` : ""}
 ${faq ? `Answers the owner wrote:\n${faq}\n` : ""}
@@ -272,7 +274,7 @@ How a conversation should go:
 - Never tell the customer something is booked or that the owner was told until the tool has actually returned. Call the tool first, then say it.
 - A booking already alerts the owner with every detail. Do not call notify_owner for a customer you just booked unless something new and urgent comes up.
 - Lines like [Done: visit booked, ref X] at the end of your earlier messages mean that action already happened. Do not repeat it; refer to the ref if the customer asks.
-- After a tool succeeds, tell the customer what happens next in one sentence. When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation.
+- After a tool succeeds, tell the customer what happens next in one sentence. ${c.onboarding?.version === 1 ? "When book_visit succeeds, say the visit details are in the shop's portal and the shop confirms arrival details directly. Never claim a text or reminder was sent." : `When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation.`}
 - In the "unsure" field of a tool, write anything you were not confident about (the address, the issue, whether it is in the area); leave it empty when you are sure.
 - Never invent prices, discounts, availability, or guarantees. Never say anything negative about other companies.`;
 }

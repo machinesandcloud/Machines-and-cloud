@@ -1,8 +1,18 @@
 # Demonstrate the work an owner needs done
 
-Product Owner brief, **October 21, 2026, Houston**. Research continued after midnight UTC on October 22. Steve rejected the published demo because the plumber and Spanish examples did not work for him and asked for deeper customer research. **The revised experience is accepted for the bounded local outcomes recorded below; publication remains pending.** Earlier release checks do not override Steve’s reported failures.
+Product Owner brief, **October 21, 2026, Houston**. Research continued after midnight UTC on October 22. Steve rejected the earlier demo because the plumber and Spanish examples did not work for him and asked for deeper customer research. **The revised experience is published at `bb8d515`; bounded capabilities are accepted, but its hosted voice closing promise is returned below.** Earlier release checks do not override Steve’s reported failures.
 
 Owner: **Product Owner**, accountable for whether the experience helps a small service-shop owner evaluate the product. Root owns the page and interaction implementation; Engineer owns the bounded practice API/voice implementation; PM independently verifies visible behavior. No new deployment, purchase, outreach or provider acceptance is authorized by this brief.
+
+## Hosted follow-up: callback capability works; human promise is returned
+
+Root's [publication receipt](../scratchpad/demo-outcome-publication.json) confirms the separately approved `bb8d515` batch, deploy `6ad97c7d627896508d5eff6e`, published at **10:01 p.m. Houston on October 21** with one automatic build. The self-service platform changes were excluded. The [one approved hosted voice call](../scratchpad/demo-voice-hosted-first.json) is preserved verbatim; [independent PO adjudication](../scratchpad/demo-voice-hosted-po-review.json) records the full final utterances and structured result. PO made no network, provider or microphone request and did not listen to a saved recording.
+
+**Accepted for this observed call:** real hosted browser audio receives synthetic English input and remote audio; Sam Demo's phone and supplied Fulshear address are captured; an active after-hours leak becomes an urgent **callback request**, with no booked/dispatched visit. The structured timing stays empty and the visible card says **Not confirmed**. The complete reply makes the published $150 emergency fee conditional on dispatch. End releases the microphone/connections and restores typing. Remote counters record 2,833 packets and nonzero audio energy; these prove received audio, not naturalness or accent coverage.
+
+**Returned P0 outcome, `DEMO-CALL-COMMITMENT`:** the final delivered sentence says, **“And someone will call you back as soon as possible.”** The caller supplied no callback time, no human accepted the request, and this practice has only an on-page preview. The sentence promises human action and response timing that the system cannot establish. Correct structured timing does not repair misleading speech. Full closing semantics are not accepted; actual callback, shop delivery and first-shop gates remain open.
+
+The narrow local correction adds one shared prompt paragraph for spoken and typed practice: a callback is a request, never a commitment that someone will act; “as soon as possible,” “shortly” and deadlines cannot substitute for confirmed timing. Unknown timing must remain unconfirmed in the reply as well as the card. It changes no tools, state or provider routing. Offline typed-handler/wire checks pass **18 progressive turns plus 12 customer jobs**; voice checks pass **47 groups** with seven SDK-double CAS conflicts and zero live requests. Their exact prompt source bridge is in [the PO review](../scratchpad/demo-voice-hosted-po-review.json). **The correction is local, unpublished and unverified with an actual model.** The original call stays returned; fixture output and prompt propagation cannot establish corrected real speech. The authorized hosted call is spent; no further call or publication is authorized here.
 
 ## Product decision
 
@@ -67,9 +77,9 @@ PM first reproduces and retains the reported failures, then tests the final impl
 
 Acceptance requires the complete paths above, raw customer replies and the resulting structured owner state. Fixture/transport tests establish plumbing and isolation; they cannot establish natural-language quality or audible voice operation. Any real-model/voice proof needs root's separate explicit scope and request cap. PO reviews raw behavior and actual mobile views independently, including corrections, refusal and safety-first ordering. A regex match or a count of revealed messages alone is insufficient.
 
-## Current acceptance checkpoint
+## Local acceptance checkpoint before approved publication
 
-Updated **October 21, 2026, Houston**, after the final local source/header review on October 22 UTC. **PO accepts the bounded local outcomes:** three Watch/typed situations, Spanish customer replies with an English owner summary, and a real English plumbing browser-audio exchange through initial callback capture and explicit End. Full call-closing quality is not established. Header preflight is accepted; the replacement is **unpublished** and requires separate build approval. Production stays the confirmed `283e421` scheduler-repair release.
+Recorded **October 21, 2026, Houston**, after the final local source/header review on October 22 UTC. This historical checkpoint precedes the separately approved publication and hosted follow-up above. **PO accepts the bounded local outcomes:** three Watch/typed situations, Spanish customer replies with an English owner summary, and a real English plumbing browser-audio exchange through initial callback capture and explicit End. Full call-closing quality was not established. At this checkpoint the replacement was unpublished and production remained `283e421`.
 
 | Gate | Evidence and PO decision | Concrete remaining action |
 |---|---|---|

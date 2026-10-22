@@ -1,0 +1,195 @@
+{
+  "at": "2026-10-22T02:47:46.955Z",
+  "base": "http://127.0.0.1:8895",
+  "mode": "memory/fake; outbound blocked",
+  "sourceBefore": {
+    "onboard.html": "b91bfa53abc9c68eae0749a5be7cda60c120310a05e09bac1a44956aab8fabc5",
+    "desk.html": "894d51a5b1355ae1757481af3c6a0bd72046304e66bf89279cf0593d8ca58df3",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "netlify/functions/onboard.mjs": "a94322bc80471b206651799952c7442eff6135202e6290d64b58ac1a37333e9d",
+    "netlify/functions/onboard-build-background.mjs": "5e6803f40ada32ae15c0b891331244e5403c6929010f682f52b2976af5babcfb",
+    "netlify/functions/provision-background.mjs": "3a99a19e82a6ed059d428dd095f8b5da8876d5d2d218fa37cc85e628f214f671",
+    "netlify/functions/client.mjs": "88f391fe7df2c8e3485146263a91dbdc6fa76556404ff6df748362cf57f346d6",
+    "netlify/functions/lib/config.mjs": "9d592e23e8633bfcb3aa7a56016e80359a40c7766de21d1af5f622b5f6666a57",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+  },
+  "checks": [
+    {
+      "name": "Signup shows actionable required-field validation before advancing",
+      "pass": true
+    },
+    {
+      "name": "Five-step mobile signup creates a private portal without a website",
+      "pass": true
+    },
+    {
+      "name": "Completion distinguishes logged email from actual delivery",
+      "pass": false
+    },
+    {
+      "name": "Owner portal loads exact configured shop after signup",
+      "pass": true
+    },
+    {
+      "name": "New owner has a discoverable guided tutorial",
+      "pass": false
+    },
+    {
+      "name": "Setup accurately marks unavailable SMS and phone as unavailable",
+      "pass": true
+    },
+    {
+      "name": "Go live does not claim a texting number is answering when no number/provider exists",
+      "pass": false
+    },
+    {
+      "name": "Public client response omits private owner record/key",
+      "pass": true
+    },
+    {
+      "name": "Wrong owner key cannot mutate status",
+      "pass": true
+    },
+    {
+      "name": "Unauthenticated duplicate email never discloses existing portal credential",
+      "pass": false
+    },
+    {
+      "name": "Unauthenticated duplicate email leaves existing account unchanged",
+      "pass": false
+    },
+    {
+      "name": "Reload restores in-progress onboarding instead of losing answers",
+      "pass": false
+    },
+    {
+      "name": "Wrong portal link fails cleanly with no uncaught browser error",
+      "pass": false
+    },
+    {
+      "name": "Source remained stable throughout evidence capture",
+      "pass": true
+    }
+  ],
+  "observations": {
+    "created": {
+      "slug": "qa-isolated-hvac-9fe8",
+      "status": "testing",
+      "build": {
+        "status": "built",
+        "notes": "No website given; built from your answers. hours; service area",
+        "sourcePages": [],
+        "builtAt": "2026-10-22T02:47:49.783Z",
+        "missing": [
+          "hours",
+          "service area"
+        ]
+      },
+      "provision": {
+        "status": "partial",
+        "startedAt": "2026-10-22T02:47:49.786Z",
+        "steps": {
+          "number": "waiting: Twilio keys"
+        },
+        "finishedAt": "2026-10-22T02:47:49.786Z"
+      },
+      "integrations": {
+        "sms": false,
+        "google": false,
+        "stripe": false
+      }
+    },
+    "firstPortal": {
+      "status": "testing, not live yet",
+      "buttons": [
+        "Today",
+        "Test it",
+        "Leads and bookings",
+        "Availability",
+        "Conversations",
+        "What it knows",
+        "Setup",
+        "Account"
+      ],
+      "goLiveVisible": true,
+      "tutorialControls": 0
+    },
+    "setupText": "Line health\nLast inbound call: none yet\nLast inbound text: none yet\nLast text delivered: none yet\nErrors in the last 24 h: 0\nTexting from: Machines & Cloud's registered number until carriers approve yours\nChecklist\nFront desk built from your website and answers\nAnswers checked under What it knows\nYour cell on file for lead texts\nFront desk number assigned\nPhone: texts and chat only for now\nTexting registration approved by carriers\nGoogle review link added (review requests start only once it is there; the field is under You)\nCalendar connected (optional; bookings are texted to you either way)\nLive on your website\nYour front desk number\n\nBeing assigned. You will get it by text and email.\n\nForward your calls (one minute, from your business cell)\n\nAvailable once your number is assigned.\n\nTexting registration\n\nNot filed yet.\n\nLegal business name\nEIN\nBusiness type\nLLC\nCorporation\nSole proprietorship\nPartnership\nNon-profit\nStreet address\nCity\nState and ZIP\nSave and file registration\nPhone answering\n\nAvailable once your number is assigned.\n\nAdd the chat to your website\n\nPaste this one line before </body> on every page, or send it to whoever runs your site. It only works on your domain.\n\n<script src=\"http://127.0.0.1:8895/embed.js\" data-client=\"qa-isolated-hvac-9fe8\" async></script>\nPaste this on your website too\n\nMost trade websites are missing hours, a service area, and answers to the first five questions. Here is yours, written from what your front desk knows. Copy it onto your contact or FAQ page.\n\nHours: Mon to Fri 8 am to 5 pm\nService area: Katy\nPricing: Diagnostic $89\nCalendar\n\nConnect Google Calendar Coming online; bookings are texted to you meanwhile.\n\nTexts to your cell\n\nSend me a test text",
+    "afterGoLive": {
+      "status": "live",
+      "number": "",
+      "texting": false,
+      "voice": {
+        "provider": "none",
+        "ready": false,
+        "detached": false
+      },
+      "toast": "Live. Your website chat and texting number are answering."
+    },
+    "duplicateEmail": {
+      "status": 200,
+      "reusedSlug": true,
+      "exposedSameOwnerKey": true,
+      "returnedPrivateClient": true,
+      "before": {
+        "name": "QA Isolated HVAC",
+        "status": "live",
+        "phone": "+17135550101"
+      },
+      "after": {
+        "name": "QA Replacement Attacker",
+        "status": "testing",
+        "phone": "+17135550199"
+      }
+    },
+    "draftAfterReload": {
+      "name": "",
+      "business": ""
+    },
+    "invalidLink": {
+      "title": "Your front desk",
+      "status": "loading"
+    }
+  },
+  "browserBlocked": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    }
+  ],
+  "pageErrors": [
+    "Cannot read properties of undefined (reading 'windows')"
+  ],
+  "sourceAfter": {
+    "onboard.html": "b91bfa53abc9c68eae0749a5be7cda60c120310a05e09bac1a44956aab8fabc5",
+    "desk.html": "894d51a5b1355ae1757481af3c6a0bd72046304e66bf89279cf0593d8ca58df3",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "netlify/functions/onboard.mjs": "a94322bc80471b206651799952c7442eff6135202e6290d64b58ac1a37333e9d",
+    "netlify/functions/onboard-build-background.mjs": "5e6803f40ada32ae15c0b891331244e5403c6929010f682f52b2976af5babcfb",
+    "netlify/functions/provision-background.mjs": "3a99a19e82a6ed059d428dd095f8b5da8876d5d2d218fa37cc85e628f214f671",
+    "netlify/functions/client.mjs": "88f391fe7df2c8e3485146263a91dbdc6fa76556404ff6df748362cf57f346d6",
+    "netlify/functions/lib/config.mjs": "9d592e23e8633bfcb3aa7a56016e80359a40c7766de21d1af5f622b5f6666a57",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+  },
+  "summary": {
+    "checks": 14,
+    "passed": 7,
+    "failed": 7
+  }
+}

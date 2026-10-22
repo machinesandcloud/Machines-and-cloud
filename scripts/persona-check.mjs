@@ -121,7 +121,7 @@ const urgentUnknownTiming = await jobTurn("katy-pipeworks", [], "I have an activ
 assert.equal(urgentUnknownTiming.summary.requested_action, "callback");
 assert.equal(urgentUnknownTiming.summary.urgency, "emergency");
 assert.equal(urgentUnknownTiming.summary.requested_window, "", "urgent leak alone must not infer ASAP callback timing");
-assert.doesNotMatch(urgentUnknownTiming.reply, /ASAP|right away|within \d|immediately/i);
+assert.doesNotMatch(urgentUnknownTiming.reply, /ASAP|as soon as possible|shortly|right away|within \d|immediately|(?:someone|Dana|we)(?:\s+will|['’]ll)\s+(?:call|contact|dispatch)/i, "an urgent callback fixture must not promise a person will act or invent timing");
 const cleaningHistory = [];
 await jobTurn("westheimer-maids", cleaningHistory, "Hola, necesito solicitar una limpieza profunda en Memorial. Son 2 recámaras, 2 baños y 1,000 pies cuadrados.");
 await jobTurn("westheimer-maids", cleaningHistory, "Soy Ana Ruiz. Mi teléfono es 713-555-0113. La dirección es 130 Oak St, Memorial. Mañana de 1 a 3, por favor.");
@@ -218,6 +218,9 @@ async function scripted(tools) {
   assert.match(wire[0].system[0].text, /no live schedule, booking, texting, email, or customer-record tools/);
   assert.match(wire[0].system[0].text, /owner reads English/);
   assert.match(wire[0].system[0].text, /Urgency alone does not establish requested callback timing/);
+  assert.match(wire[0].system[0].text, /In spoken and typed replies, never promise that someone will call back/, "typed provider prompt forbids an unsupported human callback commitment");
+  assert.match(wire[0].system[0].text, /including "as soon as possible," "shortly," or by a deadline/, "non-numeric timing promises remain unsupported");
+  assert.match(wire[0].system[0].text, /say its timing is not confirmed when unknown/);
   assert.match(wire[0].tools[0].input_schema.properties.requested_window.description, /Never infer ASAP/);
   assert.match(wire[0].system[0].text, /customer_name and address exactly as the customer supplied/);
   assert.match(wire[0].tools[0].input_schema.properties.requested_window.description, /English/);

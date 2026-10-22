@@ -4,6 +4,7 @@
 import { list, getClient, logEvent, get, put } from "./store.mjs";
 import { sendSMS, sendEmail, notifySteve } from "./send.mjs";
 import { dailyDigest, autoFlagDay, weeklyReport, monthlyReport } from "./desk.mjs";
+import { isSelfServiceClient } from "./setup.mjs";
 
 const D = 24 * 3600 * 1000;
 const hou = (d = new Date()) => new Date(d.toLocaleString("en-US", { timeZone: "America/Chicago" }));
@@ -12,7 +13,7 @@ export const KINDS = ["digest", "autoflag", "weekly", "monthly"];
 
 async function liveShops() {
   const out = [];
-  for (const slug of await list("clients", "")) { const c = await getClient(slug); if (c && c.status === "live") out.push(c); }
+  for (const slug of await list("clients", "")) { const c = await getClient(slug); if (c && c.status === "live" && !isSelfServiceClient(c)) out.push(c); }
   return out;
 }
 

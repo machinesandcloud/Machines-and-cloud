@@ -1,0 +1,251 @@
+{
+  "at": "2026-10-22T03:29:18.080Z",
+  "sourceBefore": {
+    "netlify/functions/chat.mjs": "b734ee488ad6cdad29f0b36fc0a17f1c5411e8626c0dc183283817e0ab0dfab6",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "mode": "memory/fake; all external fetches blocked",
+  "checks": [
+    {
+      "name": "Actual stream ends with a complete labeled simulation",
+      "pass": true
+    },
+    {
+      "name": "Streamed deltas exactly match final labeled reply",
+      "pass": true
+    },
+    {
+      "name": "Booking event is explicitly a preview with no real booking ID",
+      "pass": true
+    },
+    {
+      "name": "Rehearsal cannot change real bookings/leads/capacity/tasks/messages",
+      "pass": true
+    },
+    {
+      "name": "Successful rehearsal stamps only current owner revision",
+      "pass": true
+    },
+    {
+      "name": "Fake rehearsal provenance is retained and cannot certify live AI",
+      "pass": true
+    },
+    {
+      "name": "History lives in private test store and is explicitly labeled",
+      "pass": true
+    },
+    {
+      "name": "Emergency preview has test-lead label and safety text",
+      "pass": true
+    },
+    {
+      "name": "Emergency preview cannot alert real owner or schedule escalations",
+      "pass": true
+    },
+    {
+      "name": "A verified mailbox cannot run B private test",
+      "pass": true
+    },
+    {
+      "name": "Rejected test booking cannot count as successful test",
+      "pass": true
+    },
+    {
+      "name": "Actual customer stores remain identical after rejected test",
+      "pass": true
+    },
+    {
+      "name": "A question-only test also makes its simulation status visible",
+      "pass": true
+    },
+    {
+      "name": "Public customer access cannot bypass missing readiness in testing",
+      "pass": true
+    },
+    {
+      "name": "Owner portal key cannot bypass inactive customer channel in testing",
+      "pass": true
+    },
+    {
+      "name": "Omitting channel cannot make owner key bypass activation in testing",
+      "pass": true
+    },
+    {
+      "name": "Public customer access cannot bypass missing readiness in building",
+      "pass": true
+    },
+    {
+      "name": "Owner portal key cannot bypass inactive customer channel in building",
+      "pass": true
+    },
+    {
+      "name": "Omitting channel cannot make owner key bypass activation in building",
+      "pass": true
+    },
+    {
+      "name": "Public customer access cannot bypass missing readiness in paused",
+      "pass": true
+    },
+    {
+      "name": "Owner portal key cannot bypass inactive customer channel in paused",
+      "pass": true
+    },
+    {
+      "name": "Omitting channel cannot make owner key bypass activation in paused",
+      "pass": true
+    },
+    {
+      "name": "Public customer access cannot bypass missing readiness in cancelled",
+      "pass": true
+    },
+    {
+      "name": "Owner portal key cannot bypass inactive customer channel in cancelled",
+      "pass": true
+    },
+    {
+      "name": "Omitting channel cannot make owner key bypass activation in cancelled",
+      "pass": true
+    },
+    {
+      "name": "Public customer access cannot bypass missing readiness in live",
+      "pass": true
+    },
+    {
+      "name": "Owner portal key cannot bypass inactive customer channel in live",
+      "pass": true
+    },
+    {
+      "name": "Omitting channel cannot make owner key bypass activation in live",
+      "pass": true
+    },
+    {
+      "name": "New private test cannot be reopened using a permanent key alone",
+      "pass": true
+    },
+    {
+      "name": "No external model or provider request was attempted",
+      "pass": true
+    },
+    {
+      "name": "Test isolation source stayed unchanged",
+      "pass": true
+    }
+  ],
+  "examples": [
+    {
+      "case": "streamed booking with real-record matching phone/contact",
+      "status": 200,
+      "data": {
+        "t": "done",
+        "reply": "Test preview: The visit details for tomorrow, 12 to 5, at 12 Oak St in Katy are saved in the shop portal. The shop needs to confirm arrival details.",
+        "events": [
+          {
+            "type": "test_booking",
+            "id": "test-ae89c689bb",
+            "simulation": true,
+            "data": {
+              "customer_name": "Alex Demo",
+              "phone": "+17135550142",
+              "address": "12 Oak St in Katy",
+              "issue": "AC not cooling",
+              "date": "2026-10-22",
+              "window": "12 to 5",
+              "urgency": "this_week",
+              "language": "en",
+              "notes": "",
+              "unsure": ""
+            }
+          }
+        ],
+        "simulation": true,
+        "test": {
+          "proofRecorded": true,
+          "revision": "67c5c7c70b9bf984004dc5c6822d888529b5a73bc5b2502e0ee40120adeba205"
+        }
+      },
+      "lines": [
+        {
+          "t": "delta",
+          "text": "Test preview: "
+        },
+        {
+          "t": "delta",
+          "text": "The visit details for tomorrow, 12 to 5, at 12 Oak St in Katy are saved in the shop portal. The shop needs to confirm arrival details."
+        },
+        {
+          "t": "done",
+          "reply": "Test preview: The visit details for tomorrow, 12 to 5, at 12 Oak St in Katy are saved in the shop portal. The shop needs to confirm arrival details.",
+          "events": [
+            {
+              "type": "test_booking",
+              "id": "test-ae89c689bb",
+              "simulation": true,
+              "data": {
+                "customer_name": "Alex Demo",
+                "phone": "+17135550142",
+                "address": "12 Oak St in Katy",
+                "issue": "AC not cooling",
+                "date": "2026-10-22",
+                "window": "12 to 5",
+                "urgency": "this_week",
+                "language": "en",
+                "notes": "",
+                "unsure": ""
+              }
+            }
+          ],
+          "simulation": true,
+          "test": {
+            "proofRecorded": true,
+            "revision": "67c5c7c70b9bf984004dc5c6822d888529b5a73bc5b2502e0ee40120adeba205"
+          }
+        }
+      ]
+    },
+    {
+      "case": "emergency handoff preview with matching real lead phone",
+      "status": 200,
+      "data": {
+        "reply": "Test preview: Please leave the house right now, call 911 or CenterPoint from outside, then call us. Your urgent request is saved in the shop portal; human contact is not confirmed.",
+        "events": [
+          {
+            "type": "test_lead",
+            "id": "test-1c19f14a96",
+            "simulation": true,
+            "data": {
+              "customer_name": "Alex Demo",
+              "phone": "+17135550142",
+              "address": "12 Oak St in Katy",
+              "issue": "Call me, I am Alex Demo at 713-555-0142. I smell gas at 12 Oak St.",
+              "reason": "emergency",
+              "urgency": "emergency",
+              "wanted": "",
+              "language": "en",
+              "unsure": ""
+            }
+          }
+        ],
+        "simulation": true,
+        "test": {
+          "revision": "67c5c7c70b9bf984004dc5c6822d888529b5a73bc5b2502e0ee40120adeba205",
+          "completedAt": "2026-10-22T03:29:18.116Z",
+          "proofRecorded": true,
+          "testMode": "fake"
+        }
+      }
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/chat.mjs": "b734ee488ad6cdad29f0b36fc0a17f1c5411e8626c0dc183283817e0ab0dfab6",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "summary": {
+    "checks": 31,
+    "passed": 31,
+    "failed": 0
+  }
+}

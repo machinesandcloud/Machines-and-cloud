@@ -2,7 +2,11 @@
 // records, health, and forwarding instructions. PUT with the key updates the editable config (loop-checked).
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
-import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock } from "./lib/store.mjs";
+import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock, atomicUpdate } from "./lib/store.mjs";
+import { getAIAllowance } from "./lib/self-service-ai.mjs";
+import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
+import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
+import { setupReadiness, configurationRevision, isSelfServiceClient } from "./lib/setup.mjs";
 import { AvailabilityInputError } from "./lib/availability.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
@@ -16,12 +20,13 @@ import { forwardingInstructions } from "./lib/forwarding.mjs";
 
 export const config = { path: "/api/client" };
 
-const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", Vary: "Origin" } : {});
+const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", Vary: "Origin" } : {});
 const s = (v, n = 300) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 const arr = (v, n = 40) => (Array.isArray(v) ? v : String(v || "").split(/[\n;]+/)).map((x) => s(x, 160)).filter(Boolean).slice(0, n);
 
 export default async (req) => {
-  const out = await handle(req);
+  let out;
+  try { out = await handle(req); } catch { out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -31,19 +36,33 @@ async function handle(req) {
   const origin = req.headers.get("origin") || "";
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS(origin) });
   const slug = s(url.searchParams.get("c"), 40);
-  const c = slug ? await getClient(slug) : null;
+  const c = slug ? await strictRead("clients", slug) : null;
   if (!c) return json({ error: "not_found" }, 404, CORS(origin));
   const key = s(url.searchParams.get("k"), 80);
-  const isOwner = key && key === c.ownerKey;
+  const selfService = isSelfServiceClient(c);
+  let session = null;
+  if (selfService && req.headers.has("authorization")) {
+    if (origin && !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
+    session = await getAccessSession(req);
+    if (!session) return json({ error: "verification_required" }, 401);
+    if (normalizeAccountEmail(session.email) !== normalizeAccountEmail(c.owner?.email)) return json({ error: "forbidden" }, 403);
+  }
+  const isOwner = selfService ? !!session : key && key === c.ownerKey;
+  if (url.searchParams.has("k") && !isOwner) return json({ error: selfService ? "verification_required" : "invalid_owner_key" }, 401);
+  if (selfService && !isOwner && (req.method !== "GET" || url.searchParams.has("export"))) return json({ error: "verification_required" }, 401);
+  const ownsCurrent = current => !!current && current.slug === c.slug && current.ownerKey === c.ownerKey && (selfService ? isSelfServiceClient(current) && normalizeAccountEmail(current.owner?.email) === normalizeAccountEmail(session?.email) : current.ownerKey === key);
   const site = process.env.URL || url.origin;
 
   if (req.method === "GET") {
     if (!isOwner) {
       if (url.searchParams.get("export")) return json({ error: "forbidden" }, 403);
-      return json(publicView(c), 200, { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
+      const aiAllowance = selfService ? await getAIAllowance(c) : null;
+      const web = selfService ? setupReadiness(c).channels.web : null;
+      return json({ ...publicView(c), ...(selfService ? { webAvailable: web.ready && web.active && aiAllowance.available } : {}) }, 200, selfService ? { ...CORS(origin), "Cache-Control": "no-store", "Netlify-CDN-Cache-Control": "no-store", Vary: "Origin, Authorization" } : { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
     }
     const exp = url.searchParams.get("export");
     if (exp) return exportCSV(c, exp);
+    const aiAllowance = selfService ? await getAIAllowance(c) : null;
     let availabilityBlocks;
     try { availabilityBlocks = await getAvailabilityBlocks(c); }
     catch { return json({ error: "availability_unavailable", message: "The visit schedule could not be read. Try again before changing availability." }, 503); }
@@ -52,7 +71,7 @@ async function handle(req) {
     ]);
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     return json({
-      client: ownerView(c), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: setupReadiness(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, bookings, leads, events),
@@ -68,6 +87,7 @@ async function handle(req) {
 
   if (req.method === "PUT") {
     let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+    if (isSelfServiceClient(c) && b.expectedRevision !== configurationRevision(c)) return json({ error: "configuration_changed", message: "Your saved rules changed. Reload before saving so another tab's changes are kept." }, 409);
     const before = JSON.stringify(c);
     const bz = c.business;
     if (b.business) Object.assign(bz, {
@@ -103,6 +123,19 @@ async function handle(req) {
     if (b.software) c.software = s(b.software, 30);
     const loop = loopCheck(c);
     if (loop) { Object.assign(c, JSON.parse(before)); return json({ error: "loop", ...loop }, 400); }
+    if (isSelfServiceClient(c)) {
+      const original = JSON.parse(before), revision = configurationRevision(original);
+      const changes = Object.fromEntries(Object.entries(c).filter(([field, value]) => JSON.stringify(value) !== JSON.stringify(original[field])));
+      const result = await atomicUpdate("clients", c.slug, current => {
+        if (!ownsCurrent(current)) return { result: null };
+        if (configurationRevision(current) !== revision || Object.keys(changes).some(field => JSON.stringify(current[field]) !== JSON.stringify(original[field]))) return { result: { conflict: true } };
+        const updated = { ...current, ...changes, updatedAt: new Date().toISOString() };
+        return { value: updated, result: { client: updated } };
+      });
+      if (!result) return json({ error: "forbidden" }, 403);
+      if (result.conflict) return json({ error: "configuration_changed", message: "Rules changed in another tab. Reload before saving." }, 409);
+      return json({ ok: true, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client) });
+    }
     await saveClient(c); await indexClient(c);
     await logEvent(c.slug, "config_updated", {});
     const priorVoice = JSON.stringify(c.voice);
@@ -116,6 +149,33 @@ async function handle(req) {
     if (b.action === "availability_block" || b.action === "availability_unblock") {
       try { return json(await setAvailabilityBlock(c, b.date, b.window, b.action === "availability_block")); }
       catch (err) { return err instanceof AvailabilityInputError ? json({ error: err.code, message: err.message }, 400) : json({ error: "availability_unavailable", message: "The schedule change could not be confirmed. Reload availability before trying again." }, 503); }
+    }
+    if (isSelfServiceClient(c) && ["review_rules", "go_live", "resume", "pause", "cancel", "provision", "forwarding_verified"].includes(b.action)) {
+      if (["provision", "forwarding_verified"].includes(b.action)) return json({ error: "channel_setup_unavailable", message: "Phone and text service are not active. A button cannot certify provider acceptance or delivery.", setup: setupReadiness(c) }, 409);
+      if ((b.channel && b.channel !== "web") || (b.channels && (!Array.isArray(b.channels) || b.channels.length !== 1 || b.channels[0] !== "web"))) return json({ error: "channel_not_ready", setup: setupReadiness(c) }, 409);
+      const result = await atomicUpdate("clients", c.slug, async current => {
+        if (!ownsCurrent(current)) return { result: { error: "forbidden", status: 403 } };
+        const setup = setupReadiness(current), now = new Date().toISOString();
+        if (b.action === "review_rules") {
+          if (typeof b.revision !== "string" || b.revision !== configurationRevision(current)) return { result: { error: "configuration_changed", status: 409, setup } };
+          const updated = { ...current, setupProof: { ...current.setupProof, reviewedRevision: b.revision, reviewedAt: now }, updatedAt: now };
+          return { value: updated, result: { client: updated } };
+        }
+        if (["go_live", "resume"].includes(b.action) && !setup.canActivateWeb) return { result: { error: "not_ready", status: 409, setup } };
+        if (["go_live", "resume"].includes(b.action)) {
+          const aiAllowance = await getAIAllowance(current);
+          if (!aiAllowance.available) return { result: { error: "ai_daily_limit", status: 429, setup, aiAllowance } };
+        }
+        if (b.action === "pause" && !["live", "testing"].includes(current.status)) return { result: { error: "not_active", status: 409, setup } };
+        const status = b.action === "pause" ? "paused" : b.action === "cancel" ? "cancelled" : "live";
+        const updated = { ...current, status, channels: { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
+          ...(status === "live" ? { liveAt: current.liveAt || now, pausedAt: null } : status === "paused" ? { pausedAt: now, pausedFrom: current.status } : { cancelledAt: current.cancelledAt || now, cancelReason: s(b.reason, 300) }) };
+        return { value: updated, result: { client: updated } };
+      });
+      if (result.error) return json({ error: result.error, setup: result.setup, ...(result.aiAllowance ? { aiAllowance: result.aiAllowance, message: "Website chat cannot activate while today’s AI allowance is exhausted." } : {}) }, result.status);
+      if (b.action === "cancel") await cancelTasks(c.slug, () => true);
+      const aiAllowance = await getAIAllowance(result.client);
+      return json({ ok: true, status: result.client.status, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), aiAllowance, webAvailable: result.client.status === "live" && setupReadiness(result.client).canActivateWeb && aiAllowance.available, activeChannels: result.client.status === "live" && aiAllowance.available ? ["web"] : [] });
     }
     const fw = forwardingInstructions(c);
     const name = c.business.name || "Your front desk";
@@ -180,7 +240,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
         conv.flag = { at: new Date().toISOString(), note: s(b.note, 300), by: "owner" };
         await saveConversation(conv); await logEvent(c.slug, "flagged", { channel, contact });
         const tail = conv.messages.slice(-6).map((m) => `${m.role === "user" ? "Customer" : "Desk"}: ${m.content}`).join("\n");
-        await notifySteve(`Flagged by ${name}: ${channel} ${contact}`, `${conv.flag.note || "(no note)"}\n\n${tail}\n\n${site}/desk?c=${c.slug}&k=${c.ownerKey}#convs`);
+        if (!isSelfServiceClient(c)) await notifySteve(`Flagged by ${name}: ${channel} ${contact}`, `${conv.flag.note || "(no note)"}\n\n${tail}\n\n${site}/desk?c=${c.slug}&k=${c.ownerKey}#convs`);
       } else { conv.flag = null; await saveConversation(conv); await logEvent(c.slug, "unflagged", { channel, contact }); }
       return json({ ok: true, flag: conv.flag });
     }

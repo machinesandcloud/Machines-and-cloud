@@ -137,7 +137,12 @@ export function ndjsonResponse(run, extraHeaders = {}) {
       const send = (o) => controller.enqueue(enc.encode(JSON.stringify(o) + "\n"));
       try {
         const out = await run((text) => send({ t: "delta", text }));
-        send({ t: "done", reply: out.reply, events: out.events });
+        const simulation = out.simulation === true ? { simulation: true } : {};
+        if (out.simulation === true && typeof out.test?.proofRecorded === "boolean") {
+          simulation.test = { proofRecorded: out.test.proofRecorded };
+          if (typeof out.test.revision === "string" && /^[a-f0-9]{64}$/.test(out.test.revision)) simulation.test.revision = out.test.revision;
+        }
+        send({ t: "done", reply: out.reply, events: out.events, ...simulation });
       } catch (err) {
         send({ t: "error", error: classifyError(err).error });
       } finally { controller.close(); }

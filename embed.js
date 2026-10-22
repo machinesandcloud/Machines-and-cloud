@@ -41,12 +41,12 @@
 
   var root = document.createElement('div'); root.id = 'mcDesk';
   root.innerHTML = '<button type="button" class="l" aria-expanded="false"><i></i><span>Chat with us</span></button>' +
-    '<section class="p" role="dialog" aria-label="Chat"><header class="h"><div><b>Front desk</b><small>Usually replies in seconds</small></div><button type="button" class="x" aria-label="Close">&times;</button></header>' +
-    '<div class="m"></div><form><textarea rows="1" maxlength="1500" placeholder="Type your message" required></textarea><button type="submit" class="s">Send</button></form>' +
-    '<p class="f">Texts and calls welcome too. This chat is an automated front desk; a person confirms every booking.</p></section>';
+    '<section class="p" role="dialog" aria-label="Chat"><header class="h"><div><b>Front desk</b><small>Automated front desk</small></div><button type="button" class="x" aria-label="Close">&times;</button></header>' +
+    '<div class="m"></div><form><textarea rows="1" maxlength="1500" placeholder="Type your message" aria-label="Your message" required disabled></textarea><button type="submit" class="s" disabled>Send</button></form>' +
+    '<p class="f">For urgent help, use the shop’s contact details on this website.</p></section>';
   document.body.appendChild(root);
   var launcher = root.querySelector('.l'), panel = root.querySelector('.p'), list = root.querySelector('.m'), form = root.querySelector('form'), input = root.querySelector('textarea'), sendBtn = root.querySelector('.s');
-  var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?' };
+  var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?', available: false };
   var busy = false, rendered = false;
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -54,11 +54,14 @@
   function typing() { var el = document.createElement('div'); el.className = 'b a t'; el.innerHTML = '<span></span><span></span><span></span>'; list.appendChild(el); list.scrollTop = list.scrollHeight; return el; }
   function render() { list.innerHTML = ''; add('a', cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); }); rendered = true; }
 
-  fetch(BASE + '/api/client?c=' + encodeURIComponent(slug)).then(function (r) { return r.json(); }).then(function (d) {
+  function unavailable(message) { cfg.available = false; cfg.greeting = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true; if (rendered) render(); }
+  fetch(BASE + '/api/client?c=' + encodeURIComponent(slug)).then(function (r) { if (!r.ok) throw new Error('unavailable'); return r.json(); }).then(function (d) {
+    if (!d || !d.name) throw new Error('unavailable');
     if (d && d.name) { cfg.name = d.name; cfg.greeting = d.greeting || cfg.greeting; root.querySelector('.h b').textContent = cfg.name; }
-    if (d && (d.status === 'paused' || d.status === 'cancelled')) { cfg.greeting = 'We are not taking chats right now. Please call ' + (d.businessNumber || 'us') + '.'; input.disabled = true; sendBtn.disabled = true; }
+    if (d.webAvailable === false || d.status === 'paused' || d.status === 'cancelled') { unavailable(); return; }
+    cfg.available = true; input.disabled = false; sendBtn.disabled = false;
     if (rendered) render();
-  }).catch(function () { /* keep defaults */ });
+  }).catch(function () { unavailable(); });
 
   function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); if (!rendered) render(); setTimeout(function () { input.focus(); }, 50); }
   function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); }
@@ -73,11 +76,11 @@
     var tp = typing(), bubble = null, full = '', done = false;
     function delta(t) { if (!bubble) { tp.remove(); bubble = add('a', ''); } full += t; bubble.textContent = full; list.scrollTop = list.scrollHeight; }
     function finish(reply) { if (done) return; done = true; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; state.transcript.push({ role: 'assistant', content: reply }); persist(); }
-    function fail() { if (done) return; done = true; if (tp.parentNode) tp.remove(); add('a', 'Sorry, something went wrong on our end. Please call or text us and a person will help.'); }
+    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); add('a', typeof message === 'string' ? message : 'Chat is unavailable right now. Please use the shop’s contact details on this website.'); }
     fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, contact: state.contact, messages: state.transcript.slice(-20), page: location.pathname, stream: true }) })
       .then(function (res) {
         var type = res.headers.get('content-type') || '';
-        if (!res.ok) { fail(); return; }
+        if (!res.ok) { if (res.status === 429) { cfg.available = false; input.disabled = true; } fail(res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : undefined); return; }
         if (type.indexOf('ndjson') !== -1 && res.body && res.body.getReader) {
           var reader = res.body.getReader(), dec = new TextDecoder(), buf = '';
           return (function pump() { return reader.read().then(function (r) {
@@ -90,6 +93,6 @@
         return res.json().then(function (d) { if (d && typeof d.reply === 'string') finish(d.reply); else fail(); });
       })
       .catch(fail)
-      .then(function () { busy = false; sendBtn.disabled = false; input.focus(); });
+      .then(function () { busy = false; sendBtn.disabled = !cfg.available; input.focus(); });
   });
 })();

@@ -173,11 +173,20 @@ async function mobileDialogAndMenu(page) {
   await toggle.focus(); await page.keyboard.press('Enter');
   check('390px keyboard opens menu with close control focused', await menu.isVisible() && await page.locator('.nav-menu-close').evaluate(el => document.activeElement === el));
   const contrast = await menu.locator('a').evaluateAll(elements => {
-    const rgb = s => (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-    const light = c => c.map(n => n / 255).map(n => n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4).reduce((sum, n, i) => sum + n * [.2126, .7152, .0722][i], 0);
-    return elements.map(el => { const a = light(rgb(getComputedStyle(el).color)), b = light([255, 255, 255]); return { label: el.textContent.trim(), ratioAgainstOpaqueWhitePanel: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) }; });
+    const rgba = s => (s.match(/[\d.]+/g) || []).map(Number);
+    const light = c => c.slice(0, 3).map(n => n / 255).map(n => n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4).reduce((sum, n, i) => sum + n * [.2126, .7152, .0722][i], 0);
+    return elements.map(el => {
+      let background = [255, 255, 255], chain = [];
+      for (let node = el; node; node = node.parentElement) chain.unshift(node);
+      for (const node of chain) {
+        const color = rgba(getComputedStyle(node).backgroundColor), alpha = color[3] ?? 1;
+        if (color.length >= 3) background = color.slice(0, 3).map((n, i) => n * alpha + background[i] * (1 - alpha));
+      }
+      const a = light(rgba(getComputedStyle(el).color)), b = light(background);
+      return { label: el.textContent.trim(), background, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) };
+    });
   });
-  check('390px menu text remains readable', contrast.every(row => row.ratioAgainstOpaqueWhitePanel >= 4.5), contrast);
+  check('390px menu text remains readable', contrast.every(row => row.ratio >= 4.5), contrast);
   await shot(page, '-390-menu.png'); await page.keyboard.press('Escape');
   check('390px menu Escape closes and restores focus', !await menu.isVisible() && await toggle.evaluate(el => document.activeElement === el));
   await toggle.click(); await page.locator('.nav-menu-close').click();

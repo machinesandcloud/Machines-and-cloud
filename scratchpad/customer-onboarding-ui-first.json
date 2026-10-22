@@ -1,0 +1,221 @@
+{
+  "at": "2026-10-22T03:08:28.959Z",
+  "mode": "actual source/handlers in memory; private fake mailbox; no network",
+  "checks": [
+    {
+      "name": "Fresh customer sees email gate before private questionnaire",
+      "pass": true
+    },
+    {
+      "name": "Fake mailbox is visibly distinguished from sent email",
+      "pass": true
+    },
+    {
+      "name": "Verification fragment is immediately removed from address bar",
+      "pass": true
+    },
+    {
+      "name": "Opening mailbox link does not consume proof automatically",
+      "pass": true
+    },
+    {
+      "name": "Explicit Continue exchanges proof and binds read-only email",
+      "pass": true
+    },
+    {
+      "name": "Empty required fields keep customer in current step with guidance",
+      "pass": true
+    },
+    {
+      "name": "Saved answers and wizard position survive reload",
+      "pass": true
+    },
+    {
+      "name": "Failed autosave visibly preserves unsaved answers without claiming saved",
+      "pass": true
+    },
+    {
+      "name": "Lost create response leaves one tenant and permits retry",
+      "pass": true
+    },
+    {
+      "name": "Retry recovers the same tenant without duplicate creation",
+      "pass": true
+    },
+    {
+      "name": "Completed setup has no routine founder or false delivery claim",
+      "pass": true
+    },
+    {
+      "name": "Sign out revokes onboarding session and returns to email gate",
+      "pass": true
+    },
+    {
+      "name": "Source stayed stable throughout browser journey",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    }
+  ],
+  "blockedBrowser": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    }
+  ],
+  "blockedServer": [],
+  "pageErrors": [],
+  "sourceBefore": {
+    "onboard.html": "61f64479c9ecabccfe9b85917e6b56f02e182244cbb287e268889f460b9785ac",
+    "onboard.js": "0740c97b1988c344cfc0b383f042ba1724da5678b5093d112ed033bf5ec88f12",
+    "netlify/functions/access.mjs": "2268f6d2a614454bf6d98af3ab07ecf122712c459206a6e90c1e7befecb9b803",
+    "netlify/functions/lib/access.mjs": "fc4786c960a512bf504db6f961a24e0cd056f24e682256b6149dfac7c4322416",
+    "netlify/functions/onboard.mjs": "4dcdb74998664c5d0237938954d6969307e5c16ebcd27482b42702b7b1543481",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "c4354b077a5e81bb25d58be6198d1ba2528ca20165e8acbb8553a517b053fbe7",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "84448c2f0e916862735d9d5fbac19f3476f2fe27de8da21c2ae40443a375e346"
+  },
+  "created": {
+    "slug": "qa-browser-air-482b",
+    "status": "testing",
+    "build": {
+      "status": "built",
+      "source": "owner_answers",
+      "notes": "Built from your saved answers. Website import is not enabled; review these rules before activation.",
+      "sourcePages": [],
+      "builtAt": "2026-10-22T03:08:32.283Z"
+    },
+    "channels": {
+      "web": {
+        "active": false
+      },
+      "voice": {
+        "active": false
+      },
+      "sms": {
+        "active": false
+      }
+    }
+  },
+  "fatal": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#access-verify')\u001b[22m\n\u001b[2m    - locator resolved to <button hidden=\"\" type=\"button\" id=\"access-verify\" class=\"btn-pill btn-pill-blue\">Continue securely</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at /Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/customer-onboarding-ui-check.mjs:86:140",
+  "sourceAfter": {
+    "onboard.html": "61f64479c9ecabccfe9b85917e6b56f02e182244cbb287e268889f460b9785ac",
+    "onboard.js": "0740c97b1988c344cfc0b383f042ba1724da5678b5093d112ed033bf5ec88f12",
+    "netlify/functions/access.mjs": "2268f6d2a614454bf6d98af3ab07ecf122712c459206a6e90c1e7befecb9b803",
+    "netlify/functions/lib/access.mjs": "fc4786c960a512bf504db6f961a24e0cd056f24e682256b6149dfac7c4322416",
+    "netlify/functions/onboard.mjs": "4dcdb74998664c5d0237938954d6969307e5c16ebcd27482b42702b7b1543481",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "c4354b077a5e81bb25d58be6198d1ba2528ca20165e8acbb8553a517b053fbe7",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "84448c2f0e916862735d9d5fbac19f3476f2fe27de8da21c2ae40443a375e346"
+  },
+  "summary": {
+    "checks": 13,
+    "passed": 13,
+    "failed": 0
+  }
+}

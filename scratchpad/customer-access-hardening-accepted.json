@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-22T03:05:26.074Z",
+  "priorEvidence": "scratchpad/customer-access-accepted.json",
+  "checks": [
+    {
+      "name": "Recorded access source matches or exactly reverses hardening: netlify/functions/access.mjs",
+      "pass": true
+    },
+    {
+      "name": "Recorded access source matches or exactly reverses hardening: netlify/functions/lib/access.mjs",
+      "pass": true
+    },
+    {
+      "name": "Recorded access source matches or exactly reverses hardening: netlify/functions/lib/accounts.mjs",
+      "pass": true
+    },
+    {
+      "name": "Recorded access source matches or exactly reverses hardening: netlify/functions/lib/store.mjs",
+      "pass": true
+    },
+    {
+      "name": "Malformed expiry cannot authenticate",
+      "pass": true
+    },
+    {
+      "name": "Malformed-expiry rejection does not grant a session",
+      "pass": true
+    },
+    {
+      "name": "Exchange attempts are capped at fifteen per IP bucket",
+      "pass": true,
+      "detail": [
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        410,
+        429
+      ]
+    },
+    {
+      "name": "Rate-limited valid proof remains unconsumed",
+      "pass": true
+    },
+    {
+      "name": "Separate IP can exchange valid proof without another mailbox message",
+      "pass": true
+    },
+    {
+      "name": "Elapsed exchange bucket permits later recovery",
+      "pass": true
+    },
+    {
+      "name": "No external request was attempted",
+      "pass": true
+    }
+  ],
+  "source": {
+    "netlify/functions/access.mjs": {
+      "current": "2268f6d2a614454bf6d98af3ab07ecf122712c459206a6e90c1e7befecb9b803",
+      "previous": "2268f6d2a614454bf6d98af3ab07ecf122712c459206a6e90c1e7befecb9b803",
+      "reconstructedPrevious": "c8d1b02b009eeb4e9685e726f0325faddc556cc1c18d36f1585524f56c48fc35"
+    },
+    "netlify/functions/lib/access.mjs": {
+      "current": "fc4786c960a512bf504db6f961a24e0cd056f24e682256b6149dfac7c4322416",
+      "previous": "fc4786c960a512bf504db6f961a24e0cd056f24e682256b6149dfac7c4322416",
+      "reconstructedPrevious": "5bc867621ed2e27caa9670e97538dbc6bdca0bb96d7dec455f8764da282f40bc"
+    },
+    "netlify/functions/lib/accounts.mjs": {
+      "current": "7a840b430e7594c9fda062a0ed8958090c59ada1977484d6336936ba4be1755b",
+      "previous": "7a840b430e7594c9fda062a0ed8958090c59ada1977484d6336936ba4be1755b",
+      "reconstructedPrevious": "7a840b430e7594c9fda062a0ed8958090c59ada1977484d6336936ba4be1755b"
+    },
+    "netlify/functions/lib/store.mjs": {
+      "current": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+      "previous": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+      "reconstructedPrevious": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+    }
+  },
+  "summary": {
+    "checks": 11,
+    "passed": 11,
+    "failed": 0
+  }
+}

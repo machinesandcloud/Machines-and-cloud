@@ -97,6 +97,9 @@ try {
       assert.equal(Object.hasOwn(a, "server"), false); assert.equal(Object.hasOwn(a, "phoneNumberId"), false);
       assert.match(a.model.messages[0].content, /does not book, dispatch/); assert.match(a.model.messages[0].content, /Safety guidance is spoken first/);
       assert.match(a.model.messages[0].content, /Urgency alone does not establish requested callback timing/);
+      assert.match(a.model.messages[0].content, /In spoken and typed replies, never promise that someone will call back/, "voice provider prompt forbids an unsupported human callback commitment");
+      assert.match(a.model.messages[0].content, /including "as soon as possible," "shortly," or by a deadline/);
+      assert.match(a.model.messages[0].content, /say its timing is not confirmed when unknown/);
       assert.match(tool.function.parameters.properties.requested_window.description, /Empty if not stated, including urgent callbacks/);
       assert.match(tool.function.parameters.properties.requested_window.description, /Never infer ASAP/);
       if (persona === "katy-pipeworks") assert.match(a.model.messages[0].content, /10\s*p\.?m/i);

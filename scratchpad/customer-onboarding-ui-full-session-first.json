@@ -1,0 +1,671 @@
+{
+  "at": "2026-10-22T03:29:17.973Z",
+  "mode": "actual source/handlers in memory; private fake mailbox; no network",
+  "checks": [
+    {
+      "name": "Fresh customer sees email gate before private questionnaire",
+      "pass": true
+    },
+    {
+      "name": "Fake mailbox is visibly distinguished from sent email",
+      "pass": true
+    },
+    {
+      "name": "Verification fragment is immediately removed from address bar",
+      "pass": true
+    },
+    {
+      "name": "Opening mailbox link does not consume proof automatically",
+      "pass": true
+    },
+    {
+      "name": "Explicit Continue exchanges proof and binds read-only email",
+      "pass": true
+    },
+    {
+      "name": "Empty required fields keep customer in current step with guidance",
+      "pass": true
+    },
+    {
+      "name": "Saved answers and wizard position survive reload",
+      "pass": true
+    },
+    {
+      "name": "Failed autosave visibly preserves unsaved answers without claiming saved",
+      "pass": true
+    },
+    {
+      "name": "Web-only signup omits phone-registration and legal/purchase step",
+      "pass": true
+    },
+    {
+      "name": "Lost create response leaves one tenant and permits retry",
+      "pass": true
+    },
+    {
+      "name": "Retry recovers the same tenant without duplicate creation",
+      "pass": true
+    },
+    {
+      "name": "Completed setup has no routine founder or false delivery claim",
+      "pass": true
+    },
+    {
+      "name": "New workspace link carries no permanent owner credential",
+      "pass": true
+    },
+    {
+      "name": "Selected Starter plan survives verified signup without a billing action",
+      "pass": false
+    },
+    {
+      "name": "Sign out revokes onboarding session and returns to email gate",
+      "pass": true
+    },
+    {
+      "name": "Proven returning customer opens existing workspace without overwrite",
+      "pass": true
+    },
+    {
+      "name": "Onboarding session storage contains no questionnaire/legal draft",
+      "pass": true
+    },
+    {
+      "name": "New owner automatically discovers an actual guided workspace",
+      "pass": true
+    },
+    {
+      "name": "Six useful tutorial steps cover real customer work",
+      "pass": true
+    },
+    {
+      "name": "Reading guide cannot fabricate review or test proof",
+      "pass": true
+    },
+    {
+      "name": "Guide can be skipped, reopened and closed by Escape with focus restored",
+      "pass": true
+    },
+    {
+      "name": "Dismissed tutorial preference survives reload without certifying setup",
+      "pass": true
+    },
+    {
+      "name": "Guide fits and centers in viewport at 390px without horizontal overflow",
+      "pass": true,
+      "detail": {
+        "x": 19,
+        "y": 241.890625,
+        "right": 371,
+        "bottom": 658.109375,
+        "width": 390,
+        "height": 900,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Guide fits and centers in viewport at 320px without horizontal overflow",
+      "pass": true,
+      "detail": {
+        "x": 19,
+        "y": 187.109375,
+        "right": 301,
+        "bottom": 712.875,
+        "width": 320,
+        "height": 900,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Guide fits and centers in viewport at 1440px without horizontal overflow",
+      "pass": true,
+      "detail": {
+        "x": 450,
+        "y": 249.078125,
+        "right": 990,
+        "bottom": 650.90625,
+        "width": 1440,
+        "height": 900,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Tutorial action opens and focuses real rules editor",
+      "pass": true
+    },
+    {
+      "name": "Review is an actual saved API action",
+      "pass": true
+    },
+    {
+      "name": "Review proof survives reload and is visible for saved version",
+      "pass": true
+    },
+    {
+      "name": "Unsaved rule edits prevent false review completion",
+      "pass": true
+    },
+    {
+      "name": "Failed rule save retains edits and persisted record",
+      "pass": true
+    },
+    {
+      "name": "Retry saves corrected rules and invalidates earlier review",
+      "pass": true
+    },
+    {
+      "name": "A sequential stale second tab cannot overwrite a completed newer save",
+      "pass": true
+    },
+    {
+      "name": "Private practice shows actual collected contact/address and explicit no-action result",
+      "pass": true
+    },
+    {
+      "name": "Browser private test creates no real visits/messages/customer records",
+      "pass": true
+    },
+    {
+      "name": "Successful fake test stays blocked from real customer activation",
+      "pass": true
+    },
+    {
+      "name": "Phone and SMS copy remains explicitly inactive after test",
+      "pass": true
+    },
+    {
+      "name": "Real availability action survives reload from new customer workspace",
+      "pass": true
+    },
+    {
+      "name": "Owner can remove actual availability block",
+      "pass": true
+    },
+    {
+      "name": "Workspace API failure exposes retry rather than spinner/success",
+      "pass": true
+    },
+    {
+      "name": "Retry recovers actual saved owner workspace",
+      "pass": true
+    },
+    {
+      "name": "Signed-in owner can download CSV without leaking preview as real work",
+      "pass": true
+    },
+    {
+      "name": "Visible portal sign out revokes authority and clears private DOM/address",
+      "pass": true
+    },
+    {
+      "name": "Revoked browser session cannot replay private GET/export/action/chat",
+      "pass": true,
+      "detail": [
+        {
+          "path": "/api/client",
+          "status": 401,
+          "body": {
+            "error": "verification_required"
+          }
+        },
+        {
+          "path": "/api/client",
+          "status": 401,
+          "body": {
+            "error": "verification_required"
+          }
+        },
+        {
+          "path": "/api/client",
+          "status": 401,
+          "body": {
+            "error": "verification_required"
+          }
+        },
+        {
+          "path": "/api/chat",
+          "status": 401,
+          "body": {
+            "error": "verification_required"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reload after portal sign out reveals no saved customer workspace",
+      "pass": true
+    },
+    {
+      "name": "Wrong private link is recoverable without legacy JS crash",
+      "pass": true
+    },
+    {
+      "name": "Missing private link offers email recovery instead of dead end",
+      "pass": true
+    },
+    {
+      "name": "New mailbox proof restores the same workspace after real portal logout",
+      "pass": true
+    },
+    {
+      "name": "No new customer response discloses permanent owner key",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Entry and recovery have no uncaught browser errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Automatic setup attempted no model/provider/background fetch",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Source stayed stable throughout browser journey",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/client",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    }
+  ],
+  "blockedServer": [],
+  "pageErrors": [],
+  "leakedOwnerKey": [],
+  "sourceBefore": {
+    "onboard.html": "97c69c8db34bbd2137f124b928527fa5f1af9c8bab5527d845c69a13dff80670",
+    "onboard.js": "2115e2b7bc9420f1a9282653a185887a421547ef80cd674722ee055e82b3bc77",
+    "netlify/functions/access.mjs": "2268f6d2a614454bf6d98af3ab07ecf122712c459206a6e90c1e7befecb9b803",
+    "netlify/functions/lib/access.mjs": "938a85c3bc92a8d0619c8b513c2e130f1a6ade5041fbd9f3c2257a6c95cb8755",
+    "netlify/functions/onboard.mjs": "eb5225030b5dc5ae395337d7a137c90d4c2464ed233bac292f45edc6a6eb0465",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "desk.html": "9ad531e2fc08b5cb50490e3afeeeb6cf42a1ed0a267e3fc5f011a6fc0598e251",
+    "desk.js": "4ba4f2df869af455eebdc5c80e82be0fe20412714b162ca274521c51aeaabb4f",
+    "netlify/functions/client.mjs": "50d436e5f8c2bb9472127a9a610a0ea1ee2d17a607e5a7dcf93ea6e19aa50010",
+    "netlify/functions/chat.mjs": "b734ee488ad6cdad29f0b36fc0a17f1c5411e8626c0dc183283817e0ab0dfab6",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "created": {
+    "slug": "qa-browser-air-f8d3",
+    "status": "testing",
+    "build": {
+      "status": "built",
+      "source": "owner_answers",
+      "notes": "Built from your saved answers. Website import is not enabled; review these rules before activation.",
+      "sourcePages": [],
+      "builtAt": "2026-10-22T03:29:21.884Z"
+    },
+    "channels": {
+      "web": {
+        "active": false
+      },
+      "voice": {
+        "active": false
+      },
+      "sms": {
+        "active": false
+      }
+    }
+  },
+  "guide": [
+    {
+      "step": 1,
+      "title": "Your desk, in one place",
+      "body": "Your business answers are saved here. The checklist shows what is complete and what needs attention. Website chat, phone and texting have separate statuses, so you can see exactly what customers can use.",
+      "action": "See my setup"
+    },
+    {
+      "step": 2,
+      "title": "Make the answers yours",
+      "body": "Open What it knows and check your services, service area, published prices, hours and safety instructions. Save any corrections, then select “I reviewed these saved rules.” Changes require another review and test.",
+      "action": "Review my rules"
+    },
+    {
+      "step": 3,
+      "title": "Practice the requests you get",
+      "body": "Try a customer booking, callback request or question in Test it. The result shows the details collected. Practice does not book a real visit, contact anyone, use your actual capacity or change a calendar.",
+      "action": "Try a private conversation"
+    },
+    {
+      "step": 4,
+      "title": "Protect time you have already booked",
+      "body": "Under Availability, block a whole day or an arrival window for existing jobs, closures or time off. Existing visits stay booked. Calendar sync is not connected, so keep outside work up to date here.",
+      "action": "Check availability"
+    },
+    {
+      "step": 5,
+      "title": "Choose when customers can use it",
+      "body": "Setup lists the requirements for website chat. When the saved rules have been reviewed and tested with the working AI service, activate chat and install the code on your website. Phone and text messages stay inactive until their own setup is verified.",
+      "action": "See activation and installation"
+    },
+    {
+      "step": 6,
+      "title": "Know what needs you each day",
+      "body": "Leads and bookings holds customer requests; Conversations shows what was said. Check these regularly while phone and text alerts are inactive. Pause website chat from the top of this page, export your records under Account, and reopen this guide whenever you need it.",
+      "action": "View customer requests"
+    }
+  ],
+  "sourceAfter": {
+    "onboard.html": "97c69c8db34bbd2137f124b928527fa5f1af9c8bab5527d845c69a13dff80670",
+    "onboard.js": "2115e2b7bc9420f1a9282653a185887a421547ef80cd674722ee055e82b3bc77",
+    "netlify/functions/access.mjs": "2268f6d2a614454bf6d98af3ab07ecf122712c459206a6e90c1e7befecb9b803",
+    "netlify/functions/lib/access.mjs": "938a85c3bc92a8d0619c8b513c2e130f1a6ade5041fbd9f3c2257a6c95cb8755",
+    "netlify/functions/onboard.mjs": "eb5225030b5dc5ae395337d7a137c90d4c2464ed233bac292f45edc6a6eb0465",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "desk.html": "9ad531e2fc08b5cb50490e3afeeeb6cf42a1ed0a267e3fc5f011a6fc0598e251",
+    "desk.js": "4ba4f2df869af455eebdc5c80e82be0fe20412714b162ca274521c51aeaabb4f",
+    "netlify/functions/client.mjs": "50d436e5f8c2bb9472127a9a610a0ea1ee2d17a607e5a7dcf93ea6e19aa50010",
+    "netlify/functions/chat.mjs": "b734ee488ad6cdad29f0b36fc0a17f1c5411e8626c0dc183283817e0ab0dfab6",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "summary": {
+    "checks": 51,
+    "passed": 50,
+    "failed": 1
+  }
+}

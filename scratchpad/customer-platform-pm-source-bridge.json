@@ -1,0 +1,131 @@
+{
+  "at": "2026-10-22T03:50:02.733Z",
+  "scope": "Local first-slice source bridge; no hosted, model, email or provider acceptance",
+  "stages": {
+    "full": {
+      "artifact": "scratchpad/customer-onboarding-ui-session-final.json",
+      "actor": "PM independent execution",
+      "summary": {
+        "checks": 52,
+        "passed": 51,
+        "failed": 1
+      },
+      "sourceStable": true,
+      "recordedSources": 15,
+      "changedSinceRecorded": [
+        "onboard.js",
+        "netlify/functions/access.mjs",
+        "netlify/functions/lib/access.mjs",
+        "desk.html",
+        "desk.js",
+        "netlify/functions/client.mjs",
+        "netlify/functions/chat.mjs"
+      ],
+      "serverFetchAttempts": 0,
+      "uncaughtBrowserErrors": 0
+    },
+    "plan": {
+      "artifact": "scratchpad/customer-onboarding-plan-accepted.json",
+      "actor": "PM independent execution",
+      "summary": {
+        "checks": 27,
+        "passed": 27,
+        "failed": 0
+      },
+      "sourceStable": true,
+      "recordedSources": 9,
+      "changedSinceRecorded": [],
+      "serverFetchAttempts": 0,
+      "uncaughtBrowserErrors": 0
+    },
+    "allowance": {
+      "artifact": "scratchpad/customer-budget-ui-accepted.json",
+      "actor": "PM independent execution",
+      "summary": {
+        "checks": 19,
+        "passed": 19,
+        "failed": 0
+      },
+      "sourceStable": true,
+      "recordedSources": 13,
+      "changedSinceRecorded": [],
+      "serverFetchAttempts": 0,
+      "uncaughtBrowserErrors": 0
+    }
+  },
+  "currentRelevantSources": {
+    "desk.html": "5be684fd291d25731d6bf4757de74d60317fa911a4465045bbdfeecf6520e61a",
+    "desk.js": "782ffd1eab755fc9951425a8c55bd022ec3d3e2ca121f04c33581c74dfea94a0",
+    "embed.js": "70c9f04aada23032ec71bdc6d8e7f4e08495b7c6c2ddbb51e00187cdaab80a11",
+    "netlify/functions/access.mjs": "0169e4012a782e8f66124af1b504b1c8e0de3cef9295edf1b5daba9375cfd30e",
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/client.mjs": "080efa1f159f3be957791282c9fd03f814152ef72a0ce807b13cc5d7bec84d46",
+    "netlify/functions/lib/access.mjs": "232fd4627031cea837f459324fe3ba704949e8778cf72bdfda92129f39f01d06",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/onboard.mjs": "eb5225030b5dc5ae395337d7a137c90d4c2464ed233bac292f45edc6a6eb0465",
+    "onboard.html": "97c69c8db34bbd2137f124b928527fa5f1af9c8bab5527d845c69a13dff80670",
+    "onboard.js": "67c728abd96c4be515f34e59d5e5558974a674afe5d2c8bc0e2841fa7c74d394"
+  },
+  "currentCombinedSHA256": "5b7cec40e02cfb9698b7cefdfe39284afee45c6d002cd2ea3640dfedd713e7f9",
+  "bridge": [
+    {
+      "change": "Starter enum hint through fixed trusted mailbox URL; existing tenant never reset",
+      "files": [
+        "onboard.js",
+        "netlify/functions/access.mjs",
+        "netlify/functions/lib/access.mjs"
+      ],
+      "proof": "scratchpad/customer-onboarding-plan-accepted.json"
+    },
+    {
+      "change": "Strict daily allowance in central handlers; owner/embed truthful remaining, denial, unavailable state",
+      "files": [
+        "netlify/functions/lib/self-service-ai.mjs",
+        "netlify/functions/client.mjs",
+        "netlify/functions/chat.mjs",
+        "desk.html",
+        "desk.js",
+        "embed.js"
+      ],
+      "proof": "scratchpad/customer-budget-ui-accepted.json"
+    },
+    {
+      "change": "Abort pending private browser reply and discard late portal updates on Sign out",
+      "files": [
+        "desk.js"
+      ],
+      "proof": "scratchpad/customer-budget-ui-accepted.json"
+    }
+  ],
+  "actualHandlerChatRequests": [
+    {
+      "scope": "actual handler",
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 429,
+      "error": "ai_daily_limit",
+      "hasPrivateAllowance": true
+    },
+    {
+      "scope": "actual handler",
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 429,
+      "error": "ai_daily_limit",
+      "hasPrivateAllowance": false
+    }
+  ],
+  "fixtureBoundaries": [
+    "Current reviewed/live test proof and credential availability are injected solely for pure readiness rendering; no inference was made.",
+    "Configuration503, chat transport failure and late private completion are explicit browser response fixtures.",
+    "Private/public429, all public/owner configuration reads and Sign out use actual in-process handlers in memory.",
+    "Earlier failed run artifacts remain unchanged."
+  ],
+  "currentFirstSliceVerdict": "Independent local functional gates pass with targeted source bridge; final PO/Architect decision and separate accepted release remain required."
+}

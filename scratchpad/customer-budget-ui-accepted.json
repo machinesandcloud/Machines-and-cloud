@@ -1,0 +1,250 @@
+{
+  "at": "2026-10-22T03:48:06.337Z",
+  "mode": "actual handlers/memory; model availability and current-proof fixtures only; no accepted inference",
+  "checks": [
+    {
+      "name": "Owner sees separate remaining replies and Houston reset",
+      "pass": true
+    },
+    {
+      "name": "Eligible availability fixture renders website active without phone or texting",
+      "pass": true
+    },
+    {
+      "name": "Actual private 429 shows a readable practice limit and refreshes allowance",
+      "pass": true,
+      "detail": {
+        "allowance": "AI replies left today: 0 practice · 30 customer chat. Resets at midnight Houston time.",
+        "error": "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset."
+      }
+    },
+    {
+      "name": "Private-only exhaustion leaves eligible customer website chat active",
+      "pass": true
+    },
+    {
+      "name": "Denied private turn creates no business or test history",
+      "pass": true
+    },
+    {
+      "name": "Shared exhaustion removes active badge and states saved-record recovery",
+      "pass": true
+    },
+    {
+      "name": "Shared exhaustion disables website activation",
+      "pass": true
+    },
+    {
+      "name": "Fresh embed cannot accept input while configuration is pending",
+      "pass": true
+    },
+    {
+      "name": "Actual eligible public config enables named widget without sending",
+      "pass": true
+    },
+    {
+      "name": "Actual not-active config keeps widget disabled with a direct-contact fallback",
+      "pass": true,
+      "detail": {
+        "disabled": true,
+        "sendDisabled": true,
+        "text": "Website chat is unavailable right now. Please use the shop’s contact details on this website."
+      }
+    },
+    {
+      "name": "Configuration 503 fails closed without inventing a callback or message promise",
+      "pass": true
+    },
+    {
+      "name": "Actual public 429 gives explicit daily limit and disables further sends",
+      "pass": true
+    },
+    {
+      "name": "Denied public turn leaves all business and conversation stores unchanged",
+      "pass": true
+    },
+    {
+      "name": "Public quota denial reveals no private allowance",
+      "pass": true
+    },
+    {
+      "name": "Chat transport failure uses shop contact details without false service promise",
+      "pass": true,
+      "detail": "Hi, this is the PM Budget Air front desk. What can we help with today? / Hola, le atiende la recepción de PM Budget Air. ¿En qué le podemos ayudar?\nWhat services do you provide?\nChat is unavailable right now. Please use the shop’s contact details on this website."
+    },
+    {
+      "name": "Sign out during a delayed private response clears authority and cannot restore private DOM",
+      "pass": true
+    },
+    {
+      "name": "Only the two intentionally denied turns reached actual chat handlers",
+      "pass": true
+    },
+    {
+      "name": "No server/model/provider fetch or uncaught browser error occurred",
+      "pass": true,
+      "detail": {
+        "serverAttempts": 0,
+        "pageErrors": []
+      }
+    },
+    {
+      "name": "Recorded source remained unchanged through rendered acceptance",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 429,
+      "error": "ai_daily_limit",
+      "hasPrivateAllowance": true
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "injected failure",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 503
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 429,
+      "error": "ai_daily_limit",
+      "hasPrivateAllowance": false
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "injected transport failure",
+      "method": "POST",
+      "path": "/api/chat"
+    },
+    {
+      "scope": "actual handler",
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200
+    },
+    {
+      "scope": "actual handler",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "scope": "injected delayed response",
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/customer-budget-ui-accepted-owner-exhausted-390.png",
+    "scratchpad/customer-budget-ui-accepted-embed-exhausted-390.png"
+  ],
+  "sourceBefore": {
+    "desk.html": "5be684fd291d25731d6bf4757de74d60317fa911a4465045bbdfeecf6520e61a",
+    "desk.js": "782ffd1eab755fc9951425a8c55bd022ec3d3e2ca121f04c33581c74dfea94a0",
+    "embed.js": "70c9f04aada23032ec71bdc6d8e7f4e08495b7c6c2ddbb51e00187cdaab80a11",
+    "netlify/functions/client.mjs": "080efa1f159f3be957791282c9fd03f814152ef72a0ce807b13cc5d7bec84d46",
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/access.mjs": "0169e4012a782e8f66124af1b504b1c8e0de3cef9295edf1b5daba9375cfd30e",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/access.mjs": "232fd4627031cea837f459324fe3ba704949e8778cf72bdfda92129f39f01d06",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "sourceAfter": {
+    "desk.html": "5be684fd291d25731d6bf4757de74d60317fa911a4465045bbdfeecf6520e61a",
+    "desk.js": "782ffd1eab755fc9951425a8c55bd022ec3d3e2ca121f04c33581c74dfea94a0",
+    "embed.js": "70c9f04aada23032ec71bdc6d8e7f4e08495b7c6c2ddbb51e00187cdaab80a11",
+    "netlify/functions/client.mjs": "080efa1f159f3be957791282c9fd03f814152ef72a0ce807b13cc5d7bec84d46",
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/access.mjs": "0169e4012a782e8f66124af1b504b1c8e0de3cef9295edf1b5daba9375cfd30e",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/access.mjs": "232fd4627031cea837f459324fe3ba704949e8778cf72bdfda92129f39f01d06",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "summary": {
+    "checks": 19,
+    "passed": 19,
+    "failed": 0
+  }
+}

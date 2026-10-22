@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-22T03:49:01.585773+00:00",
+  "reviewer": "software_architect",
+  "scope": "Independent read review of new-tenant AI budgets and static packaging; local only",
+  "quota": {
+    "artifact": "scratchpad/architect-self-service-ai-review.txt",
+    "checks": 43,
+    "casConflicts": 6652,
+    "actualExternalRequests": 0,
+    "unit": "Accepted logical turn; internal agent and SDK retries remain bounded within it",
+    "defaults": {
+      "privatePerTenantDay": 20,
+      "publicPerTenantDay": 50,
+      "globalSharedDay": 50
+    },
+    "operatorGlobalRange": [
+      0,
+      500
+    ],
+    "review": "Accepted: reservation precedes model/history, strict CAS shared across modes/tenants, retry-time Houston rollover, no refund on ambiguity, no admin or owner exemption for new marker"
+  },
+  "sourceFreeze": "scratchpad/customer-platform-budget-frozen.json",
+  "frozenSourceChanges": [],
+  "publicPackage": {
+    "manifest": "scratchpad/public-build-manifest.json",
+    "html": 182,
+    "browserFiles": 217,
+    "sourceOrOutputMismatches": [],
+    "forbiddenPresent": [],
+    "symlinks": [],
+    "publishDirectory": "dist",
+    "functionDirectory": "netlify/functions",
+    "review": "Accepted: explicit browser roots and assets only; source/private evidence/credentials excluded; HTML dependencies and copied hashes verified by packager and read review"
+  },
+  "limits": [
+    "Not a dollar cap or a budget for legacy/homepage modes",
+    "Installed SDK and storage protocol fixtures are not actual inference or live-store/provider acceptance",
+    "No deployment, real provider call, inbox delivery or hosted routing/header acceptance performed by this review"
+  ]
+}

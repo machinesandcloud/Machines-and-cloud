@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Set up your front desk | Machines &amp; Cloud</title>
-  <meta name="description" content="Ten minutes of answers and your front desk is built from your website.">
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Create a secure workspace, save your business rules, and privately test website chat before activation.">
+  <meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
   <link rel="icon" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -37,6 +37,13 @@
     .ob code { background: #F3F4F6; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
     .ob .portal { word-break: break-all; }
     .ob .chk { display: flex; gap: 10px; align-items: center; margin: 8px 0; font-size: 14px; }
+    [hidden] { display: none !important; }
+    .access-card { padding: 24px; border: 1px solid #dbe3ef; border-radius: 16px; background: #fff; margin-bottom: 24px; }
+    .access-card h2 { margin: 0 0 10px; }
+    .access-card p { color: #52627a; margin: 10px 0; line-height: 1.6; }
+    .access-card .btn-pill { margin-top: 14px; min-height: 44px; }
+    .access-signed-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; font-size: 13px; }
+    .access-signed-in button { background: none; border: 0; color: #2459df; padding: 10px; cursor: pointer; }
   .hours-rows{display:grid;gap:6px;margin-top:8px}.hours-row{display:grid;grid-template-columns:44px 1fr 24px 1fr;align-items:center;gap:8px;font-size:14px}.hours-row input{padding:8px;border:1px solid #D1D5DB;border-radius:8px;font:inherit}
 </style>
 </head>
@@ -44,25 +51,34 @@
 <nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
 <main class="ob">
   <h1>Set up your front desk</h1>
-  <p class="lead">About ten minutes. We read your website too, so skip anything it already says. You can change everything later.</p>
-  <div class="ob-steps"><span class="on">1 You</span><span>2 Shop</span><span>3 Prices and windows</span><span>4 Rules</span><span>5 Phone and texting</span></div>
-  <form id="ob" novalidate>
+  <p class="lead">Create your workspace, add your shop’s rules, and try your front desk before customers use it. Your answers are saved as you go.</p>
+  <p class="hint">This setup prepares website chat. Phone answering, texting and calendar sync are not active. No payment is taken and no subscription starts.</p>
+  <section id="access-gate" class="access-card" aria-labelledby="access-title">
+    <h2 id="access-title">Start with your email</h2><p>Sign in or create your workspace with a secure email link. No password to remember.</p>
+    <form id="access-form"><label class="form-label" for="access-email">Your email</label><input class="form-input" id="access-email" type="email" autocomplete="email" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Email me a sign-in link</button></form>
+    <button class="btn-pill btn-pill-blue" id="access-verify" type="button" hidden>Continue securely</button><p id="access-status" role="status" aria-live="polite"></p>
+  </section>
+  <div id="access-signed-in" class="access-signed-in" hidden><span id="access-identity"></span><button type="button" id="access-sign-out">Sign out</button></div>
+  <p id="draft-status" class="hint" role="status" aria-live="polite" hidden></p>
+  <div class="ob-steps" hidden><span class="on">1 You</span><span>2 Shop</span><span>3 Prices and windows</span><span>4 Rules</span></div>
+  <form id="ob" novalidate hidden>
     <p hidden><input name="botfield" tabindex="-1" autocomplete="off"></p>
     <fieldset class="on" data-step="1"><legend>You</legend>
       <div class="row">
         <div class="form-group"><label class="form-label" for="name">Your name</label><input class="form-input" id="name" name="name" required autocomplete="name"></div>
-        <div class="form-group"><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email"></div>
+        <div class="form-group"><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email" readonly></div>
       </div>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="phone">Your cell (where leads get texted)</label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555 0100" autocomplete="tel"></div>
-        <div class="form-group"><label class="form-label" for="website">Your website (leave blank if you do not have one yet)</label><input class="form-input" id="website" name="website" type="url" placeholder="https://"></div>
+        <div class="form-group"><label class="form-label" for="phone">Your contact cell</label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555 0100" autocomplete="tel"><span class="hint" style="display:block;margin-top:4px">Saved as your shop’s callback contact. This setup does not call or text you.</span></div>
+        <div class="form-group"><label class="form-label" for="website">Your website (leave blank if you do not have one yet)</label><input class="form-input" id="website" name="website" type="url" placeholder="https://"><span class="hint" style="display:block;margin-top:4px">Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.</span></div>
       </div>
-      <p class="hint">Plan</p>
+      <p class="hint">Plan preference for later activation</p>
       <div class="plans-pick">
-        <label><input type="radio" name="plan" value="starter"> <b>Starter</b> $99<br><small>Calls, texts, chat, booking</small></label>
-        <label class="on"><input type="radio" name="plan" value="growth" checked> <b>Growth</b> $249<br><small>Adds lead platforms and follow-up</small></label>
-        <label><input type="radio" name="plan" value="pro"> <b>Pro</b> $449<br><small>Several crews, reports</small></label>
+        <label><input type="radio" name="plan" value="starter"> <b>Starter</b> $99/month</label>
+        <label class="on"><input type="radio" name="plan" value="growth" checked> <b>Growth</b> $249/month</label>
+        <label><input type="radio" name="plan" value="pro"> <b>Pro</b> $449/month</label>
       </div>
+      <p class="hint">Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.</p>
     </fieldset>
     <fieldset data-step="2"><legend>Your shop</legend>
       <div class="row">
@@ -71,7 +87,7 @@
       </div>
       <div class="form-group"><label class="form-label" for="services">What you do (one per line)</label><textarea class="form-input" id="services" name="services" placeholder="AC repair&#10;AC replacement&#10;Maintenance plans"></textarea></div>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="hours">Hours</label><input class="form-input" id="hours" name="hours" placeholder="Mon to Fri 7 to 6, Sat 8 to 2"><div id="hoursRows" class="hours-rows"></div><span class="hint">The rows fill in from what you type; fix any day that is off. The front desk uses them for the callback promise and after-hours rules.</span><input type="hidden" name="hoursTable" id="hoursTable"></div>
+        <div class="form-group"><label class="form-label" for="hours">Hours</label><input class="form-input" id="hours" name="hours" placeholder="Mon to Fri 7 to 6, Sat 8 to 2"><div id="hoursRows" class="hours-rows"></div><span class="hint">The rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.</span><input type="hidden" name="hoursTable" id="hoursTable"></div>
         <div class="form-group"><label class="form-label" for="afterHours">After hours</label><input class="form-input" id="afterHours" name="afterHours" placeholder="Emergencies only, $150 fee"></div>
       </div>
       <div class="row">
@@ -93,115 +109,23 @@
     <fieldset data-step="4"><legend>Rules</legend>
       <div class="form-group"><label class="form-label" for="handoff">Always hand these to a person (one per line)</label><textarea class="form-input" id="handoff" name="handoff" placeholder="Complaints about past work&#10;Warranty questions&#10;Commercial jobs"></textarea></div>
       <div class="form-group"><label class="form-label" for="never">Never do (one per line; the basics are already in)</label><textarea class="form-input" id="never" name="never" placeholder="Never quote a replacement price&#10;No window units"></textarea></div>
-      <div class="form-group"><label class="form-label" for="tier0">Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)</label><textarea class="form-input" id="tier0" name="tier0"></textarea><span class="hint">The front desk gives your safety script, takes only a phone number and address, and pages you.</span></div>
-      <div class="form-group"><label class="form-label" for="tier1">Emergencies, tier 1: same day (one per line)</label><textarea class="form-input" id="tier1" name="tier1"></textarea><span class="hint">Booked today or handed to you today. With an infant, elderly, or medically dependent person in the home it is treated as tier 0. Everything else gets the next available window.</span></div>
+      <div class="form-group"><label class="form-label" for="tier0">Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)</label><textarea class="form-input" id="tier0" name="tier0"></textarea><span class="hint">The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.</span></div>
+      <div class="form-group"><label class="form-label" for="tier1">Emergencies, tier 1: same day (one per line)</label><textarea class="form-input" id="tier1" name="tier1"></textarea><span class="hint">These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.</span></div>
       <div class="form-group"><label class="form-label" for="emergencies">Your safety script, in your words</label><textarea class="form-input" id="emergencies" name="emergencies" placeholder="Gas smell: leave the house, call CenterPoint or 911, then us."></textarea></div>
       <div class="form-group"><label class="form-label" for="notes">Anything else a new receptionist should know</label><textarea class="form-input" id="notes" name="notes" placeholder="We are a family shop, 12 years in Katy. Say 'Ray or one of the guys' not 'a technician'."></textarea></div>
       <div class="form-group"><label class="form-label" for="greeting">First line of the website chat (optional)</label><input class="form-input" id="greeting" name="greeting" placeholder="Hi, this is the Bayou Air front desk. What can we help with today?"></div>
-    </fieldset>
-    <fieldset data-step="5"><legend>Phone, texting, leads</legend>
-      <div class="row">
-        <div class="form-group"><label class="form-label" for="businessNumber">Business number customers call</label><input class="form-input" id="businessNumber" name="businessNumber" type="tel" placeholder="(281) 555 0100"></div>
-        <div class="form-group"><label class="form-label" for="forwarding">Which calls should the front desk take?</label><select class="form-input" id="forwarding" name="forwarding"><option value="missed">Only the ones I miss</option><option value="all">All of them, transfer the ones that need me</option><option value="none">None yet, texts and chat only</option></select></div>
-      </div>
-      <div class="row">
-        <div class="form-group"><label class="form-label" for="carrier">Carrier for that number</label><select class="form-input" id="carrier" name="carrier"><option value="att">AT&amp;T</option><option value="verizon">Verizon</option><option value="tmobile">T-Mobile</option><option value="voip">Office phone or VoIP (RingCentral, Google Voice, etc.)</option><option value="other">Other</option></select></div>
-        <div class="form-group"><label class="form-label" for="backupPhone">Backup number for urgent alerts (optional)</label><input class="form-input" id="backupPhone" name="backupPhone" type="tel" placeholder="A second phone, not your cell"><span class="hint" style="display:block;margin-top:4px">If you do not acknowledge an urgent alert within 10 minutes, it goes here.</span></div>
-      </div>
-      <div class="row" id="transferRow" style="display:none"><div class="form-group"><label class="form-label" for="transferTo">Transfer calls that need you to</label><input class="form-input" id="transferTo" name="transferTo" type="tel" placeholder="Your cell"></div><div class="form-group"><span class="hint">Running Google Local Services ads? Google now bills business-hours calls that ring unanswered past 20 seconds. Your forwarding code sets a 15-second ring time on AT&amp;T and T-Mobile; on Verizon choose "All of them" for that line. Leave the transfer number blank if your cell is the forwarded line; the front desk will take a message and promise a callback.</span></div></div>
-      <p class="hint">Texting registration. Carriers require every business that texts customers to be registered (it is called 10DLC). We file it for you with these details; it takes one to six weeks; until it clears, your front desk texts from our registered number with your business name on every message. Leave blank to add later from your portal.</p>
-      <div class="row">
-        <div class="form-group"><label class="form-label" for="legalName">Legal business name</label><input class="form-input" id="legalName" name="legalName" placeholder="Katy Pipeworks LLC"></div>
-        <div class="form-group"><label class="form-label" for="ein">EIN</label><input class="form-input" id="ein" name="ein" placeholder="12-3456789" inputmode="numeric"></div>
-      </div>
-      <div class="row">
-        <div class="form-group"><label class="form-label" for="businessType">Business type</label><select class="form-input" id="businessType" name="businessType"><option value="llc">LLC</option><option value="corp">Corporation</option><option value="sole">Sole proprietorship</option><option value="partnership">Partnership</option><option value="nonprofit">Non-profit</option></select></div>
-        <div class="form-group"><label class="form-label" for="street">Business street address</label><input class="form-input" id="street" name="street" placeholder="1234 Mason Rd"></div>
-      </div>
-      <div class="row">
-        <div class="form-group"><label class="form-label" for="legalCity">City</label><input class="form-input" id="legalCity" name="legalCity" placeholder="Katy"></div>
-        <div class="form-group"><label class="form-label" for="zip">State and ZIP</label><div style="display:flex;gap:8px"><input class="form-input" id="state" name="state" value="TX" maxlength="2" style="width:70px"><input class="form-input" id="zip" name="zip" placeholder="77450" inputmode="numeric"></div></div>
-      </div>
-      <p class="hint">Where your leads come from (check all)</p>
-      <div class="chk"><label><input type="checkbox" name="leadSources" value="referrals"> Referrals and repeat</label></div>
-      <div class="chk"><label><input type="checkbox" name="leadSources" value="google"> Google search and Business Profile</label></div>
-      <div class="chk"><label><input type="checkbox" name="leadSources" value="lsa"> Google Local Services Ads</label></div>
-      <div class="chk"><label><input type="checkbox" name="leadSources" value="angi"> Angi</label></div>
-      <div class="chk"><label><input type="checkbox" name="leadSources" value="thumbtack"> Thumbtack</label></div>
-      <div class="chk"><label><input type="checkbox" name="leadSources" value="nextdoor"> Nextdoor or Facebook</label></div>
-      <div class="row" style="margin-top:12px;">
-        <div class="form-group"><label class="form-label" for="software">Scheduling software</label><select class="form-input" id="software" name="software"><option value="google">Google Calendar</option><option value="jobber">Jobber</option><option value="housecall">Housecall Pro</option><option value="servicetitan">ServiceTitan</option><option value="paper">Paper or whiteboard</option><option value="other">Something else</option></select></div>
-        <div class="form-group"><label class="form-label" for="reviewLink">Google review link (optional)</label><input class="form-input" id="reviewLink" name="reviewLink" placeholder="https://g.page/r/..."></div>
-      </div>
-      <div class="form-group"><label class="form-label" for="payLink">Payment link for invoices (optional)</label><input class="form-input" id="payLink" name="payLink" placeholder="https://"></div>
     </fieldset>
     <div class="nav"><button type="button" class="btn-pill btn-pill-dark" id="back" style="visibility:hidden">Back</button><button type="button" class="btn-pill btn-pill-blue" id="next">Next</button></div>
     <p class="form-status" id="err" role="alert"></p>
   </form>
   <section class="done" id="done">
     <h2 style="margin-top:0">Building your front desk</h2>
-    <p class="status" id="buildStatus">Reading your website and drafting what it knows. This takes a minute or two.</p>
-    <p><b>Your portal and test line</b> (keep this link, it is your login):<br><a class="portal" id="portalLink" href="#"></a></p>
-    <p class="status">We also emailed it to you. On the portal you can chat with your front desk as a customer, read everything it knows, fix anything wrong, and add the chat to your website with one line. Your front desk number and the one-minute forwarding step arrive by text and email as soon as the number is ready. Texting from your own number starts when carriers approve the registration (one to six weeks); your desk texts from our registered number until then.</p>
+    <p class="status" id="buildStatus">Your answers are saved. Preparing your front desk.</p>
+    <p><b>Your workspace</b> (you can sign in again with your email):<br><a class="portal" id="portalLink" href="#"></a></p>
+    <p class="status">Review your saved rules, try an isolated practice conversation, and follow the setup checklist. Website chat, phone, and texting each show their own status; no channel is active until its requirements are met. No payment is taken during this setup.</p>
     <p><a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my portal</a></p>
   </section>
 </main>
-<script>
-(function () {
-  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
-  var form = document.getElementById('ob'), steps = [].slice.call(form.querySelectorAll('fieldset')), pills = [].slice.call(document.querySelectorAll('.ob-steps span'));
-  var i = 0, back = document.getElementById('back'), next = document.getElementById('next'), err = document.getElementById('err');
-  var q = new URLSearchParams(location.search);
-  ['name', 'email', 'website', 'phone', 'business'].forEach(function (k) { if (q.get(k)) form.elements[k].value = q.get(k); });
-  if (q.get('plan')) { var r = form.querySelector('input[name=plan][value=' + q.get('plan') + ']'); if (r) r.checked = true; }
-  // Emergency tiers prefilled by trade (same table as the server); the owner can edit every line.
-  var T0 = 'Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space';
-  var T1 = { hvac: 'No cooling when the forecast high is 90°F or more\nNo cooling with an infant, elderly, or medically dependent person in the home\nNo heat when it is at or below freezing outside\nWater pouring from the air handler', plumbing: 'Uncontrolled water (a burst pipe, a leak that will not stop)\nNo water in the house\nSewage backup\nLeaking water heater\nNo hot water with an infant, elderly, or medically dependent person in the home', electrical: "Loss of power from the home's own system, not a utility outage\nA hot outlet, switch, or breaker\nPartial power or flickering across the house\nExposed or damaged wiring", roofing: 'Active leak during rain\nStorm or tree damage with the interior exposed\nTarping after hail or wind', cleaning: '', other: '' };
-  function tradeKey(t) { t = (t || '').toLowerCase(); return /hvac|air|cool|heat|a\/c|ac\b/.test(t) ? 'hvac' : /plumb|drain|water heater|sewer/.test(t) ? 'plumbing' : /electr/.test(t) ? 'electrical' : /roof/.test(t) ? 'roofing' : /clean|maid|janitor/.test(t) ? 'cleaning' : 'other'; }
-  var t0 = form.elements['tier0'], t1 = form.elements['tier1'], touched = { t0: false, t1: false };
-  t0.addEventListener('input', function () { touched.t0 = true; }); t1.addEventListener('input', function () { touched.t1 = true; });
-  function fillTiers() { if (!touched.t0) t0.value = T0; if (!touched.t1) t1.value = T1[tradeKey(form.elements['trade'].value)] || ''; }
-  form.elements['trade'].addEventListener('change', fillTiers); form.elements['trade'].addEventListener('blur', fillTiers); fillTiers();
-  // Structured hours: seven rows, prefilled from the hours sentence (same parser as the server, simplified).
-  var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], DI = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
-  function clock(str, isClose) { var m = String(str).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/i); if (!m) return null; var h = +m[1], mi = +(m[2] || 0), ap = (m[3] || '').toLowerCase(); if (ap.charAt(0) === 'p' && h < 12) h += 12; else if (ap.charAt(0) === 'a' && h === 12) h = 0; else if (!ap) { if (isClose && h <= 9) h += 12; else if (!isClose && h < 5) h += 12; } return (h < 10 ? '0' : '') + h + ':' + (mi < 10 ? '0' : '') + mi; }
-  function parseHours(str) { var out = {}, any = false; String(str || '').split(/[,;\n]+/).forEach(function (part) { var t = part.trim().toLowerCase().replace(/\./g, ''); var dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun)[a-z]*)?\s*:?\s*(.*)$/); if (!dm) return; var a = DI[dm[1]], b = dm[2] ? DI[dm[2]] : a, days = [], i = a; for (var k = 0; k < 7; k++) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; i = (i + 1) % 7; } if (/closed/.test(dm[3])) { days.forEach(function (d) { out[d] = null; }); any = true; return; } var tm = dm[3].match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/); if (!tm) return; var o = clock(tm[1], false), c = clock(tm[2], true); if (!o || !c) return; days.forEach(function (d) { out[d] = { open: o, close: c }; }); any = true; }); if (!any) return null; DAYS.forEach(function (d) { if (out[d] === undefined) out[d] = null; }); return out; }
-  var hoursRows = document.getElementById('hoursRows'), hoursTouched = false;
-  hoursRows.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" data-d="' + d + '" data-k="close"></div>'; }).join('');
-  hoursRows.addEventListener('input', function () { hoursTouched = true; });
-  function fillHours() { if (hoursTouched) return; var h = parseHours(form.elements['hours'].value); hoursRows.querySelectorAll('input').forEach(function (inp) { var v = h && h[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); }
-  form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
-  function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c } : null; }); return t; }
-  var fwdSel = form.elements['forwarding']; function fwdUI() { document.getElementById('transferRow').style.display = fwdSel.value === 'all' ? 'grid' : 'none'; } fwdSel.addEventListener('change', fwdUI); fwdUI();
-  form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { form.querySelectorAll('.plans-pick label').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }); });
-  function show(n) { i = n; steps.forEach(function (s, k) { s.classList.toggle('on', k === n); }); pills.forEach(function (p, k) { p.classList.toggle('on', k <= n); }); back.style.visibility = n ? 'visible' : 'hidden'; next.textContent = n === steps.length - 1 ? 'Build my front desk' : 'Next'; err.textContent = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function valid() { var ok = true; steps[i].querySelectorAll('[required]').forEach(function (f) { var bad = !f.value.trim() || (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.value)); f.classList.toggle('error', bad); if (bad) ok = false; }); if (!ok) err.textContent = 'Fill in the highlighted fields.'; return ok; }
-  back.addEventListener('click', function () { if (i > 0) show(i - 1); });
-  next.addEventListener('click', function () {
-    if (!valid()) return;
-    if (i < steps.length - 1) return show(i + 1);
-    next.disabled = true; next.textContent = 'Building...';
-    document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
-    var data = {}; new FormData(form).forEach(function (v, k) { if (k === 'leadSources') { (data.leadSources = data.leadSources || []).push(v); } else data[k] = v; });
-    fetch(API_BASE + '/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-      .then(function (r) {
-        if (!r.ok && r.d.error === 'loop') { var fld = form.elements[(r.d.field || '').split('.').pop()] || form.elements['phone']; fld.classList.add('error'); err.textContent = r.d.message; next.disabled = false; next.textContent = 'Build my front desk'; return; }
-        if (!r.ok || !r.d.portal) throw new Error(r.d.error || 'failed');
-        form.style.display = 'none'; document.querySelector('.ob-steps').style.display = 'none';
-        var done = document.getElementById('done'); done.classList.add('on');
-        document.getElementById('portalLink').textContent = r.d.portal; document.getElementById('portalLink').href = r.d.portal; document.getElementById('goPortal').href = r.d.portal;
-        var st = document.getElementById('buildStatus'), tries = 0;
-        (function poll() { tries++; fetch(API_BASE + '/api/onboard?c=' + r.d.slug + '&k=' + r.d.key).then(function (x) { return x.json(); }).then(function (s) {
-          if (s.status === 'testing') { st.textContent = 'Built. ' + (s.build && s.build.notes ? 'Your website is missing: ' + s.build.notes + '. We filled in what we could from your answers.' : 'Open your portal to test it.'); return; }
-          if (s.build && s.build.status === 'failed') { st.textContent = 'We could not read your website automatically. Your answers are loaded; Steve will finish the rest by hand today.'; return; }
-          if (tries < 60) setTimeout(poll, 5000);
-        }).catch(function () { if (tries < 60) setTimeout(poll, 8000); }); })();
-      })
-      .catch(function (e) { next.disabled = false; next.textContent = 'Build my front desk'; err.textContent = 'Something went wrong (' + e.message + '). Email support@machinesandcloud.com and we will set you up by hand.'; });
-  });
-  show(0);
-})();
-</script>
+<script src="onboard.js" defer></script>
 </body>
 </html>

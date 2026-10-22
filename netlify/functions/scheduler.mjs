@@ -9,6 +9,7 @@ import { forwardingInstructions } from "./lib/forwarding.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
+import { isSelfServiceClient } from "./lib/setup.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -17,6 +18,10 @@ const D = 24 * 3600 * 1000;
 async function runTask(t) {
   const c = await getClient(t.slug);
   if (!c) return "no client";
+  if (isSelfServiceClient(c)) {
+    await logEvent(c.slug, "task_skipped", { type: t.type, reason: "self_service_portal_only" });
+    return "channel_not_active";
+  }
   if (!ACTIVE.includes(c.status)) { await logEvent(c.slug, "task_skipped", { type: t.type, reason: c.status }); return "skipped"; }
   if (t.type === "escalate") return runEscalation(c, t);
   if (t.type === "callback_check") return runCallbackCheck(c, t);
@@ -157,7 +162,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     let polled = 0;
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
-      if (!c?.phone?.brandSid || !["brand_pending", "campaign_pending"].includes(c.phone.tenDlc)) continue;
+      if (isSelfServiceClient(c) || !c?.phone?.brandSid || !["brand_pending", "campaign_pending"].includes(c.phone.tenDlc)) continue;
       polled++;
       try {
         if (c.phone.tenDlc === "brand_pending") {
@@ -185,7 +190,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     if (!halfHour) return { skipped: "runs at :00 and :30" };
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
-      if (!c || !["testing", "live"].includes(c.status)) continue;
+      if (!c || isSelfServiceClient(c) || !["testing", "live"].includes(c.status)) continue;
       try { alerts += await healthAlerts(c); } catch (err) { console.error("health", slug, err); }
       try { lifecycles += await lifecycle(c); } catch (err) { console.error("lifecycle", slug, err); }
     }
@@ -196,7 +201,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     if (!halfHour) return { skipped: "runs at :00 and :30" };
     for (const slug of await list("clients", "")) {
       const c = await getClient(slug);
-      if (!c || c.status !== "cancelled" || !c.serviceEndsAt || new Date(c.serviceEndsAt).getTime() > Date.now()) continue;
+      if (!c || isSelfServiceClient(c) || c.status !== "cancelled" || !c.serviceEndsAt || new Date(c.serviceEndsAt).getTime() > Date.now()) continue;
       if (!c.phone?.twilioNumber && !c.phone?.twilioNumberSid && !c.voice?.assistantId) continue;
       try {
         const out = { number: c.phone?.twilioNumber || null, sid: c.phone?.twilioNumberSid || null };

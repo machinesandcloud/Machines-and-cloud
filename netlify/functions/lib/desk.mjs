@@ -8,6 +8,7 @@ import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalize
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
 import { getUsage, usageView } from "./usage.mjs";
 import { auditNeedsAttention, actionableAuditReasons } from "./audit-policy.mjs";
+import { isSelfServiceClient } from "./setup.mjs";
 
 const H = 3600 * 1000, D = 24 * H;
 const esc = (s) => String(s || "").trim();
@@ -228,6 +229,7 @@ async function calendarFailed(c, b, err, op) {
 }
 
 export async function bookVisit(c, input, ctx = {}) {
+  const portalOnly = isSelfServiceClient(c);
   const phone = e164(input.phone) || esc(input.phone);
   const bookingId = id(5), type = await customerType(c.slug, phone);
   const taken = await reserveBookingWindow(c, bookingId, input.date, input.window);
@@ -240,22 +242,25 @@ export async function bookVisit(c, input, ctx = {}) {
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     date: taken.date, dateSaid: esc(input.date), window: taken.window, urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: type,
+    ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false } } : {}),
   });
   let canFinish = true;
   try {
     await addToIndex("bookings", c.slug, b.phone, b.id);
-    try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
-    await scheduleReminders(c, b);
-    // consent: told at booking, recorded on the booking
-    const { consentLine } = await import("./config.mjs");
-    b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
+    if (!portalOnly) {
+      try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
+      await scheduleReminders(c, b);
+      // consent: told at booking, recorded on the booking
+      const { consentLine } = await import("./config.mjs");
+      b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
+    }
     try { await saveRecord("bookings", b, { capacityClaim: taken }); }
     catch (err) { canFinish = false; throw err; }
   } finally { if (canFinish) await finishBookingWindow(c.slug, bookingId, taken); }
-  if (b.phone && ctx.channel !== "sms") {
+  if (!portalOnly && b.phone && ctx.channel !== "sms") {
     await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
   }
-  await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
+  if (!portalOnly) await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
   await logEvent(c.slug, "booking", { id: b.id, channel: ctx.channel });
   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
   const since = Date.now() - D;
@@ -279,6 +284,7 @@ async function recentOpenLead(c, phone, contact) {
 
 // The promise the front desk makes in the owner's name, and when it comes due.
 export function callbackPromise(c, at) {
+  if (isSelfServiceClient(c)) return ""; // Requested timing is not a confirmed human-contact promise.
   if (isBusinessHours(c, at)) return c.rules?.callbackHours || "within 30 minutes";
   const o = opensLaterToday(c, at);
   if (o) return `when we open at ${o.label} this morning`;
@@ -304,6 +310,7 @@ export function callbackDue(phrase, at, c) {
   return new Date(now.getTime() + 60 * 60000);
 }
 async function trackCallback(c, lead) {
+  if (isSelfServiceClient(c)) return;
   const promise = callbackPromise(c);
   lead.callbackPromise = promise; lead.callbackDueAt = callbackDue(promise, undefined, c).toISOString(); lead.overdueAt = null;
   await cancelTasks(c.slug, (t) => t.type === "callback_check" && t.data?.leadId === lead.id);
@@ -311,6 +318,7 @@ async function trackCallback(c, lead) {
 }
 // The scheduler runs this at callbackDueAt.
 export async function runCallbackCheck(c, task) {
+  if (isSelfServiceClient(c)) return "channel_not_active";
   const l = await getRecord("leads", c.slug, task.data?.leadId);
   if (!l) return "no lead";
   if (l.calledAt) return "called";
@@ -324,6 +332,7 @@ export async function runCallbackCheck(c, task) {
 }
 
 export async function flagLead(c, input, ctx = {}) {
+  const portalOnly = isSelfServiceClient(c);
   const phone = e164(input.phone) || esc(input.phone);
   const reason = input.reason || "lead";
   const prior = reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact);
@@ -335,10 +344,16 @@ export async function flagLead(c, input, ctx = {}) {
     if (escalate) { prior.urgency = "emergency"; prior.reason = "emergency"; prior.outcome = "needs_action"; changed.push("urgency"); }
     if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); await trackCallback(c, prior); }
     if (input.nobook_reason && input.nobook_reason !== "none" && input.nobook_reason !== prior.nobook_reason) prior.nobook_reason = input.nobook_reason;
+    if (portalOnly) {
+      prior.delivery = { mode: "portal_only", ownerContactConfirmed: false };
+      delete prior.callbackPromise; delete prior.callbackDueAt; delete prior.overdueAt;
+    }
     await saveRecord("leads", prior);
-    if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
-    const waiting = (await listRecords("alerts", c.slug, 100)).some((a) => a.leadId === prior.id && a.status === "waiting");
-    if (!waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
+    if (!portalOnly) {
+      if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
+      const waiting = (await listRecords("alerts", c.slug, 100)).some((a) => a.leadId === prior.id && a.status === "waiting");
+      if (!waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
+    }
     await logEvent(c.slug, "lead_updated", { id: prior.id, changed, channel: ctx.channel });
     return prior;
   }
@@ -346,9 +361,10 @@ export async function flagLead(c, input, ctx = {}) {
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
     channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
+    ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false } } : {}),
   });
   await addToIndex("leads", c.slug, l.phone, l.id);
-  if (reason !== "spam") {
+  if (!portalOnly && reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
     await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
     const urgent = reason === "emergency" || reason === "wants_call" || input.urgency === "emergency";
@@ -413,6 +429,7 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
 
 // ---- Acknowledge and escalate ----
 export async function openAlert(c, lead, kind) {
+  if (isSelfServiceClient(c)) return { status: "channel_not_active" };
   const a = await addRecord("alerts", c.slug, { leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
   const mins = Number(c.rules?.ackMinutes) || 10;
   await scheduleTask(c.slug, new Date(Date.now() + mins * 60 * 1000), "escalate", { alertId: a.id });
@@ -428,6 +445,7 @@ export async function ackAlertsFor(c, recordId, by = "owner") {
 }
 
 export async function runEscalation(c, task) {
+  if (isSelfServiceClient(c)) return "channel_not_active";
   const a = await getRecord("alerts", c.slug, task.data?.alertId);
   if (!a) return "no alert";
   if (a.status !== "waiting") return a.status;
@@ -460,7 +478,7 @@ export async function runEscalation(c, task) {
       await sendSMS({ to: c.owner?.phone, client: c, type: "owner_alert", force: true, body: `Second notice: not acknowledged in ${mins * 2} min.\n${summary}` });
       how = "call replaced by text (forwarded line)";
     } else {
-      const r = await placeCall({ to: c.owner?.phone, say: `Urgent lead from your ${c.business.name} front desk. Please check your texts. Urgent lead from your ${c.business.name} front desk. Please check your texts.` });
+      const r = await placeCall({ client: c, to: c.owner?.phone, say: `Urgent lead from your ${c.business.name} front desk. Please check your texts. Urgent lead from your ${c.business.name} front desk. Please check your texts.` });
       how = r.ok ? "call" : "call (logged)";
     }
   } else {
@@ -501,6 +519,7 @@ export async function confirmVisit(c, b) {
 }
 
 export async function rescheduleVisit(c, b, date, window) {
+  const portalOnly = isSelfServiceClient(c);
   const nd = date === undefined ? b.date : date;
   const nw = window === undefined ? b.window : window;
   const from = ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date && b.window ? b : undefined;
@@ -513,12 +532,14 @@ export async function rescheduleVisit(c, b, date, window) {
   let canFinish = true;
   try {
     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
-    await scheduleReminders(c, b);
-    try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
+    if (!portalOnly) {
+      await scheduleReminders(c, b);
+      try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
+    }
     try { await saveRecord("bookings", b, { capacityClaim: claim }); }
     catch (err) { canFinish = false; throw err; }
   } finally { if (canFinish) await finishBookingWindow(c.slug, b.id, claim); }
-  await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
+  if (!portalOnly) await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
   await logEvent(c.slug, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
   return b;
 }

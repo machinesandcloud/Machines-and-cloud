@@ -1,0 +1,406 @@
+{
+  "at": "2026-10-22T03:29:18.084Z",
+  "sourceBefore": {
+    "netlify/functions/onboard.mjs": "eb5225030b5dc5ae395337d7a137c90d4c2464ed233bac292f45edc6a6eb0465",
+    "netlify/functions/client.mjs": "50d436e5f8c2bb9472127a9a610a0ea1ee2d17a607e5a7dcf93ea6e19aa50010",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/access.mjs": "938a85c3bc92a8d0619c8b513c2e130f1a6ade5041fbd9f3c2257a6c95cb8755",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/chat.mjs": "b734ee488ad6cdad29f0b36fc0a17f1c5411e8626c0dc183283817e0ab0dfab6",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "mode": "actual handlers, memory/fake; no external network",
+  "checks": [
+    {
+      "name": "Original unauthenticated duplicate-email exploit now rejected before disclosure",
+      "pass": true
+    },
+    {
+      "name": "Original exploit leaves client/index/events/jobs byte-identical",
+      "pass": true
+    },
+    {
+      "name": "Proof for another email cannot overwrite or recover existing tenant",
+      "pass": true
+    },
+    {
+      "name": "Proven existing owner recovers same portal without changing supplied fields",
+      "pass": true
+    },
+    {
+      "name": "Existing recovery preserves live state/phone/business/rules and starts no jobs",
+      "pass": true
+    },
+    {
+      "name": "Concurrent first submit returns one stable tenant without permanent browser key",
+      "pass": true,
+      "detail": [
+        200,
+        200
+      ]
+    },
+    {
+      "name": "Only one new tenant exists after concurrent submit",
+      "pass": true
+    },
+    {
+      "name": "Lost-response retry recovers existing result instead of rerunning questionnaire",
+      "pass": true
+    },
+    {
+      "name": "Verified identity, registry and legacy index agree",
+      "pass": true
+    },
+    {
+      "name": "Initial draft uses only saved owner answers without pretending website import",
+      "pass": true
+    },
+    {
+      "name": "New account starts with every channel inactive",
+      "pass": true
+    },
+    {
+      "name": "Owner API exposes truthful readiness and current revision",
+      "pass": true
+    },
+    {
+      "name": "Permanent owner key alone cannot authorize new workspace",
+      "pass": true
+    },
+    {
+      "name": "Intended public widget response still omits owner credentials and setup",
+      "pass": true
+    },
+    {
+      "name": "Stale review cannot certify new configuration",
+      "pass": true
+    },
+    {
+      "name": "Actual reviewed rules persist exact revision",
+      "pass": true
+    },
+    {
+      "name": "Owner completes safe test and receives structured revision proof",
+      "pass": true
+    },
+    {
+      "name": "Fake/no-key mode cannot falsely activate even reviewed/tested desk",
+      "pass": true
+    },
+    {
+      "name": "Unavailable channel action fails honestly: provision",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "data": {
+          "error": "channel_setup_unavailable",
+          "message": "Phone and text service are not active. A button cannot certify provider acceptance or delivery.",
+          "setup": {
+            "version": 1,
+            "revision": "0dc73b8b1b525b06ae387fcf9ea7ac24122433f9a972067b848a91ee93ad418e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers. Website import is not enabled; review these rules before activation.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "waiting_provider",
+                "detail": "Not active. Calls have not been connected or verified.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "waiting_provider",
+                "detail": "Not active. Sender approval and delivery checks are incomplete.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ]
+              }
+            },
+            "next": {
+              "id": "test",
+              "tab": "test",
+              "label": "Try your desk"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Unavailable channel action fails honestly: forwarding_verified",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "data": {
+          "error": "channel_setup_unavailable",
+          "message": "Phone and text service are not active. A button cannot certify provider acceptance or delivery.",
+          "setup": {
+            "version": 1,
+            "revision": "0dc73b8b1b525b06ae387fcf9ea7ac24122433f9a972067b848a91ee93ad418e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers. Website import is not enabled; review these rules before activation.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "waiting_provider",
+                "detail": "Not active. Calls have not been connected or verified.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "waiting_provider",
+                "detail": "Not active. Sender approval and delivery checks are incomplete.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ]
+              }
+            },
+            "next": {
+              "id": "test",
+              "tab": "test",
+              "label": "Try your desk"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Unavailable channel action fails honestly: test_sms",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "data": {
+          "ok": false,
+          "logged": false,
+          "error": "channel_not_active"
+        }
+      }
+    },
+    {
+      "name": "Enabling a real-model environment cannot promote earlier fake proof",
+      "pass": true
+    },
+    {
+      "name": "Eligible pure activation gate enables only web, with no provider sends",
+      "pass": true
+    },
+    {
+      "name": "Pause disables only active website channel with no phone routing claim",
+      "pass": true
+    },
+    {
+      "name": "Changing rules invalidates previous review/test before resume",
+      "pass": true
+    },
+    {
+      "name": "Sequential stale-tab save is rejected without overwriting newer rules",
+      "pass": true
+    },
+    {
+      "name": "Verified session can be revoked after workspace use",
+      "pass": true
+    },
+    {
+      "name": "Revoked session cannot read or mutate private workspace",
+      "pass": true
+    },
+    {
+      "name": "Revoked session cannot export private customer records",
+      "pass": true
+    },
+    {
+      "name": "Revoked session cannot use private test channel",
+      "pass": true
+    },
+    {
+      "name": "No website crawl/model/email/purchase/provision/provider fetch occurred",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Source stayed unchanged through coupled API acceptance",
+      "pass": true
+    }
+  ],
+  "gateFixture": {
+    "notice": "Only for pure readiness-gate evaluation: synthetic live proof injected after the fake-proof negative case. No inference or provider verification.",
+    "mode": "availability fixture"
+  },
+  "sourceAfter": {
+    "netlify/functions/onboard.mjs": "eb5225030b5dc5ae395337d7a137c90d4c2464ed233bac292f45edc6a6eb0465",
+    "netlify/functions/client.mjs": "50d436e5f8c2bb9472127a9a610a0ea1ee2d17a607e5a7dcf93ea6e19aa50010",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/access.mjs": "938a85c3bc92a8d0619c8b513c2e130f1a6ade5041fbd9f3c2257a6c95cb8755",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/chat.mjs": "b734ee488ad6cdad29f0b36fc0a17f1c5411e8626c0dc183283817e0ab0dfab6",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "summary": {
+    "checks": 32,
+    "passed": 32,
+    "failed": 0
+  }
+}

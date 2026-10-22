@@ -1,0 +1,142 @@
+{
+  "at": "2026-10-22T03:10:00.186Z",
+  "sourceBefore": {
+    "netlify/functions/onboard.mjs": "4dcdb74998664c5d0237938954d6969307e5c16ebcd27482b42702b7b1543481",
+    "netlify/functions/client.mjs": "cf8ad432225a68b20c57e0bb075dc061dac9eea01bcad97ff191245a9b9a0427",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "c4354b077a5e81bb25d58be6198d1ba2528ca20165e8acbb8553a517b053fbe7",
+    "netlify/functions/lib/access.mjs": "fc4786c960a512bf504db6f961a24e0cd056f24e682256b6149dfac7c4322416",
+    "netlify/functions/lib/config.mjs": "84448c2f0e916862735d9d5fbac19f3476f2fe27de8da21c2ae40443a375e346",
+    "netlify/functions/chat.mjs": "bd16561948e255ecf06e8cb72d813b775a1e90433f7a77d602234fe889b76399",
+    "netlify/functions/lib/owner-test.mjs": "f83e452a42e6a44e4fb226de7574cfab9f8112afcbf98a8cc1f32d828c41fae6",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "mode": "actual handlers, memory/fake; no external network",
+  "checks": [
+    {
+      "name": "Original unauthenticated duplicate-email exploit now rejected before disclosure",
+      "pass": true
+    },
+    {
+      "name": "Original exploit leaves client/index/events/jobs byte-identical",
+      "pass": true
+    },
+    {
+      "name": "Proof for another email cannot overwrite or recover existing tenant",
+      "pass": true
+    },
+    {
+      "name": "Proven existing owner recovers same portal without changing supplied fields",
+      "pass": true
+    },
+    {
+      "name": "Existing recovery preserves live state/phone/business/rules and starts no jobs",
+      "pass": true
+    },
+    {
+      "name": "Concurrent first submit returns one stable tenant and owner identity",
+      "pass": true,
+      "detail": [
+        200,
+        200
+      ]
+    },
+    {
+      "name": "Only one new tenant exists after concurrent submit",
+      "pass": true
+    },
+    {
+      "name": "Lost-response retry recovers existing result instead of rerunning questionnaire",
+      "pass": true
+    },
+    {
+      "name": "Verified identity, registry and legacy index agree",
+      "pass": true
+    },
+    {
+      "name": "Initial draft uses only saved owner answers without pretending website import",
+      "pass": true
+    },
+    {
+      "name": "New account starts with every channel inactive",
+      "pass": true
+    },
+    {
+      "name": "Owner API exposes truthful readiness and current revision",
+      "pass": true
+    },
+    {
+      "name": "Explicit invalid private key is rejected instead of downgraded to public shape",
+      "pass": true
+    },
+    {
+      "name": "Intended public widget response still omits owner credentials and setup",
+      "pass": true
+    },
+    {
+      "name": "Stale review cannot certify new configuration",
+      "pass": true
+    },
+    {
+      "name": "Actual reviewed rules persist exact revision",
+      "pass": true
+    },
+    {
+      "name": "Owner completes safe test and receives structured revision proof",
+      "pass": true
+    },
+    {
+      "name": "Fake/no-key mode cannot falsely activate even reviewed/tested desk",
+      "pass": true
+    },
+    {
+      "name": "Unavailable channel action fails honestly: provision",
+      "pass": true
+    },
+    {
+      "name": "Unavailable channel action fails honestly: forwarding_verified",
+      "pass": true
+    },
+    {
+      "name": "Unavailable channel action fails honestly: test_sms",
+      "pass": false
+    },
+    {
+      "name": "Eligible pure activation gate enables only web, with no provider sends",
+      "pass": true
+    },
+    {
+      "name": "Pause disables only active website channel with no phone routing claim",
+      "pass": true
+    },
+    {
+      "name": "Changing rules invalidates previous review/test before resume",
+      "pass": true
+    },
+    {
+      "name": "No website crawl/model/email/purchase/provision/provider fetch occurred",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Source stayed unchanged through coupled API acceptance",
+      "pass": true
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/onboard.mjs": "4dcdb74998664c5d0237938954d6969307e5c16ebcd27482b42702b7b1543481",
+    "netlify/functions/client.mjs": "cf8ad432225a68b20c57e0bb075dc061dac9eea01bcad97ff191245a9b9a0427",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "c4354b077a5e81bb25d58be6198d1ba2528ca20165e8acbb8553a517b053fbe7",
+    "netlify/functions/lib/access.mjs": "fc4786c960a512bf504db6f961a24e0cd056f24e682256b6149dfac7c4322416",
+    "netlify/functions/lib/config.mjs": "84448c2f0e916862735d9d5fbac19f3476f2fe27de8da21c2ae40443a375e346",
+    "netlify/functions/chat.mjs": "bd16561948e255ecf06e8cb72d813b775a1e90433f7a77d602234fe889b76399",
+    "netlify/functions/lib/owner-test.mjs": "f83e452a42e6a44e4fb226de7574cfab9f8112afcbf98a8cc1f32d828c41fae6",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4"
+  },
+  "summary": {
+    "checks": 26,
+    "passed": 25,
+    "failed": 1
+  }
+}

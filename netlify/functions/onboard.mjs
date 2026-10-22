@@ -1,9 +1,13 @@
-// Onboarding: POST creates the client from the questionnaire and starts the build job.
+// Verified onboarding: reserve one stable account and build a draft from saved owner answers.
 // GET ?c=slug&k=key returns build status for the onboarding page to poll.
-import { getClient, saveClient, indexClient, clientByEmail, id, secret, logEvent } from "./lib/store.mjs";
+import { id, secret } from "./lib/store.mjs";
 import { newClient, ownerView, loopCheck, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
-import { notifySteve, sendEmail, e164 } from "./lib/send.mjs";
+import { e164 } from "./lib/send.mjs";
 import { json } from "./lib/agent.mjs";
+import { createHash } from "node:crypto";
+import { getAccessSession, accessOriginAllowed, accessSite } from "./lib/access.mjs";
+import { strictRead, normalizeAccountEmail, findVerifiedAccount, ensureVerifiedAccount, AccountError } from "./lib/accounts.mjs";
+import { setupReadiness } from "./lib/setup.mjs";
 
 export const config = { path: "/api/onboard" };
 
@@ -17,30 +21,48 @@ function slugify(name, site) {
 }
 function hostOf(u) { try { return new URL(u.startsWith("http") ? u : "https://" + u).hostname.replace(/^www\./, "").split(".")[0]; } catch { return ""; } }
 
-const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", Vary: "Origin" } : {});
+const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", Vary: "Origin" } : {});
 export default async (req) => {
+  try { return await handle(req); }
+  catch (err) { return json({ error: err instanceof AccountError ? err.code : "setup_unavailable", message: "Your answers are safe. Please try again; an existing account will not be replaced." }, err instanceof AccountError ? err.status : 503, { "Cache-Control": "no-store" }); }
+};
+async function handle(req) {
   const url = new URL(req.url);
   const origin = req.headers.get("origin") || "";
+  if (origin && !accessOriginAllowed(origin)) return json({ error: "forbidden_origin" }, 403);
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS(origin) });
   if (req.method === "GET") {
-    const c = await getClient(url.searchParams.get("c") || "");
-    if (!c || c.ownerKey !== url.searchParams.get("k")) return json({ error: "not_found" }, 404);
+    const c = await strictRead("clients", url.searchParams.get("c") || "");
+    if (!c) return json({ error: "not_found" }, 404);
+    if (c.onboarding?.version === 1) {
+      const session = await getAccessSession(req);
+      if (!session) return json({ error: "verification_required" }, 401);
+      if (normalizeAccountEmail(session.email) !== normalizeAccountEmail(c.owner?.email)) return json({ error: "forbidden" }, 403);
+    } else if (c.ownerKey !== url.searchParams.get("k")) return json({ error: "not_found" }, 404);
     return json({ status: c.status, build: c.build, slug: c.slug }, 200, CORS(origin));
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  const session = await getAccessSession(req);
+  if (!session) return json({ error: "verification_required", message: "Verify your email before creating a desk." }, 401);
+  if (Number(req.headers.get("content-length")) > 32000) return json({ error: "too_large" }, 413);
   let b;
   try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+  if (!b || typeof b !== "object" || Array.isArray(b)) return json({ error: "bad_json" }, 400);
+  if (JSON.stringify(b).length > 32000) return json({ error: "too_large" }, 413);
   if (s(b.botfield)) return json({ ok: true });
-  const email = s(b.email, 120).toLowerCase();
+  const email = normalizeAccountEmail(session.email);
+  if (!email || (b.email !== undefined && normalizeAccountEmail(b.email) !== email)) return json({ error: "email_mismatch" }, 400);
+  const existing = await findVerifiedAccount(email);
+  const response = (client, extra = {}) => json({ ok: true, slug: client.slug, ...(client.onboarding?.version === 1 ? {} : { key: client.ownerKey }), portal: `${accessSite()}/desk.html?c=${encodeURIComponent(client.slug)}${client.onboarding?.version === 1 ? "" : `&k=${encodeURIComponent(client.ownerKey)}`}`, client: ownerView(client), setup: setupReadiness(client), ...extra }, 200, { ...CORS(origin), "Cache-Control": "no-store" });
+  if (existing) return response(existing, { existing: true });
   const website = s(b.website, 200);
   const phone = e164(s(b.phone, 30));
-  if (!email.includes("@") || !s(b.name)) return json({ error: "missing_fields" }, 400);
-  if (!phone || phone.length < 11) return json({ error: "missing_fields", field: "owner.phone", message: "Your cell is where every lead and booking is texted; the front desk cannot run without it." }, 400);
+  if (!s(b.name) || !s(b.business)) return json({ error: "missing_fields" }, 400);
+  if (!/^\+1\d{10}$/.test(phone)) return json({ error: "missing_fields", field: "owner.phone", message: "Add a valid cell number for callback requests. Phone and text service remain inactive until separately verified." }, 400);
 
-  let c = await clientByEmail(email);
-  if (!c) {
-    c = newClient({ slug: slugify(s(b.business), website), ownerKey: secret(), owner: { name: s(b.name), email, phone: e164(s(b.phone, 30)) }, business: { name: s(b.business, 120), website } });
-  }
+  const c = newClient({ slug: slugify(s(b.business), website), ownerKey: secret(), owner: { name: s(b.name), email, phone }, business: { name: s(b.business, 120), website } });
+  c.onboarding = { version: 1, verifiedEmail: email, verifiedAt: session.createdAt };
+  c.channels = { web: { active: false }, voice: { active: false }, sms: { active: false } };
   const bz = c.business;
   Object.assign(bz, {
     name: s(b.business, 120) || bz.name, website, trade: s(b.trade, 80), city: s(b.city, 80) || "Houston",
@@ -65,21 +87,11 @@ export default async (req) => {
   c.widget = { ...c.widget, greeting: s(b.greeting, 200) };
   const loop = loopCheck(c);
   if (loop) return json({ error: "loop", ...loop }, 400);
-  c.status = "building";
-  c.build = { status: "queued", notes: "", sourcePages: [], queuedAt: new Date().toISOString() };
-  await saveClient(c);
-  await indexClient(c);
-  await logEvent(c.slug, "onboarded", { plan: c.plan });
-
-  // Kick off the build in a background function (reads the website, drafts the knowledge base).
-  const base = process.env.URL || url.origin;
-  const fnBase = url.origin; // the deploy that is serving this request has the build function
-  try {
-    await fetch(`${fnBase}/.netlify/functions/onboard-build-background`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: c.slug, key: c.ownerKey }) });
-  } catch (e) { console.error("could not start build", e); }
-
-  const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
-  await notifySteve(`New front desk: ${c.business.name || c.slug} (${c.plan})`, `${c.owner.name} <${c.owner.email}> ${c.owner.phone || ""}\n${website}\nPortal: ${portal}`);
-  await sendEmail({ to: c.owner.email, subject: `Your front desk is being built, ${c.owner.name.split(" ")[0]}`, text: `Thanks. We are ${website ? "reading " + website + " and " : ""}drafting your front desk from your answers now. Your private portal and test line:\n${portal}\n\nKeep that link; it is your login. Steve will reach out within one business day.` });
-  return json({ ok: true, slug: c.slug, key: c.ownerKey, portal, client: ownerView(c) }, 200, CORS(origin));
-};
+  c.status = "testing";
+  c.build = { status: "built", source: "owner_answers", notes: "Built from your saved answers. Website import is not enabled; review these rules before activation.", sourcePages: [], builtAt: new Date().toISOString() };
+  // Hash only the normalized submission, never the newly generated identity/timestamps.
+  const normalized = { ...c, slug: undefined, ownerKey: undefined, createdAt: undefined, updatedAt: undefined, onboarding: undefined, build: undefined };
+  const submissionHash = createHash("sha256").update(JSON.stringify(normalized)).digest("hex");
+  const result = await ensureVerifiedAccount({ email, initialClient: c, submissionHash });
+  return response(result.client, { existing: result.outcome === "existing", recovered: result.outcome === "resumed" });
+}

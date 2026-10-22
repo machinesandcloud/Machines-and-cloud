@@ -7,6 +7,11 @@ import { getClient, getConversation, saveConversation, get, put } from "./lib/st
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
 import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
+import { runOwnerTest } from "./lib/owner-test.mjs";
+import { reserveAIRequest } from "./lib/self-service-ai.mjs";
+import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
+import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
+import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
 
 export const config = { path: "/api/chat" };
 
@@ -79,7 +84,7 @@ function clientOriginAllowed(c, origin) {
   return allowed.includes(h);
 }
 function cors(origin) {
-  return origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "POST, OPTIONS", Vary: "Origin" } : {};
+  return origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "POST, OPTIONS", Vary: "Origin" } : {};
 }
 
 async function captureLead(input, page) {
@@ -118,16 +123,34 @@ export default async (req, context) => {
   const wantStream = body?.stream === true;
   const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "";
   const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
-  let ownerExempt = false;
-  if (typeof body?.client === "string" && body.client && typeof body.key === "string") { const c0 = await getClient(body.client.slice(0, 40)); ownerExempt = !!c0 && body.key === c0.ownerKey; }
-  if (!adminOk && !ownerExempt && (await rateLimited(ip))) return json({ error: "busy" }, 429, cors(origin));
+  let requestedClient = null, session = null, ownerExempt = false;
+  if (typeof body?.client === "string" && body.client) {
+    try {
+      requestedClient = await strictRead("clients", body.client.slice(0, 40));
+      if (isSelfServiceClient(requestedClient) && req.headers.has("authorization")) {
+        if (origin && !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, cors(origin));
+        session = await getAccessSession(req);
+        if (!session) return json({ error: "verification_required" }, 401, cors(origin));
+        if (normalizeAccountEmail(session.email) !== normalizeAccountEmail(requestedClient.owner?.email)) return json({ error: "forbidden" }, 403, cors(origin));
+      }
+      ownerExempt = isSelfServiceClient(requestedClient) ? !!session : !!requestedClient && body.key === requestedClient.ownerKey;
+    } catch { return json({ error: "client_unavailable" }, 503, cors(origin)); }
+  }
+  if (!isSelfServiceClient(requestedClient) && !adminOk && !ownerExempt && (await rateLimited(ip))) return json({ error: "busy" }, 429, cors(origin));
 
   // ---- Client mode: a real shop's front desk ----
   if (typeof body?.client === "string" && body.client) {
-    const c = await getClient(body.client.slice(0, 40));
+    const c = requestedClient;
     if (!c) return json({ error: "unknown_client" }, 404);
-    const isOwner = typeof body.key === "string" && body.key === c.ownerKey;
+    const isOwner = isSelfServiceClient(c) ? !!session : typeof body.key === "string" && body.key === c.ownerKey;
+    if (isSelfServiceClient(c) && !isOwner && (body.channel === "test" || (typeof body.key === "string" && body.key))) return json({ error: "verification_required" }, 401, cors(origin));
     const channel = isOwner && body.channel === "test" ? "test" : "web";
+    if (body.channel === "test" && !isOwner) return json({ error: "forbidden" }, 403);
+    // Verified owner authority opens rehearsal, never bypasses customer activation.
+    if (isSelfServiceClient(c) && channel === "web") {
+      const web = setupReadiness(c).channels.web;
+      if (!web.ready || !web.active) return json({ error: c.status === "paused" ? "paused" : "not_live" }, 403);
+    }
     if (!isOwner) {
       if (!clientOriginAllowed(c, origin)) return json({ error: "forbidden" }, 403);
       if (!["testing", "live"].includes(c.status)) return json({ error: c.status === "paused" ? "paused" : "not_live" }, 403);
@@ -135,22 +158,36 @@ export default async (req, context) => {
     const contact = String(body.contact || "anon").slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "");
     const incoming = sanitizeMessages(body?.messages);
     if (!incoming) return json({ error: "invalid_messages" }, 400);
+    if (isSelfServiceClient(c)) {
+      let budget;
+      try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web"); }
+      catch { return json({ error: "ai_allowance_unavailable", message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
+      if (!budget.allowed) return json({ error: "ai_daily_limit", message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin));
+    }
+    if (channel === "test") {
+      const runTest = (onText) => runOwnerTest({ client: c, contact, messages: incoming, onText });
+      if (wantStream) return ndjsonResponse(runTest, cors(origin));
+      try { return json(await runTest(), 200, cors(origin)); }
+      catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
+    }
     // Persist the conversation so the owner can read it and the desk keeps context across reloads.
     const conv = await getConversation(c.slug, channel, contact);
     const last = incoming[incoming.length - 1];
     conv.messages.push({ role: "user", content: last.content, at: new Date().toISOString() });
     const history = toApiMessages(conv.messages);
     const system = buildSystemPrompt(c, channel);
-    const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
+    const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY].map(tool => !isSelfServiceClient(c) ? tool : {
+      ...tool, description: tool.name === "book_visit" ? "Save a visit in the shop portal after the customer accepts a real available window. No text, phone call, calendar event or owner contact is created or confirmed." : tool.name === "notify_owner" ? "Save a callback, handoff or emergency request in the shop portal. No one is contacted and human response or timing is not confirmed." : tool.description,
+    });
     const execTool = async (name, input) => {
       if (name === "get_availability") return availabilityToolResult(c, input);
-      if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
-      if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
+      if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); if (b.full) return { content: b.message }; return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. No text reminder or phone call was sent. Do not claim email delivery or an arrival notification. The shop must confirm arrival details directly.` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
+      if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. No phone call or text was sent; human response and timing are not confirmed. Do not claim email delivery.` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
       return { content: "Unknown tool.", is_error: true };
     };
     const finish = async (out) => {
       // Record what the tools did inside the stored turn, so later turns know it already happened.
-      const done = (out.events || []).map((e) => e.type === "booking" ? `[Done: visit booked, ref ${e.id}]` : e.type === "lead" ? `[Done: owner notified, ref ${e.id}]` : "").filter(Boolean).join(" ");
+      const done = (out.events || []).map((e) => e.type === "booking" ? `[Done: ${isSelfServiceClient(c) ? "visit saved in portal" : "visit booked"}, ref ${e.id}]` : e.type === "lead" ? `[Done: ${isSelfServiceClient(c) ? "request saved in portal, human contact unconfirmed" : "owner notified"}, ref ${e.id}]` : "").filter(Boolean).join(" ");
       conv.messages.push({ role: "assistant", content: done ? out.reply + "\n" + done : out.reply, at: new Date().toISOString() });
       await saveConversation(conv); return out;
     };
