@@ -1,0 +1,25 @@
+{
+  "result": "reproduced-failure-before-fix",
+  "recordedAt": "2026-10-22T02:35:36.308Z",
+  "sourceSHA256": "b030f2ab7d8d62be479cbdf17ccb49c37ffeef298063a8e19dde0dbbcd2fc749",
+  "scope": "Read-only in-process installed Blobs SDK conditional-write double, dummy credentials, network disabled; no source edits or actual provider calls during reproduction.",
+  "interleaving": "Hold pre-midnight first GET response; advance Houston clock across midnight; commit newer worker; resume old conditional create, force412/CASretry; let both150s holds expire; issue next request.",
+  "observed": {
+    "newerDayBudget": {
+      "day": "2026-10-23",
+      "starts": 1
+    },
+    "afterOldCASRetry": {
+      "day": "2026-10-22",
+      "starts": 1
+    },
+    "afterNextCall": {
+      "day": "2026-10-23",
+      "starts": 1
+    },
+    "fixtureProviderRequests": 3,
+    "conflicts": 1,
+    "unexpected": 0
+  },
+  "defect": "CAS retry used captured old day/hour and erased already committed newer-period counters."
+}

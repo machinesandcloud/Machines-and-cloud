@@ -1,0 +1,84 @@
+{
+  "startedAt": "2026-10-22T02:09:10.971Z",
+  "language": "en",
+  "syntheticInput": "/tmp/mc-voice-en-padded.wav",
+  "source": {
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "netlify/functions/practice-voice.mjs": "1d9a7619121e2a9997b6c529cd4a02b3b41a4cc0026342857854064ccb24b91f",
+    "netlify/functions/lib/practice-personas.mjs": "4d23449d12f905687324f19c613ffc81f0466d381f492bb166eb3938647ef034",
+    "stories.js": "ceca811125766646f2725c9752b611354f25d12084989422c8c151e2bd6d8724",
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "_headers": "e9e07d7f5d414aa785b9e43a86ce566860b315bf817c4a85a7dd1cc5d2ac749f"
+  },
+  "ledgerBefore": {
+    "phase": "demo-owner-outcomes-2026-10-21",
+    "startedAt": "2026-10-22T02:04:49.279Z",
+    "maxAnthropicRequests": 20,
+    "maxVapiCreates": 3,
+    "anthropicRequests": 0,
+    "vapiCreates": 0,
+    "blocked": 0,
+    "requests": [],
+    "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+  },
+  "scope": "One explicit browser-mic practice call through loopback proxy to real Vapi, using OS-generated synthetic speech. No telephone calls, SMS, email or Calendar actions.",
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/practice-voice/call/web",
+      "body": {
+        "persona": "katy-pipeworks",
+        "language": "en"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "browser": "signal is aborted without reason"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exactly one server-created voice room",
+      "pass": false,
+      "detail": []
+    }
+  ],
+  "result": "failed",
+  "creation": [],
+  "uiAfterCreate": "The call could not connect. You can retry or type below.",
+  "error": "Exactly one server-created voice room",
+  "ledgerAfter": {
+    "phase": "demo-owner-outcomes-2026-10-21",
+    "startedAt": "2026-10-22T02:04:49.279Z",
+    "maxAnthropicRequests": 20,
+    "maxVapiCreates": 3,
+    "anthropicRequests": 0,
+    "vapiCreates": 1,
+    "blocked": 0,
+    "requests": [
+      {
+        "at": "2026-10-22T02:09:15.503Z",
+        "provider": "vapi",
+        "sequence": 1,
+        "method": "POST",
+        "host": "api.vapi.ai",
+        "path": "/call/web",
+        "status": 401,
+        "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+      }
+    ],
+    "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+  },
+  "sourceAfter": {
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "netlify/functions/practice-voice.mjs": "1d9a7619121e2a9997b6c529cd4a02b3b41a4cc0026342857854064ccb24b91f",
+    "netlify/functions/lib/practice-personas.mjs": "4d23449d12f905687324f19c613ffc81f0466d381f492bb166eb3938647ef034",
+    "stories.js": "ceca811125766646f2725c9752b611354f25d12084989422c8c151e2bd6d8724",
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "_headers": "e9e07d7f5d414aa785b9e43a86ce566860b315bf817c4a85a7dd1cc5d2ac749f"
+  },
+  "finishedAt": "2026-10-22T02:09:15.744Z"
+}

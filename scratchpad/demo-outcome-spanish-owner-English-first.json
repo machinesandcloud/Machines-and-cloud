@@ -1,0 +1,1445 @@
+{
+  "startedAt": "2026-10-22T02:21:13.805Z",
+  "base": "http://127.0.0.1:8894",
+  "source": {
+    "netlify/functions/chat.mjs": "869cad5bb8623520de29e08788eb38b7586f2eb26d56dc1d3082849c98cdd7e6",
+    "netlify/functions/lib/practice-personas.mjs": "42d87dddd473f1eb451a969be4dec9deb3b1584cd68a3e159aba93c34d8c3062",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd",
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "stories.js": "d8725cfbe9e395a65c8a643c571a80d65d040a515932ce6c08440f54f9075a97",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "scripts/demo-outcome-model-check.mjs": "41d1c4f04c8f94eb8c32b9b3031c118a55c5902c2a3d9ff815e0e1ec189190b3"
+  },
+  "mode": "targeted-Spanish-English-owner",
+  "maxLogicalTurns": 2,
+  "maxActualAnthropicRequests": 20,
+  "priorSpentAnthropic": 16,
+  "maxActualRequestsThisRun": 4,
+  "scope": "Actual local browser UI -> /api/chat -> Anthropic, guarded memory-only server. No voice endpoint, real shop mutation, hosted page, direct provider request, microphone or paid actions by this runner. Root may concurrently use separate three-create Vapi budget.",
+  "cases": [
+    {
+      "id": "spanish_English_owner_partial",
+      "persona": "westheimer-maids",
+      "input": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+      "startedAt": "2026-10-22T02:21:14.882Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 16,
+        "vapiCreates": 2,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:04.093Z",
+            "provider": "anthropic",
+            "sequence": 15,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:06.690Z",
+            "provider": "anthropic",
+            "sequence": 16,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:17:08.951Z",
+            "provider": "vapi",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call",
+            "status": 400,
+            "providerMessage": "Couldn't Get Phone Number. Need Either `phoneNumberId` Or `phoneNumber`."
+          },
+          {
+            "at": "2026-10-22T02:19:24.627Z",
+            "provider": "vapi-config",
+            "sequence": 1,
+            "method": "GET",
+            "host": "api.vapi.ai",
+            "path": "/org",
+            "purpose": "Read existing organization ID for documented public-scoped short JWT; no key creation or account mutation",
+            "status": 401,
+            "failed": true
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged.",
+        "continuations": [
+          {
+            "at": "2026-10-22T02:16:59.113Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 1,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          },
+          {
+            "at": "2026-10-22T02:21:12.629Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 2,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          }
+        ]
+      },
+      "request": {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita.\"}\n{\"t\":\"done\",\"reply\":\"¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Nia\",\"company\":\"Westheimer Maids\",\"data\":{\"customer_name\":\"\",\"phone\":\"\",\"address\":\"\",\"issue\":\"Price question: deep clean of apartment in Memorial, 2 bedrooms, 2 bathrooms, 1,000 square feet.\",\"requested_window\":\"\",\"urgency\":\"flexible\",\"language\":\"es\",\"requested_action\":\"question_only\"},\"at\":\"2026-10-22T02:21:18.186Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita."
+        },
+        {
+          "t": "done",
+          "reply": "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Nia",
+              "company": "Westheimer Maids",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "Price question: deep clean of apartment in Memorial, 2 bedrooms, 2 bathrooms, 1,000 square feet.",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "es",
+                "requested_action": "question_only"
+              },
+              "at": "2026-10-22T02:21:18.186Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 18,
+        "vapiCreates": 2,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:04.093Z",
+            "provider": "anthropic",
+            "sequence": 15,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:06.690Z",
+            "provider": "anthropic",
+            "sequence": 16,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:17:08.951Z",
+            "provider": "vapi",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call",
+            "status": 400,
+            "providerMessage": "Couldn't Get Phone Number. Need Either `phoneNumberId` Or `phoneNumber`."
+          },
+          {
+            "at": "2026-10-22T02:19:24.627Z",
+            "provider": "vapi-config",
+            "sequence": 1,
+            "method": "GET",
+            "host": "api.vapi.ai",
+            "path": "/org",
+            "purpose": "Read existing organization ID for documented public-scoped short JWT; no key creation or account mutation",
+            "status": 401,
+            "failed": true
+          },
+          {
+            "at": "2026-10-22T02:21:14.926Z",
+            "provider": "anthropic",
+            "sequence": 17,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:21:18.187Z",
+            "provider": "anthropic",
+            "sequence": 18,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged.",
+        "continuations": [
+          {
+            "at": "2026-10-22T02:16:59.113Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 1,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          },
+          {
+            "at": "2026-10-22T02:21:12.629Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 2,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          }
+        ]
+      },
+      "reply": "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Nia",
+          "company": "Westheimer Maids",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "Price question: deep clean of apartment in Memorial, 2 bedrooms, 2 bathrooms, 1,000 square feet.",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "es",
+            "requested_action": "question_only"
+          },
+          "at": "2026-10-22T02:21:18.186Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "",
+        "phone": "",
+        "address": "",
+        "issue": "Price question: deep clean of apartment in Memorial, 2 bedrooms, 2 bathrooms, 1,000 square feet.",
+        "requested_window": "",
+        "urgency": "flexible",
+        "language": "es",
+        "requested_action": "question_only"
+      },
+      "ui": {
+        "messages": [
+          "¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+          "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+          "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita."
+        ],
+        "summary": "Job\nPrice question: deep clean of apartment in Memorial, 2 bedrooms, 2 bathrooms, 1,000 square feet.\nWhere\nNot provided yet\nRequested\nNot confirmed\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nSpanish\nNext\nReview the conversation; no visit requested",
+        "status": "Question answered",
+        "next": "Review the conversation; no visit requested",
+        "error": ""
+      }
+    },
+    {
+      "id": "spanish_English_owner_corrected",
+      "persona": "westheimer-maids",
+      "input": "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados.",
+      "startedAt": "2026-10-22T02:21:20.658Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 18,
+        "vapiCreates": 2,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:04.093Z",
+            "provider": "anthropic",
+            "sequence": 15,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:06.690Z",
+            "provider": "anthropic",
+            "sequence": 16,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:17:08.951Z",
+            "provider": "vapi",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call",
+            "status": 400,
+            "providerMessage": "Couldn't Get Phone Number. Need Either `phoneNumberId` Or `phoneNumber`."
+          },
+          {
+            "at": "2026-10-22T02:19:24.627Z",
+            "provider": "vapi-config",
+            "sequence": 1,
+            "method": "GET",
+            "host": "api.vapi.ai",
+            "path": "/org",
+            "purpose": "Read existing organization ID for documented public-scoped short JWT; no key creation or account mutation",
+            "status": 401,
+            "failed": true
+          },
+          {
+            "at": "2026-10-22T02:21:14.926Z",
+            "provider": "anthropic",
+            "sequence": 17,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:21:18.187Z",
+            "provider": "anthropic",
+            "sequence": 18,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged.",
+        "continuations": [
+          {
+            "at": "2026-10-22T02:16:59.113Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 1,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          },
+          {
+            "at": "2026-10-22T02:21:12.629Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 2,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          }
+        ]
+      },
+      "request": {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados."
+          },
+          {
+            "role": "assistant",
+            "content": "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita."
+          },
+          {
+            "role": "user",
+            "content": "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada.\"}\n{\"t\":\"done\",\"reply\":\"Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Nia\",\"company\":\"Westheimer Maids\",\"data\":{\"customer_name\":\"Ana\",\"phone\":\"713-555-0152\",\"address\":\"36 Elm St, Memorial\",\"issue\":\"Deep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.\",\"requested_window\":\"Saturday, 8 to 10\",\"urgency\":\"flexible\",\"language\":\"es\",\"requested_action\":\"visit_request\"},\"at\":\"2026-10-22T02:21:23.587Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada."
+        },
+        {
+          "t": "done",
+          "reply": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Nia",
+              "company": "Westheimer Maids",
+              "data": {
+                "customer_name": "Ana",
+                "phone": "713-555-0152",
+                "address": "36 Elm St, Memorial",
+                "issue": "Deep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.",
+                "requested_window": "Saturday, 8 to 10",
+                "urgency": "flexible",
+                "language": "es",
+                "requested_action": "visit_request"
+              },
+              "at": "2026-10-22T02:21:23.587Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 20,
+        "vapiCreates": 2,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:04.093Z",
+            "provider": "anthropic",
+            "sequence": 15,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:06.690Z",
+            "provider": "anthropic",
+            "sequence": 16,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:17:08.951Z",
+            "provider": "vapi",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call",
+            "status": 400,
+            "providerMessage": "Couldn't Get Phone Number. Need Either `phoneNumberId` Or `phoneNumber`."
+          },
+          {
+            "at": "2026-10-22T02:19:24.627Z",
+            "provider": "vapi-config",
+            "sequence": 1,
+            "method": "GET",
+            "host": "api.vapi.ai",
+            "path": "/org",
+            "purpose": "Read existing organization ID for documented public-scoped short JWT; no key creation or account mutation",
+            "status": 401,
+            "failed": true
+          },
+          {
+            "at": "2026-10-22T02:21:14.926Z",
+            "provider": "anthropic",
+            "sequence": 17,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:21:18.187Z",
+            "provider": "anthropic",
+            "sequence": 18,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:21:20.701Z",
+            "provider": "anthropic",
+            "sequence": 19,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:21:23.588Z",
+            "provider": "anthropic",
+            "sequence": 20,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged.",
+        "continuations": [
+          {
+            "at": "2026-10-22T02:16:59.113Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 1,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          },
+          {
+            "at": "2026-10-22T02:21:12.629Z",
+            "anthropicRequests": 16,
+            "vapiCreates": 2,
+            "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+          }
+        ]
+      },
+      "reply": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Nia",
+          "company": "Westheimer Maids",
+          "data": {
+            "customer_name": "Ana",
+            "phone": "713-555-0152",
+            "address": "36 Elm St, Memorial",
+            "issue": "Deep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.",
+            "requested_window": "Saturday, 8 to 10",
+            "urgency": "flexible",
+            "language": "es",
+            "requested_action": "visit_request"
+          },
+          "at": "2026-10-22T02:21:23.587Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "Ana",
+        "phone": "713-555-0152",
+        "address": "36 Elm St, Memorial",
+        "issue": "Deep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.",
+        "requested_window": "Saturday, 8 to 10",
+        "urgency": "flexible",
+        "language": "es",
+        "requested_action": "visit_request"
+      },
+      "ui": {
+        "messages": [
+          "¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+          "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+          "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita.",
+          "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados.",
+          "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada."
+        ],
+        "summary": "Job\nDeep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.\nWhere\n36 Elm St, Memorial\nRequested\nSaturday, 8 to 10\nContact\nAna · 713-555-0152\nPriority\nNot specified\nLanguage\nSpanish\nNext\nConfirm the requested arrival window",
+        "status": "Visit request",
+        "next": "Confirm the requested arrival window",
+        "error": ""
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "spanish_English_owner_partial: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_partial: completed stream",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_partial: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_partial: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_partial: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_partial: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Spanish customer receives Spanish fee answer",
+      "pass": true
+    },
+    {
+      "name": "English owner partial captures size without invented contact",
+      "pass": true
+    },
+    {
+      "name": "English owner partial remains question only in UI",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_corrected: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_corrected: completed stream",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_corrected: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_corrected: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_corrected: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "spanish_English_owner_corrected: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Spanish reply preserved with English owner fields",
+      "pass": true
+    },
+    {
+      "name": "English owner correction replaces stale bedrooms while retaining baths and size",
+      "pass": true
+    },
+    {
+      "name": "Supplied proper details preserved verbatim",
+      "pass": true
+    },
+    {
+      "name": "English owner timing and action visible in DOM",
+      "pass": true
+    },
+    {
+      "name": "No Spanish problem/timing text leaked into English owner fields",
+      "pass": true
+    },
+    {
+      "name": "No browser JavaScript errors",
+      "pass": true
+    },
+    {
+      "name": "Shared backend stayed frozen",
+      "pass": true
+    },
+    {
+      "name": "Cumulative and targeted HTTP ceilings retained with zero guard blocks",
+      "pass": true
+    }
+  ],
+  "browserErrors": [],
+  "blockedBrowserRequests": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "servedSources": {
+    "/": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "/styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "/site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "/script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "/stories.js": "d8725cfbe9e395a65c8a643c571a80d65d040a515932ce6c08440f54f9075a97"
+  },
+  "result": "passed_pending_PO_raw_semantic_review",
+  "manualSemanticReviewRequired": true,
+  "sourceAfter": {
+    "netlify/functions/chat.mjs": "869cad5bb8623520de29e08788eb38b7586f2eb26d56dc1d3082849c98cdd7e6",
+    "netlify/functions/lib/practice-personas.mjs": "42d87dddd473f1eb451a969be4dec9deb3b1584cd68a3e159aba93c34d8c3062",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd",
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "stories.js": "d8725cfbe9e395a65c8a643c571a80d65d040a515932ce6c08440f54f9075a97",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "scripts/demo-outcome-model-check.mjs": "41d1c4f04c8f94eb8c32b9b3031c118a55c5902c2a3d9ff815e0e1ec189190b3"
+  },
+  "sourceDrift": [],
+  "ledger": {
+    "phase": "demo-owner-outcomes-2026-10-21",
+    "startedAt": "2026-10-22T02:04:49.279Z",
+    "maxAnthropicRequests": 20,
+    "maxVapiCreates": 3,
+    "anthropicRequests": 20,
+    "vapiCreates": 2,
+    "blocked": 0,
+    "requests": [
+      {
+        "at": "2026-10-22T02:09:15.503Z",
+        "provider": "vapi",
+        "sequence": 1,
+        "method": "POST",
+        "host": "api.vapi.ai",
+        "path": "/call/web",
+        "status": 401,
+        "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+      },
+      {
+        "at": "2026-10-22T02:09:17.449Z",
+        "provider": "anthropic",
+        "sequence": 1,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:29.556Z",
+        "provider": "anthropic",
+        "sequence": 2,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:31.545Z",
+        "provider": "anthropic",
+        "sequence": 3,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:34.810Z",
+        "provider": "anthropic",
+        "sequence": 4,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:36.762Z",
+        "provider": "anthropic",
+        "sequence": 5,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:39.330Z",
+        "provider": "anthropic",
+        "sequence": 6,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:41.093Z",
+        "provider": "anthropic",
+        "sequence": 7,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:43.910Z",
+        "provider": "anthropic",
+        "sequence": 8,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:46.129Z",
+        "provider": "anthropic",
+        "sequence": 9,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:50.097Z",
+        "provider": "anthropic",
+        "sequence": 10,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:52.793Z",
+        "provider": "anthropic",
+        "sequence": 11,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:55.406Z",
+        "provider": "anthropic",
+        "sequence": 12,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:58.447Z",
+        "provider": "anthropic",
+        "sequence": 13,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:10:01.523Z",
+        "provider": "anthropic",
+        "sequence": 14,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:10:04.093Z",
+        "provider": "anthropic",
+        "sequence": 15,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:10:06.690Z",
+        "provider": "anthropic",
+        "sequence": 16,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:17:08.951Z",
+        "provider": "vapi",
+        "sequence": 2,
+        "method": "POST",
+        "host": "api.vapi.ai",
+        "path": "/call",
+        "status": 400,
+        "providerMessage": "Couldn't Get Phone Number. Need Either `phoneNumberId` Or `phoneNumber`."
+      },
+      {
+        "at": "2026-10-22T02:19:24.627Z",
+        "provider": "vapi-config",
+        "sequence": 1,
+        "method": "GET",
+        "host": "api.vapi.ai",
+        "path": "/org",
+        "purpose": "Read existing organization ID for documented public-scoped short JWT; no key creation or account mutation",
+        "status": 401,
+        "failed": true
+      },
+      {
+        "at": "2026-10-22T02:21:14.926Z",
+        "provider": "anthropic",
+        "sequence": 17,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:21:18.187Z",
+        "provider": "anthropic",
+        "sequence": 18,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:21:20.701Z",
+        "provider": "anthropic",
+        "sequence": 19,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:21:23.588Z",
+        "provider": "anthropic",
+        "sequence": 20,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      }
+    ],
+    "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged.",
+    "continuations": [
+      {
+        "at": "2026-10-22T02:16:59.113Z",
+        "anthropicRequests": 16,
+        "vapiCreates": 1,
+        "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+      },
+      {
+        "at": "2026-10-22T02:21:12.629Z",
+        "anthropicRequests": 16,
+        "vapiCreates": 2,
+        "reason": "Continue unchanged phase limits after correcting the private-key Vapi route and English owner summary. Local memory restarts; actual outbound spent counters are retained here."
+      }
+    ]
+  },
+  "finishedAt": "2026-10-22T02:21:26.463Z"
+}

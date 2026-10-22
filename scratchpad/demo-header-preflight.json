@@ -1,0 +1,356 @@
+{
+  "startedAt": "2026-10-22T02:31:12.103Z",
+  "source": {
+    "_headers": "f3ec009b3ff62804d70cc8989b39aa9a38723160d1d99b8f602ef04797dddb89",
+    "index.html": "1fd422b8a50bce97128deee425dfff105a57376ebe77e3cbb20e1d25f78e2af4",
+    "stories.js": "8f5f33d7a0e65ad6dc21a7cbb261add5c59a129cadce6673c76aa42cbd4f7c75",
+    "site-refresh.css": "1eb9cc5181786bc29b8ae348f0dd8cc807fad970893ae7d513f73186840dad2c",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "assets/vendor/vapi-web.js": "69bd24b471b0396122bef8cbc6658195916ed818d7bf127981e0f4826ef967fe"
+  },
+  "checks": [
+    {
+      "name": "/ has one unambiguous effective Permissions-Policy",
+      "pass": true,
+      "detail": [
+        [
+          "Permissions-Policy",
+          "camera=(), microphone=(self), geolocation=()"
+        ]
+      ]
+    },
+    {
+      "name": "/index.html has one unambiguous effective Permissions-Policy",
+      "pass": true,
+      "detail": [
+        [
+          "Permissions-Policy",
+          "camera=(), microphone=(self), geolocation=()"
+        ]
+      ]
+    },
+    {
+      "name": "/about.html has one unambiguous effective Permissions-Policy",
+      "pass": true,
+      "detail": [
+        [
+          "Permissions-Policy",
+          "camera=(), microphone=(self), geolocation=()"
+        ]
+      ]
+    },
+    {
+      "name": "Chrome permits self microphone while blocking camera/geolocation",
+      "pass": true,
+      "detail": {
+        "secure": true,
+        "microphone": true,
+        "camera": false,
+        "geolocation": false,
+        "micCalls": 0,
+        "bridge": false
+      }
+    },
+    {
+      "name": "first load performs no microphone or lazy bridge/SDK work",
+      "pass": true
+    },
+    {
+      "name": "actual lazy bridge loads under parsed homepage CSP",
+      "pass": true
+    },
+    {
+      "name": "actual local vendor module imports under CSP without device work",
+      "pass": true,
+      "detail": {
+        "defaultType": "function",
+        "micCalls": 0
+      }
+    },
+    {
+      "name": "synthetic Chrome microphone is allowed and immediately stopped",
+      "pass": true,
+      "detail": {
+        "count": 1,
+        "audioOnly": true,
+        "synthetic": true,
+        "allEnded": true
+      }
+    },
+    {
+      "name": "no homepage CSP/eval violations",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "replay delivers exact saved Spanish reply",
+      "pass": true
+    },
+    {
+      "name": "replay delivers exact saved Spanish reply",
+      "pass": true
+    },
+    {
+      "name": "replay preserves actual two-turn selected-persona history",
+      "pass": true
+    },
+    {
+      "name": "Spanish voice card is actually hidden",
+      "pass": true
+    },
+    {
+      "name": "English owner preview retains corrected size, proper details and English timing",
+      "pass": true
+    },
+    {
+      "name": "owner preview is readable within actual390 viewport",
+      "pass": true
+    },
+    {
+      "name": "320px English plumbing voice card is visible and honest",
+      "pass": true
+    },
+    {
+      "name": "320px Start is visible and unobstructed without being invoked",
+      "pass": true
+    },
+    {
+      "name": "replay/static call capture never requests microphone",
+      "pass": true
+    },
+    {
+      "name": "replay context has no CSP violations",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "zero API/provider/model requests left browser",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        }
+      ]
+    },
+    {
+      "name": "zero browser errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "static preflight sources stayed stable",
+      "pass": true
+    }
+  ],
+  "issues": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/site-refresh.css",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/logo-dark.png",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/photos/hero-hvac.jpg",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/script.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/agent-widget.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/stories.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/favicon.png",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/practice-voice.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/vendor/vapi-web.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/site-refresh.css",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/photos/hero-hvac.jpg",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/logo-dark.png",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/script.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/agent-widget.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/stories.js",
+      "servedFromDisk": true
+    },
+    {
+      "method": "GET",
+      "path": "/assets/favicon.png",
+      "servedFromDisk": true
+    }
+  ],
+  "blocked": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "browserErrors": [],
+  "screenshots": [
+    "scratchpad/demo-header-preflight-390-spanish-raw-replay.png",
+    "scratchpad/demo-header-preflight-390-English-owner-raw-replay.png",
+    "scratchpad/demo-header-preflight-320-English-plumbing-static.png"
+  ],
+  "scope": "Local files with actual parsed _headers. Synthetic Chrome microphone only, immediately stopped. Two accepted Spanish replies replayed from raw artifact, not new inference. Zero API/provider/model/voice creation.",
+  "replay": {
+    "source": "scratchpad/demo-outcome-spanish-owner-English-first.json",
+    "sha256": "2d4b484ddc47e85015be5e84825f1349f83b388c20a9a75a06f4bb80e4527ae8",
+    "kind": "Already accepted actual-AI raw response replayed inside browser fetch fixture; no new API/model request",
+    "rows": [
+      {
+        "input": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+        "reply": "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita.",
+        "events": [
+          {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "",
+              "phone": "",
+              "address": "",
+              "issue": "Price question: deep clean of apartment in Memorial, 2 bedrooms, 2 bathrooms, 1,000 square feet.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "es",
+              "requested_action": "question_only"
+            },
+            "at": "2026-10-22T02:21:18.186Z"
+          }
+        ]
+      },
+      {
+        "input": "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados.",
+        "reply": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados. Con la recámara extra, la limpieza profunda empieza desde $254 ($229 más $25), y Nia confirmará el precio final. Su solicitud para el sábado de 8 a 10 en 36 Elm St quedó en el resumen para que Nia la revise, pero todavía no es una cita confirmada.",
+        "events": [
+          {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "Ana",
+              "phone": "713-555-0152",
+              "address": "36 Elm St, Memorial",
+              "issue": "Deep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.",
+              "requested_window": "Saturday, 8 to 10",
+              "urgency": "flexible",
+              "language": "es",
+              "requested_action": "visit_request"
+            },
+            "at": "2026-10-22T02:21:23.587Z"
+          }
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados."
+          },
+          {
+            "role": "assistant",
+            "content": "¡Hola! Sí trabajamos en Memorial. La limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, puedo tomar sus datos para que Nia revise una solicitud de visita."
+          },
+          {
+            "role": "user",
+            "content": "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      }
+    ],
+    "ownerDialog": "Job\nDeep clean of apartment in Memorial: 3 bedrooms (corrected from 2), 2 bathrooms, 1,000 square feet.\nWhere\n36 Elm St, Memorial\nRequested\nSaturday, 8 to 10\nContact\nAna · 713-555-0152\nPriority\nNot specified\nLanguage\nSpanish\nNext\nConfirm the requested arrival window"
+  },
+  "result": "passed",
+  "finishedAt": "2026-10-22T02:31:14.239Z"
+}

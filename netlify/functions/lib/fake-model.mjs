@@ -48,19 +48,38 @@ function practiceDesk(system, messages) {
   const owner = pick(/^Owner: ([^.]+)\./m, system) || "the owner";
   const latest = extractor => turns.map(extractor).filter(Boolean).at(-1) || "";
   const name = latest(text => pick(/\b(?:I(?:'m| am)|my name is|[Ss]oy|[Mm]e llamo)\s+([A-ZÁÉÍÓÚÑ][\p{L}]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}]+)?)/u, text));
-  const phone = latest(E164), address = latest(ADDR), window = latest(WINDOW), date = latest(DATE);
+  const days = { "lunes": "monday", "martes": "tuesday", "miércoles": "wednesday", "jueves": "thursday", "viernes": "friday", "sábado": "saturday", "domingo": "sunday" };
+  const phone = latest(E164), address = latest(ADDR), window = latest(WINDOW), date = latest(text => DATE(text) || days[pick(/(lunes|martes|miércoles|jueves|viernes|sábado|domingo)/i, text).toLowerCase()] || "");
   const emergency = /\b(gas|carbon monoxide|smoke|fire|sparks?|burning|humo|fuego)\b/i.test(all);
-  const issue = (turns[0] || "").slice(0, 250);
-  const requested_window = window ? [date === "tomorrow" && lang === "es" ? "mañana" : date, window].filter(Boolean).join(", ") : "";
-  const input = { customer_name: name, phone, address, issue, urgency: emergency ? "emergency" : /\b(today|hoy)\b/i.test(all) ? "today" : /\b(this week|esta semana)\b/i.test(all) ? "this_week" : "flexible", requested_window, language: lang };
+  let issue = (turns[0] || "").slice(0, 250);
+  const rooms = latest(text => pick(/(\d+)\s*(?:recámaras|habitaciones|bedrooms?|beds?)/i, text));
+  if (rooms) issue = issue.replace(/\d+\s*(recámaras|habitaciones|bedrooms?|beds?)/gi, (_, noun) => rooms + " " + noun);
+  const callbackTiming = latest(text => pick(/((?:after|despu[eé]s de)\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i, text));
+  if (callbackTiming) issue = issue.replace(/(?:after|despu[eé]s de)\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?/gi, callbackTiming);
+  // Fixture-only English owner fields; this is not a production translation service.
+  if (lang === "es") {
+    const baths = latest(text => pick(/(\d+)\s*baños/i, text));
+    const area = latest(text => pick(/([\d,]+)\s*pies cuadrados/i, text));
+    issue = /limpieza/i.test(all) ? [(/profunda/i.test(all) ? "Deep cleaning" : "Cleaning") + " request" + (/Memorial/i.test(all) ? " in Memorial" : ""), rooms && `${rooms} bedrooms`, baths && `${baths} bathrooms`, area && `${area} square feet`].filter(Boolean).join("; ") : emergency ? "Safety emergency reported" : "Service request";
+  }
+  const requested_window = callbackTiming.replace(/despu[eé]s de/i, "after") || (window ? [date, window.replace(/\s*a\s*/, " to ")].filter(Boolean).join(", ") : "");
+  const customerDate = lang === "es" ? date === "tomorrow" ? "mañana" : date === "today" ? "hoy" : Object.keys(days).find(day => days[day] === date) || date : date;
+  const customerWindow = callbackTiming || (window ? [customerDate, window].filter(Boolean).join(", ") : "");
+  const urgentLeak = /actively leaking|active leak|water is (?:actively )?leaking|sewage backup/i.test(all) && /Katy Pipeworks/.test(system);
+  const callback = urgentLeak || /call me|call back|callback|don.t book|solo.*llam|ll.meme/i.test(all);
+  const areaQuestion = /Woodlands|Pearland|only asking|do you serv(?:e|ice)/i.test(turns.at(-1) || "");
+  const questionOnly = areaQuestion || /only.*(?:information|price)|solo.*información|total repair price|exactly|exactamente|slab leak.*(?:price|cost)|outside.*Beltway/i.test(turns.at(-1) || "");
+  const input = { requested_action: emergency ? "emergency_handoff" : callback ? "callback" : questionOnly ? "question_only" : "visit_request", customer_name: name, phone, address, issue, urgency: emergency || urgentLeak ? "emergency" : /\b(today|hoy)\b/i.test(all) ? "today" : /\b(this week|esta semana)\b/i.test(all) ? "this_week" : "flexible", requested_window, language: lang };
   const say = (english, spanish) => lang === "es" ? spanish : english;
   let text;
   if (emergency) text = say("Leave the area now and call 911 from safety.", "Salga del lugar ahora y llame al 911 desde un lugar seguro.") + " " + (!phone ? say("When safe, what is your best phone number?", "Cuando esté a salvo, ¿cuál es su número de teléfono?") : !address ? say("When safe, what is the street address?", "Cuando esté a salvo, ¿cuál es la dirección?") : say("Your request is shown in the practice owner summary.", "Su solicitud aparece en el resumen de práctica."));
+  else if (questionOnly) text = /Woodlands|Pearland/.test(turns.at(-1)) ? `We do not serve ${/Pearland/.test(turns.at(-1)) ? "Pearland" : "The Woodlands"}. We cover Katy, Cypress, Memorial, Energy Corridor, Sugar Land and Richmond.` : say("The owner must confirm that; I cannot promise an exact time or an unpublished repair price.", "La dueña debe confirmarlo; no puedo prometer una hora exacta ni un precio no publicado.");
   else if (!name) text = say("What is your name?", "¿Cómo se llama?");
   else if (!phone) text = say("What is your best phone number?", "¿Cuál es su número de teléfono?");
+  else if (callback) text = say(`Your callback request is ready for ${owner} to review; no visit is requested.`, `Su solicitud de llamada está lista para que ${owner} la revise; no se solicita una visita.`);
   else if (!address) text = say("What is the street address?", "¿Cuál es la dirección?");
   else if (!window) text = say("What day and arrival window would you like to request?", "¿Qué día y horario quiere solicitar?");
-  else text = say(`Thanks, ${name.split(" ")[0]}. Your requested ${requested_window} visit is ready for ${owner} to review.`, `Gracias, ${name.split(" ")[0]}. Su solicitud para ${requested_window} está lista para que ${owner} la revise.`);
+  else text = say(`Thanks, ${name.split(" ")[0]}. Your requested ${customerWindow} visit is ready for ${owner} to review.`, `Gracias, ${name.split(" ")[0]}. Su solicitud para ${customerWindow} está lista para que ${owner} la revise.`);
   return { text, tool: { name: "send_owner_summary", input } };
 }
 

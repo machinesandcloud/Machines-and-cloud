@@ -1,0 +1,25 @@
+{
+  "at": "2026-10-22T02:26:21.879Z",
+  "result": "passed",
+  "scope": "Offline exact source comparison only; no requests",
+  "priorArtifact": "scratchpad/demo-outcome-fallback-accepted.json",
+  "priorFingerprint": "00f8c7046f4f39dee1a1020d09a15ee8cefc4e19a4651a1bb8495c264919d248",
+  "currentArtifact": "scratchpad/demo-outcome-voice-scope-accepted.json",
+  "currentFingerprint": "ba3fa8f350f09c523becdfb1e6faa0965c4fb150d192eb08c888f2afb87ab48f",
+  "checks": 17,
+  "changes": {
+    "index.html": "Voice card gets ID/initial hidden state and explicit English plumbing label",
+    "stories.js": "Voice card hidden unless call scenario; startVoice refuses other scenarios",
+    "site-refresh.css": "One scoped display:none rule makes voice-card hidden state authoritative"
+  },
+  "unchanged": [
+    "styles.css",
+    "script.js",
+    "practice-voice.js"
+  ],
+  "proof": "Removing only the listed changes reconstructs every prior source hash exactly",
+  "earlierSourceBridge": "scratchpad/demo-outcome-ui-source-bridge.json",
+  "returnedFailure": "scratchpad/demo-outcome-voice-scope.json",
+  "returnedFailureReason": "Two actual rendered-visibility failures: display:flex overrode hidden=true for HVAC/Spanish; final scoped rule fixes these",
+  "limits": "138 UI and28 recovery checks were not rerun; bounded code/source and17-check discovery/fallback proof only. No actual audio or model quality claim."
+}

@@ -2,7 +2,11 @@
 
 Date: **2026-10-21, Houston**. User request: make the See it work section dynamic and live; Steve explicitly chose **both** animated examples and a real AI conversation. Root owns the UI/integration, engineering owns persona isolation, PM owns independent browser acceptance, and PO owns the working outcome.
 
-## Result and release boundary
+## Current revision after the reported failure
+
+Steve subsequently rejected the plumber and Spanish experience. The old UI acceptance below is historical and does not override that feedback. The replacement requirements, research and current local outcome decisions are in [DEMO-OUTCOMES.md](DEMO-OUTCOMES.md) and [RESEARCH-live-demo.md](../RESEARCH-live-demo.md). The current revision fixes first-click playback and phone-visible results, retains Watch plus actual typed practice for all three owner situations, and adds a bounded real English plumbing microphone call. Spanish customers receive Spanish replies while the owner summary is English. This replacement is locally verified and **not published yet**; production remains the scheduler-repaired commit recorded below.
+
+## Historical result and release boundary
 
 **Current production:** `283e421b81382483c2342bb5ab405b0e181f1bef`, deploy `6ad96934cad3895b36362f17`, published at `2026-10-22T01:39:26.962Z` (8:39 p.m. Houston). Steve separately approved the tested scheduler repair in one additional build. One push started one automatic build, without a manual trigger. A natural scheduled run at `01:40:19.886Z` followed publication, and root's single subsequent health GET returned **200**, `ok: true`, no failing blocks and `minutesAgo: 0`. PO and PM independently reviewed the receipts and accepted this specific operational recovery. [Repair publication](../scratchpad/scheduler-repair-publication.json), [fresh health](../scratchpad/scheduler-repair-hosted-health.json). The :40 gate skips live carrier polling; this is scheduler/health recovery, not a Twilio-delivery or first-shop acceptance claim.
 

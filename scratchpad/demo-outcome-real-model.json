@@ -1,0 +1,2727 @@
+{
+  "startedAt": "2026-10-22T02:09:16.478Z",
+  "base": "http://127.0.0.1:8894",
+  "source": {
+    "netlify/functions/chat.mjs": "869cad5bb8623520de29e08788eb38b7586f2eb26d56dc1d3082849c98cdd7e6",
+    "netlify/functions/lib/practice-personas.mjs": "4d23449d12f905687324f19c613ffc81f0466d381f492bb166eb3938647ef034",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd",
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "stories.js": "ceca811125766646f2725c9752b611354f25d12084989422c8c151e2bd6d8724",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "scripts/demo-outcome-model-check.mjs": "f8d9ac71b9588d5cea7098bad64858929d39b8b2429053825fb280c84a35d24c"
+  },
+  "maxLogicalTurns": 8,
+  "maxActualAnthropicRequests": 20,
+  "scope": "Actual local browser UI -> /api/chat -> Anthropic, guarded memory-only server. No voice endpoint, real shop mutation, hosted page, direct provider request, microphone or paid actions by this runner. Root may concurrently use separate three-create Vapi budget.",
+  "cases": [
+    {
+      "id": "hvac_area_fee_partial",
+      "persona": "bayou-air",
+      "input": "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?",
+      "startedAt": "2026-10-22T02:09:17.408Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 0,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?"
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know.\"}\n{\"t\":\"done\",\"reply\":\"Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Ray\",\"company\":\"Bayou Air & Heat\",\"data\":{\"customer_name\":\"\",\"phone\":\"\",\"address\":\"\",\"issue\":\"AC running but not cooling; asked about Katy service area and diagnostic fee\",\"requested_window\":\"\",\"urgency\":\"flexible\",\"language\":\"en\",\"requested_action\":\"question_only\"},\"at\":\"2026-10-22T02:09:29.555Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know."
+        },
+        {
+          "t": "done",
+          "reply": "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "AC running but not cooling; asked about Katy service area and diagnostic fee",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "en",
+                "requested_action": "question_only"
+              },
+              "at": "2026-10-22T02:09:29.555Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 2,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "AC running but not cooling; asked about Katy service area and diagnostic fee",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "en",
+            "requested_action": "question_only"
+          },
+          "at": "2026-10-22T02:09:29.555Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "",
+        "phone": "",
+        "address": "",
+        "issue": "AC running but not cooling; asked about Katy service area and diagnostic fee",
+        "requested_window": "",
+        "urgency": "flexible",
+        "language": "en",
+        "requested_action": "question_only"
+      },
+      "ui": {
+        "messages": [
+          "Hi! I’m the AI front desk for Bayou Air & Heat. Ask me about an AC problem, our area or a service visit.",
+          "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?",
+          "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know."
+        ],
+        "summary": "Job\nAC running but not cooling; asked about Katy service area and diagnostic fee\nWhere\nNot provided yet\nRequested\nNot confirmed\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nReview the conversation; no visit requested",
+        "status": "Question answered",
+        "next": "Review the conversation; no visit requested",
+        "error": ""
+      }
+    },
+    {
+      "id": "callback_only",
+      "persona": "bayou-air",
+      "input": "Just have Ray call me; I do not want to request a visit. I am Alex. Call 713-555-0142 after 3 pm.",
+      "startedAt": "2026-10-22T02:09:31.498Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 2,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?"
+          },
+          {
+            "role": "assistant",
+            "content": "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know."
+          },
+          {
+            "role": "user",
+            "content": "Just have Ray call me; I do not want to request a visit. I am Alex. Call 713-555-0142 after 3 pm."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call.\"}\n{\"t\":\"done\",\"reply\":\"Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Ray\",\"company\":\"Bayou Air & Heat\",\"data\":{\"customer_name\":\"Alex\",\"phone\":\"713-555-0142\",\"address\":\"\",\"issue\":\"AC running but not cooling; in Katy; asked about service area and diagnostic fee; wants a call from Ray, not a visit\",\"requested_window\":\"after 3 pm\",\"urgency\":\"flexible\",\"language\":\"en\",\"requested_action\":\"callback\"},\"at\":\"2026-10-22T02:09:34.808Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call."
+        },
+        {
+          "t": "done",
+          "reply": "Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "Alex",
+                "phone": "713-555-0142",
+                "address": "",
+                "issue": "AC running but not cooling; in Katy; asked about service area and diagnostic fee; wants a call from Ray, not a visit",
+                "requested_window": "after 3 pm",
+                "urgency": "flexible",
+                "language": "en",
+                "requested_action": "callback"
+              },
+              "at": "2026-10-22T02:09:34.808Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 4,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "Alex",
+            "phone": "713-555-0142",
+            "address": "",
+            "issue": "AC running but not cooling; in Katy; asked about service area and diagnostic fee; wants a call from Ray, not a visit",
+            "requested_window": "after 3 pm",
+            "urgency": "flexible",
+            "language": "en",
+            "requested_action": "callback"
+          },
+          "at": "2026-10-22T02:09:34.808Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "Alex",
+        "phone": "713-555-0142",
+        "address": "",
+        "issue": "AC running but not cooling; in Katy; asked about service area and diagnostic fee; wants a call from Ray, not a visit",
+        "requested_window": "after 3 pm",
+        "urgency": "flexible",
+        "language": "en",
+        "requested_action": "callback"
+      },
+      "ui": {
+        "messages": [
+          "Hi! I’m the AI front desk for Bayou Air & Heat. Ask me about an AC problem, our area or a service visit.",
+          "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?",
+          "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know.",
+          "Just have Ray call me; I do not want to request a visit. I am Alex. Call 713-555-0142 after 3 pm.",
+          "Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call."
+        ],
+        "summary": "Job\nAC running but not cooling; in Katy; asked about service area and diagnostic fee; wants a call from Ray, not a visit\nWhere\nNot needed for a callback\nTiming\nafter 3 pm\nContact\nAlex · 713-555-0142\nPriority\nNot specified\nLanguage\nEnglish\nNext\nCall the customer; confirm timing",
+        "status": "Callback requested",
+        "next": "Call the customer; confirm timing",
+        "error": ""
+      }
+    },
+    {
+      "id": "callback_correction",
+      "persona": "bayou-air",
+      "input": "Correction: my phone is 713-555-0177, and please call after 4 pm instead. Everything else is the same.",
+      "startedAt": "2026-10-22T02:09:36.719Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 4,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?"
+          },
+          {
+            "role": "assistant",
+            "content": "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know."
+          },
+          {
+            "role": "user",
+            "content": "Just have Ray call me; I do not want to request a visit. I am Alex. Call 713-555-0142 after 3 pm."
+          },
+          {
+            "role": "assistant",
+            "content": "Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call."
+          },
+          {
+            "role": "user",
+            "content": "Correction: my phone is 713-555-0177, and please call after 4 pm instead. Everything else is the same."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Got it, Alex. I've changed your number to 713-555-0177 and the call time to after 4 pm. It's still just a callback about your AC running but not cooling, with no visit requested.\"}\n{\"t\":\"done\",\"reply\":\"Got it, Alex. I've changed your number to 713-555-0177 and the call time to after 4 pm. It's still just a callback about your AC running but not cooling, with no visit requested.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Ray\",\"company\":\"Bayou Air & Heat\",\"data\":{\"customer_name\":\"Alex\",\"phone\":\"713-555-0177\",\"address\":\"\",\"issue\":\"AC running but not cooling; customer in Katy wants a callback only, no visit\",\"requested_window\":\"after 4 pm\",\"urgency\":\"flexible\",\"language\":\"en\",\"requested_action\":\"callback\"},\"at\":\"2026-10-22T02:09:39.329Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Got it, Alex. I've changed your number to 713-555-0177 and the call time to after 4 pm. It's still just a callback about your AC running but not cooling, with no visit requested."
+        },
+        {
+          "t": "done",
+          "reply": "Got it, Alex. I've changed your number to 713-555-0177 and the call time to after 4 pm. It's still just a callback about your AC running but not cooling, with no visit requested.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "Alex",
+                "phone": "713-555-0177",
+                "address": "",
+                "issue": "AC running but not cooling; customer in Katy wants a callback only, no visit",
+                "requested_window": "after 4 pm",
+                "urgency": "flexible",
+                "language": "en",
+                "requested_action": "callback"
+              },
+              "at": "2026-10-22T02:09:39.329Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 6,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "Got it, Alex. I've changed your number to 713-555-0177 and the call time to after 4 pm. It's still just a callback about your AC running but not cooling, with no visit requested.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "Alex",
+            "phone": "713-555-0177",
+            "address": "",
+            "issue": "AC running but not cooling; customer in Katy wants a callback only, no visit",
+            "requested_window": "after 4 pm",
+            "urgency": "flexible",
+            "language": "en",
+            "requested_action": "callback"
+          },
+          "at": "2026-10-22T02:09:39.329Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "Alex",
+        "phone": "713-555-0177",
+        "address": "",
+        "issue": "AC running but not cooling; customer in Katy wants a callback only, no visit",
+        "requested_window": "after 4 pm",
+        "urgency": "flexible",
+        "language": "en",
+        "requested_action": "callback"
+      },
+      "ui": {
+        "messages": [
+          "Hi! I’m the AI front desk for Bayou Air & Heat. Ask me about an AC problem, our area or a service visit.",
+          "My AC is running but not cooling. Before I decide on anything, do you serve Katy, and what is your diagnostic fee?",
+          "Yes, we serve Katy. The diagnostic visit is $89, and that amount goes toward the repair if you decide to go ahead with it. Any repair price would come from the tech once they've looked at the system. If you'd like to request a visit, just let me know.",
+          "Just have Ray call me; I do not want to request a visit. I am Alex. Call 713-555-0142 after 3 pm.",
+          "Thanks, Alex. I've written up your request for Ray to call you at 713-555-0142 after 3 pm about your AC running but not cooling, and I left it as a callback, not a visit. Ray will review it, but I can't promise exactly when he'll call.",
+          "Correction: my phone is 713-555-0177, and please call after 4 pm instead. Everything else is the same.",
+          "Got it, Alex. I've changed your number to 713-555-0177 and the call time to after 4 pm. It's still just a callback about your AC running but not cooling, with no visit requested."
+        ],
+        "summary": "Job\nAC running but not cooling; customer in Katy wants a callback only, no visit\nWhere\nNot needed for a callback\nTiming\nafter 4 pm\nContact\nAlex · 713-555-0177\nPriority\nNot specified\nLanguage\nEnglish\nNext\nCall the customer; confirm timing",
+        "status": "Callback requested",
+        "next": "Call the customer; confirm timing",
+        "error": ""
+      }
+    },
+    {
+      "id": "spanish_size_fee",
+      "persona": "westheimer-maids",
+      "input": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+      "startedAt": "2026-10-22T02:09:41.058Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 6,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?\"}\n{\"t\":\"done\",\"reply\":\"¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Nia\",\"company\":\"Westheimer Maids\",\"data\":{\"customer_name\":\"\",\"phone\":\"\",\"address\":\"\",\"issue\":\"Pregunta precio de limpieza profunda de apartamento en Memorial: 2 recámaras, 2 baños, 1,000 pies cuadrados.\",\"requested_window\":\"\",\"urgency\":\"flexible\",\"language\":\"es\",\"requested_action\":\"question_only\"},\"at\":\"2026-10-22T02:09:43.909Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?"
+        },
+        {
+          "t": "done",
+          "reply": "¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Nia",
+              "company": "Westheimer Maids",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "Pregunta precio de limpieza profunda de apartamento en Memorial: 2 recámaras, 2 baños, 1,000 pies cuadrados.",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "es",
+                "requested_action": "question_only"
+              },
+              "at": "2026-10-22T02:09:43.909Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 8,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Nia",
+          "company": "Westheimer Maids",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "Pregunta precio de limpieza profunda de apartamento en Memorial: 2 recámaras, 2 baños, 1,000 pies cuadrados.",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "es",
+            "requested_action": "question_only"
+          },
+          "at": "2026-10-22T02:09:43.909Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "",
+        "phone": "",
+        "address": "",
+        "issue": "Pregunta precio de limpieza profunda de apartamento en Memorial: 2 recámaras, 2 baños, 1,000 pies cuadrados.",
+        "requested_window": "",
+        "urgency": "flexible",
+        "language": "es",
+        "requested_action": "question_only"
+      },
+      "ui": {
+        "messages": [
+          "¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+          "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+          "¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?"
+        ],
+        "summary": "Job\nPregunta precio de limpieza profunda de apartamento en Memorial: 2 recámaras, 2 baños, 1,000 pies cuadrados.\nWhere\nNot provided yet\nRequested\nNot confirmed\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nSpanish\nNext\nReview the conversation; no visit requested",
+        "status": "Question answered",
+        "next": "Review the conversation; no visit requested",
+        "error": ""
+      }
+    },
+    {
+      "id": "spanish_complete_correction",
+      "persona": "westheimer-maids",
+      "input": "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados.",
+      "startedAt": "2026-10-22T02:09:46.085Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 8,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados."
+          },
+          {
+            "role": "assistant",
+            "content": "¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?"
+          },
+          {
+            "role": "user",
+            "content": "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados, y su solicitud para el sábado de 8 a 10 en 36 Elm St. La limpieza profunda empieza desde $229, y la tarifa publicada agrega $25 por cada recámara extra, pero Nia le confirmará el precio final y si ese horario está disponible, porque todavía no está reservado. Para cancelar, se pide aviso con 24 horas de anticipación o se cobra $50.\"}\n{\"t\":\"done\",\"reply\":\"Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados, y su solicitud para el sábado de 8 a 10 en 36 Elm St. La limpieza profunda empieza desde $229, y la tarifa publicada agrega $25 por cada recámara extra, pero Nia le confirmará el precio final y si ese horario está disponible, porque todavía no está reservado. Para cancelar, se pide aviso con 24 horas de anticipación o se cobra $50.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Nia\",\"company\":\"Westheimer Maids\",\"data\":{\"customer_name\":\"Ana\",\"phone\":\"713-555-0152\",\"address\":\"36 Elm St, Memorial\",\"issue\":\"Limpieza profunda de apartamento: 3 recámaras, 2 baños, 1,000 pies cuadrados.\",\"requested_window\":\"Sábado de 8 a 10\",\"urgency\":\"flexible\",\"language\":\"es\",\"requested_action\":\"visit_request\"},\"at\":\"2026-10-22T02:09:50.095Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados, y su solicitud para el sábado de 8 a 10 en 36 Elm St. La limpieza profunda empieza desde $229, y la tarifa publicada agrega $25 por cada recámara extra, pero Nia le confirmará el precio final y si ese horario está disponible, porque todavía no está reservado. Para cancelar, se pide aviso con 24 horas de anticipación o se cobra $50."
+        },
+        {
+          "t": "done",
+          "reply": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados, y su solicitud para el sábado de 8 a 10 en 36 Elm St. La limpieza profunda empieza desde $229, y la tarifa publicada agrega $25 por cada recámara extra, pero Nia le confirmará el precio final y si ese horario está disponible, porque todavía no está reservado. Para cancelar, se pide aviso con 24 horas de anticipación o se cobra $50.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Nia",
+              "company": "Westheimer Maids",
+              "data": {
+                "customer_name": "Ana",
+                "phone": "713-555-0152",
+                "address": "36 Elm St, Memorial",
+                "issue": "Limpieza profunda de apartamento: 3 recámaras, 2 baños, 1,000 pies cuadrados.",
+                "requested_window": "Sábado de 8 a 10",
+                "urgency": "flexible",
+                "language": "es",
+                "requested_action": "visit_request"
+              },
+              "at": "2026-10-22T02:09:50.095Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 10,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados, y su solicitud para el sábado de 8 a 10 en 36 Elm St. La limpieza profunda empieza desde $229, y la tarifa publicada agrega $25 por cada recámara extra, pero Nia le confirmará el precio final y si ese horario está disponible, porque todavía no está reservado. Para cancelar, se pide aviso con 24 horas de anticipación o se cobra $50.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Nia",
+          "company": "Westheimer Maids",
+          "data": {
+            "customer_name": "Ana",
+            "phone": "713-555-0152",
+            "address": "36 Elm St, Memorial",
+            "issue": "Limpieza profunda de apartamento: 3 recámaras, 2 baños, 1,000 pies cuadrados.",
+            "requested_window": "Sábado de 8 a 10",
+            "urgency": "flexible",
+            "language": "es",
+            "requested_action": "visit_request"
+          },
+          "at": "2026-10-22T02:09:50.095Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "Ana",
+        "phone": "713-555-0152",
+        "address": "36 Elm St, Memorial",
+        "issue": "Limpieza profunda de apartamento: 3 recámaras, 2 baños, 1,000 pies cuadrados.",
+        "requested_window": "Sábado de 8 a 10",
+        "urgency": "flexible",
+        "language": "es",
+        "requested_action": "visit_request"
+      },
+      "ui": {
+        "messages": [
+          "¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+          "Hola. ¿Cuánto cuesta una limpieza profunda de mi apartamento en Memorial? Tiene 2 recámaras, 2 baños y 1,000 pies cuadrados.",
+          "¡Hola! Sí trabajamos en Memorial. Una limpieza profunda empieza desde $229, y Nia confirmará el precio final para su apartamento de 2 recámaras, 2 baños y 1,000 pies cuadrados. Si quiere, le ayudo a pedir una cita para que Nia la revise. ¿Qué día y horario le conviene?",
+          "Soy Ana, mi teléfono es 713-555-0152 y la dirección es 36 Elm St, Memorial. Quiero solicitar el sábado de 8 a 10. Corrección: son 3 recámaras, no 2; siguen siendo 2 baños y 1,000 pies cuadrados.",
+          "Gracias, Ana. Ya anoté el cambio a 3 recámaras, 2 baños y 1,000 pies cuadrados, y su solicitud para el sábado de 8 a 10 en 36 Elm St. La limpieza profunda empieza desde $229, y la tarifa publicada agrega $25 por cada recámara extra, pero Nia le confirmará el precio final y si ese horario está disponible, porque todavía no está reservado. Para cancelar, se pide aviso con 24 horas de anticipación o se cobra $50."
+        ],
+        "summary": "Job\nLimpieza profunda de apartamento: 3 recámaras, 2 baños, 1,000 pies cuadrados.\nWhere\n36 Elm St, Memorial\nRequested\nSábado de 8 a 10\nContact\nAna · 713-555-0152\nPriority\nNot specified\nLanguage\nSpanish\nNext\nConfirm the requested arrival window",
+        "status": "Visit request",
+        "next": "Confirm the requested arrival window",
+        "error": ""
+      }
+    },
+    {
+      "id": "gas_initial_safety",
+      "persona": "katy-pipeworks",
+      "input": "I smell gas inside the house. What should I do?",
+      "startedAt": "2026-10-22T02:09:52.757Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 10,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "katy-pipeworks",
+        "messages": [
+          {
+            "role": "user",
+            "content": "I smell gas inside the house. What should I do?"
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Leave the house now with everyone inside, and once you're safely outside, call 911 or your gas company. Don't go back in until they tell you it's safe. When you're safe, please send me your phone number and street address so Dana can follow up about the gas line.\"}\n{\"t\":\"done\",\"reply\":\"Leave the house now with everyone inside, and once you're safely outside, call 911 or your gas company. Don't go back in until they tell you it's safe. When you're safe, please send me your phone number and street address so Dana can follow up about the gas line.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Dana\",\"company\":\"Katy Pipeworks\",\"data\":{\"customer_name\":\"\",\"phone\":\"\",\"address\":\"\",\"issue\":\"Customer smells gas inside the house.\",\"requested_window\":\"\",\"urgency\":\"emergency\",\"language\":\"en\",\"requested_action\":\"emergency_handoff\"},\"at\":\"2026-10-22T02:09:55.406Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Leave the house now with everyone inside, and once you're safely outside, call 911 or your gas company. Don't go back in until they tell you it's safe. When you're safe, please send me your phone number and street address so Dana can follow up about the gas line."
+        },
+        {
+          "t": "done",
+          "reply": "Leave the house now with everyone inside, and once you're safely outside, call 911 or your gas company. Don't go back in until they tell you it's safe. When you're safe, please send me your phone number and street address so Dana can follow up about the gas line.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Dana",
+              "company": "Katy Pipeworks",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "Customer smells gas inside the house.",
+                "requested_window": "",
+                "urgency": "emergency",
+                "language": "en",
+                "requested_action": "emergency_handoff"
+              },
+              "at": "2026-10-22T02:09:55.406Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 12,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "Leave the house now with everyone inside, and once you're safely outside, call 911 or your gas company. Don't go back in until they tell you it's safe. When you're safe, please send me your phone number and street address so Dana can follow up about the gas line.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Dana",
+          "company": "Katy Pipeworks",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "Customer smells gas inside the house.",
+            "requested_window": "",
+            "urgency": "emergency",
+            "language": "en",
+            "requested_action": "emergency_handoff"
+          },
+          "at": "2026-10-22T02:09:55.406Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "",
+        "phone": "",
+        "address": "",
+        "issue": "Customer smells gas inside the house.",
+        "requested_window": "",
+        "urgency": "emergency",
+        "language": "en",
+        "requested_action": "emergency_handoff"
+      },
+      "ui": {
+        "messages": [
+          "Hi! I’m the AI front desk for Katy Pipeworks. It’s after hours in this example. What can I help you with?",
+          "I smell gas inside the house. What should I do?",
+          "Leave the house now with everyone inside, and once you're safely outside, call 911 or your gas company. Don't go back in until they tell you it's safe. When you're safe, please send me your phone number and street address so Dana can follow up about the gas line."
+        ],
+        "summary": "Job\nCustomer smells gas inside the house.\nWhere\nNot provided yet\nRequested\nNot confirmed\nContact\nNot provided yet\nPriority\nUrgent\nLanguage\nEnglish\nNext\nHuman safety handoff; no dispatch confirmed",
+        "status": "Urgent human handoff",
+        "next": "Human safety handoff; no dispatch confirmed",
+        "error": ""
+      }
+    },
+    {
+      "id": "unpublished_slab_quote",
+      "persona": "katy-pipeworks",
+      "input": "It is 10 pm and I am in Katy. How much is slab leak repair, including the service call and after-hours charge? I only want the price information for now.",
+      "startedAt": "2026-10-22T02:09:58.409Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 12,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "katy-pipeworks",
+        "messages": [
+          {
+            "role": "user",
+            "content": "It is 10 pm and I am in Katy. How much is slab leak repair, including the service call and after-hours charge? I only want the price information for now."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"Katy is in our service area, but we don't quote prices for slab leak repair. Dana or the tech has to look at the job before giving a price. What I can tell you is that the regular service call is $79 and is waived if you get a repair, and the after-hours emergency fee is $150. I can't give you a combined total because I don't know whether those two charges get added together, so the owner would confirm that.\"}\n{\"t\":\"done\",\"reply\":\"Katy is in our service area, but we don't quote prices for slab leak repair. Dana or the tech has to look at the job before giving a price. What I can tell you is that the regular service call is $79 and is waived if you get a repair, and the after-hours emergency fee is $150. I can't give you a combined total because I don't know whether those two charges get added together, so the owner would confirm that.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Dana\",\"company\":\"Katy Pipeworks\",\"data\":{\"customer_name\":\"\",\"phone\":\"\",\"address\":\"\",\"issue\":\"Asking price of slab leak repair including service call and after-hours charge (Katy); price info only\",\"requested_window\":\"\",\"urgency\":\"flexible\",\"language\":\"en\",\"requested_action\":\"question_only\"},\"at\":\"2026-10-22T02:10:01.523Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Katy is in our service area, but we don't quote prices for slab leak repair. Dana or the tech has to look at the job before giving a price. What I can tell you is that the regular service call is $79 and is waived if you get a repair, and the after-hours emergency fee is $150. I can't give you a combined total because I don't know whether those two charges get added together, so the owner would confirm that."
+        },
+        {
+          "t": "done",
+          "reply": "Katy is in our service area, but we don't quote prices for slab leak repair. Dana or the tech has to look at the job before giving a price. What I can tell you is that the regular service call is $79 and is waived if you get a repair, and the after-hours emergency fee is $150. I can't give you a combined total because I don't know whether those two charges get added together, so the owner would confirm that.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Dana",
+              "company": "Katy Pipeworks",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "Asking price of slab leak repair including service call and after-hours charge (Katy); price info only",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "en",
+                "requested_action": "question_only"
+              },
+              "at": "2026-10-22T02:10:01.523Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 14,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "Katy is in our service area, but we don't quote prices for slab leak repair. Dana or the tech has to look at the job before giving a price. What I can tell you is that the regular service call is $79 and is waived if you get a repair, and the after-hours emergency fee is $150. I can't give you a combined total because I don't know whether those two charges get added together, so the owner would confirm that.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Dana",
+          "company": "Katy Pipeworks",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "Asking price of slab leak repair including service call and after-hours charge (Katy); price info only",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "en",
+            "requested_action": "question_only"
+          },
+          "at": "2026-10-22T02:10:01.523Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "",
+        "phone": "",
+        "address": "",
+        "issue": "Asking price of slab leak repair including service call and after-hours charge (Katy); price info only",
+        "requested_window": "",
+        "urgency": "flexible",
+        "language": "en",
+        "requested_action": "question_only"
+      },
+      "ui": {
+        "messages": [
+          "Hi! I’m the AI front desk for Katy Pipeworks. It’s after hours in this example. What can I help you with?",
+          "It is 10 pm and I am in Katy. How much is slab leak repair, including the service call and after-hours charge? I only want the price information for now.",
+          "Katy is in our service area, but we don't quote prices for slab leak repair. Dana or the tech has to look at the job before giving a price. What I can tell you is that the regular service call is $79 and is waived if you get a repair, and the after-hours emergency fee is $150. I can't give you a combined total because I don't know whether those two charges get added together, so the owner would confirm that."
+        ],
+        "summary": "Job\nAsking price of slab leak repair including service call and after-hours charge (Katy); price info only\nWhere\nNot provided yet\nRequested\nNot confirmed\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nReview the conversation; no visit requested",
+        "status": "Question answered",
+        "next": "Review the conversation; no visit requested",
+        "error": ""
+      }
+    },
+    {
+      "id": "unsupported_pearland",
+      "persona": "bayou-air",
+      "input": "Do you serve Pearland? I only want to know your service area.",
+      "startedAt": "2026-10-22T02:10:04.057Z",
+      "ledgerBefore": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 14,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Do you serve Pearland? I only want to know your service area."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "rawNDJSON": "{\"t\":\"delta\",\"text\":\"No, Bayou Air & Heat doesn't serve Pearland. Our service area is Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond, and we don't cover inside the 610 Loop or The Woodlands.\"}\n{\"t\":\"done\",\"reply\":\"No, Bayou Air & Heat doesn't serve Pearland. Our service area is Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond, and we don't cover inside the 610 Loop or The Woodlands.\",\"events\":[{\"type\":\"owner_notification\",\"owner\":\"Ray\",\"company\":\"Bayou Air & Heat\",\"data\":{\"customer_name\":\"\",\"phone\":\"\",\"address\":\"\",\"issue\":\"Asked whether Pearland is in the service area (it is not served).\",\"requested_window\":\"\",\"urgency\":\"flexible\",\"language\":\"en\",\"requested_action\":\"question_only\"},\"at\":\"2026-10-22T02:10:06.689Z\"}]}\n",
+      "stream": [
+        {
+          "t": "delta",
+          "text": "No, Bayou Air & Heat doesn't serve Pearland. Our service area is Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond, and we don't cover inside the 610 Loop or The Woodlands."
+        },
+        {
+          "t": "done",
+          "reply": "No, Bayou Air & Heat doesn't serve Pearland. Our service area is Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond, and we don't cover inside the 610 Loop or The Woodlands.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "Asked whether Pearland is in the service area (it is not served).",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "en",
+                "requested_action": "question_only"
+              },
+              "at": "2026-10-22T02:10:06.689Z"
+            }
+          ]
+        }
+      ],
+      "ledgerAfter": {
+        "phase": "demo-owner-outcomes-2026-10-21",
+        "startedAt": "2026-10-22T02:04:49.279Z",
+        "maxAnthropicRequests": 20,
+        "maxVapiCreates": 3,
+        "anthropicRequests": 16,
+        "vapiCreates": 1,
+        "blocked": 0,
+        "requests": [
+          {
+            "at": "2026-10-22T02:09:15.503Z",
+            "provider": "vapi",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.vapi.ai",
+            "path": "/call/web",
+            "status": 401,
+            "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+          },
+          {
+            "at": "2026-10-22T02:09:17.449Z",
+            "provider": "anthropic",
+            "sequence": 1,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:29.556Z",
+            "provider": "anthropic",
+            "sequence": 2,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:31.545Z",
+            "provider": "anthropic",
+            "sequence": 3,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:34.810Z",
+            "provider": "anthropic",
+            "sequence": 4,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:36.762Z",
+            "provider": "anthropic",
+            "sequence": 5,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:39.330Z",
+            "provider": "anthropic",
+            "sequence": 6,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:41.093Z",
+            "provider": "anthropic",
+            "sequence": 7,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:43.910Z",
+            "provider": "anthropic",
+            "sequence": 8,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:46.129Z",
+            "provider": "anthropic",
+            "sequence": 9,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:50.097Z",
+            "provider": "anthropic",
+            "sequence": 10,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:52.793Z",
+            "provider": "anthropic",
+            "sequence": 11,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:55.406Z",
+            "provider": "anthropic",
+            "sequence": 12,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:09:58.447Z",
+            "provider": "anthropic",
+            "sequence": 13,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:01.523Z",
+            "provider": "anthropic",
+            "sequence": 14,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:04.093Z",
+            "provider": "anthropic",
+            "sequence": 15,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "at": "2026-10-22T02:10:06.690Z",
+            "provider": "anthropic",
+            "sequence": 16,
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+      },
+      "reply": "No, Bayou Air & Heat doesn't serve Pearland. Our service area is Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond, and we don't cover inside the 610 Loop or The Woodlands.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "Asked whether Pearland is in the service area (it is not served).",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "en",
+            "requested_action": "question_only"
+          },
+          "at": "2026-10-22T02:10:06.689Z"
+        }
+      ],
+      "summary": {
+        "customer_name": "",
+        "phone": "",
+        "address": "",
+        "issue": "Asked whether Pearland is in the service area (it is not served).",
+        "requested_window": "",
+        "urgency": "flexible",
+        "language": "en",
+        "requested_action": "question_only"
+      },
+      "ui": {
+        "messages": [
+          "Hi! I’m the AI front desk for Bayou Air & Heat. Ask me about an AC problem, our area or a service visit.",
+          "Do you serve Pearland? I only want to know your service area.",
+          "No, Bayou Air & Heat doesn't serve Pearland. Our service area is Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond, and we don't cover inside the 610 Loop or The Woodlands."
+        ],
+        "summary": "Job\nAsked whether Pearland is in the service area (it is not served).\nWhere\nNot provided yet\nRequested\nNot confirmed\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nReview the conversation; no visit requested",
+        "status": "Question answered",
+        "next": "Review the conversation; no visit requested",
+        "error": ""
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "hvac_area_fee_partial: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "hvac_area_fee_partial: completed stream",
+      "pass": true
+    },
+    {
+      "name": "hvac_area_fee_partial: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "hvac_area_fee_partial: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "hvac_area_fee_partial: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "hvac_area_fee_partial: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "HVAC answers Katy and published $89 fee",
+      "pass": true
+    },
+    {
+      "name": "HVAC partial contains no invented contact/address/window",
+      "pass": true
+    },
+    {
+      "name": "callback_only: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "callback_only: completed stream",
+      "pass": true
+    },
+    {
+      "name": "callback_only: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "callback_only: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "callback_only: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "callback_only: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Callback stays callback with name/phone/timing only",
+      "pass": true
+    },
+    {
+      "name": "Callback does not demand a street address or visit window",
+      "pass": true
+    },
+    {
+      "name": "Callback owner status and Next are actionable",
+      "pass": true
+    },
+    {
+      "name": "callback_correction: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "callback_correction: completed stream",
+      "pass": true
+    },
+    {
+      "name": "callback_correction: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "callback_correction: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "callback_correction: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "callback_correction: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Callback correction replaces stale phone/timing and retains facts",
+      "pass": true
+    },
+    {
+      "name": "Corrected callback remains callback in owner DOM",
+      "pass": true
+    },
+    {
+      "name": "spanish_size_fee: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "spanish_size_fee: completed stream",
+      "pass": true
+    },
+    {
+      "name": "spanish_size_fee: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "spanish_size_fee: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "spanish_size_fee: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "spanish_size_fee: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Spanish quote uses supplied size facts and published starting fee",
+      "pass": true
+    },
+    {
+      "name": "spanish_complete_correction: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "spanish_complete_correction: completed stream",
+      "pass": true
+    },
+    {
+      "name": "spanish_complete_correction: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "spanish_complete_correction: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "spanish_complete_correction: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "spanish_complete_correction: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Spanish completed request and correction retain current facts",
+      "pass": true
+    },
+    {
+      "name": "Spanish owner DOM exposes visit request and review next step",
+      "pass": true
+    },
+    {
+      "name": "gas_initial_safety: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "gas_initial_safety: completed stream",
+      "pass": true
+    },
+    {
+      "name": "gas_initial_safety: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "gas_initial_safety: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "gas_initial_safety: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "gas_initial_safety: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Gas first delivered instruction is safety before intake",
+      "pass": true
+    },
+    {
+      "name": "Gas owner action is emergency human handoff",
+      "pass": true
+    },
+    {
+      "name": "unpublished_slab_quote: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "unpublished_slab_quote: completed stream",
+      "pass": true
+    },
+    {
+      "name": "unpublished_slab_quote: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "unpublished_slab_quote: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "unpublished_slab_quote: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "unpublished_slab_quote: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Unpublished slab quote declines invented repair/combined total",
+      "pass": true
+    },
+    {
+      "name": "Informational slab question remains question only",
+      "pass": true
+    },
+    {
+      "name": "unsupported_pearland: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "unsupported_pearland: completed stream",
+      "pass": true
+    },
+    {
+      "name": "unsupported_pearland: actual inference counted",
+      "pass": true
+    },
+    {
+      "name": "unsupported_pearland: final reply delivered in page",
+      "pass": true
+    },
+    {
+      "name": "unsupported_pearland: structured owner action displayed",
+      "pass": true
+    },
+    {
+      "name": "unsupported_pearland: no false completed booking/message claim",
+      "pass": true
+    },
+    {
+      "name": "Pearland clearly declined without intake loop",
+      "pass": true
+    },
+    {
+      "name": "Unsupported area owner status is question only",
+      "pass": true
+    },
+    {
+      "name": "No browser JavaScript errors",
+      "pass": true
+    },
+    {
+      "name": "Shared backend stayed frozen",
+      "pass": true
+    },
+    {
+      "name": "Cumulative HTTP ceiling retained with zero guard blocks",
+      "pass": true
+    }
+  ],
+  "browserErrors": [],
+  "blockedBrowserRequests": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "servedSources": {
+    "/": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "/styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "/site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "/script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "/stories.js": "ceca811125766646f2725c9752b611354f25d12084989422c8c151e2bd6d8724"
+  },
+  "result": "passed_pending_PO_raw_semantic_review",
+  "manualSemanticReviewRequired": true,
+  "sourceAfter": {
+    "netlify/functions/chat.mjs": "869cad5bb8623520de29e08788eb38b7586f2eb26d56dc1d3082849c98cdd7e6",
+    "netlify/functions/lib/practice-personas.mjs": "4d23449d12f905687324f19c613ffc81f0466d381f492bb166eb3938647ef034",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd",
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "stories.js": "ceca811125766646f2725c9752b611354f25d12084989422c8c151e2bd6d8724",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09",
+    "scripts/demo-outcome-model-check.mjs": "f8d9ac71b9588d5cea7098bad64858929d39b8b2429053825fb280c84a35d24c"
+  },
+  "sourceDrift": [],
+  "ledger": {
+    "phase": "demo-owner-outcomes-2026-10-21",
+    "startedAt": "2026-10-22T02:04:49.279Z",
+    "maxAnthropicRequests": 20,
+    "maxVapiCreates": 3,
+    "anthropicRequests": 16,
+    "vapiCreates": 1,
+    "blocked": 0,
+    "requests": [
+      {
+        "at": "2026-10-22T02:09:15.503Z",
+        "provider": "vapi",
+        "sequence": 1,
+        "method": "POST",
+        "host": "api.vapi.ai",
+        "path": "/call/web",
+        "status": 401,
+        "providerMessage": "Invalid Key. Hot tip, you may be using the private key instead of the public key, or vice versa."
+      },
+      {
+        "at": "2026-10-22T02:09:17.449Z",
+        "provider": "anthropic",
+        "sequence": 1,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:29.556Z",
+        "provider": "anthropic",
+        "sequence": 2,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:31.545Z",
+        "provider": "anthropic",
+        "sequence": 3,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:34.810Z",
+        "provider": "anthropic",
+        "sequence": 4,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:36.762Z",
+        "provider": "anthropic",
+        "sequence": 5,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:39.330Z",
+        "provider": "anthropic",
+        "sequence": 6,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:41.093Z",
+        "provider": "anthropic",
+        "sequence": 7,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:43.910Z",
+        "provider": "anthropic",
+        "sequence": 8,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:46.129Z",
+        "provider": "anthropic",
+        "sequence": 9,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:50.097Z",
+        "provider": "anthropic",
+        "sequence": 10,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:52.793Z",
+        "provider": "anthropic",
+        "sequence": 11,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:55.406Z",
+        "provider": "anthropic",
+        "sequence": 12,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:09:58.447Z",
+        "provider": "anthropic",
+        "sequence": 13,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:10:01.523Z",
+        "provider": "anthropic",
+        "sequence": 14,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:10:04.093Z",
+        "provider": "anthropic",
+        "sequence": 15,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "at": "2026-10-22T02:10:06.690Z",
+        "provider": "anthropic",
+        "sequence": 16,
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      }
+    ],
+    "scope": "Loopback memory; real typed AI and at most3 browser voice creates90seconds each. Existing provider keys only. No telephone, SMS, email, Calendar, shop data or other outbound API. Earlier phase ledgers remain unchanged."
+  },
+  "finishedAt": "2026-10-22T02:10:08.472Z"
+}

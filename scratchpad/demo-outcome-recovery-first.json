@@ -1,0 +1,397 @@
+{
+  "startedAt": "2026-10-22T02:12:59.644Z",
+  "phase": "recovery",
+  "base": "http://127.0.0.1:8893",
+  "source": {
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "stories.js": "ceca811125766646f2725c9752b611354f25d12084989422c8c151e2bd6d8724",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09"
+  },
+  "servedSources": [],
+  "checks": [
+    {
+      "name": "fresh offscreen Watch does not run or request anything",
+      "pass": true
+    },
+    {
+      "name": "first viewport intersection advances ordinary Watch automatically",
+      "pass": true
+    },
+    {
+      "name": "Pause preserves revealed facts without advancing",
+      "pass": true
+    },
+    {
+      "name": "offscreen playback pauses without advancing",
+      "pass": true
+    },
+    {
+      "name": "returning on screen requires explicit Play",
+      "pass": true
+    },
+    {
+      "name": "Replay restarts ordered playback at first fact",
+      "pass": true
+    },
+    {
+      "name": "hidden document pauses active playback",
+      "pass": true
+    },
+    {
+      "name": "keyboard scenario activation starts selected conversation",
+      "pass": true
+    },
+    {
+      "name": "Shift+Enter creates newline without sending",
+      "pass": true
+    },
+    {
+      "name": "Enter explicitly sends fragmented UTF8 reply and actual callback summary",
+      "pass": true
+    },
+    {
+      "name": "blank send remains disabled",
+      "pass": true
+    },
+    {
+      "name": "rate limit restores exact draft and truthful previous summary",
+      "pass": true
+    },
+    {
+      "name": "retry clears error and does not duplicate failed history",
+      "pass": true
+    },
+    {
+      "name": "stream error removes partial answer, retains draft and prior summary",
+      "pass": true
+    },
+    {
+      "name": "malformed stream removes partial answer, retains draft and prior summary",
+      "pass": true
+    },
+    {
+      "name": "missing completion removes partial answer, retains draft and prior summary",
+      "pass": true
+    },
+    {
+      "name": "90-second timeout restores a retryable draft",
+      "pass": true
+    },
+    {
+      "name": "Start over rejects late typed reply and owner summary",
+      "pass": true
+    },
+    {
+      "name": "scenario switch rejects late typed reply and prior-shop summary",
+      "pass": true
+    },
+    {
+      "name": "new scenario starts fresh request history",
+      "pass": true
+    },
+    {
+      "name": "Watch switch rejects late typed completion",
+      "pass": true
+    },
+    {
+      "name": "Start over destroys voice and rejects late transcript/summary",
+      "pass": true
+    },
+    {
+      "name": "scenario switch destroys voice and rejects prior-shop callbacks",
+      "pass": true
+    },
+    {
+      "name": "inline challenge is unobstructed and sales launcher cannot take focus",
+      "pass": true,
+      "detail": {
+        "hit": true,
+        "launcherHidden": true,
+        "launcherFocusable": false
+      }
+    },
+    {
+      "name": "sales launcher returns away from inline controls",
+      "pass": true
+    },
+    {
+      "name": "zero unexpected network attempts",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        }
+      ]
+    },
+    {
+      "name": "zero browser errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "relevant sources stayed stable",
+      "pass": true
+    }
+  ],
+  "issues": [],
+  "cases": [
+    {
+      "name": "390px local recovery and keyboard fixtures",
+      "mode": "live",
+      "progress": "1 of 4 messages",
+      "messages": "Front deskHi! I’m the AI front desk for Bayou Air & Heat. Ask me about an AC problem, our area or a service visit.",
+      "summary": "JobWaiting for your requestWhereNot provided yetWindowNot chosen yetContactNot provided yetNextTell the front desk what you need",
+      "status": "Waiting for details",
+      "input": "",
+      "busy": "false",
+      "error": "",
+      "requests": 11,
+      "timeoutScale": "Only exact90000ms request timeout accelerated to80ms; playback uses real timers"
+    }
+  ],
+  "screenshots": [
+    "scratchpad/demo-outcome-recovery-first-390-recovery.png"
+  ],
+  "browserErrors": [],
+  "blockedRequests": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "typedFixtureRequests": [
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        },
+        {
+          "role": "assistant",
+          "content": "Callback request ready for Dana."
+        },
+        {
+          "role": "user",
+          "content": "stream error"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        },
+        {
+          "role": "assistant",
+          "content": "Callback request ready for Dana."
+        },
+        {
+          "role": "user",
+          "content": "malformed stream"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        },
+        {
+          "role": "assistant",
+          "content": "Callback request ready for Dana."
+        },
+        {
+          "role": "user",
+          "content": "missing completion"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        },
+        {
+          "role": "assistant",
+          "content": "Callback request ready for Dana."
+        },
+        {
+          "role": "user",
+          "content": "Timeout draft"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Call me\na"
+        },
+        {
+          "role": "assistant",
+          "content": "José requested a callback — not a visit."
+        },
+        {
+          "role": "user",
+          "content": "Please call again"
+        },
+        {
+          "role": "assistant",
+          "content": "Callback request ready for Dana."
+        },
+        {
+          "role": "user",
+          "content": "Reset pending"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "katy-pipeworks",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Switch pending"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "westheimer-maids",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Fresh Spanish request"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    },
+    {
+      "persona": "westheimer-maids",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Fresh Spanish request"
+        },
+        {
+          "role": "assistant",
+          "content": "Solicitud preparada."
+        },
+        {
+          "role": "user",
+          "content": "Watch pending"
+        }
+      ],
+      "stream": true,
+      "page": "/"
+    }
+  ],
+  "scope": "Local rendered UI/dependency fixtures, explicitly identified by phase; no actual mic, audio connection, provider request or real-model customer-semantic quality proof",
+  "sourceFingerprint": "17bff42aa0d7677d7ef39dca77afb407154010e45f6c0b7782d920f1d9b3e94a",
+  "result": "passed",
+  "finishedAt": "2026-10-22T02:13:15.275Z"
+}

@@ -2,4 +2,10 @@
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()
+
+/
+  Content-Security-Policy: frame-ancestors 'self'; connect-src 'self' https://*.vapi.ai wss://*.vapi.ai https://*.daily.co wss://*.daily.co; media-src 'self' blob: https://*.daily.co; frame-src 'self' blob: https://*.daily.co
+
+/index.html
+  Content-Security-Policy: frame-ancestors 'self'; connect-src 'self' https://*.vapi.ai wss://*.vapi.ai https://*.daily.co wss://*.daily.co; media-src 'self' blob: https://*.daily.co; frame-src 'self' blob: https://*.daily.co

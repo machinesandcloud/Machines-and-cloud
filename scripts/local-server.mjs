@@ -23,7 +23,11 @@ const PORT = Number(process.env.PORT) || 8888;
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error("PORT must be between 1 and 65535");
 process.env.URL = `http://127.0.0.1:${PORT}`;
 if (process.env.MC_LOCAL_NO_KEYS !== "0") {
-  for (const k of ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "VAPI_API_KEY", "RESEND_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY"]) delete process.env[k];
+  for (const k of ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "VAPI_API_KEY", "VAPI_PUBLIC_KEY", "RESEND_API_KEY", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY"]) {
+    // Narrow opt-in for an explicitly bounded browser-voice rehearsal. No other provider is enabled.
+    if (["VAPI_API_KEY", "VAPI_PUBLIC_KEY"].includes(k) && process.env.MC_LOCAL_VOICE === "1") continue;
+    delete process.env[k];
+  }
   process.env.VAPI_WEBHOOK_SECRET = process.env.LOCAL_VAPI_WEBHOOK_SECRET || "local-vapi-secret";
 }
 
@@ -73,6 +77,6 @@ const server = createServer(async (req, res) => {
     const nf = staticFile("/404.html"); res.writeHead(404, { "Content-Type": "text/html" }); res.end(nf ? nf.body : "not found");
   } catch (err) { console.error(req.method, url.pathname, err); res.writeHead(500, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: "local_server", message: String(err?.message || err) })); }
 });
-server.listen(PORT, "127.0.0.1", () => console.log(`local front desk at ${process.env.URL} (${routes.length} routes, admin key ${process.env.ADMIN_KEY}, model ${process.env.MC_FAKE_MODEL === "1" ? "FAKE (deterministic rules; add ANTHROPIC_API_KEY to .env for the real one)" : process.env.ANTHROPIC_API_KEY ? "real" : "off"}, provider APIs ${process.env.MC_LOCAL_NO_KEYS === "0" ? "enabled" : "disabled"})`));
+server.listen(PORT, "127.0.0.1", () => console.log(`local front desk at ${process.env.URL} (${routes.length} routes, admin key ${process.env.ADMIN_KEY}, model ${process.env.MC_FAKE_MODEL === "1" ? "FAKE (deterministic rules; add ANTHROPIC_API_KEY to .env for the real one)" : process.env.ANTHROPIC_API_KEY ? "real" : "off"}, provider APIs ${process.env.MC_LOCAL_NO_KEYS === "0" ? "enabled" : process.env.MC_LOCAL_VOICE === "1" ? "voice practice only" : "disabled"})`));
 async function snapshot() { if (!process.env.MC_MEMORY_FILE) return; const out = {}; for (const kind of ["clients", "index", "conversations", "bookings", "leads", "alerts", "events", "tasks", "usage", "customers", "optouts", "health"]) { out[kind] = {}; for (const k of await store.list(kind, "")) out[kind][k] = await store.get(kind, k); } writeFileSync(join(root, process.env.MC_MEMORY_FILE), JSON.stringify(out)); console.log("store saved"); }
 for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, async () => { await snapshot(); process.exit(0); });

@@ -1,0 +1,87 @@
+{
+  "startedAt": "2026-10-22T02:19:06.428Z",
+  "phase": "fallback",
+  "base": "http://127.0.0.1:8893",
+  "source": {
+    "index.html": "08c69f35f87215116c677427d23735f79abf0667e037f4e968bd0bfc009da355",
+    "stories.js": "d8725cfbe9e395a65c8a643c571a80d65d040a515932ce6c08440f54f9075a97",
+    "site-refresh.css": "cdea46bac0e81596dd8e539e815395ddbd784be42b85019ec2a353f6a304025d",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09"
+  },
+  "servedSources": [],
+  "checks": [
+    {
+      "name": "not_supported presents correct friendly typing fallback",
+      "pass": true,
+      "detail": {
+        "status": "Voice is unavailable in this browser. You can use the live typed chat below.",
+        "error": "Voice is unavailable in this browser. You can use the live typed chat below.",
+        "errorVisible": true,
+        "inputDisabled": false,
+        "stopHidden": true,
+        "startHidden": false
+      }
+    },
+    {
+      "name": "not_supported restores usable composer and retry control",
+      "pass": true
+    },
+    {
+      "name": "daily_limit presents correct friendly typing fallback",
+      "pass": true,
+      "detail": {
+        "status": "Today’s practice call allowance has been used. The live typed chat is ready below.",
+        "error": "Today’s practice call allowance has been used. The live typed chat is ready below.",
+        "errorVisible": true,
+        "inputDisabled": false,
+        "stopHidden": true,
+        "startHidden": false
+      }
+    },
+    {
+      "name": "daily_limit restores usable composer and retry control",
+      "pass": true
+    },
+    {
+      "name": "zero unexpected network attempts",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        }
+      ]
+    },
+    {
+      "name": "zero browser errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "relevant sources stayed stable",
+      "pass": true
+    }
+  ],
+  "issues": [],
+  "cases": [
+    {
+      "name": "two actual bridge-code UI fallbacks",
+      "calls": "Injected MCDemoVoice only; no microphone, SDK, proxy or typed send"
+    }
+  ],
+  "screenshots": [],
+  "browserErrors": [],
+  "blockedRequests": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "typedFixtureRequests": [],
+  "scope": "Local rendered UI/dependency fixtures, explicitly identified by phase; no actual mic, audio connection, provider request or real-model customer-semantic quality proof",
+  "sourceFingerprint": "00f8c7046f4f39dee1a1020d09a15ee8cefc4e19a4651a1bb8495c264919d248",
+  "result": "passed",
+  "finishedAt": "2026-10-22T02:19:07.635Z"
+}

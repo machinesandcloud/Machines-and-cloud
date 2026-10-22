@@ -1,0 +1,145 @@
+{
+  "startedAt": "2026-10-22T02:25:51.218Z",
+  "phase": "fallback",
+  "base": "http://127.0.0.1:8893",
+  "source": {
+    "index.html": "1fd422b8a50bce97128deee425dfff105a57376ebe77e3cbb20e1d25f78e2af4",
+    "stories.js": "8f5f33d7a0e65ad6dc21a7cbb261add5c59a129cadce6673c76aa42cbd4f7c75",
+    "site-refresh.css": "1eb9cc5181786bc29b8ae348f0dd8cc807fad970893ae7d513f73186840dad2c",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09"
+  },
+  "servedSources": [],
+  "checks": [
+    {
+      "name": "sms discovers voice only for English plumbing",
+      "pass": true,
+      "detail": {
+        "hidden": true,
+        "display": "none",
+        "heading": "English plumbing practice call",
+        "rendered": false
+      }
+    },
+    {
+      "name": "sms retains usable explicit-send typing and challenges",
+      "pass": true
+    },
+    {
+      "name": "sms typing preserves the draft without a voice start",
+      "pass": true
+    },
+    {
+      "name": "spanish discovers voice only for English plumbing",
+      "pass": true,
+      "detail": {
+        "hidden": true,
+        "display": "none",
+        "heading": "English plumbing practice call",
+        "rendered": false
+      }
+    },
+    {
+      "name": "spanish retains usable explicit-send typing and challenges",
+      "pass": true
+    },
+    {
+      "name": "spanish typing preserves the draft without a voice start",
+      "pass": true
+    },
+    {
+      "name": "call discovers voice only for English plumbing",
+      "pass": true,
+      "detail": {
+        "hidden": false,
+        "display": "flex",
+        "heading": "English plumbing practice call",
+        "rendered": true
+      }
+    },
+    {
+      "name": "call retains usable explicit-send typing and challenges",
+      "pass": true
+    },
+    {
+      "name": "call typing preserves the draft without a voice start",
+      "pass": true
+    },
+    {
+      "name": "not_supported presents correct friendly typing fallback",
+      "pass": true,
+      "detail": {
+        "status": "Voice is unavailable in this browser. You can use the live typed chat below.",
+        "error": "Voice is unavailable in this browser. You can use the live typed chat below.",
+        "errorVisible": true,
+        "inputDisabled": false,
+        "stopHidden": true,
+        "startHidden": false
+      }
+    },
+    {
+      "name": "not_supported restores usable composer and retry control",
+      "pass": true
+    },
+    {
+      "name": "daily_limit presents correct friendly typing fallback",
+      "pass": true,
+      "detail": {
+        "status": "Today’s practice call allowance has been used. The live typed chat is ready below.",
+        "error": "Today’s practice call allowance has been used. The live typed chat is ready below.",
+        "errorVisible": true,
+        "inputDisabled": false,
+        "stopHidden": true,
+        "startHidden": false
+      }
+    },
+    {
+      "name": "daily_limit restores usable composer and retry control",
+      "pass": true
+    },
+    {
+      "name": "English plumbing Start invokes only the selected voice fixture",
+      "pass": true
+    },
+    {
+      "name": "zero unexpected network attempts",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        }
+      ]
+    },
+    {
+      "name": "zero browser errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "relevant sources stayed stable",
+      "pass": true
+    }
+  ],
+  "issues": [],
+  "cases": [
+    {
+      "name": "three scenario voice discovery and two actual bridge-code UI fallbacks",
+      "calls": "Injected MCDemoVoice only; no microphone, SDK, proxy or typed send"
+    }
+  ],
+  "screenshots": [],
+  "browserErrors": [],
+  "blockedRequests": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "typedFixtureRequests": [],
+  "scope": "Local rendered UI/dependency fixtures, explicitly identified by phase; no actual mic, audio connection, provider request or real-model customer-semantic quality proof",
+  "sourceFingerprint": "ba3fa8f350f09c523becdfb1e6faa0965c4fb150d192eb08c888f2afb87ab48f",
+  "result": "passed",
+  "finishedAt": "2026-10-22T02:25:52.604Z"
+}

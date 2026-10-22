@@ -1,0 +1,1310 @@
+{
+  "startedAt": "2026-10-22T01:58:48.139Z",
+  "phase": "bridge",
+  "base": "http://127.0.0.1:8893",
+  "source": {
+    "practice-voice.js": "63e58c2820086542efb71d2b71d73cdcce770ee12286c0e8425848e541420b09"
+  },
+  "checks": [
+    {
+      "name": "loading bridge performs no microphone/SDK/proxy work",
+      "pass": true
+    },
+    {
+      "name": "explicit start resolves room ID with injected audio",
+      "pass": true
+    },
+    {
+      "name": "proxy request contains only fixed persona and language",
+      "pass": true
+    },
+    {
+      "name": "voice reports connecting/listening/speaking transitions",
+      "pass": true
+    },
+    {
+      "name": "partial and final transcript states remain distinct",
+      "pass": true
+    },
+    {
+      "name": "only valid requested-action summary reaches fixed owner",
+      "pass": true,
+      "detail": [
+        {
+          "id": 0,
+          "name": "onSummary",
+          "data": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "713-555-0111",
+              "address": "",
+              "issue": "Dripping tap",
+              "requested_window": "after 3 pm",
+              "urgency": "flexible",
+              "language": "en",
+              "requested_action": "callback"
+            },
+            "at": "2026-10-22T01:58:49.239Z"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stop ends once, releases track and closes SDK once",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "listening"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "speaking"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "listening"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onTranscript",
+            "data": {
+              "role": "user",
+              "text": "Call me",
+              "isFinal": false
+            }
+          },
+          {
+            "id": 0,
+            "name": "onTranscript",
+            "data": {
+              "role": "assistant",
+              "text": "Your callback is requested.",
+              "isFinal": true
+            }
+          },
+          {
+            "id": 0,
+            "name": "onSummary",
+            "data": {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "Morgan Lee",
+                "phone": "713-555-0111",
+                "address": "",
+                "issue": "Dripping tap",
+                "requested_window": "after 3 pm",
+                "urgency": "flexible",
+                "language": "en",
+                "requested_action": "callback"
+              },
+              "at": "2026-10-22T01:58:49.239Z"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "stopped"
+            }
+          }
+        ],
+        "requests": [
+          {
+            "url": "/api/practice-voice/call/web",
+            "method": "POST",
+            "body": {
+              "persona": "bayou-air",
+              "language": "en"
+            }
+          }
+        ],
+        "micCalls": 1,
+        "sdkLoads": 1,
+        "stoppedTracks": 1,
+        "instances": [
+          {
+            "stops": 1,
+            "sent": [
+              {
+                "type": "end-call"
+              }
+            ],
+            "joins": [
+              {
+                "id": "fixture-call",
+                "webCallUrl": "https://example.daily.co/fixture-room"
+              }
+            ],
+            "audioInjected": true,
+            "startAudioOff": false
+          }
+        ],
+        "timers": []
+      }
+    },
+    {
+      "name": "stopped session ignores all late callbacks",
+      "pass": true
+    },
+    {
+      "name": "NotAllowedError returns null with actionable failure before SDK/proxy",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onError",
+            "data": {
+              "code": "microphone_denied",
+              "message": "Microphone access was denied. Allow it in your browser or type instead."
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "error"
+            }
+          }
+        ],
+        "requests": [],
+        "micCalls": 1,
+        "sdkLoads": 0,
+        "stoppedTracks": 0,
+        "instances": [],
+        "timers": []
+      }
+    },
+    {
+      "name": "NotFoundError returns null with actionable failure before SDK/proxy",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onError",
+            "data": {
+              "code": "microphone_unavailable",
+              "message": "No usable microphone was found. Check the device or type instead."
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "error"
+            }
+          }
+        ],
+        "requests": [],
+        "micCalls": 1,
+        "sdkLoads": 0,
+        "stoppedTracks": 0,
+        "instances": [],
+        "timers": []
+      }
+    },
+    {
+      "name": "unsupported browser refuses voice before device/proxy work",
+      "pass": true
+    },
+    {
+      "name": "daily cap ends without retaining microphone",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onError",
+            "data": {
+              "code": "daily_limit",
+              "message": "Voice practice is busy or has reached its limit. Please try later."
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "error"
+            }
+          }
+        ],
+        "requests": [
+          {
+            "url": "/api/practice-voice/call/web",
+            "method": "POST",
+            "body": {
+              "persona": "bayou-air",
+              "language": "en"
+            }
+          }
+        ],
+        "micCalls": 1,
+        "sdkLoads": 1,
+        "stoppedTracks": 1,
+        "instances": [],
+        "timers": []
+      }
+    },
+    {
+      "name": "SDK failure ends without retaining microphone",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onError",
+            "data": {
+              "code": "connection_failed",
+              "message": "Voice could not connect. Please try again or type."
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "error"
+            }
+          }
+        ],
+        "requests": [],
+        "micCalls": 1,
+        "sdkLoads": 1,
+        "stoppedTracks": 1,
+        "instances": [],
+        "timers": []
+      }
+    },
+    {
+      "name": "join failure ends without retaining microphone",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onError",
+            "data": {
+              "code": "connection_failed",
+              "message": "Voice could not connect. Please try again or type."
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "error"
+            }
+          }
+        ],
+        "requests": [
+          {
+            "url": "/api/practice-voice/call/web",
+            "method": "POST",
+            "body": {
+              "persona": "bayou-air",
+              "language": "en"
+            }
+          }
+        ],
+        "micCalls": 1,
+        "sdkLoads": 1,
+        "stoppedTracks": 1,
+        "instances": [
+          {
+            "stops": 1,
+            "sent": [
+              {
+                "type": "end-call"
+              }
+            ],
+            "joins": [
+              {
+                "id": "fixture-call",
+                "webCallUrl": "https://example.daily.co/fixture-room"
+              }
+            ],
+            "audioInjected": true,
+            "startAudioOff": false
+          }
+        ],
+        "timers": []
+      }
+    },
+    {
+      "name": "cancel settles ready without waiting for microphone",
+      "pass": true
+    },
+    {
+      "name": "late granted microphone is stopped without SDK/proxy work",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "stopped"
+            }
+          }
+        ],
+        "requests": [],
+        "micCalls": 1,
+        "sdkLoads": 0,
+        "stoppedTracks": 1,
+        "instances": [],
+        "timers": []
+      }
+    },
+    {
+      "name": "timeout settles ready without waiting for microphone",
+      "pass": true
+    },
+    {
+      "name": "late granted microphone is stopped without SDK/proxy work",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onError",
+            "data": {
+              "code": "timeout",
+              "message": "Voice took too long to connect. Please try again."
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "error"
+            }
+          }
+        ],
+        "requests": [],
+        "micCalls": 1,
+        "sdkLoads": 0,
+        "stoppedTracks": 1,
+        "instances": [],
+        "timers": []
+      }
+    },
+    {
+      "name": "duration cap stops and releases all audio resources",
+      "pass": true,
+      "detail": {
+        "events": [
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "connecting"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "listening"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onStatus",
+            "data": {
+              "state": "ended"
+            }
+          },
+          {
+            "id": 0,
+            "name": "onEnd",
+            "data": {
+              "reason": "duration_limit"
+            }
+          }
+        ],
+        "requests": [
+          {
+            "url": "/api/practice-voice/call/web",
+            "method": "POST",
+            "body": {
+              "persona": "bayou-air",
+              "language": "en"
+            }
+          }
+        ],
+        "micCalls": 1,
+        "sdkLoads": 1,
+        "stoppedTracks": 1,
+        "instances": [
+          {
+            "stops": 1,
+            "sent": [
+              {
+                "type": "end-call"
+              }
+            ],
+            "joins": [
+              {
+                "id": "fixture-call",
+                "webCallUrl": "https://example.daily.co/fixture-room"
+              }
+            ],
+            "audioInjected": true,
+            "startAudioOff": false
+          }
+        ],
+        "timers": []
+      }
+    },
+    {
+      "name": "scenario replacement releases prior mic and rejects stale callbacks",
+      "pass": true
+    },
+    {
+      "name": "pagehide releases microphone and SDK",
+      "pass": true
+    },
+    {
+      "name": "invalid persona starts no device or proxy work",
+      "pass": true
+    },
+    {
+      "name": "zero real network attempts",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "zero browser errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "bridge source stayed stable",
+      "pass": true
+    }
+  ],
+  "issues": [],
+  "cases": [
+    {
+      "name": "explicit start, transport, valid action, stop and late-event isolation",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "listening"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "speaking"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "listening"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onTranscript",
+          "data": {
+            "role": "user",
+            "text": "Call me",
+            "isFinal": false
+          }
+        },
+        {
+          "id": 0,
+          "name": "onTranscript",
+          "data": {
+            "role": "assistant",
+            "text": "Your callback is requested.",
+            "isFinal": true
+          }
+        },
+        {
+          "id": 0,
+          "name": "onSummary",
+          "data": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "713-555-0111",
+              "address": "",
+              "issue": "Dripping tap",
+              "requested_window": "after 3 pm",
+              "urgency": "flexible",
+              "language": "en",
+              "requested_action": "callback"
+            },
+            "at": "2026-10-22T01:58:49.239Z"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "stopped"
+          }
+        }
+      ],
+      "requests": [
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "bayou-air",
+            "language": "en"
+          }
+        }
+      ],
+      "micCalls": 1,
+      "sdkLoads": 1,
+      "stoppedTracks": 1,
+      "instances": [
+        {
+          "stops": 1,
+          "sent": [
+            {
+              "type": "end-call"
+            }
+          ],
+          "joins": [
+            {
+              "id": "fixture-call",
+              "webCallUrl": "https://example.daily.co/fixture-room"
+            }
+          ],
+          "audioInjected": true,
+          "startAudioOff": false
+        }
+      ],
+      "timers": []
+    },
+    {
+      "name": "NotAllowedError",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "microphone_denied",
+            "message": "Microphone access was denied. Allow it in your browser or type instead."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 1,
+      "sdkLoads": 0,
+      "stoppedTracks": 0,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "NotFoundError",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "microphone_unavailable",
+            "message": "No usable microphone was found. Check the device or type instead."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 1,
+      "sdkLoads": 0,
+      "stoppedTracks": 0,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "unsupported browser",
+      "events": [
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "not_supported",
+            "message": "Voice needs HTTPS and a browser with microphone access."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 0,
+      "sdkLoads": 0,
+      "stoppedTracks": 0,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "daily cap",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "daily_limit",
+            "message": "Voice practice is busy or has reached its limit. Please try later."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "bayou-air",
+            "language": "en"
+          }
+        }
+      ],
+      "micCalls": 1,
+      "sdkLoads": 1,
+      "stoppedTracks": 1,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "SDK failure",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "connection_failed",
+            "message": "Voice could not connect. Please try again or type."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 1,
+      "sdkLoads": 1,
+      "stoppedTracks": 1,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "join failure",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "connection_failed",
+            "message": "Voice could not connect. Please try again or type."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "bayou-air",
+            "language": "en"
+          }
+        }
+      ],
+      "micCalls": 1,
+      "sdkLoads": 1,
+      "stoppedTracks": 1,
+      "instances": [
+        {
+          "stops": 1,
+          "sent": [
+            {
+              "type": "end-call"
+            }
+          ],
+          "joins": [
+            {
+              "id": "fixture-call",
+              "webCallUrl": "https://example.daily.co/fixture-room"
+            }
+          ],
+          "audioInjected": true,
+          "startAudioOff": false
+        }
+      ],
+      "timers": []
+    },
+    {
+      "name": "cancel while microphone pending",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "stopped"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 1,
+      "sdkLoads": 0,
+      "stoppedTracks": 1,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "startup timeout",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "timeout",
+            "message": "Voice took too long to connect. Please try again."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 1,
+      "sdkLoads": 0,
+      "stoppedTracks": 1,
+      "instances": [],
+      "timers": []
+    },
+    {
+      "name": "90-second hard limit",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "listening"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "duration_limit"
+          }
+        }
+      ],
+      "requests": [
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "bayou-air",
+            "language": "en"
+          }
+        }
+      ],
+      "micCalls": 1,
+      "sdkLoads": 1,
+      "stoppedTracks": 1,
+      "instances": [
+        {
+          "stops": 1,
+          "sent": [
+            {
+              "type": "end-call"
+            }
+          ],
+          "joins": [
+            {
+              "id": "fixture-call",
+              "webCallUrl": "https://example.daily.co/fixture-room"
+            }
+          ],
+          "audioInjected": true,
+          "startAudioOff": false
+        }
+      ],
+      "timers": []
+    },
+    {
+      "name": "new persona destroys prior audio session",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 1,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        },
+        {
+          "id": 1,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 1,
+          "name": "onEnd",
+          "data": {
+            "reason": "stopped"
+          }
+        }
+      ],
+      "requests": [
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "bayou-air",
+            "language": "en"
+          }
+        },
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "katy-pipeworks",
+            "language": "en"
+          }
+        }
+      ],
+      "micCalls": 2,
+      "sdkLoads": 2,
+      "stoppedTracks": 2,
+      "instances": [
+        {
+          "stops": 1,
+          "sent": [
+            {
+              "type": "end-call"
+            }
+          ],
+          "joins": [
+            {
+              "id": "fixture-call",
+              "webCallUrl": "https://example.daily.co/fixture-room"
+            }
+          ],
+          "audioInjected": true,
+          "startAudioOff": false
+        },
+        {
+          "stops": 1,
+          "sent": [
+            {
+              "type": "end-call"
+            }
+          ],
+          "joins": [
+            {
+              "id": "fixture-call",
+              "webCallUrl": "https://example.daily.co/fixture-room"
+            }
+          ],
+          "audioInjected": true,
+          "startAudioOff": false
+        }
+      ],
+      "timers": []
+    },
+    {
+      "name": "page departure cleanup",
+      "events": [
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "connecting"
+          }
+        }
+      ],
+      "requests": [
+        {
+          "url": "/api/practice-voice/call/web",
+          "method": "POST",
+          "body": {
+            "persona": "bayou-air",
+            "language": "en"
+          }
+        }
+      ],
+      "micCalls": 1,
+      "sdkLoads": 1,
+      "stoppedTracks": 1,
+      "instances": [
+        {
+          "stops": 1,
+          "sent": [
+            {
+              "type": "end-call"
+            }
+          ],
+          "joins": [
+            {
+              "id": "fixture-call",
+              "webCallUrl": "https://example.daily.co/fixture-room"
+            }
+          ],
+          "audioInjected": true,
+          "startAudioOff": false
+        }
+      ],
+      "timers": []
+    },
+    {
+      "name": "invalid persona",
+      "events": [
+        {
+          "id": 0,
+          "name": "onError",
+          "data": {
+            "code": "invalid_request",
+            "message": "Choose a supported practice and language."
+          }
+        },
+        {
+          "id": 0,
+          "name": "onStatus",
+          "data": {
+            "state": "ended"
+          }
+        },
+        {
+          "id": 0,
+          "name": "onEnd",
+          "data": {
+            "reason": "error"
+          }
+        }
+      ],
+      "requests": [],
+      "micCalls": 0,
+      "sdkLoads": 0,
+      "stoppedTracks": 0,
+      "instances": [],
+      "timers": []
+    }
+  ],
+  "browserErrors": [],
+  "blockedRequests": [],
+  "scope": "Browser voice bridge with injected microphone/SDK/fetch/timer dependencies; no actual mic, audio connection, provider request or customer-semantic quality proof",
+  "result": "passed",
+  "finishedAt": "2026-10-22T01:58:51.386Z"
+}
