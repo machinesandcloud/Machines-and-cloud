@@ -51,4 +51,16 @@ Readable clipped images use the `acquisition-visual-qa-cta-final-` prefix. They 
 
 ## Release boundary
 
-No deployment, actual customer signup, real email, AI request, provider call, purchase, campaign or billing change is included in this QA. A capture is an inquiry; a verified optional affirmative preference without suppression is an eligible audience record; an exported audience is not a sent campaign. Requested phone, text and calendar connections remain inactive until their separately verified operational paths exist.
+The local phases above included no deployment, actual customer signup, real email, AI request, provider call, purchase, campaign or billing change. A capture is an inquiry; a verified optional affirmative preference without suppression is an eligible audience record; an exported audience is not a sent campaign. Requested phone, text and calendar connections remain inactive until their separately verified operational paths exist.
+
+## Separately approved publication and hosted review
+
+Steve subsequently approved exact commit `04e2c9d27b3179f8bc1c556d80750eb0a1447f3b`, one automatic Netlify build and up to 25 read-only hosted requests. The retained [publication receipt](../scratchpad/acquisition-publication-04e2c9d.json) identifies READY deploy `6ad9b3a60d48419c216d821b`, published October 22 at 06:57:20 UTC, with one automatic build and no manual trigger.
+
+The closed [hosted receipt](../scratchpad/acquisition-hosted-04e2c9d.json) passes **73/73 checks**, using **24 of 25 allowed production GETs**, no redirects or retries and no non-GET request. Eleven CSS, JavaScript and image responses independently match exact committed source bytes. Five private paths return 404. Anonymous intake and access reads return 403 and 401; two explicitly synthetic nonexistent-account reads return 404. The one health GET returns 200/ok, with a natural scheduler run at 07:00:24 UTC and no failing blocks.
+
+Thirty of those checks render the retained deployed HTML and assets in Chrome with all browser networking intercepted. They confirm the preliminary form and optional unchecked email preference, Coverage/Follow-through/Enterprise presentation, one mobile menu X, all twelve messages in each reduced-motion Watch example, no message counter, responsive containment, the unverified signup gate and the uncredentialed owner recovery gate. No browser API request or script error occurred. The three retained mobile screenshots were reviewed independently.
+
+The [independent disposition](../scratchpad/acquisition-hosted-04e2c9d-qa-disposition.json) passes twelve receipt-integrity and scope checks, including rehashing every captured response and all eleven source assets. That audit made **zero additional hosted requests**. The request ledger is closed; the unused one-request headroom is not a reason to reopen it.
+
+This hosted pass did not submit a lead, send a verification email, complete a real signup, exercise live Blobs creation/CAS/revocation, open private customer data or invoke AI, voice or any provider. It also sent no marketing email and changed no purchases or billing. The actual-handler local journey and read-only deployed-byte review remain distinct evidence.
