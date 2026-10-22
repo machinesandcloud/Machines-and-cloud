@@ -47,15 +47,47 @@
       ],
       [
         "agent",
-        "Yes, we serve Katy. The diagnostic visit is $89, applied to the repair if you go ahead. What day and arrival window would you like to request: 8 to 12 or 12 to 5?"
+        "Yes, we serve Katy. The diagnostic visit is $89, applied to the repair if you go ahead."
       ],
       [
         "customer",
-        "Tomorrow, 12 to 5. I’m Alex, (713) 555-0142, at 12 Oak St, Katy."
+        "Does that cover the whole repair? I don’t want a surprise price."
       ],
       [
         "agent",
-        "Thanks, Alex. Your request is ready for Ray to review. Tomorrow, 12 to 5 is requested, not confirmed; the repair price will be quoted on site."
+        "The $89 covers the diagnostic, not the whole repair. The technician quotes the repair on site; I can’t give you a repair total before that."
+      ],
+      [
+        "customer",
+        "Could I request tomorrow at exactly 2 pm?"
+      ],
+      [
+        "agent",
+        "We don’t promise exact arrival times. Our usual windows are 8 to 12 or 12 to 5; which would you like to request?"
+      ],
+      [
+        "customer",
+        "Tomorrow, 12 to 5 works. I’m Alex, (713) 555-0142, at 12 Oak St, Katy."
+      ],
+      [
+        "agent",
+        "Thanks, Alex. The preview has your AC problem, contact details and tomorrow’s 12-to-5 request. That window still needs Ray’s confirmation."
+      ],
+      [
+        "customer",
+        "Actually, use (713) 555-0143 instead. The address is still 12 Oak St."
+      ],
+      [
+        "agent",
+        "Updated your number to (713) 555-0143. The Katy address and tomorrow’s 12-to-5 request stay the same."
+      ],
+      [
+        "customer",
+        "If that window doesn’t work, ask me before choosing a different one."
+      ],
+      [
+        "agent",
+        "Added: ask you before changing the window. Ray’s preview now has the corrected number and your preferred time; no visit is confirmed."
       ]
     ],
     "first": [
@@ -69,7 +101,7 @@
       ],
       [
         "Requested",
-        "Not chosen yet"
+        "No visit requested yet"
       ],
       [
         "Contact",
@@ -77,7 +109,7 @@
       ],
       [
         "Next",
-        "Answer area and fee questions"
+        "Answer service-area and diagnostic-fee questions"
       ]
     ],
     "summary": [
@@ -91,18 +123,202 @@
       ],
       [
         "Requested",
-        "Tomorrow, 12 to 5"
+        "Tomorrow, 12 to 5 · not confirmed"
       ],
       [
         "Contact",
-        "Alex · (713) 555-0142"
+        "Alex · (713) 555-0143"
       ],
       [
         "Next",
-        "Ray confirms the requested window"
+        "Ray to review; ask Alex before changing the window"
       ]
     ],
-    "completeStatus": "Visit request"
+    "completeStatus": "Visit request · not confirmed",
+    "checkpoints": [
+      {
+        "after": 1,
+        "status": "Answering a question",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool"
+          ],
+          [
+            "Where",
+            "Katy; street not provided"
+          ],
+          [
+            "Requested",
+            "No visit requested yet"
+          ],
+          [
+            "Contact",
+            "Not provided yet"
+          ],
+          [
+            "Next",
+            "Answer service-area and diagnostic-fee questions"
+          ]
+        ]
+      },
+      {
+        "after": 3,
+        "status": "Answering a question",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool; asks about repair pricing"
+          ],
+          [
+            "Where",
+            "Katy; street not provided"
+          ],
+          [
+            "Requested",
+            "No visit requested yet"
+          ],
+          [
+            "Contact",
+            "Not provided yet"
+          ],
+          [
+            "Next",
+            "Explain the diagnostic fee and on-site repair quote"
+          ]
+        ]
+      },
+      {
+        "after": 5,
+        "status": "Visit request · time not confirmed",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool"
+          ],
+          [
+            "Where",
+            "Katy; street not provided"
+          ],
+          [
+            "Requested",
+            "Tomorrow at 2 pm; exact times not promised"
+          ],
+          [
+            "Contact",
+            "Not provided yet"
+          ],
+          [
+            "Next",
+            "Choose a usual arrival window"
+          ]
+        ]
+      },
+      {
+        "after": 7,
+        "status": "Visit request · not confirmed",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool"
+          ],
+          [
+            "Where",
+            "12 Oak St, Katy"
+          ],
+          [
+            "Requested",
+            "Tomorrow, 12 to 5 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Alex · (713) 555-0142"
+          ],
+          [
+            "Next",
+            "Ray to review the requested window"
+          ]
+        ]
+      },
+      {
+        "after": 9,
+        "status": "Contact corrected",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool"
+          ],
+          [
+            "Where",
+            "12 Oak St, Katy"
+          ],
+          [
+            "Requested",
+            "Tomorrow, 12 to 5 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Alex · (713) 555-0143"
+          ],
+          [
+            "Next",
+            "Ray to review the request using the corrected number"
+          ]
+        ]
+      },
+      {
+        "after": 11,
+        "status": "Visit request · not confirmed",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool"
+          ],
+          [
+            "Where",
+            "12 Oak St, Katy"
+          ],
+          [
+            "Requested",
+            "Tomorrow, 12 to 5 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Alex · (713) 555-0143"
+          ],
+          [
+            "Next",
+            "Ray to review; ask Alex before changing the window"
+          ]
+        ]
+      },
+      {
+        "after": 12,
+        "status": "Visit request · not confirmed",
+        "rows": [
+          [
+            "Job",
+            "AC runs but won’t cool"
+          ],
+          [
+            "Where",
+            "12 Oak St, Katy"
+          ],
+          [
+            "Requested",
+            "Tomorrow, 12 to 5 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Alex · (713) 555-0143"
+          ],
+          [
+            "Next",
+            "Ray to review; ask Alex before changing the window"
+          ]
+        ]
+      }
+    ]
   },
   "call": {
     "persona": "katy-pipeworks",
@@ -143,21 +359,53 @@
       ],
       [
         "agent",
-        "Active leaks are an after-hours emergency request. The published emergency fee is $150; I can’t promise an arrival time. What’s the street address and best number for an urgent callback request?"
+        "We handle active leaks as after-hours emergencies. The published emergency fee is $150, but no arrival time is confirmed. What’s your name and best callback number?"
       ],
       [
         "customer",
-        "I’m Sam, (713) 555-0151, at 24 Pine St, Fulshear. Please have someone call me; don’t book a visit."
+        "I’m Sam, (713) 555-0151, at 24 Pine St, Fulshear. I only want a call first, not a booked visit."
       ],
       [
         "agent",
-        "Your urgent callback request is ready for Dana to review. No visit is booked and no arrival or callback time is confirmed."
+        "Understood: an urgent callback request, with no visit booked. Your name, number and Fulshear address are in the owner preview."
+      ],
+      [
+        "customer",
+        "Is the $150 the whole bill, or is there a service fee and repair cost too?"
+      ],
+      [
+        "agent",
+        "The $150 is the published after-hours emergency fee, not a repair quote. I can’t confirm whether the $79 service-call fee is additional; that and the repair price need confirmation before a visit."
+      ],
+      [
+        "customer",
+        "Can you guarantee a call back within ten minutes?"
+      ],
+      [
+        "agent",
+        "I can’t guarantee a callback time. I’ve added your request for a call within ten minutes to the preview; the timing is not confirmed."
+      ],
+      [
+        "customer",
+        "Use (713) 555-0154 instead, and call only, please. Don’t text me."
+      ],
+      [
+        "agent",
+        "Updated to (713) 555-0154 and noted call only, no texts. This remains a callback request, not a visit."
+      ],
+      [
+        "customer",
+        "The leak is under the kitchen sink. Don’t send anyone until we’ve spoken."
+      ],
+      [
+        "agent",
+        "The preview for Dana now says active leak under the kitchen sink, urgent callback only, and speak with you before any visit. Your corrected number is included; no callback or arrival time is confirmed."
       ]
     ],
     "first": [
       [
         "Job",
-        "Active leak after hours"
+        "Active leak at 10 pm"
       ],
       [
         "Where",
@@ -165,7 +413,7 @@
       ],
       [
         "Priority",
-        "Urgent"
+        "Urgent after-hours request"
       ],
       [
         "Contact",
@@ -173,13 +421,13 @@
       ],
       [
         "Next",
-        "Collect urgent callback details"
+        "Collect the caller’s preferred next step and callback details"
       ]
     ],
     "summary": [
       [
         "Job",
-        "Active leak at 10 pm"
+        "Active leak under kitchen sink at 10 pm"
       ],
       [
         "Where",
@@ -187,18 +435,230 @@
       ],
       [
         "Request",
-        "Callback only; no visit"
+        "Callback only; no texts; speak before any visit"
       ],
       [
         "Contact",
-        "Sam · (713) 555-0151"
+        "Sam · (713) 555-0154"
+      ],
+      [
+        "Timing",
+        "Within ten minutes requested · not confirmed"
       ],
       [
         "Next",
-        "Dana reviews urgent callback request"
+        "Dana to review urgent callback and fee questions; no dispatch arranged"
       ]
     ],
-    "completeStatus": "Urgent callback request"
+    "completeStatus": "Urgent callback request",
+    "checkpoints": [
+      {
+        "after": 1,
+        "status": "Urgent request",
+        "rows": [
+          [
+            "Job",
+            "Active leak at 10 pm"
+          ],
+          [
+            "Where",
+            "Fulshear; street not provided"
+          ],
+          [
+            "Priority",
+            "Urgent after-hours request"
+          ],
+          [
+            "Contact",
+            "Not provided yet"
+          ],
+          [
+            "Next",
+            "Collect the caller’s preferred next step and callback details"
+          ]
+        ]
+      },
+      {
+        "after": 3,
+        "status": "Urgent callback request",
+        "rows": [
+          [
+            "Job",
+            "Active leak at 10 pm"
+          ],
+          [
+            "Where",
+            "24 Pine St, Fulshear"
+          ],
+          [
+            "Request",
+            "Callback only; no visit"
+          ],
+          [
+            "Contact",
+            "Sam · (713) 555-0151"
+          ],
+          [
+            "Timing",
+            "Not provided; not confirmed"
+          ],
+          [
+            "Next",
+            "Dana to review the urgent callback request"
+          ]
+        ]
+      },
+      {
+        "after": 5,
+        "status": "Urgent callback request",
+        "rows": [
+          [
+            "Job",
+            "Active leak at 10 pm; asks about fees"
+          ],
+          [
+            "Where",
+            "24 Pine St, Fulshear"
+          ],
+          [
+            "Request",
+            "Callback only; no visit"
+          ],
+          [
+            "Contact",
+            "Sam · (713) 555-0151"
+          ],
+          [
+            "Timing",
+            "Not provided; not confirmed"
+          ],
+          [
+            "Next",
+            "Dana to review the request and confirm charges before any visit"
+          ]
+        ]
+      },
+      {
+        "after": 7,
+        "status": "Callback timing not confirmed",
+        "rows": [
+          [
+            "Job",
+            "Active leak at 10 pm; asks about fees"
+          ],
+          [
+            "Where",
+            "24 Pine St, Fulshear"
+          ],
+          [
+            "Request",
+            "Callback only; no visit"
+          ],
+          [
+            "Contact",
+            "Sam · (713) 555-0151"
+          ],
+          [
+            "Timing",
+            "Within ten minutes requested · not confirmed"
+          ],
+          [
+            "Next",
+            "Dana to review; no callback deadline guaranteed"
+          ]
+        ]
+      },
+      {
+        "after": 9,
+        "status": "Contact corrected · call only",
+        "rows": [
+          [
+            "Job",
+            "Active leak at 10 pm; asks about fees"
+          ],
+          [
+            "Where",
+            "24 Pine St, Fulshear"
+          ],
+          [
+            "Request",
+            "Callback only; no texts or visit"
+          ],
+          [
+            "Contact",
+            "Sam · (713) 555-0154"
+          ],
+          [
+            "Timing",
+            "Within ten minutes requested · not confirmed"
+          ],
+          [
+            "Next",
+            "Dana to review using the corrected number; confirm charges before any visit"
+          ]
+        ]
+      },
+      {
+        "after": 11,
+        "status": "Urgent callback request",
+        "rows": [
+          [
+            "Job",
+            "Active leak under kitchen sink at 10 pm"
+          ],
+          [
+            "Where",
+            "24 Pine St, Fulshear"
+          ],
+          [
+            "Request",
+            "Callback only; no texts; speak before any visit"
+          ],
+          [
+            "Contact",
+            "Sam · (713) 555-0154"
+          ],
+          [
+            "Timing",
+            "Within ten minutes requested · not confirmed"
+          ],
+          [
+            "Next",
+            "Dana to review urgent callback and fee questions; no dispatch arranged"
+          ]
+        ]
+      },
+      {
+        "after": 12,
+        "status": "Urgent callback request",
+        "rows": [
+          [
+            "Job",
+            "Active leak under kitchen sink at 10 pm"
+          ],
+          [
+            "Where",
+            "24 Pine St, Fulshear"
+          ],
+          [
+            "Request",
+            "Callback only; no texts; speak before any visit"
+          ],
+          [
+            "Contact",
+            "Sam · (713) 555-0154"
+          ],
+          [
+            "Timing",
+            "Within ten minutes requested · not confirmed"
+          ],
+          [
+            "Next",
+            "Dana to review urgent callback and fee questions; no dispatch arranged"
+          ]
+        ]
+      }
+    ]
   },
   "spanish": {
     "persona": "westheimer-maids",
@@ -235,25 +695,57 @@
     "messages": [
       [
         "customer",
-        "Hola, necesito una limpieza profunda en Memorial: dos habitaciones, dos baños y 1,000 pies cuadrados. ¿Cuánto cuesta?"
+        "Hola, necesito una limpieza profunda en Memorial. ¿Cuánto cuesta?"
       ],
       [
         "agent",
-        "La limpieza profunda empieza desde $229; Nia confirmará el precio final. ¿Cuál es su nombre, teléfono y dirección, y qué horario quiere solicitar?"
+        "Sí, atendemos Memorial. Para orientarle sobre el precio, ¿cuántas habitaciones y baños tiene, y cuántos pies cuadrados son?"
       ],
       [
         "customer",
-        "Soy Ana, (713) 555-0152, en 36 Elm St, Memorial. Me gustaría el sábado de 8 a 10."
+        "Son dos habitaciones, dos baños y 1,000 pies cuadrados."
       ],
       [
         "agent",
-        "Gracias, Ana. Su solicitud está lista para que Nia la revise. El sábado de 8 a 10 está solicitado, todavía no confirmado."
+        "La limpieza profunda empieza desde $229; Nia debe confirmar el precio final. ¿Qué día y horario quiere solicitar?"
+      ],
+      [
+        "customer",
+        "El sábado. ¿Pueden garantizar que lleguen exactamente a las 9 de la mañana?"
+      ],
+      [
+        "agent",
+        "No prometemos una hora exacta ni tenemos disponibilidad confirmada aquí. Puede solicitar de 8 a 10; ¿le sirve esa ventana?"
+      ],
+      [
+        "customer",
+        "Sí, de 8 a 10. Soy Ana, (713) 555-0152, en 36 Elm St, Memorial."
+      ],
+      [
+        "agent",
+        "Gracias, Ana. La vista previa incluye sus datos y el sábado de 8 a 10 como horario solicitado, todavía sin confirmar."
+      ],
+      [
+        "customer",
+        "En realidad son tres habitaciones, no dos. Los dos baños y los 1,000 pies cuadrados siguen igual."
+      ],
+      [
+        "agent",
+        "Actualizado: tres habitaciones, dos baños y 1,000 pies cuadrados. Nia debe revisar el precio final con ese cambio; su dirección y horario solicitado siguen iguales."
+      ],
+      [
+        "customer",
+        "Prefiero que me llamen antes de cambiar el horario. No elijan otro sin preguntarme."
+      ],
+      [
+        "agent",
+        "Añadido: llamada solicitada antes de cualquier cambio de horario. La vista previa para Nia contiene los datos corregidos y su solicitud del sábado de 8 a 10; la visita y la llamada siguen sin confirmar."
       ]
     ],
     "first": [
       [
         "Job",
-        "Deep clean · 2 beds, 2 baths · 1,000 sq ft"
+        "Deep clean; size and room counts not provided"
       ],
       [
         "Where",
@@ -261,7 +753,7 @@
       ],
       [
         "Requested",
-        "Not chosen yet"
+        "No visit requested yet"
       ],
       [
         "Language",
@@ -269,13 +761,13 @@
       ],
       [
         "Next",
-        "Answer the published-fee question"
+        "Collect bedrooms, bathrooms and square footage before quoting"
       ]
     ],
     "summary": [
       [
         "Job",
-        "Deep clean · 2 beds, 2 baths · 1,000 sq ft"
+        "Deep clean · 3 beds, 2 baths · 1,000 sq ft"
       ],
       [
         "Where",
@@ -283,7 +775,7 @@
       ],
       [
         "Requested",
-        "Saturday, 8 to 10"
+        "Saturday, 8 to 10 · not confirmed"
       ],
       [
         "Contact",
@@ -295,10 +787,210 @@
       ],
       [
         "Next",
-        "Nia confirms the requested window"
+        "Nia to review price and window; call before any window change"
       ]
     ],
-    "completeStatus": "Visit request"
+    "completeStatus": "Visit request · not confirmed",
+    "checkpoints": [
+      {
+        "after": 1,
+        "status": "Answering a question",
+        "rows": [
+          [
+            "Job",
+            "Deep clean; size and room counts not provided"
+          ],
+          [
+            "Where",
+            "Memorial; street not provided"
+          ],
+          [
+            "Requested",
+            "No visit requested yet"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Collect bedrooms, bathrooms and square footage before quoting"
+          ]
+        ]
+      },
+      {
+        "after": 3,
+        "status": "Answering a question",
+        "rows": [
+          [
+            "Job",
+            "Deep clean · 2 beds, 2 baths · 1,000 sq ft"
+          ],
+          [
+            "Where",
+            "Memorial; street not provided"
+          ],
+          [
+            "Requested",
+            "No visit requested yet"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Explain the starting price; Nia to confirm the final quote"
+          ]
+        ]
+      },
+      {
+        "after": 5,
+        "status": "Visit request · time not confirmed",
+        "rows": [
+          [
+            "Job",
+            "Deep clean · 2 beds, 2 baths · 1,000 sq ft"
+          ],
+          [
+            "Where",
+            "Memorial; street not provided"
+          ],
+          [
+            "Requested",
+            "Saturday at 9 am; exact times not promised"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Choose a usual arrival window"
+          ]
+        ]
+      },
+      {
+        "after": 7,
+        "status": "Visit request · not confirmed",
+        "rows": [
+          [
+            "Job",
+            "Deep clean · 2 beds, 2 baths · 1,000 sq ft"
+          ],
+          [
+            "Where",
+            "36 Elm St, Memorial"
+          ],
+          [
+            "Requested",
+            "Saturday, 8 to 10 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Ana · (713) 555-0152"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Nia to review the requested window and final price"
+          ]
+        ]
+      },
+      {
+        "after": 9,
+        "status": "Room count corrected",
+        "rows": [
+          [
+            "Job",
+            "Deep clean · 3 beds, 2 baths · 1,000 sq ft"
+          ],
+          [
+            "Where",
+            "36 Elm St, Memorial"
+          ],
+          [
+            "Requested",
+            "Saturday, 8 to 10 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Ana · (713) 555-0152"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Nia to review the final price using the corrected room count"
+          ]
+        ]
+      },
+      {
+        "after": 11,
+        "status": "Visit request · not confirmed",
+        "rows": [
+          [
+            "Job",
+            "Deep clean · 3 beds, 2 baths · 1,000 sq ft"
+          ],
+          [
+            "Where",
+            "36 Elm St, Memorial"
+          ],
+          [
+            "Requested",
+            "Saturday, 8 to 10 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Ana · (713) 555-0152"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Nia to review price and window; call before any window change"
+          ]
+        ]
+      },
+      {
+        "after": 12,
+        "status": "Visit request · not confirmed",
+        "rows": [
+          [
+            "Job",
+            "Deep clean · 3 beds, 2 baths · 1,000 sq ft"
+          ],
+          [
+            "Where",
+            "36 Elm St, Memorial"
+          ],
+          [
+            "Requested",
+            "Saturday, 8 to 10 · not confirmed"
+          ],
+          [
+            "Contact",
+            "Ana · (713) 555-0152"
+          ],
+          [
+            "Language",
+            "Spanish"
+          ],
+          [
+            "Next",
+            "Nia to review price and window; call before any window change"
+          ]
+        ]
+      }
+    ]
   }
 };
   var scenario = 'sms', mode = 'watch', step = 1, playing = false, timer = null;
@@ -341,22 +1033,23 @@
   }
   function watchSummary() {
     var ex = examples[scenario];
-    var data = step < 3 ? ex.first : ex.summary.map(function (row) { return row.slice(); });
-    if (step === 3 && scenario !== 'spanish') data[4] = ['Next', scenario === 'call' ? 'Dana reviews the urgent callback' : 'Ray confirms the requested window'];
-    rows(data); setTicket(step === 4 ? ex.completeStatus : scenario === 'call' ? 'Urgent request' : 'Gathering details');
-    el('progress').textContent = step + ' of 4 messages';
+    var checkpoint = (ex.checkpoints || []).filter(function (item) { return item.after <= step; }).pop();
+    var data = checkpoint ? checkpoint.rows : step === ex.messages.length ? ex.summary : ex.first;
+    rows(data); setTicket(checkpoint ? checkpoint.status : step === ex.messages.length ? ex.completeStatus : scenario === 'call' ? 'Urgent request' : 'Gathering details');
   }
   function playbackControls() {
-    el('play').hidden = step === 4;
-    el('play').textContent = playing ? 'Pause' : step === 4 ? 'Play again' : 'Play';
-    el('play').setAttribute('aria-label', playing ? 'Pause the example' : step === 4 ? 'Play the example again' : 'Play the example');
+    var complete = step === examples[scenario].messages.length;
+    el('play').hidden = complete;
+    el('play').textContent = playing ? 'Pause' : complete ? 'Play again' : 'Play';
+    el('play').setAttribute('aria-label', playing ? 'Pause the example' : complete ? 'Play the example again' : 'Play the example');
   }
   function pause() { clearTimeout(timer); timer = null; playing = false; removeTyping(); playbackControls(); }
   function nextMessage() {
     if (!playing || mode !== 'watch') return;
+    if (step >= examples[scenario].messages.length) { pause(); return; }
     removeTyping(); var m = examples[scenario].messages[step]; bubble(m[0], m[1]); step++; watchSummary(); follow();
-    announce(step === 4 ? 'Example complete. The owner summary is ready.' : step + ' of 4 messages shown.');
-    if (step === 4) { pause(); return; }
+    announce(step === examples[scenario].messages.length ? 'Example complete. The owner summary is ready.' : m[0] === 'agent' ? 'Front desk replied. Owner details updated.' : 'Customer details added.');
+    if (step === examples[scenario].messages.length) { pause(); return; }
     schedule();
   }
   function schedule() {
@@ -364,14 +1057,14 @@
     timer = setTimeout(nextMessage, 2300);
   }
   function watchStart() {
-    pause(); messages.replaceChildren(); step = motion.matches ? 4 : 1;
+    pause(); messages.replaceChildren(); step = motion.matches ? examples[scenario].messages.length : 1;
     examples[scenario].messages.slice(0, step).forEach(function (m) { bubble(m[0], m[1]); });
-    if (step === 4) requestAnimationFrame(follow); else messages.scrollTop = 0; watchSummary(); playbackControls();
+    if (step === examples[scenario].messages.length) requestAnimationFrame(follow); else messages.scrollTop = 0; watchSummary(); playbackControls();
   }
   function play() {
     autoStarted = true;
     if (motion.matches) { watchStart(); announce('Complete example shown.'); return; }
-    if (step === 4) watchStart();
+    if (step === examples[scenario].messages.length) watchStart();
     playing = true; playbackControls(); schedule();
   }
   function cancelRequest() {

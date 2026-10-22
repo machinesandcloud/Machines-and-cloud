@@ -6,6 +6,7 @@ const deny = () => { throw new Error('Network disabled by sales-desk-check'); };
 net.connect = net.createConnection = http.request = http.get = https.request = https.get = globalThis.fetch = deny;
 syncBuiltinESMExports();
 const { estimateCallVolume, adjacentPlanBreakpoints, assessWorkflowFit, suggestNextStep, sanitizeSalesMessages, executeSalesTool, SALES_FACTS, SALES_TOOLS, salesSystem } = await import('../netlify/functions/lib/sales-desk.mjs');
+const { PLANS, PUBLIC_PLAN_IDS, PUBLIC_PLAN_LABELS, PUBLIC_PLANS } = await import('../netlify/functions/lib/config.mjs');
 const cases = [];
 function check(name, fn) { fn(); cases.push(name); }
 const input = { call_count: 18, period: 'day', count_kind: 'total', routing: 'unknown', average_minutes: 3, workdays_per_month: 22, missed_percent: null, routed_percent: null };
@@ -50,24 +51,41 @@ check('Removing maxItems preserves the fourteen-entry runtime cap in either feat
 });
 check('Total volume is1188 minutes without invented missed/routed volume or plan', () => { const x = estimateCallVolume(input); assert.equal(x.totalMinutes, 1188); assert.equal(x.routedMinutes, null); assert.equal(x.missedMinutes, null); assert.equal(x.lowestPublishedCallCostPlan, null); assert.deepEqual(x.planComparison, []); });
 check('Unknown AI coverage gives no hypothetical all-call recommendation or breakpoints', () => { const x = estimateCallVolume(input); assert.equal(x.input.routing, 'unknown'); assert.equal(x.unroundedMinutes.routed, null); assert.deepEqual(x.planBreakpoints, []); assert.deepEqual(x.lowestPublishedCallCostPlans, []); assert.ok(x.missing[0].includes('Which calls')); });
+check('Public preferences expose Coverage and Follow-through at the unchanged rates and application-text units', () => {
+  assert.deepEqual(PUBLIC_PLAN_IDS, ['starter', 'growth']);
+  assert.deepEqual(PUBLIC_PLAN_LABELS, { starter: 'Coverage', growth: 'Follow-through' });
+  assert.deepEqual(PUBLIC_PLANS, { starter: { name: 'Coverage', price: 99, minutes: 150, texts: 500 }, growth: { name: 'Follow-through', price: 249, minutes: 600, texts: 1500 } });
+  assert.deepEqual(SALES_FACTS.plans, [{ id: 'starter', name: 'Coverage', monthly: 99, includedCallMinutes: 150, includedTexts: 500 }, { id: 'growth', name: 'Follow-through', monthly: 249, includedCallMinutes: 600, includedTexts: 1500 }]);
+  assert.deepEqual(SALES_FACTS.commercial.publishedOverage, { callMinute: 0.35, text: 0.03 });
+  assert.match(SALES_FACTS.commercial.planScope, /not carrier SMS segments/); assert.match(SALES_FACTS.commercial.planScope, /Pro is held out of new selection/);
+});
+check('Public pricing changes preserve all legacy plan IDs, usage amounts and follow-up entitlements', () => {
+  assert.deepEqual(PLANS, {
+    starter: { name: 'Starter', price: 99, minutes: 150, texts: 500, leadPlatforms: false, followUp: false, software: ['google'] },
+    growth: { name: 'Growth', price: 249, minutes: 600, texts: 1500, leadPlatforms: true, followUp: true, software: ['google', 'jobber', 'housecall'] },
+    pro: { name: 'Pro', price: 449, minutes: 1500, texts: 5000, leadPlatforms: true, followUp: true, software: ['google', 'jobber', 'housecall'] },
+  });
+  assert.notEqual(PUBLIC_PLANS.starter, PLANS.starter); assert.notEqual(PUBLIC_PLANS.growth, PLANS.growth);
+  assert.ok(Object.isFrozen(PUBLIC_PLAN_IDS) && Object.isFrozen(PUBLIC_PLAN_LABELS) && Object.isFrozen(PUBLIC_PLANS) && Object.isFrozen(PUBLIC_PLANS.starter));
+});
 check('Adjacent plan breakpoints expose exact rational ties and first cheaper whole minutes', () => {
-  const x = adjacentPlanBreakpoints(); assert.equal(x.length, 2);
-  assert.deepEqual(x.map(row => [row.lowerPlan, row.higherPlan]), [['starter', 'growth'], ['growth', 'pro']]);
+  const x = adjacentPlanBreakpoints(); assert.equal(x.length, 1);
+  assert.deepEqual(x.map(row => [row.lowerPlan, row.higherPlan]), [['starter', 'growth']]);
   assert.deepEqual(x[0].exactTieMinutes, { numerator: 4050, denominator: 7 });
-  assert.deepEqual(x[1].exactTieMinutes, { numerator: 8200, denominator: 7 });
-  assert.equal(x[0].firstWholeMinuteHigherPlanCheaper, 579); assert.equal(x[1].firstWholeMinuteHigherPlanCheaper, 1172);
-  assert.equal(x[0].tieCallCost, 249); assert.equal(x[1].tieCallCost, 449);
-  assert.equal(x[0].approximateTieMinutes, 4050 / 7); assert.equal(x[1].approximateTieMinutes, 8200 / 7);
+  assert.equal(x[0].firstWholeMinuteHigherPlanCheaper, 579);
+  assert.equal(x[0].tieCallCost, 249);
+  assert.equal(x[0].approximateTieMinutes, 4050 / 7);
 });
 const minutesEstimate = minutes => estimateCallVolume({ ...input, call_count: minutes, period: 'month', count_kind: 'routed', average_minutes: 1 });
-check('The lower plan wins just before each whole-minute breakpoint, and the higher just after', () => {
+check('The lower plan wins before the whole-minute breakpoint, and the higher wins after without offering Pro', () => {
   assert.equal(minutesEstimate(578).lowestPublishedCallCostPlan, 'starter'); assert.equal(minutesEstimate(579).lowestPublishedCallCostPlan, 'growth');
-  assert.equal(minutesEstimate(1171).lowestPublishedCallCostPlan, 'growth'); assert.equal(minutesEstimate(1172).lowestPublishedCallCostPlan, 'pro');
+  assert.equal(minutesEstimate(1171).lowestPublishedCallCostPlan, 'growth'); assert.equal(minutesEstimate(1172).lowestPublishedCallCostPlan, 'growth');
+  assert.deepEqual(minutesEstimate(10000).planComparison.map(plan => plan.plan), ['starter', 'growth']);
   const at600 = minutesEstimate(600); assert.equal(at600.planComparison[0].projectedCallCost, 256.5); assert.equal(at600.planComparison[1].projectedCallCost, 249);
 });
 check('Exact fractional ties identify both co-lowest plans', () => {
   assert.deepEqual(minutesEstimate(4050 / 7).lowestPublishedCallCostPlans, ['starter', 'growth']);
-  assert.deepEqual(minutesEstimate(8200 / 7).lowestPublishedCallCostPlans, ['growth', 'pro']);
+  assert.deepEqual(minutesEstimate(8200 / 7).lowestPublishedCallCostPlans, ['growth']);
 });
 check('Display rounding cannot make a more expensive plan the recommendation', () => {
   const x = minutesEstimate(578.575); assert.equal(x.routedMinutes, 578.58); assert.equal(x.unroundedMinutes.routed, 578.575);
@@ -84,7 +102,7 @@ check('Breakpoints are computed from supplied plan/rate facts rather than fixed 
 });
 check('Explicit quarter routed is297 without equating missed share', () => { const x = estimateCallVolume({ ...input, routing: 'selected_share', routed_percent: 25 }); assert.equal(x.totalMinutes, 1188); assert.equal(x.routedMinutes, 297); assert.equal(x.missedMinutes, null); assert.equal(x.lowestPublishedCallCostPlan, 'starter'); assert.equal(x.planComparison[0].projectedCallCost, 150.45); });
 check('Known missed share remains separate from chosen routed share', () => { const x = estimateCallVolume({ ...input, missed_percent: 10, routing: 'selected_share', routed_percent: 25 }); assert.equal(x.missedMinutes, 118.8); assert.equal(x.routedMinutes, 297); });
-check('All calls coverage is explicit, lowest cost includes overages', () => { const x = estimateCallVolume({ ...input, routing: 'all_calls' }); assert.equal(x.routedMinutes, 1188); assert.equal(x.lowestPublishedCallCostPlan, 'pro'); assert.equal(x.planComparison[0].projectedCallCost, 462.3); assert.equal(x.planComparison[1].projectedCallCost, 454.8); });
+check('All calls coverage is explicit, lowest public cost includes overages without a held Pro recommendation', () => { const x = estimateCallVolume({ ...input, routing: 'all_calls' }); assert.equal(x.routedMinutes, 1188); assert.equal(x.lowestPublishedCallCostPlan, 'growth'); assert.equal(x.planComparison[0].projectedCallCost, 462.3); assert.equal(x.planComparison[1].projectedCallCost, 454.8); assert.equal(x.planComparison.length, 2); });
 check('Correction30 missed weekly→3 monthly discards the old period/count', () => { const first = estimateCallVolume({ ...input, call_count: 30, period: 'week', count_kind: 'missed', routing: 'missed_only' }); const corrected = estimateCallVolume({ ...input, call_count: 3, period: 'month', count_kind: 'missed', routing: 'missed_only' }); assert.equal(first.routedMinutes, 390); assert.equal(corrected.routedMinutes, 9); assert.equal(corrected.totalMinutes, null); assert.equal(corrected.monthlyCount, 3); });
 check('Missed count cannot establish all-call volume', () => { const x = estimateCallVolume({ ...input, count_kind: 'missed', routing: 'all_calls' }); assert.equal(x.totalMinutes, null); assert.equal(x.routedMinutes, null); assert.ok(x.missing.length); });
 check('Nullable assumptions are disclosed and measured workdays take precedence', () => { const x = estimateCallVolume({ ...input, average_minutes: null, workdays_per_month: null }); assert.equal(x.totalMinutes, 1188); assert.equal(x.assumptions.length, 2); assert.equal(estimateCallVolume({ ...input, workdays_per_month: 10 }).totalMinutes, 540); });

@@ -1,0 +1,2411 @@
+{
+  "startedAt": "2026-10-22T05:54:58.194Z",
+  "base": "http://127.0.0.1:8894",
+  "source": {
+    "index.html": "d0201e614f126711a40d277614b1e9e006fd2764ea02a04979cdc0942835f042",
+    "onboard.html": "4f9e0f9699ed6abb528c7ab52bfaaa08c691a47b454804556424a5a1fabe73e7",
+    "onboard.js": "9cf591fee4973816601ee26c37cfd0d2662da4de50442e53467ffc4edcc161f7",
+    "netlify/functions/lib/config.mjs": "702eb7c11b2cd9f6ef158bfbda7bea7323fa67a090fd9c8aff163e8c3db308ed",
+    "netlify/functions/lib/sales-desk.mjs": "aac9ebb1fb86c9e1a14968529f6b9ffcab9fcf24f4a9fbe67829260d820d77c2",
+    "netlify/functions/billing.mjs": "22dc5a1cf6fb365757ddce19ecb455d8ccd8c70fb46cd788fddeb86d74c07432"
+  },
+  "checks": [
+    {
+      "name": "exactly two stable public IDs",
+      "pass": true,
+      "detail": [
+        "starter",
+        "growth"
+      ]
+    },
+    {
+      "name": "public names and amounts match the selected offer",
+      "pass": true,
+      "detail": {
+        "starter": {
+          "name": "Coverage",
+          "price": 99,
+          "minutes": 150,
+          "texts": 500
+        },
+        "growth": {
+          "name": "Follow-through",
+          "price": 249,
+          "minutes": 600,
+          "texts": 1500
+        }
+      }
+    },
+    {
+      "name": "legacy plan units and prices remain unchanged",
+      "pass": true
+    },
+    {
+      "name": "sales comparison uses the two public offers only",
+      "pass": true,
+      "detail": {
+        "kind": "call_volume",
+        "planningOnly": true,
+        "phoneActive": false,
+        "billingActive": false,
+        "input": {
+          "call_count": 1188,
+          "period": "month",
+          "count_kind": "routed",
+          "routing": "all_calls",
+          "average_minutes": 1,
+          "workdays_per_month": null,
+          "missed_percent": null,
+          "routed_percent": null
+        },
+        "monthlyCount": 1188,
+        "totalMinutes": null,
+        "missedMinutes": null,
+        "routedMinutes": 1188,
+        "unroundedMinutes": {
+          "total": null,
+          "missed": null,
+          "routed": 1188
+        },
+        "routedMonthlyCalls": 1188,
+        "assumptions": [],
+        "missing": [],
+        "planComparison": [
+          {
+            "plan": "starter",
+            "name": "Coverage",
+            "monthlyBase": 99,
+            "includedCallMinutes": 150,
+            "estimatedOverageMinutes": 1038,
+            "projectedCallCost": 462.3,
+            "unroundedCallCost": 462.29999999999995
+          },
+          {
+            "plan": "growth",
+            "name": "Follow-through",
+            "monthlyBase": 249,
+            "includedCallMinutes": 600,
+            "estimatedOverageMinutes": 588,
+            "projectedCallCost": 454.8,
+            "unroundedCallCost": 454.79999999999995
+          }
+        ],
+        "lowestPublishedCallCostPlan": "growth",
+        "lowestPublishedCallCostPlans": [
+          "growth"
+        ],
+        "planBreakpoints": [
+          {
+            "lowerPlan": "starter",
+            "higherPlan": "growth",
+            "callOnly": true,
+            "exactTieMinutes": {
+              "numerator": 4050,
+              "denominator": 7
+            },
+            "approximateTieMinutes": 578.5714285714286,
+            "tieCallCost": 249,
+            "firstWholeMinuteHigherPlanCheaper": 579,
+            "higherPlanEverStrictlyCheaper": true,
+            "note": "Exact fractional-minute tie; the decimal is approximate. The higher plan is cheaper above the tie, beginning at the stated whole-minute threshold."
+          }
+        ],
+        "estimationBasis": "Uses the unrounded estimated routed minutes for call-cost arithmetic; displayed minutes and money are rounded separately. The current app meter rounds elapsed seconds and then rounds each call up to whole minutes; duration totals alone do not reproduce it. Provider legs and rounding may differ. This is not an invoice.",
+        "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+      }
+    },
+    {
+      "name": "sales planning preserves unrounded pricing and no billing activation",
+      "pass": true,
+      "detail": [
+        {
+          "plan": "starter",
+          "name": "Coverage",
+          "monthlyBase": 99,
+          "includedCallMinutes": 150,
+          "estimatedOverageMinutes": 1038,
+          "projectedCallCost": 462.3,
+          "unroundedCallCost": 462.29999999999995
+        },
+        {
+          "plan": "growth",
+          "name": "Follow-through",
+          "monthlyBase": 249,
+          "includedCallMinutes": 600,
+          "estimatedOverageMinutes": 588,
+          "projectedCallCost": 454.8,
+          "unroundedCallCost": 454.79999999999995
+        }
+      ]
+    },
+    {
+      "name": "billing endpoint retains new-workspace block before checkout",
+      "pass": true
+    },
+    {
+      "name": "1440px homepage displays only Coverage and Follow-through",
+      "pass": true,
+      "detail": [
+        {
+          "name": "Coverage",
+          "price": "$99/ month",
+          "allowance": "Planning allowance: 150 call minutes · 500 outgoing texts",
+          "link": "onboard.html?plan=starter",
+          "copy": "CoverageFor the owner who needs help while on a job.$99/ monthPlanning allowance: 150 call minutes · 500 outgoing textsLight or overflow call coverageAnswers using your service area and feesClear requests for you to reviewPhone and texting need separate activationChoose Coverage ↗"
+        },
+        {
+          "name": "Follow-through",
+          "price": "$249/ month",
+          "allowance": "Planning allowance: 600 call minutes · 1,500 outgoing texts",
+          "link": "onboard.html?plan=growth",
+          "copy": "Follow-throughFor a shop handling more customer conversations.$249/ monthPlanning allowance: 600 call minutes · 1,500 outgoing textsMore room for calls and textsCoverage for a higher-volume workflowAgree follow-up rules before activationConnected services verified separatelyChoose Follow-through ↗"
+        }
+      ]
+    },
+    {
+      "name": "1440px public plan links retain stable preference IDs",
+      "pass": true,
+      "detail": [
+        {
+          "name": "Coverage",
+          "price": "$99/ month",
+          "allowance": "Planning allowance: 150 call minutes · 500 outgoing texts",
+          "link": "onboard.html?plan=starter",
+          "copy": "CoverageFor the owner who needs help while on a job.$99/ monthPlanning allowance: 150 call minutes · 500 outgoing textsLight or overflow call coverageAnswers using your service area and feesClear requests for you to reviewPhone and texting need separate activationChoose Coverage ↗"
+        },
+        {
+          "name": "Follow-through",
+          "price": "$249/ month",
+          "allowance": "Planning allowance: 600 call minutes · 1,500 outgoing texts",
+          "link": "onboard.html?plan=growth",
+          "copy": "Follow-throughFor a shop handling more customer conversations.$249/ monthPlanning allowance: 600 call minutes · 1,500 outgoing textsMore room for calls and textsCoverage for a higher-volume workflowAgree follow-up rules before activationConnected services verified separatelyChoose Follow-through ↗"
+        }
+      ]
+    },
+    {
+      "name": "1440px structured offer range is 99 to 249",
+      "pass": true,
+      "detail": {
+        "@type": "AggregateOffer",
+        "lowPrice": "99",
+        "highPrice": "249",
+        "priceCurrency": "USD",
+        "description": "Two future service preferences: Coverage and Follow-through. Free workspace setup starts no subscription. Final paid terms and channel activation are agreed separately.",
+        "offerCount": 2
+      }
+    },
+    {
+      "name": "1440px homepage has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px default has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px default preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px default selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "1440px default starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px default has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px Coverage link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "starter"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px Coverage link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px Coverage link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "starter"
+      ]
+    },
+    {
+      "name": "1440px Coverage link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px Coverage link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px Follow-through link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px Follow-through link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px Follow-through link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "1440px Follow-through link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px Follow-through link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px legacy Pro link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px legacy Pro link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px legacy Pro link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "1440px legacy Pro link explains the retired preference without a crash",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "name": "1440px legacy Pro link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px legacy Pro link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px legacy Pro link choosing Coverage clears the legacy note",
+      "pass": true
+    },
+    {
+      "name": "1440px restored Pro draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "Pro is no longer offered for new setup. Choose a current preference; billing remains off.",
+        "noteHidden": false,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      Pro is no longer offered for new setup. Choose a current preference; billing remains off.\n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px restored Pro draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px restored Pro draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "1440px restored Pro draft explains the retired preference without a crash",
+      "pass": true,
+      "detail": "Pro is no longer offered for new setup. Choose a current preference; billing remains off."
+    },
+    {
+      "name": "1440px restored Pro draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px restored Pro draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px restored Pro draft choosing Coverage clears the legacy note",
+      "pass": true
+    },
+    {
+      "name": "1440px restored Coverage draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "starter"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px restored Coverage draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px restored Coverage draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "starter"
+      ]
+    },
+    {
+      "name": "1440px restored Coverage draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px restored Coverage draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px restored Follow-through draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px restored Follow-through draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "1440px restored Follow-through draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "1440px restored Follow-through draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "1440px restored Follow-through draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px existing Pro workspace opens without plan re-selection",
+      "pass": true
+    },
+    {
+      "name": "390px homepage displays only Coverage and Follow-through",
+      "pass": true,
+      "detail": [
+        {
+          "name": "Coverage",
+          "price": "$99/ month",
+          "allowance": "Planning allowance: 150 call minutes · 500 outgoing texts",
+          "link": "onboard.html?plan=starter",
+          "copy": "CoverageFor the owner who needs help while on a job.$99/ monthPlanning allowance: 150 call minutes · 500 outgoing textsLight or overflow call coverageAnswers using your service area and feesClear requests for you to reviewPhone and texting need separate activationChoose Coverage ↗"
+        },
+        {
+          "name": "Follow-through",
+          "price": "$249/ month",
+          "allowance": "Planning allowance: 600 call minutes · 1,500 outgoing texts",
+          "link": "onboard.html?plan=growth",
+          "copy": "Follow-throughFor a shop handling more customer conversations.$249/ monthPlanning allowance: 600 call minutes · 1,500 outgoing textsMore room for calls and textsCoverage for a higher-volume workflowAgree follow-up rules before activationConnected services verified separatelyChoose Follow-through ↗"
+        }
+      ]
+    },
+    {
+      "name": "390px public plan links retain stable preference IDs",
+      "pass": true,
+      "detail": [
+        {
+          "name": "Coverage",
+          "price": "$99/ month",
+          "allowance": "Planning allowance: 150 call minutes · 500 outgoing texts",
+          "link": "onboard.html?plan=starter",
+          "copy": "CoverageFor the owner who needs help while on a job.$99/ monthPlanning allowance: 150 call minutes · 500 outgoing textsLight or overflow call coverageAnswers using your service area and feesClear requests for you to reviewPhone and texting need separate activationChoose Coverage ↗"
+        },
+        {
+          "name": "Follow-through",
+          "price": "$249/ month",
+          "allowance": "Planning allowance: 600 call minutes · 1,500 outgoing texts",
+          "link": "onboard.html?plan=growth",
+          "copy": "Follow-throughFor a shop handling more customer conversations.$249/ monthPlanning allowance: 600 call minutes · 1,500 outgoing textsMore room for calls and textsCoverage for a higher-volume workflowAgree follow-up rules before activationConnected services verified separatelyChoose Follow-through ↗"
+        }
+      ]
+    },
+    {
+      "name": "390px structured offer range is 99 to 249",
+      "pass": true,
+      "detail": {
+        "@type": "AggregateOffer",
+        "lowPrice": "99",
+        "highPrice": "249",
+        "priceCurrency": "USD",
+        "description": "Two future service preferences: Coverage and Follow-through. Free workspace setup starts no subscription. Final paid terms and channel activation are agreed separately.",
+        "offerCount": 2
+      }
+    },
+    {
+      "name": "390px homepage has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px default has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px default preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px default selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "390px default starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px default has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px Coverage link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "starter"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px Coverage link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px Coverage link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "starter"
+      ]
+    },
+    {
+      "name": "390px Coverage link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px Coverage link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px Follow-through link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px Follow-through link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px Follow-through link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "390px Follow-through link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px Follow-through link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px legacy Pro link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px legacy Pro link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px legacy Pro link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "390px legacy Pro link explains the retired preference without a crash",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "name": "390px legacy Pro link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px legacy Pro link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px legacy Pro link choosing Coverage clears the legacy note",
+      "pass": true
+    },
+    {
+      "name": "390px restored Pro draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "Pro is no longer offered for new setup. Choose a current preference; billing remains off.",
+        "noteHidden": false,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      Pro is no longer offered for new setup. Choose a current preference; billing remains off.\n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px restored Pro draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px restored Pro draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "390px restored Pro draft explains the retired preference without a crash",
+      "pass": true,
+      "detail": "Pro is no longer offered for new setup. Choose a current preference; billing remains off."
+    },
+    {
+      "name": "390px restored Pro draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px restored Pro draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px restored Pro draft choosing Coverage clears the legacy note",
+      "pass": true
+    },
+    {
+      "name": "390px restored Coverage draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "starter"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px restored Coverage draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px restored Coverage draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "starter"
+      ]
+    },
+    {
+      "name": "390px restored Coverage draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px restored Coverage draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px restored Follow-through draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px restored Follow-through draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "390px restored Follow-through draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "390px restored Follow-through draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "390px restored Follow-through draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px existing Pro workspace opens without plan re-selection",
+      "pass": true
+    },
+    {
+      "name": "320px homepage displays only Coverage and Follow-through",
+      "pass": true,
+      "detail": [
+        {
+          "name": "Coverage",
+          "price": "$99/ month",
+          "allowance": "Planning allowance: 150 call minutes · 500 outgoing texts",
+          "link": "onboard.html?plan=starter",
+          "copy": "CoverageFor the owner who needs help while on a job.$99/ monthPlanning allowance: 150 call minutes · 500 outgoing textsLight or overflow call coverageAnswers using your service area and feesClear requests for you to reviewPhone and texting need separate activationChoose Coverage ↗"
+        },
+        {
+          "name": "Follow-through",
+          "price": "$249/ month",
+          "allowance": "Planning allowance: 600 call minutes · 1,500 outgoing texts",
+          "link": "onboard.html?plan=growth",
+          "copy": "Follow-throughFor a shop handling more customer conversations.$249/ monthPlanning allowance: 600 call minutes · 1,500 outgoing textsMore room for calls and textsCoverage for a higher-volume workflowAgree follow-up rules before activationConnected services verified separatelyChoose Follow-through ↗"
+        }
+      ]
+    },
+    {
+      "name": "320px public plan links retain stable preference IDs",
+      "pass": true,
+      "detail": [
+        {
+          "name": "Coverage",
+          "price": "$99/ month",
+          "allowance": "Planning allowance: 150 call minutes · 500 outgoing texts",
+          "link": "onboard.html?plan=starter",
+          "copy": "CoverageFor the owner who needs help while on a job.$99/ monthPlanning allowance: 150 call minutes · 500 outgoing textsLight or overflow call coverageAnswers using your service area and feesClear requests for you to reviewPhone and texting need separate activationChoose Coverage ↗"
+        },
+        {
+          "name": "Follow-through",
+          "price": "$249/ month",
+          "allowance": "Planning allowance: 600 call minutes · 1,500 outgoing texts",
+          "link": "onboard.html?plan=growth",
+          "copy": "Follow-throughFor a shop handling more customer conversations.$249/ monthPlanning allowance: 600 call minutes · 1,500 outgoing textsMore room for calls and textsCoverage for a higher-volume workflowAgree follow-up rules before activationConnected services verified separatelyChoose Follow-through ↗"
+        }
+      ]
+    },
+    {
+      "name": "320px structured offer range is 99 to 249",
+      "pass": true,
+      "detail": {
+        "@type": "AggregateOffer",
+        "lowPrice": "99",
+        "highPrice": "249",
+        "priceCurrency": "USD",
+        "description": "Two future service preferences: Coverage and Follow-through. Free workspace setup starts no subscription. Final paid terms and channel activation are agreed separately.",
+        "offerCount": 2
+      }
+    },
+    {
+      "name": "320px homepage has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px default has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px default preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px default selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "320px default starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px default has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px Coverage link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "starter"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px Coverage link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px Coverage link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "starter"
+      ]
+    },
+    {
+      "name": "320px Coverage link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px Coverage link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px Follow-through link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px Follow-through link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px Follow-through link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "320px Follow-through link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px Follow-through link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px legacy Pro link has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px legacy Pro link preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px legacy Pro link selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "320px legacy Pro link explains the retired preference without a crash",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "name": "320px legacy Pro link starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px legacy Pro link has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px legacy Pro link choosing Coverage clears the legacy note",
+      "pass": true
+    },
+    {
+      "name": "320px restored Pro draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "Pro is no longer offered for new setup. Choose a current preference; billing remains off.",
+        "noteHidden": false,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      Pro is no longer offered for new setup. Choose a current preference; billing remains off.\n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px restored Pro draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px restored Pro draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "320px restored Pro draft explains the retired preference without a crash",
+      "pass": true,
+      "detail": "Pro is no longer offered for new setup. Choose a current preference; billing remains off."
+    },
+    {
+      "name": "320px restored Pro draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px restored Pro draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px restored Pro draft choosing Coverage clears the legacy note",
+      "pass": true
+    },
+    {
+      "name": "320px restored Coverage draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "starter"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px restored Coverage draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px restored Coverage draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "starter"
+      ]
+    },
+    {
+      "name": "320px restored Coverage draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px restored Coverage draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px restored Follow-through draft has exactly two offered preferences and one selection",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Coverage $99/month",
+          "Follow-through $249/month"
+        ],
+        "values": [
+          "starter",
+          "growth"
+        ],
+        "selected": [
+          "growth"
+        ],
+        "note": "",
+        "noteHidden": true,
+        "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+        "requests": [
+          {
+            "method": "GET",
+            "body": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px restored Follow-through draft preserves public name and amount mapping",
+      "pass": true,
+      "detail": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ]
+    },
+    {
+      "name": "320px restored Follow-through draft selects its intended preference",
+      "pass": true,
+      "detail": [
+        "growth"
+      ]
+    },
+    {
+      "name": "320px restored Follow-through draft starts no paid subscription or trial",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "name": "320px restored Follow-through draft has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px existing Pro workspace opens without plan re-selection",
+      "pass": true
+    },
+    {
+      "name": "runtime sources remained stable",
+      "pass": true
+    },
+    {
+      "name": "zero browser exceptions",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "zero unexpected network attempts",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        },
+        {
+          "method": "GET",
+          "url": "https://fonts.googleapis.com/css2"
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "width": 1440,
+      "name": "default",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "name": "Coverage link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "starter"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "name": "Follow-through link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "name": "legacy Pro link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "name": "restored Pro draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "Pro is no longer offered for new setup. Choose a current preference; billing remains off.",
+      "noteHidden": false,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      Pro is no longer offered for new setup. Choose a current preference; billing remains off.\n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "name": "restored Coverage draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "starter"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "name": "restored Follow-through draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "default",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "Coverage link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "starter"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "Follow-through link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "legacy Pro link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "restored Pro draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "Pro is no longer offered for new setup. Choose a current preference; billing remains off.",
+      "noteHidden": false,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      Pro is no longer offered for new setup. Choose a current preference; billing remains off.\n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "restored Coverage draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "starter"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "name": "restored Follow-through draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "default",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "Coverage link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "starter"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "Follow-through link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "legacy Pro link",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "restored Pro draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "Pro is no longer offered for new setup. Choose a current preference; billing remains off.",
+      "noteHidden": false,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      Pro is no longer offered for new setup. Choose a current preference; billing remains off.\n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "restored Coverage draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "starter"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "name": "restored Follow-through draft",
+      "labels": [
+        "Coverage $99/month",
+        "Follow-through $249/month"
+      ],
+      "values": [
+        "starter",
+        "growth"
+      ],
+      "selected": [
+        "growth"
+      ],
+      "note": "",
+      "noteHidden": true,
+      "copy": "\n    \n    You\n      \n        Your name\n        Email\n      \n      \n        Your contact cellSaved as your shop’s callback contact. This setup does not call or text you.\n        Your website (leave blank if you do not have one yet)Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.\n      \n      Plan preference for later activation\n      \n         Coverage $99/month\n         Follow-through $249/month\n      \n      \n      Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.\n    \n    Your shop\n      \n        Business name\n        TradeHVACPlumbingElectricalRoofingCleaningLandscapingPest controlGarage doorsHandyman\n      \n      What you do (one per line)\n      \n        HoursMontoTuetoWedtoThutoFritoSattoSuntoThe rows fill in from what you type; fix any day that is off. The front desk uses these hours to explain when your shop is open and apply your after-hours rules.\n        After hours\n      \n      \n        Service area (one per line or commas)\n        Not served\n      \n      \n        City\n        Answer in Spanish too?YesNo\n      \n      License numbers (optional)\n    \n    Prices and arrival windows\n      The front desk only ever quotes what you list here. Everything else it says the tech confirms on site.\n      Published prices (one per line: what: amount (note))\n      Arrival windows you offer (one per line)\n      Questions customers ask, with your answer (one per line: Question? Answer)\n    \n    Rules\n      Always hand these to a person (one per line)\n      Never do (one per line; the basics are already in)\n      Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.\n      Emergencies, tier 1: same day (one per line)These requests need urgent review in your workspace; a same-day visit or callback is not guaranteed. With an infant, elderly, or medically dependent person in the home, your safety rules take priority.\n      Your safety script, in your words\n      Anything else a new receptionist should know\n      First line of the website chat (optional)\n    \n    BackSave and continue\n    \n  ",
+      "requests": [
+        {
+          "method": "GET",
+          "body": null
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "blocked": [
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2"
+    }
+  ],
+  "fixtureRequests": [
+    {
+      "width": 1440,
+      "case": "default",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 1440,
+      "case": "Coverage link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 1440,
+      "case": "Follow-through link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 1440,
+      "case": "legacy Pro link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 1440,
+      "case": "restored Pro draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 1440,
+      "case": "restored Coverage draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 1440,
+      "case": "restored Follow-through draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "default",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "Coverage link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "Follow-through link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "legacy Pro link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "restored Pro draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "restored Coverage draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 390,
+      "case": "restored Follow-through draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "default",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "Coverage link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "Follow-through link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "legacy Pro link",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "restored Pro draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "restored Coverage draft",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "width": 320,
+      "case": "restored Follow-through draft",
+      "method": "GET",
+      "body": null
+    }
+  ],
+  "screenshots": [
+    "scratchpad/demo-pricing-public-first-1440-plans.png",
+    "scratchpad/demo-pricing-public-first-390-plans.png",
+    "scratchpad/demo-pricing-public-first-320-plans.png"
+  ],
+  "scope": "Local static browser rendering and pure planning functions; API replies intercepted in browser. No real account, storage, email, model, provider or billing operation.",
+  "result": "failed",
+  "finishedAt": "2026-10-22T05:55:01.425Z"
+}

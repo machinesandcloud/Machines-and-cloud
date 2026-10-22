@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-10-22T06:00:21.291Z",
+  "scope": "Pure positive/negative tests of the corrected plumbing callback-state oracle, including rejected booking/dispatch/deadline claims and rejected stale milestone text. No browser, model, provider, email or billing operation.",
+  "harness": "scripts/demo-outcome-check.mjs",
+  "harnessSha256": "f20975edbdc732bd1657786ccf5e28984995a0659a29ec85d798d78d0824c8b2",
+  "result": "passed",
+  "checks": [
+    {
+      "message": 3,
+      "request": "Callback only; no visit",
+      "accept": true,
+      "pass": true
+    },
+    {
+      "message": 9,
+      "request": "Callback only; no texts or visit",
+      "accept": true,
+      "pass": true
+    },
+    {
+      "message": 12,
+      "request": "Callback only; no texts; speak before any visit",
+      "accept": true,
+      "pass": true
+    },
+    {
+      "message": 9,
+      "request": "Visit booked; no texts",
+      "accept": false,
+      "pass": true
+    },
+    {
+      "message": 9,
+      "request": "Callback only; visit booked",
+      "accept": false,
+      "pass": true
+    },
+    {
+      "message": 9,
+      "request": "Callback only; no texts; technician dispatched",
+      "accept": false,
+      "pass": true
+    },
+    {
+      "message": 9,
+      "request": "No visit requested; callback promised within ten minutes",
+      "accept": false,
+      "pass": true
+    },
+    {
+      "message": 9,
+      "request": "Callback only; no visit",
+      "accept": false,
+      "pass": true
+    },
+    {
+      "message": 12,
+      "request": "Callback only; no texts or visit",
+      "accept": false,
+      "pass": true
+    }
+  ]
+}

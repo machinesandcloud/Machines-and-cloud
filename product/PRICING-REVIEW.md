@@ -1,8 +1,16 @@
 # Pricing decision review
 
-Reviewed October 21, 2026 Houston / October 22 UTC. **Our paid bundles are not yet validated as competitively positioned and economically safe. Do not approve their activation from this review.** Today’s verified signup offers free workspace setup, no card, no subscription and no timed trial. Phone/SMS delivery and paid billing remain separately gated. The current public $99/$249/$449 preferences are unchanged.
+Reviewed October 21, 2026 Houston / October 22 UTC. **Our paid bundles are not yet validated as competitively positioned and economically safe. Do not approve their activation from this review.** Verified signup offers free workspace setup, no card, no subscription and no timed trial. Phone/SMS delivery and paid billing remain separately gated.
 
-The Product Owner researched the offer and target-customer value; Architect inspected the actual implementation/provider rates and modeled cost; QA independently audited claims, units and arithmetic; root reconciled the decision. This review creates no paid account, outreach, price change, model rehearsal or deployment. The sales chatbot’s separately requested18-turn/30-request real-model review remains pending, with its ledger unopened.
+The Product Owner researched the offer and target-customer value; Architect inspected the actual implementation/provider rates and modeled cost; QA independently audited claims, units and arithmetic; root reconciled the decision. The original review created no paid account, outreach, price change, model rehearsal or deployment. The separately authorized sales-model review has since run and returned truth issues; see [its independent results](SALES-DESK-MODEL-REVIEW.md).
+
+## October 22 implementation
+
+Following Steve's request to apply the recommended pricing changes, the local public catalog now has **Coverage at $99/month and Follow-through at $249/month**, with Pro removed from new choices. These two monthly amounts are retained from the original catalog; the change is the two-plan structure, names and honest offer presentation. Final numerical allowances and candidate overage rates were not selected by the review. Existing150/500 and600/1,500 minute/outgoing-application-text references, plus0.35/0.03 planning rates, remain unchanged and explicitly non-invoice planning terms. They are not relabeled carrier segments or a validated paid offer.
+
+The homepage, onboarding choices, sales facts/planning tools, structured data, five short industry pages, Houston/About entry copy and public machine-readable summaries use the same two preferences. Rules and CSV download are included in the free workspace. New public choices use a separate projection; legacy plan records, IDs, usage and billing behavior retain compatibility. An old Pro link or unfinished Pro draft offers a current preference with an explanation; an already created Pro workspace is recovered rather than rewritten. [Independent QA](QA-DEMO-PRICING-2026-10-22.md) retains the first138/141 result and actual retired-link explanation defect, then accepts its69-check targeted repair and37-check final copy audit. These are source-bound local results, not a new full billing or actual-AI acceptance.
+
+Billing remains off. This local implementation starts no subscription, changes no provider price IDs and does not accept paid economics, invoice units or channel delivery. The research tables and hypotheses below retain the original three-plan comparison for audit history. Publication is a separate release step.
 
 ## Recommended decision
 

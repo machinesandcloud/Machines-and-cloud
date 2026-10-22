@@ -1,8 +1,8 @@
 // Sales-only product facts and planning tools. These have no delivery/provider side effects.
-import { PLANS } from './config.mjs';
+import { PUBLIC_PLANS } from './config.mjs';
 
 export const SALES_FACTS = Object.freeze({
-  version: 'web-workspace-2026-10-22-quality-repair',
+  version: 'web-workspace-2026-10-22-two-plan-preferences',
   company: { name: 'Machines & Cloud', location: 'Houston, Texas' },
   workspace: {
     signup: 'Verify your email, save your shop answers and open your private workspace. No founder call or hand-edited setup is required.',
@@ -28,11 +28,12 @@ export const SALES_FACTS = Object.freeze({
     external_busy_time: 'No external calendar or field-service busy-time synchronization. Use manual Availability blocks.',
     spanish: 'Spanish typed practice is available. Review your own shop’s language and safety rules before using them with customers.',
   },
-  plans: Object.entries(PLANS).map(([id, plan]) => ({ id, name: plan.name, monthly: plan.price, includedCallMinutes: plan.minutes, includedTexts: plan.texts })),
+  plans: Object.entries(PUBLIC_PLANS).map(([id, plan]) => ({ id, name: plan.name, monthly: plan.price, includedCallMinutes: plan.minutes, includedTexts: plan.texts })),
   commercial: {
     status: 'Workspace setup is free, requires no card and starts no paid subscription or timed trial. A plan selection is a preference only.',
     publishedOverage: { callMinute: 0.35, text: 0.03 },
     limits: 'Published monthly plans and usage rates describe activated service. Selecting one does not switch on phone, texting, integrations or billing. There is no automatic day-eight charge.',
+    planScope: 'Coverage and Follow-through are the two public future-service preferences. The numeric allowances and rates are unchanged; texts mean customer-outbound application messages, not carrier SMS segments. Pro is held out of new selection. Legacy plan IDs remain compatible and do not activate paid service. Editable business rules and customer CSV exports are available in the free workspace, not paid-only upgrades.',
   },
   practice: 'Three fictional shop situations have Watch and typed AI: HVAC while busy, after-hours plumbing and Spanish cleaning. English plumbing also has an explicit microphone voice practice, up to 90 seconds when available. Practice creates no actual visit, message or owner contact. It does not prove live phone/SMS delivery for a customer shop.',
   salesPrivacy: {

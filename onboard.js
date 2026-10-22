@@ -3,7 +3,16 @@
   var form = document.getElementById('ob'), steps = [].slice.call(form.querySelectorAll('fieldset')), pills = [].slice.call(document.querySelectorAll('.ob-steps span'));
   var i = 0, back = document.getElementById('back'), next = document.getElementById('next'), err = document.getElementById('err');
   var q = new URLSearchParams(location.search);
-  function choosePlan() { var plan = new URLSearchParams(location.search).get('plan'); if (['starter', 'growth', 'pro'].indexOf(plan) >= 0) form.querySelector('input[name=plan][value=' + plan + ']').checked = true; }
+  var PLAN_IDS = ['starter', 'growth'], retiredPlanHint = false;
+  function selectPlan(plan) {
+    var selected = PLAN_IDS.indexOf(plan) >= 0 ? plan : 'growth';
+    retiredPlanHint = plan === 'pro';
+    form.querySelectorAll('input[name=plan]').forEach(function (field) { field.checked = field.value === selected; });
+    var note = document.getElementById('plan-preference-note');
+    if (note) { note.hidden = plan !== 'pro'; note.textContent = plan === 'pro' ? 'Pro is no longer offered for new setup. Choose a current preference; billing remains off.' : ''; }
+    form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
+  }
+  function choosePlan() { selectPlan(new URLSearchParams(location.search).get('plan')); }
   choosePlan();
   // Emergency tiers prefilled by trade (same table as the server); the owner can edit every line.
   var T0 = 'Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space';
@@ -24,13 +33,13 @@
   form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
   function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c } : null; }); return t; }
   var fwdSel = form.elements['forwarding']; function fwdUI() { if (fwdSel && document.getElementById('transferRow')) document.getElementById('transferRow').style.display = fwdSel.value === 'all' ? 'grid' : 'none'; } if (fwdSel) fwdSel.addEventListener('change', fwdUI); fwdUI();
-  form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { form.querySelectorAll('.plans-pick label').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }); });
+  form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { selectPlan(r.value); }); });
   var accessGeneration = 0, session = null, revision = 0, saving = null, saveAgain = false, dirty = false, restoring = false, saveTimer = null;
   var gate = document.getElementById('access-gate'), gateStatus = document.getElementById('access-status'), accessForm = document.getElementById('access-form');
   var draftStatus = document.getElementById('draft-status'), verifiedToken = new URLSearchParams(location.hash.slice(1)).get('verify');
   var storageKey = 'mc-onboarding-session-v1';
   if (location.hash || ['email', 'name', 'phone', 'business'].some(function (key) { return q.has(key); })) {
-    history.replaceState(null, '', location.pathname + (['starter', 'growth', 'pro'].indexOf(q.get('plan')) >= 0 ? '?plan=' + encodeURIComponent(q.get('plan')) : ''));
+    history.replaceState(null, '', location.pathname + (PLAN_IDS.indexOf(q.get('plan')) >= 0 ? '?plan=' + encodeURIComponent(q.get('plan')) : ''));
   }
   function setSession(value) {
     session = value;
@@ -97,6 +106,7 @@
   function restore(fields) {
     restoring = true; hoursTouched = false;
     Object.keys(fields || {}).forEach(function (name) {
+      if (name === 'plan') return; // A retired preference must not clear both current choices.
       form.querySelectorAll('[name]').forEach(function (field) {
         if (field.name !== name) return;
         if (field.type === 'radio') field.checked = field.value === fields[name];
@@ -104,6 +114,8 @@
         else field.value = fields[name];
       });
     });
+    var savedPlan = fields.plan;
+    selectPlan(PLAN_IDS.indexOf(savedPlan) >= 0 || savedPlan === 'pro' ? savedPlan : retiredPlanHint ? 'pro' : form.elements.plan.value);
     if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = true; hoursRows.querySelectorAll('input').forEach(function (field) { field.value = hours[field.dataset.d]?.[field.dataset.k] || ''; }); } catch (error) { fillHours(); } } else fillHours();
     touched.t0 = !!fields.tier0; touched.t1 = !!fields.tier1; fillTiers(); fwdUI();
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });

@@ -7,6 +7,15 @@ export const PLANS = {
   pro: { name: "Pro", price: 449, minutes: 1500, texts: 5000, leadPlatforms: true, followUp: true, software: ["google", "jobber", "housecall"] },
 };
 
+// Public preferences use stable IDs, while existing shops keep their original plan
+// records and usage behavior above. This projection does not enable paid service.
+export const PUBLIC_PLAN_IDS = Object.freeze(["starter", "growth"]);
+export const PUBLIC_PLAN_LABELS = Object.freeze({ starter: "Coverage", growth: "Follow-through" });
+export const PUBLIC_PLANS = Object.freeze(Object.fromEntries(PUBLIC_PLAN_IDS.map((id) => {
+  const { price, minutes, texts } = PLANS[id];
+  return [id, Object.freeze({ name: PUBLIC_PLAN_LABELS[id], price, minutes, texts })];
+})));
+
 export const ACTIVE = ["testing", "live"];
 export const STATUSES = ["new", "building", "testing", "live", "paused", "cancelled"];
 

@@ -48,6 +48,30 @@ async function fixture(config={}){
 async function inspect(page){return page.evaluate(()=>{const h=window.__voiceFixture;return{events:h.events,requests:h.requests,micCalls:h.micCalls,sdkLoads:h.sdkLoads,stoppedTracks:h.stoppedTracks,instances:h.instances.map(sdk=>({stops:sdk.stops,sent:sdk.sent,joins:sdk.joins,audioInjected:sdk.args[3]?.audioSource===h.stream.getAudioTracks()[0],startAudioOff:sdk.args[3]?.startAudioOff})),timers:[...h.timers.values()].map(timer=>timer.ms)};});}
 async function run(name,config,work){let handle;try{handle=await fixture(config);await work(handle.page);report.cases.push({name,...await inspect(handle.page)});}catch(error){report.issues.push({name,detail:String(error.message||error)});}finally{await handle?.context.close();}}
 async function startReady(page,persona='bayou-air',language='en'){return page.evaluate(async({persona,language})=>{const h=window.__voiceFixture,id=h.start(persona,language);const ready=await h.controllers[id].ready;return{id,ready};},{persona,language});}
+function watchFactChecks(width,id,current){
+  const n=current.messageCount,rows=Object.fromEntries(current.summaryRows),facts=[];
+  const expect=(name,pass)=>facts.push({name,pass:!!pass});
+  if(id==='sms'){
+    expect('contact and street remain unknown until supplied',n>=7||(!current.summary.includes('0142')&&!current.summary.includes('0143')&&!current.summary.includes('12 Oak St')));
+    if(n<5)expect('questions are not visit requests',rows.Requested==='No visit requested yet');
+    if(n>=5&&n<7)expect('exact-time request remains unpromised',rows.Requested.includes('2 pm')&&rows.Requested.includes('exact times not promised'));
+    if(n>=7){expect('selected window and address persist',rows.Requested.includes('Tomorrow, 12 to 5')&&rows.Requested.includes('not confirmed')&&rows.Where==='12 Oak St, Katy');expect('phone correction replaces only the old number',rows.Contact===(n>=9?'Alex · (713) 555-0143':'Alex · (713) 555-0142')&&!current.summary.includes(n>=9?'0142':'0143'));}
+    if(n>=11)expect('alternate window requires asking the customer',/ask Alex before changing the window/.test(rows.Next));
+  }else if(id==='call'){
+    expect('contact and street remain unknown until supplied',n>=3||(!current.summary.includes('0151')&&!current.summary.includes('0154')&&!current.summary.includes('24 Pine St')));
+    if(n>=3){expect('callback does not become a visit',rows.Request===(n<9?'Callback only; no visit':n<11?'Callback only; no texts or visit':'Callback only; no texts; speak before any visit'));expect('address and corrected contact persist',rows.Where==='24 Pine St, Fulshear'&&rows.Contact===(n>=9?'Sam · (713) 555-0154':'Sam · (713) 555-0151')&&!current.summary.includes(n>=9?'0151':'0154'));}
+    if(n>=7)expect('requested callback deadline remains unconfirmed',rows.Timing==='Within ten minutes requested · not confirmed');
+    if(n>=9)expect('call-only preference is retained',rows.Request.includes('no texts'));
+    if(n>=11)expect('specific issue and dispatch boundary are retained',rows.Job.includes('under kitchen sink')&&rows.Next.includes('no dispatch arranged'));
+  }else{
+    expect('owner language is English with Spanish customer tag',rows.Language==='Spanish'&&rows.Job.startsWith('Deep clean')&&/Collect|Explain|Choose|Nia/.test(rows.Next));
+    expect('contact and street remain unknown until supplied',n>=7||(!current.summary.includes('0152')&&!current.summary.includes('36 Elm St')));
+    if(n>=3)expect('bedroom correction preserves bathrooms and area',rows.Job.includes(n>=9?'3 beds':'2 beds')&&rows.Job.includes('2 baths')&&rows.Job.includes('1,000 sq ft')&&(n<9||!rows.Job.includes('2 beds')));
+    if(n>=7)expect('contact address and requested window persist',rows.Contact==='Ana · (713) 555-0152'&&rows.Where==='36 Elm St, Memorial'&&rows.Requested==='Saturday, 8 to 10 · not confirmed');
+    if(n>=11)expect('window changes require a requested call',rows.Next.includes('call before any window change'));
+  }
+  check(`${width}px ${id} message ${n} owner facts match supplied intent`,facts.every(row=>row.pass),{facts,rows,status:current.status});
+}
 async function uiChecks(){
   for(const width of[1440,390,320]){
     const context=await browser.newContext({viewport:{width,height:width<=390?844:1000},reducedMotion:'no-preference',serviceWorkers:'block'});
@@ -66,7 +90,7 @@ async function uiChecks(){
     const page=await context.newPage();page.setDefaultTimeout(6000);page.on('pageerror',error=>report.browserErrors.push(error.message));
     const sourceReads=[];page.on('response',response=>{const file=new URL(response.url()).pathname.slice(1);if(['stories.js','site-refresh.css'].includes(file))sourceReads.push(response.body().then(body=>report.servedSources.push({width,file,sha256:hash(body),matchesStartingSource:hash(body)===report.source[file]})));});
     const capture=async name=>{const path=`${prefix}-${width}-${name}.png`;await page.screenshot({path,animations:'disabled'});report.screenshots.push(path);};
-    const state=()=>page.locator('#demo-wrap').evaluate(wrap=>({scenario:wrap.querySelector('[data-example][aria-pressed="true"]')?.dataset.example,mode:wrap.dataset.mode,progress:document.querySelector('#example-progress').textContent,messages:[...wrap.querySelectorAll('#example-messages .site-message p')].map(el=>el.textContent),summary:document.querySelector('#example-summary').textContent,status:document.querySelector('#example-ticket-status').textContent,voiceStatus:document.querySelector('#example-voice-status').textContent,input:document.querySelector('#example-input').value,scrollY}));
+    const state=()=>page.locator('#demo-wrap').evaluate(wrap=>({scenario:wrap.querySelector('[data-example][aria-pressed="true"]')?.dataset.example,mode:wrap.dataset.mode,messageCount:wrap.querySelectorAll('#example-messages .site-message').length,playVisible:!document.querySelector('#example-play').hidden,playLabel:document.querySelector('#example-play').textContent,counterPresent:!!document.querySelector('#example-progress'),messages:[...wrap.querySelectorAll('#example-messages .site-message p')].map(el=>el.textContent),roles:[...wrap.querySelectorAll('#example-messages .site-message')].map(el=>el.classList.contains('site-message-agent')?'agent':'customer'),summaryRows:[...document.querySelectorAll('#example-summary > div')].map(el=>[el.querySelector('dt').textContent,el.querySelector('dd').textContent]),summary:document.querySelector('#example-summary').textContent,status:document.querySelector('#example-ticket-status').textContent,voiceStatus:document.querySelector('#example-voice-status').textContent,input:document.querySelector('#example-input').value,scrollY}));
     const visibleReply=async label=>{
       const geometry=await page.locator('#example-messages .site-message').last().evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect(),header=document.querySelector('#navbar').getBoundingClientRect().bottom;return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,paneTop:p.top,paneBottom:p.bottom,header,viewport:innerHeight};});
       check(`${width}px ${label} latest reply actually visible`,geometry.top>=Math.max(geometry.header,geometry.paneTop)-2&&geometry.bottom<=Math.min(geometry.viewport,geometry.paneBottom)+2,geometry);
@@ -94,9 +118,16 @@ async function uiChecks(){
       for(const id of['call','spanish','sms']){
         await page.locator(`[data-example="${id}"]`).click();
         check(`${width}px ${id} first selection starts playback`,await page.locator('#example-play').innerText()==='Pause');
-        await page.waitForTimeout(2700);check(`${width}px ${id} delivered an assistant answer after first click`,(await state()).messages.length>=2);await visibleReply(`${id} first answer`);
-        await page.waitForTimeout(4600);await visibleReply(`${id} completion`);
-        const result=await state();check(`${width}px ${id} finishes useful owner result`,/4\s+of\s+4/.test(result.progress)&&result.messages.length===4&&result.summary.length>80,result);
+        const timeline=[{at:new Date().toISOString(),...await state()}];
+        check(`${width}px ${id} starts at one message without a counter`,timeline[0].messageCount===1&&!timeline[0].counterPresent,timeline[0]);watchFactChecks(width,id,timeline[0]);
+        for(let delivered=2;delivered<=12;delivered++){
+          await page.waitForFunction(expected=>document.querySelectorAll('#example-messages .site-message').length===expected,delivered,{timeout:5000});
+          const current=await state();timeline.push({at:new Date().toISOString(),...current});
+          check(`${width}px ${id} message ${delivered} arrives in order with an owner view`,current.messageCount===delivered&&current.messages.length===delivered&&current.summary.length>40&&current.roles.every((role,index)=>role===(index%2?'agent':'customer')),current);
+          watchFactChecks(width,id,current);await visibleReply(`${id} message ${delivered}`);
+        }
+        const result=await state();check(`${width}px ${id} finishes all twelve messages and useful owner result`,result.messageCount===12&&!result.playVisible&&!result.counterPresent&&result.summary.length>80,result);
+        report.cases.push({name:`${width}px ${id} complete normal-motion playback`,timeline});
         if(id==='spanish')check(`${width}px Spanish Watch owner result retains language`,result.summary.includes('Spanish'),result.summary);
         await capture(`${id}-watch`);await ownerPreview(`${id}-watch`);
       }
@@ -125,9 +156,15 @@ async function uiChecks(){
       check(`${width}px Stop rejects late voice and restores typing`,!(await state()).messages.includes('STALE VOICE')&&!await page.locator('#example-input').isDisabled()&&await page.evaluate(()=>window.__outcomeUI.voices[0].destroyed===1),stopped);
       await page.locator('#example-voice-start').click();await page.waitForTimeout(30);await page.evaluate(()=>window.__outcomeUI.voices[1].options.onError({code:'microphone_denied',message:'Fixture denial'}));
       check(`${width}px denied microphone keeps working typed fallback`,!await page.locator('#example-input').isDisabled()&&/type/i.test(await page.locator('#example-voice-status').innerText()));
-      await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#example-mode-watch').click();await page.locator('[data-example="spanish"]').click();await page.waitForTimeout(150);
-      check(`${width}px reduced motion shows complete Spanish result`,(await state()).messages.length===4&&(await state()).summary.includes('Spanish'));
-      await visibleReply('reduced-motion final answer');await capture('spanish-reduced-complete');await ownerPreview('spanish-reduced');
+      await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#example-mode-watch').click();
+      for(const id of['sms','call','spanish']){
+        await page.locator(`[data-example="${id}"]`).click();await page.waitForTimeout(150);
+        const reduced=await state();
+        check(`${width}px ${id} reduced motion shows all twelve messages without playback`,reduced.messageCount===12&&!reduced.playVisible&&!reduced.counterPresent&&reduced.summary.length>80,reduced);
+        watchFactChecks(width,id,reduced);if(id==='spanish')check(`${width}px Spanish reduced motion keeps English owner language label`,reduced.summary.includes('Spanish'));
+        await visibleReply(`${id} reduced-motion final answer`);await capture(`${id}-reduced-complete`);await ownerPreview(`${id}-reduced`);
+        report.cases.push({name:`${width}px ${id} reduced-motion complete result`,...reduced});
+      }
       const requests=await page.evaluate(()=>window.__outcomeUI.typed);report.typedFixtureRequests.push(...requests);report.cases.push({name:`${width}px customer-job UI fixtures`,...await state()});
       check(`${width}px no horizontal overflow`,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     }catch(error){report.issues.push({name:`${width}px UI`,detail:String(error.message||error)});}finally{await context.close();}
@@ -153,7 +190,7 @@ async function recoveryChecks(){
     window.MCDemoVoice={start(options){const voice={options,destroyed:0};h.voices.push(voice);return{ready:Promise.resolve({callId:'recovery-fixture'}),destroy(){voice.destroyed++;},stop(){}};}};
   },{origin:base.origin});
   const page=await context.newPage();page.setDefaultTimeout(6000);page.on('pageerror',error=>report.browserErrors.push(error.message));
-  const snapshot=()=>page.evaluate(()=>({mode:document.querySelector('#demo-wrap').dataset.mode,progress:document.querySelector('#example-progress').textContent,messages:document.querySelector('#example-messages').textContent,summary:document.querySelector('#example-summary').textContent,status:document.querySelector('#example-ticket-status').textContent,input:document.querySelector('#example-input').value,busy:document.querySelector('#example-messages').getAttribute('aria-busy'),error:document.querySelector('#example-error').hidden?'':document.querySelector('#example-error').textContent,requests:window.__recovery.requests.length}));
+  const snapshot=()=>page.evaluate(()=>({mode:document.querySelector('#demo-wrap').dataset.mode,messageCount:document.querySelectorAll('#example-messages .site-message').length,messages:document.querySelector('#example-messages').textContent,summary:document.querySelector('#example-summary').textContent,status:document.querySelector('#example-ticket-status').textContent,input:document.querySelector('#example-input').value,busy:document.querySelector('#example-messages').getAttribute('aria-busy'),error:document.querySelector('#example-error').hidden?'':document.querySelector('#example-error').textContent,requests:window.__recovery.requests.length}));
   const queue=async item=>page.evaluate(item=>window.__recovery.queue.push(item),item);
   const send=async(text,item,keyboard=false)=>{await queue(item);await page.locator('#example-input').fill(text);if(keyboard)await page.locator('#example-input').press('Enter');else await page.locator('#example-send').click();};
   const idle=()=>page.waitForFunction(()=>document.querySelector('#example-messages').getAttribute('aria-busy')==='false');
@@ -161,16 +198,16 @@ async function recoveryChecks(){
   const event={type:'owner_notification',company:'Katy Pipeworks',owner:'Dana',data:{customer_name:'Sam',phone:'713-555-0151',address:'',issue:'Leaky tap',requested_window:'after 3 pm',urgency:'flexible',language:'en',requested_action:'callback'}};
   try{
     await page.goto(base.href,{waitUntil:'domcontentloaded'});await page.locator('.site-demo-ready').waitFor();
-    check('fresh offscreen Watch does not run or request anything',(await snapshot()).progress==='1 of 4 messages'&&await page.locator('#example-play').innerText()==='Play'&&(await snapshot()).requests===0);
+    check('fresh offscreen Watch does not run or request anything',(await snapshot()).messageCount===1&&await page.locator('#example-play').innerText()==='Play'&&(await snapshot()).requests===0);
     await page.locator('#example-messages').scrollIntoViewIfNeeded();await page.waitForTimeout(2500);
-    check('first viewport intersection advances ordinary Watch automatically',/2 of 4/.test((await snapshot()).progress));
-    await page.locator('#example-play').click();const paused=(await snapshot()).progress;await page.waitForTimeout(2450);
-    check('Pause preserves revealed facts without advancing',(await snapshot()).progress===paused&&await page.locator('#example-play').innerText()==='Play');
-    await page.locator('#example-play').click();await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await settle();const offscreen=(await snapshot()).progress;await page.waitForTimeout(2450);
-    check('offscreen playback pauses without advancing',(await snapshot()).progress===offscreen&&await page.locator('#example-play').innerText()==='Play');
+    check('first viewport intersection advances ordinary Watch automatically',(await snapshot()).messageCount===2);
+    await page.locator('#example-play').click();const paused=(await snapshot()).messageCount;await page.waitForTimeout(2450);
+    check('Pause preserves revealed facts without advancing',(await snapshot()).messageCount===paused&&await page.locator('#example-play').innerText()==='Play');
+    await page.locator('#example-play').click();await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await settle();const offscreen=(await snapshot()).messageCount;await page.waitForTimeout(2450);
+    check('offscreen playback pauses without advancing',(await snapshot()).messageCount===offscreen&&await page.locator('#example-play').innerText()==='Play');
     await page.locator('#example-messages').scrollIntoViewIfNeeded();await page.waitForTimeout(2450);
-    check('returning on screen requires explicit Play',(await snapshot()).progress===offscreen&&await page.locator('#example-play').innerText()==='Play');
-    await page.locator('#example-replay').click();check('Replay restarts ordered playback at first fact',(await snapshot()).progress==='1 of 4 messages'&&await page.locator('#example-play').innerText()==='Pause');
+    check('returning on screen requires explicit Play',(await snapshot()).messageCount===offscreen&&await page.locator('#example-play').innerText()==='Play');
+    await page.locator('#example-replay').click();check('Replay restarts ordered playback at first fact',(await snapshot()).messageCount===1&&await page.locator('#example-play').innerText()==='Pause');
     await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});
     check('hidden document pauses active playback',await page.locator('#example-play').innerText()==='Play');
     await page.evaluate(()=>Object.defineProperty(document,'hidden',{configurable:true,get:()=>false}));
