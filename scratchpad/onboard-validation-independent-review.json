@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-22T18:39:34.258Z",
+  "reviewer": "platform_readiness_packet",
+  "mode": "independent source review only; reviewed assertions below were not executed as browser or runtime tests",
+  "ok": true,
+  "disposition": "No remaining source blocker found in the scoped onboarding validation fix.",
+  "sourceHashes": {
+    "onboard.html": "42765930f9a4b19141d83b026643213d1f52f78ba01ac30f38e799c00046b3dd",
+    "onboard.js": "21b720ec0ab38491efb1cdde98466c8623577b02bae349d88bd10717e139cdd4"
+  },
+  "assertionsReviewed": [
+    {
+      "topic": "Visible and accessible errors",
+      "finding": "Scoped invalid and invalid:focus styles override the light-theme border; readable field text and summary use textContent. aria-invalid and aria-describedby are added/removed with the error, retaining phone/website hints. The first invalid field is focused/scrolled into view."
+    },
+    {
+      "topic": "Required and optional contract",
+      "finding": "Current-step validation marks all invalid form controls instead of stopping after the first. Name, verified email, US-format callback and business name remain the required contract. Optional blank fields remain allowed; an entered website uses its native URL validity. Phone normalization matches the server’s trimmed30-character/e164 behavior."
+    },
+    {
+      "topic": "Keyboard and step behavior",
+      "finding": "Next is a submit button handled once by the form submit listener; Back stays type=button and novalidate prevents hidden future required fields from triggering native submission validation. No textarea key handler consumes normal newlines. Final Create checks all steps and reveals the first invalid step."
+    },
+    {
+      "topic": "Save race closure",
+      "finding": "Submission captures submittedStep, disables Back/Next, awaits existing saveDraft, checks accessGeneration and step identity, then revalidates latest values before advancing or creating. Editable inputs can still autosave incomplete drafts; invalid continuation does not discard them."
+    },
+    {
+      "topic": "Persistence and identity",
+      "finding": "Existing draft revisions, saved-answer restoration, marketing handling and request/session authority are retained. Stale generations cannot apply continuation or errors. Validation clears on sign-out/new verification identity, and identity reset restores navigation controls."
+    },
+    {
+      "topic": "Server and correction feedback",
+      "finding": "Mapped server fields reveal their step and receive linked inline text. Server-rejected values stay marked until changed; client-invalid corrections remain marked until valid. Unmapped failures receive a readable summary. No backend/server requirement or provisioning gate was changed."
+    }
+  ],
+  "limits": [
+    "This receipt is source analysis, not independently executed browser/keyboard/accessibility/contrast or production acceptance. QA’s actual-asset fixture runs are separate evidence.",
+    "The existing401 flow calls gateOnly before the submit catch; that catch can attempt focus on the summary inside the now-hidden form. The sign-in gate already presents its status message. This minor focus issue is not a blocker for the reviewed validation fix.",
+    "No real sign-in, email, customer creation, model/provider call or deployment was performed by this reviewer. The production authentication cause and pending diagnostic remain separate."
+  ],
+  "backendChangedInThisDiff": false,
+  "effects": {
+    "physicalNetworkRequests": 0,
+    "browserOrMailboxAccess": 0,
+    "providerRequests": 0,
+    "emails": 0,
+    "customerWrites": 0,
+    "sourceEdits": 0,
+    "backendEdits": 0,
+    "testRuns": 0,
+    "builds": 0,
+    "deployments": 0,
+    "environmentChanges": 0,
+    "commits": 0,
+    "pushes": 0,
+    "reviewReceiptWrites": 1
+  }
+}

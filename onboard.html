@@ -23,6 +23,12 @@
     .ob .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 600px) { .ob .row { grid-template-columns: 1fr; } }
     .ob .form-group { margin-bottom: 14px; }
+    .ob .required-note { color: #5B6273; font-size: 13px; margin: 0 0 16px; }
+    .ob .required-mark { color: #b42318; }
+    .ob .form-input[aria-invalid="true"] { border: 2px solid #b42318; }
+    .ob .form-input[aria-invalid="true"]:focus { border-color: #b42318; box-shadow: 0 0 0 3px rgba(180, 35, 24, .15); }
+    .ob .field-error { color: #b42318; font-size: 13px; line-height: 1.5; margin: 6px 0; }
+    .ob .form-status.is-error { color: #b42318; background: #fff1f0; border: 1px solid #f3b5af; border-radius: 10px; padding: 12px 14px; margin: 0 0 18px; text-align: left; font-size: 14px; line-height: 1.5; }
     .ob textarea.form-input { min-height: 84px; resize: vertical; }
     .ob .plans-pick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
     @media (max-width: 600px) { .ob .plans-pick { grid-template-columns: 1fr; } }
@@ -72,14 +78,16 @@
   <form id="ob" novalidate hidden>
     <p hidden><input name="botfield" tabindex="-1" autocomplete="off"></p>
     <input type="hidden" id="primaryGoal" name="primaryGoal">
+    <p class="required-note">Fields marked <span class="required-mark" aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.</p>
+    <p class="form-status" id="err" role="alert" aria-atomic="true" tabindex="-1" hidden></p>
     <fieldset class="on" data-step="1"><legend>Your front desk</legend>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="name">Your name</label><input class="form-input" id="name" name="name" required autocomplete="name"></div>
+        <div class="form-group"><label class="form-label" for="name">Your name <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="name" name="name" required autocomplete="name"></div>
         <div class="form-group"><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email" readonly></div>
       </div>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="phone">Your contact cell</label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555 0100" autocomplete="tel"><span class="hint" style="display:block;margin-top:4px">The callback number you want saved with your business.</span></div>
-        <div class="form-group"><label class="form-label" for="website">Business website <span>(optional)</span></label><input class="form-input" id="website" name="website" type="url" placeholder="https://"><span class="hint" style="display:block;margin-top:4px">For reference. Next, you’ll add the answers your front desk should use.</span></div>
+        <div class="form-group"><label class="form-label" for="phone">Your contact cell <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555 0100" autocomplete="tel" aria-describedby="phone-hint"><span id="phone-hint" class="hint" style="display:block;margin-top:4px">The callback number you want saved with your business.</span></div>
+        <div class="form-group"><label class="form-label" for="website">Business website <span>(optional)</span></label><input class="form-input" id="website" name="website" type="url" placeholder="https://" aria-describedby="website-hint"><span id="website-hint" class="hint" style="display:block;margin-top:4px">For reference. Next, you’ll add the answers your front desk should use.</span></div>
       </div>
       <p class="form-label" id="connection-preferences-label">Where would you like help?</p>
       <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked>Website inquiries</label><label><input type="checkbox" name="desiredChannels" value="voice">Phone calls</label><label><input type="checkbox" name="desiredChannels" value="sms">Text messages</label><label><input type="checkbox" name="desiredChannels" value="calendar">Calendar scheduling</label></div>
@@ -96,7 +104,7 @@
     </fieldset>
     <fieldset data-step="2"><legend>Your business</legend>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="business">Business name</label><input class="form-input" id="business" name="business" required></div>
+        <div class="form-group"><label class="form-label" for="business">Business name <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="business" name="business" required></div>
         <div class="form-group"><label class="form-label" for="trade">Trade</label><input class="form-input" id="trade" name="trade" placeholder="HVAC, plumbing, electrical, roofing, cleaning" list="trades"><datalist id="trades"><option>HVAC</option><option>Plumbing</option><option>Electrical</option><option>Roofing</option><option>Cleaning</option><option>Landscaping</option><option>Pest control</option><option>Garage doors</option><option>Handyman</option></datalist></div>
       </div>
       <div class="form-group"><label class="form-label" for="services">What you do (one per line)</label><textarea class="form-input" id="services" name="services" placeholder="AC repair&#10;AC replacement&#10;Maintenance plans"></textarea></div>
@@ -129,8 +137,7 @@
       <div class="form-group"><label class="form-label" for="notes">Anything else a new receptionist should know</label><textarea class="form-input" id="notes" name="notes" placeholder="We are a family shop, 12 years in Katy. Say 'Ray or one of the guys' not 'a technician'."></textarea></div>
       <div class="form-group"><label class="form-label" for="greeting">First line of the website chat (optional)</label><input class="form-input" id="greeting" name="greeting" placeholder="Hi, this is the Bayou Air front desk. What can we help with today?"></div>
     </fieldset>
-    <div class="nav"><button type="button" class="btn-pill btn-pill-dark" id="back" style="visibility:hidden">Back</button><button type="button" class="btn-pill btn-pill-blue" id="next">Next</button></div>
-    <p class="form-status" id="err" role="alert"></p>
+    <div class="nav"><button type="button" class="btn-pill btn-pill-dark" id="back" style="visibility:hidden">Back</button><button type="submit" class="btn-pill btn-pill-blue" id="next">Next</button></div>
   </form>
   <section class="done" id="done">
     <h2 style="margin-top:0">Building your front desk</h2>

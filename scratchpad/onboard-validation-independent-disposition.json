@@ -1,0 +1,125 @@
+{
+  "at": "2026-10-22T18:40:20.895Z",
+  "disposition": "Accepted locally for the reported validation UI bug; no hosted acceptance or publication",
+  "receipt": "scratchpad/onboard-validation-candidate-second.json",
+  "receiptSHA256": "6bb5f7b1cba1cf7d11499edc9f68b604877cc97f5f08ee919ce37eaad9c8951e",
+  "checks": {
+    "passed": 16,
+    "total": 16,
+    "sourceStable": true,
+    "pageErrors": 0,
+    "physicalHTTPAttempts": 0
+  },
+  "source": {
+    "onboard.html": "42765930f9a4b19141d83b026643213d1f52f78ba01ac30f38e799c00046b3dd",
+    "onboard.js": "21b720ec0ab38491efb1cdde98466c8623577b02bae349d88bd10717e139cdd4",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "assets/favicon.png": "363569357efc676f023c78500d353258cd464781ea9c94a4af289346ee7de348",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f"
+  },
+  "script": "scripts/onboard-validation-qa-check.mjs",
+  "scriptSHA256": "18e365d157b8185f9476f83ec16c01e91804bd69a1177b6a66e7b66ae6f7535f",
+  "before": {
+    "receipt": "scratchpad/onboard-validation-before.json",
+    "passed": 0,
+    "total": 4,
+    "genuineFailures": [
+      "Light-theme invalid border remained gray or blue.",
+      "Pale summary was outside the mobile viewport.",
+      "Validation stopped at the first missing required field."
+    ]
+  },
+  "preservedCandidate": {
+    "receipt": "scratchpad/onboard-validation-candidate-first.json",
+    "passed": 9,
+    "total": 13,
+    "fixtureCorrections": [
+      "Server field details intentionally moved from summary to the aria-linked inline error.",
+      "Existing CSS border-color transition requires waiting for rendered color before comparing."
+    ]
+  },
+  "visualReview": {
+    "widths": [
+      375,
+      1365
+    ],
+    "screenshots": [
+      "scratchpad/onboard-validation-candidate-second-empty-cell-375.png",
+      "scratchpad/onboard-validation-candidate-second-empty-cell-1365.png"
+    ],
+    "findings": "Focused phone has a red border and readable linked inline message; no horizontal overflow. Full-page screenshots include the fixed navbar at the current focused scroll position."
+  },
+  "coverage": [
+    "Missing/whitespace names, contact cells and business name; malformed phone and optional website; optional website blank remains allowed.",
+    "All current-step invalid fields are marked; focus moves to the first invalid field; errors clear only after valid correction.",
+    "Input Enter advances once and textarea Enter inserts a newline.",
+    "Restored final-step drafts validate every earlier required field before create.",
+    "Server field mapping returns to the correct step, retains rejected values until changed and preserves existing hint associations.",
+    "Pending draft saves revalidate edited fields; final saves cannot create after earlier fields become invalid; Back cannot change steps during continuation."
+  ],
+  "limits": [
+    "All owner sessions and API results were synthetic fixtures; account creation endpoints returned mocked validation failures.",
+    "Incomplete draft autosaves were intentionally allowed; this is not a no-write assertion.",
+    "No real email, provider call, customer account, deployment, environment change or external HTTP was performed by this QA task."
+  ],
+  "viewportSupplement": {
+    "receipt": "scratchpad/onboard-validation-viewport-final.json",
+    "passed": 1,
+    "total": 1,
+    "screenshots": [
+      "scratchpad/onboard-validation-viewport-final-focused-viewport-375.png"
+    ],
+    "geometry": {
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "scrollY": 426,
+      "focus": "phone",
+      "header": {
+        "x": 0,
+        "y": 0,
+        "top": 0,
+        "bottom": 69,
+        "left": 0,
+        "right": 375,
+        "width": 375,
+        "height": 69
+      },
+      "phone": {
+        "x": 43,
+        "y": 396.046875,
+        "top": 396.046875,
+        "bottom": 450.046875,
+        "left": 43,
+        "right": 332,
+        "width": 289,
+        "height": 54
+      },
+      "inlineError": {
+        "x": 43,
+        "y": 456.046875,
+        "top": 456.046875,
+        "bottom": 495.046875,
+        "left": 43,
+        "right": 332,
+        "width": 289,
+        "height": 39
+      },
+      "summary": {
+        "x": 20,
+        "y": 48.4375,
+        "top": 48.4375,
+        "bottom": 95.4375,
+        "left": 20,
+        "right": 355,
+        "width": 335,
+        "height": 47
+      }
+    },
+    "sourceStable": true,
+    "scriptSHA256": "811ae9fa96c14c03e4ecb477cbc8f4cea656f785b757e958fe6fea33250abecb",
+    "provenance": "The16-group execution uses its preserved script18e365d1. Latest811ae9fa adds a viewport-only option without altering the app or default functional cases; only the focused viewport supplement was executed after that addition.",
+    "finding": "Focused phone and specific linked error clear the69px header. Summary begins at48px and is partly clipped by the fixed header; inline feedback is fully visible and satisfies the scoped acceptance criterion."
+  }
+}

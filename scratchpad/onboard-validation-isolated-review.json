@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-22T18:44:00.102Z",
+  "disposition": "Accepted locally as an isolated UI-only validation candidate based on exact production source; no deployment proof",
+  "worktree": "/private/tmp/mc-onboard-validation-b9",
+  "branch": "release/onboard-validation-b9",
+  "parent": "b9f4578155dd6672fdd89d9870affc92c0cba0fb",
+  "qa": {
+    "receipt": "scratchpad/onboard-validation-isolated-qa.json",
+    "receiptSHA256": "1f88779034f9082d2123d4dc17bebe3480b2cf23cac3b753af5edcd527609eeb",
+    "passed": 16,
+    "total": 16,
+    "sourceStable": true,
+    "pageErrors": 0,
+    "physicalHTTPAttempts": 0,
+    "scriptSHA256": "811ae9fa96c14c03e4ecb477cbc8f4cea656f785b757e958fe6fea33250abecb",
+    "screenshots": [
+      "scratchpad/onboard-validation-isolated-qa-empty-cell-375.png",
+      "scratchpad/onboard-validation-isolated-qa-empty-cell-1365.png"
+    ]
+  },
+  "frontend": {
+    "onboard.js": "21b720ec0ab38491efb1cdde98466c8623577b02bae349d88bd10717e139cdd4",
+    "onboard.html": "42765930f9a4b19141d83b026643213d1f52f78ba01ac30f38e799c00046b3dd"
+  },
+  "trackedReleaseChanges": [
+    "onboard.html",
+    "onboard.js",
+    "scripts/customer-onboarding-ui-check.mjs",
+    "scripts/onboard-recovery-ui-check.mjs"
+  ],
+  "protectedPathsUnchanged": [
+    "netlify",
+    "netlify.toml",
+    "_headers",
+    "_redirects",
+    ".github",
+    ".gitignore",
+    ".env.example",
+    "package.json",
+    "package-lock.json",
+    "robots.txt",
+    "sitemap.xml"
+  ],
+  "untrackedCandidateSources": [
+    "product/ONBOARDING-VALIDATION.md",
+    "scripts/onboard-validation-qa-check.mjs"
+  ],
+  "generatedReceiptChangesExcludedFromReleaseAssessment": [
+    "scratchpad/intake-engineering-check.json",
+    "scratchpad/public-build-manifest.json"
+  ],
+  "developmentDependency": {
+    "path": "node_modules",
+    "symlink": true,
+    "mustRemainUnstaged": true
+  },
+  "review": [
+    "Frontend bytes match the independently accepted validation implementation.",
+    "The b9 comparison changes only onboarding HTML/JS plus the two private QA regressions; new documentation/QA/evidence stay outside product runtime.",
+    "No tracked backend functions, Netlify configuration, headers, routing, environment template, provider adapter or dependency manifest changed.",
+    "Existing QA test edits target linked inline error semantics and unchanged server-rejected values; channel wording accepts the existing inactive/unavailable labels without changing runtime."
+  ],
+  "limits": [
+    "Only cached assets and mocked verified owner/API responses were used in this independent browser run.",
+    "Incomplete draft autosaves were allowed. Three mocked final-create attempts returned validation failures; no actual account was created.",
+    "Root owns the separate actual-handler journey/build gate evidence. Their results are not added to this16-case count.",
+    "No live browser, site/provider traffic, emails, environment changes, commit, push or deployment were performed by this review."
+  ]
+}

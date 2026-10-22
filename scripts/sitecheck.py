@@ -19,7 +19,7 @@ for f in html:
     parsed = References()
     parsed.feed(s)
     for m in parsed.refs:
-        if m.startswith(("http", "mailto:", "tel:", "data:", "//")): continue
+        if m.startswith(("http", "mailto:", "tel:", "sms:", "data:", "//")): continue
         m = urlparse(m).path
         if m.startswith("/"): m = m[1:]
         if m and m not in files:

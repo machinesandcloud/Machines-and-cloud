@@ -19,7 +19,7 @@ const store = await import('../netlify/functions/lib/store.mjs');
 const { accessHash } = await import('../netlify/functions/lib/access.mjs');
 const handlers = Object.fromEntries(await Promise.all(['access', 'onboard', 'client', 'chat'].map(async name => ['/api/' + name, (await import('../netlify/functions/' + name + '.mjs')).default])));
 const sources = ['onboard.html', 'onboard.js', 'netlify/functions/access.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/accounts.mjs', 'netlify/functions/lib/setup.mjs', 'netlify/functions/lib/store.mjs', 'netlify/functions/lib/config.mjs'];
-if (phase === 'full') sources.push('desk.html', 'desk.js', 'netlify/functions/client.mjs', 'netlify/functions/chat.mjs', 'netlify/functions/lib/owner-test.mjs', 'netlify/functions/lib/agent.mjs');
+if (phase === 'full') sources.push('desk.html', 'desk.js', 'desk-connections.js', 'netlify/functions/client.mjs', 'netlify/functions/chat.mjs', 'netlify/functions/lib/owner-test.mjs', 'netlify/functions/lib/agent.mjs');
 const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 result.sourceBefore = hashes();
 const check = (name, pass, detail) => result.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
@@ -180,7 +180,8 @@ try {
     check('Private practice shows actual collected contact/address and explicit no-action result', /12 Oak/.test(await page.locator('#testPreview').innerText()) && /No real visit/.test(await page.locator('#testPreview').innerText()));
     check('Browser private test creates no real visits/messages/customer records', JSON.stringify(beforePrivateTest) === JSON.stringify(await snapshot()));
     check('Successful fake test stays blocked from real customer activation', (await store.getClient(created.slug)).setupProof?.testMode === 'fake' && (await store.getClient(created.slug)).status === 'testing' && await page.locator('#golive').isDisabled());
-    check('Phone and SMS copy remains explicitly inactive after test', /Phone: not active/.test(await page.locator('#channelStates').innerText()) && /Text messages: not active/.test(await page.locator('#channelStates').innerText()));
+    const channelStatus = await page.locator('#channelStates').innerText();
+    check('Phone and SMS copy remains explicitly inactive after test', /Phone: (?:not active|unavailable)/.test(channelStatus) && /(?:Text messages|Texts): (?:not active|unavailable)/.test(channelStatus), channelStatus);
     await shot(page, 'test-390');
     await page.locator('[data-t="availability"]').click(); await page.locator('#availabilityDate').fill('2099-01-07'); await page.locator('#availabilityWindow').selectOption(''); await page.locator('#availabilitySubmit').click();
     await page.locator('#availabilityMessage').filter({ hasText: 'Time blocked.' }).waitFor(); await page.reload(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await page.locator('[data-t="availability"]').click();

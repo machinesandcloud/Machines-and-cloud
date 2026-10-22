@@ -27,7 +27,7 @@
   function clock(str, isClose) { var m = String(str).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/i); if (!m) return null; var h = +m[1], mi = +(m[2] || 0), ap = (m[3] || '').toLowerCase(); if (ap.charAt(0) === 'p' && h < 12) h += 12; else if (ap.charAt(0) === 'a' && h === 12) h = 0; else if (!ap) { if (isClose && h <= 9) h += 12; else if (!isClose && h < 5) h += 12; } return (h < 10 ? '0' : '') + h + ':' + (mi < 10 ? '0' : '') + mi; }
   function parseHours(str) { var out = {}, any = false; String(str || '').split(/[,;\n]+/).forEach(function (part) { var t = part.trim().toLowerCase().replace(/\./g, ''); var dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun)[a-z]*)?\s*:?\s*(.*)$/); if (!dm) return; var a = DI[dm[1]], b = dm[2] ? DI[dm[2]] : a, days = [], i = a; for (var k = 0; k < 7; k++) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; i = (i + 1) % 7; } if (/closed/.test(dm[3])) { days.forEach(function (d) { out[d] = null; }); any = true; return; } var tm = dm[3].match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/); if (!tm) return; var o = clock(tm[1], false), c = clock(tm[2], true); if (!o || !c) return; days.forEach(function (d) { out[d] = { open: o, close: c }; }); any = true; }); if (!any) return null; DAYS.forEach(function (d) { if (out[d] === undefined) out[d] = null; }); return out; }
   var hoursRows = document.getElementById('hoursRows'), hoursTouched = false;
-  hoursRows.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" data-d="' + d + '" data-k="close"></div>'; }).join('');
+  hoursRows.innerHTML = DAYS.map(function (d) { var day = d.charAt(0).toUpperCase() + d.slice(1); return '<div class="hours-row"><span>' + day + '</span><input type="time" aria-label="' + day + ' opening time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" aria-label="' + day + ' closing time" data-d="' + d + '" data-k="close"></div>'; }).join('');
   hoursRows.addEventListener('input', function () { hoursTouched = true; });
   function fillHours() { if (hoursTouched) return; var h = parseHours(form.elements['hours'].value); hoursRows.querySelectorAll('input').forEach(function (inp) { var v = h && h[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); }
   form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
@@ -90,7 +90,7 @@
     i = Math.max(0, Math.min(steps.length - 1, n));
     steps.forEach(function (step, k) { step.classList.toggle('on', k === i); });
     pills.forEach(function (pill, k) { pill.classList.toggle('on', k <= i); pill.setAttribute('aria-current', k === i ? 'step' : 'false'); });
-    back.style.visibility = i ? 'visible' : 'hidden'; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; err.textContent = '';
+    back.style.visibility = i ? 'visible' : 'hidden'; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; setErrorSummary('');
     if (frame) { window.scrollTo({ top: 0, behavior: 'instant' }); steps[i].querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
   }
   function collect() {
@@ -208,14 +208,56 @@
     try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
     if (generation !== accessGeneration) return;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); form.reset(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); form.reset(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
-  function valid() {
-    var invalid = Array.from(steps[i].querySelectorAll('[required]')).find(function (field) {
-      var bad = !field.value.trim() || !field.checkValidity() || (field.name === 'phone' && !validCallbackNumber(field.value));
-      field.classList.toggle('error', bad); if (bad) field.setAttribute('aria-invalid', 'true'); else field.removeAttribute('aria-invalid'); return bad;
+  function setErrorSummary(message) {
+    err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
+  }
+  function fieldMessage(field) {
+    var value = field.value.trim();
+    if (field.required && !value) {
+      return { name: 'Enter your name.', email: 'Confirm your email to continue.', phone: 'Enter your contact cell, including the area code.', business: 'Enter your business name.' }[field.name] || 'Fill in this field.';
+    }
+    if (value && field.name === 'phone' && !validCallbackNumber(value)) return 'Enter a valid US cell number, including the area code, such as (713) 555-0100.';
+    if (value && !field.checkValidity()) return field.type === 'url' ? 'Enter a full website address, such as https://yourbusiness.com, or leave this blank.' : 'Check this field and try again.';
+    return '';
+  }
+  function setFieldError(field, message, fromServer) {
+    var id = field.id + '-error', note = document.getElementById(id);
+    if (!note && message) {
+      note = document.createElement('p'); note.id = id; note.className = 'field-error'; field.insertAdjacentElement('afterend', note);
+    }
+    if (note) { note.textContent = message; note.hidden = !message; }
+    var descriptions = (field.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (value) { return value && value !== id; });
+    if (message) descriptions.push(id);
+    if (descriptions.length) field.setAttribute('aria-describedby', descriptions.join(' ')); else field.removeAttribute('aria-describedby');
+    field.classList.toggle('error', !!message);
+    if (message) field.setAttribute('aria-invalid', 'true'); else field.removeAttribute('aria-invalid');
+    if (fromServer) field.dataset.rejectedValue = field.value; else delete field.dataset.rejectedValue;
+  }
+  function clearValidation() {
+    form.querySelectorAll('.form-input').forEach(function (field) { setFieldError(field, ''); }); setErrorSummary('');
+  }
+  function focusError(field) {
+    field.focus({ preventScroll: true }); field.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }
+  function valid(allSteps) {
+    var invalid = [];
+    (allSteps ? steps : [steps[i]]).forEach(function (step) {
+      step.querySelectorAll('.form-input').forEach(function (field) {
+        var message = fieldMessage(field);
+        // A server-rejected value stays marked until it is changed.
+        if (!message && field.dataset.rejectedValue === field.value) message = document.getElementById(field.id + '-error').textContent;
+        setFieldError(field, message, !!message && field.dataset.rejectedValue === field.value);
+        if (message) invalid.push(field);
+      });
     });
-    if (invalid) { err.textContent = invalid.name === 'phone' ? 'Add a valid US callback number, including the area code.' : 'Check the highlighted field.'; invalid.focus(); return false; } return true;
+    if (invalid.length) {
+      var step = steps.indexOf(invalid[0].closest('fieldset'));
+      if (step !== i) show(step, false);
+      setErrorSummary(invalid.length === 1 ? 'Check the highlighted field to continue.' : 'Check the highlighted fields to continue.'); focusError(invalid[0]); return false;
+    }
+    setErrorSummary(''); return true;
   }
   function validCallbackNumber(value) {
     // Match onboard.mjs's trimmed 30-character input and send.mjs's e164 normalization.
@@ -223,22 +265,32 @@
     var normalized = digits.charAt(0) === '+' ? digits : digits.length === 10 ? '+1' + digits : '+' + digits;
     return /^\+1\d{10}$/.test(normalized);
   }
-  function revealFieldError(path) {
+  function revealFieldError(path, message) {
     var names = { 'owner.name': 'name', 'owner.email': 'email', 'owner.phone': 'phone', 'business.name': 'business', 'business.website': 'website' };
     var name = names[path] || String(path).split('.').pop(), field = form.elements[name];
-    if (!field || field.nodeType !== 1) return;
+    if (!field || field.nodeType !== 1) return false;
     var step = steps.indexOf(field.closest('fieldset'));
-    if (step >= 0) show(step, true);
-    field.classList.add('error'); field.setAttribute('aria-invalid', 'true'); field.focus();
+    if (step >= 0) show(step, false);
+    setFieldError(field, message, true); focusError(field); return true;
   }
-  form.addEventListener('input', function (event) { if (event.target.classList) { event.target.classList.remove('error'); event.target.removeAttribute('aria-invalid'); } });
+  function recheckField(event) {
+    var field = event.target;
+    if (!field.matches('.form-input[aria-invalid="true"]') || field.dataset.rejectedValue === field.value) return;
+    setFieldError(field, fieldMessage(field));
+    if (!steps[i].querySelector('[aria-invalid="true"]')) setErrorSummary('');
+  }
+  form.addEventListener('input', recheckField); form.addEventListener('change', recheckField);
   back.addEventListener('click', async function () { if (i > 0) { show(i - 1, true); dirty = true; await saveDraft().catch(function () {}); } });
-  next.addEventListener('click', async function () {
-    if (!session || !valid()) return; next.disabled = true;
-    var generation = accessGeneration;
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    if (next.disabled || !session || !valid(i === steps.length - 1)) return;
+    var generation = accessGeneration, submittedStep = i, backWasDisabled = back.disabled;
+    next.disabled = true; back.disabled = true;
     try {
       await saveDraft();
       if (generation !== accessGeneration) return;
+      // Answers remain editable while saving. Check the latest values before proceeding.
+      if (i !== submittedStep || !valid(submittedStep === steps.length - 1)) return;
       if (i < steps.length - 1) { show(i + 1, true); dirty = true; await saveDraft(); return; }
       next.textContent = 'Creating your workspace…';
       var fields = collect(); fields.email = form.elements.email.value;
@@ -248,14 +300,15 @@
       workspace(result.portal);
     } catch (error) {
       if (generation !== accessGeneration) return;
-      if (error.field) revealFieldError(error.field);
-      err.textContent = error.name === 'AbortError' ? 'The request timed out. Your saved answers are kept. Retry to continue the same workspace.' : error.message;
-    } finally { if (generation === accessGeneration) { next.disabled = false; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; } }
+      var message = error.name === 'AbortError' ? 'The request timed out. Your saved answers are kept. Retry to continue the same workspace.' : error.message;
+      var hasField = error.field && revealFieldError(error.field, message);
+      setErrorSummary(hasField ? 'Check the highlighted field to continue.' : message);
+      if (!hasField) focusError(err);
+    } finally { if (generation === accessGeneration) { back.disabled = backWasDisabled; next.disabled = false; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; } }
   });
-  form.addEventListener('submit', function (event) { event.preventDefault(); next.click(); });
   function showVerification(token) {
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
-    saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false;
+    saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
     setSession(null); gateOnly('Confirm to continue securely. This link works once and expires after 20 minutes.');
     accessForm.hidden = true; verifyButton.hidden = false; document.getElementById('access-title').textContent = 'Continue to your workspace';
   }
