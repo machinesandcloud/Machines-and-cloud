@@ -1,0 +1,215 @@
+{
+  "at": "2026-10-22T21:15:55.248Z",
+  "reviewer": "Independent public-consent QA agent",
+  "scope": "OFFLINE inspection of root-captured Console/provider/publication artifacts and approved runtime source. No external requests, account/browser actions, emails, texts, calls, provider writes or deployment by this review.",
+  "sourceHashes": {
+    "scratchpad/campaign-correction-help-before.json": "c542d65d51cbef1f3b4621076a12164b760ac400f4472dfa80173781abc5e7a5",
+    "scratchpad/campaign-correction-help-after-save.json": "341d232be0b8b0156c95b605d88a221cbfa4dc183a224e1ea4d2fb29ce72d554",
+    "scratchpad/campaign-correction-help-readback.json": "a893a54cd1ed6ade238edea77c9867423628472c4d67eb2e5fd414d8a590e6ae",
+    "scratchpad/campaign-correction-campaign-after-help.json": "864bd0680ae80f472e8ce1eaec9a4919b58b36b1a73e0eaf7f2ff58067eb9f5c",
+    "scratchpad/campaign-correction-editor-prepared.json": "82b6ff210d7260c81441e48b3f0c7a3f99d569aef9dc3c36496d2e64d94f4c60",
+    "scratchpad/campaign-correction-provider-edits.jsonl": "a87bc3ddd8f2e9dbb7af134378ebb340cf041b9bb3f9b8f57f306dd8129a539a",
+    "scratchpad/campaign-correction-console-before.json": "65b004e897bf3e74c6b3f3f345e6d2bc05e9e5f603c09cb3f28878a037a7572e",
+    "scratchpad/platform-campaign-rejection-readback.json": "2678d92ac98ce12076c99895a650645db0540ad784f6913edc79739e82f863da",
+    "scratchpad/campaign-correction-publish-ledger.jsonl": "fb96d9aea53119dd1db3472c9607ceed2b939d136287c7197b946b5fcbe634a7",
+    "product/PLATFORM-SMS-CAMPAIGN.md": "1879cec1795dcacea5cba38a0abd3b5690d1308043f5cb669a511a059df29925",
+    "netlify/functions/lib/platform-sms.mjs": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c"
+  },
+  "checks": [
+    {
+      "name": "Exactly nine existing-campaign editor fields are prepared",
+      "pass": true
+    },
+    {
+      "name": "Prepared use_description matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared message_flow matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared privacy_policy_url matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared terms_and_conditions_url matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared sample_message_one matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared sample_message_two matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared sample_message_three matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared sample_message_four matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "Prepared sample_message_five matches canonical source exactly",
+      "pass": true
+    },
+    {
+      "name": "All five actual reply branches match the five samples and approved runtime bytes",
+      "pass": true
+    },
+    {
+      "name": "Existing campaignSID is preserved across captured Console and editor evidence",
+      "pass": true
+    },
+    {
+      "name": "Existing brandSID is preserved across captured Console and editor evidence",
+      "pass": true
+    },
+    {
+      "name": "Existing serviceSID is preserved across captured Console and editor evidence",
+      "pass": true
+    },
+    {
+      "name": "Customer Care use case remains unchanged",
+      "pass": true
+    },
+    {
+      "name": "Content flags match canonical source",
+      "pass": true
+    },
+    {
+      "name": "Owner acknowledgment remains unchecked and Update disabled",
+      "pass": true
+    },
+    {
+      "name": "Campaign editor remains unsaved and unsubmitted",
+      "pass": true
+    },
+    {
+      "name": "Existing service and Advanced Opt-Out configuration are the captured target",
+      "pass": true
+    },
+    {
+      "name": "Service HELP matches canonical immediate save summary",
+      "pass": true
+    },
+    {
+      "name": "STOP keywords and confirmation preserved immediate save summary",
+      "pass": true
+    },
+    {
+      "name": "START keywords and confirmation preserved immediate save summary",
+      "pass": true
+    },
+    {
+      "name": "HELP keywords preserved immediate save summary",
+      "pass": true
+    },
+    {
+      "name": "Service HELP matches canonical after reload",
+      "pass": true
+    },
+    {
+      "name": "STOP keywords and confirmation preserved after reload",
+      "pass": true
+    },
+    {
+      "name": "START keywords and confirmation preserved after reload",
+      "pass": true
+    },
+    {
+      "name": "HELP keywords preserved after reload",
+      "pass": true
+    },
+    {
+      "name": "Exactly one HELP save attempt with after-reload confirmation is recorded",
+      "pass": true
+    },
+    {
+      "name": "Old campaign HELP snapshot remains unresolved, unlike the saved service",
+      "pass": true
+    },
+    {
+      "name": "API401 does not replace visible successful Console-edit evidence",
+      "pass": true
+    },
+    {
+      "name": "Hosted read allowance is closed at25 and is not reused",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 health is distinguished from a new post-publication worker invocation",
+      "pass": true
+    }
+  ],
+  "observations": {
+    "target": {
+      "campaignSID": "CMe638260fd3afd71954a8bbd3a9fd52d3",
+      "brandSID": "BNe97ca7cce6642beb6450d6f5eef56d15",
+      "serviceSID": "MG7643ab5d7b0bf42b24a2b476ce8e02eb"
+    },
+    "useCase": "Customer Care",
+    "editor": {
+      "fieldCount": 9,
+      "canonicalValuesExact": true,
+      "acknowledgmentChecked": false,
+      "updateDisabled": true,
+      "saved": false,
+      "submitted": false
+    },
+    "service": {
+      "helpMessage": "Machines & Cloud: account help at https://machinesandcloud.com/desk. Setup guidance at https://machinesandcloud.com/onboard. Reply STOP, ALTO or PARAR to stop texts.",
+      "saveAttempts": 1,
+      "afterReloadConfirmedAt": "2026-10-22T21:10:10.152991+00:00",
+      "keywordSetsPreserved": true,
+      "stopStartConfirmationsPreserved": true
+    },
+    "unresolved": {
+      "campaignStatus": "Rejected",
+      "campaignHelpSnapshot": "Machines & Cloud product help: https://machinesandcloud.com/#pilot. Sign in: https://machinesandcloud.com/desk. Reply STOP, ALTO or PARAR to stop texts.",
+      "desiredHelp": "Machines & Cloud: account help at https://machinesandcloud.com/desk. Setup guidance at https://machinesandcloud.com/onboard. Reply STOP, ALTO or PARAR to stop texts.",
+      "reason": "The campaign detail page displays the old HELP text after the Messaging Service save/reload, while the service displays the new text. The nine prepared editable fields do not expose HELP. This is an observed display discrepancy; the inspected evidence does not establish whether that campaign snapshot is authoritative vetting data, whether it refreshes during update, or whether it affects carrier review.",
+      "next": "Review the separate unsent Twilio Support draft to clarify the campaign/service HELP relationship before deciding whether further changes or owner resubmission are appropriate. Do not create a duplicate campaign or claim a support case was sent.",
+      "reviewSignificance": "Unknown. No proven mandatory campaign amendment or guaranteed carrier-review blocker is established by the stale display.",
+      "handoffDecision": "The team currently defers owner attestation and resubmission while seeking Twilio guidance about the displayed HELP discrepancy. readyForOwnerAttestation=false and readyToResubmit=false record this handoff decision, not a provider-imposed requirement proven by these artifacts."
+    },
+    "account": {
+      "apiReadStatus": 401,
+      "apiReadAt": "2026-10-22T20:36:12.293Z",
+      "cause": "Unresolved. A401 and one separately reported Suspended Console label do not prove why API access failed; the recorded legacy Console HELP edit did persist. This review did not inspect billing, keys or current account state."
+    },
+    "health": {
+      "httpStatus": 200,
+      "ok": true,
+      "lastRecordedWorkerRun": "2026-10-22T21:00:20.357Z",
+      "publishedAt": "2026-10-22T21:03:09.358Z",
+      "newPostPublicationWorkerInvocationProven": false
+    },
+    "budgets": {
+      "siteNetlifyReadsUsed": 25,
+      "siteNetlifyReadPhaseClosed": true
+    },
+    "boundaries": [
+      "No carrier resubmission, owner attestation, new brand/campaign/number or gate activation is evidenced by this handoff.",
+      "All five sample outputs are verified by offline execution of the pure reply function from the approved runtime source, not real SMS delivery.",
+      "The support draft is separate and unsent; no specialist or Twilio employee has been contacted by this review.",
+      "Console-captured artifacts are accepted only for their timestamps and targets; no additional account read was performed."
+    ]
+  },
+  "readyForOwnerAttestation": false,
+  "readyToResubmit": false,
+  "carrierSubmissionsByThisReview": 0,
+  "providerMutationsByThisReview": 0,
+  "physicalNetworkRequests": 0,
+  "sourceStable": true,
+  "passed": 32,
+  "failed": 0,
+  "disposition": "Prepared editor and saved service HELP verified; the team defers attestation/resubmission pending clarification of a displayed campaign HELP discrepancy whose vetting relevance is unproven.",
+  "wordingRefinement": {
+    "scope": "Clarification only; no new evidence, tests or external actions. Original reviewed-artifact hashes and 32-check results are retained.",
+    "unreportedRejectionCodes": "Only the reported 30893 and 30909 are established in this review. No 30890 rejection, cause or mandatory repair is inferred; any separate proactive concern would need its own stated evidence."
+  }
+}

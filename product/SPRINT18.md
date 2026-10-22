@@ -2,6 +2,22 @@
 
 October 22, 2026. Steve supplied Twilio's rejection for existing campaign `CMe638260fd3afd71954a8bbd3a9fd52d3`:30893, sample/use-case mismatch, and30909, incomplete or unverifiable message flow. The prior in-review receipt is historical. This sprint prepares a correction of the same campaign; it creates no new brand, campaign, number or messaging scope.
 
+## Publication and provider handoff, 4:17 p.m. Houston
+
+**Published October 22 at 4:03 p.m. Houston:** `05e8c5c34656f3257af8a8d3d7e8523dcbd542b3`, READY Netlify deploy `6ada79da2125b9c8ebe7ad56`. [Publication receipt](../scratchpad/campaign-correction-publication-result.json). This is the approved `e0a8503` application tree with exactly four account-identifier redactions in three private evidence files; runtime/tests are identical. GitHub blocked the first push before any build; the sanitized release used one successful push and one automatic build, with no bypass or manual trigger.
+
+Sprint15's unified setup/coordinator, Sprint16's onboarding/workspace/admin design, Sprint17's Google consent continuation and Sprint18's public consent/receiver correction are published. [Captured-public QA](../scratchpad/campaign-correction-hosted-offline-review.json) passes44/44: seven HTML pages match after allowed Netlify transforms and nine CSS/JS files match exactly. All25/25 authorized site/Netlify GETs are spent and closed. Health returned200/ok, but its recorded21:00:20 worker run predates this21:03:09 publication; a new post-release worker invocation was not proven. No live signup or provider-delivery acceptance is implied.
+
+**Existing campaign remains rejected; the corrected revision has not been resubmitted.** Console confirms30893 on sample1 and30909 on message flow. The existing service's revised HELP is saved and confirmed after reload; STOP/START replies and all keyword sets are preserved. Nine corrected campaign text fields are prepared only in the open browser, unsaved; acknowledgment is unchecked and Update is disabled. [Independent provider handoff](../scratchpad/campaign-correction-provider-independent-handoff.json) passes32/32 within that scope.
+
+The campaign still displays the old HELP snapshot. Its relevance to vetting and refresh behavior are unknown; do not claim it is a proven carrier blocker or promise automatic refresh. Also clarify whether the custom HELP needs a phone/email rather than URLs alone;30890 was not a reported rejection. [Twilio Support request](CAMPAIGN-CORRECTION-SUPPORT-DRAFT.md) was sent after separate owner approval: [ticket30031927](https://help.twilio.com/tickets/30031927), **New**, P3, at4:22p.m.Houston. [Submission receipt](../scratchpad/campaign-correction-support-submission.json). No human response has been received. Defer owner attestation/resubmission until those questions are resolved. One Console shows Suspended and the earlier API read returned401 while legacy Console editing succeeded; account/access cause remains unresolved.
+
+All activation gates and environment/billing settings are unchanged; no call, text, email, model request, purchase or carrier submission occurred in this release phase. **Do not push main wholesale:** older cleanup/access-link runtime remains unpublished. Future release work starts from published `05e8c5c`; this build/read approval is fully spent. Full automatic customer phone/text/Calendar delivery still needs separately scoped actual acceptance.
+
+## Original preparation evidence — historical
+
+The sections below retain the pre-release findings, checks and proposed sequence. Publication and provider status are superseded by the handoff above.
+
 ## Findings and evidence
 
 [The owner-provided notice](../scratchpad/platform-campaign-rejection-notice.json) identifies the existing Zari AI account, Machines & Cloud brand, service and Customer Care use case. One fresh exact compliance-resource GET returned401; [the readback](../scratchpad/platform-campaign-rejection-readback.json) therefore does not establish current saved form fields, a new account suspension or the reason that credential was rejected. Console now needs owner sign-in. Do not try alternate credentials or change authentication without a concrete authorized repair.
@@ -26,7 +42,7 @@ Two inconsistencies are verified in source: the filing specification called this
 
 No campaign edit, resubmission, fee acknowledgment, attestation, keyword-setting change, deployment, env change, call, message or email has been performed. All service gates remain unchanged, last recorded off/unset. Company approval cannot register the customers' dedicated shop campaigns. Real carrier approval and actual inbound/reply/STOP delivery remain separate requirements.
 
-## Completion sequence
+## Original completion sequence (steps1–3 now executed; final handoff deferred)
 
 1. Owner signs in to Twilio. Read the exact existing campaign's rejected status, fields and detailed review notes, matching account/brand/service. Preserve a sanitized before-state; do not read unrelated messages or customers. Reconcile the draft against what is actually saved.
 2. Verify the isolated production-based correction candidate with required build checks and affected public/receiver QA. Main still contains older unrelated authentication/provider-cleanup work and must not be pushed wholesale. Any release proposal must name all included pending changes and its exact candidate.

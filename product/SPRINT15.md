@@ -1,5 +1,7 @@
 # Sprint 15: one business setup and automatic connection continuation
 
+**Publication update, October22 at4:03p.m. Houston:** this sprint's accepted runtime is included in READY production `05e8c5c34656f3257af8a8d3d7e8523dcbd542b3`, deploy `6ada79da2125b9c8ebe7ad56`. [Combined release receipt](../scratchpad/campaign-correction-publication-result.json). One approved build is complete;25/25 site/Netlify GETs are closed. All service gates/settings are unchanged and real signup/provider delivery remains unaccepted. Older cleanup/access-link runtime remains excluded. The dated preparation/verification record below is historical where it says unpublished or approval pending. Future release isolation starts from `05e8c5c`.
+
 October 22, 2026. **Implemented and accepted locally; not published.** Production remains exact `e997de2f8def3a04feaa543360faa58c0d280b5a`, READY deploy `6ada5bf6c0a4dca0ebcff5f0`, published at `2026-10-22T18:55:34.275Z`. Its approved build and verification budget are closed. This sprint authorizes no release, activation, email, call, text, purchase or billing change.
 
 ## Customer outcome
