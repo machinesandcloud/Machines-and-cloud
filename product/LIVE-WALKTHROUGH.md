@@ -1,0 +1,56 @@
+# Homepage: watch and try the front desk
+
+Date: **2026-10-21, Houston**. User request: make the See it work section dynamic and live; Steve explicitly chose **both** animated examples and a real AI conversation. Root owns the UI/integration, engineering owns persona isolation, PM owns independent browser acceptance, and PO owns the working outcome.
+
+## Result and release boundary
+
+**Accepted locally by PM and PO: 92/92 dedicated UI checks, 509/509 existing site checks, 18 offline API updates and six independently reviewed actual-AI cases.** The published site remains the previously accepted `40a147b`; this enhancement has **not been pushed or deployed**. The previous approval covered that specific batch and one build. Another same-day release requires the existing deployment exception after this result is reviewable; auto recharge stays disabled.
+
+- **Watch it work:** the current text, call-transcript and Spanish examples reveal messages and matching owner details in order. First visibility starts one silent playback; Pause/Play and Replay remain available. Leaving the viewport or tab pauses without automatic resumption. Reduced motion shows the complete exchange immediately. The default HTML stays useful without JavaScript. There is no provider or model call in Watch.
+- **Try it yourself:** the visitor chooses an HVAC, plumbing or Spanish cleaning practice desk, types a request and explicitly sends it. Real Anthropic replies stream into the conversation. The adjacent owner card fills from validated structured events as actual visitor facts emerge, including corrections. Unknown facts stay unknown; a requested window is not a reservation. A mobile link calls attention to the updated owner summary without moving the page automatically.
+- **Clear practice boundary:** the page asks for made-up details and says no appointments or messages are sent. The plumbing practice mode is labeled chat, while Watch labels its scripted call transcript. This feature provides no audio calling.
+- **Responsive interaction:** blank/duplicate sends are prevented; Shift+Enter adds a line; Send/Enter sends. Errors, rate limits, timeout and incomplete streams retain the message for retry. Start over and mode/business switches abort and invalidate pending responses. The separate M&C sales launcher is hidden on mobile only while the inline composer is visible, preventing an overlap with Send, and returns outside that area.
+
+## Backend contract and isolation
+
+`POST /api/chat` accepts `{persona,messages,stream:true,page:"/"}`. This page uses `bayou-air`, `katy-pipeworks` and `westheimer-maids`. Alternating visitor/assistant history is limited by the existing 20-message/1,500-character sanitizer. Frontend history stays in memory and clears on reset/mode/business changes.
+
+Streaming NDJSON uses `delta`, `done` and `error`. A successful `done` carries the authoritative reply and `owner_notification` events. Their bounded, whitelisted `data` fields are `customer_name`, `phone`, `address`, `issue`, `requested_window`, `urgency` and `language`. Empty strings represent uncollected facts. The frontend renders text nodes and never extracts a success claim from reply prose.
+
+Named practice personas have only `send_owner_summary`, which updates the on-page preview. They cannot call the M&C lead capture tool or real client booking/notification tools. Unknown persona identifiers and mixed persona/client requests fail closed. Tool preambles are withheld until the final customer response. **No bookings, leads, conversations, tasks, customer records, Calendar writes, texts or emails are created in practice mode.** The existing public rate-limit bucket is the sole storage bookkeeping. The separate `mc` sales desk and real client modes retain their existing behavior.
+
+## Evidence and retained failures
+
+The checks below use loopback servers with forced in-memory storage. Twilio, Vapi, Resend, Google and Stripe credentials are disabled. Local browser fixtures, deterministic model integration and actual Anthropic inference are separate evidence layers.
+
+- **Offline backend:** `scripts/persona-check.mjs` passed 18 progressive intake/correction updates, partial summaries, English and Spanish, emergency-first behavior, malformed/forbidden/duplicate tool handling, unknown/mixed persona rejection, origin/rate controls and the unchanged M&C tool control. Business-store snapshots stayed unchanged and no external request was allowed. Raw results: `scratchpad/persona-check.txt`. Existing delivery, 35-group availability/17-CAS-conflict and 36-module/five-scheduler-gate smoke regressions also passed in the separate `persona-*-check.txt` / `persona-smoke.txt` artifacts.
+- **First browser fixtures:** the initial run retained failures for the blank-send state and exact practice-note copy; those were corrected. A harness clock/IntersectionObserver synchronization issue was corrected separately. The next stable fixture run passed 81 checks. Raw reports remain `scratchpad/site-demo-first.json` and `scratchpad/site-demo-fixtures.json`.
+- **Progressive API/browser integration:** PM made exactly 15 deterministic local persona requests, five turns for each business. All 150 UI/behavior/source checks passed, including gradual issue/name/phone/address/window intake and the final Visit request card. The original final report remains failed because an optional Chrome response-body collector could not retrieve a stream after the UI intentionally canceled its completed reader. This was an observation failure; the actual DOM replies and cards are retained in `scratchpad/site-demo-final.json`, and backend raw replies/events are separately established by the handler suite. No additional fake requests were made to replace those observations.
+- **Real AI, actual browser:** six final cases cover partial HVAC facts plus the published diagnostic fee, full contact/window intake, a window correction retaining contact, Spanish cleaning, gas safety first and unsupported service-area refusal. Each actual reply and structured event is recorded with its displayed card in `scratchpad/site-demo-real-model-observed.json`. PO independently read all six and accepted the semantics. The final automated area assertion was too narrow: the reply correctly said "doesn't serve The Woodlands," but the regex omitted "doesn't." Offline adjudication verified that literal refusal, all six completed streams, zero browser errors and matching relevant code without repeating a model request. See `scratchpad/site-demo-real-model-adjudication.json`.
+- **Bounded inference ledger:** this new feature phase used **14 actual Anthropic HTTP requests of a ceiling of 16, all HTTP 200, zero blocked**, including SDK/tool turns and the preserved first two-request observation failure. That first runner failure is `scratchpad/site-demo-real-model-first.json`; a same-response clone fixed capture without another network call. The guard ledger was never reset; earlier exhausted product/Sprint 9 ledgers are separate and unchanged. The real-model server is stopped and this phase is closed; the two unused slots are not authorization for another run. `scratchpad/site-demo-model-network.json` and the guard script record the bounds.
+
+Root subsequently returned a real 320 px visual defect: the floating sales button overlapped the inline Send corner in `site-demo-final-320-live.png`. The final mobile launcher visibility rule fixes that presentation issue. PO also requested neutral partial-card Next wording after an area refusal. These two frontend-only changes follow the recorded model run; they do not alter model prompts, tools or API behavior. No model rerun was made for these presentation changes.
+
+**Final PM/PO acceptance:** `scratchpad/site-demo-accepted.json` passes **92/92**, including actual 320/390 px Send hit tests at the former overlap position, hidden-launcher keyboard exclusion and restoration outside the composer/Watch. Playback, reduced motion, fragmented streams, sparse facts, errors, rate limits, timeout and stale reset/switch responses pass. The unchanged core suite passes **509/509** in `scratchpad/site-demo-site-accepted.json`. These final runs made zero actual API requests, produced zero JavaScript errors and forwarded zero form submissions; the two contact-form POST simulations were fulfilled inside the browser. PO inspected final Watch-playing/complete, composer and summary images and accepted the complete feature locally.
+
+PM's read-only `scratchpad/site-demo-adjudication.json` preserves the earlier collector failure and bridges its eight-file fingerprint `9371dc18a5770b77ffb58ed5d582738bb6cbdc23b3580bc34fb22342ce06e7d9` to final `5ac44c80eb0558fd3ed7796cde8bfc887af1709b57a0265af26313e07c01032c`: only `stories.js` and `site-refresh.css` changed. Backend chat/fake-model/agent hashes stayed identical. The final five-file UI fingerprint is `116816c70e57e1f7cfb6288c0b9eb28828c055b562e7caf05ddcf7dd98cee9d9`; core nine-file fingerprint is `9aab54d80c8dbf80f41fb0cf7fc852d84e135a48392a7554e7469356767eb665`.
+
+Representative visual evidence: [animated Watch](../scratchpad/site-demo-accepted-1440-watch-playing.png), [320 px composer](../scratchpad/site-demo-accepted-320-composer-safe.png), [390 px composer](../scratchpad/site-demo-accepted-390-composer-safe.png), [mobile owner card](../scratchpad/site-demo-accepted-390-owner-summary.png), [desktop practice conversation/card](../scratchpad/site-demo-final-1440-sms-fake.png). The last image uses the deterministic model and precedes the two final presentation changes; it is not presented as a real-AI transcript. The real-model replies/events are the separate raw JSON evidence above. Other raw images remain locally archived.
+
+## Reproduce locally
+
+Start the isolated fake server first, then use the existing installed Playwright path:
+
+```sh
+MC_LOCAL_NO_KEYS=1 MC_FAKE_MODEL=1 PORT=8893 LOCAL_ADMIN_KEY=local-demo-admin node scripts/local-server.mjs
+node scripts/persona-check.mjs
+node scripts/site-demo-check.mjs --base http://127.0.0.1:8893 --fake-model-ready --playwright /path/to/playwright/index.mjs
+node scripts/site-ui-check.mjs --base http://127.0.0.1:8893 --playwright /path/to/playwright/index.mjs
+node scripts/smoke.mjs
+```
+
+The dedicated browser runner identifies synthetic NDJSON fixtures separately from local fake-model requests. Never run it against production. `scripts/site-demo-model-check.mjs` is a credit-spending, guarded local rehearsal, not a generic test; do not restart its historical guard or reset its ledger. A future model phase needs its own concrete purpose, cap and preserved failures.
+
+The existing site checker reports four known scanner false positives: three JavaScript-generated template paths and `assets/photos/hero-hvac.jpg`, which exists but is excluded by the scanner's one-level file inventory. Sitemap, redirect and canonical checks remain clean.
+
+Real provider delivery, real shop booking/Calendar acceptance, live storage contention, a named Spanish reviewer and first-shop launch gates are unchanged. This section's practice interaction does not establish those outcomes.

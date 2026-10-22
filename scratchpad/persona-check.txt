@@ -1,0 +1,383 @@
+PERSONA OK: 18 multi-turn JSON/NDJSON updates, partial/corrected/language summaries, mode isolation, safety, origin/validation/rate controls, SDK forbidden/malformed/duplicate tool guards and MC control; zero business writes or external requests (offline fake + SDK fixtures, not live semantic proof)
+{
+  "scope": "offline full handler with deterministic fake model",
+  "transcripts": [
+    {
+      "persona": "bayou-air",
+      "turns": [
+        {
+          "input": "My AC is blowing warm in Katy.",
+          "reply": "What is your name?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "",
+              "phone": "",
+              "address": "",
+              "issue": "My AC is blowing warm in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.939Z"
+          }
+        },
+        {
+          "input": "I'm Morgan Lee.",
+          "reply": "What is your best phone number?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "",
+              "address": "",
+              "issue": "My AC is blowing warm in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.941Z"
+          }
+        },
+        {
+          "input": "My phone is 713-555-0111.",
+          "reply": "What is the street address?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "713-555-0111",
+              "address": "",
+              "issue": "My AC is blowing warm in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.942Z"
+          }
+        },
+        {
+          "input": "The address is 120 Oak St, Katy.",
+          "reply": "What day and arrival window would you like to request?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "713-555-0111",
+              "address": "120 Oak St, Katy",
+              "issue": "My AC is blowing warm in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.942Z"
+          }
+        },
+        {
+          "input": "Tomorrow, 8 to 12 works for my request.",
+          "reply": "Thanks, Morgan. Your requested tomorrow, 8 to 12 visit is ready for Ray to review.",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "713-555-0111",
+              "address": "120 Oak St, Katy",
+              "issue": "My AC is blowing warm in Katy.",
+              "requested_window": "tomorrow, 8 to 12",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.943Z"
+          }
+        },
+        {
+          "input": "Correction: my phone is 713-555-0199 and the address is 145 Oak St, Katy.",
+          "reply": "Thanks, Morgan. Your requested tomorrow, 8 to 12 visit is ready for Ray to review.",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Ray",
+            "company": "Bayou Air & Heat",
+            "data": {
+              "customer_name": "Morgan Lee",
+              "phone": "713-555-0199",
+              "address": "145 Oak St, Katy",
+              "issue": "My AC is blowing warm in Katy.",
+              "requested_window": "tomorrow, 8 to 12",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.943Z"
+          }
+        }
+      ]
+    },
+    {
+      "persona": "katy-pipeworks",
+      "turns": [
+        {
+          "input": "My kitchen drain is slow in Katy.",
+          "reply": "What is your name?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Dana",
+            "company": "Katy Pipeworks",
+            "data": {
+              "customer_name": "",
+              "phone": "",
+              "address": "",
+              "issue": "My kitchen drain is slow in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.943Z"
+          }
+        },
+        {
+          "input": "I am Jamie Reed.",
+          "reply": "What is your best phone number?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Dana",
+            "company": "Katy Pipeworks",
+            "data": {
+              "customer_name": "Jamie Reed",
+              "phone": "",
+              "address": "",
+              "issue": "My kitchen drain is slow in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.944Z"
+          }
+        },
+        {
+          "input": "My phone is 713-555-0112.",
+          "reply": "What is the street address?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Dana",
+            "company": "Katy Pipeworks",
+            "data": {
+              "customer_name": "Jamie Reed",
+              "phone": "713-555-0112",
+              "address": "",
+              "issue": "My kitchen drain is slow in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.944Z"
+          }
+        },
+        {
+          "input": "The address is 125 Oak St, Katy.",
+          "reply": "What day and arrival window would you like to request?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Dana",
+            "company": "Katy Pipeworks",
+            "data": {
+              "customer_name": "Jamie Reed",
+              "phone": "713-555-0112",
+              "address": "125 Oak St, Katy",
+              "issue": "My kitchen drain is slow in Katy.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.944Z"
+          }
+        },
+        {
+          "input": "Tomorrow, 12 to 5 works for my request.",
+          "reply": "Thanks, Jamie. Your requested tomorrow, 12 to 5 visit is ready for Dana to review.",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Dana",
+            "company": "Katy Pipeworks",
+            "data": {
+              "customer_name": "Jamie Reed",
+              "phone": "713-555-0112",
+              "address": "125 Oak St, Katy",
+              "issue": "My kitchen drain is slow in Katy.",
+              "requested_window": "tomorrow, 12 to 5",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.944Z"
+          }
+        },
+        {
+          "input": "Correction: my phone is 713-555-0199 and the address is 145 Oak St, Katy.",
+          "reply": "Thanks, Jamie. Your requested tomorrow, 12 to 5 visit is ready for Dana to review.",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Dana",
+            "company": "Katy Pipeworks",
+            "data": {
+              "customer_name": "Jamie Reed",
+              "phone": "713-555-0199",
+              "address": "145 Oak St, Katy",
+              "issue": "My kitchen drain is slow in Katy.",
+              "requested_window": "tomorrow, 12 to 5",
+              "urgency": "flexible",
+              "language": "en"
+            },
+            "at": "2026-10-22T01:17:14.944Z"
+          }
+        }
+      ]
+    },
+    {
+      "persona": "westheimer-maids",
+      "turns": [
+        {
+          "input": "Hola, necesito una limpieza en Memorial.",
+          "reply": "¿Cómo se llama?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "",
+              "phone": "",
+              "address": "",
+              "issue": "Hola, necesito una limpieza en Memorial.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "es"
+            },
+            "at": "2026-10-22T01:17:14.945Z"
+          }
+        },
+        {
+          "input": "Soy Ana Ruiz.",
+          "reply": "¿Cuál es su número de teléfono?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "Ana Ruiz",
+              "phone": "",
+              "address": "",
+              "issue": "Hola, necesito una limpieza en Memorial.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "es"
+            },
+            "at": "2026-10-22T01:17:14.945Z"
+          }
+        },
+        {
+          "input": "Mi teléfono es 713-555-0113.",
+          "reply": "¿Cuál es la dirección?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "Ana Ruiz",
+              "phone": "713-555-0113",
+              "address": "",
+              "issue": "Hola, necesito una limpieza en Memorial.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "es"
+            },
+            "at": "2026-10-22T01:17:14.945Z"
+          }
+        },
+        {
+          "input": "La dirección es 130 Oak St, Memorial.",
+          "reply": "¿Qué día y horario quiere solicitar?",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "Ana Ruiz",
+              "phone": "713-555-0113",
+              "address": "130 Oak St, Memorial",
+              "issue": "Hola, necesito una limpieza en Memorial.",
+              "requested_window": "",
+              "urgency": "flexible",
+              "language": "es"
+            },
+            "at": "2026-10-22T01:17:14.945Z"
+          }
+        },
+        {
+          "input": "Mañana de 1 a 3, por favor.",
+          "reply": "Gracias, Ana. Su solicitud para mañana, 1 a 3 está lista para que Nia la revise.",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "Ana Ruiz",
+              "phone": "713-555-0113",
+              "address": "130 Oak St, Memorial",
+              "issue": "Hola, necesito una limpieza en Memorial.",
+              "requested_window": "mañana, 1 a 3",
+              "urgency": "flexible",
+              "language": "es"
+            },
+            "at": "2026-10-22T01:17:14.945Z"
+          }
+        },
+        {
+          "input": "Corrección: mi teléfono es 713-555-0199 y la dirección es 145 Oak St, Memorial.",
+          "reply": "Gracias, Ana. Su solicitud para mañana, 1 a 3 está lista para que Nia la revise.",
+          "summary": {
+            "type": "owner_notification",
+            "owner": "Nia",
+            "company": "Westheimer Maids",
+            "data": {
+              "customer_name": "Ana Ruiz",
+              "phone": "713-555-0199",
+              "address": "145 Oak St, Memorial",
+              "issue": "Hola, necesito una limpieza en Memorial.",
+              "requested_window": "mañana, 1 a 3",
+              "urgency": "flexible",
+              "language": "es"
+            },
+            "at": "2026-10-22T01:17:14.946Z"
+          }
+        }
+      ]
+    }
+  ],
+  "emergency": {
+    "reply": "Leave the area now and call 911 from safety. Your request is shown in the practice owner summary.",
+    "events": [
+      {
+        "type": "owner_notification",
+        "owner": "Dana",
+        "company": "Katy Pipeworks",
+        "data": {
+          "customer_name": "",
+          "phone": "713-555-0114",
+          "address": "140 Oak St, Katy",
+          "issue": "I smell gas at 140 Oak St, Katy. My phone is 713-555-0114.",
+          "requested_window": "",
+          "urgency": "emergency",
+          "language": "en"
+        },
+        "at": "2026-10-22T01:17:14.946Z"
+      }
+    ]
+  }
+}

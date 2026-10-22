@@ -48,11 +48,27 @@
   <div class="site-example-heading"><div><p class="site-eyebrow">See it work</p><h2 id="example-title">From “can you help?”<br>to “you’re booked.”</h2></div><p>The customer gets a conversation.<br>You get what you need to take the job.</p></div>
   <div class="site-example" id="demo-wrap">
     <div class="site-example-options" role="group" aria-label="Choose a conversation"><button type="button" data-example="sms" aria-pressed="true">A text about the AC</button><button type="button" data-example="call" aria-pressed="false">A call for a plumber</button><button type="button" data-example="spanish" aria-pressed="false">A chat in Spanish</button></div>
+    <div class="site-demo-toolbar" id="example-controls" hidden>
+      <div class="site-demo-modes" role="group" aria-label="How to explore"><button type="button" id="example-mode-watch" aria-pressed="true">Watch it work</button><button type="button" id="example-mode-live" aria-pressed="false">Try it yourself <span aria-hidden="true">↗</span></button></div>
+      <div class="site-demo-playback" id="example-playback"><span id="example-progress">1 of 4 messages</span><button type="button" id="example-play">Play</button><button type="button" id="example-replay" aria-label="Replay the example">Replay</button></div>
+      <button type="button" id="example-reset" hidden>Start over</button>
+    </div>
     <div class="site-example-grid" id="example-content">
-      <div class="site-conversation"><div class="site-conversation-head"><span class="site-conversation-mark" aria-hidden="true">M<span>&amp;</span>C</span><div><strong id="example-channel">Text conversation</strong><span>Your shop’s AI front desk</span></div><span class="site-conversation-time" aria-hidden="true">11:24</span></div>
+      <div class="site-conversation"><div class="site-conversation-head"><span class="site-conversation-mark" aria-hidden="true">M<span>&amp;</span>C</span><div><strong id="example-channel">Text conversation</strong><span id="example-company">Your shop’s AI front desk</span></div><span class="site-conversation-time" id="example-badge">Example</span></div>
         <div class="site-messages" id="example-messages"><div class="site-message site-message-customer"><span>Customer</span><p>My AC is running, but the house isn’t cooling. Do you come out to Katy?</p></div><div class="site-message site-message-agent"><span>Front desk</span><p>Yes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?</p></div><div class="site-message site-message-customer"><span>Customer</span><p>12 to 5. I’m Alex, (713) 555-0142, at 12 Oak St in Katy. 12 to 5 works.</p></div><div class="site-message site-message-agent"><span>Front desk</span><p>You’re booked for tomorrow, 12 to 5. The tech will text when they’re on the way. You’ll get appointment texts from your shop; reply STOP any time to end them.</p></div></div>
+        <p class="site-demo-context" id="example-context">An example of the conversation and the details your shop receives.</p>
+        <div id="example-live" hidden>
+          <a class="site-demo-summary-link" id="example-summary-link" href="#owner-note-title">Owner summary below <span aria-hidden="true">↓</span></a>
+          <button class="site-demo-suggestion" type="button" id="example-suggestion">Try: My AC is running, but the house isn’t cooling.</button>
+          <form class="site-demo-form" id="example-form">
+            <label for="example-input" id="example-input-label">Your message as the customer</label>
+            <div class="site-demo-compose"><textarea id="example-input" name="message" rows="2" maxlength="1500" placeholder="Tell the front desk what you need…" required aria-describedby="example-context example-input-help"></textarea><button type="submit" id="example-send" aria-label="Send message">Send <span aria-hidden="true">↑</span></button></div>
+            <span id="example-input-help">Enter to send · Shift + Enter for a new line</span>
+          </form>
+          <p class="site-demo-error" id="example-error" role="alert" hidden></p>
+        </div>
       </div>
-      <aside class="site-owner-note" aria-labelledby="owner-note-title"><p class="site-owner-eyebrow">On your phone</p><h3 id="owner-note-title">The details.<br>Without the phone tag.</h3><div class="site-owner-ticket"><span class="site-ticket-status">New booking</span><dl id="example-summary"><div><dt>Job</dt><dd>AC running, not cooling</dd></div><div><dt>Where</dt><dd>12 Oak St, Katy</dd></div><div><dt>Window</dt><dd>Tomorrow, 12 to 5</dd></div><div><dt>Contact</dt><dd>Alex · (713) 555-0142</dd></div><div><dt>Next</dt><dd>Text when you’re on the way</dd></div></dl></div><p class="site-owner-foot">A clear handoff, with the conversation there when you need it.</p></aside>
+      <aside class="site-owner-note" aria-labelledby="owner-note-title"><p class="site-owner-eyebrow">The owner’s view</p><h3 id="owner-note-title">The details.<br>Without the phone tag.</h3><div class="site-owner-ticket"><span class="site-ticket-status" id="example-ticket-status">Example booking</span><dl id="example-summary"><div><dt>Job</dt><dd>AC running, not cooling</dd></div><div><dt>Where</dt><dd>12 Oak St, Katy</dd></div><div><dt>Window</dt><dd>Tomorrow, 12 to 5</dd></div><div><dt>Contact</dt><dd>Alex · (713) 555-0142</dd></div><div><dt>Next</dt><dd>Text when you’re on the way</dd></div></dl></div><p class="site-owner-foot" id="example-owner-foot">A clear handoff, with the conversation there when you need it.</p></aside>
     </div>
     <p id="example-status" class="sr-only" role="status" aria-live="polite"></p>
   </div>

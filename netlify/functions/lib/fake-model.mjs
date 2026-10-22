@@ -40,6 +40,30 @@ function desk(system, messages) {
   return { text: sayES(`Sorry to hear that. To get you scheduled I need your ${missing.join(", ") || "go-ahead"}.`, `Lamento escucharlo. Para agendar necesito su ${missing.join(", ") || "confirmación"}.`) };
 }
 
+// The public practice personas expose only an on-page summary tool. Keep this separate
+// from the real-shop fake desk so rehearsal cannot emit booking/notification tools.
+function practiceDesk(system, messages) {
+  const turns = messages.filter(message => message.role === "user" && typeof message.content === "string").map(message => message.content);
+  const all = turns.join("\n"), lang = es(all) ? "es" : "en";
+  const owner = pick(/^Owner: ([^.]+)\./m, system) || "the owner";
+  const latest = extractor => turns.map(extractor).filter(Boolean).at(-1) || "";
+  const name = latest(text => pick(/\b(?:I(?:'m| am)|my name is|[Ss]oy|[Mm]e llamo)\s+([A-ZÁÉÍÓÚÑ][\p{L}]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}]+)?)/u, text));
+  const phone = latest(E164), address = latest(ADDR), window = latest(WINDOW), date = latest(DATE);
+  const emergency = /\b(gas|carbon monoxide|smoke|fire|sparks?|burning|humo|fuego)\b/i.test(all);
+  const issue = (turns[0] || "").slice(0, 250);
+  const requested_window = window ? [date === "tomorrow" && lang === "es" ? "mañana" : date, window].filter(Boolean).join(", ") : "";
+  const input = { customer_name: name, phone, address, issue, urgency: emergency ? "emergency" : /\b(today|hoy)\b/i.test(all) ? "today" : /\b(this week|esta semana)\b/i.test(all) ? "this_week" : "flexible", requested_window, language: lang };
+  const say = (english, spanish) => lang === "es" ? spanish : english;
+  let text;
+  if (emergency) text = say("Leave the area now and call 911 from safety.", "Salga del lugar ahora y llame al 911 desde un lugar seguro.") + " " + (!phone ? say("When safe, what is your best phone number?", "Cuando esté a salvo, ¿cuál es su número de teléfono?") : !address ? say("When safe, what is the street address?", "Cuando esté a salvo, ¿cuál es la dirección?") : say("Your request is shown in the practice owner summary.", "Su solicitud aparece en el resumen de práctica."));
+  else if (!name) text = say("What is your name?", "¿Cómo se llama?");
+  else if (!phone) text = say("What is your best phone number?", "¿Cuál es su número de teléfono?");
+  else if (!address) text = say("What is the street address?", "¿Cuál es la dirección?");
+  else if (!window) text = say("What day and arrival window would you like to request?", "¿Qué día y horario quiere solicitar?");
+  else text = say(`Thanks, ${name.split(" ")[0]}. Your requested ${requested_window} visit is ready for ${owner} to review.`, `Gracias, ${name.split(" ")[0]}. Su solicitud para ${requested_window} está lista para que ${owner} la revise.`);
+  return { text, tool: { name: "send_owner_summary", input } };
+}
+
 function classify(system, messages) {
   const text = String(messages[0]?.content || "");
   if (/Classify the customer's reply/.test(system)) return /\b(mess|rude|late|never|wrong|bad|worst|unhappy|not happy|disappoint|still (rattles|broken))\b/i.test(text) ? "negative" : /\b(great|thanks|thank you|wonderful|good job|perfect|will do|love)\b/i.test(text) ? "positive" : "none";
@@ -73,7 +97,7 @@ export function fakeClient() {
     if ((tools || []).some((t) => t.name === "save_front_desk_profile")) return { stop_reason: "tool_use", content: [profile(sys, messages)], usage: { input_tokens: 10, output_tokens: 10 } };
     return { stop_reason: "end_turn", content: [{ type: "text", text: classify(sys, messages) }], usage: { input_tokens: 10, output_tokens: 5 } };
   };
-  const stream = ({ system, messages }) => {
+  const stream = ({ system, messages, tools }) => {
     const sys = Array.isArray(system) ? system.map((b) => b.text).join("\n") : String(system || "");
     const lastIsToolResult = Array.isArray(messages[messages.length - 1]?.content) && messages[messages.length - 1].content.some((b) => b.type === "tool_result");
     let text, tool = null;
@@ -84,7 +108,7 @@ export function fakeClient() {
       // A refused booking: say so and offer the other window, as the real model would from the tool result.
       text = /already full|Nothing was booked/.test(res) ? "That window just filled up. " + (res.match(/Offer ([^.]+)/)?.[1] ? "I can do " + res.match(/Offer ([^.]+)/)[1].replace(/^the other window \(([^)]+)\)/, "$1") + " instead. Which works?" : "Which other time works?") : ((prev?.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ") || "Done.");
     }
-    else ({ text, tool } = desk(sys, messages));
+    else ({ text, tool } = (tools || []).some(tool => tool.name === "send_owner_summary") ? practiceDesk(sys, messages) : desk(sys, messages));
     const content = []; if (text) content.push({ type: "text", text }); if (tool) content.push({ type: "tool_use", id: id(), name: tool.name, input: tool.input });
     const final = { stop_reason: tool ? "tool_use" : "end_turn", content, usage: { input_tokens: 10, output_tokens: 10 } };
     return { async *[Symbol.asyncIterator]() { if (text) yield { type: "content_block_delta", delta: { type: "text_delta", text } }; }, finalMessage: async () => final };

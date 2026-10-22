@@ -1,0 +1,965 @@
+{
+  "startedAt": "2026-10-22T01:23:37.707Z",
+  "base": "http://127.0.0.1:8893",
+  "fixturesOnly": true,
+  "commit": "02d14592c1b3c1181879bb54ea21a94f2fac7fd6",
+  "source": {
+    "index.html": "7828957d40afd97da17ff7d5203bff85ad2893abb31391870add37651ba4cdd4",
+    "stories.js": "4509130cdbba4dc63c023bc36f6c868dee6458a187030201bc772915756186b1",
+    "site-refresh.css": "cb9f5afb1c2fa209e33ab1222e280c8ee8241c632fc30185a96611cf9410e1d1",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14"
+  },
+  "checks": [
+    {
+      "name": "playback lifecycle: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "offscreen begins with first customer only",
+      "pass": true,
+      "detail": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?",
+        "summary": "Job\nAC running, not cooling\nWhere\nKaty\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window",
+        "count": 1,
+        "progress": "1 of 4 messages",
+        "play": "Play",
+        "input": "",
+        "error": "",
+        "scrollY": 0,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "offscreen summary does not reveal contact early",
+      "pass": true,
+      "detail": "Job\nAC running, not cooling\nWhere\nKaty\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window"
+    },
+    {
+      "name": "offscreen does not autoplay or force scroll",
+      "pass": true
+    },
+    {
+      "name": "first viewport intersection starts ordered playback",
+      "pass": true,
+      "detail": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?\n\nFront desk\n\nYes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?\n\nCustomer is typing\n•••",
+        "summary": "Job\nAC running, not cooling\nWhere\nKaty\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window",
+        "count": 2,
+        "progress": "2 of 4 messages",
+        "play": "Pause",
+        "input": "",
+        "error": "",
+        "scrollY": 1349,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "playback does not force page scroll",
+      "pass": true,
+      "detail": {
+        "before": 1349,
+        "after": 1349
+      }
+    },
+    {
+      "name": "Pause freezes messages and owner summary",
+      "pass": true
+    },
+    {
+      "name": "Play completes four ordered messages",
+      "pass": true
+    },
+    {
+      "name": "completed Watch offers one Replay control",
+      "pass": true
+    },
+    {
+      "name": "completed playback never loops",
+      "pass": true
+    },
+    {
+      "name": "Replay resets message progress/contact summary",
+      "pass": true
+    },
+    {
+      "name": "offscreen pause requires explicit Play on return",
+      "pass": true
+    },
+    {
+      "name": "visibility event pauses playback",
+      "pass": true
+    },
+    {
+      "name": "returning visible does not auto-resume",
+      "pass": true
+    },
+    {
+      "name": "scenario keyboard switch resets progress and summary",
+      "pass": true
+    },
+    {
+      "name": "scenario switch cancels old playback timer",
+      "pass": true
+    },
+    {
+      "name": "Try mode cancels pending Watch playback",
+      "pass": true
+    },
+    {
+      "name": "returning to Watch requires explicit Play",
+      "pass": true
+    },
+    {
+      "name": "reduced motion 320: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "320px reduced motion shows complete static example",
+      "pass": true
+    },
+    {
+      "name": "320px reduced motion does not auto animate",
+      "pass": true
+    },
+    {
+      "name": "320px no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px Spanish scenario usable by keyboard",
+      "pass": true
+    },
+    {
+      "name": "320px live mode has labeled composer",
+      "pass": true
+    },
+    {
+      "name": "320px practice-only notice visible",
+      "pass": true
+    },
+    {
+      "name": "320px bottom composer Send is not covered by sales launcher",
+      "pass": true,
+      "detail": {
+        "send": {
+          "left": 209.734375,
+          "right": 276,
+          "top": 802.359375,
+          "bottom": 844.359375
+        },
+        "launcher": {
+          "left": 256,
+          "right": 304,
+          "top": 780,
+          "bottom": 828
+        },
+        "launcherVisible": false,
+        "overlap": true,
+        "sendReceivesHit": true,
+        "viewport": 844
+      }
+    },
+    {
+      "name": "320px hidden sales launcher cannot take focus",
+      "pass": true
+    },
+    {
+      "name": "320px sales launcher returns away from composer",
+      "pass": true
+    },
+    {
+      "name": "320px Watch restores sales launcher",
+      "pass": true
+    },
+    {
+      "name": "reduced motion 390: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "390px reduced motion shows complete static example",
+      "pass": true
+    },
+    {
+      "name": "390px reduced motion does not auto animate",
+      "pass": true
+    },
+    {
+      "name": "390px no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px Spanish scenario usable by keyboard",
+      "pass": true
+    },
+    {
+      "name": "390px live mode has labeled composer",
+      "pass": true
+    },
+    {
+      "name": "390px practice-only notice visible",
+      "pass": true
+    },
+    {
+      "name": "390px bottom composer Send is not covered by sales launcher",
+      "pass": true,
+      "detail": {
+        "send": {
+          "left": 275.734375,
+          "right": 342,
+          "top": 801.578125,
+          "bottom": 843.578125
+        },
+        "launcher": {
+          "left": 326,
+          "right": 374,
+          "top": 780,
+          "bottom": 828
+        },
+        "launcherVisible": false,
+        "overlap": true,
+        "sendReceivesHit": true,
+        "viewport": 844
+      }
+    },
+    {
+      "name": "390px hidden sales launcher cannot take focus",
+      "pass": true
+    },
+    {
+      "name": "390px sales launcher returns away from composer",
+      "pass": true
+    },
+    {
+      "name": "390px Watch restores sales launcher",
+      "pass": true
+    },
+    {
+      "name": "reduced motion 1440: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "1440px reduced motion shows complete static example",
+      "pass": true
+    },
+    {
+      "name": "1440px reduced motion does not auto animate",
+      "pass": true
+    },
+    {
+      "name": "1440px no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px Spanish scenario usable by keyboard",
+      "pass": true
+    },
+    {
+      "name": "1440px live mode has labeled composer",
+      "pass": true
+    },
+    {
+      "name": "1440px practice-only notice visible",
+      "pass": true
+    },
+    {
+      "name": "progressive live fixture: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "blank live send disabled",
+      "pass": true
+    },
+    {
+      "name": "streamed delta appears before final summary",
+      "pass": true
+    },
+    {
+      "name": "send is disabled while reply is pending",
+      "pass": true
+    },
+    {
+      "name": "pending composer is read-only",
+      "pass": true
+    },
+    {
+      "name": "one explicit send creates one fixture request",
+      "pass": true
+    },
+    {
+      "name": "final response replaces streamed draft",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nSynthetic AC question\n\nFront desk\n\nDEMO-FINAL: I have the details for this practice request. Nothing has been booked or sent."
+    },
+    {
+      "name": "owner event populates truthful supplied fields",
+      "pass": true,
+      "detail": "Job\nAC not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex Fixture · (713) 555-0142\nPriority\nThis week\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "send recovers after final response",
+      "pass": true
+    },
+    {
+      "name": "mobile link indicates updated owner summary",
+      "pass": true
+    },
+    {
+      "name": "keyboard summary link reaches owner view below header",
+      "pass": true,
+      "detail": {
+        "top": 94.890625,
+        "header": 75
+      }
+    },
+    {
+      "name": "sparse live summary: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "unknown summary fields remain Not provided without scripted bleed",
+      "pass": true,
+      "detail": "Job\nAC not cooling\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nThis week\nLanguage\nEnglish\nNext\nReview the conversation"
+    },
+    {
+      "name": "live http-error: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "http-error exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "http-error does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "http-error input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live rate-limit: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "rate-limit exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "rate-limit does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "rate-limit input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live stream-error: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "stream-error exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "stream-error does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "stream-error input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live truncated: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "truncated exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "truncated does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "truncated input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live timeout: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "timeout exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "timeout does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "timeout input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "late response after reset: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "reset rejects stale reply and owner event",
+      "pass": true,
+      "detail": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "reset clears busy composer",
+      "pass": true
+    },
+    {
+      "name": "late response after mode: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "mode rejects stale reply and owner event",
+      "pass": true,
+      "detail": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?\n\nFront desk\n\nYes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?\n\nCustomer\n\nI’m Alex, (713) 555-0142, at 12 Oak St in Katy. 12 to 5 works.\n\nFront desk\n\nYou’re booked for tomorrow, 12 to 5. The tech will text when they’re on the way. You’ll get appointment texts from your shop; reply STOP any time to end them.",
+        "summary": "Job\nAC running, not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex · (713) 555-0142\nNext\nText when you’re on the way",
+        "count": 4,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "late response after scenario: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "scenario rejects stale reply and owner event",
+      "pass": true,
+      "detail": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "scenario clears busy composer",
+      "pass": true
+    },
+    {
+      "name": "no JavaScript errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no unrelated form submissions",
+      "pass": true
+    },
+    {
+      "name": "only expected font GETs were blocked",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "relevant sources stayed stable during acceptance",
+      "pass": true
+    }
+  ],
+  "issues": [],
+  "cases": [
+    {
+      "name": "playback lifecycle",
+      "evidence": "rendered local frontend only",
+      "state": {
+        "messages": "Caller\n\nThe kitchen tap keeps dripping. Can a plumber come this week?",
+        "summary": "Job\nDripping kitchen tap\nWhere\nNot provided yet\nWindow\nThis week, not chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window",
+        "count": 1,
+        "progress": "1 of 4 messages",
+        "play": "Play",
+        "input": "",
+        "error": "",
+        "scrollY": 1349,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "reduced motion 320",
+      "evidence": "rendered local frontend only",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1785,
+        "width": 320,
+        "scrollWidth": 320
+      }
+    },
+    {
+      "name": "reduced motion 390",
+      "evidence": "rendered local frontend only",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1707,
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "reduced motion 1440",
+      "evidence": "rendered local frontend only",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1359,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "progressive live fixture",
+      "evidence": "browser-fixture:stream",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nSynthetic AC question\n\nFront desk\n\nDEMO-FINAL: I have the details for this practice request. Nothing has been booked or sent.",
+        "summary": "Job\nAC not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex Fixture · (713) 555-0142\nPriority\nThis week\nLanguage\nEnglish\nNext\nOwner reviews the visit request",
+        "count": 3,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 2776,
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic AC question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "sparse live summary",
+      "evidence": "browser-fixture:sparse",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nAC not cooling\n\nFront desk\n\nDEMO-FINAL: I have the details for this practice request. Nothing has been booked or sent.",
+        "summary": "Job\nAC not cooling\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nThis week\nLanguage\nEnglish\nNext\nReview the conversation",
+        "count": 3,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "AC not cooling"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live http-error",
+      "evidence": "browser-fixture:http-error",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live rate-limit",
+      "evidence": "browser-fixture:rate-limit",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The front desk is busy. Please try again in a moment.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live stream-error",
+      "evidence": "browser-fixture:stream-error",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live truncated",
+      "evidence": "browser-fixture:truncated",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live timeout",
+      "evidence": "browser-fixture:timeout",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "late response after reset",
+      "evidence": "browser-fixture:delayed",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stale request"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "late response after mode",
+      "evidence": "browser-fixture:delayed",
+      "state": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?\n\nFront desk\n\nYes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?\n\nCustomer\n\nI’m Alex, (713) 555-0142, at 12 Oak St in Katy. 12 to 5 works.\n\nFront desk\n\nYou’re booked for tomorrow, 12 to 5. The tech will text when they’re on the way. You’ll get appointment texts from your shop; reply STOP any time to end them.",
+        "summary": "Job\nAC running, not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex · (713) 555-0142\nNext\nText when you’re on the way",
+        "count": 4,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stale request"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "late response after scenario",
+      "evidence": "browser-fixture:delayed",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stale request"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    "scratchpad/site-demo-accepted-1440-watch-playing.png",
+    "scratchpad/site-demo-accepted-1440-watch-complete.png",
+    "scratchpad/site-demo-accepted-320-watch-static.png",
+    "scratchpad/site-demo-accepted-320-composer-safe.png",
+    "scratchpad/site-demo-accepted-320-live.png",
+    "scratchpad/site-demo-accepted-390-watch-static.png",
+    "scratchpad/site-demo-accepted-390-composer-safe.png",
+    "scratchpad/site-demo-accepted-390-live.png",
+    "scratchpad/site-demo-accepted-1440-watch-static.png",
+    "scratchpad/site-demo-accepted-1440-live.png",
+    "scratchpad/site-demo-accepted-390-live-final.png",
+    "scratchpad/site-demo-accepted-390-owner-summary.png"
+  ],
+  "browserErrors": [],
+  "blockedRequests": [
+    {
+      "case": "playback lifecycle",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "reduced motion 320",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "reduced motion 390",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "reduced motion 1440",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "progressive live fixture",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "sparse live summary",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live http-error",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live rate-limit",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live stream-error",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live truncated",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live timeout",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "late response after reset",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "late response after mode",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "late response after scenario",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    }
+  ],
+  "localFakeRequests": [],
+  "localFakeResponses": [],
+  "progressiveConversations": [],
+  "otherFormSubmissions": 0,
+  "evidenceLimits": "Real local fake-model requests and synthetic browser fetch/stream fixtures are identified separately. No real-model quality, production behavior, persistence or provider-delivery claim. Offline business-store isolation has separate scripts/persona-check.mjs evidence.",
+  "sourceAfter": {
+    "index.html": "7828957d40afd97da17ff7d5203bff85ad2893abb31391870add37651ba4cdd4",
+    "stories.js": "4509130cdbba4dc63c023bc36f6c868dee6458a187030201bc772915756186b1",
+    "site-refresh.css": "cb9f5afb1c2fa209e33ab1222e280c8ee8241c632fc30185a96611cf9410e1d1",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14"
+  },
+  "result": "passed",
+  "finishedAt": "2026-10-22T01:23:46.229Z"
+}

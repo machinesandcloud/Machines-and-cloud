@@ -1,0 +1,74 @@
+{
+  "startedAt": "2026-10-22T01:19:03.574Z",
+  "base": "http://127.0.0.1:8894",
+  "source": {
+    "index.html": "7828957d40afd97da17ff7d5203bff85ad2893abb31391870add37651ba4cdd4",
+    "stories.js": "ba73d06dd748366b8ef6a02460148f4c9c9abaceef87df8e013a80867920d55c",
+    "site-refresh.css": "374eedeb8f20a935c2c7c08a5be9ad2ff1861ea5bd3d7e35b160b46301bd9419",
+    "netlify/functions/chat.mjs": "16090254d400d447f8618d221a17ef5457c64136f23840ef29b287bc8ee62501",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd"
+  },
+  "maxLogicalTurns": 6,
+  "maxActualAnthropicRequests": 16,
+  "scope": "Actual local browser -> persona API -> Anthropic. Forced memory store and provider credentials disabled. No real bookings, notifications, Calendar writes or hosted requests.",
+  "cases": [
+    {
+      "id": "hvac_partial",
+      "input": "My AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?",
+      "startedAt": "2026-10-22T01:19:04.681Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 0,
+        "blocked": 0,
+        "requests": [],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?"
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200
+    }
+  ],
+  "checks": [],
+  "browserErrors": [],
+  "result": "failed",
+  "manualReviewRequired": true,
+  "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation.",
+  "ledger": {
+    "phase": "homepage-live-demo-2026-10-21",
+    "startedAt": "2026-10-22T01:19:02.404Z",
+    "maxAnthropicRequests": 16,
+    "anthropicRequests": 2,
+    "blocked": 0,
+    "requests": [
+      {
+        "sequence": 1,
+        "at": "2026-10-22T01:19:04.737Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 2,
+        "at": "2026-10-22T01:19:15.545Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      }
+    ],
+    "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+  },
+  "finishedAt": "2026-10-22T01:19:17.988Z"
+}

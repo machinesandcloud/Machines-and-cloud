@@ -64,8 +64,12 @@ const PERSONAS = {
 };
 
 function personaSystem(p) {
-  return `You are the AI front desk on the website of ${p.company}, a ${p.trade} company in the Houston area. ${p.brief}
-Rules: you are an AI, say so if asked, never claim to be a person. Keep replies short: one to three sentences, plain words, no lists. Quote only the published prices; for anything else say the tech or the owner will confirm. Never promise an exact arrival time; offer the windows. Find out what is wrong, where, and when, then collect the customer's name and phone and offer the next window. Ask one question at a time. For emergencies follow the owner's safety rule first, then collect address and phone fast, then call send_owner_summary with urgency "emergency". Call send_owner_summary once you have the customer's name and phone. Answer in Spanish if the customer writes in Spanish.`;
+  return `You are the AI front desk for a practice conversation with ${p.company}, a ${p.trade} company in the Houston area. ${p.brief}
+Owner: ${p.owner}.
+This conversation updates an owner-summary card on the page only. You have no live schedule, booking, texting, email, or customer-record tools. Collect a requested visit or callback for the owner to review; never claim a visit is booked/reserved, a message was sent, or the owner was actually contacted. Do not invent available dates or confirmed arrival windows. The page explains the practice setting, so give natural concise answers without repeating a disclaimer in every reply.
+Rules: you are an AI, say so if asked, never claim to be a person. Keep replies short: one to three sentences, plain words, no lists. Answer a price, service-area, or other direct question first from the brief. Quote only published prices; for anything else say the tech or owner will confirm. Never promise an exact arrival time. Find out what is wrong, where, and the requested day/window, then collect name and phone, one question at a time. Use only facts the customer actually supplied, including corrections; do not copy facts from your own suggested questions into the summary. A city alone is not a street address. Leave unknown fields empty. Urgency defaults to flexible when not stated and is not confirmation of a visit.
+Call send_owner_summary once per relevant customer turn, as facts emerge, even with only an issue and the other fields empty. Include all known customer facts each time. Call it before asking the next question; after it returns, finish your customer reply without calling it again in the same turn. Update it when a customer corrects a fact. Never call a tool to book a visit or send a real message.
+Safety takes priority: for gas smell, carbon monoxide alarm, smoke/fire, sparks or burning smell, begin the final customer reply with leaving the area and calling 911 from safety. Do not give repair, breaker, or diagnostic instructions. Then ask only for missing phone/address and use urgency emergency in the on-page summary. Otherwise follow the owner's emergency rules. Answer in Spanish if the customer writes in Spanish, and keep the summary in that language.`;
 }
 
 const CAPTURE_LEAD = {
@@ -76,9 +80,9 @@ const CAPTURE_LEAD = {
 };
 const OWNER_SUMMARY = {
   name: "send_owner_summary",
-  description: "Text the business owner a summary of this customer conversation. Call once you have the customer's name and phone, or immediately for an emergency once you have a phone number.",
+  description: "Update the practice owner-summary card on this page once per relevant customer turn, including partial facts. No messages, bookings, or customer records are created. Include all known customer-supplied facts; use empty strings for unknowns and flexible urgency unless stated. A requested window is tentative, never confirmed availability.",
   strict: true,
-  input_schema: { type: "object", properties: { customer_name: { type: "string" }, phone: { type: "string" }, address: { type: "string" }, issue: { type: "string" }, urgency: { type: "string", enum: ["emergency", "today", "this_week", "flexible"] }, requested_window: { type: "string" }, language: { type: "string", enum: ["en", "es"] } }, required: ["customer_name", "phone", "address", "issue", "urgency", "requested_window", "language"], additionalProperties: false },
+  input_schema: { type: "object", properties: { customer_name: { type: "string" }, phone: { type: "string" }, address: { type: "string", description: "Customer-supplied street address; empty until supplied, not just a city" }, issue: { type: "string" }, urgency: { type: "string", enum: ["emergency", "today", "this_week", "flexible"] }, requested_window: { type: "string", description: "Requested day and arrival window, never a confirmed booking; empty if unknown" }, language: { type: "string", enum: ["en", "es"] } }, required: ["customer_name", "phone", "address", "issue", "urgency", "requested_window", "language"], additionalProperties: false },
 };
 
 const SITE_ORIGIN = /^https:\/\/(www\.)?machinesandcloud\.com$/;
@@ -126,6 +130,11 @@ export default async (req, context) => {
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+  // A practice persona must never fall through into real lead capture or a stored shop.
+  const requestedPersona = body?.persona;
+  if (requestedPersona !== undefined && requestedPersona !== "mc" && (typeof requestedPersona !== "string" || !Object.hasOwn(PERSONAS, requestedPersona))) return json({ error: "unknown_persona" }, 400);
+  const persona = requestedPersona && requestedPersona !== "mc" ? PERSONAS[requestedPersona] : null;
+  if (persona && body?.client) return json({ error: "invalid_mode" }, 400);
   const page = typeof body?.page === "string" ? body.page.slice(0, 120) : "";
   const wantStream = body?.stream === true;
   const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "";
@@ -177,21 +186,26 @@ export default async (req, context) => {
   if (!siteOrigin(origin)) return json({ error: "forbidden" }, 403);
   const messages = sanitizeMessages(body?.messages);
   if (!messages) return json({ error: "invalid_messages" }, 400);
-  const personaId = typeof body?.persona === "string" && PERSONAS[body.persona] ? body.persona : "mc";
-  const persona = personaId === "mc" ? null : PERSONAS[personaId];
   const system = persona ? personaSystem(persona) : MC_SYSTEM;
   const tools = persona ? [OWNER_SUMMARY] : [CAPTURE_LEAD];
+  let summaryUpdated = false;
   const execTool = async (name, input) => {
     if (name === "capture_lead" && !persona) {
       const r = await captureLead(input, page);
       return { content: r.ok ? "Lead recorded. Steve will follow up within one business day." : "Lead could not be recorded; ask the visitor to email support@machinesandcloud.com.", is_error: !r.ok, event: r.ok ? { type: "lead_captured" } : undefined };
     }
     if (name === "send_owner_summary" && persona) {
-      return { content: `Text sent to ${persona.owner}.`, event: { type: "owner_notification", owner: persona.owner, company: persona.company, data: input, at: new Date().toISOString() } };
+      if (summaryUpdated) return { content: "The on-page summary is already updated for this turn. Finish the customer reply without another tool call." };
+      const fields = ["customer_name", "phone", "address", "issue", "requested_window"];
+      if (!input || fields.some(field => typeof input[field] !== "string") || !["emergency", "today", "this_week", "flexible"].includes(input.urgency) || !["en", "es"].includes(input.language)) return { content: "The summary fields were invalid. Use customer-supplied strings, empty for unknowns, and the allowed urgency/language.", is_error: true };
+      const data = Object.fromEntries(fields.map(field => [field, input[field].trim().slice(0, 500)]));
+      data.urgency = input.urgency; data.language = input.language;
+      summaryUpdated = true;
+      return { content: "Practice summary updated on this page only. No visit was booked and no text/email was sent. Continue with a natural concise answer or the next missing question; do not claim the owner was contacted.", event: { type: "owner_notification", owner: persona.owner, company: persona.company, data, at: new Date().toISOString() } };
     }
     return { content: "Unknown tool.", is_error: true };
   };
-  const run = (onText) => runAgent({ system, tools, messages, onText, execTool });
+  const run = (onText) => runAgent({ system, tools, messages, onText, execTool, dropToolPreamble: !!persona });
   if (wantStream) return ndjsonResponse(run);
   try { return json(await run()); } catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status); }
 };

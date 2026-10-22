@@ -1,0 +1,149 @@
+AVAILABILITY OK: memory
+AVAILABILITY OK: blobs
+AVAILABILITY OK: 35 acceptance groups; 17 SDK CAS conflicts; 0 expected tool/storage error logs; zero live provider/model/network requests
+{
+  "scope": "offline memory + installed Blobs SDK protocol double + simulated Vapi transport; scripted model streams only",
+  "checks": [
+    {
+      "backend": "memory",
+      "name": "owner add/remove/reload, canonical labels, idempotence and auth"
+    },
+    {
+      "backend": "memory",
+      "name": "invalid dates/windows/types/past and lookup range fail without mutation"
+    },
+    {
+      "backend": "memory",
+      "name": "Houston DST/leap/month/year dates, no office-hour inference and isolation"
+    },
+    {
+      "backend": "memory",
+      "name": "direct stale/alias/invalid booking cannot bypass recorded availability"
+    },
+    {
+      "backend": "memory",
+      "name": "capacity two; later blocks preserve existing visits, confirmation and self-move"
+    },
+    {
+      "backend": "memory",
+      "name": "blocked/full move preserves original and all side effects; unblock permits booking"
+    },
+    {
+      "backend": "memory",
+      "name": "active history outside 500-record cap remains authoritative"
+    },
+    {
+      "backend": "memory",
+      "name": "chat/SMS/voice execute the same strict availability tool (scripted stream)"
+    },
+    {
+      "backend": "memory",
+      "name": "all routes distinguish exhausted success and reject stale blocked booking tools"
+    },
+    {
+      "backend": "memory",
+      "name": "manual blocks preserve emergency notification/escalation dispatch, never emergency bookings"
+    },
+    {
+      "backend": "memory",
+      "name": "existing past visit confirmation and retired-window block removal remain possible"
+    },
+    {
+      "backend": "memory",
+      "name": "Houston end boundary/aliases, stale three-route bypass, expired self/status and move safety"
+    },
+    {
+      "backend": "memory",
+      "name": "midnight and Houston DST wall-time boundaries; no invented named-window end"
+    },
+    {
+      "backend": "memory",
+      "name": "competing block/reserve retains both state changes and stops later bookings"
+    },
+    {
+      "backend": "memory",
+      "name": "100-block limit, duplicate at limit and removal recovery"
+    },
+    {
+      "backend": "blobs",
+      "name": "owner add/remove/reload, canonical labels, idempotence and auth"
+    },
+    {
+      "backend": "blobs",
+      "name": "invalid dates/windows/types/past and lookup range fail without mutation"
+    },
+    {
+      "backend": "blobs",
+      "name": "Houston DST/leap/month/year dates, no office-hour inference and isolation"
+    },
+    {
+      "backend": "blobs",
+      "name": "direct stale/alias/invalid booking cannot bypass recorded availability"
+    },
+    {
+      "backend": "blobs",
+      "name": "capacity two; later blocks preserve existing visits, confirmation and self-move"
+    },
+    {
+      "backend": "blobs",
+      "name": "blocked/full move preserves original and all side effects; unblock permits booking"
+    },
+    {
+      "backend": "blobs",
+      "name": "active history outside 500-record cap remains authoritative"
+    },
+    {
+      "backend": "blobs",
+      "name": "chat/SMS/voice execute the same strict availability tool (scripted stream)"
+    },
+    {
+      "backend": "blobs",
+      "name": "all routes distinguish exhausted success and reject stale blocked booking tools"
+    },
+    {
+      "backend": "blobs",
+      "name": "manual blocks preserve emergency notification/escalation dispatch, never emergency bookings"
+    },
+    {
+      "backend": "blobs",
+      "name": "existing past visit confirmation and retired-window block removal remain possible"
+    },
+    {
+      "backend": "blobs",
+      "name": "Houston end boundary/aliases, stale three-route bypass, expired self/status and move safety"
+    },
+    {
+      "backend": "blobs",
+      "name": "midnight and Houston DST wall-time boundaries; no invented named-window end"
+    },
+    {
+      "backend": "blobs",
+      "name": "competing block/reserve retains both state changes and stops later bookings"
+    },
+    {
+      "backend": "blobs",
+      "name": "claim before block may finish and remains confirmable"
+    },
+    {
+      "backend": "blobs",
+      "name": "stale block CAS retries without losing committed reservation"
+    },
+    {
+      "backend": "blobs",
+      "name": "block before claim rejects independent store instance"
+    },
+    {
+      "backend": "blobs",
+      "name": "read/write failures stay explicit across owner and all three tool routes"
+    },
+    {
+      "backend": "blobs",
+      "name": "100-block limit, duplicate at limit and removal recovery"
+    },
+    {
+      "backend": "simulated-vapi-transport",
+      "name": "three-tool provisioning and persisted two-tool migration without repeated creation"
+    }
+  ]
+}
+OFFLINE GUARD: 0 rejected nonlocal attempts

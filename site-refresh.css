@@ -106,6 +106,45 @@
 .site-owner-ticket dt { color: #b2c3dc; font-size: 11px; }
 .site-owner-ticket dd { margin: 0; color: #fff; font-size: 12px; line-height: 1.5; }
 .site-owner-foot { max-width: 290px; margin: 23px 0 0; color: #c0cfe3; font-size: 12px; }
+.site-demo-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 13px 26px; border-bottom: 1px solid var(--site-line); }
+.site-demo-toolbar[hidden], .site-demo-playback[hidden], #example-live[hidden], #example-reset[hidden], #example-error[hidden], #example-suggestion[hidden], #example-play[hidden] { display: none; }
+.site-demo-summary-link { display: none; margin-top: 10px; color: #194cbf; font-size: 11px; font-weight: 500; text-decoration: none; }
+#owner-note-title { scroll-margin-top: 110px; }
+.site-demo-modes { display: flex; flex-wrap: wrap; gap: 5px; padding: 4px; border-radius: 9px; background: #eff3f9; }
+.site-demo-toolbar button { min-height: 36px; padding: 7px 11px; border: 0; border-radius: 6px; color: #52627a; background: transparent; font: 500 12px/1.4 var(--font-sans); cursor: pointer; }
+.site-demo-modes button[aria-pressed="true"] { color: #172b49; background: #fff; box-shadow: 0 1px 4px #142b4b12; }
+.site-demo-modes button > span { margin-left: 5px; color: #2859b7; }
+.site-demo-playback { display: flex; align-items: center; gap: 6px; }
+.site-demo-playback > span { margin-right: 5px; color: #637087; font-size: 10px; }
+.site-demo-toolbar #example-play { min-width: 65px; color: #194cbf; background: #edf3ff; }
+.site-demo-toolbar button:hover { color: #194cbf; background: #e6edfa; }
+.site-demo-ready .site-messages { display: flex; flex-direction: column; min-height: 370px; max-height: 440px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #cbd6e8 transparent; padding-right: 3px; padding-bottom: 10px; }
+.site-demo-ready .site-message { flex: none; align-self: flex-start; animation: site-message-in .22s ease-out; overflow-wrap: anywhere; }
+.site-demo-ready .site-message-agent { align-self: flex-end; }
+.site-demo-ready .site-conversation-time { flex: none; padding: 5px 8px; border-radius: 5px; background: #f0f3f8; white-space: nowrap; }
+.site-demo-ready[data-mode="live"] .site-conversation-time { color: #246244; background: #eaf6ef; }
+.site-demo-context { margin: 17px 0 0; color: #637087; font-size: 11px; line-height: 1.6; }
+.site-demo-ready[data-mode="live"] .site-messages { min-height: 250px; max-height: 350px; }
+.site-demo-suggestion { max-width: 100%; margin: 15px 0 0; padding: 10px 12px; border: 1px solid #d7e2f3; border-radius: 7px; color: #2859a7; background: #f8faff; font: 400 11px/1.6 var(--font-sans); text-align: left; cursor: pointer; }
+.site-demo-suggestion:hover { border-color: #7698d8; background: #f0f5ff; }
+.site-demo-form { margin-top: 16px; }
+.site-demo-form label { display: block; margin-bottom: 7px; color: var(--site-ink); font-size: 11px; font-weight: 500; }
+.site-demo-compose { display: flex; align-items: end; gap: 8px; padding: 9px; border: 1px solid #b6c6df; border-radius: 10px; background: #fff; }
+.site-demo-compose:focus-within { border-color: #2859b7; box-shadow: 0 0 0 3px #2859b710; }
+.site-demo-compose textarea { display: block; width: 100%; min-width: 0; min-height: 55px; max-height: 150px; resize: vertical; border: 0; border-radius: 4px; padding: 5px; background: #fff; color: var(--site-ink); font: 400 14px/1.5 var(--font-sans); }
+.site-demo-compose textarea:focus { outline: 0; }
+.site-demo-compose textarea::placeholder { color: #637087; }
+.site-demo-compose button { flex: none; min-width: 62px; min-height: 42px; padding: 9px 12px; border: 0; border-radius: 7px; background: #2459df; color: #fff; font: 500 12px/1.4 var(--font-sans); cursor: pointer; }
+.site-demo-compose button:hover { background: #194bbf; }
+.site-demo-compose button:disabled { background: #7184aa; cursor: wait; }
+.site-demo-form #example-input-help { display: block; margin-top: 6px; color: #637087; font-size: 10px; }
+.site-demo-error { margin: 12px 0 0; color: #a32b32; font-size: 12px; }
+.site-demo-typing { display: flex; align-items: center; gap: 8px; flex: none; min-height: 28px; color: #637087; font-size: 10px; }
+.site-demo-dots { color: #2859b7; font-size: 15px; letter-spacing: 3px; animation: site-typing 1s ease-in-out infinite; }
+.site-owner-ticket dd { overflow-wrap: anywhere; }
+#demo-wrap button:focus-visible, #example-input:focus-visible { outline: 3px solid #638ff5; outline-offset: 3px; }
+@keyframes site-message-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes site-typing { 50% { opacity: .35; } }
 .site-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; padding-top: 14px; }
 .site-plan { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 29px 28px 27px; border: 1px solid var(--site-line); border-radius: 13px; background: #fff; }
 .site-plan-featured { border-color: var(--site-blue); box-shadow: 0 4px 20px #2459df0a; }
@@ -254,6 +293,16 @@
   .site-example-grid { grid-template-columns: 1fr; }
   .site-example-options { gap: 5px; padding: 11px; }
   .site-example-options button { padding: 8px 10px; font-size: 10px; }
+  .site-demo-toolbar { padding: 11px 13px; gap: 9px; }
+  .site-demo-toolbar button { min-height: 44px; padding: 8px 10px; }
+  .site-demo-playback { width: 100%; justify-content: flex-end; }
+  .site-demo-playback > span { margin-right: auto; }
+  .site-demo-ready .site-messages { min-height: 300px; max-height: 390px; }
+  .site-demo-ready[data-mode="live"] .site-messages { min-height: 210px; max-height: 300px; }
+  .site-demo-compose textarea { font-size: 16px; }
+  .site-demo-summary-link { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; }
+  .site-refresh.site-inline-chat-active .mc-agent-launcher { visibility: hidden; pointer-events: none; }
+  .site-demo-ready .site-conversation-time { padding: 4px 6px; font-size: 9px; }
   .site-conversation { padding: 20px 17px 25px; }
   .site-owner-note { padding: 28px 23px; }
   .site-owner-note h3 { font-size: 26px; }

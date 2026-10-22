@@ -8,6 +8,8 @@ Updated **2026-10-21**. **Product Owner is accountable for the final working pro
 
 ## What each evidence stage establishes
 
+**Subsequent homepage enhancement, local:** Steve requested both animated Watch and real AI Try modes. [LIVE-WALKTHROUGH.md](LIVE-WALKTHROUGH.md) records progressive summary previews, isolation, responsive/error/race acceptance and six actual-model cases independently accepted by PO. Its closed ledger used 14/16 actual HTTP requests, including a retained observer failure. The enhancement has not been pushed or deployed; it does not create real appointments, messages or customer records.
+
 | Stage | Current evidence | Limit still open |
 |---|---|---|
 | Code | Shared owner blocks, availability lookup and booking/reschedule enforcement; truthfulness and error-handling fixes reviewed. | A code change alone is not a customer outcome. |

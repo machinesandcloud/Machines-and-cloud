@@ -1,0 +1,1599 @@
+{
+  "startedAt": "2026-10-22T01:19:55.470Z",
+  "base": "http://127.0.0.1:8894",
+  "source": {
+    "index.html": "7828957d40afd97da17ff7d5203bff85ad2893abb31391870add37651ba4cdd4",
+    "stories.js": "ba73d06dd748366b8ef6a02460148f4c9c9abaceef87df8e013a80867920d55c",
+    "site-refresh.css": "374eedeb8f20a935c2c7c08a5be9ad2ff1861ea5bd3d7e35b160b46301bd9419",
+    "netlify/functions/chat.mjs": "16090254d400d447f8618d221a17ef5457c64136f23840ef29b287bc8ee62501",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd"
+  },
+  "maxLogicalTurnsThisRun": 6,
+  "phaseMaxTurns": 7,
+  "priorAttempt": "scratchpad/site-demo-real-model-first.json: first turn spent two requests; Chrome could not expose a stream canceled after done. Retained failure; observer fixed without frontend changes. Actual HTTP cap remains16.",
+  "maxActualAnthropicRequests": 16,
+  "scope": "Actual local browser -> persona API -> Anthropic. Forced memory store and provider credentials disabled. No real bookings, notifications, Calendar writes or hosted requests.",
+  "cases": [
+    {
+      "id": "hvac_partial",
+      "input": "My AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?",
+      "startedAt": "2026-10-22T01:19:56.451Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 2,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?"
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Yes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?"
+        },
+        {
+          "t": "done",
+          "reply": "Yes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "AC running but not cooling",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "en"
+              },
+              "at": "2026-10-22T01:19:58.855Z"
+            }
+          ]
+        }
+      ],
+      "reply": "Yes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "AC running but not cooling",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "en"
+          },
+          "at": "2026-10-22T01:19:58.855Z"
+        }
+      ],
+      "ui": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?\n\nFront desk\n\nYes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?",
+        "summary": "Job\nAC running but not cooling\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details",
+        "ticket": "Gathering details",
+        "context": "Practice conversation only. No appointments or messages are sent. Use made-up details."
+      },
+      "ledgerAfter": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 4,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      }
+    },
+    {
+      "id": "hvac_intake",
+      "input": "I’m Alex Demo. Use (713) 555-0142 and 12 Oak St, Katy. I’d like tomorrow, 12 to 5.",
+      "startedAt": "2026-10-22T01:20:00.998Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 4,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?"
+          },
+          {
+            "role": "assistant",
+            "content": "Yes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?"
+          },
+          {
+            "role": "user",
+            "content": "I’m Alex Demo. Use (713) 555-0142 and 12 Oak St, Katy. I’d like tomorrow, 12 to 5."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Thanks, Alex. I've added your request for tomorrow in the 12 to 5 window at 12 Oak St, Katy, so Ray can look at it. That time isn't confirmed yet, and the visit is still the $89 diagnostic. Is there anything else about the AC you'd like the tech to know, like how long it's been happening?"
+        },
+        {
+          "t": "done",
+          "reply": "Thanks, Alex. I've added your request for tomorrow in the 12 to 5 window at 12 Oak St, Katy, so Ray can look at it. That time isn't confirmed yet, and the visit is still the $89 diagnostic. Is there anything else about the AC you'd like the tech to know, like how long it's been happening?",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "Alex Demo",
+                "phone": "(713) 555-0142",
+                "address": "12 Oak St, Katy",
+                "issue": "AC running but not cooling",
+                "requested_window": "Tomorrow, 12 to 5",
+                "urgency": "flexible",
+                "language": "en"
+              },
+              "at": "2026-10-22T01:20:03.597Z"
+            }
+          ]
+        }
+      ],
+      "reply": "Thanks, Alex. I've added your request for tomorrow in the 12 to 5 window at 12 Oak St, Katy, so Ray can look at it. That time isn't confirmed yet, and the visit is still the $89 diagnostic. Is there anything else about the AC you'd like the tech to know, like how long it's been happening?",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "Alex Demo",
+            "phone": "(713) 555-0142",
+            "address": "12 Oak St, Katy",
+            "issue": "AC running but not cooling",
+            "requested_window": "Tomorrow, 12 to 5",
+            "urgency": "flexible",
+            "language": "en"
+          },
+          "at": "2026-10-22T01:20:03.597Z"
+        }
+      ],
+      "ui": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?\n\nFront desk\n\nYes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?\n\nCustomer\n\nI’m Alex Demo. Use (713) 555-0142 and 12 Oak St, Katy. I’d like tomorrow, 12 to 5.\n\nFront desk\n\nThanks, Alex. I've added your request for tomorrow in the 12 to 5 window at 12 Oak St, Katy, so Ray can look at it. That time isn't confirmed yet, and the visit is still the $89 diagnostic. Is there anything else about the AC you'd like the tech to know, like how long it's been happening?",
+        "summary": "Job\nAC running but not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex Demo · (713) 555-0142\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request",
+        "ticket": "Visit request",
+        "context": "Practice conversation only. No appointments or messages are sent. Use made-up details."
+      },
+      "ledgerAfter": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 6,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      }
+    },
+    {
+      "id": "hvac_correction",
+      "input": "Actually, change the requested window to Saturday, 8 to 12. Everything else is the same.",
+      "startedAt": "2026-10-22T01:20:05.705Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 6,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?"
+          },
+          {
+            "role": "assistant",
+            "content": "Yes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?"
+          },
+          {
+            "role": "user",
+            "content": "I’m Alex Demo. Use (713) 555-0142 and 12 Oak St, Katy. I’d like tomorrow, 12 to 5."
+          },
+          {
+            "role": "assistant",
+            "content": "Thanks, Alex. I've added your request for tomorrow in the 12 to 5 window at 12 Oak St, Katy, so Ray can look at it. That time isn't confirmed yet, and the visit is still the $89 diagnostic. Is there anything else about the AC you'd like the tech to know, like how long it's been happening?"
+          },
+          {
+            "role": "user",
+            "content": "Actually, change the requested window to Saturday, 8 to 12. Everything else is the same."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "stream": [
+        {
+          "t": "delta",
+          "text": "I've updated your request to Saturday, 8 to 12. Everything else is the same, and Ray still needs to confirm that time. Is there anything else the tech should know, like how long the AC hasn't been cooling?"
+        },
+        {
+          "t": "done",
+          "reply": "I've updated your request to Saturday, 8 to 12. Everything else is the same, and Ray still needs to confirm that time. Is there anything else the tech should know, like how long the AC hasn't been cooling?",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "Alex Demo",
+                "phone": "(713) 555-0142",
+                "address": "12 Oak St, Katy",
+                "issue": "AC running but not cooling",
+                "requested_window": "Saturday, 8 to 12",
+                "urgency": "flexible",
+                "language": "en"
+              },
+              "at": "2026-10-22T01:20:09.070Z"
+            }
+          ]
+        }
+      ],
+      "reply": "I've updated your request to Saturday, 8 to 12. Everything else is the same, and Ray still needs to confirm that time. Is there anything else the tech should know, like how long the AC hasn't been cooling?",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "Alex Demo",
+            "phone": "(713) 555-0142",
+            "address": "12 Oak St, Katy",
+            "issue": "AC running but not cooling",
+            "requested_window": "Saturday, 8 to 12",
+            "urgency": "flexible",
+            "language": "en"
+          },
+          "at": "2026-10-22T01:20:09.070Z"
+        }
+      ],
+      "ui": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is running but not cooling. Do you serve Katy, and what is your diagnostic fee?\n\nFront desk\n\nYes, we serve Katy. The diagnostic visit is $89, and that goes toward the repair if you go ahead with it. What day would you like a visit, and do you want the 8 to 12 or the 12 to 5 window?\n\nCustomer\n\nI’m Alex Demo. Use (713) 555-0142 and 12 Oak St, Katy. I’d like tomorrow, 12 to 5.\n\nFront desk\n\nThanks, Alex. I've added your request for tomorrow in the 12 to 5 window at 12 Oak St, Katy, so Ray can look at it. That time isn't confirmed yet, and the visit is still the $89 diagnostic. Is there anything else about the AC you'd like the tech to know, like how long it's been happening?\n\nCustomer\n\nActually, change the requested window to Saturday, 8 to 12. Everything else is the same.\n\nFront desk\n\nI've updated your request to Saturday, 8 to 12. Everything else is the same, and Ray still needs to confirm that time. Is there anything else the tech should know, like how long the AC hasn't been cooling?",
+        "summary": "Job\nAC running but not cooling\nWhere\n12 Oak St, Katy\nWindow\nSaturday, 8 to 12\nContact\nAlex Demo · (713) 555-0142\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request",
+        "ticket": "Visit request",
+        "context": "Practice conversation only. No appointments or messages are sent. Use made-up details."
+      },
+      "ledgerAfter": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 8,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      }
+    },
+    {
+      "id": "spanish_cleaning",
+      "input": "Hola, soy Ana Demo. Necesito una limpieza profunda de mi apartamento en 36 Elm St, Memorial. Son dos habitaciones, dos baños y 1,000 pies cuadrados. Mi número de práctica es (713) 555-0152. Me gustaría el sábado de 8 a 10.",
+      "startedAt": "2026-10-22T01:20:10.649Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 8,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "westheimer-maids",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hola, soy Ana Demo. Necesito una limpieza profunda de mi apartamento en 36 Elm St, Memorial. Son dos habitaciones, dos baños y 1,000 pies cuadrados. Mi número de práctica es (713) 555-0152. Me gustaría el sábado de 8 a 10."
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Gracias, Ana. Memorial está dentro de nuestra zona, y la limpieza profunda empieza desde $229. Nia confirmará el precio final. Anoté su solicitud para el sábado de 8 a 10 en 36 Elm St, pero todavía no está confirmada, y Nia la revisará con su número (713) 555-0152."
+        },
+        {
+          "t": "done",
+          "reply": "Gracias, Ana. Memorial está dentro de nuestra zona, y la limpieza profunda empieza desde $229. Nia confirmará el precio final. Anoté su solicitud para el sábado de 8 a 10 en 36 Elm St, pero todavía no está confirmada, y Nia la revisará con su número (713) 555-0152.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Nia",
+              "company": "Westheimer Maids",
+              "data": {
+                "customer_name": "Ana Demo",
+                "phone": "(713) 555-0152",
+                "address": "36 Elm St, Memorial",
+                "issue": "Limpieza profunda de apartamento, 2 habitaciones, 2 baños, 1,000 pies cuadrados",
+                "requested_window": "Sábado de 8 a 10",
+                "urgency": "flexible",
+                "language": "es"
+              },
+              "at": "2026-10-22T01:20:13.289Z"
+            }
+          ]
+        }
+      ],
+      "reply": "Gracias, Ana. Memorial está dentro de nuestra zona, y la limpieza profunda empieza desde $229. Nia confirmará el precio final. Anoté su solicitud para el sábado de 8 a 10 en 36 Elm St, pero todavía no está confirmada, y Nia la revisará con su número (713) 555-0152.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Nia",
+          "company": "Westheimer Maids",
+          "data": {
+            "customer_name": "Ana Demo",
+            "phone": "(713) 555-0152",
+            "address": "36 Elm St, Memorial",
+            "issue": "Limpieza profunda de apartamento, 2 habitaciones, 2 baños, 1,000 pies cuadrados",
+            "requested_window": "Sábado de 8 a 10",
+            "urgency": "flexible",
+            "language": "es"
+          },
+          "at": "2026-10-22T01:20:13.289Z"
+        }
+      ],
+      "ui": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, soy Ana Demo. Necesito una limpieza profunda de mi apartamento en 36 Elm St, Memorial. Son dos habitaciones, dos baños y 1,000 pies cuadrados. Mi número de práctica es (713) 555-0152. Me gustaría el sábado de 8 a 10.\n\nRecepción\n\nGracias, Ana. Memorial está dentro de nuestra zona, y la limpieza profunda empieza desde $229. Nia confirmará el precio final. Anoté su solicitud para el sábado de 8 a 10 en 36 Elm St, pero todavía no está confirmada, y Nia la revisará con su número (713) 555-0152.",
+        "summary": "Job\nLimpieza profunda de apartamento, 2 habitaciones, 2 baños, 1,000 pies cuadrados\nWhere\n36 Elm St, Memorial\nWindow\nSábado de 8 a 10\nContact\nAna Demo · (713) 555-0152\nPriority\nNot specified\nLanguage\nSpanish\nNext\nOwner reviews the visit request",
+        "ticket": "Visit request",
+        "context": "Practice conversation only. No appointments or messages are sent. Use made-up details."
+      },
+      "ledgerAfter": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 10,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 9,
+            "at": "2026-10-22T01:20:10.681Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 10,
+            "at": "2026-10-22T01:20:13.291Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      }
+    },
+    {
+      "id": "gas_safety",
+      "input": "I smell gas inside the house. I’m Sam Demo, (713) 555-0151, at 24 Pine St, Katy. Can someone come now?",
+      "startedAt": "2026-10-22T01:20:16.696Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 10,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 9,
+            "at": "2026-10-22T01:20:10.681Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 10,
+            "at": "2026-10-22T01:20:13.291Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "katy-pipeworks",
+        "messages": [
+          {
+            "role": "user",
+            "content": "I smell gas inside the house. I’m Sam Demo, (713) 555-0151, at 24 Pine St, Katy. Can someone come now?"
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "stream": [
+        {
+          "t": "delta",
+          "text": "Sam, everyone needs to leave the house now. Don't flip switches or use anything that could spark. Once you're outside and safe, call 911 or your gas company. I've added your name, number, 24 Pine St in Katy, and your request for someone to come now to Dana's summary card as an emergency. No visit is booked yet and I can't give you an arrival time, so please make that safety call first."
+        },
+        {
+          "t": "done",
+          "reply": "Sam, everyone needs to leave the house now. Don't flip switches or use anything that could spark. Once you're outside and safe, call 911 or your gas company. I've added your name, number, 24 Pine St in Katy, and your request for someone to come now to Dana's summary card as an emergency. No visit is booked yet and I can't give you an arrival time, so please make that safety call first.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Dana",
+              "company": "Katy Pipeworks",
+              "data": {
+                "customer_name": "Sam Demo",
+                "phone": "(713) 555-0151",
+                "address": "24 Pine St, Katy",
+                "issue": "Gas smell inside the house; customer asking for someone to come now",
+                "requested_window": "Now",
+                "urgency": "emergency",
+                "language": "en"
+              },
+              "at": "2026-10-22T01:20:21.088Z"
+            }
+          ]
+        }
+      ],
+      "reply": "Sam, everyone needs to leave the house now. Don't flip switches or use anything that could spark. Once you're outside and safe, call 911 or your gas company. I've added your name, number, 24 Pine St in Katy, and your request for someone to come now to Dana's summary card as an emergency. No visit is booked yet and I can't give you an arrival time, so please make that safety call first.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Dana",
+          "company": "Katy Pipeworks",
+          "data": {
+            "customer_name": "Sam Demo",
+            "phone": "(713) 555-0151",
+            "address": "24 Pine St, Katy",
+            "issue": "Gas smell inside the house; customer asking for someone to come now",
+            "requested_window": "Now",
+            "urgency": "emergency",
+            "language": "en"
+          },
+          "at": "2026-10-22T01:20:21.088Z"
+        }
+      ],
+      "ui": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nI smell gas inside the house. I’m Sam Demo, (713) 555-0151, at 24 Pine St, Katy. Can someone come now?\n\nFront desk\n\nSam, everyone needs to leave the house now. Don't flip switches or use anything that could spark. Once you're outside and safe, call 911 or your gas company. I've added your name, number, 24 Pine St in Katy, and your request for someone to come now to Dana's summary card as an emergency. No visit is booked yet and I can't give you an arrival time, so please make that safety call first.",
+        "summary": "Job\nGas smell inside the house; customer asking for someone to come now\nWhere\n24 Pine St, Katy\nWindow\nNow\nContact\nSam Demo · (713) 555-0151\nPriority\nUrgent\nLanguage\nEnglish\nNext\nUrgent handoff to the owner",
+        "ticket": "Urgent request",
+        "context": "Practice conversation only. No appointments or messages are sent. Use made-up details."
+      },
+      "ledgerAfter": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 12,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 9,
+            "at": "2026-10-22T01:20:10.681Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 10,
+            "at": "2026-10-22T01:20:13.291Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 11,
+            "at": "2026-10-22T01:20:16.729Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 12,
+            "at": "2026-10-22T01:20:21.089Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      }
+    },
+    {
+      "id": "outside_service_area",
+      "input": "My AC needs repair in The Woodlands. Do you serve my area?",
+      "startedAt": "2026-10-22T01:20:23.612Z",
+      "ledgerBefore": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 12,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 9,
+            "at": "2026-10-22T01:20:10.681Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 10,
+            "at": "2026-10-22T01:20:13.291Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 11,
+            "at": "2026-10-22T01:20:16.729Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 12,
+            "at": "2026-10-22T01:20:21.089Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      },
+      "request": {
+        "persona": "bayou-air",
+        "messages": [
+          {
+            "role": "user",
+            "content": "My AC needs repair in The Woodlands. Do you serve my area?"
+          }
+        ],
+        "stream": true,
+        "page": "/"
+      },
+      "httpStatus": 200,
+      "stream": [
+        {
+          "t": "delta",
+          "text": "I'm sorry, Bayou Air & Heat doesn't serve The Woodlands. We cover Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond. If you have a property in one of those areas, I'm glad to help with that."
+        },
+        {
+          "t": "done",
+          "reply": "I'm sorry, Bayou Air & Heat doesn't serve The Woodlands. We cover Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond. If you have a property in one of those areas, I'm glad to help with that.",
+          "events": [
+            {
+              "type": "owner_notification",
+              "owner": "Ray",
+              "company": "Bayou Air & Heat",
+              "data": {
+                "customer_name": "",
+                "phone": "",
+                "address": "",
+                "issue": "AC needs repair; customer is in The Woodlands (outside service area)",
+                "requested_window": "",
+                "urgency": "flexible",
+                "language": "en"
+              },
+              "at": "2026-10-22T01:20:26.933Z"
+            }
+          ]
+        }
+      ],
+      "reply": "I'm sorry, Bayou Air & Heat doesn't serve The Woodlands. We cover Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond. If you have a property in one of those areas, I'm glad to help with that.",
+      "events": [
+        {
+          "type": "owner_notification",
+          "owner": "Ray",
+          "company": "Bayou Air & Heat",
+          "data": {
+            "customer_name": "",
+            "phone": "",
+            "address": "",
+            "issue": "AC needs repair; customer is in The Woodlands (outside service area)",
+            "requested_window": "",
+            "urgency": "flexible",
+            "language": "en"
+          },
+          "at": "2026-10-22T01:20:26.933Z"
+        }
+      ],
+      "ui": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC needs repair in The Woodlands. Do you serve my area?\n\nFront desk\n\nI'm sorry, Bayou Air & Heat doesn't serve The Woodlands. We cover Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond. If you have a property in one of those areas, I'm glad to help with that.",
+        "summary": "Job\nAC needs repair; customer is in The Woodlands (outside service area)\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details",
+        "ticket": "Gathering details",
+        "context": "Practice conversation only. No appointments or messages are sent. Use made-up details."
+      },
+      "ledgerAfter": {
+        "phase": "homepage-live-demo-2026-10-21",
+        "startedAt": "2026-10-22T01:19:02.404Z",
+        "maxAnthropicRequests": 16,
+        "anthropicRequests": 14,
+        "blocked": 0,
+        "requests": [
+          {
+            "sequence": 1,
+            "at": "2026-10-22T01:19:04.737Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 2,
+            "at": "2026-10-22T01:19:15.545Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 3,
+            "at": "2026-10-22T01:19:56.504Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 4,
+            "at": "2026-10-22T01:19:58.856Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 5,
+            "at": "2026-10-22T01:20:01.033Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 6,
+            "at": "2026-10-22T01:20:03.597Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 7,
+            "at": "2026-10-22T01:20:05.747Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 8,
+            "at": "2026-10-22T01:20:09.071Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 9,
+            "at": "2026-10-22T01:20:10.681Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 10,
+            "at": "2026-10-22T01:20:13.291Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 11,
+            "at": "2026-10-22T01:20:16.729Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 12,
+            "at": "2026-10-22T01:20:21.089Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 13,
+            "at": "2026-10-22T01:20:23.648Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          },
+          {
+            "sequence": 14,
+            "at": "2026-10-22T01:20:26.933Z",
+            "method": "POST",
+            "host": "api.anthropic.com",
+            "path": "/v1/messages",
+            "status": 200
+          }
+        ],
+        "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "hvac_partial: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "hvac_partial: completed real model stream",
+      "pass": true
+    },
+    {
+      "name": "hvac_partial: real HTTP inference observed",
+      "pass": true
+    },
+    {
+      "name": "hvac_partial: final reply visible",
+      "pass": true
+    },
+    {
+      "name": "HVAC answers the published diagnostic fee",
+      "pass": true
+    },
+    {
+      "name": "Partial summary contains issue without invented contact/address/window",
+      "pass": true
+    },
+    {
+      "name": "hvac_intake: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "hvac_intake: completed real model stream",
+      "pass": true
+    },
+    {
+      "name": "hvac_intake: real HTTP inference observed",
+      "pass": true
+    },
+    {
+      "name": "hvac_intake: final reply visible",
+      "pass": true
+    },
+    {
+      "name": "Intake summary contains supplied contact and requested window",
+      "pass": true
+    },
+    {
+      "name": "Intake card is a request",
+      "pass": true
+    },
+    {
+      "name": "hvac_correction: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "hvac_correction: completed real model stream",
+      "pass": true
+    },
+    {
+      "name": "hvac_correction: real HTTP inference observed",
+      "pass": true
+    },
+    {
+      "name": "hvac_correction: final reply visible",
+      "pass": true
+    },
+    {
+      "name": "Correction keeps contact and updates window",
+      "pass": true
+    },
+    {
+      "name": "spanish_cleaning: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "spanish_cleaning: completed real model stream",
+      "pass": true
+    },
+    {
+      "name": "spanish_cleaning: real HTTP inference observed",
+      "pass": true
+    },
+    {
+      "name": "spanish_cleaning: final reply visible",
+      "pass": true
+    },
+    {
+      "name": "Spanish summary uses Spanish language and supplied facts",
+      "pass": true
+    },
+    {
+      "name": "gas_safety: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "gas_safety: completed real model stream",
+      "pass": true
+    },
+    {
+      "name": "gas_safety: real HTTP inference observed",
+      "pass": true
+    },
+    {
+      "name": "gas_safety: final reply visible",
+      "pass": true
+    },
+    {
+      "name": "Emergency begins with safety before intake",
+      "pass": true
+    },
+    {
+      "name": "Emergency summary is urgent and retains supplied contact",
+      "pass": true
+    },
+    {
+      "name": "outside_service_area: HTTP200",
+      "pass": true
+    },
+    {
+      "name": "outside_service_area: completed real model stream",
+      "pass": true
+    },
+    {
+      "name": "outside_service_area: real HTTP inference observed",
+      "pass": true
+    },
+    {
+      "name": "outside_service_area: final reply visible",
+      "pass": true
+    },
+    {
+      "name": "Out-of-area reply declines the supplied unsupported area",
+      "pass": false
+    }
+  ],
+  "browserErrors": [],
+  "result": "failed",
+  "manualReviewRequired": true,
+  "error": "Out-of-area reply declines the supplied unsupported area",
+  "ledger": {
+    "phase": "homepage-live-demo-2026-10-21",
+    "startedAt": "2026-10-22T01:19:02.404Z",
+    "maxAnthropicRequests": 16,
+    "anthropicRequests": 14,
+    "blocked": 0,
+    "requests": [
+      {
+        "sequence": 1,
+        "at": "2026-10-22T01:19:04.737Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 2,
+        "at": "2026-10-22T01:19:15.545Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 3,
+        "at": "2026-10-22T01:19:56.504Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 4,
+        "at": "2026-10-22T01:19:58.856Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 5,
+        "at": "2026-10-22T01:20:01.033Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 6,
+        "at": "2026-10-22T01:20:03.597Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 7,
+        "at": "2026-10-22T01:20:05.747Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 8,
+        "at": "2026-10-22T01:20:09.071Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 9,
+        "at": "2026-10-22T01:20:10.681Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 10,
+        "at": "2026-10-22T01:20:13.291Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 11,
+        "at": "2026-10-22T01:20:16.729Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 12,
+        "at": "2026-10-22T01:20:21.089Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 13,
+        "at": "2026-10-22T01:20:23.648Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      },
+      {
+        "sequence": 14,
+        "at": "2026-10-22T01:20:26.933Z",
+        "method": "POST",
+        "host": "api.anthropic.com",
+        "path": "/v1/messages",
+        "status": 200
+      }
+    ],
+    "scope": "New feature phase only. Local in-memory server; only Anthropic inference allowed. Earlier exhausted model ledgers are separate and unchanged."
+  },
+  "finishedAt": "2026-10-22T01:20:28.837Z"
+}

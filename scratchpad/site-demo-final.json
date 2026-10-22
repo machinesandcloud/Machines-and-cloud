@@ -1,0 +1,1872 @@
+{
+  "startedAt": "2026-10-22T01:19:57.753Z",
+  "base": "http://127.0.0.1:8893",
+  "fixturesOnly": false,
+  "commit": "02d14592c1b3c1181879bb54ea21a94f2fac7fd6",
+  "source": {
+    "index.html": "7828957d40afd97da17ff7d5203bff85ad2893abb31391870add37651ba4cdd4",
+    "stories.js": "ba73d06dd748366b8ef6a02460148f4c9c9abaceef87df8e013a80867920d55c",
+    "site-refresh.css": "374eedeb8f20a935c2c7c08a5be9ad2ff1861ea5bd3d7e35b160b46301bd9419",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "netlify/functions/chat.mjs": "16090254d400d447f8618d221a17ef5457c64136f23840ef29b287bc8ee62501",
+    "netlify/functions/lib/fake-model.mjs": "5745c27b255f37e098417b9923c86d58f62594b85628010f1b8c52c8fa74276a",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd"
+  },
+  "checks": [
+    {
+      "name": "playback lifecycle: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "offscreen begins with first customer only",
+      "pass": true,
+      "detail": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?",
+        "summary": "Job\nAC running, not cooling\nWhere\nKaty\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window",
+        "count": 1,
+        "progress": "1 of 4 messages",
+        "play": "Play",
+        "input": "",
+        "error": "",
+        "scrollY": 0,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "offscreen summary does not reveal contact early",
+      "pass": true,
+      "detail": "Job\nAC running, not cooling\nWhere\nKaty\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window"
+    },
+    {
+      "name": "offscreen does not autoplay or force scroll",
+      "pass": true
+    },
+    {
+      "name": "first viewport intersection starts ordered playback",
+      "pass": true,
+      "detail": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?\n\nFront desk\n\nYes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?\n\nCustomer is typing\n•••",
+        "summary": "Job\nAC running, not cooling\nWhere\nKaty\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window",
+        "count": 2,
+        "progress": "2 of 4 messages",
+        "play": "Pause",
+        "input": "",
+        "error": "",
+        "scrollY": 1349,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "playback does not force page scroll",
+      "pass": true,
+      "detail": {
+        "before": 1349,
+        "after": 1349
+      }
+    },
+    {
+      "name": "Pause freezes messages and owner summary",
+      "pass": true
+    },
+    {
+      "name": "Play completes four ordered messages",
+      "pass": true
+    },
+    {
+      "name": "completed Watch offers one Replay control",
+      "pass": true
+    },
+    {
+      "name": "completed playback never loops",
+      "pass": true
+    },
+    {
+      "name": "Replay resets message progress/contact summary",
+      "pass": true
+    },
+    {
+      "name": "offscreen pause requires explicit Play on return",
+      "pass": true
+    },
+    {
+      "name": "visibility event pauses playback",
+      "pass": true
+    },
+    {
+      "name": "returning visible does not auto-resume",
+      "pass": true
+    },
+    {
+      "name": "scenario keyboard switch resets progress and summary",
+      "pass": true
+    },
+    {
+      "name": "scenario switch cancels old playback timer",
+      "pass": true
+    },
+    {
+      "name": "Try mode cancels pending Watch playback",
+      "pass": true
+    },
+    {
+      "name": "returning to Watch requires explicit Play",
+      "pass": true
+    },
+    {
+      "name": "reduced motion 320: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "320px reduced motion shows complete static example",
+      "pass": true
+    },
+    {
+      "name": "320px reduced motion does not auto animate",
+      "pass": true
+    },
+    {
+      "name": "320px no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320px Spanish scenario usable by keyboard",
+      "pass": true
+    },
+    {
+      "name": "320px live mode has labeled composer",
+      "pass": true
+    },
+    {
+      "name": "320px practice-only notice visible",
+      "pass": true
+    },
+    {
+      "name": "reduced motion 390: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "390px reduced motion shows complete static example",
+      "pass": true
+    },
+    {
+      "name": "390px reduced motion does not auto animate",
+      "pass": true
+    },
+    {
+      "name": "390px no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390px Spanish scenario usable by keyboard",
+      "pass": true
+    },
+    {
+      "name": "390px live mode has labeled composer",
+      "pass": true
+    },
+    {
+      "name": "390px practice-only notice visible",
+      "pass": true
+    },
+    {
+      "name": "reduced motion 1440: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "1440px reduced motion shows complete static example",
+      "pass": true
+    },
+    {
+      "name": "1440px reduced motion does not auto animate",
+      "pass": true
+    },
+    {
+      "name": "1440px no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440px Spanish scenario usable by keyboard",
+      "pass": true
+    },
+    {
+      "name": "1440px live mode has labeled composer",
+      "pass": true
+    },
+    {
+      "name": "1440px practice-only notice visible",
+      "pass": true
+    },
+    {
+      "name": "progressive live fixture: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "blank live send disabled",
+      "pass": true
+    },
+    {
+      "name": "streamed delta appears before final summary",
+      "pass": true
+    },
+    {
+      "name": "send is disabled while reply is pending",
+      "pass": true
+    },
+    {
+      "name": "pending composer is read-only",
+      "pass": true
+    },
+    {
+      "name": "one explicit send creates one fixture request",
+      "pass": true
+    },
+    {
+      "name": "final response replaces streamed draft",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nSynthetic AC question\n\nFront desk\n\nDEMO-FINAL: I have the details for this practice request. Nothing has been booked or sent."
+    },
+    {
+      "name": "owner event populates truthful supplied fields",
+      "pass": true,
+      "detail": "Job\nAC not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex Fixture · (713) 555-0142\nPriority\nThis week\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "send recovers after final response",
+      "pass": true
+    },
+    {
+      "name": "mobile link indicates updated owner summary",
+      "pass": true
+    },
+    {
+      "name": "keyboard summary link reaches owner view below header",
+      "pass": true,
+      "detail": {
+        "top": 94.890625,
+        "header": 75
+      }
+    },
+    {
+      "name": "sparse live summary: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "unknown summary fields remain Not provided without scripted bleed",
+      "pass": true,
+      "detail": "Job\nAC not cooling\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nThis week\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "live http-error: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "http-error exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "http-error does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "http-error input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live rate-limit: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "rate-limit exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "rate-limit does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "rate-limit input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live stream-error: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "stream-error exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "stream-error does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "stream-error input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live truncated: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "truncated exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "truncated does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "truncated input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "live timeout: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "timeout exposes retryable visible error",
+      "pass": true
+    },
+    {
+      "name": "timeout does not populate final owner summary",
+      "pass": true
+    },
+    {
+      "name": "timeout input remains available to retry",
+      "pass": true
+    },
+    {
+      "name": "late response after reset: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "reset rejects stale reply and owner event",
+      "pass": true,
+      "detail": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "reset clears busy composer",
+      "pass": true
+    },
+    {
+      "name": "late response after mode: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "mode rejects stale reply and owner event",
+      "pass": true,
+      "detail": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?\n\nFront desk\n\nYes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?\n\nCustomer\n\nI’m Alex, (713) 555-0142, at 12 Oak St in Katy. 12 to 5 works.\n\nFront desk\n\nYou’re booked for tomorrow, 12 to 5. The tech will text when they’re on the way. You’ll get appointment texts from your shop; reply STOP any time to end them.",
+        "summary": "Job\nAC running, not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex · (713) 555-0142\nNext\nText when you’re on the way",
+        "count": 4,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "late response after scenario: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "scenario rejects stale reply and owner event",
+      "pass": true,
+      "detail": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "scenario clears busy composer",
+      "pass": true
+    },
+    {
+      "name": "actual local fake sms: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "sms turn1 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is blowing warm in Katy.\n\nFront desk\n\nWhat is your name?"
+    },
+    {
+      "name": "sms turn1 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn1 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn1 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What is your name?"
+    },
+    {
+      "name": "sms turn2 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is blowing warm in Katy.\n\nFront desk\n\nWhat is your name?\n\nCustomer\n\nI'm Morgan Lee.\n\nFront desk\n\nWhat is your best phone number?"
+    },
+    {
+      "name": "sms turn2 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nMorgan Lee\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn2 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nMorgan Lee\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn2 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What is your best phone number?"
+    },
+    {
+      "name": "sms turn3 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is blowing warm in Katy.\n\nFront desk\n\nWhat is your name?\n\nCustomer\n\nI'm Morgan Lee.\n\nFront desk\n\nWhat is your best phone number?\n\nCustomer\n\nMy phone is 713-555-0111.\n\nFront desk\n\nWhat is the street address?"
+    },
+    {
+      "name": "sms turn3 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn3 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn3 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What is the street address?"
+    },
+    {
+      "name": "sms turn4 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is blowing warm in Katy.\n\nFront desk\n\nWhat is your name?\n\nCustomer\n\nI'm Morgan Lee.\n\nFront desk\n\nWhat is your best phone number?\n\nCustomer\n\nMy phone is 713-555-0111.\n\nFront desk\n\nWhat is the street address?\n\nCustomer\n\nThe address is 120 Oak St, Katy.\n\nFront desk\n\nWhat day and arrival window would you like to request?"
+    },
+    {
+      "name": "sms turn4 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\nNot chosen yet\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn4 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\nNot chosen yet\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "sms turn4 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What day and arrival window would you like to request?"
+    },
+    {
+      "name": "sms turn5 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is blowing warm in Katy.\n\nFront desk\n\nWhat is your name?\n\nCustomer\n\nI'm Morgan Lee.\n\nFront desk\n\nWhat is your best phone number?\n\nCustomer\n\nMy phone is 713-555-0111.\n\nFront desk\n\nWhat is the street address?\n\nCustomer\n\nThe address is 120 Oak St, Katy.\n\nFront desk\n\nWhat day and arrival window would you like to request?\n\nCustomer\n\nTomorrow, 8 to 12 works for my request.\n\nFront desk\n\nThanks, Morgan. Your requested tomorrow, 8 to 12 visit is ready for Ray to review."
+    },
+    {
+      "name": "sms turn5 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\ntomorrow, 8 to 12\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "sms turn5 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\ntomorrow, 8 to 12\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "sms turn5 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "Thanks, Morgan. Your requested tomorrow, 8 to 12 visit is ready for Ray to review."
+    },
+    {
+      "name": "sms complete data stays a Visit request",
+      "pass": true
+    },
+    {
+      "name": "actual local fake call: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "call turn1 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nMy kitchen drain is slow in Katy.\n\nFront desk\n\nWhat is your name?"
+    },
+    {
+      "name": "call turn1 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn1 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn1 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What is your name?"
+    },
+    {
+      "name": "call turn2 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nMy kitchen drain is slow in Katy.\n\nFront desk\n\nWhat is your name?\n\nCaller\n\nI am Jamie Reed.\n\nFront desk\n\nWhat is your best phone number?"
+    },
+    {
+      "name": "call turn2 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nJamie Reed\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn2 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nJamie Reed\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn2 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What is your best phone number?"
+    },
+    {
+      "name": "call turn3 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nMy kitchen drain is slow in Katy.\n\nFront desk\n\nWhat is your name?\n\nCaller\n\nI am Jamie Reed.\n\nFront desk\n\nWhat is your best phone number?\n\nCaller\n\nMy phone is 713-555-0112.\n\nFront desk\n\nWhat is the street address?"
+    },
+    {
+      "name": "call turn3 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn3 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn3 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What is the street address?"
+    },
+    {
+      "name": "call turn4 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nMy kitchen drain is slow in Katy.\n\nFront desk\n\nWhat is your name?\n\nCaller\n\nI am Jamie Reed.\n\nFront desk\n\nWhat is your best phone number?\n\nCaller\n\nMy phone is 713-555-0112.\n\nFront desk\n\nWhat is the street address?\n\nCaller\n\nThe address is 125 Oak St, Katy.\n\nFront desk\n\nWhat day and arrival window would you like to request?"
+    },
+    {
+      "name": "call turn4 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\nNot chosen yet\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn4 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\nNot chosen yet\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "call turn4 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "What day and arrival window would you like to request?"
+    },
+    {
+      "name": "call turn5 displays customer and reply",
+      "pass": true,
+      "detail": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nMy kitchen drain is slow in Katy.\n\nFront desk\n\nWhat is your name?\n\nCaller\n\nI am Jamie Reed.\n\nFront desk\n\nWhat is your best phone number?\n\nCaller\n\nMy phone is 713-555-0112.\n\nFront desk\n\nWhat is the street address?\n\nCaller\n\nThe address is 125 Oak St, Katy.\n\nFront desk\n\nWhat day and arrival window would you like to request?\n\nCaller\n\nTomorrow, 12 to 5 works for my request.\n\nFront desk\n\nThanks, Jamie. Your requested tomorrow, 12 to 5 visit is ready for Dana to review."
+    },
+    {
+      "name": "call turn5 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\ntomorrow, 12 to 5\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "call turn5 summary keeps language",
+      "pass": true,
+      "detail": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\ntomorrow, 12 to 5\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "call turn5 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "Thanks, Jamie. Your requested tomorrow, 12 to 5 visit is ready for Dana to review."
+    },
+    {
+      "name": "call complete data stays a Visit request",
+      "pass": true
+    },
+    {
+      "name": "actual local fake spanish: local homepage200",
+      "pass": true
+    },
+    {
+      "name": "spanish turn1 displays customer and reply",
+      "pass": true,
+      "detail": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, necesito una limpieza en Memorial.\n\nRecepción\n\n¿Cómo se llama?"
+    },
+    {
+      "name": "spanish turn1 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn1 summary keeps language",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn1 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "¿Cómo se llama?"
+    },
+    {
+      "name": "spanish turn2 displays customer and reply",
+      "pass": true,
+      "detail": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, necesito una limpieza en Memorial.\n\nRecepción\n\n¿Cómo se llama?\n\nCliente\n\nSoy Ana Ruiz.\n\nRecepción\n\n¿Cuál es su número de teléfono?"
+    },
+    {
+      "name": "spanish turn2 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nAna Ruiz\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn2 summary keeps language",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nAna Ruiz\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn2 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "¿Cuál es su número de teléfono?"
+    },
+    {
+      "name": "spanish turn3 displays customer and reply",
+      "pass": true,
+      "detail": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, necesito una limpieza en Memorial.\n\nRecepción\n\n¿Cómo se llama?\n\nCliente\n\nSoy Ana Ruiz.\n\nRecepción\n\n¿Cuál es su número de teléfono?\n\nCliente\n\nMi teléfono es 713-555-0113.\n\nRecepción\n\n¿Cuál es la dirección?"
+    },
+    {
+      "name": "spanish turn3 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn3 summary keeps language",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn3 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "¿Cuál es la dirección?"
+    },
+    {
+      "name": "spanish turn4 displays customer and reply",
+      "pass": true,
+      "detail": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, necesito una limpieza en Memorial.\n\nRecepción\n\n¿Cómo se llama?\n\nCliente\n\nSoy Ana Ruiz.\n\nRecepción\n\n¿Cuál es su número de teléfono?\n\nCliente\n\nMi teléfono es 713-555-0113.\n\nRecepción\n\n¿Cuál es la dirección?\n\nCliente\n\nLa dirección es 130 Oak St, Memorial.\n\nRecepción\n\n¿Qué día y horario quiere solicitar?"
+    },
+    {
+      "name": "spanish turn4 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nNot chosen yet\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn4 summary keeps language",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nNot chosen yet\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+    },
+    {
+      "name": "spanish turn4 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "¿Qué día y horario quiere solicitar?"
+    },
+    {
+      "name": "spanish turn5 displays customer and reply",
+      "pass": true,
+      "detail": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, necesito una limpieza en Memorial.\n\nRecepción\n\n¿Cómo se llama?\n\nCliente\n\nSoy Ana Ruiz.\n\nRecepción\n\n¿Cuál es su número de teléfono?\n\nCliente\n\nMi teléfono es 713-555-0113.\n\nRecepción\n\n¿Cuál es la dirección?\n\nCliente\n\nLa dirección es 130 Oak St, Memorial.\n\nRecepción\n\n¿Qué día y horario quiere solicitar?\n\nCliente\n\nMañana de 1 a 3, por favor.\n\nRecepción\n\nGracias, Ana. Su solicitud para mañana, 1 a 3 está lista para que Nia la revise."
+    },
+    {
+      "name": "spanish turn5 summary tracks only collected fields",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nmañana, 1 a 3\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "spanish turn5 summary keeps language",
+      "pass": true,
+      "detail": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nmañana, 1 a 3\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nOwner reviews the visit request"
+    },
+    {
+      "name": "spanish turn5 no fabricated delivery or reservation",
+      "pass": true,
+      "detail": "Gracias, Ana. Su solicitud para mañana, 1 a 3 está lista para que Nia la revise."
+    },
+    {
+      "name": "spanish complete data stays a Visit request",
+      "pass": true
+    },
+    {
+      "name": "exactly15 local fake requests, zero paid-model calls",
+      "pass": false,
+      "detail": {
+        "requests": 15,
+        "responses": 15
+      }
+    },
+    {
+      "name": "no JavaScript errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no unrelated form submissions",
+      "pass": true
+    },
+    {
+      "name": "only expected font GETs were blocked",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "relevant sources stayed stable during acceptance",
+      "pass": true
+    }
+  ],
+  "issues": [
+    {
+      "name": "exactly15 local fake requests, zero paid-model calls",
+      "pass": false,
+      "detail": {
+        "requests": 15,
+        "responses": 15
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "playback lifecycle",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Caller\n\nThe kitchen tap keeps dripping. Can a plumber come this week?",
+        "summary": "Job\nDripping kitchen tap\nWhere\nNot provided yet\nWindow\nThis week, not chosen yet\nContact\nNot provided yet\nNext\nChoose an arrival window",
+        "count": 1,
+        "progress": "1 of 4 messages",
+        "play": "Play",
+        "input": "",
+        "error": "",
+        "scrollY": 1349,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "reduced motion 320",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 2114,
+        "width": 320,
+        "scrollWidth": 320
+      }
+    },
+    {
+      "name": "reduced motion 390",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 2036,
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "reduced motion 1440",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1359,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "progressive live fixture",
+      "evidence": "browser-fixture:stream",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nSynthetic AC question\n\nFront desk\n\nDEMO-FINAL: I have the details for this practice request. Nothing has been booked or sent.",
+        "summary": "Job\nAC not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex Fixture · (713) 555-0142\nPriority\nThis week\nLanguage\nEnglish\nNext\nOwner reviews the visit request",
+        "count": 3,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 2776,
+        "width": 390,
+        "scrollWidth": 390
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic AC question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "sparse live summary",
+      "evidence": "browser-fixture:sparse",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nAC not cooling\n\nFront desk\n\nDEMO-FINAL: I have the details for this practice request. Nothing has been booked or sent.",
+        "summary": "Job\nAC not cooling\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nThis week\nLanguage\nEnglish\nNext\nGather the remaining details",
+        "count": 3,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "AC not cooling"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live http-error",
+      "evidence": "browser-fixture:http-error",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live rate-limit",
+      "evidence": "browser-fixture:rate-limit",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The front desk is busy. Please try again in a moment.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live stream-error",
+      "evidence": "browser-fixture:stream-error",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live truncated",
+      "evidence": "browser-fixture:truncated",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "live timeout",
+      "evidence": "browser-fixture:timeout",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "Synthetic retry question",
+        "error": "The reply didn’t finish. Your message is below, ready to try again.",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic retry question"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "late response after reset",
+      "evidence": "browser-fixture:delayed",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stale request"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "late response after mode",
+      "evidence": "browser-fixture:delayed",
+      "state": {
+        "messages": "Customer\n\nMy AC is running, but the house isn’t cooling. Do you come out to Katy?\n\nFront desk\n\nYes, Katy is in our service area. We have tomorrow, 8 to 12 or 12 to 5. Which works for you?\n\nCustomer\n\nI’m Alex, (713) 555-0142, at 12 Oak St in Katy. 12 to 5 works.\n\nFront desk\n\nYou’re booked for tomorrow, 12 to 5. The tech will text when they’re on the way. You’ll get appointment texts from your shop; reply STOP any time to end them.",
+        "summary": "Job\nAC running, not cooling\nWhere\n12 Oak St, Katy\nWindow\nTomorrow, 12 to 5\nContact\nAlex · (713) 555-0142\nNext\nText when you’re on the way",
+        "count": 4,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stale request"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "late response after scenario",
+      "evidence": "browser-fixture:delayed",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?",
+        "summary": "Job\nWaiting for your request\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nNext\nTell the front desk what you need",
+        "count": 1,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1334,
+        "width": 1440,
+        "scrollWidth": 1440
+      },
+      "fixtureRequests": [
+        {
+          "persona": "bayou-air",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stale request"
+            }
+          ],
+          "stream": true,
+          "page": "/"
+        }
+      ]
+    },
+    {
+      "name": "actual local fake sms",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Bayou Air & Heat. What can I help you with?\n\nCustomer\n\nMy AC is blowing warm in Katy.\n\nFront desk\n\nWhat is your name?\n\nCustomer\n\nI'm Morgan Lee.\n\nFront desk\n\nWhat is your best phone number?\n\nCustomer\n\nMy phone is 713-555-0111.\n\nFront desk\n\nWhat is the street address?\n\nCustomer\n\nThe address is 120 Oak St, Katy.\n\nFront desk\n\nWhat day and arrival window would you like to request?\n\nCustomer\n\nTomorrow, 8 to 12 works for my request.\n\nFront desk\n\nThanks, Morgan. Your requested tomorrow, 8 to 12 visit is ready for Ray to review.",
+        "summary": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\ntomorrow, 8 to 12\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request",
+        "count": 11,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 1444,
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "actual local fake call",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Front desk\n\nHi! I’m the AI front desk for Katy Pipeworks. What do you need a hand with?\n\nCaller\n\nMy kitchen drain is slow in Katy.\n\nFront desk\n\nWhat is your name?\n\nCaller\n\nI am Jamie Reed.\n\nFront desk\n\nWhat is your best phone number?\n\nCaller\n\nMy phone is 713-555-0112.\n\nFront desk\n\nWhat is the street address?\n\nCaller\n\nThe address is 125 Oak St, Katy.\n\nFront desk\n\nWhat day and arrival window would you like to request?\n\nCaller\n\nTomorrow, 12 to 5 works for my request.\n\nFront desk\n\nThanks, Jamie. Your requested tomorrow, 12 to 5 visit is ready for Dana to review.",
+        "summary": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\ntomorrow, 12 to 5\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request",
+        "count": 11,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 2776,
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "actual local fake spanish",
+      "evidence": "rendered local app / local fake endpoint",
+      "state": {
+        "messages": "Recepción\n\n¡Hola! Soy la recepción con IA de Westheimer Maids. ¿En qué puedo ayudarle?\n\nCliente\n\nHola, necesito una limpieza en Memorial.\n\nRecepción\n\n¿Cómo se llama?\n\nCliente\n\nSoy Ana Ruiz.\n\nRecepción\n\n¿Cuál es su número de teléfono?\n\nCliente\n\nMi teléfono es 713-555-0113.\n\nRecepción\n\n¿Cuál es la dirección?\n\nCliente\n\nLa dirección es 130 Oak St, Memorial.\n\nRecepción\n\n¿Qué día y horario quiere solicitar?\n\nCliente\n\nMañana de 1 a 3, por favor.\n\nRecepción\n\nGracias, Ana. Su solicitud para mañana, 1 a 3 está lista para que Nia la revise.",
+        "summary": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nmañana, 1 a 3\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nOwner reviews the visit request",
+        "count": 11,
+        "progress": "4 of 4 messages",
+        "play": "Play again",
+        "input": "",
+        "error": "",
+        "scrollY": 2940,
+        "width": 320,
+        "scrollWidth": 320
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/site-demo-final-1440-watch-playing.png",
+    "scratchpad/site-demo-final-1440-watch-complete.png",
+    "scratchpad/site-demo-final-320-watch-static.png",
+    "scratchpad/site-demo-final-320-live.png",
+    "scratchpad/site-demo-final-390-watch-static.png",
+    "scratchpad/site-demo-final-390-live.png",
+    "scratchpad/site-demo-final-1440-watch-static.png",
+    "scratchpad/site-demo-final-1440-live.png",
+    "scratchpad/site-demo-final-390-live-final.png",
+    "scratchpad/site-demo-final-390-owner-summary.png",
+    "scratchpad/site-demo-final-1440-sms-fake.png",
+    "scratchpad/site-demo-final-390-call-fake-summary.png",
+    "scratchpad/site-demo-final-320-spanish-fake-summary.png"
+  ],
+  "browserErrors": [],
+  "blockedRequests": [
+    {
+      "case": "playback lifecycle",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "reduced motion 320",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "reduced motion 390",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "reduced motion 1440",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "progressive live fixture",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "sparse live summary",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live http-error",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live rate-limit",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live stream-error",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live truncated",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "live timeout",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "late response after reset",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "late response after mode",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "late response after scenario",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "actual local fake sms",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "actual local fake call",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    },
+    {
+      "case": "actual local fake spanish",
+      "method": "GET",
+      "url": "https://fonts.googleapis.com/css2",
+      "resource": "stylesheet"
+    }
+  ],
+  "localFakeRequests": [
+    {
+      "case": "actual local fake sms",
+      "persona": "bayou-air",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My AC is blowing warm in Katy."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake sms",
+      "persona": "bayou-air",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My AC is blowing warm in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I'm Morgan Lee."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake sms",
+      "persona": "bayou-air",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My AC is blowing warm in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I'm Morgan Lee."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your best phone number?"
+        },
+        {
+          "role": "user",
+          "content": "My phone is 713-555-0111."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake sms",
+      "persona": "bayou-air",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My AC is blowing warm in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I'm Morgan Lee."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your best phone number?"
+        },
+        {
+          "role": "user",
+          "content": "My phone is 713-555-0111."
+        },
+        {
+          "role": "assistant",
+          "content": "What is the street address?"
+        },
+        {
+          "role": "user",
+          "content": "The address is 120 Oak St, Katy."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake sms",
+      "persona": "bayou-air",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My AC is blowing warm in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I'm Morgan Lee."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your best phone number?"
+        },
+        {
+          "role": "user",
+          "content": "My phone is 713-555-0111."
+        },
+        {
+          "role": "assistant",
+          "content": "What is the street address?"
+        },
+        {
+          "role": "user",
+          "content": "The address is 120 Oak St, Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What day and arrival window would you like to request?"
+        },
+        {
+          "role": "user",
+          "content": "Tomorrow, 8 to 12 works for my request."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake call",
+      "persona": "katy-pipeworks",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My kitchen drain is slow in Katy."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake call",
+      "persona": "katy-pipeworks",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My kitchen drain is slow in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I am Jamie Reed."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake call",
+      "persona": "katy-pipeworks",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My kitchen drain is slow in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I am Jamie Reed."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your best phone number?"
+        },
+        {
+          "role": "user",
+          "content": "My phone is 713-555-0112."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake call",
+      "persona": "katy-pipeworks",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My kitchen drain is slow in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I am Jamie Reed."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your best phone number?"
+        },
+        {
+          "role": "user",
+          "content": "My phone is 713-555-0112."
+        },
+        {
+          "role": "assistant",
+          "content": "What is the street address?"
+        },
+        {
+          "role": "user",
+          "content": "The address is 125 Oak St, Katy."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake call",
+      "persona": "katy-pipeworks",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "My kitchen drain is slow in Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your name?"
+        },
+        {
+          "role": "user",
+          "content": "I am Jamie Reed."
+        },
+        {
+          "role": "assistant",
+          "content": "What is your best phone number?"
+        },
+        {
+          "role": "user",
+          "content": "My phone is 713-555-0112."
+        },
+        {
+          "role": "assistant",
+          "content": "What is the street address?"
+        },
+        {
+          "role": "user",
+          "content": "The address is 125 Oak St, Katy."
+        },
+        {
+          "role": "assistant",
+          "content": "What day and arrival window would you like to request?"
+        },
+        {
+          "role": "user",
+          "content": "Tomorrow, 12 to 5 works for my request."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake spanish",
+      "persona": "westheimer-maids",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hola, necesito una limpieza en Memorial."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake spanish",
+      "persona": "westheimer-maids",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hola, necesito una limpieza en Memorial."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cómo se llama?"
+        },
+        {
+          "role": "user",
+          "content": "Soy Ana Ruiz."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake spanish",
+      "persona": "westheimer-maids",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hola, necesito una limpieza en Memorial."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cómo se llama?"
+        },
+        {
+          "role": "user",
+          "content": "Soy Ana Ruiz."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cuál es su número de teléfono?"
+        },
+        {
+          "role": "user",
+          "content": "Mi teléfono es 713-555-0113."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake spanish",
+      "persona": "westheimer-maids",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hola, necesito una limpieza en Memorial."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cómo se llama?"
+        },
+        {
+          "role": "user",
+          "content": "Soy Ana Ruiz."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cuál es su número de teléfono?"
+        },
+        {
+          "role": "user",
+          "content": "Mi teléfono es 713-555-0113."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cuál es la dirección?"
+        },
+        {
+          "role": "user",
+          "content": "La dirección es 130 Oak St, Memorial."
+        }
+      ]
+    },
+    {
+      "case": "actual local fake spanish",
+      "persona": "westheimer-maids",
+      "stream": true,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hola, necesito una limpieza en Memorial."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cómo se llama?"
+        },
+        {
+          "role": "user",
+          "content": "Soy Ana Ruiz."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cuál es su número de teléfono?"
+        },
+        {
+          "role": "user",
+          "content": "Mi teléfono es 713-555-0113."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Cuál es la dirección?"
+        },
+        {
+          "role": "user",
+          "content": "La dirección es 130 Oak St, Memorial."
+        },
+        {
+          "role": "assistant",
+          "content": "¿Qué día y horario quiere solicitar?"
+        },
+        {
+          "role": "user",
+          "content": "Mañana de 1 a 3, por favor."
+        }
+      ]
+    }
+  ],
+  "localFakeResponses": [
+    {
+      "case": "actual local fake sms",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake sms",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake sms",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake sms",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake sms",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake call",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake call",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake call",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake call",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake call",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake spanish",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake spanish",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake spanish",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake spanish",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    },
+    {
+      "case": "actual local fake spanish",
+      "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    }
+  ],
+  "progressiveConversations": [
+    {
+      "persona": "bayou-air",
+      "width": 1440,
+      "turns": [
+        {
+          "input": "My AC is blowing warm in Katy.",
+          "reply": "What is your name?",
+          "summary": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "I'm Morgan Lee.",
+          "reply": "What is your best phone number?",
+          "summary": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nMorgan Lee\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "My phone is 713-555-0111.",
+          "reply": "What is the street address?",
+          "summary": "Job\nMy AC is blowing warm in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "The address is 120 Oak St, Katy.",
+          "reply": "What day and arrival window would you like to request?",
+          "summary": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\nNot chosen yet\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "Tomorrow, 8 to 12 works for my request.",
+          "reply": "Thanks, Morgan. Your requested tomorrow, 8 to 12 visit is ready for Ray to review.",
+          "summary": "Job\nMy AC is blowing warm in Katy.\nWhere\n120 Oak St, Katy\nWindow\ntomorrow, 8 to 12\nContact\nMorgan Lee · 713-555-0111\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+        }
+      ]
+    },
+    {
+      "persona": "katy-pipeworks",
+      "width": 390,
+      "turns": [
+        {
+          "input": "My kitchen drain is slow in Katy.",
+          "reply": "What is your name?",
+          "summary": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "I am Jamie Reed.",
+          "reply": "What is your best phone number?",
+          "summary": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nJamie Reed\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "My phone is 713-555-0112.",
+          "reply": "What is the street address?",
+          "summary": "Job\nMy kitchen drain is slow in Katy.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "The address is 125 Oak St, Katy.",
+          "reply": "What day and arrival window would you like to request?",
+          "summary": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\nNot chosen yet\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "Tomorrow, 12 to 5 works for my request.",
+          "reply": "Thanks, Jamie. Your requested tomorrow, 12 to 5 visit is ready for Dana to review.",
+          "summary": "Job\nMy kitchen drain is slow in Katy.\nWhere\n125 Oak St, Katy\nWindow\ntomorrow, 12 to 5\nContact\nJamie Reed · 713-555-0112\nPriority\nNot specified\nLanguage\nEnglish\nNext\nOwner reviews the visit request"
+        }
+      ]
+    },
+    {
+      "persona": "westheimer-maids",
+      "width": 320,
+      "turns": [
+        {
+          "input": "Hola, necesito una limpieza en Memorial.",
+          "reply": "¿Cómo se llama?",
+          "summary": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nNot provided yet\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "Soy Ana Ruiz.",
+          "reply": "¿Cuál es su número de teléfono?",
+          "summary": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nAna Ruiz\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "Mi teléfono es 713-555-0113.",
+          "reply": "¿Cuál es la dirección?",
+          "summary": "Job\nHola, necesito una limpieza en Memorial.\nWhere\nNot provided yet\nWindow\nNot chosen yet\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "La dirección es 130 Oak St, Memorial.",
+          "reply": "¿Qué día y horario quiere solicitar?",
+          "summary": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nNot chosen yet\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nGather the remaining details"
+        },
+        {
+          "input": "Mañana de 1 a 3, por favor.",
+          "reply": "Gracias, Ana. Su solicitud para mañana, 1 a 3 está lista para que Nia la revise.",
+          "summary": "Job\nHola, necesito una limpieza en Memorial.\nWhere\n130 Oak St, Memorial\nWindow\nmañana, 1 a 3\nContact\nAna Ruiz · 713-555-0113\nPriority\nNot specified\nLanguage\nSpanish\nNext\nOwner reviews the visit request"
+        }
+      ]
+    }
+  ],
+  "otherFormSubmissions": 0,
+  "evidenceLimits": "Real local fake-model requests and synthetic browser fetch/stream fixtures are identified separately. No real-model quality, production behavior, persistence or provider-delivery claim. Offline business-store isolation has separate scripts/persona-check.mjs evidence.",
+  "sourceAfter": {
+    "index.html": "7828957d40afd97da17ff7d5203bff85ad2893abb31391870add37651ba4cdd4",
+    "stories.js": "ba73d06dd748366b8ef6a02460148f4c9c9abaceef87df8e013a80867920d55c",
+    "site-refresh.css": "374eedeb8f20a935c2c7c08a5be9ad2ff1861ea5bd3d7e35b160b46301bd9419",
+    "styles.css": "4f945b8aac406ebf632da9ef044f26350d39d49e55623cd9e4f00b1c82aadb5e",
+    "script.js": "640f32acff2347f75b2ccc97ed09a2408474ad9929399243762bc5c8a8b93d14",
+    "netlify/functions/chat.mjs": "16090254d400d447f8618d221a17ef5457c64136f23840ef29b287bc8ee62501",
+    "netlify/functions/lib/fake-model.mjs": "5745c27b255f37e098417b9923c86d58f62594b85628010f1b8c52c8fa74276a",
+    "netlify/functions/lib/agent.mjs": "74fe9728fc31ec872f26e9496b42d25ef382fb1be06a5bf82e5ee89b470d77dd"
+  },
+  "result": "failed",
+  "finishedAt": "2026-10-22T01:20:07.876Z"
+}
