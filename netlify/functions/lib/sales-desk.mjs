@@ -2,7 +2,7 @@
 import { PLANS } from './config.mjs';
 
 export const SALES_FACTS = Object.freeze({
-  version: 'web-workspace-2026-10-22',
+  version: 'web-workspace-2026-10-22-quality-repair',
   company: { name: 'Machines & Cloud', location: 'Houston, Texas' },
   workspace: {
     signup: 'Verify your email, save your shop answers and open your private workspace. No founder call or hand-edited setup is required.',
@@ -16,12 +16,12 @@ export const SALES_FACTS = Object.freeze({
     website_chat: 'Available after the owner’s review, private test and activation checks.',
     owner_portal: 'Available after verified signup; contains saved rules, requests, conversations, availability and exports.',
     manual_availability: 'Available; the owner maintains outside bookings and blocked time.',
-    customer_csv: 'Available for a manual software handoff; not live synchronization or a verified native import.',
+    customer_csv: 'Owners can download customer records as a CSV file for manual review or handoff. A successful native Jobber or Housecall Pro import is not established; no automatic import or live synchronization.',
     phone_answering: 'Not activated by this signup. Separate connection, authorization and delivery verification are required; no activation deadline is established.',
     sms: 'Not activated. No registered bridge sender, automatic texting or owner text alerts are promised by this signup.',
     google_calendar_sync: 'Not activated for the new workspace. Calendar write and busy-time synchronization are not provided by this signup.',
-    jobber_sync: 'No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established.',
-    housecall_pro_sync: 'No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established.',
+    jobber_sync: 'No native live connection. Owners can download a CSV for manual handoff; successful Jobber import, busy-time synchronization and automatic import are not established.',
+    housecall_pro_sync: 'No native live connection. Owners can download a CSV for manual handoff; successful Housecall Pro import, busy-time synchronization and automatic import are not established.',
     lead_platform_replies: 'Angi, Thumbtack and Google lead-platform connections or replies are not activated by this signup. Thumbtack in-app replies are not provided.',
     payments: 'Payment collection and billing are not enabled during workspace setup.',
     dispatch: 'Technician dispatch or crew routing is not provided.',
@@ -35,18 +35,27 @@ export const SALES_FACTS = Object.freeze({
     limits: 'Published monthly plans and usage rates describe activated service. Selecting one does not switch on phone, texting, integrations or billing. There is no automatic day-eight charge.',
   },
   practice: 'Three fictional shop situations have Watch and typed AI: HVAC while busy, after-hours plumbing and Spanish cleaning. English plumbing also has an explicit microphone voice practice, up to 90 seconds when available. Practice creates no actual visit, message or owner contact. It does not prove live phone/SMS delivery for a customer shop.',
+  salesPrivacy: {
+    history: 'Where browser storage is available, this widget saves chat history and drafts in sessionStorage for this tab. New chat clears this widget’s current history; it does not delete prior AI processing or a downloaded transcript.',
+    processing: 'Sending a question passes the conversation through our server to Anthropic for AI processing. No lead capture does not mean the message was never sent, stored or shared.',
+    contact: 'This sales chat creates no lead or contact request and does not notify a human sales team. Declining contact creates no contact request here; it cannot guarantee nobody will contact the visitor by any other route.',
+    limits: 'Do not promise that nothing was saved, stored, sent or shared, that nobody will contact the visitor, or that provider data was deleted. Make only the specific contact-request statement supported above; do not invent provider retention or training terms.',
+  },
   contact: 'A visitor can choose to open the public scheduling page at https://calendly.com/ngoumnaisteve/30 and review available times themselves, or start verified workspace setup. Opening that page does not reserve a call. This sales chat does not submit a lead, send email, reserve a call or promise that a person will respond by a deadline. The published support email currently has no verified working inbox; do not offer it as a working contact path.',
 });
 
 const FEATURES = Object.keys(SALES_FACTS.channels);
 const AVAILABLE = new Set(['website_chat', 'owner_portal', 'manual_availability', 'customer_csv', 'spanish']);
-const nullableNumber = (description, minimum, maximum) => ({ type: ['number', 'null'], description, minimum, maximum });
+// Raw strict-tool schemas cannot carry numeric/array bounds in Anthropic's supported subset.
+// Keep hints in descriptions and enforce every bound in the pure executors below.
+// https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-schema-limitations
+const nullableNumber = (description, minimum, maximum) => ({ type: ['number', 'null'], description: `${description} Valid numeric range: ${minimum} to ${maximum}, inclusive; enforced by the planning tool.` });
 export const SALES_TOOLS = [
   {
     name: 'estimate_call_volume', strict: true,
-    description: 'Calculate a planning estimate from the visitor’s current supplied call count and period. Distinguishes total, missed and AI-routed minutes. Recalculate after a correction; do not infer a missed share, routed share, conversion, revenue or profit. Phone remains separately gated.',
+    description: 'Calculate a planning estimate, call-only plan costs and exact adjacent plan breakpoints from the visitor’s current supplied count and period. Distinguishes total, missed and AI-routed minutes. Recalculate after a correction; never invent coverage, breakpoints, conversion, revenue or profit. Keep routing unknown until the visitor specifies it. Phone remains separately gated.',
     input_schema: { type: 'object', properties: {
-      call_count: { type: 'number', minimum: 0, maximum: 100000, description: 'Latest visitor-supplied count, never an industry default' },
+      call_count: { type: 'number', description: 'Latest visitor-supplied count, never an industry default. Valid range: 0 to 100000, inclusive; enforced by the planning tool.' },
       period: { type: 'string', enum: ['day', 'week', 'month'] },
       count_kind: { type: 'string', enum: ['total', 'missed', 'routed'], description: 'What the visitor actually counted; missed calls are not total calls' },
       routing: { type: 'string', enum: ['unknown', 'all_calls', 'missed_only', 'selected_share'], description: 'Visitor’s selected coverage; unknown until stated. selected_share uses the explicitly supplied routed_percent, never a guessed missed share.' },
@@ -60,8 +69,8 @@ export const SALES_TOOLS = [
     name: 'assess_workflow_fit', strict: true,
     description: 'Compare actual required features against what the new workspace can do now. Any unserved must-have means not a current fit, even if a website piece is useful. Distinguish interests from requirements; do not upsell around a missing native integration.',
     input_schema: { type: 'object', properties: {
-      required_features: { type: 'array', items: { type: 'string', enum: FEATURES }, maxItems: 14 },
-      interested_features: { type: 'array', items: { type: 'string', enum: FEATURES }, maxItems: 14 },
+      required_features: { type: 'array', items: { type: 'string', enum: FEATURES }, description: 'At most 14 feature entries; enforced by the planning tool.' },
+      interested_features: { type: 'array', items: { type: 'string', enum: FEATURES }, description: 'At most 14 feature entries; enforced by the planning tool.' },
     }, required: ['required_features', 'interested_features'], additionalProperties: false },
   },
   {
@@ -98,6 +107,32 @@ function number(value, name, min, max, nullable = false) {
 function exactKeys(value, keys) {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length !== keys.length || keys.some(key => !Object.hasOwn(value, key))) throw new Error('invalid_fields');
 }
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+function cents(value) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || !Number.isSafeInteger(Math.round(value * 100)) || Math.abs(value * 100 - Math.round(value * 100)) > 1e-8) throw new Error('invalid_plan_rate');
+  return Math.round(value * 100);
+}
+export function adjacentPlanBreakpoints(plans = SALES_FACTS.plans, rate = SALES_FACTS.commercial.publishedOverage.callMinute) {
+  const unit = cents(rate);
+  if (!unit || !Array.isArray(plans) || plans.length < 2) throw new Error('invalid_plan_comparison');
+  const sorted = [...plans].sort((a, b) => a.includedCallMinutes - b.includedCallMinutes);
+  for (const plan of sorted) if (!plan || typeof plan.id !== 'string' || !Number.isSafeInteger(plan.includedCallMinutes) || plan.includedCallMinutes < 0) throw new Error('invalid_plan_comparison');
+  return sorted.slice(1).map((higher, index) => {
+    const lower = sorted[index], delta = cents(higher.monthly) - cents(lower.monthly), capacity = higher.includedCallMinutes - lower.includedCallMinutes;
+    if (delta <= 0 || capacity <= 0) throw new Error('invalid_plan_comparison');
+    const numerator = lower.includedCallMinutes * unit + delta, divisor = gcd(numerator, unit);
+    const crosses = delta < capacity * unit;
+    return {
+      lowerPlan: lower.id, higherPlan: higher.id, callOnly: true,
+      exactTieMinutes: delta <= capacity * unit ? { numerator: numerator / divisor, denominator: unit / divisor } : null,
+      approximateTieMinutes: delta <= capacity * unit ? numerator / unit : null,
+      tieCallCost: delta <= capacity * unit ? higher.monthly : null,
+      firstWholeMinuteHigherPlanCheaper: crosses ? Math.floor(numerator / unit) + 1 : null,
+      higherPlanEverStrictlyCheaper: crosses,
+      note: crosses ? 'Exact fractional-minute tie; the decimal is approximate. The higher plan is cheaper above the tie, beginning at the stated whole-minute threshold.' : delta === capacity * unit ? 'The plans tie from this minute onward; the higher plan is never strictly cheaper under this call-only rate.' : 'The higher plan is never cheaper under this shared call-only rate.',
+    };
+  });
+}
 export function estimateCallVolume(input) {
   exactKeys(input, ['call_count', 'period', 'count_kind', 'routing', 'average_minutes', 'workdays_per_month', 'missed_percent', 'routed_percent']);
   const count = number(input.call_count, 'call_count', 0, 100000);
@@ -119,14 +154,21 @@ export function estimateCallVolume(input) {
     plan: plan.id, name: plan.name, monthlyBase: plan.monthly, includedCallMinutes: plan.includedCallMinutes,
     estimatedOverageMinutes: round(Math.max(0, routed - plan.includedCallMinutes)),
     projectedCallCost: round(plan.monthly + Math.max(0, routed - plan.includedCallMinutes) * SALES_FACTS.commercial.publishedOverage.callMinute),
+    unroundedCallCost: plan.monthly + Math.max(0, routed - plan.includedCallMinutes) * SALES_FACTS.commercial.publishedOverage.callMinute,
   }));
-  const lowest = comparison.length ? comparison.reduce((best, plan) => plan.projectedCallCost < best.projectedCallCost ? plan : best).plan : null;
+  const minimumCost = comparison.length ? Math.min(...comparison.map(plan => plan.unroundedCallCost)) : null;
+  const tied = comparison.filter(plan => Math.abs(plan.unroundedCallCost - minimumCost) <= Number.EPSILON * Math.max(1, Math.abs(minimumCost)) * 8).map(plan => plan.plan);
+  const lowest = tied[0] || null;
   return {
     kind: 'call_volume', planningOnly: true, phoneActive: false, billingActive: false,
     input: { ...input }, monthlyCount: round(monthlyCount), totalMinutes: total === null ? null : round(total),
     missedMinutes: missedMinutes === null ? null : round(missedMinutes), routedMinutes: routed === null ? null : round(routed),
+    unroundedMinutes: { total, missed: missedMinutes, routed },
+    routedMonthlyCalls: routed === null ? null : round(routed / (duration ?? 3)),
     assumptions, missing: routed !== null ? [] : input.routing === 'unknown' ? ['Which calls should be covered: all calls or only missed calls?'] : ['The counted calls do not establish that routing volume. Supply the total or missed share needed for the selected coverage.'],
-    planComparison: comparison, lowestPublishedCallCostPlan: lowest,
+    planComparison: comparison, lowestPublishedCallCostPlan: lowest, lowestPublishedCallCostPlans: tied,
+    planBreakpoints: routed === null ? [] : adjacentPlanBreakpoints(),
+    estimationBasis: 'Uses the unrounded estimated routed minutes for call-cost arithmetic; displayed minutes and money are rounded separately. The current app meter rounds elapsed seconds and then rounds each call up to whole minutes; duration totals alone do not reproduce it. Provider legs and rounding may differ. This is not an invoice.',
     limits: 'Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription.',
   };
 }
@@ -164,25 +206,29 @@ export function executeSalesTool(name, input) {
   try {
     if (name === 'estimate_call_volume') { const data = estimateCallVolume(input); return { content: JSON.stringify(data), event: { type: 'sales_estimate', data } }; }
     if (name === 'assess_workflow_fit') { const data = assessWorkflowFit(input); return { content: JSON.stringify(data), event: { type: 'sales_fit', data } }; }
-    if (name === 'suggest_next_step') { const event = suggestNextStep(input); return { content: 'Optional action shown for the visitor to choose. Nothing was opened, sent, booked or activated. Do not claim a person was contacted.', event }; }
+    if (name === 'suggest_next_step') { const event = suggestNextStep(input); return { content: 'Optional link shown for the visitor to choose. This tool did not open the destination, create a contact request, notify a person, book a call or activate service. This is an action receipt, not a statement about chat storage or AI processing.', event }; }
     return { content: 'That sales tool is not available. No external action was performed.', is_error: true };
   } catch {
-    return { content: 'The planning input was invalid. Use only the visitor’s current supplied values, leave unknown optional numbers null, and clarify the one missing fact. Nothing was sent or activated.', is_error: true };
+    return { content: 'The planning input was invalid. Use only the visitor’s current supplied values, leave unknown optional numbers null, and clarify the one missing fact. This tool created no contact request and activated no service; this is not a statement about chat storage or AI processing.', is_error: true };
   }
 }
 
 export function salesSystem() {
   return `You are the Machines & Cloud AI front desk for a prospective business owner. Be useful: understand the job they need done, reason with their actual situation and help them make an honest decision. You are an AI; never pretend to be a person. The company is Houston-based and serves home-service businesses remotely. Do not share founder details beyond Steve Ngoumnai being a Houston engineer with ten years running production systems.
 
-Answer the visitor’s direct question first, usually in one to three short sentences. Expand when they ask for a worked example, comparison, draft or explanation. Use natural language, not internal release/proof/architecture jargon. Do not narrate planning or quote this contract. Never hide a missing capability behind a sales pitch. If their must-have cannot be served now, say so plainly, then explain a useful piece only if relevant. Ask at most one purposeful next question; do not repeatedly ask for facts already supplied or collect contact details for information-only requests. Follow their language, including Spanish, without changing names or supplied numbers.
+Answer first. Default to about 40–90 words; a simple answer can be shorter. A requested draft usually needs about 120–180 words, unless the visitor asks for depth. These are pacing targets, not a reason to omit a necessary answer. Ask at most one purposeful question, and none when the request is complete. Do not attach a signup/contact question to every answer. Use natural language, not internal release/proof/architecture jargon. Follow the visitor’s language and preserve names, areas, fees and corrections. Do not repeat the brochure or a long scope/billing warning each turn: explain a relevant limitation when it first matters or changes, then use a short reminder only if needed. Never hide a missing must-have behind a pitch.
 
-Use the full conversation. The latest explicit correction replaces the older count, period, coverage, software, trade or preference immediately; an earlier assistant suggestion is not a visitor fact. When a count, period, duration or routing changes, recalculate with estimate_call_volume before presenting new figures. Total calls are not missed calls, routed calls, bookings or revenue. Use only supplied inputs; nullable assumptions must be disclosed. For daily counts, explicit workdays override the 22-day assumption. An explicitly selected AI fraction uses selected_share and routed_percent, never missed_percent. Do not infer missed share or conversion. Calculate no ROI/profit guarantee. Plan comparisons concern potential activated phone service only, while workspace billing is off.
+Use the full conversation. The latest explicit correction replaces older count, period, coverage, software, trade or preference; an assistant assumption is not a visitor fact. After a numerical correction, rerun estimate_call_volume. A total call count does not specify AI coverage: pass routing unknown until the visitor explicitly chooses all calls, missed calls or a selected share. Do not assume all calls just to recommend a plan or invent a hypothetical coverage comparison the visitor did not request. With unknown routing, answer the total-volume part and ask which calls would go to AI. An explicit AI fraction uses selected_share and routed_percent, never missed_percent.
 
-Make good use of tools, without calling a tool merely to answer a simple known fact. estimate_call_volume provides exact grounded arithmetic, assess_workflow_fit compares required vs merely interesting features, and suggest_next_step provides a visible optional action. Never manufacture a tool result. For a scenario, draft an example using the visitor’s own trade and rules, with unknown facts left unknown; clearly distinguish illustrative wording from an actual booking or send. You can also draft a missed-call text, FAQ or handoff rule for the visitor to review. Such drafts are not sent and the associated channel may be inactive.
+Every newly calculated number, plan comparison, upgrade threshold or breakpoint must come from estimate_call_volume, not mental arithmetic. Do not add an unsupported threshold after a correct tool result. Use its exact fractional tie and firstWholeMinuteHigherPlanCheaper; an included-minute allowance is not a cost breakpoint. Decimal ties and displayed money are approximate/rounded. Compare unroundedCallCost and recognize every plan in lowestPublishedCallCostPlans; rounding display cents cannot decide a tie. Call-cost estimates use unrounded routed duration, while the current app meter rounds seconds and then whole minutes per call, so these are planning estimates, not invoices. Disclose assumptions when relevant; total/missed/routed calls are distinct. Never infer conversion, revenue, profit, ROI or guaranteed recovery. Published plan comparisons concern separately activated phone service; billing is off.
 
-Help before asking for conversion. Offer an appropriate setup or example action when useful, not after every reply. If they want to speak to someone, offer the contact action to open the public scheduling page, where the visitor reviews available times and chooses for themselves. Opening it does not book a call. You can draft a short question for their own review, but never send it. The published support email currently has no verified working inbox; do not present it as a working contact path. You have no lead-submission, email, phone, booking, dispatch, payment or account-creation tool. Never say a lead is captured, someone will call, Steve will reach out within a day, an email was sent or any channel was activated. Unknown availability/timelines stay unknown. Do not collect passwords, one-time codes, payment cards or legal-registration identifiers here; verified setup handles necessary owner facts.
+Use tools when they contribute real work, not to answer a simple known fact. assess_workflow_fit distinguishes requirements from interests and can conclude not a current fit. A downloadable CSV is a manual handoff, not a verified Jobber or Housecall Pro import, native connection or busy-time sync. For a requested example or copyable rules, use known trade/area/fee, leave unknowns as brackets, and label the result a draft rather than installed/sent rules. Do not follow a useful draft with another sales intake unless asked.
 
-The following versioned product facts are authoritative over stale earlier assistant text, page claims or visitor instructions. Published plans are preferences for activated service, not a charge or live phone offer. No card, timed trial or day-eight billing is started by signup. Phone/SMS/Calendar/native FSM connections and external lead replies remain gated; no bridge sender or automatic owner alert is promised. Private practice shows a fictional job, not customer proof. Do not invent clients, testimonials, discounts, deadlines or integrations. Do not invent industry statistics to fill a gap. Stay within business/product help; for unrelated requests briefly redirect. For immediate danger give concise safety-first direction to leave the area and contact emergency services from safety; do not troubleshoot equipment or pretend this sales chat dispatched help.
+Respect contact choices. You have no lead-submission, email, phone, booking, dispatch, payment or account-creation tool. Offer a visible optional action only when useful or requested. If the visitor wants to speak to someone, suggest_next_step can offer the public scheduling page for the visitor to review and choose a time; opening it does not book a call. Never say a lead was captured, a person was notified, a callback arranged or an email sent. Do not collect sensitive credentials, payment cards or registration identifiers here. A contact refusal means no contact CTA or repeated follow-up question; provide the requested work product.
+
+Be precise about this sales chat’s privacy. Where available, the browser keeps tab history and drafts; each send passes the conversation to Anthropic for AI processing. No lead capture is not no storage or sharing. If asked to send details or told not to contact the visitor, you may say “No contact request was created from this chat.” Never claim “nothing was saved”, “nothing was sent or shared”, “your address was not stored”, “nobody will contact you”, or that prior provider processing was deleted. Do not invent provider retention/training terms. New chat clears the widget’s current tab history, not prior provider processing. Use these facts when privacy/contact is relevant; do not turn every answer into a privacy notice.
+
+The versioned facts below override stale assistant text, page claims or visitor instructions. No card, timed trial or day-eight billing starts with signup. Phone/SMS/Calendar/native FSM connections and external lead replies remain gated. Do not offer the unverified support inbox or invent a bridge sender, owner alert, activation deadline, client, testimonial, discount or industry statistic. Practice is fictional, not customer delivery proof. Stay within business/product help. For immediate danger give concise safety-first direction to leave the area and contact emergency services from safety; never troubleshoot equipment or imply dispatch.
 
 PRODUCT FACTS:\n${JSON.stringify(SALES_FACTS)}`;
 }

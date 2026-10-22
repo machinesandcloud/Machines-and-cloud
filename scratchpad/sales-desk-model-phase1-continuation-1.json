@@ -1,0 +1,617 @@
+{
+  "phase": "sales-desk-phase1-2026-10-22",
+  "segment": "schema-repair-continuation-1",
+  "mode": "run",
+  "parent": {
+    "ledgerPath": "scratchpad/sales-desk-model-phase1-ledger.json",
+    "ledgerHash": "bd1f146ecd2a135f2523f822f64e223cd6e01b90d56b89e97ad8fae8159ddb07",
+    "resultPath": "scratchpad/sales-desk-model-phase1.json",
+    "resultHash": "6ee9f85dffe63fb0447040976ccaf133e34349a319f794d895d62b701be93841",
+    "logicalTurns": 1,
+    "actualHTTPAttempts": 1,
+    "startedAt": "2026-10-22T05:23:59.682Z"
+  },
+  "source": {
+    "agent-widget.js": "d7e9971aaeac5d31674acf637217309b77ed9be1c45c99ad9fbd260e0f50792d",
+    "stories.js": "355b2472adeceb47bee5d3d4fe0daded5341da689c3e4d61dec5578b96ee801c",
+    "styles.css": "a031732b6748ee7fec0c0077c53e205d7a891db5edd88563abc219b0198bbd5c",
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/sales-desk.mjs": "b55b2dc6d3177366cf8c1bf81420ca0a7d547c57ab8cb425568c9191366663f3",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "package-lock.json": "076a7a22a5d1d859cf5befff88d5e265a52886e6257d4a68af640e4d6dfdb4f5",
+    "scripts/sales-desk-eval.mjs": "66fce1d9b13ca0aa4ade0402ca931e7c54fbec4b8ff988efe241d0987eb41115",
+    "scripts/lib/sales-eval-transport.mjs": "9be3d83d7e4bc4d2671ef566689d76ff6557d78c1e0c4539919a1c04a0ba59aa",
+    "scripts/sales-desk-eval-continuation.mjs": "a5bafcce0c691759acbb41954b90ba280ead8e3c0dffe90be98fa36fb84e5eb7"
+  },
+  "coverageVariant": "S8-compact combines hearing, Spanish-phone and transfer questions into one turn. Original S8 two-turn continuity is not established.",
+  "threads": [
+    {
+      "id": "S1",
+      "turns": [
+        {
+          "user": "Two-truck HVAC shop in Katy. Our diagnostic is $89. I miss calls on installs. What would you actually do for us?",
+          "status": 200,
+          "latencyMs": 14770,
+          "reply": "Honestly, the part you need most isn't available yet. **We can't answer your phone calls right now.** Phone answering and texting are both turned off for new accounts. Turning them on needs a separate connection and verification step, and I don't have a date for when that will be ready.\n\n**What we can do for your shop today:**\n- **Website chat that runs while you're on an install.** It answers customer questions using rules you write, like your $89 diagnostic fee, your service area around Katy and which problems you count as urgent. It can save a requested visit or a callback request.\n- **A private owner portal.** Requests and conversations go there. You review each one and confirm the next step yourself. The system doesn't promise customers an arrival time or how fast you'll reply.\n- **Your schedule, kept by hand.** You block off install days and time off yourself. It doesn't read Google Calendar, Jobber or Housecall Pro, so you'd keep those blocks up to date.\n- **Customer list export (CSV) and control of your own data.**\n\n**What we can't do:** answer calls, send a text back to a missed caller, alert you when a request comes in, dispatch your trucks or take payments.\n\nSo, if most of your missed business comes in by phone, we won't solve that today, and I'd rather tell you now. Website chat only helps with the customers who'd reach you through your site.\n\nSetting up a workspace is free and doesn't need a card. You can also try a fictional \"HVAC shop while busy\" practice to see how the chat handles it. That practice doesn't create real visits or messages.\n\nTo figure out whether it's worth it for you: do a fair number of your customers find you through your website, or is nearly all of it phone calls?",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 121,
+            "outputTokens": 864,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 4590
+          }
+        },
+        {
+          "user": "Write the first reply. Don't ask for my email.",
+          "status": 200,
+          "latencyMs": 11681,
+          "reply": "Here's a draft of the first message your website chat could show customers. It's only an example for you to review. Nothing has been sent, and the chat won't run until you check your rules, finish a private test and turn it on.\n\n---\n\n**Draft first reply:**\n\n> Hi, thanks for reaching out to [Shop name]. I'm the shop's AI assistant. Our techs are often out on jobs, so I can help you get a visit or callback request started.\n>\n> Our diagnostic visit is $89. [Optional: add whether it's credited toward the repair.] We serve Katy and [nearby areas you cover].\n>\n> What's going on with your system? For example, no cooling, no heat, a strange noise or a quote for a new system.\n>\n> If you smell gas or a carbon monoxide alarm is going off, leave the home now and call 911 or your gas utility from outside.\n\n---\n\n**If they want a visit or callback, the follow-up could ask for:**\n- Name\n- Best phone number\n- Address or ZIP code\n- A short description of the problem and when it started\n- A preferred day or time window\n\nIt doesn't ask for an email, as you wanted.\n\n**Two things to know:**\n- **Fill in the brackets.** I left your shop name, service area and whether the $89 is credited toward the repair as placeholders, because I don't know them. Please also check the gas and carbon monoxide line against your own safety rules.\n- **The chat doesn't confirm visits.** It saves the request in your owner portal, where you review it and confirm the next step yourself. So it shouldn't promise customers an arrival time or how fast you'll call back.\n\nDo you want a version for after hours too, or is one greeting enough for now?",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 677,
+            "outputTokens": 887,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "turns": [
+        {
+          "user": "We miss 30 calls a week.",
+          "status": 200,
+          "latencyMs": 10251,
+          "reply": "Missing 30 calls a week works out to about **130 missed calls a month**. If each call lasts about 3 minutes, that's roughly **390 minutes a month**.\n\nHow I got those numbers:\n- **The 3 minutes is a guess on my part.** If you know your real average call length, I'll redo the math with it.\n- **The monthly number is an average.** It uses 52 weeks spread over 12 months, so any given month will be a little higher or lower.\n- **This only counts missed calls.** I haven't guessed your total call volume or how many of these calls would turn into jobs.\n\nOne thing to know up front: signing up for the workspace doesn't turn on phone answering. That needs a separate connection and checks, and there's no set date for when it would be ready. What you can turn on now is website chat. It saves visit and callback requests in your owner portal, and you review them and confirm each one.\n\n**Would you want AI to handle only the calls you miss, or all your incoming calls?** Once I know that, I can show how the minutes compare to the published plans. Those plans only apply once phone service is turned on.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 30,
+                  "period": "week",
+                  "count_kind": "missed",
+                  "routing": "unknown",
+                  "average_minutes": null,
+                  "workdays_per_month": null,
+                  "missed_percent": null,
+                  "routed_percent": null
+                },
+                "monthlyCount": 130,
+                "totalMinutes": null,
+                "missedMinutes": 390,
+                "routedMinutes": null,
+                "assumptions": [
+                  "Assumed three minutes per call; replace with your measured duration.",
+                  "Monthly average uses 52 weeks divided by 12; it is not an exact count for a particular month."
+                ],
+                "missing": [
+                  "Which calls should be covered: all calls or only missed calls?"
+                ],
+                "planComparison": [],
+                "lowestPublishedCallCostPlan": null,
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 921,
+            "outputTokens": 772,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "Correction: three a month, not 30 a week. I don't want another subscription.",
+          "status": 200,
+          "latencyMs": 11894,
+          "reply": "Got it. **3 missed calls a month** comes to about **9 minutes a month**. That's still based on my guess of 3 minutes per call, since I don't know your real average.\n\nOn not wanting another subscription:\n- **Setting up the workspace doesn't start one.** It's free, needs no card, and has no trial that turns into a charge later.\n- **A paid phone plan is hard to justify at your volume.** The smallest published plan is Starter at $99 a month, which includes 150 call minutes. You'd use about 9 of them. Phone answering also isn't turned on for new workspaces yet, and there's no date for when it will be.\n\nMissing 3 calls a month is already pretty good. If those calls still bother you, a few options don't add a subscription: a clear voicemail greeting, calling people back quickly, or website chat. Website chat is the part of the workspace you can use now. It saves visit and callback requests for you to review and confirm, so it only helps if customers reach you through your website.\n\nWould it help if I drafted a short voicemail greeting or callback message for your trade? You'd review it and use it yourself.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 3,
+                  "period": "month",
+                  "count_kind": "missed",
+                  "routing": "unknown",
+                  "average_minutes": null,
+                  "workdays_per_month": null,
+                  "missed_percent": null,
+                  "routed_percent": null
+                },
+                "monthlyCount": 3,
+                "totalMinutes": null,
+                "missedMinutes": 9,
+                "routedMinutes": null,
+                "assumptions": [
+                  "Assumed three minutes per call; replace with your measured duration."
+                ],
+                "missing": [
+                  "Which calls should be covered: all calls or only missed calls?"
+                ],
+                "planComparison": [],
+                "lowestPublishedCallCostPlan": null,
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 1672,
+            "outputTokens": 991,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "turns": [
+        {
+          "user": "18 calls a day, three minutes each, 22 days a month. Which plan?",
+          "status": 200,
+          "latencyMs": 9411,
+          "reply": "**If the AI answered all of those calls, Pro would cost the least, at about $449 a month.** All three plans come out close, though:\n\n18 calls × 3 minutes × 22 days = **396 calls, or 1,188 minutes a month**\n\n| Plan | Base | Included minutes | Extra minutes at $0.35 | Estimated call cost |\n|---|---|---|---|---|\n| Starter | $99 | 150 | 1,038 | $462.30 |\n| Growth | $249 | 600 | 588 | $454.80 |\n| **Pro** | $449 | 1,500 | 0 | **$449.00** |\n\n**Some things to know:**\n- **This assumes the AI answers every call.** If it only picked up missed calls or a portion of your calls, you'd use fewer minutes and a cheaper plan might work better.\n- **Text messages, taxes and other costs aren't included.**\n- **This is only for planning.** AI phone answering isn't switched on when you sign up. It needs a separate connection and checks, and there's no set date for that yet. Setting up the workspace is free, needs no card and doesn't start a subscription or trial. Choosing a plan is just a preference and doesn't start any charges.\n\nDo you want the AI to answer all your calls, or only the ones you miss? If it's only missed calls, tell me roughly what share of calls you miss and I'll recalculate.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 18,
+                  "period": "day",
+                  "count_kind": "total",
+                  "routing": "all_calls",
+                  "average_minutes": 3,
+                  "workdays_per_month": 22,
+                  "missed_percent": null,
+                  "routed_percent": null
+                },
+                "monthlyCount": 396,
+                "totalMinutes": 1188,
+                "missedMinutes": null,
+                "routedMinutes": 1188,
+                "assumptions": [],
+                "missing": [],
+                "planComparison": [
+                  {
+                    "plan": "starter",
+                    "name": "Starter",
+                    "monthlyBase": 99,
+                    "includedCallMinutes": 150,
+                    "estimatedOverageMinutes": 1038,
+                    "projectedCallCost": 462.3
+                  },
+                  {
+                    "plan": "growth",
+                    "name": "Growth",
+                    "monthlyBase": 249,
+                    "includedCallMinutes": 600,
+                    "estimatedOverageMinutes": 588,
+                    "projectedCallCost": 454.8
+                  },
+                  {
+                    "plan": "pro",
+                    "name": "Pro",
+                    "monthlyBase": 449,
+                    "includedCallMinutes": 1500,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 449
+                  }
+                ],
+                "lowestPublishedCallCostPlan": "pro",
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 1022,
+            "outputTokens": 785,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "Only a quarter would go to AI.",
+          "status": 200,
+          "latencyMs": 6591,
+          "reply": "**If the AI answers a quarter of your calls, Starter would cost the least, at about $150.45 a month.**\n\nThat's 25% of 1,188 minutes, which comes to **about 297 AI minutes a month** (roughly 99 calls).\n\n| Plan | Base | Included minutes | Extra minutes at $0.35 | Estimated call cost |\n|---|---|---|---|---|\n| **Starter** | $99 | 150 | 147 | **$150.45** |\n| Growth | $249 | 600 | 0 | $249.00 |\n| Pro | $449 | 1,500 | 0 | $449.00 |\n\n**Some things to know:**\n- **Starter stays the cheapest up to about 600 AI minutes a month.** At that point, its cost would reach Growth's $249. That's about twice your current estimate.\n- **Text messages, taxes and other costs aren't included.**\n- **This is only for planning.** AI phone answering isn't switched on when you sign up. It needs a separate connection and checks, and there's no set date for that yet. Setting up the workspace is free, needs no card and doesn't start a subscription or trial. Choosing a plan is just a preference and doesn't start any charges.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 18,
+                  "period": "day",
+                  "count_kind": "total",
+                  "routing": "selected_share",
+                  "average_minutes": 3,
+                  "workdays_per_month": 22,
+                  "missed_percent": null,
+                  "routed_percent": 25
+                },
+                "monthlyCount": 396,
+                "totalMinutes": 1188,
+                "missedMinutes": null,
+                "routedMinutes": 297,
+                "assumptions": [],
+                "missing": [],
+                "planComparison": [
+                  {
+                    "plan": "starter",
+                    "name": "Starter",
+                    "monthlyBase": 99,
+                    "includedCallMinutes": 150,
+                    "estimatedOverageMinutes": 147,
+                    "projectedCallCost": 150.45
+                  },
+                  {
+                    "plan": "growth",
+                    "name": "Growth",
+                    "monthlyBase": 249,
+                    "includedCallMinutes": 600,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 249
+                  },
+                  {
+                    "plan": "pro",
+                    "name": "Pro",
+                    "monthlyBase": 449,
+                    "includedCallMinutes": 1500,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 449
+                  }
+                ],
+                "lowestPublishedCallCostPlan": "starter",
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 1937,
+            "outputTokens": 661,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "turns": [
+        {
+          "user": "We use Jobber. Can you sync its busy time and dispatch three crews?",
+          "status": 200,
+          "latencyMs": 8887,
+          "reply": "No, we can't do either one today. There's no live connection to Jobber, so we can't read your Jobber busy time. We also don't dispatch technicians or route crews. If those two things are must-haves, we're not the right fit for you right now.\n\nHere's what does work today:\n- **Manual availability:** You'd block crew time and days off by hand in the owner portal. Nothing syncs from Jobber.\n- **Customer CSV export:** You can export your customer list and import it into Jobber yourself. It's a one-time file, not a live sync.\n- **Website chat:** Once you've reviewed your settings, run a private test and turned it on, the chat can save visit and callback requests to your portal. Your team still has to review each request and confirm the next step. Dispatching stays in Jobber.\n\nWith three crews, keeping two schedules in step by hand could easily cause double-booking. If you'd still like website chat to collect requests on top of Jobber, I can explain how that would work day to day.",
+          "events": [
+            {
+              "type": "sales_fit",
+              "data": {
+                "kind": "workflow_fit",
+                "fit": "not_current_fit",
+                "required": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "external_busy_time",
+                    "currentSupport": false,
+                    "detail": "No external calendar or field-service busy-time synchronization. Use manual Availability blocks."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "gaps": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "external_busy_time",
+                    "currentSupport": false,
+                    "detail": "No external calendar or field-service busy-time synchronization. Use manual Availability blocks."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "interests": [],
+                "usefulCurrentFeatures": [],
+                "caveat": "Website chat still requires owner review, a private AI test and activation. A useful website component does not satisfy an unmet must-have. Daily AI limits apply; no channel or paid subscription is activated by this assessment."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 935,
+            "outputTokens": 518,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "That is a requirement, not optional.",
+          "status": 200,
+          "latencyMs": 7656,
+          "reply": "Then we're not a fit for you right now. All three of your requirements are missing today:\n\n- **Jobber sync:** There's no live connection to Jobber. You can only move customer lists by hand with a CSV file.\n- **Reading Jobber busy time:** We can't read busy time from Jobber or any other calendar. You'd have to block time by hand.\n- **Crew dispatch:** We don't dispatch technicians or route crews.\n\nI don't know if or when these will be added, so I won't suggest signing up and waiting for them. If you'd like to ask about plans for these features, you can open the public scheduling page and pick a time yourself: https://calendly.com/ngoumnaisteve/30. Opening the page doesn't book anything.",
+          "events": [
+            {
+              "type": "sales_fit",
+              "data": {
+                "kind": "workflow_fit",
+                "fit": "not_current_fit",
+                "required": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "external_busy_time",
+                    "currentSupport": false,
+                    "detail": "No external calendar or field-service busy-time synchronization. Use manual Availability blocks."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "gaps": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "external_busy_time",
+                    "currentSupport": false,
+                    "detail": "No external calendar or field-service busy-time synchronization. Use manual Availability blocks."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "interests": [],
+                "usefulCurrentFeatures": [],
+                "caveat": "Website chat still requires owner review, a private AI test and activation. A useful website component does not satisfy an unmet must-have. Daily AI limits apply; no channel or paid subscription is activated by this assessment."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 1591,
+            "outputTokens": 528,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S5",
+      "turns": [
+        {
+          "user": "Can you answer my phone tonight? What do I pay and when?",
+          "status": 200,
+          "latencyMs": 7495,
+          "reply": "**No, I can't answer your phone tonight.** Signing up doesn't turn on phone answering. It needs its own connection, authorization and delivery check, and there's no set date for when that will be ready. Texting, Google Calendar and field-service software connections aren't on yet either.\n\n**What you pay and when:** You pay nothing right now. Setting up your workspace is free. It doesn't need a card, and it doesn't start a trial or a paid subscription. You won't be charged automatically after a week.\n\nThese are the published monthly plans for when phone service is turned on. Picking one now only records which plan you prefer. It doesn't charge you or switch anything on.\n\n| Plan | Monthly | Call minutes included | Texts included |\n|---|---|---|---|\n| Starter | $99 | 150 | 500 |\n| Growth | $249 | 600 | 1,500 |\n| Pro | $449 | 1,500 | 5,000 |\n\nIf you go over, it's $0.35 per extra call minute and $0.03 per extra text.\n\n**What you can use now:** You can set up AI chat on your website. It saves visit and callback requests in your owner portal, based on the availability you enter yourself. You review each request and confirm the next step with the customer. To turn it on, you sign up with a verified email, review your saved rules and run a private test.\n\nIf you tell me about how many calls you get a week, and roughly how long they last, I can work out which plan would fit once phone service is available.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 96,
+            "outputTokens": 669,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "So am I billed on day eight?",
+          "status": 200,
+          "latencyMs": 2806,
+          "reply": "**No, you won't be billed on day eight.** Setting up the workspace is free, and there's no card, timed trial or paid subscription involved, so nothing gets charged automatically on day eight or any other day.\n\nThe plan prices only apply once phone service is actually turned on, and that isn't available yet. Picking a plan now just records which one you prefer. It doesn't charge you anything.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 577,
+            "outputTokens": 139,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S6",
+      "turns": [
+        {
+          "user": "Soy Mario. Tengo una plomería en Katy. Solo quiero solicitudes de devolución de llamada, no visitas confirmadas. Escribe el saludo.",
+          "status": 200,
+          "latencyMs": 10811,
+          "reply": "Hola, Mario. Aquí tienes un borrador del saludo para el chat de tu sitio web. Solo pide datos para una devolución de llamada y no promete ninguna visita:\n\n---\n\n**Borrador (no se ha enviado ni activado):**\n\n\"¡Hola! Gracias por contactar a [nombre de su plomería] en Katy. Soy un asistente de IA y puedo tomar sus datos para que el equipo le devuelva la llamada. No puedo confirmar visitas ni horarios por este chat.\n\nPara empezar, ¿me comparte:\n1. Su nombre\n2. Su número de teléfono\n3. Una breve descripción del problema (por ejemplo, fuga, drenaje tapado o calentador de agua)\n4. ¿Cuál es el mejor horario para llamarle?\n\nEl equipo revisará su solicitud y se comunicará con usted para decidir el siguiente paso.\"\n\n---\n\nAlgunas notas:\n- **No incluí horas de respuesta**, porque no sé en cuánto tiempo puedes devolver las llamadas. Es mejor no prometer un plazo que quizá no puedas cumplir.\n- **Las solicitudes se guardan en tu portal.** En tu espacio de trabajo, las solicitudes del chat quedan ahí para que tú las revises. No se manda ningún aviso automático por mensaje de texto ni por teléfono.\n- **Este saludo solo sirve para el chat de tu sitio web.** El servicio de contestar llamadas y los mensajes de texto no están activados.\n\n¿Quieres agregar alguna regla para emergencias? Por ejemplo, podrías indicar que si huele a gas, la persona salga del lugar y llame al 911 desde un sitio seguro antes de dejar sus datos.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 135,
+            "outputTokens": 796,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "Me llamo María, no Mario. Ahora dame el resumen para mi socio en inglés.",
+          "status": 200,
+          "latencyMs": 6439,
+          "reply": "Perdón, María. Aquí tienes el resumen en inglés para tu socio:\n\n---\n\n**Summary: website chat greeting for our plumbing shop in Katy**\n\n- **Goal:** The website chat collects callback requests only. It does not confirm visits or appointment times.\n- **What the AI asks for:** The customer's name, phone number, a short description of the problem (for example, a leak, a clogged drain or a water heater) and the best time to call back.\n- **What the customer is told:** They're chatting with an AI assistant. Our team will review the request and call back to decide next steps. The greeting doesn't promise a response time, because we haven't decided on one yet.\n- **Where requests go:** Requests are saved in our owner portal for us to review. We won't get an automatic text or phone alert, so we'll need to check the portal ourselves.\n- **What's not included:** Phone answering and texting aren't turned on. This greeting is for website chat only.\n- **Still to decide:** Whether to add an emergency rule. For example, if someone smells gas, the chat would tell them to leave the building and call 911 from a safe place before leaving their details.\n- **Status:** This is a draft only. It hasn't been sent or activated.\n\n---\n\n¿Quieres que también traduzca el saludo completo al inglés para que tu socio lo pueda revisar?",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 769,
+            "outputTokens": 571,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S7",
+      "turns": [
+        {
+          "user": "AI makes my customers angry. I already have a receptionist.",
+          "status": 200,
+          "latencyMs": 5987,
+          "reply": "That's a fair concern. If your receptionist already handles your calls well, you may not need us, and I won't push you to replace someone who's working.\n\nSome things that might help you decide:\n\n- **What we can do right now:** The only thing that works today is website chat. It covers people who visit your site after hours or while your receptionist is busy. It saves their visit or callback requests to your owner portal so your team can review and confirm them. It doesn't promise arrival times or book anything on its own.\n- **What we can't do yet:** Phone answering and texting aren't turned on with this setup. So for now it wouldn't be answering your calls instead of your receptionist anyway.\n- **Keeping customers from getting annoyed:** You write the rules it follows, including when to hand off to your team. You can also test it privately before any customer sees it.\n\nDoes your receptionist cover your website and after-hours inquiries, or mainly phone calls during business hours?",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 95,
+            "outputTokens": 399,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "Stop selling. Just give me a way to find the bottleneck.",
+          "status": 200,
+          "latencyMs": 11831,
+          "reply": "Track every inbound contact for one to two normal weeks, then look for where they stall. Here's a simple way to do it:\n\n**1. Log every contact**\nUse a spreadsheet or paper sheet with one row per call, form, text or lead:\n\n| Date/time | Channel | Answered live? | Time to first response | Outcome | Reason if lost |\n|---|---|---|---|---|---|\n| Tue 7:40am | Phone | No, voicemail | 2 hrs | Booked elsewhere | Called back too late |\n\n- **Channel:** phone, website form, text, lead platform or walk-in\n- **Outcome:** booked, quoted, callback, no answer, or went elsewhere\n\n**2. Pull records you already have**\n- **Phone:** Your phone provider's call log shows missed calls, calls that hung up while waiting, and calls that went to voicemail. Your receptionist can't see the calls they never picked up.\n- **Website forms and lead platforms:** Check the time each one came in against the time someone first replied.\n\n**3. Sort the lost and slow contacts by when they happened**\nProblems usually bunch up around:\n- Before opening, after closing and weekends\n- Lunch or breaks\n- Busy stretches when your receptionist is already on a call\n- Slow callbacks on voicemails and forms\n\n**4. Check what happens after the first contact**\nSometimes intake is fine and the holdup is quoting, scheduling or not having enough technicians. If calls get answered but jobs still don't get booked, the problem is further along.\n\n**5. Read the results**\n- **Lost contacts bunch up in certain hours:** You have a coverage gap.\n- **Contacts get answered but replies are slow:** You have a follow-up problem.\n- **Contacts get answered and replied to fast, but jobs aren't booked:** Look at pricing, quoting or capacity, not how calls are answered.\n- **Nothing much is lost:** Your current setup is working, and you don't need to change it.\n\nI can turn this into a log sheet you can print or paste into a spreadsheet.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 412,
+            "outputTokens": 932,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S8-compact",
+      "turns": [
+        {
+          "user": "Can I hear it? Does Spanish work on the phone? Can you transfer me to someone now?",
+          "status": 200,
+          "latencyMs": 11910,
+          "reply": "Here are your three answers:\n\n**1. Can you hear it?** Yes, in one demo. The after-hours plumbing practice lets you talk to the AI using your microphone, in English, for up to 90 seconds when it's available. The other two demos let you watch or type. These are made-up shop situations. They don't create a real visit, message or phone call, so they don't show how phone service would work for a real shop.\n\n**2. Does Spanish work on the phone?** Not right now. You can try Spanish by typing, in the cleaning demo. But phone answering isn't turned on when you sign up. It needs a separate setup and approval, and there's no set date for when it will be available, in English or Spanish.\n\n**3. Can I transfer you to someone now?** No. I'm an AI, and I can't transfer calls or reach anyone for you. If you'd like to talk with someone, you can open the public scheduling page and see what times are open. Opening the page doesn't book anything. You pick a time yourself if one works for you.\n\nI've put two buttons on your screen. One opens the English plumbing demo you can talk to, and the other opens the scheduling page. Use either one, or neither. Do your customers mostly call in Spanish, or is it a mix?",
+          "events": [
+            {
+              "type": "sales_action",
+              "action": "see_example",
+              "label": "See an example",
+              "href": "/?example=call#demo-wrap",
+              "scenario": "call",
+              "language": "en"
+            },
+            {
+              "type": "sales_action",
+              "action": "contact",
+              "label": "Choose a time to talk",
+              "href": "https://calendly.com/ngoumnaisteve/30",
+              "scenario": "none",
+              "language": "en"
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 937,
+            "outputTokens": 819,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S9",
+      "turns": [
+        {
+          "user": "Here is my email, demo@example.test. Send this to your team.",
+          "status": 200,
+          "latencyMs": 7014,
+          "reply": "I can't send your email to the team. This chat can't pass along contact details, send email or book calls, so your address hasn't been saved or shared, and you don't need to share it here.\n\nIf you'd like to talk to someone, I've put a button on screen that opens the public scheduling page (https://calendly.com/ngoumnaisteve/30). You can look at the open times and pick one yourself. Opening the page doesn't book anything.\n\nIf you'd rather get started on your own, you can sign up for a free workspace at any time. You verify your email and enter your shop's details yourself. No card is needed.\n\nI can also write a short note for you to bring to that call. What do you want to ask the team about?",
+          "events": [
+            {
+              "type": "sales_action",
+              "action": "contact",
+              "label": "Choose a time to talk",
+              "href": "https://calendly.com/ngoumnaisteve/30",
+              "scenario": "none",
+              "language": "en"
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 571,
+            "outputTokens": 467,
+            "cacheReadTokens": 9180,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "Actually don't contact me. Just give me the rules to copy.",
+          "status": 200,
+          "latencyMs": 9830,
+          "reply": "Understood. Nothing was saved or sent, and nobody will contact you.\n\nHere's a starter set of rules you can copy into your workspace and edit. I don't know your trade, hours or service area yet, so anything in [brackets] is a blank for you to fill in. This is a draft only. It isn't saved or active anywhere.\n\n**Shop basics**\n- Business name: [name]\n- Services we offer: [list]\n- Services we don't offer: [list]\n- Service area: [cities or ZIP codes]\n- Hours: [days and times]\n\n**Booking rules**\n- Only offer times that are open on the Availability page.\n- Save each visit or callback as a request. Tell the customer the shop will review it and confirm.\n- Don't promise an exact arrival time or a callback deadline.\n- Collect the customer's name, a callback number, the service address and a short description of the problem.\n\n**Pricing**\n- Quote only these published prices: [e.g., service call fee $__, or \"no prices quoted\"].\n- For anything else, say: \"The owner will confirm pricing after reviewing your request.\"\n\n**Handoff to the owner**\n- Pass these to the owner as callback requests: [e.g., commercial jobs, warranty claims, complaints, jobs over $__].\n- If you're unsure, take a callback request rather than guessing.\n\n**Safety (edit for your trade)**\n- If the customer mentions [gas smell, sparking, flooding near electrical, smoke], tell them to leave the area and call 911 or their utility from a safe place. Don't troubleshoot or book a routine visit.\n\n**Language**\n- Reply in the language the customer uses. Spanish replies use these same rules.\n\nBefore turning on website chat, review these rules and run the private AI test in your workspace. Phone answering and texting aren't included with this signup, so these rules apply to website chat only for now.\n\nIf you tell me your trade, I can fill in the safety and handoff sections for you.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 332,
+            "outputTokens": 790,
+            "cacheReadTokens": 4590,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "completedAt": "2026-10-22T05:30:48.511Z",
+  "logicalTurns": 17,
+  "actualHTTPAttempts": 25,
+  "realModelRequests": 25,
+  "aggregate": {
+    "logicalTurns": 18,
+    "actualHTTPAttempts": 26,
+    "logicalLimit": 18,
+    "httpLimit": 30,
+    "deadline": "2026-10-22T05:43:59.682Z"
+  }
+}

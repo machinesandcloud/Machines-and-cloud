@@ -1,0 +1,218 @@
+{
+  "at": "2026-10-22T00:34:21.301822-05:00",
+  "scope": "Independent final actual-model evidence and accounting review plus offline replay; semantic scores belong exclusively to PO.",
+  "source": {
+    "agent-widget.js": "d7e9971aaeac5d31674acf637217309b77ed9be1c45c99ad9fbd260e0f50792d",
+    "stories.js": "355b2472adeceb47bee5d3d4fe0daded5341da689c3e4d61dec5578b96ee801c",
+    "styles.css": "a031732b6748ee7fec0c0077c53e205d7a891db5edd88563abc219b0198bbd5c",
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/sales-desk.mjs": "b55b2dc6d3177366cf8c1bf81420ca0a7d547c57ab8cb425568c9191366663f3",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "package-lock.json": "076a7a22a5d1d859cf5befff88d5e265a52886e6257d4a68af640e4d6dfdb4f5",
+    "scripts/sales-desk-eval.mjs": "66fce1d9b13ca0aa4ade0402ca931e7c54fbec4b8ff988efe241d0987eb41115",
+    "scripts/lib/sales-eval-transport.mjs": "9be3d83d7e4bc4d2671ef566689d76ff6557d78c1e0c4539919a1c04a0ba59aa",
+    "scripts/sales-desk-eval-continuation.mjs": "a5bafcce0c691759acbb41954b90ba280ead8e3c0dffe90be98fa36fb84e5eb7"
+  },
+  "artifactHashes": {
+    "plan": {
+      "path": "scratchpad/sales-desk-model-phase1-continuation-1-plan.json",
+      "sha256": "2cc5674fa3b51f008388408a92be4413f8f0165bcd835492d8460ace6b24bbfe"
+    },
+    "ledger": {
+      "path": "scratchpad/sales-desk-model-phase1-continuation-1-ledger.json",
+      "sha256": "d29cc26b4c69ce6ad3cc3867b30e31cfaeb085da63f6b43d040bcc6267759126"
+    },
+    "result": {
+      "path": "scratchpad/sales-desk-model-phase1-continuation-1.json",
+      "sha256": "076afc6bb26c8ddebe0163f773205f3aa08ad9b28978360091f28764aa713a84"
+    },
+    "parentLedger": {
+      "path": "scratchpad/sales-desk-model-phase1-ledger.json",
+      "sha256": "bd1f146ecd2a135f2523f822f64e223cd6e01b90d56b89e97ad8fae8159ddb07"
+    },
+    "parentResult": {
+      "path": "scratchpad/sales-desk-model-phase1.json",
+      "sha256": "6ee9f85dffe63fb0447040976ccaf133e34349a319f794d895d62b701be93841"
+    },
+    "uiReplay": {
+      "path": "scratchpad/sales-desk-model-phase1-ui-qa.json",
+      "sha256": "2bb72db5dc7f7066584fbbd2df1250bd657998f04125c66787d0d80c5a9681d3"
+    },
+    "preflight": {
+      "path": "scratchpad/sales-desk-model-phase1-continuation-1-plan-qa.json",
+      "sha256": "379767ca95cf226fa9b7ac87b8efded6039707ffe5821c1ee3848f6fc353986f"
+    }
+  },
+  "checks": [
+    {
+      "name": "All 12 continuation sources match the reviewed frozen plan",
+      "pass": true
+    },
+    {
+      "name": "Result and ledger use the frozen source snapshot",
+      "pass": true
+    },
+    {
+      "name": "Original parent ledger retains its exact immutable bytes",
+      "pass": true
+    },
+    {
+      "name": "Original parent result retains its exact immutable bytes",
+      "pass": true
+    },
+    {
+      "name": "Original 400 remains closed and incomplete, charged one logical turn and one HTTP attempt",
+      "pass": true
+    },
+    {
+      "name": "Actual continuation is closed and complete with 17 reply turns",
+      "pass": true
+    },
+    {
+      "name": "Actual HTTP count is 25 child and 26 aggregate, within the cap of 30",
+      "pass": true
+    },
+    {
+      "name": "Aggregate 18 logical turns include the initial failure and exhaust the approval",
+      "pass": true
+    },
+    {
+      "name": "Actual HTTP sequence has no gaps or resets",
+      "pass": true
+    },
+    {
+      "name": "Every actual child attempt uses the intended model and 3072-token limit and returned 200",
+      "pass": true
+    },
+    {
+      "name": "Every completed reply is nonempty with usage counters",
+      "pass": true
+    },
+    {
+      "name": "Actual frozen sales configuration disables automatic SDK retries",
+      "pass": true
+    },
+    {
+      "name": "Returned usage request counts account for all 25 child model responses",
+      "pass": true
+    },
+    {
+      "name": "Token counters are nonnegative integers and output stays within request caps",
+      "pass": true
+    },
+    {
+      "name": "No forbidden application-fetch attempt is recorded",
+      "pass": true
+    },
+    {
+      "name": "Every request start and closure precedes the original absolute deadline",
+      "pass": true
+    },
+    {
+      "name": "All 17 planned inputs remain ordered, including explicitly shortened S8",
+      "pass": true
+    },
+    {
+      "name": "Returned actions contain only pure sales event types",
+      "pass": true
+    },
+    {
+      "name": "S3 structured correction retains 1188 total, 297 routed and unknown missed minutes",
+      "pass": true
+    }
+  ],
+  "summary": {
+    "evidenceChecks": 19,
+    "evidencePassed": 19,
+    "evidenceFailed": 0,
+    "aggregateLogicalTurns": 18,
+    "completedActualReplies": 17,
+    "initialFailedLogicalTurns": 1,
+    "aggregateActualHTTPAttempts": 26,
+    "initial400HTTPAttempts": 1,
+    "continuation200HTTPAttempts": 25,
+    "httpCap": 30,
+    "maxTokensPerRequest": 3072,
+    "logicalApprovalSpent": true,
+    "remainingHTTPHeadroomIsNotMoreLogicalAuthorization": 4,
+    "qaActualHTTPModelProviderCalls": 0
+  },
+  "successfulRepliesUsage": {
+    "requests": 25,
+    "inputTokens": 12800,
+    "outputTokens": 11588,
+    "cacheReadTokens": 110160,
+    "cacheWriteTokens": 4590
+  },
+  "usageLimit": "Usage totals cover 25 successful model responses. The initial 400 has no usage receipt, so total paid usage and cost remain unknown. Cache writes and reads remain separate; no provider cost estimate is invented.",
+  "latency": {
+    "basis": "Actual complete-handler latency per successful logical turn, not browser or per-HTTP latency.",
+    "successfulTurns": 17,
+    "minMs": 2806,
+    "medianMs": 9411,
+    "meanMs": 9133.18,
+    "p95NearestRankMs": 14770,
+    "maxMs": 14770,
+    "initialFailureMs": 619,
+    "continuationElapsedMs": 155363
+  },
+  "coverage": {
+    "caseTurnCounts": {
+      "S1": 2,
+      "S2": 2,
+      "S3": 2,
+      "S4": 2,
+      "S5": 2,
+      "S6": 2,
+      "S7": 2,
+      "S8-compact": 1,
+      "S9": 2
+    },
+    "variant": "S8-compact combines three questions in one reply. Original S8 two-turn continuity remains unproved; do not claim 18 successful semantic turns.",
+    "streaming": "The actual run used stream:false. Selected saved replies and events were replayed offline through locally fulfilled NDJSON. This does not prove actual streaming, timing or hosted behavior."
+  },
+  "uiReplay": {
+    "path": "scratchpad/sales-desk-model-phase1-ui-qa.json",
+    "passed": 17,
+    "checks": 18,
+    "actualExternalCalls": 0,
+    "locallyFulfilledPOSTs": 6
+  },
+  "returnedFindings": [
+    {
+      "id": "AI-01",
+      "scope": "S3 turn 2 narrative arithmetic",
+      "status": "returned",
+      "actualClaim": "Starter cheapest up to about600AIminutes where its cost reachesGrowth249",
+      "oracle": "Call-only equality 578.5714; at 600 minutes Starter costs $256.50 versus Growth $249. Structured297/$150.45 receipt itself is correct.",
+      "semanticScoringOwner": "PO"
+    },
+    {
+      "id": "AI-02",
+      "scope": "S9 blanket privacy assurance",
+      "status": "returned",
+      "actualClaim": "Email has not been saved/shared; Nothing was saved or sent",
+      "oracle": "Exact email/question was transmitted to AI provider; browser persists actual conversation in sessionStorage. No lead/contact tool execution is a narrower true statement.",
+      "semanticScoringOwner": "PO"
+    },
+    {
+      "id": "UI-01",
+      "scope": "Actual S3 Markdown comparison table",
+      "status": "returned",
+      "oracle": "Offline exactreply replay renders raw pipe prose with0 HTML tables; screenshot and 17/18 UI receipt preserved.",
+      "evidence": "scratchpad/sales-desk-model-phase1-ui-qa.json"
+    }
+  ],
+  "initialQAStage": {
+    "path": "scratchpad/sales-desk-model-phase1-qa-first.json",
+    "checks": 17,
+    "passed": 16,
+    "returnedSourceCheck": "A current-source equality check returned after the announced post-close schema repair. The first QA probe matched all 11 original hashes at f8c23e8. Parent results remain bound to the committed original snapshot; this retained change does not establish mutation during the request.",
+    "schemaRepair": "Continuation source explicitly records repaired sales wire hash b55b2dc6...; executor boundaries are unchanged, and QA reran the existing 36 offline checks."
+  },
+  "freshnessBoundary": "QA did not personally witness initial parent-file absence; exclusive creation and refusal guards were reviewed. QA independently observed actual child-file absence in the 11-check preflight.",
+  "guardBoundary": "The application fetch/SDK path allows only model requests and rejects redirects; no forbidden fetch was recorded. This is not universal OS/socket network isolation.",
+  "disposition": "Budget, source and accounting accepted. Customer experience returned for factual arithmetic/privacy and table presentation issues; no semantic score assigned by QA. Both ledgers are closed. No new model phase, extra logical turn or publication is authorized."
+}

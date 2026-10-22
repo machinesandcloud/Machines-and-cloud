@@ -73,7 +73,8 @@
     parts.forEach(function (part) {
       if (!part) return;
       if (/^\*\*[^*]+\*\*$/.test(part)) { target.appendChild(el('strong', '', part.slice(2, -2))); return; }
-      var md = part.match(/^\[([^\]\n]+)\]\(([^\s)]+)\)$/), href = md ? md[2] : part;
+      var md = part.match(/^\[([^\]\n]+)\]\(([^\s)]+)\)$/), trailing = md ? '' : (part.match(/[.,;!?)\]]+$/) || [''])[0];
+      var href = md ? md[2] : trailing ? part.slice(0, -trailing.length) : part;
       if (md || /^https?:\/\//.test(part)) {
         try {
           var url = new URL(href, window.location.origin);
@@ -81,9 +82,12 @@
           var safePath = /^\/(?:index\.html|onboard(?:\.html)?|desk(?:\.html)?|privacy(?:\.html)?|terms(?:\.html)?|about(?:\.html)?|text-messaging-terms(?:\.html)?)?$/.test(url.pathname);
           var safeQuery = !url.search || (url.pathname === '/' || url.pathname === '/index.html') && /^\?example=(sms|call|spanish)$/.test(url.search);
           var safeHash = !url.hash || /^#(week|demo-wrap|plans|pilot|faq|top|rules)$/.test(url.hash);
-          // Only public product destinations are actionable; API paths and arbitrary parameters stay text.
-          if (own && safePath && safeQuery && safeHash && !url.username && !url.password && (url.protocol === 'http:' || url.protocol === 'https:')) {
-            var a = el('a', '', md ? md[1] : part); a.href = url.pathname + url.search + url.hash; target.appendChild(a); return;
+          var contact = url.href === ACTIONS.contact.href;
+          // Public product routes and our fixed scheduling page are the only actionable destinations.
+          if ((contact || own && safePath && safeQuery && safeHash) && !url.username && !url.password && (url.protocol === 'http:' || url.protocol === 'https:')) {
+            var a = el('a', '', md ? md[1] : href); a.href = contact ? ACTIONS.contact.href : url.pathname + url.search + url.hash;
+            if (contact) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+            target.appendChild(a); if (trailing) target.appendChild(document.createTextNode(trailing)); return;
           }
         } catch (_) {}
       }
@@ -92,20 +96,38 @@
   }
   function renderText(target, text) {
     target.replaceChildren();
-    var para = [], currentList = null;
+    var para = [], currentList = null, lines = String(text).replace(/\r/g, '').split('\n');
     function paragraph() { if (para.length) { var p = el('p'); inline(p, para.join(' ')); target.appendChild(p); para = []; } }
-    String(text).replace(/\r/g, '').split('\n').forEach(function (raw) {
-      var line = raw.trim(), m;
-      if (!line) { paragraph(); currentList = null; return; }
+    function cells(raw) {
+      var value = raw.trim().replace(/^\|/, '').replace(/\|$/, '');
+      if (value.indexOf('|') < 0) return null;
+      return value.split(/\|/).map(function (cell) { return cell.trim(); });
+    }
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim(), m, header = cells(line), separator = cells(lines[i + 1] || '');
+      if (header && separator && header.length === separator.length && separator.every(function (cell) { return /^:?-{3,}:?$/.test(cell); })) {
+        paragraph(); currentList = null;
+        var wrap = el('div', 'mc-agent-table-wrap'), table = el('table', 'mc-agent-table'), head = el('thead'), body = el('tbody'), tr = el('tr');
+        wrap.tabIndex = 0; wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-label', 'Comparison table');
+        header.forEach(function (cell) { var th = el('th'); th.scope = 'col'; inline(th, cell); tr.appendChild(th); });
+        head.appendChild(tr); table.appendChild(head); i++;
+        while (i + 1 < lines.length) {
+          var row = cells(lines[i + 1]);
+          if (!row || row.length !== header.length) break;
+          tr = el('tr'); row.forEach(function (cell) { var td = el('td'); inline(td, cell); tr.appendChild(td); }); body.appendChild(tr); i++;
+        }
+        table.appendChild(body); wrap.appendChild(table); target.appendChild(wrap); continue;
+      }
+      if (!line) { paragraph(); currentList = null; continue; }
       if ((m = line.match(/^([-*•]|\d+[.)])\s+(.*)$/))) {
         paragraph(); var type = /^\d/.test(m[1]) ? 'OL' : 'UL';
         if (!currentList || currentList.tagName !== type) { currentList = el(type.toLowerCase()); target.appendChild(currentList); }
-        var li = el('li'); inline(li, m[2]); currentList.appendChild(li); return;
+        var li = el('li'); inline(li, m[2]); currentList.appendChild(li); continue;
       }
       currentList = null;
-      if ((m = line.match(/^>\s?(.*)$/))) { paragraph(); var q = el('blockquote'); inline(q, m[1]); target.appendChild(q); return; }
+      if ((m = line.match(/^>\s?(.*)$/))) { paragraph(); var q = el('blockquote'); inline(q, m[1]); target.appendChild(q); continue; }
       para.push(line.replace(/^#{1,4}\s+/, ''));
-    });
+    }
     paragraph();
   }
   function scrollDown(force) { if (force || list.scrollHeight - list.scrollTop - list.clientHeight < 160) list.scrollTop = list.scrollHeight; }

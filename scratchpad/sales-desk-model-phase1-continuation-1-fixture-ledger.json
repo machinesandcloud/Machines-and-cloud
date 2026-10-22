@@ -1,0 +1,294 @@
+{
+  "phase": "sales-desk-phase1-2026-10-22",
+  "segment": "schema-repair-continuation-1",
+  "parent": {
+    "ledgerPath": "scratchpad/sales-desk-model-phase1-ledger.json",
+    "ledgerHash": "bd1f146ecd2a135f2523f822f64e223cd6e01b90d56b89e97ad8fae8159ddb07",
+    "resultPath": "scratchpad/sales-desk-model-phase1.json",
+    "resultHash": "6ee9f85dffe63fb0447040976ccaf133e34349a319f794d895d62b701be93841",
+    "logicalTurns": 1,
+    "actualHTTPAttempts": 1,
+    "startedAt": "2026-10-22T05:23:59.682Z"
+  },
+  "deadline": "2026-10-22T05:43:59.682Z",
+  "aggregateLogicalTurnLimit": 18,
+  "aggregateActualHTTPAttemptLimit": 30,
+  "logicalTurnLimit": 17,
+  "actualHTTPAttemptLimit": 29,
+  "maxTokensPerAttempt": 3072,
+  "maxModelIterationsPerTurn": 3,
+  "automaticSDKRetries": 0,
+  "timeLimitMinutes": 20,
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "freshLedgerRequired": true,
+  "target": "actual local sales handler with memory store; only Anthropic Messages HTTPS allowed",
+  "forbidden": [
+    "email",
+    "forms",
+    "voice",
+    "SMS",
+    "Calendar",
+    "customer writes",
+    "publication",
+    "purchases"
+  ],
+  "cases": [
+    {
+      "id": "S1",
+      "turns": [
+        "Two-truck HVAC shop in Katy. Our diagnostic is $89. I miss calls on installs. What would you actually do for us?",
+        "Write the first reply. Don't ask for my email."
+      ]
+    },
+    {
+      "id": "S2",
+      "turns": [
+        "We miss 30 calls a week.",
+        "Correction: three a month, not 30 a week. I don't want another subscription."
+      ]
+    },
+    {
+      "id": "S3",
+      "turns": [
+        "18 calls a day, three minutes each, 22 days a month. Which plan?",
+        "Only a quarter would go to AI."
+      ]
+    },
+    {
+      "id": "S4",
+      "turns": [
+        "We use Jobber. Can you sync its busy time and dispatch three crews?",
+        "That is a requirement, not optional."
+      ]
+    },
+    {
+      "id": "S5",
+      "turns": [
+        "Can you answer my phone tonight? What do I pay and when?",
+        "So am I billed on day eight?"
+      ]
+    },
+    {
+      "id": "S6",
+      "turns": [
+        "Soy Mario. Tengo una plomería en Katy. Solo quiero solicitudes de devolución de llamada, no visitas confirmadas. Escribe el saludo.",
+        "Me llamo María, no Mario. Ahora dame el resumen para mi socio en inglés."
+      ]
+    },
+    {
+      "id": "S7",
+      "turns": [
+        "AI makes my customers angry. I already have a receptionist.",
+        "Stop selling. Just give me a way to find the bottleneck."
+      ]
+    },
+    {
+      "id": "S8-compact",
+      "turns": [
+        "Can I hear it? Does Spanish work on the phone? Can you transfer me to someone now?"
+      ]
+    },
+    {
+      "id": "S9",
+      "turns": [
+        "Here is my email, demo@example.test. Send this to your team.",
+        "Actually don't contact me. Just give me the rules to copy."
+      ]
+    }
+  ],
+  "source": {
+    "agent-widget.js": "d7e9971aaeac5d31674acf637217309b77ed9be1c45c99ad9fbd260e0f50792d",
+    "stories.js": "355b2472adeceb47bee5d3d4fe0daded5341da689c3e4d61dec5578b96ee801c",
+    "styles.css": "a031732b6748ee7fec0c0077c53e205d7a891db5edd88563abc219b0198bbd5c",
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/sales-desk.mjs": "b55b2dc6d3177366cf8c1bf81420ca0a7d547c57ab8cb425568c9191366663f3",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "package-lock.json": "076a7a22a5d1d859cf5befff88d5e265a52886e6257d4a68af640e4d6dfdb4f5",
+    "scripts/sales-desk-eval.mjs": "66fce1d9b13ca0aa4ade0402ca931e7c54fbec4b8ff988efe241d0987eb41115",
+    "scripts/lib/sales-eval-transport.mjs": "9be3d83d7e4bc4d2671ef566689d76ff6557d78c1e0c4539919a1c04a0ba59aa",
+    "scripts/sales-desk-eval-continuation.mjs": "a5bafcce0c691759acbb41954b90ba280ead8e3c0dffe90be98fa36fb84e5eb7"
+  },
+  "assessment": "PO manually scores actual complete threads; fixtures and keyword checks cannot establish naturalness or semantic quality.",
+  "mode": "fixture",
+  "startedAt": "2026-10-22T05:27:01.592Z",
+  "status": "closed",
+  "logicalTurns": 17,
+  "attempts": [
+    {
+      "number": 1,
+      "aggregateNumber": 2,
+      "at": "2026-10-22T05:27:01.729Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S1",
+      "statusCode": 200
+    },
+    {
+      "number": 2,
+      "aggregateNumber": 3,
+      "at": "2026-10-22T05:27:01.735Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S1",
+      "statusCode": 200
+    },
+    {
+      "number": 3,
+      "aggregateNumber": 4,
+      "at": "2026-10-22T05:27:01.738Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S2",
+      "statusCode": 200
+    },
+    {
+      "number": 4,
+      "aggregateNumber": 5,
+      "at": "2026-10-22T05:27:01.740Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S2",
+      "statusCode": 200
+    },
+    {
+      "number": 5,
+      "aggregateNumber": 6,
+      "at": "2026-10-22T05:27:01.742Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S3",
+      "statusCode": 200
+    },
+    {
+      "number": 6,
+      "aggregateNumber": 7,
+      "at": "2026-10-22T05:27:01.743Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S3",
+      "statusCode": 200
+    },
+    {
+      "number": 7,
+      "aggregateNumber": 8,
+      "at": "2026-10-22T05:27:01.745Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S4",
+      "statusCode": 200
+    },
+    {
+      "number": 8,
+      "aggregateNumber": 9,
+      "at": "2026-10-22T05:27:01.747Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S4",
+      "statusCode": 200
+    },
+    {
+      "number": 9,
+      "aggregateNumber": 10,
+      "at": "2026-10-22T05:27:01.749Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S5",
+      "statusCode": 200
+    },
+    {
+      "number": 10,
+      "aggregateNumber": 11,
+      "at": "2026-10-22T05:27:01.751Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S5",
+      "statusCode": 200
+    },
+    {
+      "number": 11,
+      "aggregateNumber": 12,
+      "at": "2026-10-22T05:27:01.753Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S6",
+      "statusCode": 200
+    },
+    {
+      "number": 12,
+      "aggregateNumber": 13,
+      "at": "2026-10-22T05:27:01.755Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S6",
+      "statusCode": 200
+    },
+    {
+      "number": 13,
+      "aggregateNumber": 14,
+      "at": "2026-10-22T05:27:01.757Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S7",
+      "statusCode": 200
+    },
+    {
+      "number": 14,
+      "aggregateNumber": 15,
+      "at": "2026-10-22T05:27:01.759Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S7",
+      "statusCode": 200
+    },
+    {
+      "number": 15,
+      "aggregateNumber": 16,
+      "at": "2026-10-22T05:27:01.761Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S8-compact",
+      "statusCode": 200
+    },
+    {
+      "number": 16,
+      "aggregateNumber": 17,
+      "at": "2026-10-22T05:27:01.763Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S9",
+      "statusCode": 200
+    },
+    {
+      "number": 17,
+      "aggregateNumber": 18,
+      "at": "2026-10-22T05:27:01.765Z",
+      "status": "response-received",
+      "model": "claude-opus-5-5",
+      "maxTokens": 3072,
+      "case": "S9",
+      "statusCode": 200
+    }
+  ],
+  "blocked": [],
+  "closedAt": "2026-10-22T05:27:01.766Z",
+  "outcome": "complete"
+}

@@ -1,0 +1,128 @@
+{
+  "phase": "sales-desk-targeted-recheck-2026-10-22-r2",
+  "mode": "fixture",
+  "source": {
+    "agent-widget.js": "7c8c2cb1c55d708a07d4aed8ab35a35b6435ced089a7d03630e5bb122d28fa25",
+    "stories.js": "355b2472adeceb47bee5d3d4fe0daded5341da689c3e4d61dec5578b96ee801c",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/sales-desk.mjs": "907fee601dfc6e6b8deecaf07bbc86436ed2cae5c0f366c4a7bc297b014001f5",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "package-lock.json": "076a7a22a5d1d859cf5befff88d5e265a52886e6257d4a68af640e4d6dfdb4f5",
+    "scripts/sales-desk-eval-recheck.mjs": "4007928ddcfac68963d8b4ed9a33093025683216be310725823105033b61abb0",
+    "scripts/lib/sales-eval-transport.mjs": "9be3d83d7e4bc4d2671ef566689d76ff6557d78c1e0c4539919a1c04a0ba59aa",
+    "scratchpad/sales-desk-model-phase1-continuation-1.json": "076afc6bb26c8ddebe0163f773205f3aa08ad9b28978360091f28764aa713a84"
+  },
+  "threads": [
+    {
+      "id": "S1-opening",
+      "seed": [],
+      "turns": [
+        {
+          "user": "Two-truck HVAC shop in Katy. Our diagnostic is $89. I miss calls on installs. What would you actually do for us?",
+          "status": 200,
+          "latencyMs": 34,
+          "reply": "OFFLINE HARNESS FIXTURE: not an actual model answer.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 10,
+            "outputTokens": 10,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S3-corrected-replay",
+      "seed": [
+        {
+          "role": "user",
+          "content": "18 calls a day, three minutes each, 22 days a month. Which plan?"
+        },
+        {
+          "role": "assistant",
+          "content": "**If the AI answered all of those calls, Pro would cost the least, at about $449 a month.** All three plans come out close, though:\n\n18 calls × 3 minutes × 22 days = **396 calls, or 1,188 minutes a month**\n\n| Plan | Base | Included minutes | Extra minutes at $0.35 | Estimated call cost |\n|---|---|---|---|---|\n| Starter | $99 | 150 | 1,038 | $462.30 |\n| Growth | $249 | 600 | 588 | $454.80 |\n| **Pro** | $449 | 1,500 | 0 | **$449.00** |\n\n**Some things to know:**\n- **This assumes the AI answers every call.** If it only picked up missed calls or a portion of your calls, you'd use fewer minutes and a cheaper plan might work better.\n- **Text messages, taxes and other costs aren't included.**\n- **This is only for planning.** AI phone answering isn't switched on when you sign up. It needs a separate connection and checks, and there's no set date for that yet. Setting up the workspace is free, needs no card and doesn't start a subscription or trial. Choosing a plan is just a preference and doesn't start any charges.\n\nDo you want the AI to answer all your calls, or only the ones you miss? If it's only missed calls, tell me roughly what share of calls you miss and I'll recalculate."
+        }
+      ],
+      "turns": [
+        {
+          "user": "Only a quarter would go to AI.",
+          "status": 200,
+          "latencyMs": 4,
+          "reply": "OFFLINE HARNESS FIXTURE: not an actual model answer.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 10,
+            "outputTokens": 10,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S4-opening",
+      "seed": [],
+      "turns": [
+        {
+          "user": "We use Jobber. Can you sync its busy time and dispatch three crews?",
+          "status": 200,
+          "latencyMs": 3,
+          "reply": "OFFLINE HARNESS FIXTURE: not an actual model answer.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 10,
+            "outputTokens": 10,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "S9-send-withdrawal",
+      "seed": [],
+      "turns": [
+        {
+          "user": "Here is my email, demo@example.test. Send this to your team.",
+          "status": 200,
+          "latencyMs": 3,
+          "reply": "OFFLINE HARNESS FIXTURE: not an actual model answer.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 10,
+            "outputTokens": 10,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        },
+        {
+          "user": "Actually don't contact me. Just give me the rules to copy.",
+          "status": 200,
+          "latencyMs": 4,
+          "reply": "OFFLINE HARNESS FIXTURE: not an actual model answer.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 10,
+            "outputTokens": 10,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "completedAt": "2026-10-22T05:43:36.969Z",
+  "logicalTurns": 5,
+  "actualHTTPAttempts": 5,
+  "realModelRequests": 0
+}
