@@ -35,7 +35,8 @@ async function spendRate(key, limit, duration) {
   if (!allowed) throw new AccessError("rate_limited", "Please wait before requesting another sign-in email.", 429);
 }
 
-export async function requestAccessLink(emailValue, ip, planValue, intakeToken) {
+export async function requestAccessLink(emailValue, ip, planValue, intakeToken, purpose = "onboarding") {
+  if (!["onboarding", "operator"].includes(purpose)) throw new AccessError("invalid_request", "Invalid sign-in destination.");
   const email = normalizeAccountEmail(emailValue);
   if (!email) throw new AccessError("invalid_email", "Enter a valid email address.");
   const testInbox = process.env.MC_MEMORY_STORE === "1" && process.env.MC_FAKE_MODEL === "1" && !!localOrigin();
@@ -48,11 +49,11 @@ export async function requestAccessLink(emailValue, ip, planValue, intakeToken) 
   const intakeHash = await intakeBindingForEmail(intakeToken, email);
   await atomicUpdate("access_tokens", key, current => {
     if (current) throw new Error("Access token collision");
-    return { value: { email, status: "pending", createdAt, expiresAt, ...(intakeHash ? { intakeHash } : {}) } };
+    return { value: { email, status: "pending", createdAt, expiresAt, ...(purpose === "operator" ? { purpose } : {}), ...(intakeHash ? { intakeHash } : {}) } };
   });
   // A plan hint is a fixed enum, never a caller-supplied destination or authority.
   const plan = ["starter", "growth", "pro"].includes(planValue) ? planValue : "";
-  const link = `${accessSite()}/onboard.html${plan ? `?plan=${plan}` : ""}#verify=${token}`;
+  const link = purpose === "operator" ? `${accessSite()}/admin.html#verify=${token}` : `${accessSite()}/onboard.html${plan ? `?plan=${plan}` : ""}#verify=${token}`;
   let delivered = false;
   try {
     if (testInbox) {
@@ -71,28 +72,29 @@ export async function requestAccessLink(emailValue, ip, planValue, intakeToken) 
   return { ok: true, delivery: testInbox ? "test_outbox" : "email", message: testInbox ? "A link was saved in the local test inbox. No email was sent." : "Check your inbox for a link to continue. It expires in 20 minutes." };
 }
 
-export async function exchangeAccessToken(token, ip) {
+export async function exchangeAccessToken(token, ip, purpose = "onboarding") {
+  if (!["onboarding", "operator"].includes(purpose)) throw new AccessError("invalid_request", "Invalid sign-in destination.");
   await spendRate("exchange:" + accessHash(String(ip || "unknown")), 15, 600000);
   if (!hex(token)) throw new AccessError("invalid_link", "This sign-in link is invalid. Request a new one.", 410);
   const session = randomBytes(32).toString("hex"), sessionHash = accessHash(session);
   const claim = await atomicUpdate("access_tokens", accessHash(token), row => {
-    if (!row || row.status !== "pending" || !Number.isFinite(Date.parse(row.expiresAt)) || Date.parse(row.expiresAt) <= Date.now()) return { result: null };
+    if (!row || (row.purpose || "onboarding") !== purpose || row.status !== "pending" || !Number.isFinite(Date.parse(row.expiresAt)) || Date.parse(row.expiresAt) <= Date.now()) return { result: null };
     return { value: { ...row, status: "consumed", consumedAt: stamp(), sessionHash }, result: { email: row.email, intakeHash: row.intakeHash } };
   });
   if (!claim) throw new AccessError("invalid_link", "This sign-in link expired or was already used. Request a new one.", 410);
-  const expiresAt = new Date(Date.now() + 24 * 3600000).toISOString();
+  const expiresAt = new Date(Date.now() + (purpose === "operator" ? 8 : 24) * 3600000).toISOString();
   await atomicUpdate("access_sessions", sessionHash, row => {
     if (row) throw new Error("Access session collision");
-    return { value: { email: claim.email, scope: "onboarding", status: "active", createdAt: stamp(), expiresAt, ...(claim.intakeHash ? { intakeHash: claim.intakeHash } : {}) } };
+    return { value: { email: claim.email, scope: purpose, status: "active", createdAt: stamp(), expiresAt, ...(claim.intakeHash ? { intakeHash: claim.intakeHash } : {}) } };
   });
   return { ok: true, session, email: claim.email, expiresAt };
 }
 
-export async function getAccessSession(req) {
+export async function getAccessSession(req, scope = "onboarding") {
   const match = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.get("authorization") || "");
   if (!match) return null;
   const row = await strictRead("access_sessions", accessHash(match[1]));
-  return row?.scope === "onboarding" && row.status === "active" && Date.parse(row.expiresAt) > Date.now() ? { ...row, sessionHash: accessHash(match[1]) } : null;
+  return row?.scope === scope && row.status === "active" && Date.parse(row.expiresAt) > Date.now() ? { ...row, sessionHash: accessHash(match[1]) } : null;
 }
 
 export async function getAccessState(session) {
@@ -101,7 +103,7 @@ export async function getAccessState(session) {
   // can be retried with the same session; it never strands a consumed mail link.
   if (session.intakeHash) await adoptIntake(session, session.intakeHash);
   const [draft, client] = await Promise.all([strictRead("onboarding_drafts", accessHash(session.email)), findVerifiedAccount(session.email)]);
-  return { ok: true, email: session.email, expiresAt: session.expiresAt, draft: draft || { fields: {}, step: 0, revision: 0 }, marketing: await marketingState(session.email), ...(client ? { existing: { slug: client.slug, portal: `${accessSite()}/desk.html?c=${encodeURIComponent(client.slug)}${client.onboarding?.version === 1 ? "" : `&k=${encodeURIComponent(client.ownerKey)}`}` } } : {}) };
+  return { ok: true, email: session.email, expiresAt: session.expiresAt, draft: draft || { fields: {}, step: 0, revision: 0 }, marketing: await marketingState(session.email), ...(client ? { existing: { slug: client.slug, portal: `${accessSite()}/desk.html?c=${encodeURIComponent(client.slug)}${Object.hasOwn(client, "onboarding") ? "" : `&k=${encodeURIComponent(client.ownerKey)}`}` } } : {}) };
 }
 
 export const DRAFT_FIELDS = new Set(["name", "phone", "website", "plan", "business", "trade", "city", "services", "hours", "hoursTable", "afterHours", "serviceArea", "notServed", "spanish", "licenses", "fees", "windows", "faq", "handoff", "never", "tier0", "tier1", "emergencies", "notes", "greeting", "businessNumber", "forwarding", "carrier", "backupPhone", "transferTo", "legalName", "ein", "businessType", "street", "legalCity", "state", "zip", "leadSources", "software", "reviewLink", "payLink", "providerAuthorization", "primaryGoal", "desiredChannels"]);

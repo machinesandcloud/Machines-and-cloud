@@ -10,6 +10,8 @@ import { PLANS, ACTIVE } from "./lib/config.mjs";
 import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { releaseVoice } from "./lib/vapi.mjs";
 import { isSelfServiceClient } from "./lib/setup.mjs";
+import { phoneRecoveryHealth } from "./lib/phone-activation.mjs";
+import { recoverWorkspaceOperations } from "./lib/platform-operations.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -185,6 +187,12 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     }
     return { polled };
   });
+  // Due tasks retain priority. Safe local recovery still runs every invocation,
+  // independently of the usage brake or an initial browser dispatch.
+  await block(record, "setupRecovery", async () => recoverWorkspaceOperations());
+  // Provider work has its own scheduled function and 15-second aggregate budget.
+  // The main scheduler only reads its durable receipt and pending-work counters.
+  await block(record, "phoneSetupRecovery", async () => phoneRecoveryHealth());
   let alerts = 0, lifecycles = 0;
   await block(record, "healthLifecycle", async () => {
     if (!halfHour) return { skipped: "runs at :00 and :30" };

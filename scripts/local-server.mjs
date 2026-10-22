@@ -17,6 +17,8 @@ if (existsSync(join(root, ".env"))) for (const line of readFileSync(join(root, "
 process.env.MC_MEMORY_STORE = "1";
 // Always the local key, never the production one that .env may hold.
 process.env.ADMIN_KEY = process.env.LOCAL_ADMIN_KEY || "local-admin";
+process.env.ADMIN_EMAILS = process.env.LOCAL_ADMIN_EMAILS || "operator@example.test";
+delete process.env.WORKSPACE_WORKER_KEY;
 // No Anthropic key: the deterministic fake model stands in so every flow still runs (MC_FAKE_MODEL=0 to refuse instead).
 if (!process.env.ANTHROPIC_API_KEY && process.env.MC_FAKE_MODEL !== "0") process.env.MC_FAKE_MODEL = "1";
 const PORT = Number(process.env.PORT) || 8888;

@@ -12,6 +12,7 @@ import { getUsage, usageView } from "./lib/usage.mjs";
 import { run as runScheduler } from "./scheduler.mjs";
 import { releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { auditNeedsAttention } from "./lib/audit-policy.mjs";
+import { isSelfServiceClient } from "./lib/setup.mjs";
 
 export const config = { path: "/api/admin" };
 
@@ -26,7 +27,7 @@ export default async (req) => {
     const out = []; const stream = [];
     for (const sl of slugs) {
       const c = await getClient(sl); if (!c) continue;
-      const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, selfService: c.onboarding?.version === 1, owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${c.slug}&k=${c.ownerKey}`, policy: `${process.env.URL}/policy?c=${c.slug}` };
+      const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, selfService: isSelfServiceClient(c), owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${encodeURIComponent(c.slug)}`, policy: `${process.env.URL}/policy?c=${encodeURIComponent(c.slug)}` };
       if (full) {
         const [events, alerts, leads, convs, usage] = await Promise.all([listJSON("events", c.slug + "/", 400), listJSON("alerts", c.slug + "/", 100), listJSON("leads", c.slug + "/", 200), listJSON("conversations", c.slug + "/", 100), getUsage(c.slug)]);
         const h = lineHealth(c, events);
@@ -36,7 +37,7 @@ export default async (req) => {
         row.pendingCallbacks = leads.filter((l) => l.status === "open" && l.callbackDueAt && !l.calledAt).length;
         row.overdueCallbacks = leads.filter((l) => l.status === "open" && l.overdueAt && !l.calledAt).length;
         row.lastInbound = [h.lastInboundCall, h.lastInboundText].filter(Boolean).sort().pop() || null;
-        row.leads = { angiKey: c.leads?.angiKey || "", thumbtackSecret: c.leads?.thumbtackSecret || "" };
+        row.leads = { angiConfigured: !!c.leads?.angiKey, thumbtackConfigured: !!c.leads?.thumbtackSecret };
         const dayMs = 86400000;
         row.autoFlags7d = events.filter((e) => e.type === "auto_flag" && auditNeedsAttention(e.data) && Date.now() - new Date(e.at).getTime() < 7 * dayMs).length;
         row.healthAlerts7d = events.filter((e) => e.type === "health_alert" && Date.now() - new Date(e.at).getTime() < 7 * dayMs).map((e) => e.data?.reason);
@@ -48,7 +49,7 @@ export default async (req) => {
         row.liveDays = c.liveAt ? Math.floor((Date.now() - new Date(c.liveAt).getTime()) / dayMs) : null;
         row.newShopDays = Math.floor((Date.now() - new Date(c.createdAt).getTime()) / dayMs);
         let pushed = 0;
-        for (const e of [...events].reverse()) { if (pushed >= 50) break; if (Date.now() - new Date(e.at).getTime() < 86400000) { stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type, data: e.data }); pushed++; } }
+        for (const e of [...events].reverse()) { if (pushed >= 50) break; if (Date.now() - new Date(e.at).getTime() < 86400000) { stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type }); pushed++; } }
       }
       out.push(row);
     }
@@ -65,6 +66,9 @@ export default async (req) => {
   if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", ip + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }
   const c = await getClient(b.slug || "");
   if (!c) return json({ error: "not_found" }, 404);
+  // New customer support uses scoped, revisioned, audited managed actions.
+  // The legacy console must not bypass readiness, identity or lifecycle gates.
+  if (isSelfServiceClient(c) && !["prompt", "tasks", "records"].includes(b.action)) return json({ error: "managed_action_required", message: "Use the operator portal for this customer." }, 409);
 
   if (b.action === "prompt") {
     const channel = ["web", "sms", "voice", "test"].includes(b.channel) ? b.channel : "web";

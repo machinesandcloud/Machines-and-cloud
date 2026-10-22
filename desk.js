@@ -10,6 +10,7 @@
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function recover(message) {
+    if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; $('phoneAuthority').checked = false; $('phoneCosts').checked = false;
     $('portalContent').hidden = true; $('portalRecovery').hidden = false;
     $('title').textContent = 'Your workspace'; $('status').textContent = 'Unable to open workspace';
     $('recoveryMessage').textContent = message; $('liveBtns').innerHTML = '';
@@ -61,7 +62,97 @@
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
     pane.classList.add('guide-target'); pane.tabIndex = -1; pane.scrollIntoView({ behavior: 'instant', block: 'start' }); pane.focus({ preventScroll: true });
   }
+  var phoneBusy = false, phoneRequestIdentity = null, phoneCancelSnapshot = null, phoneCancelReturnFocus = null;
+  function validPhoneOffer(offer) {
+    return offer && offer.scope === 'number_acquisition_only' && offer.country === 'US' && offer.currency === 'USD' && /^[2-9]\d{2}$/.test(offer.areaCode || '') && /^[a-z0-9_-]{1,80}$/.test(offer.version || '') && /^[a-f0-9]{64}$/.test(offer.digest || '') && [offer.oneTimeCents, offer.monthlyCents, offer.maxAcquisitionCents].every(function (value) { return Number.isSafeInteger(value) && value >= 0 && value <= 100000; }) && Date.parse(offer.expiresAt) > Date.now() && typeof offer.authorityText === 'string' && offer.authorityText.length >= 20;
+  }
+  function renderPhoneActivation(d) {
+    var phone = d.phoneActivation, selfService = d.client.onboarding && d.client.onboarding.version === 1;
+    var operation = phone && phone.operation, offer = phone && phone.offer, canRequest = phone && phone.available === true && validPhoneOffer(offer) && !operation && ['testing', 'live'].indexOf(d.client.status) >= 0;
+    $('phoneSetupCard').hidden = !selfService || !phone || !operation && !canRequest;
+    if ($('phoneSetupCard').hidden) { $('phoneSetupForm').hidden = true; $('phoneSetupProgress').replaceChildren(); return; }
+    var states = { queued: 'Request saved', waiting_platform: 'Waiting for platform', running: 'Reserving number', uncertain: 'Checking request', number_acquired: 'Number reserved', cleanup_pending: 'Release pending', releasing: 'Releasing number', cleanup_uncertain: 'Checking release', cancelled: 'Request cancelled', superseded: 'Setup changed', needs_review: 'Needs attention' };
+    var when = function (value) { return value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value)) + ' CT' : 'Not recorded'; };
+    $('phoneSetupDetail').textContent = canRequest ? 'Review this number-only offer. Nothing is requested until you accept it and submit.' : phone.detail || 'Phone answering is not active.';
+    $('phoneSetupProgress').innerHTML = operation ? '<div class="setup-step"><div><strong>' + esc(states[operation.state] || 'Status unavailable') + '</strong><p>' + esc(operation.detail) + '</p>' + (operation.number ? '<p><b>' + (operation.releaseConfirmed ? 'Recorded number: ' : 'Number: ') + '</b>' + esc(operation.number) + '</p>' : '') + '<p>' + (operation.releaseConfirmed ? 'Release confirmed. The resource receipt has been retained.' : operation.resourceRecorded ? 'The number receipt is saved. Release has not been confirmed.' : 'No number resource receipt has been recorded.') + '</p><p>Updated ' + esc(when(operation.updatedAt)) + (operation.nextCheckAt ? ' · Next check ' + esc(when(operation.nextCheckAt)) : '') + '</p><p>Reference: <code style="overflow-wrap:anywhere;white-space:normal">' + esc(operation.id) + '</code></p></div></div>' : '';
+    $('phoneSetupForm').hidden = !canRequest; $('phoneAuthority').checked = false; $('phoneCosts').checked = false;
+    $('requestPhoneSetup').disabled = phoneBusy; $('phoneAuthority').disabled = phoneBusy; $('phoneCosts').disabled = phoneBusy;
+    if (canRequest) {
+      var money = function (cents) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: offer.currency }).format(cents / 100); };
+      $('phoneSetupOffer').innerHTML = '<p><b>US local number · Area code ' + esc(offer.areaCode) + '</b><br>One-time number cost: ' + esc(money(offer.oneTimeCents)) + '<br>Monthly number cost: ' + esc(money(offer.monthlyCents)) + '<br>Authorized number price cap: ' + esc(money(offer.maxAcquisitionCents)) + '<br>Offer expires ' + esc(when(offer.expiresAt)) + '</p>';
+      $('phoneAuthorityText').textContent = offer.authorityText;
+      $('phoneCostsText').textContent = 'I accept the disclosed one-time number cost and the monthly number charge until its release is confirmed. This does not activate phone answering or customer texts.';
+    } else $('phoneSetupOffer').replaceChildren();
+    $('cancelPhoneSetup').hidden = !operation || operation.state === 'cancelled' || operation.releaseConfirmed || operation.cancellationRequested;
+    $('cancelPhoneSetup').disabled = phoneBusy;
+  }
+  async function changePhoneActivation(actionName, extra) {
+    var generation = portalGeneration; if (phoneBusy || !data || leaving) return;
+    phoneBusy = true; $('phoneAuthority').disabled = true; $('phoneCosts').disabled = true; $('refreshPhoneSetup').disabled = true; $('requestPhoneSetup').disabled = true; $('cancelPhoneSetup').disabled = true; $('confirmPhoneCancel').disabled = true; $('keepPhoneSetup').disabled = true;
+    $('phoneSetupMessage').textContent = actionName === 'request_phone_activation' ? 'Saving your number request…' : 'Saving cancellation…';
+    try {
+      await action(actionName, extra); if (generation !== portalGeneration || leaving) return;
+      if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null;
+      await load(); if (generation !== portalGeneration || leaving) return;
+      $('phoneSetupMessage').textContent = actionName === 'request_phone_activation' ? 'Number request saved. Phone answering is not active. Refresh status to check progress.' : 'Cancellation saved. The status above shows whether release is confirmed; the request receipt is retained.';
+    } catch (error) {
+      if (generation === portalGeneration && !leaving) { $('phoneSetupMessage').textContent = error.message; if ($('phoneCancelDialog').open) $('phoneCancelMessage').textContent = error.message; }
+    } finally {
+      if (generation === portalGeneration && !leaving) { phoneBusy = false; $('refreshPhoneSetup').disabled = false; $('confirmPhoneCancel').disabled = false; $('keepPhoneSetup').disabled = false; if (data) renderPhoneActivation(data); }
+    }
+  }
+  $('phoneSetupForm').addEventListener('submit', function (event) {
+    event.preventDefault(); if (phoneBusy || !data || !data.phoneActivation || !$('phoneSetupForm').reportValidity() || !$('phoneAuthority').checked || !$('phoneCosts').checked) return;
+    var offer = data.phoneActivation.offer; if (!data.phoneActivation.available || !validPhoneOffer(offer) || ['testing', 'live'].indexOf(data.client.status) < 0) { $('phoneSetupMessage').textContent = 'Refresh status to review a current number offer.'; return; }
+    var identity = data.configurationRevision + ':' + offer.digest;
+    if (!phoneRequestIdentity || phoneRequestIdentity.identity !== identity) {
+      var bytes = new Uint8Array(32); try { crypto.getRandomValues(bytes); } catch (error) { $('phoneSetupMessage').textContent = 'This browser could not prepare a secure request. Try another browser.'; return; }
+      phoneRequestIdentity = { identity: identity, id: Array.from(bytes).map(function (value) { return value.toString(16).padStart(2, '0'); }).join('') };
+    }
+    changePhoneActivation('request_phone_activation', { expectedRevision: data.configurationRevision, submissionId: phoneRequestIdentity.id, offerVersion: offer.version, offerDigest: offer.digest, acceptedCosts: true, authority: true });
+  });
+  $('cancelPhoneSetup').addEventListener('click', function () {
+    if (phoneBusy || !data || !data.phoneActivation || !data.phoneActivation.operation) return;
+    phoneCancelSnapshot = { expectedRevision: data.configurationRevision, operationId: data.phoneActivation.operation.id }; phoneCancelReturnFocus = document.activeElement; $('phoneCancelMessage').textContent = ''; $('phoneCancelDialog').showModal(); $('keepPhoneSetup').focus();
+  });
+  function closePhoneCancellation() { if (phoneBusy) return; $('phoneCancelDialog').close(); phoneCancelSnapshot = null; if (phoneCancelReturnFocus && phoneCancelReturnFocus.isConnected) phoneCancelReturnFocus.focus(); }
+  $('keepPhoneSetup').addEventListener('click', closePhoneCancellation); $('phoneCancelDialog').addEventListener('cancel', function (event) { event.preventDefault(); closePhoneCancellation(); });
+  $('confirmPhoneCancel').addEventListener('click', function () { if (phoneCancelSnapshot && !phoneBusy) changePhoneActivation('cancel_phone_activation', phoneCancelSnapshot); });
+  $('refreshPhoneSetup').addEventListener('click', async function () { var generation = portalGeneration; $('refreshPhoneSetup').disabled = true; try { await load(); } finally { if (generation === portalGeneration && !leaving) $('refreshPhoneSetup').disabled = false; } });
+  var operationBusy = false;
+  function renderWorkspaceOperations(d) {
+    var selfService = d.client.onboarding && d.client.onboarding.version === 1;
+    $('backgroundWork').hidden = !selfService;
+    if (!selfService) return;
+    var states = { queued: 'Queued', running: 'Preparing your workspace', retry_due: 'Retry scheduled', succeeded: 'Refresh complete', failed: 'Needs attention', superseded: 'Newer answers saved', cancelled: 'Stopped' };
+    var rows = Array.isArray(d.operations) ? d.operations : [];
+    var when = function (value) { return value && Number.isFinite(Date.parse(value)) ? new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value)) + ' CT' : 'Not recorded'; };
+    $('workspaceOperations').innerHTML = rows.length ? rows.map(function (operation) { return '<div class="setup-step"><div><strong>' + esc(operation.label || 'Workspace refresh') + ' · ' + esc(states[operation.state] || 'Status unavailable') + '</strong><p>' + esc(operation.detail) + '</p><p>Updated ' + esc(when(operation.updatedAt)) + (operation.nextAttemptAt ? ' · Next attempt ' + esc(when(operation.nextAttemptAt)) : '') + '</p><p>Reference: <code>' + esc(operation.id) + '</code></p></div>' + (operation.nextAction && operation.nextAction.action === 'retry_operation' ? '<button type="button" class="btn-pill btn-pill-dark btn-sm" data-retry-operation="' + esc(operation.id) + '">' + esc(operation.nextAction.label || 'Retry refresh') + '</button>' : '') + '</div>'; }).join('') : '<p class="muted">No refresh has been requested. Your original saved desk remains available.</p>';
+    $('requestWorkspaceRefresh').disabled = operationBusy || d.client.status === 'cancelled' || rows.some(function (operation) { return ['queued', 'running', 'retry_due'].indexOf(operation.state) >= 0; });
+    $('workspaceOperations').querySelectorAll('button').forEach(function (button) { button.disabled = operationBusy || d.client.status === 'cancelled'; });
+  }
+  async function requestWorkspaceOperation(actionName, operationId) {
+    if (operationBusy || !data || !data.setup || cfgDirty || leaving) {
+      if (cfgDirty) $('workspaceOperationMessage').textContent = 'Save your edited business answers before refreshing the workspace.';
+      return;
+    }
+    var generation = portalGeneration; operationBusy = true; renderWorkspaceOperations(data);
+    $('workspaceOperationMessage').textContent = 'Saving your refresh request…';
+    var body = { expectedRevision: data.configurationRevision, reason: actionName === 'retry_operation' ? 'Owner retried the saved workspace refresh.' : 'Owner requested a refresh from saved business answers.' };
+    if (operationId) body.operationId = operationId;
+    try {
+      var result = await action(actionName, body); if (generation !== portalGeneration || leaving) return;
+      await load(); if (generation !== portalGeneration || leaving) return;
+      $('workspaceOperationMessage').textContent = result.operation && result.operation.state === 'succeeded' ? 'This version has already been refreshed. Your saved workspace is up to date.' : 'Request saved. Use Refresh status to check the background refresh result.';
+    } catch (error) { if (generation === portalGeneration && !leaving) $('workspaceOperationMessage').textContent = error.message; }
+    finally { if (generation === portalGeneration && !leaving) { operationBusy = false; if (data) renderWorkspaceOperations(data); } }
+  }
+  $('requestWorkspaceRefresh').addEventListener('click', function () { requestWorkspaceOperation('rebuild_workspace'); });
+  $('workspaceOperations').addEventListener('click', function (event) { var button = event.target.closest('button[data-retry-operation]'); if (button) requestWorkspaceOperation('retry_operation', button.dataset.retryOperation); });
+  $('refreshBackgroundWork').addEventListener('click', async function () { var generation = portalGeneration; $('refreshBackgroundWork').disabled = true; try { await load(); } finally { if (generation === portalGeneration && !leaving) $('refreshBackgroundWork').disabled = false; } });
   function renderSetup(d) {
+    renderWorkspaceOperations(d);
+    renderPhoneActivation(d);
     var setup = d.setup, client = d.client;
     if (!setup) return;
     $('deskSignOut').hidden = !ownerSession;

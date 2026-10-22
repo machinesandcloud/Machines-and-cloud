@@ -6,7 +6,7 @@ import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, ge
 import { getAIAllowance } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
-import { setupReadiness, configurationRevision, isSelfServiceClient } from "./lib/setup.mjs";
+import { setupReadiness, configurationRevision, isSelfServiceClient, isSupportedSelfServiceClient } from "./lib/setup.mjs";
 import { AvailabilityInputError } from "./lib/availability.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
@@ -18,6 +18,8 @@ import { getUsage, usageView } from "./lib/usage.mjs";
 import { updateVoicePrompt, detachVoice, attachVoice } from "./lib/vapi.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
 import { INTAKE_CHANNELS } from "./lib/intake.mjs";
+import { listWorkspaceOperations, queueWorkspaceRebuild, retryWorkspaceOperation, WorkspaceOperationError } from "./lib/platform-operations.mjs";
+import { phoneActivationStatus, requestPhoneActivation, cancelPhoneActivation, PhoneActivationError } from "./lib/phone-activation.mjs";
 
 export const config = { path: "/api/client" };
 
@@ -41,6 +43,7 @@ async function handle(req) {
   if (!c) return json({ error: "not_found" }, 404, CORS(origin));
   const key = s(url.searchParams.get("k"), 80);
   const selfService = isSelfServiceClient(c);
+  if (selfService && !isSupportedSelfServiceClient(c)) return json({ error: "unsupported_workspace", message: "This workspace needs a supported migration before use." }, 409);
   let session = null;
   if (selfService && req.headers.has("authorization")) {
     if (origin && !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
@@ -72,7 +75,7 @@ async function handle(req) {
     ]);
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     return json({
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: setupReadiness(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: setupReadiness(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, bookings, leads, events),
@@ -147,6 +150,28 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if (["request_phone_activation", "cancel_phone_activation"].includes(b?.action)) {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
+      const allowed = b.action === "request_phone_activation" ? ["action", "expectedRevision", "submissionId", "offerVersion", "offerDigest", "acceptedCosts", "authority"] : ["action", "expectedRevision", "operationId"];
+      if (JSON.stringify(b).length > 1500 || Object.keys(b).some(key => !allowed.includes(key))) return json({ error: "invalid_request" }, 400);
+      const actor = { role: "owner", email: session.email };
+      try {
+        const operation = b.action === "request_phone_activation" ? await requestPhoneActivation(c, { actor, expectedRevision: b.expectedRevision, submissionId: b.submissionId, offerVersion: b.offerVersion, offerDigest: b.offerDigest, acceptedCosts: b.acceptedCosts, authority: b.authority }) : await cancelPhoneActivation(c, b.operationId, { actor, expectedRevision: b.expectedRevision });
+        return json({ ok: true, operation, phoneActivation: await phoneActivationStatus(c) }, 202, { "Cache-Control": "no-store" });
+      } catch (error) { if (error instanceof PhoneActivationError) return json({ error: error.code, message: error.message }, error.status); throw error; }
+    }
+    if (["rebuild_workspace", "retry_operation"].includes(b?.action)) {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
+      if (JSON.stringify(b).length > 1500 || Object.keys(b).some(key => !["action", "expectedRevision", "reason", ...(b.action === "retry_operation" ? ["operationId"] : [])].includes(key))) return json({ error: "invalid_request" }, 400);
+      try {
+        const options = { actor: { role: "owner", email: session.email }, reason: b.reason, expectedRevision: b.expectedRevision };
+        const operation = b.action === "rebuild_workspace" ? await queueWorkspaceRebuild(c, options) : await retryWorkspaceOperation(c, b.operationId, options);
+        return json({ ok: true, operation, operations: await listWorkspaceOperations(c.slug) }, 202, { "Cache-Control": "no-store" });
+      } catch (error) {
+        if (error instanceof WorkspaceOperationError) return json({ error: error.code, message: error.message }, error.status);
+        throw error;
+      }
+    }
     if (b?.action === "save_connection_preferences") {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
       if (JSON.stringify(b).length > 1024) return json({ error: "invalid_request" }, 413);
@@ -181,7 +206,7 @@ async function handle(req) {
         }
         if (b.action === "pause" && !["live", "testing"].includes(current.status)) return { result: { error: "not_active", status: 409, setup } };
         const status = b.action === "pause" ? "paused" : b.action === "cancel" ? "cancelled" : "live";
-        const updated = { ...current, status, channels: { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
+        const updated = { ...current, status, operationLifecycleVersion: (current.operationLifecycleVersion || 0) + 1, channels: { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
           ...(status === "live" ? { liveAt: current.liveAt || now, pausedAt: null } : status === "paused" ? { pausedAt: now, pausedFrom: current.status } : { cancelledAt: current.cancelledAt || now, cancelReason: s(b.reason, 300) }) };
         return { value: updated, result: { client: updated } };
       });

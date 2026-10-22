@@ -1,0 +1,52 @@
+// Independent browser checks for actual management auth, stale UI and customer selection.
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { chromium } from '/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs';
+const output=process.argv[process.argv.indexOf('--output')+1];
+if(!process.argv.includes('--output')||!/^scratchpad\/[a-z0-9-]+\.json$/.test(output)||existsSync(output))throw new Error('Pass a new evidence output');
+const prefix=output.slice(0,-5),base='http://127.0.0.1:8894',email='independent-operator@example.test';
+for(const key of Object.keys(process.env))if(/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_|STEVE_)/.test(key))delete process.env[key];
+Object.assign(process.env,{MC_MEMORY_STORE:'1',MC_FAKE_MODEL:'1',NODE_ENV:'test',URL:base,PUBLIC_SITE_URL:base,ADMIN_EMAILS:email});
+const files=['admin.html','admin.js','admin.css','netlify/functions/manage.mjs','netlify/functions/lib/operator.mjs','netlify/functions/lib/access.mjs'];
+const hash=x=>createHash('sha256').update(x).digest('hex'),hashes=()=>Object.fromEntries(files.map(file=>[file,hash(readFileSync(file))]));
+const report={at:new Date().toISOString(),mode:'independent browser actual management handler; memory; every browser request intercepted; no email/model/provider',sourceBefore:hashes(),checks:[],requests:[],blocked:[],pageErrors:[],screenshots:[]};
+globalThis.fetch=async input=>{report.blocked.push(String(input));throw new Error('Physical networking disabled');};
+const store=await import('../netlify/functions/lib/store.mjs'),access=await import('../netlify/functions/lib/access.mjs'),config=await import('../netlify/functions/lib/config.mjs'),manage=(await import('../netlify/functions/manage.mjs')).default;
+let serial=0,hold=null;
+const check=(name,pass,detail)=>{report.checks.push({name,pass:!!pass,...(detail===undefined?{}:{detail})});assert.ok(pass,name);};
+const session=async(scope='operator')=>{const token=hash('independent-browser-'+ ++serial);await store.put('access_sessions',access.accessHash(token),{scope,email,status:'active',createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+3600000).toISOString()});return token;};
+async function customer(slug,name,supported=true){const c=config.newClient({slug,ownerKey:'CANARY-'+slug,owner:{name:'Owner '+name,email:slug+'@example.test',phone:'+17135550142'},business:{name,trade:'HVAC',city:'Houston',serviceArea:['Katy'],hours:'Mon-Fri 8am-5pm'}});if(supported)c.onboarding={version:1,verifiedEmail:c.owner.email,desiredChannels:['web']};c.services=['AC repair'];c.windows=['8 to 12'];c.build={status:'built',source:'owner_answers'};c.status='testing';await store.put('clients',slug,c);return c;}
+const a=await customer('independent-air','Independent Air'),b=await customer('independent-plumbing','Independent Plumbing'),legacy=await customer('independent-legacy','Legacy Shop',false);
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const context=await browser.newContext({viewport:{width:320,height:950},reducedMotion:'reduce'});context.setDefaultTimeout(7000);
+const page=await context.newPage();page.on('pageerror',e=>report.pageErrors.push(e.message));
+await context.route('**/*',async route=>{
+ const request=route.request(),url=new URL(request.url());if(url.origin!==base){report.blocked.push(request.url());return route.abort();}
+ if(url.pathname==='/api/manage'){
+  const body=request.method()==='POST'?request.postData():null,response=await manage(new Request(url,{method:request.method(),headers:request.headers(),...(body?{body}:{})}),{ip:'192.0.2.'+ ++serial});
+  report.requests.push({method:request.method(),query:url.search,action:body?JSON.parse(body).action:null,status:response.status});
+  if(hold&&hold.query===url.search&&request.method()==='GET'){const gate=hold;hold=null;gate.reached();await gate.release;}
+  try{return await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});}catch(error){if(!/Target|closed|intercept|Invalid|canceled/i.test(error.message))throw error;return;}
+ }
+ const file=url.pathname.slice(1);if(!files.slice(0,3).includes(file))return route.fulfill({status:404,body:''});return route.fulfill({status:200,contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html',body:readFileSync(file)});
+});
+async function openWith(token){await page.goto('about:blank');await page.goto(base+'/admin.html');await page.evaluate(value=>{sessionStorage.setItem('mc-operator-session-v1',value);sessionStorage.setItem('mc_admin_key','obsolete-shared-key');},token);await page.reload();}
+async function choose(slug){await page.locator('[data-view=customers]').click();await page.locator('#customers [data-customer="'+slug+'"]').click();await page.locator('#detailTitle').waitFor();}
+try{
+ const wrong=await session('onboarding');await openWith(wrong);await page.locator('#loginStatus').filter({hasText:'Sign in to the admin portal'}).waitFor();check('Owner bearer cannot open admin and is removed from dedicated storage',await page.locator('#app').isHidden()&&await page.evaluate(()=>sessionStorage.getItem('mc-operator-session-v1'))===null);
+ check('Obsolete shared admin key is removed from storage',await page.evaluate(()=>sessionStorage.getItem('mc_admin_key'))===null);
+ const token=await session();await openWith(token);await page.locator('#app:not([hidden])').waitFor();await choose(a.slug);
+ check('Actual customer detail takes keyboard focus',await page.locator('#detailTitle').evaluate(el=>document.activeElement===el));
+ await page.locator('[data-action=save_note]').click();check('Dialog focuses its useful first field',await page.locator('#actionNote').evaluate(el=>document.activeElement===el));await page.locator('#actionNote').fill('This draft must survive a stale revision');await page.locator('#actionReason').fill('Check conflict recovery');
+ const latest=await store.get('clients',a.slug);latest.services=['New customer-owned service'];await store.put('clients',a.slug,latest);await page.locator('#actionSubmit').click();await page.locator('#actionStatus').filter({hasText:'Close this dialog'}).waitFor();
+ check('Real stale API409 retains draft and disables unsafe retry',await page.locator('#actionSubmit').isDisabled()&&await page.locator('#actionNote').inputValue()==='This draft must survive a stale revision'&&!(await store.get('clients',a.slug)).management?.notes?.length);
+ await page.locator('#actionCancel').click();await choose(legacy.slug);check('Actual legacy customer detail has no mutation controls',await page.locator('#customerDetail [data-action]').count()===0&&/read.only/i.test(await page.locator('#customerDetail').innerText()));
+ await choose(a.slug);for(const width of [320,390,1440]){await page.setViewportSize({width,height:1000});await page.locator('[data-action=save_note]').click();await page.locator('#actionNote').fill('Viewport draft');const geometry=await page.evaluate(()=>{const d=document.getElementById('actionDialog').getBoundingClientRect();return{width:innerWidth,scroll:document.documentElement.scrollWidth,dialogLeft:d.left,dialogRight:d.right};});check('Admin and focused dialog fit '+width,geometry.scroll<=width+1&&geometry.dialogLeft>=0&&geometry.dialogRight<=width+1,geometry);const image=prefix+'-dialog-'+width+'.png';await page.screenshot({path:image});report.screenshots.push(image);await page.keyboard.press('Escape');check('Escape closes dialog at '+width,await page.locator('#actionDialog').isHidden());}
+ await page.locator('[data-view=customers]').click();let reached,release;const waited=new Promise(r=>{reached=r;}),gate=new Promise(r=>{release=r;});hold={query:'?c='+a.slug,reached,release:gate};await page.locator('#customers [data-customer="'+a.slug+'"]').click();await waited;await page.locator('[data-view=customers]').click();await page.locator('#customers [data-customer="'+b.slug+'"]').click();await page.locator('#detailTitle').filter({hasText:b.business.name}).waitFor();release();await page.waitForTimeout(100);check('Late actual detail response cannot replace another selected customer',await page.locator('#detailTitle').innerText()===b.business.name);
+ await page.locator('[data-view=customers]').click();let reachedLogout,releaseLogout;const waitingLogout=new Promise(r=>{reachedLogout=r;}),gateLogout=new Promise(r=>{releaseLogout=r;});hold={query:'?c='+a.slug,reached:reachedLogout,release:gateLogout};await page.locator('#customers [data-customer="'+a.slug+'"]').click();await waitingLogout;await page.locator('#signOut').click();await page.locator('#login:not([hidden])').waitFor();releaseLogout();await page.waitForTimeout(100);check('Late authorized response after signout cannot repopulate private DOM',!/(Independent Air|Independent Plumbing|New customer-owned service)/.test(await page.locator('body').innerText())&&await page.locator('#app').isHidden());
+ check('Signout revokes server authority', (await store.get('access_sessions',access.accessHash(token))).status==='revoked');
+ const removed=await session();await openWith(removed);await page.locator('#app:not([hidden])').waitFor();process.env.ADMIN_EMAILS='different@example.test';await page.locator('#refreshAll').click();await page.locator('#login:not([hidden])').waitFor();check('Allowlist revocation clears existing private view on next actual read',await page.evaluate(()=>sessionStorage.getItem('mc-operator-session-v1'))===null&&!(await page.locator('body').innerText()).includes(a.business.name));
+ check('No external requests or browser exceptions',report.blocked.length===0&&report.pageErrors.length===0,{blocked:report.blocked,pageErrors:report.pageErrors});
+}catch(error){report.failure=error.stack;report.checks.push({name:'Uncaught independent browser failure',pass:false,detail:error.message});}
+finally{report.sourceAfter=hashes();check('Runtime source stayed stable',JSON.stringify(report.sourceBefore)===JSON.stringify(report.sourceAfter));report.summary={passed:report.checks.filter(x=>x.pass).length,failed:report.checks.filter(x=>!x.pass).length};writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});await browser.close();console.log(JSON.stringify({output,...report.summary}));if(report.failure)console.log(report.failure);if(report.summary.failed)process.exitCode=1;}

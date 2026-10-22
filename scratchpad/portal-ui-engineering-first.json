@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-22T07:21:56.369Z",
+  "stage": "engineering injected API browser fixtures",
+  "outboundRequests": 0,
+  "actualEmailOrProviderDelivery": false,
+  "sourceBefore": {
+    "admin.html": "5788b6034be31786df542b85a5e77ab4ce8357af0fb25b85295c3a2b26ba860c",
+    "admin.js": "30f34e7e56ecd0719f88621e3acec9f1178193fafa77c58efa4e8e6264c61b71",
+    "admin.css": "938c2c6c9a5fec52856640662c6db1c84f493d6109fcd9e9f893703e911704d5"
+  },
+  "checks": [
+    {
+      "name": "Private data is hidden before sign-in",
+      "pass": true
+    },
+    {
+      "name": "Page view does not request email or consume a token",
+      "pass": true
+    },
+    {
+      "name": "Email is requested only by explicit submit",
+      "pass": true
+    },
+    {
+      "name": "Verification fragment is immediately stripped",
+      "pass": false
+    },
+    {
+      "name": "Uncaught fixture failure",
+      "pass": false,
+      "detail": "Verification fragment is immediately stripped"
+    }
+  ],
+  "screenshots": [],
+  "errors": [],
+  "failure": "Error: Verification fragment is immediately stripped\n    at check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/portal-ui-check.mjs:8:133)\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/portal-ui-check.mjs:45:63\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at process.processImmediate (node:internal/timers:472:9)",
+  "sourceAfter": {
+    "admin.html": "5788b6034be31786df542b85a5e77ab4ce8357af0fb25b85295c3a2b26ba860c",
+    "admin.js": "30f34e7e56ecd0719f88621e3acec9f1178193fafa77c58efa4e8e6264c61b71",
+    "admin.css": "938c2c6c9a5fec52856640662c6db1c84f493d6109fcd9e9f893703e911704d5"
+  },
+  "summary": {
+    "passed": 3,
+    "failed": 2
+  }
+}

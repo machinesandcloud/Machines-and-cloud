@@ -1,0 +1,156 @@
+{
+  "at": "2026-10-22T07:51:21.883Z",
+  "mode": "actual phone engine and Twilio adapter; local memory/installed SDK/HTTP protocol fixtures; zero real network",
+  "checks": [
+    {
+      "name": "memory: gate off, bad authority and wrong mailbox cannot create a purchase intent",
+      "pass": true
+    },
+    {
+      "name": "memory: new browser keys and concurrent workers cannot buy a second number",
+      "pass": true
+    },
+    {
+      "name": "memory: lost acquisition result before remote effect never blindly repurchases",
+      "pass": true
+    },
+    {
+      "name": "memory: lost acquisition result after remote effect never blindly repurchases",
+      "pass": true
+    },
+    {
+      "name": "memory: execution rechecks the gate and current owner revision",
+      "pass": true
+    },
+    {
+      "name": "memory: cancellation retains resource after before release failure and confirms cleanup",
+      "pass": true
+    },
+    {
+      "name": "memory: cancellation retains resource after after release failure and confirms cleanup",
+      "pass": true
+    },
+    {
+      "name": "memory: cancelling an in-flight request preserves late receipt and releases same number",
+      "pass": true
+    },
+    {
+      "name": "sdk: gate off, bad authority and wrong mailbox cannot create a purchase intent",
+      "pass": true
+    },
+    {
+      "name": "sdk: new browser keys and concurrent workers cannot buy a second number",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost acquisition result before remote effect never blindly repurchases",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost acquisition result after remote effect never blindly repurchases",
+      "pass": true
+    },
+    {
+      "name": "sdk: execution rechecks the gate and current owner revision",
+      "pass": true
+    },
+    {
+      "name": "sdk: cancellation retains resource after before release failure and confirms cleanup",
+      "pass": true
+    },
+    {
+      "name": "sdk: cancellation retains resource after after release failure and confirms cleanup",
+      "pass": true
+    },
+    {
+      "name": "sdk: cancelling an in-flight request preserves late receipt and releases same number",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost intent projection is recovered before adapter dispatch",
+      "pass": true
+    },
+    {
+      "name": "production wrapper and real adapter perform zero requests with gates unconfigured",
+      "pass": true
+    },
+    {
+      "name": "actual production adapter uses pricing, inventory, durable acquisition and safe correlation after lost POST",
+      "pass": true
+    },
+    {
+      "name": "real adapter never interprets empty correlation lookup as absence or idempotency",
+      "pass": true
+    },
+    {
+      "name": "changed account price cannot dispatch a number purchase above the authorized cap",
+      "pass": true
+    },
+    {
+      "name": "all network destinations were intercepted and no real network was requested",
+      "pass": true
+    }
+  ],
+  "conflicts": 5,
+  "blockedNetwork": [],
+  "twilio": [
+    {
+      "method": "GET",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "query": "?FriendlyName=mc-phone-a6121e28945445448b6b111cd81ad6bc69ffa40a4a089af7c73d965&PageSize=100"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbfbe3e063ad8ec7e6d376ccc1e648df3.json",
+      "query": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbfbe3e063ad8ec7e6d376ccc1e648df3.json",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbfbe3e063ad8ec7e6d376ccc1e648df3.json",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "query": "?FriendlyName=mc-phone-b23a6a8439c0dde5515893e7c90c1e3233b8616e634470f20dc4928&PageSize=100"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "query": ""
+    }
+  ],
+  "sourceBefore": {
+    "netlify/functions/lib/phone-activation.mjs": "bdfcdd9893c1492aabf8fcabb4e751ce3f67ee6d53cd642e4664bbed2bdc0b66",
+    "netlify/functions/lib/phone-twilio.mjs": "564ab866d2d85a11e4880bcb84c8c331dc39ed47ca85afe1f17f585782e07c01"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/phone-activation.mjs": "bdfcdd9893c1492aabf8fcabb4e751ce3f67ee6d53cd642e4664bbed2bdc0b66",
+    "netlify/functions/lib/phone-twilio.mjs": "564ab866d2d85a11e4880bcb84c8c331dc39ed47ca85afe1f17f585782e07c01"
+  },
+  "summary": {
+    "passed": 22,
+    "failed": 0,
+    "total": 22
+  }
+}

@@ -90,7 +90,8 @@ await store.saveClient({ slug: "legacy-brand", ownerKey: "legacy", status: "new"
 const poll = await run({ forceHour: 20, all: true, inline: true });
 check(() => assert.equal(poll.blocks.tenDlc.polled, 1));
 check(() => assert.equal(intercepted.filter(value => value.includes("BNlegacy")).length, 1));
-const legacy = { ...structuredClone(base), slug: "legacy-live", onboarding: undefined, phone: { forwarding: "none" }, voice: { provider: "none" } };
+const legacy = { ...structuredClone(base), slug: "legacy-live", phone: { forwarding: "none" }, voice: { provider: "none" } };
+delete legacy.onboarding; // Match the persisted, unmarked legacy schema.
 await store.saveClient(legacy);
 await run({ forceHour: 20, all: true, inline: true });
 const legacyEvents = await store.listRecords("events", legacy.slug, 100);

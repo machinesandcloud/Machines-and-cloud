@@ -1,0 +1,675 @@
+{
+  "at": "2026-10-22T07:33:02.000Z",
+  "mode": "actual handlers plus durable recovery; isolated memory; browser interception; private mailbox read only in process",
+  "sourceBefore": {
+    "admin.html": "5788b6034be31786df542b85a5e77ab4ce8357af0fb25b85295c3a2b26ba860c",
+    "admin.js": "64e22c1581804c78b42f53d633ab6865ff9a852ef0a65e993379359e9d8d1a94",
+    "admin.css": "938c2c6c9a5fec52856640662c6db1c84f493d6109fcd9e9f893703e911704d5",
+    "desk.html": "971542fb2c83de317d29c484fc8803c3392f2d2bda80b8b0eca5bf2bcba4a985",
+    "desk.js": "d7c7fc9d25e44ef7259b6d25feecf5d208522ac795ae025f27e773a97214b4ac",
+    "netlify/functions/manage.mjs": "e6cfd53d331aa05d31d54b56581b7deb58a94b2518662274d28c16ed35236416",
+    "netlify/functions/lib/operator.mjs": "c2b2d82f12bfe662d7f1a86047fbea11424eec32a0168290e5a2b866e902434d",
+    "netlify/functions/lib/platform-operations.mjs": "02d54e5beb6cf9adf3597f4366e3f8790e055dcacd66f54e4bb992fc22951dbe",
+    "netlify/functions/client.mjs": "36dbada153e9b488404e8d42cda55b4ab81d6f2c601f8fb3a5727612bdb527a0",
+    "netlify/functions/lib/access.mjs": "5be19a0338c8b0502cf5b3ef7059c4dc92c3012d31cb2d7a48e1b579a4c1951d",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "harnessHash": "7044bb2f685bca36f9bf9a2dbaf8718c64d848a463d54c8eb83566ba027b589f",
+  "checks": [
+    {
+      "name": "Fixture owner uses actual private mailbox request handler",
+      "pass": true
+    },
+    {
+      "name": "Fixture owner has actual verified customer session",
+      "pass": true
+    },
+    {
+      "name": "Fixture workspace is created by actual verified onboarding handler",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "slug": "journey-air-6d51",
+        "portal": "http://127.0.0.1:8897/desk.html?c=journey-air-6d51",
+        "client": {
+          "slug": "journey-air-6d51",
+          "status": "testing",
+          "plan": "growth",
+          "createdAt": "2026-10-22T07:33:03.193Z",
+          "owner": {
+            "name": "Journey Owner",
+            "email": "journey-owner@example.test",
+            "phone": "+17135550142",
+            "backupPhone": ""
+          },
+          "business": {
+            "name": "Journey Air",
+            "website": "",
+            "trade": "HVAC",
+            "city": "Houston",
+            "serviceArea": [
+              "Katy"
+            ],
+            "notServed": [],
+            "hours": "Mon-Fri 8am-5pm",
+            "afterHours": "",
+            "spanish": true,
+            "licenses": "",
+            "legal": {
+              "legalName": "",
+              "ein": "",
+              "businessType": "llc",
+              "street": "",
+              "city": "Houston",
+              "state": "TX",
+              "zip": ""
+            },
+            "googlePlaceId": "",
+            "reviewLink": "",
+            "payLink": ""
+          },
+          "services": [
+            "AC repair"
+          ],
+          "fees": [],
+          "windows": [
+            "8 to 12",
+            "12 to 5"
+          ],
+          "rules": {
+            "never": [
+              "Quote a price the owner has not published",
+              "Promise an exact arrival time; offer the arrival windows only",
+              "Pretend to be a person",
+              "Give advice on gas, electrical, or safety beyond: leave the area if there is a gas smell or fire, call 911, then call us"
+            ],
+            "handoff": [
+              "Complaints about past work",
+              "Warranty questions",
+              "Anything about a bill or refund",
+              "Commercial or large projects"
+            ],
+            "emergencies": {
+              "tier0": [
+                "Gas smell",
+                "Carbon monoxide alarm",
+                "Smoke or fire",
+                "Sparks or a burning smell from the panel or an outlet",
+                "Sewage flooding a living space"
+              ],
+              "tier1": [
+                "No cooling when the forecast high is 90°F or more",
+                "No cooling with an infant, elderly, or medically dependent person in the home",
+                "No heat when it is at or below freezing outside",
+                "Water pouring from the air handler"
+              ],
+              "tier2": "Everything else: offer the next available window.",
+              "script": ""
+            },
+            "hours": {
+              "mon": {
+                "open": "08:00",
+                "close": "17:00"
+              },
+              "tue": {
+                "open": "08:00",
+                "close": "17:00"
+              },
+              "wed": {
+                "open": "08:00",
+                "close": "17:00"
+              },
+              "thu": {
+                "open": "08:00",
+                "close": "17:00"
+              },
+              "fri": {
+                "open": "08:00",
+                "close": "17:00"
+              },
+              "sat": null,
+              "sun": null
+            },
+            "emergency247": false,
+            "consentAsk": false,
+            "windowCapacity": 1,
+            "ackMinutes": 10,
+            "callbackHours": "within 30 minutes",
+            "callbackAfterHours": "by 8 am tomorrow",
+            "bypass": []
+          },
+          "digest": {
+            "text": true
+          },
+          "faq": [],
+          "leadSources": [],
+          "leads": {
+            "angiKey": "",
+            "thumbtackSecret": ""
+          },
+          "software": "google",
+          "phone": {
+            "businessNumber": "",
+            "twilioNumber": "",
+            "forwarding": "missed",
+            "carrier": "other",
+            "transferTo": "",
+            "voiceForwardTo": "",
+            "textBack": true,
+            "tenDlc": "not_started"
+          },
+          "provision": {
+            "status": "pending",
+            "steps": {}
+          },
+          "build": {
+            "status": "built",
+            "source": "owner_answers",
+            "notes": "Built from your saved answers. Website import is not enabled; review these rules before activation.",
+            "sourcePages": [],
+            "builtAt": "2026-10-22T07:33:03.195Z"
+          },
+          "widget": {
+            "greeting": "",
+            "allowedOrigins": []
+          },
+          "summary": "",
+          "onboarding": {
+            "version": 1,
+            "verifiedEmail": "journey-owner@example.test",
+            "verifiedAt": "2026-10-22T07:33:03.192Z",
+            "primaryGoal": "",
+            "desiredChannels": [
+              "web",
+              "voice",
+              "sms",
+              "calendar"
+            ]
+          },
+          "channels": {
+            "web": {
+              "active": false
+            },
+            "voice": {
+              "active": false
+            },
+            "sms": {
+              "active": false
+            }
+          },
+          "calendar": {
+            "provider": "none",
+            "connected": false
+          },
+          "billing": {
+            "status": "none",
+            "plan": "growth",
+            "trialEnd": null
+          },
+          "voice": {
+            "provider": "none",
+            "ready": false,
+            "detached": false
+          }
+        },
+        "setup": {
+          "version": 1,
+          "revision": "2fd7040fe1198e9cabaccd70ed0c5498e8ab9dbf772eb486102be9e32daa5a64",
+          "stage": "review",
+          "canActivateWeb": false,
+          "steps": [
+            {
+              "id": "knowledge",
+              "label": "Desk draft",
+              "status": "done",
+              "detail": "Built from your saved answers. Website import is not enabled; review these rules before activation.",
+              "action": {
+                "tab": "know",
+                "label": "Review rules"
+              }
+            },
+            {
+              "id": "review",
+              "label": "Review what the desk knows",
+              "status": "your_action",
+              "detail": "Save your review of the current business rules.",
+              "action": {
+                "tab": "know",
+                "label": "Review what the desk knows"
+              }
+            },
+            {
+              "id": "test",
+              "label": "Try your desk",
+              "status": "your_action",
+              "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+              "action": {
+                "tab": "test",
+                "label": "Try your desk"
+              }
+            },
+            {
+              "id": "model",
+              "label": "AI service is unavailable",
+              "status": "needs_attention",
+              "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+              "action": {
+                "tab": "setup",
+                "label": "AI service is unavailable"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone",
+              "status": "waiting_provider",
+              "detail": "Not active. Calls have not been connected or verified.",
+              "action": {
+                "tab": "setup",
+                "label": "View channel setup"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messages",
+              "status": "waiting_provider",
+              "detail": "Not active. Sender approval and delivery checks are incomplete.",
+              "action": {
+                "tab": "setup",
+                "label": "View channel setup"
+              }
+            }
+          ],
+          "channels": {
+            "web": {
+              "ready": false,
+              "active": false,
+              "blockers": [
+                {
+                  "id": "review",
+                  "label": "Review what the desk knows",
+                  "detail": "Save your review of the current business rules.",
+                  "tab": "know"
+                },
+                {
+                  "id": "test",
+                  "label": "Try your desk",
+                  "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                  "tab": "test"
+                },
+                {
+                  "id": "model",
+                  "label": "AI service is unavailable",
+                  "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                  "tab": "setup"
+                }
+              ]
+            },
+            "voice": {
+              "ready": false,
+              "active": false,
+              "blockers": [
+                {
+                  "id": "voice",
+                  "label": "Phone setup is not active",
+                  "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                  "tab": "setup"
+                }
+              ]
+            },
+            "sms": {
+              "ready": false,
+              "active": false,
+              "blockers": [
+                {
+                  "id": "sms",
+                  "label": "Text messaging is not active",
+                  "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                  "tab": "setup"
+                }
+              ]
+            }
+          },
+          "connectionJourney": {
+            "title": "Your connections",
+            "channels": [
+              {
+                "id": "web",
+                "label": "Website chat",
+                "detail": "Review your business rules and complete a private test before activating customer chat.",
+                "nextStep": "Review what the desk knows",
+                "status": "needs_action",
+                "requested": true
+              },
+              {
+                "id": "voice",
+                "label": "Phone answering",
+                "detail": "Your preference is saved. Phone connection is not available yet; calls have not been routed or tested.",
+                "nextStep": "Phone connection will appear here when available",
+                "status": "pending_activation",
+                "requested": true
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "detail": "Your preference is saved. Text messaging is not available yet; sender registration and delivery checks are still required.",
+                "nextStep": "Text connection will appear here when available",
+                "status": "pending_activation",
+                "requested": true
+              },
+              {
+                "id": "calendar",
+                "label": "Calendar",
+                "detail": "Your preference is saved. Calendar sync is not available yet; no external calendar is connected or updated.",
+                "nextStep": "Calendar connection will appear here when available",
+                "status": "pending_activation",
+                "requested": true
+              }
+            ]
+          },
+          "next": {
+            "id": "review",
+            "tab": "know",
+            "label": "Review what the desk knows"
+          }
+        },
+        "existing": false,
+        "recovered": false
+      }
+    },
+    {
+      "name": "Admin page does not send mail or expose customer data on view",
+      "pass": true
+    },
+    {
+      "name": "Operator browser submit creates a fixed private admin mailbox link",
+      "pass": true
+    },
+    {
+      "name": "Admin token is scrubbed but not consumed before explicit Continue",
+      "pass": true
+    },
+    {
+      "name": "Actual operator identity has separate eight-hour scope",
+      "pass": true
+    },
+    {
+      "name": "System shows recorded scan failure and persistent open exceptions",
+      "pass": true
+    },
+    {
+      "name": "Actual customer detail has no credential-bearing portal link",
+      "pass": true
+    },
+    {
+      "name": "Actual note and identified operator audit are committed together",
+      "pass": true
+    },
+    {
+      "name": "Rule editor carries actual saved services and area",
+      "pass": true
+    },
+    {
+      "name": "Actual rules correction persists narrow fields without touching owner identity",
+      "pass": true
+    },
+    {
+      "name": "Rule correction produces a named operator audit entry",
+      "pass": true
+    },
+    {
+      "name": "Injected post-commit acknowledgement shows saved state and clears stale details",
+      "pass": true
+    },
+    {
+      "name": "Confirmed save recovery does not resubmit the accepted mutation",
+      "pass": true
+    },
+    {
+      "name": "Explicit refresh recovers the actual committed note",
+      "pass": true
+    },
+    {
+      "name": "Admin request creates actual durable queued operation",
+      "pass": true
+    },
+    {
+      "name": "Actual recovery helper completes the queued local job once",
+      "pass": true
+    },
+    {
+      "name": "Admin reads the real completed operation receipt",
+      "pass": true
+    },
+    {
+      "name": "Actual admin detail fits viewport at 390",
+      "pass": true,
+      "detail": {
+        "content": 390,
+        "viewport": 390
+      }
+    },
+    {
+      "name": "Actual admin detail fits viewport at 1440",
+      "pass": true,
+      "detail": {
+        "content": 1440,
+        "viewport": 1440
+      }
+    },
+    {
+      "name": "Owner portal receives admin corrections through actual private API",
+      "pass": true
+    },
+    {
+      "name": "Owner progress shows real completed job without internal support notes",
+      "pass": true
+    },
+    {
+      "name": "Owner API omits internal management audit and staff notes",
+      "pass": true
+    },
+    {
+      "name": "Actual owner operation reference wraps inside viewport at 390",
+      "pass": true,
+      "detail": {
+        "content": 390,
+        "viewport": 390
+      }
+    },
+    {
+      "name": "Owner progress content stays inside its own card at 390",
+      "pass": true,
+      "detail": {
+        "content": 332,
+        "width": 332,
+        "rows": [
+          {
+            "content": 332,
+            "width": 332
+          }
+        ]
+      }
+    },
+    {
+      "name": "Actual owner operation reference wraps inside viewport at 1440",
+      "pass": true,
+      "detail": {
+        "content": 1440,
+        "viewport": 1440
+      }
+    },
+    {
+      "name": "Owner progress content stays inside its own card at 1440",
+      "pass": true,
+      "detail": {
+        "content": 1382,
+        "width": 1382,
+        "rows": [
+          {
+            "content": 841,
+            "width": 841
+          }
+        ]
+      }
+    },
+    {
+      "name": "Completed refresh preserves latest business facts and leaves channels inactive",
+      "pass": true
+    },
+    {
+      "name": "Actual operator session is revoked and private browser state is cleared",
+      "pass": true
+    },
+    {
+      "name": "All server network destinations blocked and no browser errors",
+      "pass": true,
+      "detail": {
+        "blockedServer": [],
+        "pageErrors": []
+      }
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "save_note",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "update_rules",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "save_note",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "rebuild_workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200
+    }
+  ],
+  "blockedServer": [],
+  "blockedBrowser": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/portal-journey-ui-wrap-final-admin-390.png",
+    "scratchpad/portal-journey-ui-wrap-final-admin-1440.png",
+    "scratchpad/portal-journey-ui-wrap-final-owner-updates-390.png",
+    "scratchpad/portal-journey-ui-wrap-final-owner-updates-1440.png"
+  ],
+  "injectedResponses": [
+    {
+      "kind": "known-saved optional projection response injected AFTER actual handler committed note",
+      "realStatus": 200,
+      "noteSaved": true
+    }
+  ],
+  "sourceAfter": {
+    "admin.html": "5788b6034be31786df542b85a5e77ab4ce8357af0fb25b85295c3a2b26ba860c",
+    "admin.js": "64e22c1581804c78b42f53d633ab6865ff9a852ef0a65e993379359e9d8d1a94",
+    "admin.css": "938c2c6c9a5fec52856640662c6db1c84f493d6109fcd9e9f893703e911704d5",
+    "desk.html": "971542fb2c83de317d29c484fc8803c3392f2d2bda80b8b0eca5bf2bcba4a985",
+    "desk.js": "d7c7fc9d25e44ef7259b6d25feecf5d208522ac795ae025f27e773a97214b4ac",
+    "netlify/functions/manage.mjs": "e6cfd53d331aa05d31d54b56581b7deb58a94b2518662274d28c16ed35236416",
+    "netlify/functions/lib/operator.mjs": "c2b2d82f12bfe662d7f1a86047fbea11424eec32a0168290e5a2b866e902434d",
+    "netlify/functions/lib/platform-operations.mjs": "02d54e5beb6cf9adf3597f4366e3f8790e055dcacd66f54e4bb992fc22951dbe",
+    "netlify/functions/client.mjs": "36dbada153e9b488404e8d42cda55b4ab81d6f2c601f8fb3a5727612bdb527a0",
+    "netlify/functions/lib/access.mjs": "5be19a0338c8b0502cf5b3ef7059c4dc92c3012d31cb2d7a48e1b579a4c1951d",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 31,
+    "failed": 0
+  }
+}

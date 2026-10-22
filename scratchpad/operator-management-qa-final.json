@@ -1,0 +1,298 @@
+{
+  "at": "2026-10-22T07:39:10.855Z",
+  "mode": "independent actual management/owner handlers and local queue; memory and intercepted installed Blobs SDK; no external requests",
+  "checks": [
+    {
+      "name": "memory: unconfigured/nonstaff sign-in and unauthenticated reads fail closed without mail",
+      "pass": true
+    },
+    {
+      "name": "memory: owner proof cannot be consumed by operator exchange or read management data",
+      "pass": true
+    },
+    {
+      "name": "memory: operator proof has fixed return, one-use8-hour scope and cannot authorize owner APIs",
+      "pass": true
+    },
+    {
+      "name": "memory: allowlist revocation, expired and revoked operator sessions fail on every request",
+      "pass": true
+    },
+    {
+      "name": "memory: private list/detail omit owner keys and provider credentials with no-store headers",
+      "pass": true
+    },
+    {
+      "name": "memory: invalid actions, fields, reasons, origin and stale revision cannot mutate customer",
+      "pass": true
+    },
+    {
+      "name": "memory: support note and named audit commit together and stale request cannot replay",
+      "pass": true
+    },
+    {
+      "name": "memory: owner response excludes internal staff notes and another owner cannot access or queue work",
+      "pass": true
+    },
+    {
+      "name": "memory: legacy CLI read is redacted and cannot mutate any new or future onboarding marker",
+      "pass": true
+    },
+    {
+      "name": "memory: offered editable rules roundtrip preserves fee structure and credentials",
+      "pass": true
+    },
+    {
+      "name": "memory: unknown onboarding versions and legacy customers are read-only",
+      "pass": true
+    },
+    {
+      "name": "memory: closed supported accounts allow internal notes while all service changes remain blocked",
+      "pass": true
+    },
+    {
+      "name": "memory: reasoned service cancellation retains provider identities and customer records without reopening",
+      "pass": true
+    },
+    {
+      "name": "memory: failed background operation is represented as an actionable issue",
+      "pass": true
+    },
+    {
+      "name": "memory: pause works without activation; resume requires current proof, model and quota",
+      "pass": true
+    },
+    {
+      "name": "memory: rebuild intent is durable, duplicate safe and completion preserves owner/provider facts",
+      "pass": true
+    },
+    {
+      "name": "memory: stale inputs and paused work are fenced rather than overwritten",
+      "pass": true
+    },
+    {
+      "name": "memory: explicit paused repair replaces a pre-pause cancelled job and preserves paused service",
+      "pass": true
+    },
+    {
+      "name": "memory: pause and resume cycle invalidates earlier queued lifecycle work",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'superseded'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'superseded'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:114:1005\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:38:47)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:113:2)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:148:5"
+    },
+    {
+      "name": "memory: operator sign-out revokes only operator authority",
+      "pass": true
+    },
+    {
+      "name": "sdk: unconfigured/nonstaff sign-in and unauthenticated reads fail closed without mail",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner proof cannot be consumed by operator exchange or read management data",
+      "pass": true
+    },
+    {
+      "name": "sdk: operator proof has fixed return, one-use8-hour scope and cannot authorize owner APIs",
+      "pass": true
+    },
+    {
+      "name": "sdk: allowlist revocation, expired and revoked operator sessions fail on every request",
+      "pass": true
+    },
+    {
+      "name": "sdk: private list/detail omit owner keys and provider credentials with no-store headers",
+      "pass": true
+    },
+    {
+      "name": "sdk: invalid actions, fields, reasons, origin and stale revision cannot mutate customer",
+      "pass": true
+    },
+    {
+      "name": "sdk: support note and named audit commit together and stale request cannot replay",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner response excludes internal staff notes and another owner cannot access or queue work",
+      "pass": true
+    },
+    {
+      "name": "sdk: legacy CLI read is redacted and cannot mutate any new or future onboarding marker",
+      "pass": true
+    },
+    {
+      "name": "sdk: offered editable rules roundtrip preserves fee structure and credentials",
+      "pass": true
+    },
+    {
+      "name": "sdk: unknown onboarding versions and legacy customers are read-only",
+      "pass": true
+    },
+    {
+      "name": "sdk: closed supported accounts allow internal notes while all service changes remain blocked",
+      "pass": true
+    },
+    {
+      "name": "sdk: reasoned service cancellation retains provider identities and customer records without reopening",
+      "pass": true
+    },
+    {
+      "name": "sdk: failed background operation is represented as an actionable issue",
+      "pass": true
+    },
+    {
+      "name": "sdk: pause works without activation; resume requires current proof, model and quota",
+      "pass": true
+    },
+    {
+      "name": "sdk: rebuild intent is durable, duplicate safe and completion preserves owner/provider facts",
+      "pass": true
+    },
+    {
+      "name": "sdk: stale inputs and paused work are fenced rather than overwritten",
+      "pass": true
+    },
+    {
+      "name": "sdk: explicit paused repair replaces a pre-pause cancelled job and preserves paused service",
+      "pass": true
+    },
+    {
+      "name": "sdk: pause and resume cycle invalidates earlier queued lifecycle work",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'superseded'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'superseded'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:114:1005\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:38:47)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:113:2)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/operator-management-qa-check.mjs:148:27"
+    },
+    {
+      "name": "sdk: failed client/audit CAS leaves no partial support mutation",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost committed support response is visible on refresh and stale retry cannot duplicate audit",
+      "pass": true
+    },
+    {
+      "name": "sdk: CAS conflict rechecks resume readiness and preserves concurrent owner edits",
+      "pass": true
+    },
+    {
+      "name": "sdk: missing operation projection recovers durable intent without another request",
+      "pass": true
+    },
+    {
+      "name": "sdk: ambiguous local completion repairs operation receipt without rewriting the customer",
+      "pass": true
+    },
+    {
+      "name": "sdk: known committed support action survives optional detail projection failure",
+      "pass": true
+    },
+    {
+      "name": "sdk: exhausted work stays unhealthy after leaving queue and explicit retry retains attempt audit",
+      "pass": true
+    },
+    {
+      "name": "sdk: expired worker cannot commit an older generation after a newer claim",
+      "pass": true,
+      "detail": {
+        "firstGeneration": 1,
+        "newerGeneration": 2,
+        "recoveryGeneration": 3
+      }
+    },
+    {
+      "name": "sdk: recovery cursor reaches due work beyond50 backed-off candidates with10-job ceiling",
+      "pass": true,
+      "detail": {
+        "first": {
+          "scope": "bounded_candidates",
+          "inspected": 50,
+          "processed": 0,
+          "queued": 0,
+          "retryDue": 50,
+          "running": 0,
+          "failed": 0,
+          "uncertain": 0,
+          "succeeded": 0,
+          "oldestQueuedAt": null,
+          "openFailures": 0,
+          "errors": [],
+          "ok": true
+        },
+        "second": {
+          "scope": "bounded_candidates",
+          "inspected": 50,
+          "processed": 10,
+          "queued": 0,
+          "retryDue": 40,
+          "running": 0,
+          "failed": 0,
+          "uncertain": 0,
+          "succeeded": 10,
+          "oldestQueuedAt": null,
+          "openFailures": 0,
+          "errors": [],
+          "ok": true
+        }
+      }
+    },
+    {
+      "name": "sdk: operator sign-out revokes only operator authority",
+      "pass": true
+    },
+    {
+      "name": "Recorded runtime bytes stayed stable through independent QA",
+      "pass": true
+    },
+    {
+      "name": "No unexpected external/model/provider/background request",
+      "pass": true
+    }
+  ],
+  "blocked": [],
+  "mail": [
+    {
+      "subject": "Your Machines & Cloud sign-in link",
+      "recipients": 1,
+      "disposition": "intercepted fixture, not sent"
+    },
+    {
+      "subject": "Your Machines & Cloud sign-in link",
+      "recipients": 1,
+      "disposition": "intercepted fixture, not sent"
+    }
+  ],
+  "conflicts": 4,
+  "sourceBefore": {
+    "netlify/functions/manage.mjs": "e6cfd53d331aa05d31d54b56581b7deb58a94b2518662274d28c16ed35236416",
+    "netlify/functions/lib/operator.mjs": "b8638c67c88748eaeda49a884cf2255e80ffefe7eefd945510d286ed24d5f1e2",
+    "netlify/functions/lib/platform-operations.mjs": "6b79439fff8081f8f27552111b1c6810c96eb6874d934c27a89a25489a608fbb",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "5be19a0338c8b0502cf5b3ef7059c4dc92c3012d31cb2d7a48e1b579a4c1951d",
+    "netlify/functions/client.mjs": "156402f4dae773da6811172e2e2a0693384c106c55f4f7618cc51d30ca9506c2",
+    "netlify/functions/admin.mjs": "1f0b331c8cb8f2f0e25137e050adec1edb194a6e2d65e0bd0a52fca7d88666be",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "61304f9fa371a8d5b92742030c37d02a905aa40f496a9f701c8ff13df41ae586",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55"
+  },
+  "sourceAfter": {
+    "netlify/functions/manage.mjs": "e6cfd53d331aa05d31d54b56581b7deb58a94b2518662274d28c16ed35236416",
+    "netlify/functions/lib/operator.mjs": "b8638c67c88748eaeda49a884cf2255e80ffefe7eefd945510d286ed24d5f1e2",
+    "netlify/functions/lib/platform-operations.mjs": "6b79439fff8081f8f27552111b1c6810c96eb6874d934c27a89a25489a608fbb",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "5be19a0338c8b0502cf5b3ef7059c4dc92c3012d31cb2d7a48e1b579a4c1951d",
+    "netlify/functions/client.mjs": "156402f4dae773da6811172e2e2a0693384c106c55f4f7618cc51d30ca9506c2",
+    "netlify/functions/admin.mjs": "1f0b331c8cb8f2f0e25137e050adec1edb194a6e2d65e0bd0a52fca7d88666be",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "61304f9fa371a8d5b92742030c37d02a905aa40f496a9f701c8ff13df41ae586",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55"
+  },
+  "summary": {
+    "passed": 49,
+    "failed": 2,
+    "total": 51
+  }
+}

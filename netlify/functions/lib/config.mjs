@@ -215,8 +215,8 @@ export function publicView(c) {
 
 // What the owner portal sees (no secrets beyond their own key).
 export function ownerView(c) {
-  const { calendar, billing, voice, ...rest } = c;
-  if (c.onboarding?.version === 1) delete rest.ownerKey;
+  const { calendar, billing, voice, management, operationReceipts, workspaceOperationClaims, ...rest } = c;
+  if (Object.hasOwn(c, "onboarding")) delete rest.ownerKey;
   rest.rules = { ...(c.rules || {}), emergencies: normalizeEmergencies(c.rules?.emergencies, c.business?.trade) };
   return { ...rest, calendar: { provider: calendar?.provider || "none", connected: !!calendar?.google?.refreshToken }, billing: { status: billing?.status || "none", plan: c.plan, trialEnd: billing?.trialEnd || null }, voice: { provider: voice?.provider || "none", ready: !!voice?.assistantId, detached: !!voice?.detached } };
 }

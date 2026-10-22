@@ -1,169 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow">
-<title>Front desk admin</title>
-<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="styles.css">
-<style>
-  body { background: #FFFFFF; }
-  .ad { max-width: 1280px; margin: 0 auto; padding: 24px 16px 60px; color: #1E2433; font-size: 14px; }
-  .ad h1 { font-size: 24px; margin: 0 0 12px; } .ad h2 { font-size: 16px; margin: 24px 0 8px; }
-  .ad table { width: 100%; border-collapse: collapse; font-size: 13px; } .ad th, .ad td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
-  .ad th { font-weight: 600; color: #5B6273; font-size: 12px; } .ad .muted { color: #5B6273; } .ad .bad { color: #B91C1C; font-weight: 600; }
-  .ad .btn { padding: 5px 10px; border: 1px solid #D1D5DB; border-radius: 999px; background: #fff; cursor: pointer; font: inherit; font-size: 12px; margin: 2px 2px 2px 0; } .ad .btn:hover { background: #F3F4F6; }
-  .ad input.key { padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; width: 360px; max-width: 100%; }
-  .ad .ev { font-size: 12px; font-family: ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 420px; overflow: auto; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px; background: #F9FAFB; }
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1E2433; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; display: none; }
-  @media (max-width: 800px) { .ad table { display: block; overflow-x: auto; } }
-  .ad .prospects-table-scroll { max-width: 100%; overflow-x: auto; border-radius: 6px; }
-  .ad .prospects-table-scroll:focus-visible { outline: 2px solid #2455E6; outline-offset: 3px; }
-  .ad .prospects-table-scroll table { display: table; min-width: 650px; }
-</style>
+<meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
+<title>Operations | Machines &amp; Cloud</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="admin.css">
+<script src="admin.js" defer></script>
 </head>
-<body class="theme-light" data-no-widget>
-<main class="ad">
-  <h1>Front desk admin</h1>
-  <p class="muted" id="keyRow">Admin key: <input class="key" id="key" type="password" placeholder="paste the admin key once"> <button class="btn" id="keyGo">Load</button> <span id="msg"></span></p>
-  <p><button class="btn" id="runNow">Run the scheduler now</button> <button class="btn" id="lastRun">Last run</button> <button class="btn" id="brakeBtn">Brake: off</button> <span class="muted" id="runMsg"></span></p>
-  <p class="muted">Brake: press it when Netlify's 75 percent credit email arrives. The nightly audit and the half-hour scans stop; customer texts, webhooks, reminders, and the digest keep going. Press again to release.</p>
-  <section aria-labelledby="prospectsTitle">
-    <h2 id="prospectsTitle">Website inquiries</h2>
-    <p class="muted">Details saved when someone starts setup. The marketing export includes only verified contacts who confirmed email updates and have no suppression.</p>
-    <p><button type="button" class="btn" id="refreshProspects" disabled>Refresh inquiries</button> <button type="button" class="btn" id="exportMarketing" disabled>Export marketing list</button> <button type="button" class="btn" id="exportProspects" disabled>Export all inquiries</button></p>
-    <p class="muted" id="prospectsStatus" role="status">Load with the key.</p>
-    <div id="prospects"></div>
-  </section>
-  <h2>Needs me</h2><div id="needs" class="muted">Load with the key.</div>
-  <div id="shops"></div>
-  <h2>Events, last 24 hours, every shop</h2>
-  <div class="ev" id="events">Load with the key.</div>
-</main>
-<div class="toast" id="toast"></div>
-<script>
-(function () {
-  var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
-  var $ = function (id) { return document.getElementById(id); };
-  var key = ''; try { key = sessionStorage.getItem('mc_admin_key') || ''; } catch (e) { /* ignore */ }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
-  function rel(iso) { if (!iso) return 'none'; var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; }
-  function api(body, method) { return fetch(API_BASE + '/api/admin' + (method === 'GET' ? '?full=1' : ''), { method: method || 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: method === 'GET' ? undefined : JSON.stringify(body) }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || r.status); return d; }); }); }
-  var prospectsGeneration = 0;
-  function prospectControls(disabled) { ['refreshProspects', 'exportMarketing', 'exportProspects'].forEach(function (id) { $(id).disabled = disabled; }); }
-  async function prospectRequest(audience, format, requestKey) {
-    var controller = new AbortController(), timer = setTimeout(function () { controller.abort(); }, 20000);
-    try {
-      var response = await fetch(API_BASE + '/api/intake?audience=' + audience + '&format=' + format, { headers: { 'x-admin-key': requestKey }, signal: controller.signal });
-      if (!response.ok) throw new Error('Could not load inquiries. Check your access and try again.');
-      return format === 'csv' ? response.blob() : response.json();
-    } finally { clearTimeout(timer); }
-  }
-  async function loadProspects() {
-    var version = ++prospectsGeneration, requestKey = key;
-    $('prospects').replaceChildren(); prospectControls(true);
-    if (!requestKey) { $('prospectsStatus').textContent = 'Load with the key.'; return; }
-    $('prospectsStatus').textContent = 'Loading inquiries…';
-    try {
-      var result = await prospectRequest('all', 'json', requestKey);
-      if (version !== prospectsGeneration || key !== requestKey) return;
-      if (!result.ok || !Array.isArray(result.prospects)) throw new Error('The inquiry list could not be read. Try again.');
-      var rows = result.prospects, eligible = rows.filter(function (row) { return row.marketingEligible === true; }).length;
-      $('prospectsStatus').textContent = rows.length + ' inquiries · ' + eligible + ' eligible for marketing email. No campaign has been sent.';
-      if (rows.length) {
-        var table = document.createElement('table'), head = table.createTHead().insertRow();
-        ['Contact', 'Business', 'Main goal', 'Email verified', 'Email updates'].forEach(function (label) { var th = document.createElement('th'); th.scope = 'col'; th.textContent = label; head.appendChild(th); });
-        var body = table.createTBody();
-        rows.forEach(function (row) {
-          var tr = body.insertRow();
-          [String(row.name || '') + (row.name ? ' · ' : '') + String(row.email || ''), row.business || '', String(row.goal || '').replace(/_/g, ' '), row.emailVerifiedAt ? 'Verified' : 'Not verified', row.suppressed ? 'Unsubscribed' : row.marketingEligible ? 'Confirmed' : row.marketingRequested ? 'Not confirmed' : 'Not requested'].forEach(function (value) { tr.insertCell().textContent = value; });
-        });
-        var scroll = document.createElement('div'); scroll.className = 'prospects-table-scroll'; scroll.tabIndex = 0;
-        scroll.setAttribute('role', 'region'); scroll.setAttribute('aria-label', 'Website inquiries; scroll to see all columns');
-        scroll.appendChild(table); $('prospects').appendChild(scroll);
-      }
-    } catch (error) {
-      if (version === prospectsGeneration && key === requestKey) $('prospectsStatus').textContent = error.name === 'AbortError' ? 'Loading took too long. Try again.' : error.message;
-    } finally { if (version === prospectsGeneration && key === requestKey) prospectControls(false); }
-  }
-  async function exportProspects(audience) {
-    if (!key) return;
-    var requestKey = key, version = prospectsGeneration; prospectControls(true);
-    try {
-      var blob = await prospectRequest(audience, 'csv', requestKey);
-      if (version !== prospectsGeneration || key !== requestKey) return;
-      var url = URL.createObjectURL(blob), link = document.createElement('a');
-      link.href = url; link.download = audience === 'eligible' ? 'marketing-contacts.csv' : 'all-inquiries.csv'; link.click();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      $('prospectsStatus').textContent = audience === 'eligible' ? 'Marketing list downloaded. No email has been sent.' : 'All inquiries downloaded. This includes contacts who are not eligible for marketing email.';
-    } catch (error) { if (version === prospectsGeneration && key === requestKey) $('prospectsStatus').textContent = 'The export could not be completed. Please try again.'; }
-    finally { if (version === prospectsGeneration && key === requestKey) prospectControls(false); }
-  }
-  $('refreshProspects').addEventListener('click', loadProspects);
-  $('exportMarketing').addEventListener('click', function () { exportProspects('eligible'); });
-  $('exportProspects').addEventListener('click', function () { exportProspects('all'); });
-  function load() {
-    if (!key) return;
-    loadProspects();
-    $('msg').textContent = 'loading';
-    api(null, 'GET').then(function (d) {
-      try { sessionStorage.setItem('mc_admin_key', key); } catch (e) { /* ignore */ }
-      $('msg').textContent = d.clients.length + ' shop' + (d.clients.length === 1 ? '' : 's') + (d.lastRun ? ', scheduler ran ' + rel(d.lastRun.at) + (d.lastRun.ok ? '' : ' WITH ERRORS') : ', scheduler has not run');
-      window.__brake = !!(d.brake && d.brake.on); $('brakeBtn').textContent = 'Brake: ' + (window.__brake ? 'ON' : 'off'); $('brakeBtn').style.background = window.__brake ? '#FEE2E2' : '';
-      var needs = []; var dow = new Date().getDay(), dom = new Date().getDate();
-      d.clients.forEach(function (c) { var link = '<a href="' + esc(c.portal) + '" target="_blank" rel="noopener">' + esc(c.name || c.slug) + '</a>';
-        if (c.openFlags) needs.push(link + ': ' + c.openFlags + ' flagged conversation' + (c.openFlags > 1 ? 's' : '') + ' to read');
-        if (c.autoFlags7d) needs.push(link + ': ' + c.autoFlags7d + ' auto-flag' + (c.autoFlags7d > 1 ? 's' : '') + ' from the nightly check this week');
-        if (c.overdueOld) needs.push(link + ': ' + c.overdueOld + ' callback' + (c.overdueOld > 1 ? 's' : '') + ' overdue for more than a day');
-        if (c.testingDays >= 3) needs.push(link + ': in testing for ' + c.testingDays + ' days, no go-live');
-        if (c.forwardingUnverifiedDays >= 2) needs.push(link + ': number assigned ' + c.forwardingUnverifiedDays + ' days ago, forwarding never verified');
-        if ((c.phone || {}).tenDlc === 'failed') needs.push(link + ': texting registration failed');
-        if (c.healthAlerts7d && c.healthAlerts7d.length) needs.push(link + ': health alert' + (c.healthAlerts7d.length > 1 ? 's' : '') + ' this week (' + c.healthAlerts7d.join(', ') + ')');
-        var lc = c.lifecycle || {}; var lastMonth = (function () { var d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); })();
-        if (c.status === 'live' && dom <= 7 && lc.invoicedFor !== lastMonth && c.liveDays !== null && c.liveDays >= 1) needs.push(link + ': statement and invoice due for ' + lastMonth + ' <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="invoicedFor" data-val="' + lastMonth + '">Invoiced</button>');
-        if (c.status === 'live' && c.liveDays === 6 && !lc.day7Sent) needs.push(link + ': day-7 email tomorrow (the draft lands in your inbox)');
-        if (c.status === 'live' && c.liveDays !== null && c.liveDays >= 7 && !lc.day7Sent) needs.push(link + ': day-7 "what I changed" email due (the free-week-over email waits on it) <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="day7Sent">Sent</button>');
-        if (!c.selfService && !lc.onboardingCallAt && c.newShopDays <= 7 && c.status !== 'cancelled') needs.push(link + ': new shop, onboarding call promised within one business day <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="onboardingCallAt">Called</button>');
-        if (c.spanishReviewPending && c.status === 'live') needs.push(link + ': Spanish texts still waiting for the reviewer'); });
-      $('needs').innerHTML = needs.length ? needs.map(function (n) { return '<div>' + n + '</div>'; }).join('') : 'Nothing needs you.';
-      $('shops').innerHTML = d.clients.length ? '<table><tr><th>Shop</th><th>Status</th><th>Plan</th><th>Live since</th><th>Texting</th><th>Usage</th><th>Errors 24 h</th><th>Last inbound</th><th>Flags</th><th>Waiting</th><th>Callbacks</th><th>Actions</th></tr>' + d.clients.map(function (c) {
-        var h = c.health || {}, u = c.usage || {};
-        return '<tr data-slug="' + esc(c.slug) + '"><td><b>' + esc(c.name || c.slug) + '</b><br><span class="muted">' + esc(c.slug) + '<br>' + esc((c.owner || {}).name || '') + ' ' + esc((c.owner || {}).phone || '') + '</span></td>'
-          + '<td>' + esc(c.status) + '</td><td>' + esc(c.plan) + '</td><td>' + esc((c.liveAt || '').slice(0, 10) || '-') + '</td>'
-          + '<td>' + esc((c.phone || {}).tenDlc || '-') + '<br><span class="muted">' + esc(h.sender || '') + '</span></td>'
-          + '<td>' + (u.minutes || 0) + '/' + ((u.included || {}).minutes || '-') + ' min<br>' + (u.texts || 0) + '/' + ((u.included || {}).texts || '-') + ' txt</td>'
-          + '<td class="' + (h.errors24h ? 'bad' : '') + '">' + (h.errors24h || 0) + '</td><td>' + esc(rel(c.lastInbound)) + '</td><td>' + (c.openFlags || 0) + '</td><td class="' + (c.waitingAlerts ? 'bad' : '') + '">' + (c.waitingAlerts || 0) + '</td><td>' + (c.pendingCallbacks || 0) + (c.overdueCallbacks ? ' <span class="bad">(' + c.overdueCallbacks + ' overdue)</span>' : '') + '</td>'
-          + '<td><a class="btn" href="' + esc(c.portal) + '" target="_blank" rel="noopener">Portal</a><a class="btn" href="' + esc(c.policy) + '" target="_blank" rel="noopener">Policy</a>'
-          + (c.status === 'paused' ? '<button class="btn" data-a="resume">Resume</button>' : (c.status === 'live' || c.status === 'testing') ? '<button class="btn" data-a="pause">Pause</button>' : '')
-          + (c.status === 'cancelled' ? '<button class="btn" data-a="reactivate">Reactivate</button>' : '') + '<button class="btn" data-a="tasks">Tasks</button><button class="btn" data-a="prompt">Prompt</button><button class="btn" data-a="note">Next-month note</button>' + '<button class="btn" data-a="digest">Digest</button><button class="btn" data-a="weekly">Weekly</button><button class="btn" data-a="monthly">Monthly</button><button class="btn" data-a="keys">Angi/Thumbtack keys</button><button class="btn" data-a="clear_optout">Clear opt-out</button><button class="btn" data-a="delete">Delete</button></td></tr>';
-      }).join('') + '</table>' : '<p class="muted">No shops.</p>';
-      $('events').textContent = (d.events || []).map(function (e) { return e.at.slice(5, 16).replace('T', ' ') + '  ' + (e.name || e.slug).slice(0, 18).padEnd(18) + ' ' + e.type + (e.data && e.data.id ? ' ref ' + e.data.id : '') + (e.data && e.data.reason ? ' ' + e.data.reason : '') + (e.data && e.data.preview ? '  "' + String(e.data.preview).replace(/\s+/g, ' ').slice(0, 70) + '"' : ''); }).join('\n') || 'Nothing in the last 24 hours.';
-    }).catch(function (e) { $('msg').textContent = 'Could not load: ' + e.message; });
-  }
-  $('needs').addEventListener('click', function (ev) {
-    var b = ev.target.closest('button[data-stamp]'); if (!b) return;
-    var body = { slug: b.dataset.slug, lifecycle: {} }; body.lifecycle[b.dataset.stamp] = b.dataset.val || new Date().toISOString();
-    api(body).then(function () { toast('Noted'); load(); }).catch(function (e) { toast(e.message); });
-  });
-  $('shops').addEventListener('click', function (ev) {
-    var b = ev.target.closest('button[data-a]'); if (!b) return;
-    var slug = b.closest('tr').dataset.slug, a = b.dataset.a;
-    if (a === 'delete' && !confirm('Delete ' + slug + ' and everything under it? This releases the number too.')) return;
-    if (a === 'clear_optout') { var ph = prompt('Phone number to clear (E.164)'); if (!ph) return; return api({ slug: slug, action: 'clear_optout', phone: ph }).then(function (r) { toast('Cleared ' + r.cleared); }).catch(function (e) { toast(e.message); }); }
-    if (a === 'keys') { var ak = prompt('Angi key (blank keeps current)'); var ts = prompt('Thumbtack secret (blank keeps current)'); var leads = {}; if (ak) leads.angiKey = ak; if (ts) leads.thumbtackSecret = ts; if (!Object.keys(leads).length) return; return api({ slug: slug, leads: leads }).then(function () { toast('Keys saved'); }).catch(function (e) { toast(e.message); }); }
-    if (a === 'tasks') { return api({ slug: slug, action: 'tasks' }).then(function (r) { var lines = (r.tasks || []).map(function (t, i) { return (i + 1) + '. ' + t.type + ' due ' + t.dueAt.replace('T', ' ').slice(0, 16) + (t.data && (t.data.bookingId || t.data.leadId) ? ' ref ' + (t.data.bookingId || t.data.leadId) : '') + ' [' + t.id + ']'; }); var pick = prompt((lines.length ? lines.join('\n') : 'No scheduled sends.') + '\n\nTo cancel one, enter its number:'); var idx = parseInt(pick, 10); if (idx >= 1 && idx <= lines.length) return api({ slug: slug, action: 'cancel_task', id: r.tasks[idx - 1].id }).then(function (x) { toast('Cancelled ' + x.cancelled); }); }).catch(function (e) { toast(e.message); }); }
-    if (a === 'prompt') { var ch = prompt('Channel: web, sms, voice, or test', 'sms'); if (!ch) return; return api({ slug: slug, action: 'prompt', channel: ch }).then(function (r) { var w = window.open('', '_blank'); if (w) { w.document.write('<pre style="white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,monospace;padding:16px">' + esc(r.prompt) + '</pre>'); w.document.close(); } else alert(r.prompt); }).catch(function (e) { toast(e.message); }); }
-    if (a === 'note') { var n = prompt('Next month line for the statement (blank clears it)'); if (n === null) return; return api({ slug: slug, nextMonthNote: n }).then(function () { toast('Saved'); }).catch(function (e) { toast(e.message); }); }
-    if (a === 'reactivate') { if (!confirm('Reactivate ' + slug + '? It comes back paused; the owner resumes from the portal.')) return; }
-    if (a === 'digest' || a === 'weekly' || a === 'monthly') { var send = confirm('Send it to the owner too? Cancel shows it here only.'); return api({ slug: slug, action: a, send: send }).then(function (r) { alert(r.text || r.email || JSON.stringify(r)); toast(send ? 'Sent' : 'Shown'); }).catch(function (e) { toast(e.message); }); }
-    api({ slug: slug, action: a }).then(function (r) { toast(a + ': ' + (r.status || (r.ok ? 'ok' : JSON.stringify(r)))); load(); }).catch(function (e) { toast(e.message); });
-  });
-  $('runNow').addEventListener('click', function () { $('runMsg').textContent = 'running'; api({ action: 'run_scheduler' }).then(function (r) { $('runMsg').textContent = (r.ok ? 'ok' : 'with errors') + ': ' + Object.keys(r.blocks || {}).map(function (k) { return k + (r.blocks[k].ok ? '' : ' FAILED'); }).join(', '); load(); }).catch(function (e) { $('runMsg').textContent = e.message; }); });
-  $('brakeBtn').addEventListener('click', function () { var on = !window.__brake; if (!confirm((on ? 'Put the brake on? ' : 'Release the brake? ') + 'Customer sends are never affected.')) return; api({ action: 'brake', on: on }).then(function () { toast(on ? 'Brake on' : 'Brake released'); load(); }).catch(function (e) { toast(e.message); }); });
-  $('lastRun').addEventListener('click', function () { api({ action: 'last_run' }).then(function (r) { alert(JSON.stringify(r.lastRun, null, 2)); }).catch(function (e) { toast(e.message); }); });
-  $('keyGo').addEventListener('click', function () { key = $('key').value.trim(); load(); });
-  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') { key = $('key').value.trim(); load(); } });
-  if (key) { $('key').value = key; load(); }
-})();
-</script>
+<body data-no-widget>
+<section id="login" class="login-wrap" aria-labelledby="loginTitle">
+  <a class="login-logo" href="index.html">Machines &amp; Cloud</a>
+  <p class="eyebrow" style="margin-top:36px">Operations</p>
+  <h1 id="loginTitle">Welcome back.</h1>
+  <p class="muted">Sign in to manage customers, follow their setup and resolve issues.</p>
+  <form id="loginForm">
+    <div class="field"><label for="adminEmail">Your work email</label><input id="adminEmail" type="email" autocomplete="email" required maxlength="254" placeholder="you@company.com"></div>
+    <button class="btn primary" id="requestLink" type="submit">Email me a sign-in link</button>
+  </form>
+  <div id="verifyPanel" class="notice" hidden><p>Your sign-in link is ready. Continue to confirm access to this browser.</p><button class="btn primary" type="button" id="verifyLink">Continue securely</button></div>
+  <p id="loginStatus" class="page-status" role="status" aria-live="polite"></p>
+  <p class="muted">Access is limited to authorized operators. Customer sign-in does not grant access to this portal.</p>
+</section>
+<div id="app" class="app-shell" hidden>
+  <aside class="side">
+    <a class="brand" href="index.html">Machines &amp; Cloud<span>Customer operations</span></a>
+    <nav aria-label="Operations"><button type="button" data-view="overview" aria-current="page">Overview</button><button type="button" data-view="customers">Customers</button><button type="button" data-view="issues">Issues</button><button type="button" data-view="activity">Activity</button><button type="button" data-view="inquiries">Inquiries</button><button type="button" data-view="system">System</button></nav>
+    <div class="side-footer">A clear view of every customer.<br>Actions stay attached to the account.</div>
+  </aside>
+  <main class="main-area" id="mainContent">
+    <div class="topbar"><p id="operator"></p><div class="topbar-actions"><span class="timestamp" id="lastUpdated"></span><button class="btn small" type="button" id="refreshAll">Refresh</button><button class="btn small quiet" type="button" id="signOut">Sign out</button></div></div>
+    <p class="muted" id="scopeNotice" hidden></p><div id="appStatus" class="notice" role="status" aria-live="polite" hidden></div>
+    <section id="view-overview" class="view" aria-labelledby="overviewTitle"><header class="page-head"><p class="eyebrow">Your business at a glance</p><h1 id="overviewTitle" tabindex="-1">Overview</h1><p>See what needs attention, then go straight to the customer.</p></header><div id="summary" class="stat-grid"></div><div class="two-columns"><div class="panel"><div class="panel-head"><h2>Needs attention</h2><button class="btn small" data-go="issues" type="button">View all issues</button></div><div id="overviewIssues"></div></div><div class="panel"><div class="panel-head"><h2>Recent activity</h2><button class="btn small" data-go="activity" type="button">View activity</button></div><div id="overviewActivity"></div></div></div></section>
+    <section id="view-customers" class="view" hidden aria-labelledby="customersTitle"><header class="page-head"><p class="eyebrow">Customer management</p><h1 id="customersTitle" tabindex="-1">Customers</h1><p>Find a business, review its connections and help it move forward.</p></header><div id="customerList"><form class="filters" id="customerFilters" role="search"><div class="field"><label for="customerSearch">Find a customer</label><input id="customerSearch" type="search" placeholder="Business, email or account" autocomplete="off"></div><div class="field"><label for="customerStatus">Service status</label><select id="customerStatus"><option value="all">All customers</option><option value="testing">In setup</option><option value="live">Live</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select></div></form><p id="customerCount" class="muted" role="status"></p><div id="customers"></div><p><button class="btn" id="loadMoreCustomers" type="button" hidden>Load more customers</button></p></div><div id="customerDetail" hidden></div></section>
+    <section id="view-issues" class="view" hidden aria-labelledby="issuesTitle"><header class="page-head"><p class="eyebrow">Keep customers moving</p><h1 id="issuesTitle" tabindex="-1">Issues</h1><p>Current checks and recorded issues, with the account context to investigate.</p></header><div class="panel" id="issues"></div></section>
+    <section id="view-activity" class="view" hidden aria-labelledby="activityTitle"><header class="page-head"><p class="eyebrow">What happened</p><h1 id="activityTitle" tabindex="-1">Activity</h1><p>Saved activity across loaded accounts. Refresh to check for updates.</p></header><div class="panel" id="activity"></div></section>
+    <section id="view-inquiries" class="view" hidden aria-labelledby="prospectsTitle"><header class="page-head"><p class="eyebrow">People getting started</p><h1 id="prospectsTitle" tabindex="-1">Inquiries</h1><p>Details saved before signup is complete. Email eligibility is shown separately.</p></header><div class="panel"><div class="actions"><button class="btn" type="button" id="refreshProspects">Refresh inquiries</button><button class="btn" type="button" id="exportMarketing">Export marketing list</button><button class="btn" type="button" id="exportProspects">Export all inquiries</button></div><p id="prospectsStatus" class="muted" role="status" style="margin-top:16px"></p><div id="prospects"></div></div></section>
+    <section id="view-system" class="view" hidden aria-labelledby="systemTitle"><header class="page-head"><p class="eyebrow">Platform status</p><h1 id="systemTitle" tabindex="-1">System</h1><p>Recorded scheduler results and connection availability.</p></header><div id="system"></div></section>
+  </main>
+</div>
+<dialog id="actionDialog" aria-labelledby="actionTitle"><form id="actionForm" class="action-form"><div><p class="eyebrow">Customer support</p><h2 id="actionTitle"></h2><p id="actionDescription" class="muted"></p></div><div id="rulesFields" hidden><div class="field"><label for="ruleServices">Services, one per line</label><textarea id="ruleServices" maxlength="12000" rows="5"></textarea></div><div class="field"><label for="ruleServiceArea">Service area, one place per line</label><textarea id="ruleServiceArea" maxlength="6000" rows="3"></textarea></div><div class="field"><label for="ruleNotServed">Areas not served, one per line</label><textarea id="ruleNotServed" maxlength="6000" rows="3"></textarea></div><div class="field"><label for="ruleSummary">Business instructions</label><textarea id="ruleSummary" maxlength="4000" rows="4"></textarea></div></div><div class="field" id="noteField" hidden><label for="actionNote">Internal note</label><textarea id="actionNote" maxlength="2000" rows="4"></textarea></div><div class="field"><label for="actionReason">Reason for this action</label><textarea id="actionReason" required maxlength="300" rows="3" placeholder="What are you resolving?"></textarea></div><p id="actionStatus" class="page-status" role="status" aria-live="polite"></p><div class="actions"><button class="btn primary" type="submit" id="actionSubmit">Confirm</button><button class="btn" type="button" id="actionCancel">Cancel</button></div></form></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<noscript><p style="padding:24px">Enable JavaScript to sign in to this private operations portal.</p></noscript>
 </body>
 </html>

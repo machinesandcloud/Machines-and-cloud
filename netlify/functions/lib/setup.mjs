@@ -1,7 +1,9 @@
 // Derived owner readiness. Tutorial clicks and provider keys cannot certify a channel.
 import { createHash } from "node:crypto";
 import { loopCheck } from "./config.mjs";
-export const isSelfServiceClient = c => c?.onboarding?.version === 1;
+// An unknown marker must never fall back into legacy paid/provider workflows.
+export const isSelfServiceClient = c => !!c && Object.hasOwn(c, "onboarding");
+export const isSupportedSelfServiceClient = c => c?.onboarding?.version === 1;
 const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 export function configurationRevision(c) {
   const business = Object.fromEntries(["name", "trade", "city", "serviceArea", "notServed", "hours", "afterHours", "spanish", "licenses"].map(key => [key, c.business?.[key] ?? null]));

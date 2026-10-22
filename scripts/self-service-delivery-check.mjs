@@ -90,7 +90,8 @@ check(() => assert.equal(skippedCallback, "channel_not_active"));
 check(() => assert.equal(outbound.length, 0));
 // Legacy shop behavior remains: real booking tools still create reminder/consent intents
 // and invoke the intercepted sender adapters. No actual network is possible in this process.
-const legacy = { ...c, slug: "qa-legacy-delivery", onboarding: undefined, calendar: { provider: "none" } };
+const legacy = { ...c, slug: "qa-legacy-delivery", calendar: { provider: "none" } };
+delete legacy.onboarding; // A legacy record has no marker; unknown markers stay protected.
 await saveClient(legacy);
 const lb = await bookVisit(legacy, { ...input, phone: "+17135550145" }, { channel: "web" });
 check(() => assert.match(lb.consent.wording, /appointment texts/));

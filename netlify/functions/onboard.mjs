@@ -7,7 +7,7 @@ import { json } from "./lib/agent.mjs";
 import { createHash } from "node:crypto";
 import { getAccessSession, accessOriginAllowed, accessSite } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail, findVerifiedAccount, ensureVerifiedAccount, AccountError } from "./lib/accounts.mjs";
-import { setupReadiness } from "./lib/setup.mjs";
+import { setupReadiness, isSelfServiceClient, isSupportedSelfServiceClient } from "./lib/setup.mjs";
 import { INTAKE_GOALS, INTAKE_CHANNELS } from "./lib/intake.mjs";
 
 export const config = { path: "/api/onboard" };
@@ -35,10 +35,11 @@ async function handle(req) {
   if (req.method === "GET") {
     const c = await strictRead("clients", url.searchParams.get("c") || "");
     if (!c) return json({ error: "not_found" }, 404);
-    if (c.onboarding?.version === 1) {
+    if (isSelfServiceClient(c)) {
       const session = await getAccessSession(req);
       if (!session) return json({ error: "verification_required" }, 401);
       if (normalizeAccountEmail(session.email) !== normalizeAccountEmail(c.owner?.email)) return json({ error: "forbidden" }, 403);
+      if (!isSupportedSelfServiceClient(c)) return json({ error: "unsupported_workspace" }, 409);
     } else if (c.ownerKey !== url.searchParams.get("k")) return json({ error: "not_found" }, 404);
     return json({ status: c.status, build: c.build, slug: c.slug }, 200, CORS(origin));
   }
@@ -54,7 +55,7 @@ async function handle(req) {
   const email = normalizeAccountEmail(session.email);
   if (!email || (b.email !== undefined && normalizeAccountEmail(b.email) !== email)) return json({ error: "email_mismatch" }, 400);
   const existing = await findVerifiedAccount(email);
-  const response = (client, extra = {}) => json({ ok: true, slug: client.slug, ...(client.onboarding?.version === 1 ? {} : { key: client.ownerKey }), portal: `${accessSite()}/desk.html?c=${encodeURIComponent(client.slug)}${client.onboarding?.version === 1 ? "" : `&k=${encodeURIComponent(client.ownerKey)}`}`, client: ownerView(client), setup: setupReadiness(client), ...extra }, 200, { ...CORS(origin), "Cache-Control": "no-store" });
+  const response = (client, extra = {}) => isSelfServiceClient(client) && !isSupportedSelfServiceClient(client) ? json({ error: "unsupported_workspace" }, 409) : json({ ok: true, slug: client.slug, ...(isSelfServiceClient(client) ? {} : { key: client.ownerKey }), portal: `${accessSite()}/desk.html?c=${encodeURIComponent(client.slug)}${isSelfServiceClient(client) ? "" : `&k=${encodeURIComponent(client.ownerKey)}`}`, client: ownerView(client), setup: setupReadiness(client), ...extra }, 200, { ...CORS(origin), "Cache-Control": "no-store" });
   if (existing) return response(existing, { existing: true });
   const website = s(b.website, 200);
   const phone = e164(s(b.phone, 30));

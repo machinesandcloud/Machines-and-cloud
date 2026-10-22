@@ -1,0 +1,227 @@
+{
+  "at": "2026-10-22T07:24:12.154Z",
+  "mode": "independent actual management/owner handlers and local queue; memory and intercepted installed Blobs SDK; no external requests",
+  "checks": [
+    {
+      "name": "memory: unconfigured/nonstaff sign-in and unauthenticated reads fail closed without mail",
+      "pass": true
+    },
+    {
+      "name": "memory: owner proof cannot be consumed by operator exchange or read management data",
+      "pass": true
+    },
+    {
+      "name": "memory: operator proof has fixed return, one-use8-hour scope and cannot authorize owner APIs",
+      "pass": true
+    },
+    {
+      "name": "memory: allowlist revocation, expired and revoked operator sessions fail on every request",
+      "pass": true
+    },
+    {
+      "name": "memory: private list/detail omit owner keys and provider credentials with no-store headers",
+      "pass": true
+    },
+    {
+      "name": "memory: invalid actions, fields, reasons, origin and stale revision cannot mutate customer",
+      "pass": true
+    },
+    {
+      "name": "memory: support note and named audit commit together and stale request cannot replay",
+      "pass": true
+    },
+    {
+      "name": "memory: offered editable rules roundtrip preserves fee structure and credentials",
+      "pass": true
+    },
+    {
+      "name": "memory: unknown onboarding versions and legacy customers are read-only",
+      "pass": true
+    },
+    {
+      "name": "memory: failed background operation is represented as an actionable issue",
+      "pass": true
+    },
+    {
+      "name": "memory: pause works without activation; resume requires current proof, model and quota",
+      "pass": true
+    },
+    {
+      "name": "memory: rebuild intent is durable, duplicate safe and completion preserves owner/provider facts",
+      "pass": true
+    },
+    {
+      "name": "memory: stale inputs and paused work are fenced rather than overwritten",
+      "pass": true
+    },
+    {
+      "name": "memory: operator sign-out revokes only operator authority",
+      "pass": true
+    },
+    {
+      "name": "sdk: unconfigured/nonstaff sign-in and unauthenticated reads fail closed without mail",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner proof cannot be consumed by operator exchange or read management data",
+      "pass": true
+    },
+    {
+      "name": "sdk: operator proof has fixed return, one-use8-hour scope and cannot authorize owner APIs",
+      "pass": true
+    },
+    {
+      "name": "sdk: allowlist revocation, expired and revoked operator sessions fail on every request",
+      "pass": true
+    },
+    {
+      "name": "sdk: private list/detail omit owner keys and provider credentials with no-store headers",
+      "pass": true
+    },
+    {
+      "name": "sdk: invalid actions, fields, reasons, origin and stale revision cannot mutate customer",
+      "pass": true
+    },
+    {
+      "name": "sdk: support note and named audit commit together and stale request cannot replay",
+      "pass": true
+    },
+    {
+      "name": "sdk: offered editable rules roundtrip preserves fee structure and credentials",
+      "pass": true
+    },
+    {
+      "name": "sdk: unknown onboarding versions and legacy customers are read-only",
+      "pass": true
+    },
+    {
+      "name": "sdk: failed background operation is represented as an actionable issue",
+      "pass": true
+    },
+    {
+      "name": "sdk: pause works without activation; resume requires current proof, model and quota",
+      "pass": true
+    },
+    {
+      "name": "sdk: rebuild intent is durable, duplicate safe and completion preserves owner/provider facts",
+      "pass": true
+    },
+    {
+      "name": "sdk: stale inputs and paused work are fenced rather than overwritten",
+      "pass": true
+    },
+    {
+      "name": "sdk: failed client/audit CAS leaves no partial support mutation",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost committed support response is visible on refresh and stale retry cannot duplicate audit",
+      "pass": true
+    },
+    {
+      "name": "sdk: CAS conflict rechecks resume readiness and preserves concurrent owner edits",
+      "pass": true
+    },
+    {
+      "name": "sdk: missing operation projection recovers durable intent without another request",
+      "pass": true
+    },
+    {
+      "name": "sdk: ambiguous local completion repairs operation receipt without rewriting the customer",
+      "pass": true
+    },
+    {
+      "name": "sdk: recovery cursor reaches due work beyond50 backed-off candidates with10-job ceiling",
+      "pass": true,
+      "detail": {
+        "first": {
+          "scope": "bounded_candidates",
+          "inspected": 50,
+          "processed": 0,
+          "queued": 0,
+          "retryDue": 50,
+          "running": 0,
+          "failed": 0,
+          "uncertain": 0,
+          "succeeded": 0,
+          "oldestQueuedAt": null,
+          "openFailures": 0,
+          "errors": [],
+          "ok": true
+        },
+        "second": {
+          "scope": "bounded_candidates",
+          "inspected": 50,
+          "processed": 10,
+          "queued": 0,
+          "retryDue": 40,
+          "running": 0,
+          "failed": 0,
+          "uncertain": 0,
+          "succeeded": 10,
+          "oldestQueuedAt": null,
+          "openFailures": 0,
+          "errors": [],
+          "ok": true
+        }
+      }
+    },
+    {
+      "name": "sdk: operator sign-out revokes only operator authority",
+      "pass": true
+    },
+    {
+      "name": "Recorded runtime bytes stayed stable through independent QA",
+      "pass": true
+    },
+    {
+      "name": "No unexpected external/model/provider/background request",
+      "pass": true
+    }
+  ],
+  "blocked": [],
+  "mail": [
+    {
+      "subject": "Your Machines & Cloud sign-in link",
+      "recipients": 1,
+      "disposition": "intercepted fixture, not sent"
+    },
+    {
+      "subject": "Your Machines & Cloud sign-in link",
+      "recipients": 1,
+      "disposition": "intercepted fixture, not sent"
+    }
+  ],
+  "conflicts": 3,
+  "sourceBefore": {
+    "netlify/functions/manage.mjs": "3ec92314d9c4f28b8d14e42e253d4d946938e3d6123a8fcc9a0275f388ee5e3f",
+    "netlify/functions/lib/operator.mjs": "c2b2d82f12bfe662d7f1a86047fbea11424eec32a0168290e5a2b866e902434d",
+    "netlify/functions/lib/platform-operations.mjs": "4d40bedd3a3116474eab69fdb427185aa34757e0a32fe78094c708822e182507",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "5be19a0338c8b0502cf5b3ef7059c4dc92c3012d31cb2d7a48e1b579a4c1951d",
+    "netlify/functions/client.mjs": "36dbada153e9b488404e8d42cda55b4ab81d6f2c601f8fb3a5727612bdb527a0",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "00207d4e760f7043ac641509d50da5f026c7183092d730feb41ed692631b280b",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55"
+  },
+  "sourceAfter": {
+    "netlify/functions/manage.mjs": "3ec92314d9c4f28b8d14e42e253d4d946938e3d6123a8fcc9a0275f388ee5e3f",
+    "netlify/functions/lib/operator.mjs": "c2b2d82f12bfe662d7f1a86047fbea11424eec32a0168290e5a2b866e902434d",
+    "netlify/functions/lib/platform-operations.mjs": "4d40bedd3a3116474eab69fdb427185aa34757e0a32fe78094c708822e182507",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "5be19a0338c8b0502cf5b3ef7059c4dc92c3012d31cb2d7a48e1b579a4c1951d",
+    "netlify/functions/client.mjs": "36dbada153e9b488404e8d42cda55b4ab81d6f2c601f8fb3a5727612bdb527a0",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/lib/config.mjs": "00207d4e760f7043ac641509d50da5f026c7183092d730feb41ed692631b280b",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55"
+  },
+  "summary": {
+    "passed": 36,
+    "failed": 0,
+    "total": 36
+  }
+}

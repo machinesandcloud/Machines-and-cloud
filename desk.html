@@ -56,6 +56,11 @@
     .setup-step { display:flex; gap:12px; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid #d5e2fb; }
     .setup-step p { margin:4px 0; font-size:13px; color:#475569; }
     .setup-step button { flex:none; }
+    #workspaceOperations .setup-step > div { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+    #workspaceOperations code { white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
+    #phoneSetupProgress, #phoneSetupOffer { overflow-wrap:anywhere; }
+    #phoneSetupForm .check { margin:14px 0; font-size:14px; }
+    #phoneSetupForm .check input { flex:none; margin-top:5px; min-width:18px; min-height:18px; }
     .review-card { border:1px solid #d5e2fb; padding:18px; border-radius:16px; background:#f5f8ff; margin-bottom:18px; }
     .review-card p { margin:0 0 12px; }
     #testPreview { white-space:pre-wrap; overflow-wrap:anywhere; background:#f5f8ff; padding:16px; border-radius:12px; font-size:14px; }
@@ -176,6 +181,26 @@
       </form>
       <div id="connectionJourney"></div>
     </div>
+    <section class="card2" id="phoneSetupCard" hidden aria-labelledby="phoneSetupTitle">
+      <div class="workspace-guide-head"><div><h3 id="phoneSetupTitle">Your phone number request</h3><p class="muted" id="phoneSetupDetail"></p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="refreshPhoneSetup">Refresh status</button></div>
+      <div id="phoneSetupProgress"></div>
+      <form id="phoneSetupForm" hidden>
+        <h3 style="margin-top:18px">Reserve a number for your business</h3>
+        <p class="muted">This request is for a number only. Phone answering and customer text messages stay inactive until their connections and delivery are verified.</p>
+        <div id="phoneSetupOffer" class="muted"></div>
+        <label class="check"><input type="checkbox" id="phoneAuthority" required><span id="phoneAuthorityText"></span></label>
+        <label class="check"><input type="checkbox" id="phoneCosts" required><span id="phoneCostsText"></span></label>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestPhoneSetup">Request a number</button>
+      </form>
+      <button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelPhoneSetup" hidden>Cancel number request</button>
+      <p class="muted" id="phoneSetupMessage" role="status" aria-live="polite"></p>
+    </section>
+    <section class="card2" id="backgroundWork" hidden aria-labelledby="backgroundWorkTitle">
+      <div class="workspace-guide-head"><div><h3 id="backgroundWorkTitle">Workspace updates</h3><p class="muted">Refresh your desk from the business answers you have saved. This keeps your answers and customer records, and does not activate connections or contact anyone.</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="refreshBackgroundWork">Refresh status</button></div>
+      <div id="workspaceOperations"></div>
+      <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestWorkspaceRefresh">Refresh saved workspace</button>
+      <p class="muted" id="workspaceOperationMessage" role="status" aria-live="polite"></p>
+    </section>
     <div class="grid2">
       <div class="card2"><h3>Line health</h3><div id="health" class="muted"></div></div>
       <div class="card2"><h3>Checklist</h3><div id="checklist"></div>
@@ -211,6 +236,13 @@
   <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="tourBack">Back</button><button type="button" class="walkthrough-dismiss" id="skipGuide">Skip for now</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourNext">Next</button></div>
 </dialog>
 <div class="toast" id="toast"></div>
+<dialog class="walkthrough" id="phoneCancelDialog" aria-labelledby="phoneCancelTitle">
+  <h2 id="phoneCancelTitle">Cancel this number request?</h2>
+  <p>If a number has already been reserved, the platform will request its release. Phone answering stays inactive. The request and its resource receipt stay recorded until release is confirmed.</p>
+  <p class="muted">Cancellation can remain pending while provider execution is unavailable.</p>
+  <p id="phoneCancelMessage" class="muted" role="status" aria-live="polite"></p>
+  <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="confirmPhoneCancel">Cancel number request</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="keepPhoneSetup">Keep request</button></div>
+</dialog>
 <script src="desk.js" defer></script>
 
 </body>
