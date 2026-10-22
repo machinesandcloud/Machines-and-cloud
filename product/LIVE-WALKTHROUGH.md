@@ -4,7 +4,7 @@ Date: **2026-10-21, Houston**. User request: make the See it work section dynami
 
 ## Result and release boundary
 
-**Accepted locally by PM and PO: 92/92 dedicated UI checks, 509/509 existing site checks, 18 offline API updates and six independently reviewed actual-AI cases.** The published site remains the previously accepted `40a147b`; this enhancement has **not been pushed or deployed**. The previous approval covered that specific batch and one build. Another same-day release requires the existing deployment exception after this result is reviewable; auto recharge stays disabled.
+**Accepted locally by PM and PO: 92/92 dedicated UI checks, 509/509 existing site checks, 18 offline API updates and six independently reviewed actual-AI cases.** Steve subsequently approved publishing the verified `e80250f` update in one additional build and reported the stretched footer logo. Root included the footer correction in that pending batch. Publication is approved and pending the final targeted footer check; the published site remains `40a147b` until the release record confirms otherwise. Auto recharge stays disabled.
 
 - **Watch it work:** the current text, call-transcript and Spanish examples reveal messages and matching owner details in order. First visibility starts one silent playback; Pause/Play and Replay remain available. Leaving the viewport or tab pauses without automatic resumption. Reduced motion shows the complete exchange immediately. The default HTML stays useful without JavaScript. There is no provider or model call in Watch.
 - **Try it yourself:** the visitor chooses an HVAC, plumbing or Spanish cleaning practice desk, types a request and explicitly sends it. Real Anthropic replies stream into the conversation. The adjacent owner card fills from validated structured events as actual visitor facts emerge, including corrections. Unknown facts stay unknown; a requested window is not a reservation. A mobile link calls attention to the updated owner summary without moving the page automatically.
@@ -38,6 +38,12 @@ PM's read-only `scratchpad/site-demo-adjudication.json` preserves the earlier co
 Representative visual evidence: [animated Watch](../scratchpad/site-demo-accepted-1440-watch-playing.png), [320 px composer](../scratchpad/site-demo-accepted-320-composer-safe.png), [390 px composer](../scratchpad/site-demo-accepted-390-composer-safe.png), [mobile owner card](../scratchpad/site-demo-accepted-390-owner-summary.png), [desktop practice conversation/card](../scratchpad/site-demo-final-1440-sms-fake.png). The last image uses the deterministic model and precedes the two final presentation changes; it is not presented as a real-AI transcript. The real-model replies/events are the separate raw JSON evidence above. Other raw images remain locally archived.
 
 ## Reproduce locally
+
+### Footer correction included before the approved push
+
+The refresh set the footer logo width to 165 px while inheriting the legacy fixed 36 px height, flattening the 250 × 82 asset. Explicit `height: auto` restores its natural ratio at approximately 165 × 54.109 px. PM checked home, About and thank-you at 1440/390/320 px, and PO inspected actual desktop/mobile captures. Root also found the desktop sales launcher covering Privacy/Terms at the bottom of the page; footer bottom padding is now 85 px, matching the existing mobile clearance. Final targeted acceptance passes **50/50**: natural image ratio, no overflow, every footer anchor visible/hit-testable and zero launcher overlap across nine page/width combinations. There are zero JavaScript errors, API requests or submissions. `scratchpad/footer-logo-first.json` and its desktop capture retain the earlier state; `scratchpad/footer-logo-check.json` records the final targeted geometry, hit tests and source bridge. These two CSS declarations do not alter the accepted agent behavior. Final CSS SHA is `0239b4a7cdbbfd0d767c7e2cc11d045128f490ff8ef4e813964df3248a4eb86e`; nine-file fingerprint is `588a0a8affc3c5c0c1b9a2e69c8b5441f67e522ae1412e8fae9a0139668fc8f5`.
+
+### Local commands
 
 Start the isolated fake server first, then use the existing installed Playwright path:
 
