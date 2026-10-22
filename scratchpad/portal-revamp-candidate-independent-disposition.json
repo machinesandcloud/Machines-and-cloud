@@ -1,0 +1,169 @@
+{
+  "at": "2026-10-22T20:15:01.603406+00:00",
+  "reviewer": "Independent UI/UX research and QA agent",
+  "disposition": "accepted_independent_local_candidate",
+  "candidate": "d2e4092d1a0e07386aad4b26ba739bbbf4bbc005",
+  "base": "e997de2f8def3a04feaa543360faa58c0d280b5a",
+  "branch": "release/portal-revamp-e997",
+  "scope": "Exact production-based candidate UI behavior, visual inspection and production-engine isolation. Actual handlers use only isolated synthetic memory. No live sign-ins, emails, models, providers, purchases, calendar changes or deploy.",
+  "checks": {
+    "candidateIsRequestedExactCommit": true,
+    "allFrontendMatchesReviewedMain": true,
+    "protectedEnginesMatchProduction": true,
+    "accessOnlyAddsTwoDraftFields": true,
+    "messagingOnlyExportsExistingValidatorWithAlias": true,
+    "netlifyConfigOnlyAddsTwoOfflineChecks": true,
+    "runtimeChangedPathsMatchCoordinatorAllowlist": true,
+    "all31Passed": true,
+    "sourceStable": true,
+    "noBrowserErrors": true,
+    "noForbiddenRequests": true,
+    "noPhysicalNetwork": true
+  },
+  "frontendBridge": [
+    {
+      "path": "product-ui.css",
+      "matchesReviewedMain": true,
+      "sha256": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b"
+    },
+    {
+      "path": "styles.css",
+      "matchesReviewedMain": true,
+      "sha256": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+    },
+    {
+      "path": "onboard.html",
+      "matchesReviewedMain": true,
+      "sha256": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72"
+    },
+    {
+      "path": "onboard.css",
+      "matchesReviewedMain": true,
+      "sha256": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33"
+    },
+    {
+      "path": "onboard.js",
+      "matchesReviewedMain": true,
+      "sha256": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec"
+    },
+    {
+      "path": "desk.html",
+      "matchesReviewedMain": true,
+      "sha256": "d2ceb2e119e11e945ee71ca34b208bf435752ad4991d08e4b2fa795fca1180f4"
+    },
+    {
+      "path": "desk.css",
+      "matchesReviewedMain": true,
+      "sha256": "b3bae2d1b088b93623bac3b603781918017ff3ab42a14dec7348780c35c40e59"
+    },
+    {
+      "path": "desk.js",
+      "matchesReviewedMain": true,
+      "sha256": "c5cff473c530d6fb4231c6dc43126e8540cbca83a5c0b488b818afe3f98ddb53"
+    },
+    {
+      "path": "desk-connections.js",
+      "matchesReviewedMain": true,
+      "sha256": "092254896bb163a2795fcce5c658e809adc5500de62cb25e1fb30fa699e65d07"
+    },
+    {
+      "path": "desk-connections.css",
+      "matchesReviewedMain": true,
+      "sha256": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932"
+    },
+    {
+      "path": "admin.html",
+      "matchesReviewedMain": true,
+      "sha256": "807c0ff8121e2080be2635f4a6cec6ffb4bb226821d6f938ebe9ba6a42c3b0ea"
+    },
+    {
+      "path": "admin.css",
+      "matchesReviewedMain": true,
+      "sha256": "bc8f81c2754a019f6d0468862d8f81a9e88ab7202abeeb13122287d21dc68e42"
+    },
+    {
+      "path": "admin.js",
+      "matchesReviewedMain": true,
+      "sha256": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d"
+    },
+    {
+      "path": "assets/logo.png",
+      "matchesReviewedMain": true,
+      "sha256": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2"
+    },
+    {
+      "path": "assets/logo-dark.png",
+      "matchesReviewedMain": true,
+      "sha256": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f"
+    }
+  ],
+  "protectedEngineBridge": [
+    {
+      "path": "netlify/functions/lib/phone-activation.mjs",
+      "matchesProductionBase": true,
+      "sha256": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd"
+    },
+    {
+      "path": "netlify/functions/lib/phone-twilio.mjs",
+      "matchesProductionBase": true,
+      "sha256": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60"
+    },
+    {
+      "path": "netlify/functions/lib/voice-activation.mjs",
+      "matchesProductionBase": true,
+      "sha256": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46"
+    },
+    {
+      "path": "netlify/functions/lib/voice-provider.mjs",
+      "matchesProductionBase": true,
+      "sha256": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1"
+    },
+    {
+      "path": "netlify/functions/lib/messaging-provider.mjs",
+      "matchesProductionBase": true,
+      "sha256": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0"
+    }
+  ],
+  "runtimeChangedPaths": [
+    "netlify/functions/client.mjs",
+    "netlify/functions/lib/access.mjs",
+    "netlify/functions/lib/messaging-activation.mjs",
+    "netlify/functions/lib/service-health.mjs",
+    "netlify/functions/lib/service-onboarding-dispatch.mjs",
+    "netlify/functions/lib/service-onboarding.mjs",
+    "netlify/functions/onboard.mjs",
+    "netlify/functions/service-onboarding-background.mjs",
+    "netlify/functions/service-onboarding-scheduler.mjs"
+  ],
+  "browserProof": {
+    "receipt": "scratchpad/portal-revamp-qa-candidate-final.json",
+    "sha256": "ec63dfa51acedf8a0a36eb8f1e3922446744e163b22e7a59703cb03abbe63e86",
+    "summary": {
+      "passed": 31,
+      "failed": 0
+    },
+    "sourceStable": true,
+    "interceptedRequests": 40,
+    "screenshots": 46,
+    "pageErrors": [],
+    "forbiddenRequests": [],
+    "physicalNetwork": 0
+  },
+  "humanVisualReview": {
+    "screenshots": [
+      "scratchpad/portal-revamp-qa-candidate-final-onboard-contact-375.png",
+      "scratchpad/portal-revamp-qa-candidate-final-onboard-contact-1440.png",
+      "scratchpad/portal-revamp-qa-candidate-final-workspace-leads-375.png",
+      "scratchpad/portal-revamp-qa-candidate-final-workspace-home-1440.png",
+      "scratchpad/portal-revamp-qa-candidate-final-admin-detail-375.png",
+      "scratchpad/portal-revamp-qa-candidate-final-admin-home-1440.png"
+    ],
+    "result": "Accepted: proportional branding; coherent navy/grey/white hierarchy; clear current step and page; readable mobile customer records; visible next action; account identity and plan names correct. Candidate matches the reviewed main frontend bytes, including whitespace-trimmed desk.css.",
+    "blockingFindings": []
+  },
+  "remainingReleaseSteps": [
+    "Root required-build, actual customer journey, validation, recovery and syntax results must pass on this same candidate.",
+    "Fresh user approval is required for one 15-credit production build and the specified bounded hosted read-only verification.",
+    "Publication and hosted-functional acceptance have not occurred. Real service delivery remains separately gated and unverified."
+  ]
+}

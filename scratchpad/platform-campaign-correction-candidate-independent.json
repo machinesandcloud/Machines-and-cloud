@@ -1,0 +1,303 @@
+{
+  "at": "2026-10-22T20:50:48.230Z",
+  "scope": "Independent source and exact-baseline hash review of isolated candidate. No tests, provider calls, browser actions, account changes, live messages or deployment performed by this review.",
+  "candidate": {
+    "head": "d9a1098967e169b6b64da0ea5594e93b3655d77d",
+    "branch": "release/portal-campaign-correction-e997",
+    "baseline": "519e248",
+    "canonicalMain": "58790cf",
+    "protectedProduction": "e997de2"
+  },
+  "checks": [
+    {
+      "name": "Exact isolated candidate HEAD",
+      "pass": true,
+      "detail": {
+        "actual": "d9a1098967e169b6b64da0ea5594e93b3655d77d",
+        "expected": "d9a1098967e169b6b64da0ea5594e93b3655d77d"
+      }
+    },
+    {
+      "name": "No merge markers in tracked source, scripts, configuration or documentation",
+      "pass": true,
+      "detail": {
+        "matches": []
+      }
+    },
+    {
+      "name": "Canonical program and complete setup script mirror main58790cf exactly",
+      "pass": true,
+      "detail": [
+        {
+          "file": "product/PLATFORM-SMS-CAMPAIGN.md",
+          "current": "1879cec1795dcacea5cba38a0abd3b5690d1308043f5cb669a511a059df29925",
+          "main58790cf": "1879cec1795dcacea5cba38a0abd3b5690d1308043f5cb669a511a059df29925"
+        },
+        {
+          "file": "product/SETUP-FOR-BROWSER-AGENT.md",
+          "current": "1cb72cfd48b893efb1fc9b8ce9991b2aa157d9b79b21580f9d15f741bc208246",
+          "main58790cf": "1cb72cfd48b893efb1fc9b8ce9991b2aa157d9b79b21580f9d15f741bc208246"
+        }
+      ]
+    },
+    {
+      "name": "Task1.6 separately mirrors main58790cf",
+      "pass": true,
+      "detail": {
+        "current": "d8353b7a9f3f509e33c2edc66fb644e6afb5cc6588fe646de17e85b4003af7de",
+        "main58790cf": "d8353b7a9f3f509e33c2edc66fb644e6afb5cc6588fe646de17e85b4003af7de"
+      }
+    },
+    {
+      "name": "Published runtime diff since519e248 is limited to four public pages and company reply strings",
+      "pass": true,
+      "detail": {
+        "actual": [
+          "index.html",
+          "netlify/functions/lib/platform-sms.mjs",
+          "privacy-policy.html",
+          "sms-terms.html",
+          "terms-of-service.html"
+        ],
+        "expected": [
+          "index.html",
+          "netlify/functions/lib/platform-sms.mjs",
+          "privacy-policy.html",
+          "sms-terms.html",
+          "terms-of-service.html"
+        ]
+      }
+    },
+    {
+      "name": "Company handler differs only by four exact return-string literals; all routing, gates and security logic unchanged",
+      "pass": true,
+      "detail": {
+        "prior": "56b03aed583515572b3508d286a87b8102ccca74185fe2c9e45d55017be56ee8",
+        "current": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+        "replacementCount": 4,
+        "literalOccurrenceCounts": [
+          {
+            "priorOccurrences": 1,
+            "currentOccurrences": 1
+          },
+          {
+            "priorOccurrences": 1,
+            "currentOccurrences": 1
+          },
+          {
+            "priorOccurrences": 1,
+            "currentOccurrences": 1
+          },
+          {
+            "priorOccurrences": 1,
+            "currentOccurrences": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Five protected provider runtimes are productione997 byte-identical",
+      "pass": true,
+      "detail": [
+        {
+          "file": "netlify/functions/lib/phone-activation.mjs",
+          "current": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+          "productionE997": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd"
+        },
+        {
+          "file": "netlify/functions/lib/phone-twilio.mjs",
+          "current": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+          "productionE997": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60"
+        },
+        {
+          "file": "netlify/functions/lib/voice-activation.mjs",
+          "current": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+          "productionE997": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46"
+        },
+        {
+          "file": "netlify/functions/lib/voice-provider.mjs",
+          "current": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+          "productionE997": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1"
+        },
+        {
+          "file": "netlify/functions/lib/messaging-provider.mjs",
+          "current": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+          "productionE997": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0"
+        }
+      ]
+    },
+    {
+      "name": "Google continuation frontend and all reviewed portal design bytes match519e248",
+      "pass": true,
+      "detail": [
+        {
+          "file": "product-ui.css",
+          "current": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+          "baseline519e248": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b"
+        },
+        {
+          "file": "onboard.html",
+          "current": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72",
+          "baseline519e248": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72"
+        },
+        {
+          "file": "onboard.css",
+          "current": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+          "baseline519e248": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33"
+        },
+        {
+          "file": "onboard.js",
+          "current": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec",
+          "baseline519e248": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec"
+        },
+        {
+          "file": "desk.html",
+          "current": "d2ceb2e119e11e945ee71ca34b208bf435752ad4991d08e4b2fa795fca1180f4",
+          "baseline519e248": "d2ceb2e119e11e945ee71ca34b208bf435752ad4991d08e4b2fa795fca1180f4"
+        },
+        {
+          "file": "desk.css",
+          "current": "b3bae2d1b088b93623bac3b603781918017ff3ab42a14dec7348780c35c40e59",
+          "baseline519e248": "b3bae2d1b088b93623bac3b603781918017ff3ab42a14dec7348780c35c40e59"
+        },
+        {
+          "file": "desk.js",
+          "current": "c5cff473c530d6fb4231c6dc43126e8540cbca83a5c0b488b818afe3f98ddb53",
+          "baseline519e248": "c5cff473c530d6fb4231c6dc43126e8540cbca83a5c0b488b818afe3f98ddb53"
+        },
+        {
+          "file": "desk-connections.js",
+          "current": "32cf7414dc55595f11cbe4a9ea271b947e038609e049d999e3ac5be8d317e5f4",
+          "baseline519e248": "32cf7414dc55595f11cbe4a9ea271b947e038609e049d999e3ac5be8d317e5f4"
+        },
+        {
+          "file": "desk-connections.css",
+          "current": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+          "baseline519e248": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932"
+        },
+        {
+          "file": "admin.html",
+          "current": "807c0ff8121e2080be2635f4a6cec6ffb4bb226821d6f938ebe9ba6a42c3b0ea",
+          "baseline519e248": "807c0ff8121e2080be2635f4a6cec6ffb4bb226821d6f938ebe9ba6a42c3b0ea"
+        },
+        {
+          "file": "admin.css",
+          "current": "bc8f81c2754a019f6d0468862d8f81a9e88ab7202abeeb13122287d21dc68e42",
+          "baseline519e248": "bc8f81c2754a019f6d0468862d8f81a9e88ab7202abeeb13122287d21dc68e42"
+        },
+        {
+          "file": "admin.js",
+          "current": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d",
+          "baseline519e248": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d"
+        },
+        {
+          "file": "styles.css",
+          "current": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+          "baseline519e248": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+        },
+        {
+          "file": "assets/logo.png",
+          "current": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2",
+          "baseline519e248": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2"
+        },
+        {
+          "file": "assets/logo-dark.png",
+          "current": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f",
+          "baseline519e248": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f"
+        }
+      ]
+    },
+    {
+      "name": "Prepared revision retains intended company-only CustomerCare identity and five samples",
+      "pass": true,
+      "detail": {
+        "status": "rejected_revision_prepared",
+        "optInMethod": "Customer-initiated conversational SMS",
+        "useCase": "Customer Care",
+        "legalBusinessName": "Machines And Cloud LLC",
+        "phoneNumber": "+13464853328",
+        "samples": 5
+      }
+    },
+    {
+      "name": "Reviewed source bytes stayed unchanged during this independent review",
+      "pass": true,
+      "detail": {
+        "sourceFiles": 29
+      }
+    }
+  ],
+  "findings": [],
+  "passed": 10,
+  "total": 10,
+  "ok": true,
+  "before": {
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/phone-twilio.mjs": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+    "netlify/functions/lib/voice-activation.mjs": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+    "netlify/functions/lib/voice-provider.mjs": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "onboard.html": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72",
+    "onboard.css": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+    "onboard.js": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec",
+    "desk.html": "d2ceb2e119e11e945ee71ca34b208bf435752ad4991d08e4b2fa795fca1180f4",
+    "desk.css": "b3bae2d1b088b93623bac3b603781918017ff3ab42a14dec7348780c35c40e59",
+    "desk.js": "c5cff473c530d6fb4231c6dc43126e8540cbca83a5c0b488b818afe3f98ddb53",
+    "desk-connections.js": "32cf7414dc55595f11cbe4a9ea271b947e038609e049d999e3ac5be8d317e5f4",
+    "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+    "admin.html": "807c0ff8121e2080be2635f4a6cec6ffb4bb226821d6f938ebe9ba6a42c3b0ea",
+    "admin.css": "bc8f81c2754a019f6d0468862d8f81a9e88ab7202abeeb13122287d21dc68e42",
+    "admin.js": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "assets/logo.png": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f",
+    "product/PLATFORM-SMS-CAMPAIGN.md": "1879cec1795dcacea5cba38a0abd3b5690d1308043f5cb669a511a059df29925",
+    "product/SETUP-FOR-BROWSER-AGENT.md": "1cb72cfd48b893efb1fc9b8ce9991b2aa157d9b79b21580f9d15f741bc208246",
+    "index.html": "d7ffd4f94e3d769b56e7d588dc52b11d63bb744f359abbc21f456530062e70d5",
+    "netlify/functions/lib/platform-sms.mjs": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+    "privacy-policy.html": "716b6561edc4905ae8354885793a296e69116c1b1ec06cba8048163d53009076",
+    "sms-terms.html": "269314919fbbe09549f9e026abd4bb61e80e85d011dd59f546dfe4656d5360ca",
+    "terms-of-service.html": "63ff05beda76a75d280254ddf7ae113b33cfcedf8510ea25baa7a315724d10d3",
+    "scripts/sms-policy-check.mjs": "c527f7cb8205ccf34590530f02aaa5335bc61036c3249ceb0b5748bb3ac25cff",
+    "scripts/platform-sms-check.mjs": "7d6bcb1b1e4ec23a619662862282a9a380f61f98c7d201eef1fbec3f1f60cae4"
+  },
+  "after": {
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/phone-twilio.mjs": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+    "netlify/functions/lib/voice-activation.mjs": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+    "netlify/functions/lib/voice-provider.mjs": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "onboard.html": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72",
+    "onboard.css": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+    "onboard.js": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec",
+    "desk.html": "d2ceb2e119e11e945ee71ca34b208bf435752ad4991d08e4b2fa795fca1180f4",
+    "desk.css": "b3bae2d1b088b93623bac3b603781918017ff3ab42a14dec7348780c35c40e59",
+    "desk.js": "c5cff473c530d6fb4231c6dc43126e8540cbca83a5c0b488b818afe3f98ddb53",
+    "desk-connections.js": "32cf7414dc55595f11cbe4a9ea271b947e038609e049d999e3ac5be8d317e5f4",
+    "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+    "admin.html": "807c0ff8121e2080be2635f4a6cec6ffb4bb226821d6f938ebe9ba6a42c3b0ea",
+    "admin.css": "bc8f81c2754a019f6d0468862d8f81a9e88ab7202abeeb13122287d21dc68e42",
+    "admin.js": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "assets/logo.png": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f",
+    "product/PLATFORM-SMS-CAMPAIGN.md": "1879cec1795dcacea5cba38a0abd3b5690d1308043f5cb669a511a059df29925",
+    "product/SETUP-FOR-BROWSER-AGENT.md": "1cb72cfd48b893efb1fc9b8ce9991b2aa157d9b79b21580f9d15f741bc208246",
+    "index.html": "d7ffd4f94e3d769b56e7d588dc52b11d63bb744f359abbc21f456530062e70d5",
+    "netlify/functions/lib/platform-sms.mjs": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+    "privacy-policy.html": "716b6561edc4905ae8354885793a296e69116c1b1ec06cba8048163d53009076",
+    "sms-terms.html": "269314919fbbe09549f9e026abd4bb61e80e85d011dd59f546dfe4656d5360ca",
+    "terms-of-service.html": "63ff05beda76a75d280254ddf7ae113b33cfcedf8510ea25baa7a315724d10d3",
+    "scripts/sms-policy-check.mjs": "c527f7cb8205ccf34590530f02aaa5335bc61036c3249ceb0b5748bb3ac25cff",
+    "scripts/platform-sms-check.mjs": "7d6bcb1b1e4ec23a619662862282a9a380f61f98c7d201eef1fbec3f1f60cae4"
+  },
+  "limits": [
+    "This validates exact local source isolation and literal changes, not hosted public page access or currently saved Twilio fields.",
+    "The complete27-command offline build gate is a separate root-run receipt; this review did not rerun broader suites.",
+    "Local policy/handler tests and responsive public-page checks do not establish carrier approval, successful resubmission or delivered messages.",
+    "Existing company campaign correction, Advanced Opt-Out alignment, final owner attestation/submission and actual bounded delivery acceptance remain separate actions.",
+    "All pre-existing activation and commercial boundaries remain; this review does not authorize deployment or enablement."
+  ]
+}

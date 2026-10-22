@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{createHash}from'node:crypto';import{extname}from'node:path';import net from'node:net';import http from'node:http';import https from'node:https';import{syncBuiltinESMExports}from'node:module';
 const arg=k=>process.argv[process.argv.indexOf(k)+1],phase=arg('--phase'),output=arg('--output'),viewportOnly=process.argv.includes('--viewport-only');
 if(!['before','final'].includes(phase)||!/^scratchpad\/onboard-validation-[a-z0-9-]+\.json$/.test(output||'')||existsSync(output))throw Error('Use --phase before|final --output NEW scratchpad/onboard-validation-*.json');
-const base='http://127.0.0.1:8917',files=['onboard.html','onboard.js','styles.css','assets/favicon.png','assets/logo-dark.png'],assets=new Map(files.map(p=>['/'+p,readFileSync(p)])),hash=b=>createHash('sha256').update(b).digest('hex');
+const base='http://127.0.0.1:8917',files=['onboard.html','onboard.js','onboard.css', 'product-ui.css','styles.css','assets/favicon.png','assets/logo-dark.png','assets/logo.png'],assets=new Map(files.map(p=>['/'+p,readFileSync(p)])),hash=b=>createHash('sha256').update(b).digest('hex');
 const report={at:new Date().toISOString(),phase,mode:'cached current assets; mocked verified owner and APIs; no external HTTP',sourceBefore:Object.fromEntries(files.map(f=>[f,hash(assets.get('/'+f))])),checks:[],observations:[],screenshots:[],api:[],blockedBrowser:[],pageErrors:[],physicalHTTP:0};
 const deny=()=>{report.physicalHTTP++;throw Error('Independent UI QA forbids server network');};globalThis.fetch=deny;net.connect=net.createConnection=http.get=http.request=https.get=https.request=deny;syncBuiltinESMExports();
 const{chromium}=await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs');
@@ -15,7 +15,7 @@ async function fixture({width=375,fields={name:'QA Owner'},step=0,serverError=nu
  await context.routeWebSocket('**/*',socket=>socket.close());
  await context.route('**/*',async route=>{const request=route.request(),u=new URL(request.url());if(u.origin!==base){report.blockedBrowser.push({origin:u.origin,path:u.pathname});return route.abort('blockedbyclient');}
   if(u.pathname.startsWith('/api/')){const method=request.method(),headers=request.headers();if(headers.authorization!=='Bearer '+'a'.repeat(64))return route.fulfill({status:401,contentType:'application/json',body:'{"error":"unauthorized"}'});let status=200,body={};
-   if(u.pathname==='/api/access'&&method==='GET')body={email:'qa-validation@example.test',draft:{fields,step,revision},marketing:{preference:false}};
+   if(u.pathname==='/api/access'&&method==='GET')body={email:'qa-validation@example.test',draft:{fields:{trade:'HVAC',services:'AC repair',serviceArea:'Katy',hours:'Mon-Fri 8am-5pm',windows:'8 to 12',...fields},step,revision},marketing:{preference:false}};
    else if(u.pathname==='/api/access'&&method==='PUT'){const b=request.postDataJSON();local.drafts++;local.advances.push(b.step);if(holdDraft&&!held){held=true;draftReached();await released;}revision=b.revision+1;body={draft:{revision}};}
    else if(u.pathname==='/api/onboard'&&method==='POST'){local.create++;status=422;body=serverError||{error:'qa_create_blocked',message:'QA prevents actual account creation.'};}
    else{status=404;body={error:'qa_unexpected_api'};}

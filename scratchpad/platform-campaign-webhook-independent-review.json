@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-22T16:31:59.545277+00:00",
+  "mode": "independent offline review of only saved readback receipt and helper; helper not executed; zero network",
+  "ok": true,
+  "passed": 11,
+  "total": 11,
+  "inputs": {
+    "receipt": "scratchpad/platform-campaign-webhook-readback.json",
+    "receiptSha256": "612e15ccaeadd94a2b9d28a4a6c492a4dc6ccf6f6dce3afdeafc2f8ec5ffa0f1",
+    "helper": "/tmp/mc-platform-route-company-sms.mjs",
+    "helperSha256": "8b7e97037e916e80f19204c6db2d1c1ea796ce7b3787d7b8e9e023c49275ac44"
+  },
+  "checks": [
+    {
+      "name": "Exact approved company resources and verified terminal status",
+      "pass": true
+    },
+    {
+      "name": "Exactly two scoped successful existing-resource updates",
+      "pass": true
+    },
+    {
+      "name": "Each mutation has a later successful GET and confirmation",
+      "pass": true
+    },
+    {
+      "name": "Final number and service readback use exact canonical URL and POST",
+      "pass": true
+    },
+    {
+      "name": "False inbound authority flag retained through service-field equality",
+      "pass": true
+    },
+    {
+      "name": "Voice fallback application and other number fields retained",
+      "pass": true
+    },
+    {
+      "name": "Exact one-sender membership preserved",
+      "pass": true
+    },
+    {
+      "name": "Seven configured gates remain off or unset and production binding matched",
+      "pass": true
+    },
+    {
+      "name": "Initial restrictive preflight contains no mutation before corrected preflight",
+      "pass": true
+    },
+    {
+      "name": "Helper restricts provider URLs and refuses rerun after mutation intent",
+      "pass": true
+    },
+    {
+      "name": "No agent-initiated messaging purchase billing or carrier filing in this helper",
+      "pass": true
+    }
+  ],
+  "observedProviderGETEntries": 11,
+  "observedProviderPOSTEntries": 2,
+  "limitations": [
+    "Provider before/after payloads are represented by saved assertions and equal digests; this is not a second live provider observation.",
+    "The helper checks service.integration_id is absent; it does not independently inspect the full Conversations configuration.",
+    "Netlify environment gate snapshot is configured state and does not itself prove runtime execution or SMS delivery.",
+    "Hosted GET allowance and build credit use belong to separate publication evidence and are outside this two-file review."
+  ],
+  "physicalExternalRequests": 0,
+  "runtimeEdits": 0
+}

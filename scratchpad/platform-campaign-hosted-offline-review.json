@@ -1,0 +1,151 @@
+{
+  "at": "2026-10-22T16:27:31.326091+00:00",
+  "reviewer": "Independent QA/PM offline review",
+  "scope": "Saved production bytes/ledger and accepted local source only; no network, browser, provider calls, runtime edits or broad test rerun",
+  "approvedCommit": "b9f4578155dd6672fdd89d9870affc92c0cba0fb",
+  "publishedDeploy": "6ada379c827174bc5b6c26fa",
+  "capturedHTML": [
+    {
+      "label": "terms",
+      "source": "sms-terms.html",
+      "captureSHA256": "7b1e1c31118bd99f92716b8cc1cb1f5849ad8543632a3ffe17a681812e971dce",
+      "tokens": 227
+    },
+    {
+      "label": "privacy",
+      "source": "privacy-policy.html",
+      "captureSHA256": "841c1175346c2ed58a4e5856b91c59a6ab4d803b5f2da1b378b0a40bd59696a2",
+      "tokens": 276
+    },
+    {
+      "label": "admin-shell",
+      "source": "admin.html",
+      "captureSHA256": "9d2f76342ff29b51b68b1b50c7699d77aa92cb840e9c100f5e6cc170cabc47d8",
+      "tokens": 370
+    },
+    {
+      "label": "desk-shell",
+      "source": "desk.html",
+      "captureSHA256": "be250e9b81d0cc4e26944e84d009e19b99665b32c6065c2ae2340cd5ac9989b2",
+      "tokens": 1026
+    },
+    {
+      "label": "home",
+      "source": "index.html",
+      "captureSHA256": "b7392db2f6fce1284f910ee469633c868ece9ca9e31dcefbe0c35d89c49438a7",
+      "tokens": 1095
+    }
+  ],
+  "checks": [
+    {
+      "name": "terms full HTML matches accepted source after only Pretty-URL and Netlify form normalization",
+      "pass": true,
+      "detail": {
+        "sourceTokens": 227,
+        "hostedTokens": 227
+      }
+    },
+    {
+      "name": "Public terms retain awaiting approval and no live replies",
+      "pass": true
+    },
+    {
+      "name": "Public terms distinguish own-product requests from shops and reject recurring consent",
+      "pass": true
+    },
+    {
+      "name": "Terms CTA and rewritten privacy fragment resolve within captured documents",
+      "pass": true
+    },
+    {
+      "name": "privacy full HTML matches accepted source after only Pretty-URL and Netlify form normalization",
+      "pass": true,
+      "detail": {
+        "sourceTokens": 276,
+        "hostedTokens": 276
+      }
+    },
+    {
+      "name": "Privacy SMS fragment and separate sender/ongoing shop consent survive publication",
+      "pass": true
+    },
+    {
+      "name": "Privacy links reach the rewritten public terms path",
+      "pass": true
+    },
+    {
+      "name": "admin-shell full HTML matches accepted source after only Pretty-URL and Netlify form normalization",
+      "pass": true,
+      "detail": {
+        "sourceTokens": 370,
+        "hostedTokens": 370
+      }
+    },
+    {
+      "name": "Public admin shell has private SMS containers without customer messages",
+      "pass": true
+    },
+    {
+      "name": "desk-shell full HTML matches accepted source after only Pretty-URL and Netlify form normalization",
+      "pass": true,
+      "detail": {
+        "sourceTokens": 1026,
+        "hostedTokens": 1026
+      }
+    },
+    {
+      "name": "home full HTML matches accepted source after only Pretty-URL and Netlify form normalization",
+      "pass": true,
+      "detail": {
+        "sourceTokens": 1095,
+        "hostedTokens": 1095
+      }
+    },
+    {
+      "name": "carrier-terms www redirect serves identical final policy bytes",
+      "pass": true
+    },
+    {
+      "name": "carrier-privacy www redirect serves identical final policy bytes",
+      "pass": true
+    },
+    {
+      "name": "Hosted ledger counts every physical GET including two redirects",
+      "pass": true,
+      "detail": {
+        "used": 21,
+        "maximum": 25
+      }
+    },
+    {
+      "name": "Captured admin/desk/connections JS match exact accepted source",
+      "pass": true
+    },
+    {
+      "name": "Anonymous private APIs deny access with no-store",
+      "pass": true
+    },
+    {
+      "name": "Private product/env/evidence paths remain excluded",
+      "pass": true
+    },
+    {
+      "name": "Exact authorized commit is READY from one observed build and no manual trigger",
+      "pass": true
+    },
+    {
+      "name": "Initial health HTTP body is healthy, with post-release observation still separate",
+      "pass": true
+    }
+  ],
+  "passed": 19,
+  "total": 19,
+  "preliminaryVerdict": "Accept bounded publication evidence if all checks pass; final natural-worker/config/webhook proof pending",
+  "openProof": [
+    "Initial worker timestamp precedes publication; natural post-release run still required",
+    "GET403 confirms unsigned route denial, not execution-gate value; retain production config snapshot",
+    "Actual authenticated hosted admin SMS retrieval not established by anonymous/static captures",
+    "Carrier final submission/approval and actual signed SMS delivery/STOP remain outside this release",
+    "Support mailbox receiving capability has no fresh proof in this scope"
+  ]
+}

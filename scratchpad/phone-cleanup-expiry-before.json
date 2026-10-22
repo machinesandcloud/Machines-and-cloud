@@ -1,0 +1,1050 @@
+{
+  "at": "2026-10-22T16:51:53.218Z",
+  "mode": "independent actual production phone exports; memory and installed SDK with intercepted Twilio HTTP; zero real network",
+  "checks": [
+    {
+      "name": "memory: missing execution gate and invalid complete offer make no provider request",
+      "pass": true
+    },
+    {
+      "name": "memory: owner authority, quote digest and current revision are required before durable purchase",
+      "pass": true
+    },
+    {
+      "name": "memory: archived supported workspace cannot start a paid acquisition",
+      "pass": true
+    },
+    {
+      "name": "memory: owner HTTP action is scoped, rejects injected authority and returns only safe state",
+      "pass": true
+    },
+    {
+      "name": "memory: operator read sees unresolved phone issue but cannot impersonate owner acquisition",
+      "pass": true
+    },
+    {
+      "name": "memory: concurrent browser keys and recoveries acquire once and expose no private receipt",
+      "pass": true,
+      "detail": {
+        "providerPosts": 1,
+        "priceEvidence": "account_pricing_quote"
+      }
+    },
+    {
+      "name": "memory: lost purchase before remote effect never authorizes a second POST",
+      "pass": true
+    },
+    {
+      "name": "memory: lost purchase after remote effect never authorizes a second POST",
+      "pass": true
+    },
+    {
+      "name": "memory: ambiguous correlation lookup cannot repurchase or claim activation",
+      "pass": true
+    },
+    {
+      "name": "memory: post-release response loss retains resource until definitive same-ID absence",
+      "pass": true
+    },
+    {
+      "name": "memory: immediate lost purchase reconciliation then lost release reconciliation needs no lease wait",
+      "pass": true
+    },
+    {
+      "name": "memory: expired offer still permits durable owner cancellation while execution remains gated",
+      "pass": true,
+      "detail": {
+        "rejection": null,
+        "state": "cleanup_pending"
+      }
+    },
+    {
+      "name": "memory: removed offer still permits durable cancellation of already acquired resource",
+      "pass": true
+    },
+    {
+      "name": "memory: authorized retained cleanup completes after expired_offer without another purchase",
+      "pass": false,
+      "error": "Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:746\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:95)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:5"
+    },
+    {
+      "name": "memory: authorized retained cleanup completes after missing_offer without another purchase",
+      "pass": false,
+      "error": "Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:746\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:95)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:5"
+    },
+    {
+      "name": "memory: authorized retained cleanup completes after acquisition_disabled without another purchase",
+      "pass": false,
+      "error": "Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:746\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:95)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:5"
+    },
+    {
+      "name": "memory: a fully cancelled workspace discovers an already acquired number outside the active purchase queue",
+      "pass": false,
+      "error": "Closed workspace left its retained acquired resource undiscovered\n+ actual - expected\n\n+ 'number_acquired'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Closed workspace left its retained acquired resource undiscovered\n+ actual - expected\n\n+ 'number_acquired'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:74:770\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:74:16)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:5"
+    },
+    {
+      "name": "memory: gate-off recovery retains observability of unresolved purchase rather than returning an empty healthy scan",
+      "pass": true
+    },
+    {
+      "name": "memory: needs-review quote change remains a durable visible exception across later scans",
+      "pass": true
+    },
+    {
+      "name": "memory: last failed standalone recovery is not hidden by a currently empty queue",
+      "pass": true
+    },
+    {
+      "name": "memory: aggregate provider deadline prevents inventory and paid POST after pricing exceeds remaining budget",
+      "pass": true
+    },
+    {
+      "name": "memory: bounded observability cannot call51 pending intents healthy after inspecting only50",
+      "pass": true
+    },
+    {
+      "name": "sdk: missing execution gate and invalid complete offer make no provider request",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner authority, quote digest and current revision are required before durable purchase",
+      "pass": true
+    },
+    {
+      "name": "sdk: archived supported workspace cannot start a paid acquisition",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner HTTP action is scoped, rejects injected authority and returns only safe state",
+      "pass": true
+    },
+    {
+      "name": "sdk: operator read sees unresolved phone issue but cannot impersonate owner acquisition",
+      "pass": true
+    },
+    {
+      "name": "sdk: concurrent browser keys and recoveries acquire once and expose no private receipt",
+      "pass": true,
+      "detail": {
+        "providerPosts": 1,
+        "priceEvidence": "account_pricing_quote"
+      }
+    },
+    {
+      "name": "sdk: lost purchase before remote effect never authorizes a second POST",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost purchase after remote effect never authorizes a second POST",
+      "pass": true
+    },
+    {
+      "name": "sdk: ambiguous correlation lookup cannot repurchase or claim activation",
+      "pass": true
+    },
+    {
+      "name": "sdk: post-release response loss retains resource until definitive same-ID absence",
+      "pass": true
+    },
+    {
+      "name": "sdk: immediate lost purchase reconciliation then lost release reconciliation needs no lease wait",
+      "pass": true
+    },
+    {
+      "name": "sdk: expired offer still permits durable owner cancellation while execution remains gated",
+      "pass": true,
+      "detail": {
+        "rejection": null,
+        "state": "cleanup_pending"
+      }
+    },
+    {
+      "name": "sdk: removed offer still permits durable cancellation of already acquired resource",
+      "pass": true
+    },
+    {
+      "name": "sdk: authorized retained cleanup completes after expired_offer without another purchase",
+      "pass": false,
+      "error": "Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:746\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:95)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:27"
+    },
+    {
+      "name": "sdk: authorized retained cleanup completes after missing_offer without another purchase",
+      "pass": false,
+      "error": "Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:746\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:95)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:27"
+    },
+    {
+      "name": "sdk: authorized retained cleanup completes after acquisition_disabled without another purchase",
+      "pass": false,
+      "error": "Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Cancellation remained stuck after new-acquisition eligibility ended\n+ actual - expected\n\n+ 'cleanup_pending'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:746\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:73:95)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:27"
+    },
+    {
+      "name": "sdk: a fully cancelled workspace discovers an already acquired number outside the active purchase queue",
+      "pass": false,
+      "error": "Closed workspace left its retained acquired resource undiscovered\n+ actual - expected\n\n+ 'number_acquired'\n- 'cancelled'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Closed workspace left its retained acquired resource undiscovered\n+ actual - expected\n\n+ 'number_acquired'\n- 'cancelled'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:74:770\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:49:72)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:74:16)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/phone-activation-qa-check.mjs:87:27"
+    },
+    {
+      "name": "sdk: gate-off recovery retains observability of unresolved purchase rather than returning an empty healthy scan",
+      "pass": true
+    },
+    {
+      "name": "sdk: needs-review quote change remains a durable visible exception across later scans",
+      "pass": true
+    },
+    {
+      "name": "sdk: last failed standalone recovery is not hidden by a currently empty queue",
+      "pass": true
+    },
+    {
+      "name": "sdk: aggregate provider deadline prevents inventory and paid POST after pricing exceeds remaining budget",
+      "pass": true
+    },
+    {
+      "name": "sdk: bounded observability cannot call51 pending intents healthy after inspecting only50",
+      "pass": true
+    },
+    {
+      "name": "sdk: late acquisition queue cleanup cannot delete a durably accepted cancellation",
+      "pass": true
+    },
+    {
+      "name": "sdk: completed workspace pause before purchase claim commits prevents a paid dispatch",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost purchase receipt write cannot erase durable purchase-start or dispatch again",
+      "pass": true
+    },
+    {
+      "name": "sdk: cancellation queue survives failed projection and releases only the retained ID",
+      "pass": true
+    },
+    {
+      "name": "Source bytes stayed stable",
+      "pass": true
+    },
+    {
+      "name": "Every network destination was intercepted",
+      "pass": true
+    }
+  ],
+  "http": [
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-7731ac217e4269841360ad214356b4335146d855475f36032277b9a&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-7731ac217e4269841360ad214356b4335146d855475f36032277b9a&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-7731ac217e4269841360ad214356b4335146d855475f36032277b9a&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-26a7f16e7908ad13926cd4937a50aa769adec75f10a3436c97c142e&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-2ebbefc868fa9ddfa470d1cc2766904574f8db7263ea0d6671c410d&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-2ebbefc868fa9ddfa470d1cc2766904574f8db7263ea0d6671c410d&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f42e4fa275459ad9494757f5bc6bdee.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f42e4fa275459ad9494757f5bc6bdee.json",
+      "method": "DELETE",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f42e4fa275459ad9494757f5bc6bdee.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-05717b8969d6d1da7cfa91dd67b0c0845cd61bb4ee70b4fc24f5710&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf2f3a2ca968109980b9c29ee0195e240.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf2f3a2ca968109980b9c29ee0195e240.json",
+      "method": "DELETE",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf2f3a2ca968109980b9c29ee0195e240.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-796ad9a216efab190adf21a70091a0ea695d3d3f98bc0fa923f66c9&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-796ad9a216efab190adf21a70091a0ea695d3d3f98bc0fa923f66c9&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-796ad9a216efab190adf21a70091a0ea695d3d3f98bc0fa923f66c9&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-85e9165f045b1da5f211398ea4f7c64f2a5f07ca19983c5b754405a&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-cd1ffee0f30941fb06855eb6be93fa182afee0630d6de71f99f26b3&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-cd1ffee0f30941fb06855eb6be93fa182afee0630d6de71f99f26b3&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN29d9c1e06e1d53fbe159edd4b0787048.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN29d9c1e06e1d53fbe159edd4b0787048.json",
+      "method": "DELETE",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN29d9c1e06e1d53fbe159edd4b0787048.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-0dc229a4b279b5047a1afd91e82d698be228a8769f9e033bef814d1&PageSize=100"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd4a212a7d10a27453745001ea6932859.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd4a212a7d10a27453745001ea6932859.json",
+      "method": "DELETE",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd4a212a7d10a27453745001ea6932859.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd268fba2a81808905e154e27b65cc565.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd268fba2a81808905e154e27b65cc565.json",
+      "method": "DELETE",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd268fba2a81808905e154e27b65cc565.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "GET",
+      "query": "?FriendlyName=mc-phone-eb5c216a381c9ed8b4769903dc56b4d3754f95b0d26d7a6cfd73c5e&PageSize=100"
+    },
+    {
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/AvailablePhoneNumbers/US/Local.json",
+      "method": "GET",
+      "query": "?AreaCode=713&VoiceEnabled=true&SmsEnabled=true&ExcludeAllAddressRequired=true&PageSize=1"
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9b3a5df4e2e033934b2ba8a25f3af71c.json",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9b3a5df4e2e033934b2ba8a25f3af71c.json",
+      "method": "DELETE",
+      "query": ""
+    },
+    {
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9b3a5df4e2e033934b2ba8a25f3af71c.json",
+      "method": "GET",
+      "query": ""
+    }
+  ],
+  "blocked": [],
+  "conflicts": 5,
+  "sourceBefore": {
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/phone-twilio.mjs": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/client.mjs": "22d19c15c795af627bd6e52c1289cc1d9a5c425318662a721affdf073dd431c8",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a",
+    "netlify/functions/lib/operator.mjs": "a60c37ef5e93ed2187b5349fdcb54b027f198106d34aa43cf4a28e5bf56ced97",
+    "netlify/functions/lib/access.mjs": "f3943f82268a02d1bc54567831dfe9fb7f7d227215bdd4cd2e9c514f2f1d326f",
+    "netlify/functions/phone-activation-scheduler.mjs": "47c3390228f3ac280e07c1ad9fcc339a84f36b7ad707e45f302f1420234d378d"
+  },
+  "gateOffObservation": {
+    "ok": false,
+    "enabled": false,
+    "processed": 0,
+    "skipped": "Phone execution is disabled; saved work is retained",
+    "reasonCode": "product_gate_closed",
+    "scope": "bounded_candidates",
+    "pending": 1,
+    "inspected": 1,
+    "unresolved": 1,
+    "cleanupPending": 0,
+    "outcomes": []
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/phone-twilio.mjs": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/client.mjs": "22d19c15c795af627bd6e52c1289cc1d9a5c425318662a721affdf073dd431c8",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a",
+    "netlify/functions/lib/operator.mjs": "a60c37ef5e93ed2187b5349fdcb54b027f198106d34aa43cf4a28e5bf56ced97",
+    "netlify/functions/lib/access.mjs": "f3943f82268a02d1bc54567831dfe9fb7f7d227215bdd4cd2e9c514f2f1d326f",
+    "netlify/functions/phone-activation-scheduler.mjs": "47c3390228f3ac280e07c1ad9fcc339a84f36b7ad707e45f302f1420234d378d"
+  },
+  "summary": {
+    "passed": 42,
+    "failed": 8,
+    "total": 50
+  }
+}

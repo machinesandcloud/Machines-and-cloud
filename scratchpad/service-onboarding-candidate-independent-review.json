@@ -1,0 +1,123 @@
+{
+  "at": "2026-10-22T19:47:35.771844+00:00",
+  "candidate": "58746f1e48aac62559d035d0d4430cc9aaea56a8",
+  "parent": "e997de2f8def3a04feaa543360faa58c0d280b5a",
+  "scope": "Independent isolated-candidate browser and runtime-byte review. No provider or hosted actions.",
+  "runtimeBridge": {
+    "onboard.html": {
+      "candidate": "c305bcf04aadd0cf58fb26103bc0a96ee6f001095e38dbfde8f0bd4fa8e136f8",
+      "acceptedMain": "c305bcf04aadd0cf58fb26103bc0a96ee6f001095e38dbfde8f0bd4fa8e136f8"
+    },
+    "onboard.js": {
+      "candidate": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec",
+      "acceptedMain": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec"
+    },
+    "onboard.css": {
+      "candidate": "4347ac63d8a44dda3585b3f675e710f624ade33c376da73fb8dd45991984c108",
+      "acceptedMain": "4347ac63d8a44dda3585b3f675e710f624ade33c376da73fb8dd45991984c108"
+    },
+    "desk.html": {
+      "candidate": "6b3db1cde5c38f7e99f6975dfe06fd711dc5e58b9d9b6b368a57f40978a8ed1d",
+      "acceptedMain": "6b3db1cde5c38f7e99f6975dfe06fd711dc5e58b9d9b6b368a57f40978a8ed1d"
+    },
+    "desk.js": {
+      "candidate": "51246814cbd6b2fe506c65833e4943594b9a7db90c1e6ef2ec806fb55909b38e",
+      "acceptedMain": "51246814cbd6b2fe506c65833e4943594b9a7db90c1e6ef2ec806fb55909b38e"
+    },
+    "desk-connections.js": {
+      "candidate": "092254896bb163a2795fcce5c658e809adc5500de62cb25e1fb30fa699e65d07",
+      "acceptedMain": "092254896bb163a2795fcce5c658e809adc5500de62cb25e1fb30fa699e65d07"
+    },
+    "desk-connections.css": {
+      "candidate": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+      "acceptedMain": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932"
+    },
+    "styles.css": {
+      "candidate": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+      "acceptedMain": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+    },
+    "netlify/functions/onboard.mjs": {
+      "candidate": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+      "acceptedMain": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f"
+    },
+    "netlify/functions/client.mjs": {
+      "candidate": "73402205431f08ea3f87b52526550061fdbe3daeb9db908a4f4756fafac64251",
+      "acceptedMain": "73402205431f08ea3f87b52526550061fdbe3daeb9db908a4f4756fafac64251"
+    },
+    "netlify/functions/lib/service-onboarding.mjs": {
+      "candidate": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8",
+      "acceptedMain": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8"
+    },
+    "netlify/functions/lib/service-onboarding-dispatch.mjs": {
+      "candidate": "b98cba92ea7330e9f8c7abba55f96078dacf1d6a4d2e659c71d510d1d29b4560",
+      "acceptedMain": "b98cba92ea7330e9f8c7abba55f96078dacf1d6a4d2e659c71d510d1d29b4560"
+    },
+    "netlify/functions/service-onboarding-background.mjs": {
+      "candidate": "336c3744db3a86fe3af50feaf3de60ae5655b164361df84f3c91bed076c64cb5",
+      "acceptedMain": "336c3744db3a86fe3af50feaf3de60ae5655b164361df84f3c91bed076c64cb5"
+    },
+    "netlify/functions/service-onboarding-scheduler.mjs": {
+      "candidate": "ee0c4c66944121f69f5b57563b91be14589d2946c52795bc17375be7ab0cc95a",
+      "acceptedMain": "ee0c4c66944121f69f5b57563b91be14589d2946c52795bc17375be7ab0cc95a"
+    }
+  },
+  "unchangedLowerRuntime": [
+    "netlify/functions/lib/phone-activation.mjs",
+    "netlify/functions/lib/phone-twilio.mjs",
+    "netlify/functions/lib/voice-activation.mjs",
+    "netlify/functions/lib/voice-provider.mjs",
+    "netlify/functions/lib/messaging-provider.mjs"
+  ],
+  "accessDiff": "Only draft allowlist additions phoneSetupMode/setupVersion; old authentication acknowledgment repair excluded.",
+  "messagingDiff": "Only pure registration-normalizer export/alias; old cleanup runtime changes excluded.",
+  "browserResults": [
+    {
+      "receipt": "scratchpad/service-onboarding-qa-ui-candidate-final.json",
+      "summary": {
+        "passed": 21,
+        "failed": 0,
+        "total": 21
+      },
+      "sourceStable": true,
+      "physicalNetwork": 0,
+      "blockedServer": null,
+      "scope": "Cached real onboarding HTML/CSS/JS; explicitly mocked owner/draft/create API; headless isolated browser, default-deny outbound. Visual, validation and preserved-field proof only, not signup/service delivery."
+    },
+    {
+      "receipt": "scratchpad/service-onboarding-qa-connections-candidate-final.json",
+      "summary": {
+        "passed": 11,
+        "failed": 0,
+        "total": 11
+      },
+      "sourceStable": true,
+      "physicalNetwork": 0,
+      "blockedServer": null,
+      "scope": "Actual browser connection renderer and styles on explicit host-DOM/owner-DTO/mutation fixtures; no real signup, worker, provider or API mutation. Main actual-handler proof is separate."
+    },
+    {
+      "receipt": "scratchpad/service-onboarding-candidate-customer-final.json",
+      "summary": {
+        "checks": 52,
+        "passed": 52,
+        "failed": 0
+      },
+      "sourceStable": true,
+      "physicalNetwork": null,
+      "blockedServer": [],
+      "scope": "actual source/handlers in memory; private fake mailbox; no network"
+    }
+  ],
+  "inspectedImages": [
+    "scratchpad/service-onboarding-qa-ui-candidate-final-details-375.png",
+    "scratchpad/service-onboarding-qa-ui-candidate-final-preferences-1365.png",
+    "scratchpad/service-onboarding-qa-connections-candidate-final-review-320.png",
+    "scratchpad/service-onboarding-candidate-customer-final-guide-390.png"
+  ],
+  "accepted": true,
+  "limits": [
+    "Local only; actual handlers use memory and synthetic mailbox/model fixtures.",
+    "Connection component uses explicit host/DTO/mutation fixtures.",
+    "No actual signup/email, provider purchase, call, text, Calendar change, deployment or live service acceptance."
+  ]
+}

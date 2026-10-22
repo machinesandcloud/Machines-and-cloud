@@ -1,0 +1,110 @@
+{
+  "at": "2026-10-22T18:25:32.157Z",
+  "reviewer": "platform_readiness_packet",
+  "mode": "independent local source audit and existing evidence verification; no new test or external execution",
+  "ok": true,
+  "disposition": "No blocker found in the narrow exact-record access acknowledgment repair.",
+  "source": "netlify/functions/lib/access.mjs",
+  "sourceSHA256": "40d00110b7c4a4c212af7ed7e103f592a2b8ef74738a4253e5030a1db5d76e86",
+  "invariants": [
+    {
+      "name": "Only the same invocation can acknowledge its consumed challenge",
+      "verified": true,
+      "evidence": "expectedConsumption is a private closure set only after current purpose/pending/expiry checks. Recovery requires that invocation’s fresh random sessionHash and every consumed-row scalar field to match exactly. A later POST starts with expectedConsumption=null and a different sessionHash; a foreign/concurrent consumed row cannot pass."
+    },
+    {
+      "name": "Challenge and session create acknowledgments require exact fresh records",
+      "verified": true,
+      "evidence": "The challenge and session keys are fresh256-bit random values. sameAccessRecord requires the same own-key count and exact scalar values for email, purpose/scope, status, creation, expiry and optional intake binding. Changed/revoked/conflicting records throw rather than being overwritten or reactivated."
+    },
+    {
+      "name": "Purpose, expiry and revocation remain enforced",
+      "verified": true,
+      "evidence": "Wrong-purpose or initially expired challenges still fail before consumption. A same-invocation acknowledgment recognizes a consumption already accepted before expiry; it does not rewrite or extend challenge expiry. Session creation/expiry is fixed once before the write retry, and revoked/different session rows cannot match active expectedSession. getAccessSession still requires active status, current expiry and exact scope."
+    },
+    {
+      "name": "No existing bearer is disclosed and replay remains rejected",
+      "verified": true,
+      "evidence": "The only returned bearer is the newly generated local session value after its exact expected session record is confirmed. The patch does not read or return another stored raw bearer. Later/concurrent requests cannot reuse the private expected-consumption state; the recorded concurrent result is one200/one410."
+    }
+  ],
+  "scope": "Only access.mjs runtime behavior changes. Generic atomicUpdate, memory-storage policy, provider execution gates, webhook/routing and public error disclosure are unchanged.",
+  "referencedQA": [
+    {
+      "file": "scratchpad/access-link-repair-final.json",
+      "passed": 16,
+      "total": 16,
+      "sourceMatch": true,
+      "proof": "Existing local receipt inspected and source hashes verified; not rerun or summed by this reviewer."
+    },
+    {
+      "file": "scratchpad/access-link-operator-regression-final.json",
+      "passed": 56,
+      "total": 56,
+      "sourceMatch": true,
+      "proof": "Existing local receipt inspected and source hashes verified; not rerun or summed by this reviewer."
+    },
+    {
+      "file": "scratchpad/access-link-owner-regression-final.json",
+      "passed": 155,
+      "total": 155,
+      "sourceMatch": true,
+      "proof": "Existing local receipt inspected and source hashes verified; not rerun or summed by this reviewer."
+    },
+    {
+      "file": "scratchpad/access-link-required-gate-final.json",
+      "passed": 25,
+      "total": 25,
+      "sourceMatch": true,
+      "proof": "Existing local receipt inspected and source hashes verified; not rerun or summed by this reviewer."
+    }
+  ],
+  "isolatedCandidate": {
+    "commit": "dd0577bd501c404f4078abb75b2e616f9b459747",
+    "parent": "b9f4578155dd6672fdd89d9870affc92c0cba0fb",
+    "path": "/tmp/mc-auth-link-repair-b9f4578",
+    "verified": true,
+    "changedPaths": [
+      "netlify/functions/lib/access.mjs",
+      "scratchpad/auth-only-required-gate-final.json",
+      "scratchpad/auth-only-sdk-final.json",
+      "scripts/access-link-diagnosis-check.mjs"
+    ],
+    "sameAccessHash": true,
+    "childCleanupRuntimeIncluded": false,
+    "referencedQA": [
+      {
+        "file": "scratchpad/auth-only-sdk-final.json",
+        "passed": 16,
+        "total": 16,
+        "isolatedCommitSourceMatch": true,
+        "proof": "Existing candidate execution receipt inspected; not rerun."
+      },
+      {
+        "file": "scratchpad/auth-only-required-gate-final.json",
+        "passed": 25,
+        "total": 25,
+        "isolatedCommitSourceMatch": true,
+        "proof": "Existing candidate execution receipt inspected; not rerun."
+      }
+    ],
+    "publication": "Prepared locally only; this receipt grants no push, build, deployment or hosted acceptance authority."
+  },
+  "productionCauseLimit": "The SDK lost-acknowledgment defects are locally reproduced and repaired. Their production SDK retry takes about5s, while the observed hosted exchange took1.747s; the repair is not established as that incident’s cause. Mail issuance equality, server challenge state and relevant production storage configuration remain unverified pending the separately requested diagnostic.",
+  "effects": {
+    "physicalNetworkRequests": 0,
+    "browserOrMailboxAccess": 0,
+    "providerRequests": 0,
+    "emails": 0,
+    "tokenExchanges": 0,
+    "productWrites": 0,
+    "runtimeOrScriptEdits": 0,
+    "environmentChanges": 0,
+    "testReruns": 0,
+    "builds": 0,
+    "deployments": 0,
+    "commits": 0,
+    "pushes": 0,
+    "reviewReceiptWrites": 1
+  }
+}

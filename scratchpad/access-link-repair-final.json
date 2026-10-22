@@ -1,0 +1,160 @@
+{
+  "at": "2026-10-22T18:14:26.448Z",
+  "mode": "local diagnosis only; actual handlers, isolated processes and installed SDK 11.1.4; all transport intercepted over IPC",
+  "productionCommit": "b9f4578155dd6672fdd89d9870affc92c0cba0fb",
+  "expectRepair": true,
+  "sourceBefore": {
+    "netlify/functions/lib/access.mjs": "40d00110b7c4a4c212af7ed7e103f592a2b8ef74738a4253e5030a1db5d76e86",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a",
+    "netlify/functions/lib/send.mjs": "8809d608390f63f48034dc9fddb8e027b80783ce1a4542d382bd8c713b8be39c",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "admin.js": "6bd0e50de354d8f265910da625da67b6a1bd709525eaf6fa4264bf70c9dc76a0"
+  },
+  "b9SourceMatches": {
+    "netlify/functions/lib/access.mjs": false,
+    "netlify/functions/lib/store.mjs": true,
+    "netlify/functions/manage.mjs": true,
+    "netlify/functions/lib/send.mjs": true,
+    "netlify/functions/lib/accounts.mjs": true,
+    "admin.js": true
+  },
+  "checks": [
+    {
+      "name": "Production URL + MC_MEMORY_STORE=1 sends an email but the token survives only in its original process",
+      "ok": true,
+      "elapsedMs": 737787,
+      "exchangeStatus": 200,
+      "simulatedEmails": 1,
+      "durableBlobWrites": 0
+    },
+    {
+      "name": "A fresh instance with the same erroneous memory flag returns410 inside20minutes with no prior exchange",
+      "ok": true,
+      "elapsedMs": 737787,
+      "remainingLifetimeMs": 462213,
+      "exchangeStatus": 410,
+      "firstExchange": true,
+      "durableBlobWrites": 0
+    },
+    {
+      "name": "Installed durable SDK preserves an operator token across fresh function processes",
+      "ok": true,
+      "elapsedMs": 737787,
+      "exchangeStatus": 200,
+      "sessionRows": 1
+    },
+    {
+      "name": "Lost consumed-token PUT reply is recovered only inside its original invocation",
+      "ok": true,
+      "elapsedMs": 737787,
+      "exchangeStatus": 200,
+      "firstExchange": true,
+      "consumptionWritesCommitted": 1,
+      "lostReplies": 1,
+      "sdkConditionalRetry412": 1,
+      "sessionRows": 1,
+      "durationMs": 5010,
+      "recordedHostedExchangeDurationMs": 1747
+    },
+    {
+      "name": "Wrong purpose returns410 without consuming an otherwise valid operator token",
+      "ok": true,
+      "wrongPurposeStatus": 410,
+      "correctPurposeStatus": 200
+    },
+    {
+      "name": "A prior successful exchange produces the same410 code on replay",
+      "ok": true,
+      "firstStatus": 200,
+      "replayStatus": 410,
+      "sessionRows": 1
+    },
+    {
+      "name": "True expiry and a sufficiently advanced server clock produce410, while the recorded normal delay does not",
+      "ok": true,
+      "boundaryLifetimeMs": 1200000,
+      "recordedDelayMs": 737787,
+      "additionalClockAdvanceNeededMs": 462213,
+      "expiryStatus": 410
+    },
+    {
+      "name": "A missing durable token is indistinguishable from expiry in the public410 result",
+      "ok": true,
+      "exchangeStatus": 410,
+      "sessionRows": 0
+    },
+    {
+      "name": "An actual SDK token read failure yields503 rather than a false410",
+      "ok": true,
+      "exchangeStatus": 503,
+      "sessionRows": 0
+    },
+    {
+      "name": "A rejected session write yields503 after token consumption; retry then410 is a separate sequence",
+      "ok": true,
+      "initialStatus": 503,
+      "retryStatus": 410,
+      "sessionRows": 0
+    },
+    {
+      "name": "Lost pending create acknowledgment recovers its exact original random record",
+      "ok": true,
+      "repaired": true,
+      "lostReplies": 1,
+      "sdkConditionalRetry412": 1,
+      "simulatedEmails": 1,
+      "sessionRows": 1
+    },
+    {
+      "name": "Lost session create acknowledgment recovers its exact original random record",
+      "ok": true,
+      "repaired": true,
+      "lostReplies": 1,
+      "sdkConditionalRetry412": 1,
+      "simulatedEmails": 1,
+      "sessionRows": 1
+    },
+    {
+      "name": "lost_pending_conflict cannot acknowledge or reactivate a different record",
+      "ok": true,
+      "status": 503,
+      "sessionReturned": false
+    },
+    {
+      "name": "lost_session_revoked cannot acknowledge or reactivate a different record",
+      "ok": true,
+      "status": 503,
+      "sessionReturned": false
+    },
+    {
+      "name": "lost_session_conflict cannot acknowledge or reactivate a different record",
+      "ok": true,
+      "status": 503,
+      "sessionReturned": false
+    },
+    {
+      "name": "Two independent concurrent exchanges cannot recover each other consumption or create two sessions",
+      "ok": true,
+      "statuses": [
+        200,
+        410
+      ],
+      "sessionRows": 1
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "sourceAfter": {
+    "netlify/functions/lib/access.mjs": "40d00110b7c4a4c212af7ed7e103f592a2b8ef74738a4253e5030a1db5d76e86",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a",
+    "netlify/functions/lib/send.mjs": "8809d608390f63f48034dc9fddb8e027b80783ce1a4542d382bd8c713b8be39c",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "admin.js": "6bd0e50de354d8f265910da625da67b6a1bd709525eaf6fa4264bf70c9dc76a0"
+  },
+  "sourceStable": true,
+  "passed": 16,
+  "total": 16,
+  "ok": true,
+  "diagnosisLimit": "These are demonstrated failure mechanisms, not confirmed production causes. The lost-network-reply reproduction uses the production SDK 5000ms retry delay, longer than the hosted1747ms exchange, so it cannot explain that timing under normal production retry settings. The closed hosted phase retained neither MC_MEMORY_STORE/MC_FAKE_MODEL metadata nor the token row/conditional storage trace."
+}

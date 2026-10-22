@@ -1,7 +1,7 @@
 (function () {
   var q = new URLSearchParams(location.search), slug = q.get('c'), key = q.get('k');
   var ownerSession = null; try { ownerSession = sessionStorage.getItem('mc-onboarding-session-v1'); } catch (error) { /* Email sign-in is available when storage is disabled. */ }
-  if (!slug || (!key && !ownerSession)) { document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
+  if (!slug || (!key && !ownerSession)) { document.body.dataset.workspaceState = 'recovery'; document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
   var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + (key ? '&k=' + encodeURIComponent(key) : '');
   var portalGeneration = 0, leaving = false, chatController = null, cfgRevision = null, cfgDirty = false, guideStarted = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
@@ -11,7 +11,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function recover(message) {
     if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; if ($('phoneAuthority')) $('phoneAuthority').checked = false; if ($('phoneCosts')) $('phoneCosts').checked = false;
-    $('portalContent').hidden = true; $('portalRecovery').hidden = false;
+    $('portalContent').hidden = true; $('portalRecovery').hidden = false; document.body.dataset.workspaceState = 'recovery'; $('deskRail').hidden = true; $('railBusiness').textContent = 'Your front desk';
     $('title').textContent = 'Your workspace'; $('status').textContent = 'Unable to open workspace';
     $('recoveryMessage').textContent = message; if ($('liveBtns')) $('liveBtns').innerHTML = '';
   }
@@ -21,6 +21,7 @@
     recover('Your session expired. Sign in by email to reopen your workspace.'); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
   });
   document.addEventListener('mc:desk-refresh',function(){if(!leaving)load();});
+  document.addEventListener('mc:desk-route',function(event){if(!leaving && ['know','test','setup'].includes(event.detail?.tab))routeTo(event.detail.tab);});
   async function apiRequest(method, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
@@ -39,7 +40,7 @@
     $('availabilityBlocks').innerHTML = blocks.length ? blocks.map(function (b) {
       var label = availabilityDateLabel(b.date) + ' · ' + (b.window || 'Whole day');
       return '<div class="availability-row"><div><b>' + esc(label) + '</b>' + (b.existingBookings ? '<div>' + esc(b.existingBookings) + ' visit' + (b.existingBookings === 1 ? ' is' : 's are') + ' already reserved and unchanged.</div>' : '') + '</div><button type="button" class="btn-pill btn-pill-dark btn-sm availability-remove" data-date="' + esc(b.date) + '" data-window="' + esc(b.window) + '" aria-label="Remove block for ' + esc(label) + '">Remove block</button></div>';
-    }).join('') : '<p>No time blocked.</p>';
+    }).join('') : emptyState('Your schedule is open', 'Block existing work or time off above. Your front desk uses these blocks when offering new visits.');
   }
   var availabilityBusy = false;
   function availabilityChange(actionName, date, window, button) {
@@ -56,15 +57,61 @@
   $('availabilityForm').addEventListener('submit', function (e) { e.preventDefault(); availabilityChange('availability_block', $('availabilityDate').value, $('availabilityWindow').value, $('availabilitySubmit')); });
   $('availabilityBlocks').addEventListener('click', function (e) { var button = e.target.closest('button.availability-remove'); if (button) availabilityChange('availability_unblock', button.dataset.date, button.dataset.window, button); });
 
-  function showTab(t) { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); }); }
+  var pageCopy = {
+    today: ['DAILY WORK', 'Your day, at a glance', 'Customer requests, visits and the work that needs your attention.'],
+    leads: ['DAILY WORK', 'Customer requests', 'Bookings and callback requests collected by your front desk.'],
+    convs: ['DAILY WORK', 'Conversations', 'See what customers asked and how your front desk responded.'],
+    availability: ['YOUR SCHEDULE', 'Availability', 'Keep your arrival windows free for the work you can take.'],
+    know: ['YOUR FRONT DESK', 'Business rules', 'The answers, services and instructions your front desk uses.'],
+    test: ['YOUR FRONT DESK', 'Practice your front desk', 'Try a customer conversation and see the details it collects.'],
+    setup: ['YOUR FRONT DESK', 'Connections', 'Follow setup progress, connect your channels and prepare for customers.'],
+    account: ['YOUR WORKSPACE', 'Account & data', 'Manage your service preferences and download your customer records.']
+  };
+  function showTab(t) {
+    if (!pageCopy[t] || !document.getElementById('p-' + t)) return;
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); x.setAttribute('aria-current', x.dataset.t === t ? 'page' : 'false'); });
+    document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); });
+    document.body.dataset.activePage = t;
+    $('pageEyebrow').textContent = pageCopy[t][0]; $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; syncNextActionVisibility();
+  }
+  function syncNextActionVisibility() { var guide = $('workspaceGuide'); if (guide.dataset.needed) guide.hidden = guide.dataset.needed !== 'true' || $('nextSetupAction').dataset.route === document.body.dataset.activePage; }
   if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
-  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { window.__tabPicked = true; document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + b.dataset.t); }); }); });
-
+  else showTab('today');
+  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { routeTo(b.dataset.t); }); });
+  window.addEventListener('hashchange', function () { if (!leaving && pageCopy[location.hash.slice(1)]) routeTo(location.hash.slice(1)); });
   function routeTo(tab) {
+    if (!pageCopy[tab] || leaving) return;
     window.__tabPicked = true; if (tab === 'test') $('tabTest').style.display = '';
     showTab(tab); var pane = $('p-' + tab); if (!pane) return;
+    history.replaceState(null, '', location.pathname + location.search + '#' + tab);
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
-    pane.classList.add('guide-target'); pane.tabIndex = -1; pane.scrollIntoView({ behavior: 'instant', block: 'start' }); pane.focus({ preventScroll: true });
+    pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
+  }
+  $('nextSetupAction').addEventListener('click', function () { routeTo(this.dataset.route || 'know'); });
+  document.addEventListener('click', function (event) { var button = event.target.closest('.desk-empty-action[data-route]'); if (button) routeTo(button.dataset.route); });
+  document.querySelectorAll('[data-practice-prompt]').forEach(function (button) { button.addEventListener('click', function () { $('chatIn').value = button.dataset.practicePrompt; $('chatIn').focus(); }); });
+  function emptyState(title, detail, actionLabel, tab) {
+    return '<div class="desk-empty"><div class="desk-empty-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 13h4l2 3h4l2-3h4"/></svg></div><div><strong>' + esc(title) + '</strong><p>' + esc(detail) + '</p>' + (actionLabel ? '<button type="button" class="desk-empty-action" data-route="' + esc(tab) + '">' + esc(actionLabel) + ' →</button>' : '') + '</div></div>';
+  }
+  function decorateRecordTables() {
+    document.querySelectorAll('#bookings .tbl, #leads .tbl').forEach(function (table) {
+      table.setAttribute('role', 'table'); var labels = Array.prototype.map.call(table.querySelectorAll('th'), function (th) { th.scope = 'col'; th.setAttribute('role', 'columnheader'); return th.textContent; });
+      table.querySelectorAll('tr').forEach(function (row) { row.setAttribute('role', 'row'); row.querySelectorAll('td').forEach(function (cell, index) { cell.setAttribute('role', 'cell'); cell.dataset.label = labels[index] || ''; var content = document.createElement('div'); content.className = 'desk-cell-content'; while (cell.firstChild) content.appendChild(cell.firstChild); cell.appendChild(content); }); });
+    });
+  }
+  function recordTimeLabel(value) {
+    var date = new Date(value);
+    if (!value || !Number.isFinite(date.getTime())) return 'Time not recorded';
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(date) + ' CT';
+  }
+  function visitDateLabel(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value || 'Date not provided';
+    var date = new Date(value + 'T12:00:00Z');
+    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) return value;
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+  }
+  function renderConversations(rows) {
+    return rows.length ? rows.map(function (v) { return '<article class="conv"><header class="conv-header"><div><b>' + esc(v.contact) + '</b><div class="conv-meta"><span class="conv-channel">' + esc(v.channel) + '</span>' + esc(recordTimeLabel(v.updatedAt)) + (v.flag ? ' · Flagged: ' + esc(v.flag.note || '') : '') + '</div></div>' + (v.flag ? '<a href="#" class="unflag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Unflag</a>' : '<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Flag</button>') + '</header><div class="conv-thread">' + v.messages.map(function (m) { return '<div class="conv-message ' + (m.role === 'user' ? 'u' : 'a') + '"><span>' + (m.role === 'user' ? 'Customer' : 'Front desk') + '</span>' + esc(m.content) + (m.processing ? '<small class="muted"> · ' + esc(m.processing.replace(/_/g, ' ')) + '</small>' : '') + '</div>'; }).join('') + '</div></article>'; }).join('') : emptyState('No conversations yet', 'Customer conversations will appear here once a connected channel receives a message. Private practice stays separate.', 'Review your connections', 'setup');
   }
   var phoneBusy = false, phoneRequestIdentity = null, phoneCancelSnapshot = null, phoneCancelReturnFocus = null;
   function validPhoneOffer(offer) {
@@ -182,8 +229,13 @@
     }
     $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Website chat paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
     $('status').className = 'st' + (operational ? ' live' : '');
-    $('guideTitle').textContent = operational ? 'Your website front desk' : 'Set up your front desk';
-    $('guideIntro').textContent = operational ? 'Customer requests appear under Leads and bookings. Keep your rules and blocked time up to date.' : wantsWeb ? 'Your answers are saved. Review the rules, try a private conversation and follow your connection setup here.' : 'Your answers and connection preferences are saved. Follow their next steps under Setup. You can add website chat if you want it.';
+    var currentProof = client.setupProof || {}, currentRevision = setup.revision;
+    var reviewed = currentProof.reviewedRevision === currentRevision, tested = currentProof.testedRevision === currentRevision && currentProof.testMode === 'live';
+    var services = d.connections, selected = client.onboarding && client.onboarding.desiredChannels || [];
+    var otherPending = services && (selected.indexOf('voice') >= 0 && !services.voice.active || selected.indexOf('sms') >= 0 && !services.messaging.active || selected.indexOf('calendar') >= 0 && !services.calendar.connected);
+    var next = !reviewed ? { title: 'Make sure it sounds like your business', detail: 'Review your services, hours and the answers customers should hear.', button: 'Review business rules', tab: 'know' } : !tested ? { title: 'Try the questions your customers ask', detail: 'Have a private conversation before your front desk answers customers.', button: 'Try your front desk', tab: 'test' } : { title: 'Finish connecting your front desk', detail: 'Your business answers are ready. Check the next step for your selected channels.', button: 'View connections', tab: 'setup' };
+    $('workspaceGuide').dataset.needed = client.status === 'cancelled' || operational && !otherPending ? 'false' : 'true';
+    $('guideTitle').textContent = next.title; $('guideIntro').textContent = next.detail; $('nextSetupAction').textContent = next.button; $('nextSetupAction').dataset.route = next.tab; syncNextActionVisibility();
     $('channelStates').innerHTML = '<span class="channel-state">Website chat: ' + (operational ? 'active' : client.status === 'paused' ? 'paused' : 'not active') + '</span><span class="channel-state">Phone: not active</span><span class="channel-state">Text messages: not active</span>';
     var revision = setup.revision, proof = client.setupProof || {};
     var tasks = [
@@ -244,12 +296,12 @@
     catch (error) { $('copyMessage').textContent = 'Select the code above and copy it manually.'; }
   });
   var tour = [
-    { title: 'Your desk, in one place', body: 'Your business answers are saved here. The checklist shows what is complete and what needs attention. Website chat, phone and texting have separate statuses, so you can see exactly what customers can use.', action: 'See my setup', tab: 'setup' },
-    { title: 'Make the answers yours', body: 'Open What it knows and check your services, service area, published prices, hours and safety instructions. Save any corrections, then select “I reviewed these saved rules.” Changes require another review and test.', action: 'Review my rules', tab: 'know' },
-    { title: 'Practice the requests you get', body: 'Try a customer booking, callback request or question in Test it. The result shows the details collected. Practice does not book a real visit, contact anyone, use your actual capacity or change a calendar.', action: 'Try a private conversation', tab: 'test' },
+    { title: 'Your desk, in one place', body: 'Your next step appears at the top. Use the navigation to move between customer requests, your schedule and your front desk. Connections shows what is ready and what still needs attention.', action: 'See my setup', tab: 'setup' },
+    { title: 'Make the answers yours', body: 'Open Business rules and check your services, service area, published prices, hours and safety instructions. Save any corrections, then select “I reviewed these saved rules.” Changes require another review and test.', action: 'Review my rules', tab: 'know' },
+    { title: 'Practice the requests you get', body: 'Try a customer booking, callback request or question in Practice. The result shows the details collected. Practice does not book a real visit, contact anyone, use your actual capacity or change a calendar.', action: 'Try a private conversation', tab: 'test' },
     { title: 'Protect time you have already booked', body: 'Under Availability, block a whole day or an arrival window for existing jobs, closures or time off. Existing visits stay booked. Calendar sync is not connected, so keep outside work up to date here.', action: 'Check availability', tab: 'availability' },
-    { title: 'Choose when customers can use it', body: 'Setup lists the requirements for website chat. When the saved rules have been reviewed and tested with the working AI service, activate chat and install the code on your website. Phone and text messages stay inactive until their own setup is verified.', action: 'See activation and installation', tab: 'setup' },
-    { title: 'Know what needs you each day', body: 'Leads and bookings holds customer requests; Conversations shows what was said. Check these regularly while phone and text alerts are inactive. Pause website chat from the top of this page, export your records under Account, and reopen this guide whenever you need it.', action: 'View customer requests', tab: 'leads' }
+    { title: 'Choose when customers can use it', body: 'Connections lists the requirements for website chat. When the saved rules have been reviewed and tested with the working AI service, activate chat and install the code on your website. Phone and text messages stay inactive until their own setup is verified.', action: 'See activation and installation', tab: 'setup' },
+    { title: 'Know what needs you each day', body: 'Requests holds your customer work; Conversations shows what was said. Check these regularly while phone and text alerts are inactive. Pause website chat from the top of this page, export your records under Account, and reopen this guide whenever you need it.', action: 'View customer requests', tab: 'leads' }
   ];
   var tourIndex = 0, returnFocus = null;
   function renderTour() {
@@ -271,7 +323,7 @@
     return apiRequest().then(function (d) {
       if (generation !== portalGeneration) return;
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
-      $('portalRecovery').hidden = true; $('portalContent').hidden = false;
+      $('portalRecovery').hidden = true; $('portalContent').hidden = false; document.body.dataset.workspaceState = 'ready'; $('deskRail').hidden = false;
       data = d; var c = d.client;
       queueMicrotask(function () { if (!leaving && data === d) document.dispatchEvent(new CustomEvent('mc:desk', { detail: d })); });
       var windowChoice = $('availabilityWindow').value;
@@ -280,17 +332,17 @@
       var houstonToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
       $('availabilityDate').min = houstonToday; if (!$('availabilityDate').value) $('availabilityDate').value = houstonToday;
       renderAvailability(d.availabilityBlocks || []);
-      $('title').textContent = (c.business.name || 'Your front desk');
+      $('title').textContent = (c.business.name || 'Your front desk'); $('railBusiness').textContent = c.business.name || 'Your front desk';
       var selfService = c.onboarding && c.onboarding.version === 1;
       var st = $('status'); st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status; st.className = 'st' + (c.status === 'live' ? ' live' : '');
       st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;
       var offBtns = (d.forwarding && d.forwarding.off && d.forwarding.off.length && (c.status === 'paused' || c.status === 'cancelled')) ? '<div class="muted" style="margin-top:8px">Send calls back to your phone: ' + d.forwarding.off.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') + '<br>' + esc(d.forwarding.offLong || '') + '</div>' : '';
       document.querySelector('.tabs button[data-t="test"]').style.display = c.status === 'cancelled' ? 'none' : '';
-      var live = c.status === 'live'; $('tabToday').style.display = live ? '' : 'none'; $('tabTest').style.display = live || c.status === 'cancelled' ? 'none' : '';
-      if (live && !location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
+      var live = c.status === 'live'; $('tabToday').style.display = ''; $('tabTest').style.display = c.status === 'cancelled' ? 'none' : '';
+      if (!location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
 
-      $('needsYou').innerHTML = (function () { var rows = d.leads.filter(function (l) { return l.status === 'open' && (l.alertWaiting || l.overdueAt || l.outcome === 'needs_action' || l.outcome === 'wants_call'); }); return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(l.id) + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : 'Nothing waiting on you.'; })();
-      $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || 'Quiet so far.';
+      $('needsYou').innerHTML = (function () { var rows = d.leads.filter(function (l) { return l.status === 'open' && (l.alertWaiting || l.overdueAt || l.outcome === 'needs_action' || l.outcome === 'wants_call'); }); return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(l.id) + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : emptyState('You’re all caught up', 'Requests that need a callback, an acknowledgment or urgent attention will appear here.', 'View customer requests', 'leads'); })();
+      $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || emptyState('No activity in the last 24 hours', 'Customer activity appears here after it happens. Private practice is kept separate.');
       (function () { var dayOf = function (iso) { return iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }) : ''; }; var today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
         var t = d.today || {}; var calls = t.calls || 0, texts = t.texts || 0, booked = t.bookings || 0, need = t.needsYou || 0; var h = d.health || {};
         document.getElementById('today').innerHTML = '<div><b>' + calls + '</b> calls</div><div><b>' + texts + '</b> texts in</div><div><b>' + booked + '</b> booked today</div><div><b>' + need + '</b> need you</div><div class="muted">' + (selfService ? 'Website chat: ' + (d.webAvailable ? 'active' : 'not active') : 'Line: ' + (h.errors24h ? h.errors24h + ' errors in 24 h' : 'OK')) + '</div>'; })();
@@ -313,17 +365,17 @@
       });
       $('missing').textContent = (c.build && c.build.notes) ? c.build.notes : 'Nothing major.';
       // records
-      $('bookings').innerHTML = d.bookings.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Visit</th><th>Status</th><th>Ref</th></tr>' + d.bookings.map(function (b) { return '<tr><td>' + esc((b.createdAt || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(b.customer_name) + ' <span class="muted">(' + (b.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(b.phone) + '</span>' + (b.unsure ? '<br><span class="muted">Unsure: ' + esc(b.unsure) + '</span>' : '') + '</td><td>' + esc(b.issue) + '<br><span class="muted">' + esc(b.address) + '</span></td><td>' + esc(b.date) + ' ' + esc(b.window) + '</td><td>' + esc(b.status) + '</td><td>' + esc(b.id) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="muted">No bookings yet.</p>';
-      $('leads').innerHTML = d.leads.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Outcome</th><th>Status</th><th>Ref</th></tr>' + d.leads.map(function (l) { return '<tr><td>' + esc((l.createdAt || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(l.customer_name || 'no name') + ' <span class="muted">(' + (l.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(l.phone) + '</span></td><td>' + esc(l.issue) + (l.unsure ? '<br><span class="muted">Unsure: ' + esc(l.unsure) + '</span>' : '') + '</td><td>' + esc((l.outcome || l.reason || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ' <b>EMERGENCY</b>' : '') + (l.overdueAt && l.status === 'open' ? '<span class="tag-overdue">overdue callback</span>' : '') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</td><td>' + esc(l.status) + '</td><td>' + esc(l.id) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="muted">No leads yet.</p>';
+      $('bookings').innerHTML = d.bookings.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Visit</th><th>Status</th><th>Ref</th></tr>' + d.bookings.map(function (b) { return '<tr><td>' + esc(recordTimeLabel(b.createdAt)) + '</td><td>' + esc(b.customer_name) + ' <span class="muted">(' + (b.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(b.phone) + '</span>' + (b.unsure ? '<br><span class="muted">Unsure: ' + esc(b.unsure) + '</span>' : '') + '</td><td>' + esc(b.issue) + '<br><span class="muted">' + esc(b.address) + '</span></td><td>' + esc(visitDateLabel(b.date)) + ' ' + esc(b.window) + '</td><td>' + esc(b.status) + '</td><td>' + esc(b.id) + '</td></tr>'; }).join('') + '</table></div>' : emptyState('No bookings yet', 'When your front desk saves a real customer visit, you’ll see the arrival window and job details here.', 'Check connections', 'setup');
+      $('leads').innerHTML = d.leads.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Outcome</th><th>Status</th><th>Ref</th></tr>' + d.leads.map(function (l) { return '<tr><td>' + esc(recordTimeLabel(l.createdAt)) + '</td><td>' + esc(l.customer_name || 'no name') + ' <span class="muted">(' + (l.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(l.phone) + '</span></td><td>' + esc(l.issue) + (l.unsure ? '<br><span class="muted">Unsure: ' + esc(l.unsure) + '</span>' : '') + '</td><td>' + esc((l.outcome || l.reason || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ' <b>EMERGENCY</b>' : '') + (l.overdueAt && l.status === 'open' ? '<span class="tag-overdue">overdue callback</span>' : '') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</td><td>' + esc(l.status) + '</td><td>' + esc(l.id) + '</td></tr>'; }).join('') + '</table></div>' : emptyState('No callback requests yet', 'Requests passed to you will include the customer’s details and what they need.', 'Try a private conversation', 'test');
       document.querySelectorAll('button.ack').forEach(function (b) { b.addEventListener('click', function () { apiRequest('POST', { action: 'ack', leadId: b.dataset.id }).then(function () { toast('Acknowledged.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
-      $('convs').innerHTML = d.conversations.length ? d.conversations.map(function (v) { return '<div class="conv"><b>' + esc(v.channel) + ' · ' + esc(v.contact) + ' · ' + esc((v.updatedAt || '').slice(0, 16).replace('T', ' ')) + ' ' + (v.flag ? '<span class="muted">Flagged: ' + esc(v.flag.note || '') + '</span> <a href="#" class="unflag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Unflag</a>' : '<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Flag</button>') + '</b>' + v.messages.map(function (m) { return '<div class="' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.role === 'user' ? 'Customer: ' : 'Desk: ') + esc(m.content) + (m.processing ? '<small class="muted"> · ' + esc(m.processing.replace(/_/g, ' ')) + '</small>' : '') + '</div>'; }).join('') + '</div>'; }).join('') : '<p class="muted">No conversations yet.</p>';
+      $('convs').innerHTML = renderConversations(d.conversations); $('bookingCount').textContent = d.bookings.length; $('leadCount').textContent = d.leads.length; decorateRecordTables();
       document.querySelectorAll('button.flag').forEach(function (b) { b.addEventListener('click', function () { var note = window.prompt('What went wrong? One line is enough.') || ''; apiRequest('POST', { action: 'flag', channel: b.dataset.ch, contact: b.dataset.ct, note: note }).then(function () { toast('Issue recorded on this conversation.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
       document.querySelectorAll('a.unflag').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); apiRequest('POST', { action: 'unflag', channel: a.dataset.ch, contact: a.dataset.ct }).then(function () { return load(); }).catch(function (error) { toast(error.message); }); }); });
       // config form
       if (!cfgDirty) {
       cfgRevision = d.configurationRevision;
       var f = $('cfg'), lines = function (a) { return (a || []).join('\n'); };
-      f.elements['business.name'].value = c.business.name || ''; f.elements['business.trade'].value = c.business.trade || ''; f.elements['business.hours'].value = c.business.hours || ''; var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; var hr = document.getElementById('hoursRows'); if (!hr.children.length) hr.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" data-d="' + d + '" data-k="close"></div>'; }).join(''); var hrs = c.rules.hours || {}; hr.querySelectorAll('input').forEach(function (inp) { var v = hrs[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); document.getElementById('hoursNote').textContent = c.rules.hours ? 'The front desk uses these for the callback promise and after-hours rules.' : 'We could not read your hours; using 7 am to 7 pm until you fill in the rows.'; f.elements['business.afterHours'].value = c.business.afterHours || '';
+      f.elements['business.name'].value = c.business.name || ''; f.elements['business.trade'].value = c.business.trade || ''; f.elements['business.hours'].value = c.business.hours || ''; var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; var hr = document.getElementById('hoursRows'); if (!hr.children.length) hr.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open" aria-label="' + d + ' opening time"><span>to</span><input type="time" data-d="' + d + '" data-k="close" aria-label="' + d + ' closing time"></div>'; }).join(''); var hrs = c.rules.hours || {}; hr.querySelectorAll('input').forEach(function (inp) { var v = hrs[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); document.getElementById('hoursNote').textContent = c.rules.hours ? 'The front desk uses these for the callback promise and after-hours rules.' : 'We could not read your hours; using 7 am to 7 pm until you fill in the rows.'; f.elements['business.afterHours'].value = c.business.afterHours || '';
       f.elements['business.serviceArea'].value = lines(c.business.serviceArea); f.elements['business.notServed'].value = lines(c.business.notServed); f.elements['business.spanish'].value = c.business.spanish ? 'yes' : 'no'; f.elements['business.licenses'].value = c.business.licenses || '';
       f.elements['services'].value = lines(c.services); f.elements['fees'].value = (c.fees || []).map(function (x) { return x.label + ': ' + x.amount + (x.note ? ' (' + x.note + ')' : ''); }).join('\n'); f.elements['windows'].value = lines(c.windows);
       f.elements['rules.handoff'].value = lines(c.rules.handoff); f.elements['rules.never'].value = lines(c.rules.never); var em = (c.rules.emergencies && typeof c.rules.emergencies === 'object') ? c.rules.emergencies : { tier0: [], tier1: [], tier2: '', script: c.rules.emergencies || '' }; f.elements['rules.emergencies.tier0'].value = lines(em.tier0); f.elements['rules.emergencies.tier1'].value = lines(em.tier1); f.elements['rules.emergencies.tier2'].value = em.tier2 || ''; f.elements['rules.emergencies.script'].value = em.script || ''; f.elements['widget.allowedOrigins'].value = lines(c.widget.allowedOrigins || []); f.elements['summary'].value = c.summary || ''; f.elements['widget.greeting'].value = c.widget.greeting || '';

@@ -29,6 +29,8 @@ import { dispatchServiceWorker } from "./lib/managed-sms.mjs";
 import { deliveryTenant } from "./lib/managed-consent.mjs";
 import { managedSMSConversations } from "./lib/managed-history.mjs";
 import { dispatchCalendarDeliveryWave } from "./lib/calendar-delivery.mjs";
+import { serviceOnboardingStatus, requestServiceOnboarding, cancelServiceOnboarding, ServiceOnboardingError } from "./lib/service-onboarding.mjs";
+import { dispatchServiceOnboarding } from "./lib/service-onboarding-dispatch.mjs";
 
 export const config = { path: "/api/client" };
 
@@ -89,7 +91,7 @@ async function handle(req) {
       for(const conversation of sms){const old=convs.find(row=>row.channel==="sms"&&row.contact===conversation.contact);if(old)Object.assign(old,conversation);else convs.push(conversation);}
     }
     return json({
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, serviceOnboarding: await serviceOnboardingStatus(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, bookings, leads, events),
@@ -166,6 +168,8 @@ async function handle(req) {
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
     const serviceActions = {
+      request_service_onboarding: ["expectedRevision", "submissionId", "offerDigest", "acceptedCosts", "authority", "forwardingMode", "legal", "attestLegalAccuracy", "attestConsent", "testPhoneConsent"],
+      cancel_service_onboarding: ["expectedRevision", "operationId"],
       start_calendar_connection: ["expectedRevision"], complete_calendar_connection: ["state", "code", "error"], disconnect_calendar: [],
       request_voice_activation: ["expectedRevision", "acceptedAuthority", "policyVersion", "policyDigest", "forwardingMode"],
       cancel_voice_activation: ["expectedRevision"],
@@ -192,7 +196,11 @@ async function handle(req) {
           try{await dispatchCalendarDeliveryWave();}catch{/* Scheduled recovery resumes saved calendar work. */}
           return json({ok:true,client:ownerView(updated),connections:await serviceConnections(updated)},202,{"Cache-Control":"no-store"});
         }
-        if (b.action === "start_calendar_connection") {
+        if (b.action === "request_service_onboarding" || b.action === "cancel_service_onboarding") {
+          result = b.action === "request_service_onboarding" ? await requestServiceOnboarding(c, body) : await cancelServiceOnboarding(c, body);
+          try { await dispatchServiceOnboarding(c); } catch { /* The scheduled coordinator recovers the durable request. */ }
+          return json({ ok: true, result, serviceOnboarding: await serviceOnboardingStatus(c), connections: await serviceConnections(c), phoneActivation: await phoneActivationStatus(c) }, 202, { "Cache-Control": "no-store" });
+        } else if (b.action === "start_calendar_connection") {
           if (b.expectedRevision !== configurationRevision(c)) return json({ error: "configuration_changed" }, 409);
           result = await startCalendarConnection(c, session);
         } else if (b.action === "complete_calendar_connection") result = await completeCalendarConnection(c, session, {state:b.state,...(b.code!==undefined?{code:b.code}:{}),...(b.error!==undefined?{error:b.error}:{})});
@@ -207,7 +215,7 @@ async function handle(req) {
         if (b.action === "complete_calendar_connection") try { await dispatchCalendarDeliveryWave(); } catch { /* Saved future visits are discovered by scheduled recovery. */ }
         return json({ ok: true, result, connections: await serviceConnections(c) }, 202, { "Cache-Control": "no-store" });
       } catch (error) {
-        return json({ error: typeof error.code === "string" ? error.code : "service_setup_unavailable", message: error instanceof CalendarError || /ActivationError$/.test(error.constructor?.name || "") ? error.message : "Your service change could not be confirmed. Refresh its status before retrying." }, Number.isInteger(error.status) ? error.status : 503, { "Cache-Control": "no-store" });
+        return json({ error: typeof error.code === "string" ? error.code : "service_setup_unavailable", message: error instanceof CalendarError || error instanceof ServiceOnboardingError || /ActivationError$/.test(error.constructor?.name || "") ? error.message : "Your service change could not be confirmed. Refresh its status before retrying." }, Number.isInteger(error.status) ? error.status : 503, { "Cache-Control": "no-store" });
       }
     }
     if (["request_phone_activation", "cancel_phone_activation"].includes(b?.action)) {

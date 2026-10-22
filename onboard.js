@@ -10,6 +10,7 @@
     form.querySelectorAll('input[name=plan]').forEach(function (field) { field.checked = field.value === selected; });
     var note = document.getElementById('plan-preference-note');
     if (note) { note.hidden = plan !== 'pro'; note.textContent = plan === 'pro' ? 'Pro is no longer offered for new setup. Choose a current preference; billing remains off.' : ''; }
+    var preferences = document.getElementById('plan-email-preferences'); if (preferences && plan === 'pro') preferences.open = true;
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
   }
   function choosePlan() { selectPlan(new URLSearchParams(location.search).get('plan')); }
@@ -28,7 +29,7 @@
   function parseHours(str) { var out = {}, any = false; String(str || '').split(/[,;\n]+/).forEach(function (part) { var t = part.trim().toLowerCase().replace(/\./g, ''); var dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun)[a-z]*)?\s*:?\s*(.*)$/); if (!dm) return; var a = DI[dm[1]], b = dm[2] ? DI[dm[2]] : a, days = [], i = a; for (var k = 0; k < 7; k++) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; i = (i + 1) % 7; } if (/closed/.test(dm[3])) { days.forEach(function (d) { out[d] = null; }); any = true; return; } var tm = dm[3].match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/); if (!tm) return; var o = clock(tm[1], false), c = clock(tm[2], true); if (!o || !c) return; days.forEach(function (d) { out[d] = { open: o, close: c }; }); any = true; }); if (!any) return null; DAYS.forEach(function (d) { if (out[d] === undefined) out[d] = null; }); return out; }
   var hoursRows = document.getElementById('hoursRows'), hoursTouched = false;
   hoursRows.innerHTML = DAYS.map(function (d) { var day = d.charAt(0).toUpperCase() + d.slice(1); return '<div class="hours-row"><span>' + day + '</span><input type="time" aria-label="' + day + ' opening time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" aria-label="' + day + ' closing time" data-d="' + d + '" data-k="close"></div>'; }).join('');
-  hoursRows.addEventListener('input', function () { hoursTouched = true; });
+  hoursRows.addEventListener('input', function () { hoursTouched = true; if (!form.elements.hours.value.trim()) form.elements.hours.value = 'Custom weekly hours'; });
   function fillHours() { if (hoursTouched) return; var h = parseHours(form.elements['hours'].value); hoursRows.querySelectorAll('input').forEach(function (inp) { var v = h && h[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); }
   form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
   function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c } : null; }); return t; }
@@ -68,6 +69,7 @@
   }
   function gateOnly(message) {
     gate.hidden = false; form.hidden = true; document.querySelector('.ob-steps').hidden = true;
+    document.body.dataset.setupState = 'signin';
     document.getElementById('access-signed-in').hidden = true; draftStatus.hidden = true;
     document.getElementById('done').classList.remove('on');
     if (message) gateStatus.textContent = message;
@@ -89,10 +91,33 @@
   function show(n, frame) {
     i = Math.max(0, Math.min(steps.length - 1, n));
     steps.forEach(function (step, k) { step.classList.toggle('on', k === i); });
-    pills.forEach(function (pill, k) { pill.classList.toggle('on', k <= i); pill.setAttribute('aria-current', k === i ? 'step' : 'false'); });
+    pills.forEach(function (pill, k) {
+      var complete = k < i && Array.from(steps[k].querySelectorAll('.form-input')).every(function (field) { return !fieldMessage(field) && field.getAttribute('aria-invalid') !== 'true'; });
+      pill.classList.toggle('on', k <= i); pill.dataset.stepState = complete ? 'complete' : k === i ? 'current' : 'upcoming'; pill.setAttribute('aria-current', k === i ? 'step' : 'false');
+    });
+    var contextTitle = document.getElementById('setup-context-title'), contextCopy = document.getElementById('setup-context-copy');
+    if (contextTitle) contextTitle.textContent = steps[i].dataset.stepTitle || steps[i].querySelector('legend').textContent;
+    if (contextCopy && steps[i].dataset.stepDescription) contextCopy.textContent = steps[i].dataset.stepDescription;
+    var stepLabel = document.getElementById('onboard-step-label');
+    if (stepLabel) stepLabel.textContent = 'Step ' + (i + 1) + ' of ' + steps.length;
     back.style.visibility = i ? 'visible' : 'hidden'; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; setErrorSummary('');
     if (frame) { window.scrollTo({ top: 0, behavior: 'instant' }); steps[i].querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
   }
+  function updatePhoneSetup() {
+    var section = document.getElementById('phone-routing-settings'), existing = document.getElementById('existing-phone-fields'), mode = form.elements.phoneSetupMode;
+    if (!section || !existing || !mode) return;
+    var wantsVoice = !!form.querySelector('input[name="desiredChannels"][value="voice"]:checked');
+    var keepNumber = wantsVoice && mode.value === 'forward_business_line';
+    section.hidden = !wantsVoice; existing.hidden = !keepNumber; mode.disabled = !wantsVoice;
+    ['businessNumber', 'carrier', 'forwarding'].forEach(function (name) {
+      var field = form.elements[name]; if (!field) return;
+      field.disabled = !keepNumber;
+      if (name === 'businessNumber') field.required = keepNumber;
+      if (field.disabled) setFieldError(field, '');
+    });
+  }
+  form.addEventListener('change', updatePhoneSetup);
+  updatePhoneSetup();
   function collect() {
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     var fields = {}; new FormData(form).forEach(function (value, key) {
@@ -147,13 +172,17 @@
     touched.t0 = !!fields.tier0; touched.t1 = !!fields.tier1; fillTiers(); fwdUI();
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
     restoring = false; dirty = false;
+    updatePhoneSetup();
   }
   function workspace(portal, text) {
+    document.body.dataset.setupState = 'ready';
     form.hidden = true; document.querySelector('.ob-steps').hidden = true; draftStatus.hidden = true; gate.hidden = true;
     document.getElementById('done').classList.add('on');
     document.getElementById('done').querySelector('h2').textContent = 'Your workspace is ready';
-    document.getElementById('buildStatus').textContent = text || 'Your saved answers are ready to review. Follow the checklist before activating website chat.';
+    document.getElementById('buildStatus').textContent = text || 'Your business details are saved. Review them, try a private customer conversation, then finish your selected connections.';
     document.getElementById('portalLink').textContent = 'Open your private workspace'; document.getElementById('portalLink').href = portal; document.getElementById('goPortal').href = portal;
+    document.getElementById('goPortal').textContent = text ? 'Open my workspace' : 'Review my front desk';
+    if (!text) document.getElementById('goPortal').href = portal + '#know';
   }
   async function signedIn() {
     var generation = accessGeneration;
@@ -180,6 +209,7 @@
     revision = state.draft.revision || 0; restore(state.draft.fields || {});
     marketingField.checked = !!(state.marketing && state.marketing.preference === true); marketingVersion = 0; marketingSavedVersion = 0;
     form.hidden = false; document.querySelector('.ob-steps').hidden = false; draftStatus.hidden = false;
+    document.body.dataset.setupState = 'questions';
     draftStatus.textContent = revision ? 'Your saved answers have been restored.' : 'Your answers will save automatically.'; show(state.draft.step || 0, false);
   }
   accessForm.addEventListener('submit', async function (event) {
@@ -214,11 +244,20 @@
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
   }
   function fieldMessage(field) {
+    if (field.disabled) return '';
     var value = field.value.trim();
     if (field.required && !value) {
-      return { name: 'Enter your name.', email: 'Confirm your email to continue.', phone: 'Enter your contact cell, including the area code.', business: 'Enter your business name.' }[field.name] || 'Fill in this field.';
+      return { name: 'Enter your name.', email: 'Confirm your email to continue.', phone: 'Enter your contact cell, including the area code.', business: 'Enter your business name.', businessNumber: 'Enter the business number your customers call.', trade: 'Choose your trade.', services: 'Add at least one service your business offers.', serviceArea: 'Add a town, neighborhood or ZIP code you serve.', hours: 'Add your business hours, or enter them under Review each day.', windows: 'Add at least one arrival window you offer.' }[field.name] || 'Fill in this field.';
     }
     if (value && field.name === 'phone' && !validCallbackNumber(value)) return 'Enter a valid US cell number, including the area code, such as (713) 555-0100.';
+    if (value && field.name === 'businessNumber' && !validCallbackNumber(value)) return 'Enter a valid US business number, including the area code.';
+    if (value && field.name === 'businessNumber' && field.required && value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '') === form.elements.phone.value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '')) return 'Use a separate contact cell above so calls can reach you without looping back to the front desk. You can also choose a new front desk number.';
+    if (field.required && (field.name === 'services' || field.name === 'serviceArea' || field.name === 'windows') && !value.split(/[\n,;]+/).some(function (part) { return part.trim(); })) return 'Add at least one item before continuing.';
+    if (field.name === 'hours' && field.required && value) {
+      var table = hoursTable(), any = DAYS.some(function (day) { return !!table[day]; });
+      var partial = DAYS.some(function (day) { var row = hoursRows.querySelectorAll('[data-d="' + day + '"]'); return !!row[0].value !== !!row[1].value; });
+      if (partial || !any && !/(?:24\s*[/x]\s*7|24\s*hours)/i.test(value)) return 'Use hours such as Mon–Fri 8am–5pm, or finish the opening and closing times under Review each day.';
+    }
     if (value && !field.checkValidity()) return field.type === 'url' ? 'Enter a full website address, such as https://yourbusiness.com, or leave this blank.' : 'Check this field and try again.';
     return '';
   }
@@ -239,6 +278,9 @@
     form.querySelectorAll('.form-input').forEach(function (field) { setFieldError(field, ''); }); setErrorSummary('');
   }
   function focusError(field) {
+    if (field.name === 'hours' && hoursTouched) { var hoursDetails = hoursRows.closest('details'); if (hoursDetails) hoursDetails.open = true; }
+    var ancestor = field.parentElement;
+    while (ancestor && ancestor !== form) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
     field.focus({ preventScroll: true }); field.scrollIntoView({ block: 'center', behavior: 'instant' });
   }
   function valid(allSteps) {
@@ -266,7 +308,7 @@
     return /^\+1\d{10}$/.test(normalized);
   }
   function revealFieldError(path, message) {
-    var names = { 'owner.name': 'name', 'owner.email': 'email', 'owner.phone': 'phone', 'business.name': 'business', 'business.website': 'website' };
+    var names = { 'owner.name': 'name', 'owner.email': 'email', 'owner.phone': 'phone', 'business.name': 'business', 'business.website': 'website', 'phone.businessNumber': 'businessNumber' };
     var name = names[path] || String(path).split('.').pop(), field = form.elements[name];
     if (!field || field.nodeType !== 1) return false;
     var step = steps.indexOf(field.closest('fieldset'));
@@ -309,6 +351,7 @@
   function showVerification(token) {
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
     saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
+    updatePhoneSetup();
     setSession(null); gateOnly('Confirm to continue securely. This link works once and expires after 20 minutes.');
     accessForm.hidden = true; verifyButton.hidden = false; document.getElementById('access-title').textContent = 'Continue to your workspace';
   }

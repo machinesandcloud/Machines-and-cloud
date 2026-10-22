@@ -1,0 +1,117 @@
+{
+  "approval": "call_d4b8d8f02f4d4005a1ca9b7eaf011cec",
+  "at": "2026-10-22T18:49:50.687Z",
+  "scope": "Four read-only Netlify/Blobs HTTP requests and reread only the already-sent12:49PM operator message; no signin/session/email/changes",
+  "requests": [
+    {
+      "number": 1,
+      "kind": "site_revision",
+      "method": "GET",
+      "startedAt": "2026-10-22T18:49:50.689Z",
+      "status": 200,
+      "date": "Thu, 22 Oct 2026 18:49:51 GMT",
+      "completedAt": "2026-10-22T18:49:51.044Z"
+    },
+    {
+      "number": 2,
+      "kind": "runtime_flags",
+      "method": "GET",
+      "startedAt": "2026-10-22T18:49:51.076Z",
+      "status": 200,
+      "date": "Thu, 22 Oct 2026 18:49:51 GMT",
+      "completedAt": "2026-10-22T18:49:51.264Z"
+    },
+    {
+      "number": 3,
+      "kind": "exact_challenge_signed_url",
+      "method": "GET",
+      "startedAt": "2026-10-22T18:49:51.687Z",
+      "status": 200,
+      "date": "Thu, 22 Oct 2026 18:49:51 GMT",
+      "completedAt": "2026-10-22T18:49:51.754Z"
+    },
+    {
+      "number": 4,
+      "kind": "exact_challenge_record",
+      "method": "GET",
+      "startedAt": "2026-10-22T18:49:51.755Z",
+      "status": 200,
+      "date": "Thu, 22 Oct 2026 18:49:52 GMT",
+      "completedAt": "2026-10-22T18:49:52.006Z"
+    }
+  ],
+  "maximum": 4,
+  "site": {
+    "id": "f87916f1-bcc4-4171-a96f-2900cbf0b6dc",
+    "account": "69797d78f01c70674ffef858",
+    "name": "machines-and-cloud",
+    "commit": "b9f4578155dd6672fdd89d9870affc92c0cba0fb",
+    "deploy": "6ada379c827174bc5b6c26fa",
+    "state": "ready"
+  },
+  "runtimeFlags": {
+    "MC_MEMORY_STORE": "unset",
+    "MC_FAKE_MODEL": "unset",
+    "MC_LOCAL_NO_KEYS": "unset",
+    "MC_LOCAL_VOICE": "unset",
+    "NODE_ENV": "unset",
+    "PHONE_ACQUISITION_ENABLED": [
+      {
+        "scopes": [
+          "functions"
+        ],
+        "values": [
+          {
+            "context": "production",
+            "contextParameter": null,
+            "value": "false"
+          }
+        ]
+      }
+    ],
+    "VOICE_ACTIVATION_ENABLED": "unset",
+    "MESSAGING_ACTIVATION_ENABLED": "unset",
+    "MANAGED_SMS_ENABLED": "unset",
+    "MANAGED_CALENDAR_ENABLED": "unset",
+    "PLATFORM_SMS_ENABLED": "unset",
+    "COMPANY_SMS_ENABLED": "unset"
+  },
+  "mail": {
+    "subject": "Your Machines & Cloud sign-in link",
+    "sender": "desk@machinesandcloud.com",
+    "date": "Oct 22, 2026, 12:49\u202fPM",
+    "unique": true,
+    "tokenPersisted": false,
+    "challengeFingerprint": "106d465ff85b"
+  },
+  "challenge": {
+    "emailMatches": true,
+    "purpose": "operator",
+    "status": "consumed",
+    "createdAt": "2026-10-22T17:49:55.800Z",
+    "expiresAt": "2026-10-22T18:09:55.800Z",
+    "consumedAt": "2026-10-22T17:50:17.629Z",
+    "sessionHashPresent": true,
+    "expiryAfterFailedExchange": true
+  },
+  "outcome": "read_only_diagnosis_complete",
+  "closedAt": "2026-10-22T18:49:52.007Z",
+  "requestsUsed": 4,
+  "unusedBudgetClosed": 0,
+  "effects": {
+    "writes": 0,
+    "newEmails": 0,
+    "signinAttempts": 0,
+    "sessionsRead": 0,
+    "customerRecords": 0,
+    "deployments": 0
+  },
+  "controllerSHA256": "f31d3e4ecb1ce1e5aa6e65505a5eca10eeb3c86373875882fa0a4e013e4d2d77",
+  "controllerArchive": "scratchpad/signin-readonly-diagnosis-controller.txt",
+  "finding": "The exact operator challenge was consumed at17:50:17.629Z, before the recorded18:02:11.924Z rejected exchange and before its18:09:55.800Z expiry. Consumer identity, original request and any issued session are not established by this four-read scope.",
+  "limits": [
+    "Runtime environment metadata is current at diagnosis, not a historical snapshot at the earlier consumption.",
+    "Listed gate names are not a new acceptance of all seven canonical service gates.",
+    "The earlier consumer/request and any issued session were not inspected; no session lookup or revocation was authorized."
+  ]
+}

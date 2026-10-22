@@ -1,0 +1,103 @@
+{
+  "ok": true,
+  "groups": [
+    {
+      "name": "production closed gates reject without persisting legal or paid intent",
+      "ok": true
+    },
+    {
+      "name": "fixture injection cannot run in a nonlocal production origin",
+      "ok": true
+    },
+    {
+      "name": "missing or foreign actor cannot accept or cancel",
+      "ok": true
+    },
+    {
+      "name": "one unavailable selected child blocks the entire combined acceptance",
+      "ok": true
+    },
+    {
+      "name": "invalid SMS legal details cannot precede a number request",
+      "ok": true
+    },
+    {
+      "name": "concurrent identical acceptances share a single durable admission",
+      "ok": true
+    },
+    {
+      "name": "single acceptance automatically hands acquired number to both existing child engines",
+      "ok": true
+    },
+    {
+      "name": "number acquisition and queued children are never reported as active service",
+      "ok": true
+    },
+    {
+      "name": "voice-only continuation is independent of the SMS and delivery service",
+      "ok": true
+    },
+    {
+      "name": "SMS-only continuation does not require voice service",
+      "ok": true
+    },
+    {
+      "name": "private legal data is encrypted in both admission and intent and absent from owner DTO",
+      "ok": true
+    },
+    {
+      "name": "changed terms stop handoff and permit a new owner review only before any dispatch",
+      "ok": true
+    },
+    {
+      "name": "changed business revision blocks execution until a fresh safe review",
+      "ok": true
+    },
+    {
+      "name": "pause and credential rotation cannot hand off new children",
+      "ok": true
+    },
+    {
+      "name": "cancel before any handoff creates no lower intent",
+      "ok": true
+    },
+    {
+      "name": "cancellation after children persists every stop even with selected gates closed",
+      "ok": true
+    },
+    {
+      "name": "lost primary admission projects the same encrypted request before any effect",
+      "ok": true
+    },
+    {
+      "name": "missing primary after dispatch is retained as unresolved and cannot recreate authority",
+      "ok": true
+    },
+    {
+      "name": "lost child acknowledgment reuses recorded intent instead of another number request",
+      "ok": true
+    },
+    {
+      "name": "concurrent cancellation retains a late child and stops before subsequent child handoff",
+      "ok": true
+    },
+    {
+      "name": "a completed lower dispatch forbids silent renewed terms and exposes existing connection actions",
+      "ok": true
+    },
+    {
+      "name": "health distinguishes missing and stale work from an empty healthy queue",
+      "ok": true
+    }
+  ],
+  "passed": 22,
+  "total": 22,
+  "sourceStable": true,
+  "sourceHashes": {
+    "netlify/functions/lib/service-onboarding.mjs": "6d7245b1a5870cfe24305ce572bab9d1e80caae016ba3c54fdbdbdb569908d70",
+    "scripts/service-onboarding-check.mjs": "a70e79f04db1e575c1b904f8a4277a2a8c4c49c2023fbb78294c0d18ab4e738a"
+  },
+  "mode": "memory storage, synthetic dependency fixtures, production closed-gate export, physical networking denied",
+  "physicalNetworkRequests": 0,
+  "providerDeliveryAcceptance": false
+}

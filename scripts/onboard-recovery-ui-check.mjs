@@ -9,14 +9,14 @@ const root = resolve('.'), base = 'http://127.0.0.1:8896';
 const outputIndex = process.argv.indexOf('--output'), output = outputIndex >= 0 ? process.argv[outputIndex + 1] : 'scratchpad/onboard-recovery-ui.json';
 if (!output?.startsWith('scratchpad/') || !output.endsWith('.json')) throw new Error('QA output must be a JSON file under scratchpad/');
 if (existsSync(output) || existsSync(output.slice(0, -5) + '.png')) throw new Error('Refusing to overwrite retained QA evidence');
-const files = ['onboard.html', 'onboard.js'];
+const files = ['onboard.html', 'onboard.js', 'onboard.css', 'product-ui.css'];
 const hashes = () => Object.fromEntries(files.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 const report = { at: new Date().toISOString(), mode: 'browser/API fixtures; no actual email, model or provider', sourceBefore: hashes(), checks: [], blockedExternal: [], pageErrors: [] };
 const check = (name, pass, detail) => report.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
 const { chromium } = await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-const state = { fields: { name: 'Avery Owner', business: 'Bayou Service', plan: 'starter', desiredChannels: ['web'] }, step: 0, revision: 0, requests: [], fieldError: null };
+const state = { fields: { name: 'Avery Owner', business: 'Bayou Service', trade: 'HVAC', services: 'AC repair', serviceArea: 'Katy', hours: 'Mon-Fri 8am-5pm', windows: '8 to 12', plan: 'starter', desiredChannels: ['web'] }, step: 0, revision: 0, requests: [], fieldError: null };
 await context.addInitScript(() => sessionStorage.setItem('mc-onboarding-session-v1', 'fixture-session'));
 await context.route('**/*', async route => {
   const request = route.request(), url = new URL(request.url());

@@ -61,11 +61,23 @@ async function handle(req) {
   const phone = e164(s(b.phone, 30));
   if (!s(b.name) || !s(b.business)) return json({ error: "missing_fields" }, 400);
   if (!/^\+1\d{10}$/.test(phone)) return json({ error: "missing_fields", field: "owner.phone", message: "Add a valid cell number for callback requests. Phone and text service remain inactive until separately verified." }, 400);
+  const phoneSetupMode = s(b.phoneSetupMode, 40), businessNumber = e164(s(b.businessNumber, 30));
+  if (phoneSetupMode && !["forward_business_line", "use_new_number"].includes(phoneSetupMode)) return json({ error: "invalid_phone_setup", field: "phoneSetupMode", message: "Choose how customers should reach your front desk." }, 400);
+  if (phoneSetupMode === "forward_business_line" && Array.isArray(b.desiredChannels) && b.desiredChannels.includes("voice") && (!/^\+1\d{10}$/.test(businessNumber) || businessNumber === phone)) return json({ error: "invalid_business_number", field: "phone.businessNumber", message: "Add your business line and a separate contact cell so calls can reach you without looping." }, 400);
+  if (b.setupVersion !== undefined && b.setupVersion !== "2") return json({ error: "invalid_setup_version" }, 400);
+  if (b.setupVersion === "2") {
+    let suppliedHours = b.hoursTable;
+    if (typeof suppliedHours === "string") { try { suppliedHours = JSON.parse(suppliedHours); } catch { suppliedHours = null; } }
+    const partialHours = suppliedHours && Object.values(suppliedHours).some(day => day && (!day.open || !day.close));
+    const required = [["trade", s(b.trade)], ["services", lines(b.services).length], ["serviceArea", arr(b.serviceArea).length], ["hours", !partialHours && (normalizeHours(suppliedHours) || parseHours(s(b.hours)))], ["windows", lines(b.windows).length]];
+    const missing = required.find(([, value]) => !value);
+    if (missing) return json({ error: "incomplete_business_details", field: missing[0], message: missing[0] === "hours" ? "Add valid business hours, including opening and closing times." : "Complete this business detail so your front desk has the information it needs." }, 400);
+  }
 
   const c = newClient({ slug: slugify(s(b.business), website), ownerKey: secret(), owner: { name: s(b.name), email, phone }, business: { name: s(b.business, 120), website } });
   if (b.primaryGoal !== undefined && b.primaryGoal !== "" && !INTAKE_GOALS.includes(b.primaryGoal)) return json({ error: "invalid_goal" }, 400);
   if (b.desiredChannels !== undefined && (!Array.isArray(b.desiredChannels) || b.desiredChannels.length > 4 || new Set(b.desiredChannels).size !== b.desiredChannels.length || b.desiredChannels.some(value => !INTAKE_CHANNELS.includes(value)))) return json({ error: "invalid_channels" }, 400);
-  c.onboarding = { version: 1, verifiedEmail: email, verifiedAt: session.createdAt, primaryGoal: b.primaryGoal || "", desiredChannels: b.desiredChannels || ["web"] };
+  c.onboarding = { version: 1, verifiedEmail: email, verifiedAt: session.createdAt, primaryGoal: b.primaryGoal || "", desiredChannels: b.desiredChannels || ["web"], ...(phoneSetupMode ? { phoneSetupMode } : {}), ...(b.setupVersion === "2" ? { experienceVersion: 2 } : {}) };
   c.channels = { web: { active: false }, voice: { active: false }, sms: { active: false } };
   const bz = c.business;
   Object.assign(bz, {

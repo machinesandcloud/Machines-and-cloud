@@ -1,0 +1,601 @@
+{
+  "at": "2026-10-22T20:13:28.894Z",
+  "phase": "final",
+  "mode": "cached current assets; mocked verified owner and APIs; no external HTTP",
+  "sourceBefore": {
+    "onboard.html": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72",
+    "onboard.js": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec",
+    "onboard.css": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "assets/favicon.png": "363569357efc676f023c78500d353258cd464781ea9c94a4af289346ee7de348",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f",
+    "assets/logo.png": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2"
+  },
+  "checks": [
+    {
+      "name": "375: empty callback visibly errors and keeps step1",
+      "ok": true
+    },
+    {
+      "name": "1365: empty callback visibly errors and keeps step1",
+      "ok": true
+    },
+    {
+      "name": "375: every missing required field is marked and first receives focus",
+      "ok": true
+    },
+    {
+      "name": "1365: every missing required field is marked and first receives focus",
+      "ok": true
+    },
+    {
+      "name": "whitespace name and malformed phone remain invalid until corrected",
+      "ok": true
+    },
+    {
+      "name": "optional malformed website blocks progression; blank website is allowed",
+      "ok": true
+    },
+    {
+      "name": "Enter follows step validation once without silent navigation or account creation",
+      "ok": true
+    },
+    {
+      "name": "Enter in a textarea adds a newline without advancing",
+      "ok": true
+    },
+    {
+      "name": "blank or whitespace business stays on step2 with named visible error",
+      "ok": true
+    },
+    {
+      "name": "restored final-step draft validates earlier fields before any create request",
+      "ok": true
+    },
+    {
+      "name": "server error owner.phone opens correct step and stays until actual correction",
+      "ok": true
+    },
+    {
+      "name": "server error business.website opens correct step and stays until actual correction",
+      "ok": true
+    },
+    {
+      "name": "server error business.name opens correct step and stays until actual correction",
+      "ok": true
+    },
+    {
+      "name": "delayed draft save revalidates phone edited while pending",
+      "ok": true
+    },
+    {
+      "name": "delayed final-step save revalidates earlier field before create",
+      "ok": true
+    },
+    {
+      "name": "Back cannot change steps during a delayed continuation save",
+      "ok": true
+    }
+  ],
+  "observations": [
+    {
+      "case": "empty callback",
+      "width": 375,
+      "step": "1",
+      "focus": "phone",
+      "error": "Check the highlighted field to continue.",
+      "errorVisible": true,
+      "errorInViewport": true,
+      "errorStyle": {
+        "color": "rgb(180, 35, 24)",
+        "background": "rgb(255, 244, 242)"
+      },
+      "overflow": false,
+      "fields": {
+        "name": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": null,
+          "messages": []
+        },
+        "phone": {
+          "invalid": "true",
+          "classError": true,
+          "border": "rgb(180, 35, 24)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "phone-hint phone-error",
+          "messages": [
+            {
+              "text": "Enter your contact cell, including the area code.",
+              "visible": true,
+              "color": "rgb(180, 35, 24)"
+            }
+          ]
+        },
+        "website": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "website-hint",
+          "messages": []
+        },
+        "business": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": null,
+          "messages": []
+        }
+      }
+    },
+    {
+      "case": "empty callback",
+      "width": 1365,
+      "step": "1",
+      "focus": "phone",
+      "error": "Check the highlighted field to continue.",
+      "errorVisible": true,
+      "errorInViewport": true,
+      "errorStyle": {
+        "color": "rgb(180, 35, 24)",
+        "background": "rgb(255, 244, 242)"
+      },
+      "overflow": false,
+      "fields": {
+        "name": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": null,
+          "messages": []
+        },
+        "phone": {
+          "invalid": "true",
+          "classError": true,
+          "border": "rgb(180, 35, 24)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "phone-hint phone-error",
+          "messages": [
+            {
+              "text": "Enter your contact cell, including the area code.",
+              "visible": true,
+              "color": "rgb(180, 35, 24)"
+            }
+          ]
+        },
+        "website": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "website-hint",
+          "messages": []
+        },
+        "business": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": null,
+          "messages": []
+        }
+      }
+    },
+    {
+      "case": "all required",
+      "width": 375,
+      "step": "1",
+      "focus": "name",
+      "error": "Check the highlighted fields to continue.",
+      "errorVisible": true,
+      "errorInViewport": true,
+      "errorStyle": {
+        "color": "rgb(180, 35, 24)",
+        "background": "rgb(255, 244, 242)"
+      },
+      "overflow": false,
+      "fields": {
+        "name": {
+          "invalid": "true",
+          "classError": true,
+          "border": "rgb(180, 35, 24)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "name-error",
+          "messages": [
+            {
+              "text": "Enter your name.",
+              "visible": true,
+              "color": "rgb(180, 35, 24)"
+            }
+          ]
+        },
+        "phone": {
+          "invalid": "true",
+          "classError": true,
+          "border": "rgb(180, 35, 24)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "phone-hint phone-error",
+          "messages": [
+            {
+              "text": "Enter your contact cell, including the area code.",
+              "visible": true,
+              "color": "rgb(180, 35, 24)"
+            }
+          ]
+        },
+        "website": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "website-hint",
+          "messages": []
+        },
+        "business": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": null,
+          "messages": []
+        }
+      }
+    },
+    {
+      "case": "all required",
+      "width": 1365,
+      "step": "1",
+      "focus": "name",
+      "error": "Check the highlighted fields to continue.",
+      "errorVisible": true,
+      "errorInViewport": true,
+      "errorStyle": {
+        "color": "rgb(180, 35, 24)",
+        "background": "rgb(255, 244, 242)"
+      },
+      "overflow": false,
+      "fields": {
+        "name": {
+          "invalid": "true",
+          "classError": true,
+          "border": "rgb(180, 35, 24)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "name-error",
+          "messages": [
+            {
+              "text": "Enter your name.",
+              "visible": true,
+              "color": "rgb(180, 35, 24)"
+            }
+          ]
+        },
+        "phone": {
+          "invalid": "true",
+          "classError": true,
+          "border": "rgb(180, 35, 24)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "phone-hint phone-error",
+          "messages": [
+            {
+              "text": "Enter your contact cell, including the area code.",
+              "visible": true,
+              "color": "rgb(180, 35, 24)"
+            }
+          ]
+        },
+        "website": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": "website-hint",
+          "messages": []
+        },
+        "business": {
+          "invalid": null,
+          "classError": false,
+          "border": "rgb(216, 225, 237)",
+          "outline": "rgb(25, 40, 63)",
+          "inViewport": true,
+          "describedby": null,
+          "messages": []
+        }
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/onboard-validation-portal-revamp-candidate-final-empty-cell-375.png",
+    "scratchpad/onboard-validation-portal-revamp-candidate-final-empty-cell-1365.png"
+  ],
+  "api": [
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 422
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 422
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 422
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "pageErrors": [],
+  "physicalHTTP": 0,
+  "sourceAfter": {
+    "onboard.html": "dc58ae40fdbe58c244572ae10ee5a41162bea6bdaecc5c2bb1ef75ba133d2f72",
+    "onboard.js": "5c1a56767feec961db4b82ea4e1453ae3133ed1c311ea4a2c3b5a34580c578ec",
+    "onboard.css": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "assets/favicon.png": "363569357efc676f023c78500d353258cd464781ea9c94a4af289346ee7de348",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f",
+    "assets/logo.png": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2"
+  },
+  "sourceStable": true,
+  "scriptSHA256": "b5fd25de75d11cddcf6025b6696c0119eaa4ecb7417317748c0b6bece752e816",
+  "passed": 16,
+  "total": 16,
+  "ok": true
+}

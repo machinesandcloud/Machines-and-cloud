@@ -1,0 +1,413 @@
+{
+  "phaseId": "hosted-onboarding-20261022-stage-a-approved",
+  "targetCommit": "b9f4578155dd6672fdd89d9870affc92c0cba0fb",
+  "approvalId": "approval-call-4a372a1e46934d65848236b958d40a60",
+  "checks": [
+    {
+      "name": "Original metadata and pending operator mail recovered without counter reset",
+      "ok": true
+    },
+    {
+      "name": "Operator token removed from URL before exchange",
+      "ok": true
+    }
+  ],
+  "fidelityLimits": [
+    "Guard manually follows public GET redirects; displayed canonical URL/history behavior is outside proof."
+  ],
+  "effects": {
+    "models": 0,
+    "voiceCalls": 0,
+    "texts": 0,
+    "calendar": 0,
+    "purchases": 0,
+    "billingChanges": 0,
+    "environmentChanges": 0,
+    "deployments": 0,
+    "verificationEmails": 1,
+    "siteRequests": 10,
+    "apiMutationAttempts": 2,
+    "netlifyMetadataReads": 2,
+    "sessionsReturned": 0,
+    "intakes": 0,
+    "tenantsCreated": 0,
+    "operatorNotes": 0,
+    "operatorCancellations": 0
+  },
+  "state": {
+    "stage": "stopped_operator_exchange_rejected",
+    "counters": {
+      "total": 10,
+      "api": 2,
+      "mutation": 2,
+      "draft": 0,
+      "asset": 8,
+      "email": 1,
+      "ownerEmail": 0,
+      "operatorEmail": 1,
+      "metadata": 2
+    },
+    "halted": true,
+    "checks": 2,
+    "tenantBound": false
+  },
+  "closedAt": "2026-10-22T18:05:42.935Z",
+  "ledger": {
+    "version": 1,
+    "scope": "hosted_onboarding_stage_a_v1",
+    "phaseId": "hosted-onboarding-20261022-stage-a-approved",
+    "mode": "live",
+    "counters": {
+      "total": 10,
+      "api": 2,
+      "mutation": 2,
+      "draft": 0,
+      "asset": 8,
+      "email": 1,
+      "ownerEmail": 0,
+      "operatorEmail": 1,
+      "metadata": 2
+    },
+    "halted": true,
+    "closed": true,
+    "records": [
+      {
+        "id": 1,
+        "method": "GET",
+        "path": "/api/v1/sites/:site",
+        "queryNames": [],
+        "action": "metadata_site",
+        "status": 200,
+        "startedAt": 1792691376208,
+        "counters": {
+          "total": 0,
+          "api": 0,
+          "mutation": 0,
+          "draft": 0,
+          "asset": 0,
+          "email": 0,
+          "ownerEmail": 0,
+          "operatorEmail": 0,
+          "metadata": 1
+        },
+        "completedAt": 1792691376566,
+        "elapsedMs": 358
+      },
+      {
+        "id": 2,
+        "method": "GET",
+        "path": "/api/v1/accounts/:account/env",
+        "queryNames": [
+          "site_id"
+        ],
+        "action": "metadata_gates",
+        "status": 200,
+        "startedAt": 1792691376573,
+        "counters": {
+          "total": 0,
+          "api": 0,
+          "mutation": 0,
+          "draft": 0,
+          "asset": 0,
+          "email": 0,
+          "ownerEmail": 0,
+          "operatorEmail": 0,
+          "metadata": 2
+        },
+        "completedAt": 1792691376708,
+        "elapsedMs": 135
+      },
+      {
+        "id": 3,
+        "method": "GET",
+        "path": "/admin.html",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792691392909,
+        "counters": {
+          "total": 1,
+          "api": 0,
+          "mutation": 0,
+          "draft": 0,
+          "asset": 1,
+          "email": 0,
+          "ownerEmail": 0,
+          "operatorEmail": 0,
+          "metadata": 2
+        },
+        "completedAt": 1792691393486,
+        "elapsedMs": 577
+      },
+      {
+        "id": 4,
+        "method": "GET",
+        "path": "/admin.css",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792691393527,
+        "counters": {
+          "total": 2,
+          "api": 0,
+          "mutation": 0,
+          "draft": 0,
+          "asset": 2,
+          "email": 0,
+          "ownerEmail": 0,
+          "operatorEmail": 0,
+          "metadata": 2
+        },
+        "completedAt": 1792691393715,
+        "elapsedMs": 188
+      },
+      {
+        "id": 5,
+        "method": "GET",
+        "path": "/admin.js",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792691393537,
+        "counters": {
+          "total": 3,
+          "api": 0,
+          "mutation": 0,
+          "draft": 0,
+          "asset": 3,
+          "email": 0,
+          "ownerEmail": 0,
+          "operatorEmail": 0,
+          "metadata": 2
+        },
+        "completedAt": 1792691394020,
+        "elapsedMs": 483
+      },
+      {
+        "id": 6,
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792691394041,
+        "counters": {
+          "total": 4,
+          "api": 0,
+          "mutation": 0,
+          "draft": 0,
+          "asset": 4,
+          "email": 0,
+          "ownerEmail": 0,
+          "operatorEmail": 0,
+          "metadata": 2
+        },
+        "completedAt": 1792691394122,
+        "elapsedMs": 81
+      },
+      {
+        "id": 7,
+        "method": "POST",
+        "path": "/api/manage",
+        "queryNames": [],
+        "action": "request_link",
+        "status": 202,
+        "startedAt": 1792691394137,
+        "counters": {
+          "total": 5,
+          "api": 1,
+          "mutation": 1,
+          "draft": 0,
+          "asset": 4,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        },
+        "completedAt": 1792691395997,
+        "elapsedMs": 1860
+      },
+      {
+        "id": 8,
+        "method": "LOCAL",
+        "path": "/checkpoint/zero-session",
+        "queryNames": [],
+        "action": "zero_session_recovery",
+        "status": "recovered",
+        "startedAt": 1792692125701,
+        "completedAt": 1792692125701,
+        "elapsedMs": 0,
+        "counters": {
+          "total": 5,
+          "api": 1,
+          "mutation": 1,
+          "draft": 0,
+          "asset": 4,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        }
+      },
+      {
+        "id": 9,
+        "method": "GET",
+        "path": "/admin.html",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792692130508,
+        "counters": {
+          "total": 6,
+          "api": 1,
+          "mutation": 1,
+          "draft": 0,
+          "asset": 5,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        },
+        "completedAt": 1792692131333,
+        "elapsedMs": 825
+      },
+      {
+        "id": 10,
+        "method": "GET",
+        "path": "/admin.css",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792692131364,
+        "counters": {
+          "total": 7,
+          "api": 1,
+          "mutation": 1,
+          "draft": 0,
+          "asset": 6,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        },
+        "completedAt": 1792692131841,
+        "elapsedMs": 477
+      },
+      {
+        "id": 11,
+        "method": "GET",
+        "path": "/admin.js",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792692131369,
+        "counters": {
+          "total": 8,
+          "api": 1,
+          "mutation": 1,
+          "draft": 0,
+          "asset": 7,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        },
+        "completedAt": 1792692131788,
+        "elapsedMs": 419
+      },
+      {
+        "id": 12,
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "queryNames": [],
+        "action": "asset",
+        "status": 200,
+        "startedAt": 1792692131885,
+        "counters": {
+          "total": 9,
+          "api": 1,
+          "mutation": 1,
+          "draft": 0,
+          "asset": 8,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        },
+        "completedAt": 1792692132092,
+        "elapsedMs": 207
+      },
+      {
+        "id": 13,
+        "method": "POST",
+        "path": "/api/manage",
+        "queryNames": [],
+        "action": "exchange",
+        "status": 410,
+        "startedAt": 1792692131924,
+        "counters": {
+          "total": 10,
+          "api": 2,
+          "mutation": 2,
+          "draft": 0,
+          "asset": 8,
+          "email": 1,
+          "ownerEmail": 0,
+          "operatorEmail": 1,
+          "metadata": 2
+        },
+        "completedAt": 1792692133671,
+        "elapsedMs": 1747
+      }
+    ]
+  },
+  "startedAt": "2026-10-22T18:01:59.889Z",
+  "outcome": "blocked_at_operator_exchange",
+  "accepted": false,
+  "observedFailure": {
+    "path": "/api/manage",
+    "action": "exchange",
+    "httpStatus": 410,
+    "requestStartedAt": "2026-10-22T18:02:11.924000Z",
+    "responseCompletedAt": "2026-10-22T18:02:13.671000Z",
+    "emailRequestedAt": "2026-10-22T17:49:54.137000Z",
+    "clientElapsedSeconds": 737.787,
+    "tokenShape": "guard accepted lowercase 64-hex",
+    "responseBody": "not retained",
+    "cause": "unresolved; message selection/transport, prior consumption, purpose, clock and persistence are not distinguished by the saved HTTP status"
+  },
+  "mailReceipt": {
+    "count": 1,
+    "authorizedRole": "operator",
+    "observedHeaderLocal": "October 22, 2026, 12:49 PM America/Chicago",
+    "linkNotPrintedOrPersisted": true
+  },
+  "temporaryControllerIncident": {
+    "failure": "controller exited while its browser-reader connection was being repaired, before any exchange",
+    "priorControllerAndOwnedBrowserAbsent": true,
+    "recovery": "one independently reviewed zero-session prefix continuation; same phase/counters and original pending email; no metadata or mail reset",
+    "prefixSHA256": "2181608840fc5ae736c191213b39398d58ac8fcfe66949e6d29542c8f6c7b048"
+  },
+  "unexecuted": [
+    "owner identity preflight",
+    "early inquiry capture",
+    "questionnaire/autosave/restore",
+    "workspace creation",
+    "customer guide and responsive portal",
+    "purpose/privacy probes",
+    "owner return",
+    "operator note/cancellation"
+  ],
+  "cleanup": {
+    "knownPhaseBearerSessions": 0,
+    "workspaceCleanupRequired": false,
+    "browserClosed": true,
+    "ledgerClosed": true,
+    "unusedBudgetClosed": {
+      "email": 3,
+      "siteRequests": 150,
+      "netlifyMetadataReads": 0
+    },
+    "challengeState": "not inspected; no claim about unrelated sessions"
+  }
+}

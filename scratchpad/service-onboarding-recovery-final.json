@@ -1,0 +1,94 @@
+{
+  "at": "2026-10-22T19:34:02.515Z",
+  "mode": "browser/API fixtures; no actual email, model or provider",
+  "sourceBefore": {
+    "onboard.html": "c305bcf04aadd0cf58fb26103bc0a96ee6f001095e38dbfde8f0bd4fa8e136f8",
+    "onboard.js": "bc88cdc25e8eb82afe2e1d506dca9f9fade20bc33069a61ff30b5979780b698c",
+    "onboard.css": "4347ac63d8a44dda3585b3f675e710f624ade33c376da73fb8dd45991984c108"
+  },
+  "checks": [
+    {
+      "name": "Invalid callback is stopped on its first step: 12345",
+      "pass": true
+    },
+    {
+      "name": "Invalid callback is stopped on its first step: +44 207 123 4567",
+      "pass": true
+    },
+    {
+      "name": "Invalid callback is stopped on its first step: +1 713 555 0100 ext 22",
+      "pass": true
+    },
+    {
+      "name": "Invalid callback is stopped on its first step: 7135550100+",
+      "pass": true
+    },
+    {
+      "name": "Early phone validation never attempts account creation",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: 7135550100",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: (713) 555-0100",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: 1 713 555 0100",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: +1 (713) 555-0100",
+      "pass": true
+    },
+    {
+      "name": "Final server callback error reveals its earlier step and focuses the field",
+      "pass": true
+    },
+    {
+      "name": "Routed server error retains its linked message and all questionnaire answers",
+      "pass": true
+    },
+    {
+      "name": "Editing a corrected field clears its stale invalid marker",
+      "pass": true
+    },
+    {
+      "name": "Nested business-name error maps to business rather than the owner name",
+      "pass": true
+    },
+    {
+      "name": "An unchanged server-rejected value stays marked and cannot advance",
+      "pass": true
+    },
+    {
+      "name": "Unknown server field keeps the current step with a readable error",
+      "pass": true
+    },
+    {
+      "name": "Recovery source remained stable during verification",
+      "pass": true
+    },
+    {
+      "name": "No browser page errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "blockedExternal": [
+    "https://fonts.googleapis.com"
+  ],
+  "pageErrors": [],
+  "sourceAfter": {
+    "onboard.html": "c305bcf04aadd0cf58fb26103bc0a96ee6f001095e38dbfde8f0bd4fa8e136f8",
+    "onboard.js": "bc88cdc25e8eb82afe2e1d506dca9f9fade20bc33069a61ff30b5979780b698c",
+    "onboard.css": "4347ac63d8a44dda3585b3f675e710f624ade33c376da73fb8dd45991984c108"
+  },
+  "summary": {
+    "passed": 17,
+    "failed": 0,
+    "total": 17
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "at": "2026-10-22T19:58:58.946Z",
+  "surface": "admin",
+  "scope": "Independent browser review of actual product assets and actual isolated-memory handlers. Loading, failure and empty-list responses are explicit fixtures. No signup, email, AI, provider, purchase, calendar mutation or deploy.",
+  "sourceBefore": {
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/client.mjs": "73402205431f08ea3f87b52526550061fdbe3daeb9db908a4f4756fafac64251",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a",
+    "netlify/functions/lib/operator.mjs": "a60c37ef5e93ed2187b5349fdcb54b027f198106d34aa43cf4a28e5bf56ced97",
+    "admin.html": "1417e08a12f24726900221d7069c6428901a653d94dc8d2b4aaaf434d3ce04ec",
+    "admin.css": "734d9e205bcd7d3c7c875e42f447617fb1e8a732579d291a88d421deb1090164",
+    "admin.js": "d299e2f66d2a3f306bc465b16e466e6b829a396b6b81b86658bf4cb0075e1d05",
+    "assets/logo.png": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f"
+  },
+  "harnessHash": "87b50a68fa257b8be7777d18028e9798c36dd1ac9a839409b12b515d2305e81f",
+  "checks": [
+    {
+      "name": "Operations sign-in keeps customer data private and does not email on view",
+      "pass": true
+    },
+    {
+      "name": "Operations loading state contains no fabricated totals",
+      "pass": true
+    },
+    {
+      "name": "Operations initial load failure provides recovery instead of an empty success",
+      "pass": true
+    },
+    {
+      "name": "Operations route hierarchy, customer selection and safe dialog at 320",
+      "pass": true
+    },
+    {
+      "name": "Operations route hierarchy, customer selection and safe dialog at 375",
+      "pass": true
+    },
+    {
+      "name": "Operations route hierarchy, customer selection and safe dialog at 768",
+      "pass": true
+    },
+    {
+      "name": "Operations route hierarchy, customer selection and safe dialog at 1440",
+      "pass": true
+    },
+    {
+      "name": "Operations empty customer state offers honest guidance and zero real records",
+      "pass": true
+    },
+    {
+      "name": "Operations note save is audited by actual handler and signout clears private content",
+      "pass": true
+    },
+    {
+      "name": "No browser exceptions, external actions or physical networking",
+      "pass": true
+    },
+    {
+      "name": "Application sources stayed stable during this review",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "fixture": "explicit load503",
+      "status": 503
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "?c=revamp-fixture-air",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "?c=revamp-fixture-air",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "?c=revamp-fixture-air",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "?c=revamp-fixture-air",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200,
+      "fixture": "explicit empty collection projection over actual authorized read"
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "?c=revamp-fixture-air",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "POST",
+      "action": "save_note",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "?c=revamp-fixture-air",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "query": "",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200
+    }
+  ],
+  "screenshots": [
+    "scratchpad/portal-revamp-qa-admin-first-admin-signin-375.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-loading-375.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-load-error-375.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-home-320.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-detail-320.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-dialog-320.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-home-375.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-detail-375.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-dialog-375.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-home-768.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-detail-768.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-dialog-768.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-home-1440.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-detail-1440.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-dialog-1440.png",
+    "scratchpad/portal-revamp-qa-admin-first-admin-empty-375.png"
+  ],
+  "pageErrors": [],
+  "forbiddenRequests": [],
+  "fontRequestsBlocked": [],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/client.mjs": "73402205431f08ea3f87b52526550061fdbe3daeb9db908a4f4756fafac64251",
+    "netlify/functions/manage.mjs": "ca3332e4a549137fdafe8430a34004ee5f137524bc022371c1565630eac59e8a",
+    "netlify/functions/lib/operator.mjs": "a60c37ef5e93ed2187b5349fdcb54b027f198106d34aa43cf4a28e5bf56ced97",
+    "admin.html": "1417e08a12f24726900221d7069c6428901a653d94dc8d2b4aaaf434d3ce04ec",
+    "admin.css": "734d9e205bcd7d3c7c875e42f447617fb1e8a732579d291a88d421deb1090164",
+    "admin.js": "d299e2f66d2a3f306bc465b16e466e6b829a396b6b81b86658bf4cb0075e1d05",
+    "assets/logo.png": "b77924de3e0f8098e179b35bb13d696f66f5cb2db547b4480a51d972737904c2",
+    "assets/logo-dark.png": "7386e1ed01d0874913b5eed48a2029957b9dba2168fddec4f7aa6e290d286a9f"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 11,
+    "failed": 0
+  }
+}

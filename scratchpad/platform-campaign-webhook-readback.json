@@ -1,0 +1,184 @@
+{
+  "startedAt": "2026-10-22T16:27:32.695Z",
+  "account": "[redacted company account SID]",
+  "number": "PN3f39fccc8599429e09ceccfa43b5db8b",
+  "service": "MG7643ab5d7b0bf42b24a2b476ce8e02eb",
+  "phone": "+13464853328",
+  "desiredURL": "https://machinesandcloud.com/api/platform-sms",
+  "gates": {
+    "PHONE_ACQUISITION_ENABLED": {
+      "present": true,
+      "enabledContexts": []
+    },
+    "VOICE_ACTIVATION_ENABLED": {
+      "present": false,
+      "enabledContexts": []
+    },
+    "MESSAGING_ACTIVATION_ENABLED": {
+      "present": false,
+      "enabledContexts": []
+    },
+    "SERVICE_DELIVERY_ENABLED": {
+      "present": false,
+      "enabledContexts": []
+    },
+    "CALENDAR_CONNECTION_ENABLED": {
+      "present": false,
+      "enabledContexts": []
+    },
+    "CALENDAR_DELIVERY_ENABLED": {
+      "present": false,
+      "enabledContexts": []
+    },
+    "MC_PLATFORM_SMS_ENABLED": {
+      "present": false,
+      "enabledContexts": []
+    }
+  },
+  "productionBindingMatches": true,
+  "operations": [
+    {
+      "method": "GET",
+      "resource": "number",
+      "startedAt": "2026-10-22T16:27:10.472Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "service",
+      "startedAt": "2026-10-22T16:27:10.797Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "sender-membership",
+      "startedAt": "2026-10-22T16:27:10.990Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "number",
+      "startedAt": "2026-10-22T16:27:32.696Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "service",
+      "startedAt": "2026-10-22T16:27:32.951Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "sender-membership",
+      "startedAt": "2026-10-22T16:27:33.097Z",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "resource": "number",
+      "startedAt": "2026-10-22T16:27:33.249Z",
+      "fields": [
+        "SmsUrl",
+        "SmsMethod"
+      ],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "number",
+      "startedAt": "2026-10-22T16:27:33.623Z",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "resource": "service",
+      "startedAt": "2026-10-22T16:27:33.808Z",
+      "fields": [
+        "InboundRequestUrl",
+        "InboundMethod"
+      ],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "service",
+      "startedAt": "2026-10-22T16:27:33.984Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "number",
+      "startedAt": "2026-10-22T16:27:34.087Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "service",
+      "startedAt": "2026-10-22T16:27:34.087Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "resource": "sender-membership",
+      "startedAt": "2026-10-22T16:27:34.087Z",
+      "status": 200
+    }
+  ],
+  "preflightNote": "Initial preflight stopped with no mutations because an unnecessarily restrictive true-only authority assertion rejected the valid false service flag. The flag is now accepted as either boolean and preserved.",
+  "mutations": [
+    {
+      "resource": "number",
+      "attemptedAt": "2026-10-22T16:27:33.248Z",
+      "fields": {
+        "SmsUrl": "https://machinesandcloud.com/api/platform-sms",
+        "SmsMethod": "POST"
+      },
+      "confirmed": true,
+      "unrelatedFieldsPreserved": true,
+      "verifiedAt": "2026-10-22T16:27:33.807Z"
+    },
+    {
+      "resource": "service",
+      "attemptedAt": "2026-10-22T16:27:33.808Z",
+      "fields": {
+        "InboundRequestUrl": "https://machinesandcloud.com/api/platform-sms",
+        "InboundMethod": "POST"
+      },
+      "confirmed": true,
+      "unrelatedFieldsPreserved": true,
+      "verifiedAt": "2026-10-22T16:27:34.087Z"
+    }
+  ],
+  "status": "verified",
+  "emails": 0,
+  "texts": 0,
+  "calls": 0,
+  "purchases": 0,
+  "billingChanges": 0,
+  "carrierSubmissions": 0,
+  "preflight": {
+    "numberSMSURLHash": "4a5fc557332a2070a06bb61a221127a026589e3ee38bc0cec029ef806d6efb91",
+    "numberSMSMethod": "POST",
+    "serviceInboundURLHash": "4a5fc557332a2070a06bb61a221127a026589e3ee38bc0cec029ef806d6efb91",
+    "serviceInboundMethod": "POST",
+    "smsApplicationAbsent": true,
+    "senderCount": 1,
+    "useInboundWebhookOnNumber": false,
+    "numberUnchangedFieldsHash": "2946f9c6acb019049d3a702f220bb5d464bbb333111bf1020550bd50417c409c",
+    "serviceUnchangedFieldsHash": "450e8708a50a963040523142858819f57fd46c62570d896f91f2bed1988ffc9f",
+    "senderMembershipHash": "d9e9dfbcb8b620fc4d1be0f9afdd8390f182b6c277ffb5677cafdcbbb5f47254"
+  },
+  "final": {
+    "numberSMSURL": "https://machinesandcloud.com/api/platform-sms",
+    "numberSMSMethod": "POST",
+    "serviceInboundURL": "https://machinesandcloud.com/api/platform-sms",
+    "serviceInboundMethod": "POST",
+    "voiceAndFallbackAndOtherNumberFieldsPreserved": true,
+    "otherServiceFieldsPreserved": true,
+    "senderMembershipPreserved": true,
+    "numberUnchangedFieldsHash": "2946f9c6acb019049d3a702f220bb5d464bbb333111bf1020550bd50417c409c",
+    "serviceUnchangedFieldsHash": "450e8708a50a963040523142858819f57fd46c62570d896f91f2bed1988ffc9f",
+    "senderMembershipHash": "d9e9dfbcb8b620fc4d1be0f9afdd8390f182b6c277ffb5677cafdcbbb5f47254"
+  },
+  "finishedAt": "2026-10-22T16:27:34.256Z"
+}

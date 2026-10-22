@@ -18,8 +18,8 @@ globalThis.fetch = async input => { const url = new URL(String(input)); result.b
 const store = await import('../netlify/functions/lib/store.mjs');
 const { accessHash } = await import('../netlify/functions/lib/access.mjs');
 const handlers = Object.fromEntries(await Promise.all(['access', 'onboard', 'client', 'chat'].map(async name => ['/api/' + name, (await import('../netlify/functions/' + name + '.mjs')).default])));
-const sources = ['onboard.html', 'onboard.js', 'netlify/functions/access.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/accounts.mjs', 'netlify/functions/lib/setup.mjs', 'netlify/functions/lib/store.mjs', 'netlify/functions/lib/config.mjs'];
-if (phase === 'full') sources.push('desk.html', 'desk.js', 'desk-connections.js', 'netlify/functions/client.mjs', 'netlify/functions/chat.mjs', 'netlify/functions/lib/owner-test.mjs', 'netlify/functions/lib/agent.mjs');
+const sources = ['onboard.html', 'onboard.js', 'onboard.css', 'product-ui.css', 'netlify/functions/access.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/accounts.mjs', 'netlify/functions/lib/setup.mjs', 'netlify/functions/lib/store.mjs', 'netlify/functions/lib/config.mjs'];
+if (phase === 'full') sources.push('desk.html', 'desk.js', 'desk-connections.js', 'desk-connections.css', 'desk.css', 'netlify/functions/client.mjs', 'netlify/functions/chat.mjs', 'netlify/functions/lib/owner-test.mjs', 'netlify/functions/lib/agent.mjs');
 const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 result.sourceBefore = hashes();
 const check = (name, pass, detail) => result.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
@@ -91,7 +91,7 @@ try {
   await page.locator('#fees').fill('Diagnostic: $89'); await page.locator('#windows').fill('8 to 12\n12 to 5'); await page.locator('#next').click(); await page.locator('[data-step="4"]').waitFor({ state: 'visible' });
   const wizardSteps = await page.locator('#ob fieldset[data-step]').count();
   if (wizardSteps === 5) { await page.locator('#next').click(); await page.locator('[data-step="5"]').waitFor({ state: 'visible' }); await page.locator('#forwarding').selectOption('none'); }
-  check('Web-only signup omits phone-registration and legal/purchase step', wizardSteps === 4 && await page.locator('#ein, #legalName, #businessNumber').count() === 0);
+  check('Web-only signup omits legal/purchase step and leaves phone routing hidden and disabled', wizardSteps === 4 && await page.locator('#ein, #legalName').count() === 0 && !await page.locator('#businessNumber').isVisible() && await page.locator('#businessNumber').isDisabled());
   dropOnboardResponse = true; await page.locator('#next').click(); await page.locator('#err').filter({ hasText: /fetch|request|workspace|failed/i }).waitFor();
   const clients = await store.list('clients', '');
   check('Lost create response leaves one tenant and permits retry', clients.length === 1 && await page.locator('#next').isEnabled());
@@ -109,7 +109,8 @@ try {
   check('Sign out revokes onboarding session and returns to email gate', (await store.get('access_sessions', accessHash(sessionBeforeSignout))).status === 'revoked' && !await page.locator('#ob').isVisible());
   await page.locator('#access-email').fill(email); await page.locator('#access-send').click(); await page.locator('#access-status').filter({ hasText: 'No email was sent' }).waitFor();
   const recover = await store.get('access_outbox', accessHash(email)); await page.goto(recover.link); await page.locator('#access-verify').click(); await page.locator('#done.on').waitFor();
-  check('Proven returning customer opens existing workspace without overwrite', await page.locator('#goPortal').getAttribute('href') === portal && JSON.stringify(created) === JSON.stringify(await store.getClient(created.slug)));
+  const returningPortal = new URL(await page.locator('#goPortal').getAttribute('href')), createdPortal = new URL(portal); createdPortal.hash = '';
+  check('Proven returning customer opens existing workspace without overwrite', returningPortal.href === createdPortal.href && await page.locator('#goPortal').innerText() === 'Open my workspace' && JSON.stringify(created) === JSON.stringify(await store.getClient(created.slug)));
   check('Onboarding session storage contains no questionnaire/legal draft', await page.evaluate(() => Object.keys(sessionStorage).length === 1 && Object.keys(localStorage).length === 0));
   if (phase === 'plan') {
     result.planMetadata = [];

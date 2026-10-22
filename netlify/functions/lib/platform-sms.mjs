@@ -42,11 +42,11 @@ function keyword(body, type) {
 function guidance(body, kind) {
   if (kind === 'stop') return 'Machines & Cloud: texts stopped. Reply START or EMPEZAR to remove the block.';
   if (kind === 'start') return 'Machines & Cloud: your texting block is removed. We only reply to messages you send; no recurring texts. Reply HELP for help or STOP to stop.';
-  if (kind === 'help') return 'Machines & Cloud product help: https://machinesandcloud.com/#pilot. Sign in: https://machinesandcloud.com/desk. Reply STOP, ALTO or PARAR to stop texts.';
-  if (/\b(price|prices|pricing|cost|plans?|precio|precios|cuesta)\b/i.test(body)) return 'Machines & Cloud: compare Coverage, Follow-through and Enterprise at https://machinesandcloud.com/#plans. Reply STOP to stop texts.';
+  if (kind === 'help') return 'Machines & Cloud: account help at https://machinesandcloud.com/desk. Setup guidance at https://machinesandcloud.com/onboard. Reply STOP, ALTO or PARAR to stop texts.';
+  if (/\b(price|prices|pricing|cost|plans?|precio|precios|cuesta)\b/i.test(body)) return 'Machines & Cloud: you asked about plan pricing. Current plan details are at https://machinesandcloud.com/#plans. Reply STOP to stop texts.';
   if (/\b(log\s?in|sign\s?in|password|account|cuenta|acceso|sesion|sesión)\b/i.test(body)) return 'Machines & Cloud: sign in securely at https://machinesandcloud.com/desk. Request a fresh email link there. Never text a password or sign-in code. Reply STOP to stop texts.';
-  if (/\b(set\s?up|onboard\w*|register|start|signup|sign\s?up|empezar|configurar|registro)\b/i.test(body)) return 'Machines & Cloud: start your front desk setup at https://machinesandcloud.com/#pilot. Already started? https://machinesandcloud.com/desk. Reply STOP to stop texts.';
-  return 'Machines & Cloud: explore our AI front desk at https://machinesandcloud.com/#demo-wrap. Product and setup help: https://machinesandcloud.com/#pilot. Reply STOP to stop texts.';
+  if (/\b(set\s?up|onboard\w*|register|start|signup|sign\s?up|empezar|configurar|registro)\b/i.test(body)) return 'Machines & Cloud: continue your workspace setup at https://machinesandcloud.com/onboard using your setup email. Reply STOP to stop texts.';
+  return 'Machines & Cloud: this line provides account and setup guidance. For secure account access, visit https://machinesandcloud.com/desk. Reply STOP to stop texts.';
 }
 async function verifyRequest(req, config) {
   if (req.method !== 'POST' || req.url !== PLATFORM_SMS_WEBHOOK_URL || !/^application\/x-www-form-urlencoded(?:\s*;\s*charset=utf-8)?$/i.test(req.headers.get('content-type') || '')) return null;

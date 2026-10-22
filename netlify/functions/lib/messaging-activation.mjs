@@ -65,7 +65,7 @@ function validOffer(value, { allowExpired = false } = {}) {
   return structuredClone(value);
 }
 const digestOffer = offer => hash(JSON.stringify(offer));
-function validateLegal(value) {
+export function normalizeMessagingRegistration(value) {
   const strings = { legalName: [2, 100], ein: [9, 10], businessType: [3, 20], street: [2, 100], street2: [0, 100], city: [2, 100], state: [2, 2], zip: [5, 10], website: [10, 500] };
   if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(key => ![...Object.keys(strings), "representative"].includes(key))) throw new MessagingActivationError("invalid_legal_details", "Check the legal business details.", 400);
   const out = {};
@@ -82,6 +82,7 @@ function validateLegal(value) {
   if (!out.representative.email || !/^\+1\d{10}$/.test(out.representative.phone) || !["CEO", "CFO", "General_Manager", "VP", "Director", "Other"].includes(out.representative.jobPosition)) throw new MessagingActivationError("invalid_representative", "Use a working representative email, US mobile number and position.", 400);
   return out;
 }
+const validateLegal = normalizeMessagingRegistration;
 async function authorize(c, body) {
   if (!validSlug(c?.slug) || !isSupportedSelfServiceClient(c) || body.actor?.role !== "owner" || normalizeAccountEmail(body.actor.email) !== normalizeAccountEmail(c.owner?.email)) throw new MessagingActivationError("forbidden", "The verified customer must authorize this request.", 403);
   const latest = await strictRead("clients", c.slug);
