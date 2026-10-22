@@ -1,6 +1,16 @@
 # Site refresh: independent visual acceptance
 
-Date: **2026-10-21**. PM owns this record and `scripts/site-ui-check.mjs`; root owns the homepage/About/refresh styles and stories; engineering owns shared navigation; PO owns design acceptance. Starting local commit: `07241ef`. No deployment is authorized by this record. Product providers and billing are outside this task.
+Date: **2026-10-21**. PM owns the local browser record and `scripts/site-ui-check.mjs`; root owns publication and release evidence; engineering owns shared navigation; PO owns design acceptance. Starting local commit: `07241ef`. The original local review did not authorize deployment; Steve subsequently explicitly approved publishing `40a147b` plus the three pending commits in one additional build. Product-provider acceptance and billing remain outside this task.
+
+## Published result
+
+**Live and independently accepted:** [machinesandcloud.com](https://machinesandcloud.com), commit `40a147b871f160374c8dc2e2ef198ceb1d0fdca7`, deploy `6ad95e1f07f1b73d0733317c`. Netlify published it at `2026-10-22T00:52:13.360Z` (October 21, 7:52 p.m. Houston). The Git push started exactly one automatic build; no manual build or second production push was needed. [Publication ledger](../scratchpad/site-publication.json).
+
+PM's bounded hosted check passes **62/62**, covering fresh desktop/mobile homepages, About and thank-you, 320 px resizing, closed/open navigation and focus, readable contrast, hero layout, channel examples, FAQ, widget open/close and CTA position. Five CSS/JS assets each had one hosted GET and matched the accepted local hashes; later page checks reused their fetched bodies. There were zero JavaScript errors, API attempts, non-GET requests or submissions. PO independently inspected the actual hosted desktop/390/320/open-menu images and read the report; appearance and bounded interactions are accepted. [Hosted report](../scratchpad/site-hosted.json), [method](../scratchpad/site-hosted-plan.md), [desktop](../scratchpad/site-hosted-1440.png), [mobile](../scratchpad/site-hosted-390.png), [open menu](../scratchpad/site-hosted-390-menu.png), [320 px](../scratchpad/site-hosted-320.png).
+
+Root separately made one public health GET: HTTP 200, `ok: true`, no failing blocks. Its stored scheduler timestamp, `2026-10-22T00:50:17.912Z`, precedes this publication, so it does not establish a new-code scheduled run. Netlify's read-only form API confirmed both `contact` and `agent-lead` with the expected field names. [Health evidence](../scratchpad/site-hosted-health.json), [registered forms](../scratchpad/site-hosted-forms.json). No real lead, chat, call, text, email or Calendar action was sent for release verification. Provider delivery, actual form delivery, live storage contention and first-shop gates remain open.
+
+The earlier sections below retain their local/prepublication scope and failures. A subsequent local documentation commit records this release without triggering another build.
 
 Additional root rendering check: actual Inter and Space Grotesk web fonts loaded successfully, with no page overflow or clipped headline at 1440/865/390/320 px. Root inspected the font-loaded desktop/mobile images. This complements the main suite's blocked-font fallback checks; it made no API request or submission. [Font results](../scratchpad/site-font-check.json), [desktop](../scratchpad/site-font-loaded-1440.png), [mobile](../scratchpad/site-font-loaded-390.png).
 
