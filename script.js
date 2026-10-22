@@ -132,7 +132,11 @@
 
     navToggle.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
     backdrop.addEventListener('click', () => closeMenu());
-    navMenu.addEventListener('click', event => { if (event.target.closest('a[href]')) closeMenu(); });
+    // Unlock the page before a link's own anchor handler measures or scrolls it.
+    navMenu.addEventListener('click', event => {
+      if (event.defaultPrevented || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (event.target.closest('a[href]')) closeMenu({ restoreFocus: false });
+    }, { capture: true });
     document.addEventListener('keydown', event => {
       if (!isOpen) return;
       if (event.key === 'Escape') { event.preventDefault(); closeMenu(); }
@@ -353,12 +357,21 @@
   // ============================================
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', function(e) {
+      if (e.defaultPrevented || e.button > 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || this.hasAttribute('download') || this.target && this.target !== '_self') return;
       const href = this.getAttribute('href');
       if (href === '#') return;
 
-      const target = document.querySelector(href);
+      const target = document.getElementById(href.slice(1));
       if (target) {
         e.preventDefault();
+        // Keyboard navigation leaves the hidden menu and continues at its destination.
+        if (!target.hasAttribute('tabindex')) {
+          target.setAttribute('tabindex', '-1');
+          target.addEventListener('blur', () => {
+            if (target.getAttribute('tabindex') === '-1') target.removeAttribute('tabindex');
+          }, { once: true });
+        }
+        target.focus({ preventScroll: true });
         const navbarHeight = navbar ? navbar.offsetHeight : 0;
         const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 20;
 

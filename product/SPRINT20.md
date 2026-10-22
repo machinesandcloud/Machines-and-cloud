@@ -1,5 +1,7 @@
 # Sprint20: automatic core service delivery
 
+**Latest steering and approval:** Steve reported the mobile menu setup button failing, then approved publication and the controlled Calendar proof. Its one build now includes the requested narrow `script.js` repair after independent16-case browser acceptance and another source-stable30-command pass. Provider/effect caps are unchanged. The root [navigation handoff](../scratchpad/signup-nav-release-preflight.json) records the exact proof and original approval; no second build is authorized. Live execution has not started apart from the allowed owned-Calendar settings inspection.
+
 October22,2026. PO accountability: a shop completes setup once and receives dependable customer service without routine founder intervention. Steve's latest feedback makes this the primary track. Sprint19's reproduced settings-save defects remain open in parallel. No new visual redesign or list of unavailable features completes this outcome.
 
 ## Current implementation boundary

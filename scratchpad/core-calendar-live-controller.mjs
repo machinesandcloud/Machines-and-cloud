@@ -32,6 +32,17 @@ function validatePacket(p,{live,now}){
  if(!Array.isArray(p.blobRoutes)||p.blobRoutes.length!==6||new Set(p.blobRoutes.map(r=>r.store)).size!==6)fail('blob_routes');
  for(const r of p.blobRoutes){if(!exact(r,['store','origin','prefix'])||![...CALENDAR_STORES,'clients','health','calendar_execution_budgets'].includes(r.store))fail('blob_routes');const u=new URL(r.origin);if(u.protocol!=='https:'||u.origin!==r.origin||u.username||u.password||!/(?:^|\.)(?:netlify\.com|netlify\.app)$/.test(u.hostname)||!r.prefix.startsWith('/')||!r.prefix.includes(TARGET.siteId)||!r.prefix.endsWith('/'))fail('blob_target');}
 }
+function signedReadURL(value, at) {
+ const u=new URL(value);
+ if(u.protocol!=='https:'||u.username||u.password||u.port&&u.port!=='443'||!/(?:^|\.)(?:amazonaws\.com|cloudfront\.net|netlify\.com|netlify\.app|storage\.googleapis\.com)$/.test(u.hostname))fail('signed_read_host');
+ const aws=u.searchParams.has('X-Amz-Signature'),google=u.searchParams.has('X-Goog-Signature');
+ if(aws||google){const prefix=aws?'X-Amz':'X-Goog',date=u.searchParams.get(prefix+'-Date'),seconds=Number(u.searchParams.get(prefix+'-Expires')),signature=u.searchParams.get(prefix+'-Signature');
+  if(!/^\d{8}T\d{6}Z$/.test(date||'')||!Number.isInteger(seconds)||seconds<1||seconds>3600||!/^[a-f0-9]{32,1024}$/i.test(signature||''))fail('signed_read_expiry');
+  const start=Date.parse(date.slice(0,4)+'-'+date.slice(4,6)+'-'+date.slice(6,8)+'T'+date.slice(9,11)+':'+date.slice(11,13)+':'+date.slice(13,15)+'Z');
+  if(!Number.isFinite(start)||start>at+60000||start+seconds*1000<=at)fail('signed_read_expired');
+ }else{const expires=Number(u.searchParams.get('Expires'));if(!Number.isSafeInteger(expires)||expires*1000<=at||expires*1000>at+3600000||!u.searchParams.get('Signature'))fail('signed_read_expiry');}
+ return u.href;
+}
 export async function fileLedger(path){
  const handle=await open(path,'wx',0o600); // Existing phases are never reopened.
  let poisoned=false;
@@ -116,7 +127,7 @@ export async function createController({mode='plan',approvedPacketPath,approvedP
    }
    if(action==='asset'&&headers.has('x-service-worker-key')||action!=='worker_create'&&action!=='worker_update'&&action!=='worker_cancel'&&headers.has('x-service-worker-key'))fail('worker_credential_scope');
    if(['request_link','exchange','intake','create_workspace','save_draft'].includes(action)&&!baselineSeen)fail('baseline_evidence_required');
-  }else if(url.origin==='https://api.netlify.com'&&!p.blobRoutes.some(r=>r.origin===url.origin&&url.pathname.startsWith(r.prefix))){
+  }else if(url.origin==='https://api.netlify.com'&&!p.blobRoutes.some(r=>r.origin===url.origin&&(url.pathname===r.prefix.slice(0,-1)||url.pathname.startsWith(r.prefix)))){
    kind='metadata';if(method!=='GET'||spec.body!==undefined||headers.has('cookie'))fail('metadata_read_only');
    const site=`/api/v1/sites/${TARGET.siteId}`,account=`/api/v1/accounts/${TARGET.accountId}/env`;
    if(url.pathname===site&&!url.search)action='site_metadata';
@@ -125,7 +136,7 @@ export async function createController({mode='plan',approvedPacketPath,approvedP
    else fail('metadata_target');cleanup=true;
   }else{
    kind='blobs';if(method!=='GET'||spec.body!==undefined||headers.has('cookie'))fail('blobs_read_only');
-   const route=p.blobRoutes.find(r=>url.origin===r.origin&&url.pathname.startsWith(r.prefix));if(!route)fail('blobs_target');
+   const route=p.blobRoutes.find(r=>url.origin===r.origin&&(url.pathname===r.prefix.slice(0,-1)||url.pathname.startsWith(r.prefix)));if(!route)fail('blobs_target');
    if([...url.searchParams.keys()].some(k=>!['prefix','cursor','limit'].includes(k)))fail('blobs_query');
    const rawKey=decodeURIComponent(url.pathname.slice(route.prefix.length));details={store:route.store,key:rawKey};
    if(CALENDAR_STORES.includes(route.store)){
@@ -204,13 +215,27 @@ export async function createController({mode='plan',approvedPacketPath,approvedP
   const additions={[c.kind==='site'?'site':c.kind]:1,...(c.write?{writes:1}:{}),...(spec.hostedCheck?{hostedChecks:1}:{}),...(c.action==='request_link'?{email:1}:{}),...(c.details.workerStage?{workerPosts:1}:{})};
   for(const [key,n]of Object.entries(additions))if(counters[key]+n>LIMITS[key])return deny('limit_'+key);
   for(const [key,n]of Object.entries(additions))counters[key]+=n;
-  if(phase==='calendar'&&c.write)budgetFresh=false;
+  if(phase==='calendar'&&c.write&&!['create_visit','reschedule_visit'].includes(c.action))budgetFresh=false;
   if(c.details.workerStage)workerStages.add(c.details.workerStage);
-  const id=++sequence;await persist({event:'reserved_unknown',id,kind:c.kind,method:c.method,path:c.url.pathname,action:c.action});
+  let id=++sequence;await persist({event:'reserved_unknown',id,kind:c.kind,method:c.method,path:c.url.pathname,action:c.action});
   let response;
   try{
-   response=await send(c.url.href,{method:c.method,headers:c.headers,...(spec.body!==undefined?{body:typeof spec.body==='string'?spec.body:JSON.stringify(spec.body)}:{}),redirect:c.action==='google_callback'?'manual':'error',signal:AbortSignal.timeout(20000)});
-   const raw=await response.text();let data=null;try{data=JSON.parse(raw);}catch{if(c.action!=='google_callback'&&!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action))&&(c.kind!=='site'||c.action!=='asset'))fail('json_response');}
+   const initialHeaders=new Headers(c.headers);
+   if(c.kind==='blobs'&&c.details.key)initialHeaders.set('accept','application/json;type=signed-url');
+   response=await send(c.url.href,{method:c.method,headers:initialHeaders,...(spec.body!==undefined?{body:typeof spec.body==='string'?spec.body:JSON.stringify(spec.body)}:{}),redirect:c.action==='google_callback'?'manual':'error',signal:AbortSignal.timeout(20000)});
+   let raw=await response.text(),data=null;try{data=JSON.parse(raw);}catch{if(c.action!=='google_callback'&&!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action))&&(c.kind!=='site'||c.action!=='asset'))fail('json_response');}
+   // Off-runtime Blobs record reads first obtain a short-lived URL from the
+   // exact approved Netlify API record route. Resolve it once, without forwarding
+   // authorization, cookies, query values or the signed destination to the ledger.
+   if(c.kind==='blobs'&&c.details.key&&response.ok&&exact(data,['url'])&&typeof data.url==='string'){
+    const resolved=signedReadURL(data.url,now());
+    await persist({event:'completed',id,status:response.status,bytes:Buffer.byteLength(raw),responseSHA256:sha(raw),signedLookup:true});
+    if(counters.blobs>=LIMITS.blobs)fail('limit_blobs');
+    counters.blobs++;id=++sequence;
+    await persist({event:'reserved_unknown',id,kind:'blobs',method:'GET',path:'/signed-read/'+c.details.store+'/:approved-record',action:c.action,signedRecordBinding:digest([c.details.store,c.details.key])});
+    response=await send(resolved,{method:'GET',headers:{Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(20000)});
+    raw=await response.text();try{data=JSON.parse(raw);}catch{if(!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action)))fail('json_response');}
+   }
    await observe(c,response,data);await persist({event:'completed',id,status:response.status,bytes:Buffer.byteLength(raw),responseSHA256:sha(raw)});
    return {status:response.status,headers:new Headers(response.headers),data,text:raw};
   }catch(error){halted=true;await persist({event:'failed_or_uncertain',id,code:error.code||'transport_or_response_failure'});throw error;}
