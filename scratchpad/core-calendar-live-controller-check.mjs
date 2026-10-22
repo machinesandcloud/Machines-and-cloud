@@ -35,7 +35,8 @@ async function fixture({p=packet(),clock=()=>NOW,persistence,signed=false,signed
    const signedURL=signedOverride||`https://fixture-records.s3.amazonaws.com/private-record-${calls.length}?X-Amz-Date=20261022T220000Z&X-Amz-Expires=600&X-Amz-Signature=${'f'.repeat(64)}&X-Amz-Credential=fixture-secret-never-log`;
    signedRecords.set(signedURL,record);lastSigned=signedURL;return json({url:signedURL});
   }
-  if(u.pathname==='/styles.css')return new Response('offline CSS fixture');
+  if(['/styles.css','/desk-connections.css'].includes(u.pathname))return new Response('offline CSS fixture');
+  if(u.pathname==='/assets/favicon.png')return new Response(Uint8Array.from([137,80,78,71,13,10,26,10,255]),{headers:{'content-type':'image/png'}});
   if(u.pathname===`/api/v1/sites/${TARGET.siteId}`)return json({id:TARGET.siteId,account_id:TARGET.accountId,published_deploy:{id:'a'.repeat(24),state:'ready',commit_ref:published?p.candidateCommit:TARGET.baselineCommit}});
   if(u.pathname.includes('/site:clients/'))return json({...owner(),owner:{email:TARGET.ownerEmail},ownerKey,onboarding:{version:1}});
   if(u.pathname.includes('/site:calendar_execution_budgets/'))return json({version:1,policyDigest:bound.digest,used:{...used}});
@@ -73,6 +74,7 @@ async function fixture({p=packet(),clock=()=>NOW,persistence,signed=false,signed
  return {c,p,rows,calls,signup,cohort,deploy,connect,budget,receipt,request,blob,headers,get bound(){return bound;},get current(){return current;},get lastSigned(){return lastSigned;},used,fail:()=>{failNext=true;},redirect:()=>{redirectNext=true;}};
 }
 await check('Default plan performs no I/O and cannot execute a request',async()=>{const p=await createController();assert.equal(p.mode,'plan');assert.equal(p.executes,false);assert.equal(p.request,undefined);});
+await check('Published portal stylesheet is allowed and binary asset bytes survive routed fulfillment',async()=>{const f=await fixture();assert.equal((await f.c.request({url:site+'/desk-connections.css'})).status,200);const image=await f.c.request({url:site+'/assets/favicon.png'});assert.deepEqual([...image.bodyBytes],[137,80,78,71,13,10,26,10,255]);assert.equal(f.c.state().counters.site,2);});
 await check('Execute requires explicit private approved packet path and SHA256',async()=>{await assert.rejects(createController({mode:'execute'}),e=>e.code==='approved_packet_path_required');});
 await check('Offline packet cannot claim approval or enlarge any counter',async()=>{for(const mutate of [p=>p.approved=true,p=>p.limits.site=999,p=>p.target.ownerEmail='other@example.test']){const p=packet();mutate(p);await assert.rejects(fixture({p}));}});
 await check('Unknown model, SMS, voice, payment and wrong mailbox requests are blocked before transport',async()=>{for(const path of ['/api/agent','/api/chat','/api/sms','/api/vapi','/api/billing','/api/stripe','/api/client?c=other']){const f=await fixture();await assert.rejects(f.request(path,{action:'send'}));assert.equal(f.calls.length,0);}const f=await fixture();await assert.rejects(f.request('/api/access',{action:'request_link',email:'other@example.test'}));assert.equal(f.calls.length,0);});

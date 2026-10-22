@@ -11,7 +11,7 @@ export const LIMITS=Object.freeze({site:160,writes:40,hostedChecks:25,email:3,me
 export const RUNTIME_LIMITS=Object.freeze({oauthStart:1,tokenExchange:1,tokenRefresh:6,calendarRead:8,eventCreate:1,eventUpdate:1,eventDelete:2,workerDispatch:10,totalRequests:29});
 const PHASES=['signup','census','publish','calendar','cleanup','closed'];
 const CALENDAR_STORES=['calendar_connections','calendar_deliveries','calendar_oauth'];
-const STATIC=new Set(['/','/index','/index.html','/onboard','/onboard.html','/desk','/desk.html','/styles.css','/site-refresh.css','/script.js','/agent-widget.js','/stories.js','/signup-intake.js','/onboard.js','/onboard.css','/desk.js','/desk.css','/desk-connections.js','/product-ui.css','/assets/favicon.png','/assets/logo-dark.png','/assets/photos/hero-hvac.jpg','/privacy-policy','/privacy-policy.html','/terms-of-service','/terms-of-service.html','/sms-terms','/sms-terms.html']);
+const STATIC=new Set(['/','/index','/index.html','/onboard','/onboard.html','/desk','/desk.html','/styles.css','/site-refresh.css','/script.js','/agent-widget.js','/stories.js','/signup-intake.js','/onboard.js','/onboard.css','/desk.js','/desk.css','/desk-connections.css','/desk-connections.js','/product-ui.css','/assets/favicon.png','/assets/logo-dark.png','/assets/photos/hero-hvac.jpg','/privacy-policy','/privacy-policy.html','/terms-of-service','/terms-of-service.html','/sms-terms','/sms-terms.html']);
 const HASH=/^[a-f0-9]{64}$/, COMMIT=/^[a-f0-9]{40}$/, NONCE=/^[a-f0-9]{32}$/;
 const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x), exact=(x,keys)=>object(x)&&Object.keys(x).sort().join(',')===[...keys].sort().join(',');
 const sha=x=>createHash('sha256').update(x).digest('hex');
@@ -223,21 +223,21 @@ export async function createController({mode='plan',approvedPacketPath,approvedP
    const initialHeaders=new Headers(c.headers);
    if(c.kind==='blobs'&&c.details.key)initialHeaders.set('accept','application/json;type=signed-url');
    response=await send(c.url.href,{method:c.method,headers:initialHeaders,...(spec.body!==undefined?{body:typeof spec.body==='string'?spec.body:JSON.stringify(spec.body)}:{}),redirect:c.action==='google_callback'?'manual':'error',signal:AbortSignal.timeout(20000)});
-   let raw=await response.text(),data=null;try{data=JSON.parse(raw);}catch{if(c.action!=='google_callback'&&!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action))&&(c.kind!=='site'||c.action!=='asset'))fail('json_response');}
+   let bodyBytes=Buffer.from(await response.arrayBuffer()),raw=bodyBytes.toString('utf8'),data=null;try{data=JSON.parse(raw);}catch{if(c.action!=='google_callback'&&!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action))&&(c.kind!=='site'||c.action!=='asset'))fail('json_response');}
    // Off-runtime Blobs record reads first obtain a short-lived URL from the
    // exact approved Netlify API record route. Resolve it once, without forwarding
    // authorization, cookies, query values or the signed destination to the ledger.
    if(c.kind==='blobs'&&c.details.key&&response.ok&&exact(data,['url'])&&typeof data.url==='string'){
     const resolved=signedReadURL(data.url,now());
-    await persist({event:'completed',id,status:response.status,bytes:Buffer.byteLength(raw),responseSHA256:sha(raw),signedLookup:true});
+    await persist({event:'completed',id,status:response.status,bytes:bodyBytes.length,responseSHA256:sha(bodyBytes),signedLookup:true});
     if(counters.blobs>=LIMITS.blobs)fail('limit_blobs');
     counters.blobs++;id=++sequence;
     await persist({event:'reserved_unknown',id,kind:'blobs',method:'GET',path:'/signed-read/'+c.details.store+'/:approved-record',action:c.action,signedRecordBinding:digest([c.details.store,c.details.key])});
     response=await send(resolved,{method:'GET',headers:{Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(20000)});
-    raw=await response.text();try{data=JSON.parse(raw);}catch{if(!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action)))fail('json_response');}
+    bodyBytes=Buffer.from(await response.arrayBuffer());raw=bodyBytes.toString('utf8');try{data=JSON.parse(raw);}catch{if(!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action)))fail('json_response');}
    }
-   await observe(c,response,data);await persist({event:'completed',id,status:response.status,bytes:Buffer.byteLength(raw),responseSHA256:sha(raw)});
-   return {status:response.status,headers:new Headers(response.headers),data,text:raw};
+   await observe(c,response,data);await persist({event:'completed',id,status:response.status,bytes:bodyBytes.length,responseSHA256:sha(bodyBytes)});
+   return {status:response.status,headers:new Headers(response.headers),data,text:raw,bodyBytes};
   }catch(error){halted=true;await persist({event:'failed_or_uncertain',id,code:error.code||'transport_or_response_failure'});throw error;}
  });}
  return {
