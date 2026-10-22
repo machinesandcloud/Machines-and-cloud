@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-22T14:06:57.531Z",
+  "mode": "independent real handler/provider protocol/installed SDK fixtures; fake model only; zero external network",
+  "before": {
+    "netlify/functions/lib/managed-sms.mjs": "7366e6f750e46c5aed90980ac015c71b1486992cac9710d9b1184faa2977ed67",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "cd78bc9c323ce9a15866fa0c501c9448fce20a52f5e16093bbb95ce839c06f88",
+    "netlify/functions/lib/managed-consent.mjs": "07c9f1cfb5ada1c81ea1b1dcbe792134e0d07bcbc14e7f3c21b6a61c1d983da9",
+    "netlify/functions/client.mjs": "aa3f9efa8f45444f5545803b9730004443b013053814482b7243511442af9be4"
+  },
+  "checks": [
+    {
+      "name": "invalid signatures/accounts/duplicate fields/provider identities are rejected before consent or queue",
+      "pass": true
+    },
+    {
+      "name": "old and future provider messages do not refresh reply authority",
+      "pass": true
+    },
+    {
+      "name": "Spanish STOP persists before AI even while paused; duplicate is harmless; START grants no recurring consent",
+      "pass": true
+    },
+    {
+      "name": "provider-verified normal inbound recovers after consent committed but queue projection failed",
+      "pass": true
+    },
+    {
+      "name": "background endpoint requires exact worker key and strict body",
+      "pass": true
+    },
+    {
+      "name": "callback cannot bind queued intent or wrong-account/direction/service/old receipt",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'uncertain'\n- 'delivered'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'uncertain'\n- 'delivered'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/managed-sms-qa-check.mjs:87:138\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/managed-sms-qa-check.mjs:47:40)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/managed-sms-qa-check.mjs:82:1"
+    },
+    {
+      "name": "two-way setup proof waits for actual delivered GET and matching inbound nonce",
+      "pass": true
+    },
+    {
+      "name": "customer activation HTTP actions require owner scope, same origin, exact fields and current revision",
+      "pass": true
+    }
+  ],
+  "conflicts": 0,
+  "blocked": [],
+  "dispatches": 5,
+  "providerSends": 2,
+  "after": {
+    "netlify/functions/lib/managed-sms.mjs": "7366e6f750e46c5aed90980ac015c71b1486992cac9710d9b1184faa2977ed67",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "cd78bc9c323ce9a15866fa0c501c9448fce20a52f5e16093bbb95ce839c06f88",
+    "netlify/functions/lib/managed-consent.mjs": "07c9f1cfb5ada1c81ea1b1dcbe792134e0d07bcbc14e7f3c21b6a61c1d983da9",
+    "netlify/functions/client.mjs": "aa3f9efa8f45444f5545803b9730004443b013053814482b7243511442af9be4"
+  },
+  "sourceStable": true,
+  "passed": 7,
+  "total": 8,
+  "ok": false
+}

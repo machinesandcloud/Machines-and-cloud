@@ -10,11 +10,17 @@
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function recover(message) {
-    if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; $('phoneAuthority').checked = false; $('phoneCosts').checked = false;
+    if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; if ($('phoneAuthority')) $('phoneAuthority').checked = false; if ($('phoneCosts')) $('phoneCosts').checked = false;
     $('portalContent').hidden = true; $('portalRecovery').hidden = false;
     $('title').textContent = 'Your workspace'; $('status').textContent = 'Unable to open workspace';
-    $('recoveryMessage').textContent = message; $('liveBtns').innerHTML = '';
+    $('recoveryMessage').textContent = message; if ($('liveBtns')) $('liveBtns').innerHTML = '';
   }
+  document.addEventListener('mc:session-expired',function () {
+    leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; if (chatController) chatController.abort();
+    try { sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); } catch (error) { /* Private content is still cleared. */ }
+    recover('Your session expired. Sign in by email to reopen your workspace.'); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
+  });
+  document.addEventListener('mc:desk-refresh',function(){if(!leaving)load();});
   async function apiRequest(method, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
@@ -49,8 +55,6 @@
   }
   $('availabilityForm').addEventListener('submit', function (e) { e.preventDefault(); availabilityChange('availability_block', $('availabilityDate').value, $('availabilityWindow').value, $('availabilitySubmit')); });
   $('availabilityBlocks').addEventListener('click', function (e) { var button = e.target.closest('button.availability-remove'); if (button) availabilityChange('availability_unblock', button.dataset.date, button.dataset.window, button); });
-  var ref = { calendar: q.get('calendar'), billing: q.get('billing') };
-  if (ref.calendar === 'ok') toast('Calendar connected.');
 
   function showTab(t) { document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); }); document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); }); }
   if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
@@ -166,7 +170,7 @@
     if (journey && Array.isArray(journey.channels)) {
       var states = { active: 'Connected', needs_action: 'Setup needed', pending_activation: 'Not connected yet', not_selected: 'Not selected', limited: 'Daily limit reached' };
       $('connectionPreferences').querySelectorAll('input[name="connection"]').forEach(function (field) { field.checked = journey.channels.some(function (channel) { return channel.id === field.value && channel.requested; }); });
-      $('connectionJourney').innerHTML = journey.channels.map(function (channel) {
+      $('connectionJourney').innerHTML = journey.channels.filter(function (channel) { return channel.id === 'web'; }).map(function (channel) {
         var state = channel.status, detail = channel.detail, next = channel.nextStep;
         if (channel.id === 'web' && state === 'active' && !operational) {
           state = limited ? 'limited' : 'needs_action';
@@ -212,7 +216,7 @@
     var disabledNames = ['owner.backupPhone', 'phone.transferTo', 'phone.forwarding', 'rules.bypass', 'rules.consentAsk', 'digest.text', 'rules.ackMinutes', 'rules.callbackHours', 'rules.callbackAfterHours'];
     disabledNames.forEach(function (name) { var field = $('cfg').elements[name]; if (field) { field.disabled = true; field.closest('.form-group').hidden = true; } });
     var messages = setup.channels.web.blockers.map(function (blocker) { return blocker.detail; });
-    $('setupMessage').textContent = !wantsWeb && !operational ? 'Your connection preferences are saved. Check Your connections for the next step; website chat is optional.' : limited ? 'The daily AI allowance has been used. Your settings and records are saved. More replies become available at midnight Houston time.' : messages.length ? 'Before activation: ' + messages.join(' ') : operational ? 'Website chat is active. Phone and text messages remain inactive.' : 'Ready to activate website chat using the button above.';
+    $('setupMessage').textContent = !wantsWeb && !operational ? 'Your connection preferences are saved. Check Your connections for the next step; website chat is optional.' : limited ? 'The daily AI allowance has been used. Your settings and records are saved. More replies become available at midnight Houston time.' : messages.length ? 'Before activation: ' + messages.join(' ') : operational ? 'Website chat is active. Your other connections show their own status below.' : 'Ready to activate website chat using the button above.';
     if (!guideStarted) {
       guideStarted = true;
       var seen = false; try { seen = localStorage.getItem('mc-walkthrough-v1:' + slug) === 'seen'; } catch (error) { /* Optional preference only. */ }
@@ -269,6 +273,7 @@
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
       $('portalRecovery').hidden = true; $('portalContent').hidden = false;
       data = d; var c = d.client;
+      queueMicrotask(function () { if (!leaving && data === d) document.dispatchEvent(new CustomEvent('mc:desk', { detail: d })); });
       var windowChoice = $('availabilityWindow').value;
       $('availabilityWindow').innerHTML = '<option value="">Whole day</option>' + (c.windows || []).map(function (w) { return '<option value="' + esc(w) + '">' + esc(w) + '</option>'; }).join('');
       if ((c.windows || []).indexOf(windowChoice) >= 0) $('availabilityWindow').value = windowChoice;
@@ -295,7 +300,7 @@
       if (c.status === 'live') { var tl = document.createElement('a'); tl.id = 'testLink'; tl.href = '#test'; tl.className = 'muted'; tl.style.marginLeft = '10px'; tl.textContent = 'Test it'; tl.addEventListener('click', function (ev) { ev.preventDefault(); window.__tabPicked = true; $('tabTest').style.display = ''; showTab('test'); }); $('liveBtns').appendChild(tl); }
       var go = $('golive'), pa = $('pause'), re = $('resume'), ca = $('cancelBtn') || $('cancelBtn2');
       if ($('cancelBtn') && $('cancelBtn2')) $('cancelBtn2').addEventListener('click', function () { $('cancelBtn').click(); });
-      if (go) { if (selfService) { go.textContent = 'Activate website chat'; go.disabled = !d.setup || !d.setup.canActivateWeb; } go.addEventListener('click', function () { confirmAction('go_live', selfService ? 'Website chat is active. Phone and text messages are not active.' : 'Activation saved. Check Setup for each channel.'); }); }
+      if (go) { if (selfService) { go.textContent = 'Activate website chat'; go.disabled = !d.setup || !d.setup.canActivateWeb; } go.addEventListener('click', function () { confirmAction('go_live', selfService ? 'Website chat is active. Check Connections for your other services.' : 'Activation saved. Check Setup for each channel.'); }); }
       if (pa) pa.addEventListener('click', function () { confirmAction('pause', selfService ? 'Website chat is paused.' : 'Service paused. Check call forwarding under Setup.'); });
       if (re) { if (selfService) re.disabled = !d.setup || !d.setup.canActivateWeb; re.addEventListener('click', function () { confirmAction('resume', selfService ? 'Website chat is active again.' : 'Resume saved. Check Setup for active channels.'); }); }
       if (ca) ca.addEventListener('click', function () {
@@ -311,7 +316,7 @@
       $('bookings').innerHTML = d.bookings.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Visit</th><th>Status</th><th>Ref</th></tr>' + d.bookings.map(function (b) { return '<tr><td>' + esc((b.createdAt || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(b.customer_name) + ' <span class="muted">(' + (b.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(b.phone) + '</span>' + (b.unsure ? '<br><span class="muted">Unsure: ' + esc(b.unsure) + '</span>' : '') + '</td><td>' + esc(b.issue) + '<br><span class="muted">' + esc(b.address) + '</span></td><td>' + esc(b.date) + ' ' + esc(b.window) + '</td><td>' + esc(b.status) + '</td><td>' + esc(b.id) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="muted">No bookings yet.</p>';
       $('leads').innerHTML = d.leads.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Outcome</th><th>Status</th><th>Ref</th></tr>' + d.leads.map(function (l) { return '<tr><td>' + esc((l.createdAt || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(l.customer_name || 'no name') + ' <span class="muted">(' + (l.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(l.phone) + '</span></td><td>' + esc(l.issue) + (l.unsure ? '<br><span class="muted">Unsure: ' + esc(l.unsure) + '</span>' : '') + '</td><td>' + esc((l.outcome || l.reason || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ' <b>EMERGENCY</b>' : '') + (l.overdueAt && l.status === 'open' ? '<span class="tag-overdue">overdue callback</span>' : '') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</td><td>' + esc(l.status) + '</td><td>' + esc(l.id) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="muted">No leads yet.</p>';
       document.querySelectorAll('button.ack').forEach(function (b) { b.addEventListener('click', function () { apiRequest('POST', { action: 'ack', leadId: b.dataset.id }).then(function () { toast('Acknowledged.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
-      $('convs').innerHTML = d.conversations.length ? d.conversations.map(function (v) { return '<div class="conv"><b>' + esc(v.channel) + ' · ' + esc(v.contact) + ' · ' + esc((v.updatedAt || '').slice(0, 16).replace('T', ' ')) + ' ' + (v.flag ? '<span class="muted">Flagged: ' + esc(v.flag.note || '') + '</span> <a href="#" class="unflag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Unflag</a>' : '<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Flag</button>') + '</b>' + v.messages.map(function (m) { return '<div class="' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.role === 'user' ? 'Customer: ' : 'Desk: ') + esc(m.content) + '</div>'; }).join('') + '</div>'; }).join('') : '<p class="muted">No conversations yet.</p>';
+      $('convs').innerHTML = d.conversations.length ? d.conversations.map(function (v) { return '<div class="conv"><b>' + esc(v.channel) + ' · ' + esc(v.contact) + ' · ' + esc((v.updatedAt || '').slice(0, 16).replace('T', ' ')) + ' ' + (v.flag ? '<span class="muted">Flagged: ' + esc(v.flag.note || '') + '</span> <a href="#" class="unflag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Unflag</a>' : '<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Flag</button>') + '</b>' + v.messages.map(function (m) { return '<div class="' + (m.role === 'user' ? 'u' : 'a') + '">' + (m.role === 'user' ? 'Customer: ' : 'Desk: ') + esc(m.content) + (m.processing ? '<small class="muted"> · ' + esc(m.processing.replace(/_/g, ' ')) + '</small>' : '') + '</div>'; }).join('') + '</div>'; }).join('') : '<p class="muted">No conversations yet.</p>';
       document.querySelectorAll('button.flag').forEach(function (b) { b.addEventListener('click', function () { var note = window.prompt('What went wrong? One line is enough.') || ''; apiRequest('POST', { action: 'flag', channel: b.dataset.ch, contact: b.dataset.ct, note: note }).then(function () { toast('Issue recorded on this conversation.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
       document.querySelectorAll('a.unflag').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); apiRequest('POST', { action: 'unflag', channel: a.dataset.ch, contact: a.dataset.ct }).then(function () { return load(); }).catch(function (error) { toast(error.message); }); }); });
       // config form
@@ -391,10 +396,11 @@
       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');
       ownerSession = null; key = null; data = null; transcript = [];
       try { sessionStorage.removeItem('mc-onboarding-session-v1'); } catch (error) { /* Session is revoked on the server. */ }
-      $('portalContent').innerHTML = ''; button.hidden = true; $('retryLoad').hidden = true;
+      button.hidden = true; $('retryLoad').hidden = true;
       history.replaceState(null, '', location.pathname);
       recover('Signed out. Use an email sign-in link to open your workspace again.');
-    } catch (error) { leaving = false; toast(error.message); } finally { button.disabled = false; }
+      $('portalContent').innerHTML = '';
+    } catch (error) { leaving = false; await load(); toast(error.message); } finally { button.disabled = false; }
   });
   ['expBookings','expLeads','expConvs','expCustomers'].forEach(function (id) {
     $(id).addEventListener('click', async function (event) {

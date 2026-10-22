@@ -46,8 +46,8 @@ try {
   assert.equal(admin.status, 200, "inherited memory-store=0 must not select production Blobs");
   assert.deepEqual((await admin.json()).clients, []);
   const google = await fetch(origin + "/api/google/auth");
-  assert.equal(google.status, 503);
-  assert.equal((await google.json()).error, "google_not_configured", "no-key mode must strip Google credentials");
+  assert.equal(google.status, 410);
+  assert.equal((await google.json()).error, "owner_session_required", "legacy OAuth entry never accepts permanent credentials");
   for (const [secret, expected] of [["inherited-secret", 403], ["local-vapi-secret", 200]]) {
     const response = await fetch(origin + "/api/vapi", { method: "POST", headers: { "Content-Type": "application/json", "x-vapi-secret": secret }, body: JSON.stringify({ message: { type: "local-check" } }) });
     assert.equal(response.status, expected, "local webhook secret must replace inherited secret");

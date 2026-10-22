@@ -20,6 +20,15 @@ import { forwardingInstructions } from "./lib/forwarding.mjs";
 import { INTAKE_CHANNELS } from "./lib/intake.mjs";
 import { listWorkspaceOperations, queueWorkspaceRebuild, retryWorkspaceOperation, WorkspaceOperationError } from "./lib/platform-operations.mjs";
 import { phoneActivationStatus, requestPhoneActivation, cancelPhoneActivation, PhoneActivationError } from "./lib/phone-activation.mjs";
+import { startCalendarConnection, completeCalendarConnection, disconnectCalendar, calendarConnectionView, CalendarError } from "./lib/calendar-connection.mjs";
+import { voiceActivationStatus, requestVoiceActivation, cancelVoiceActivation } from "./lib/voice-activation.mjs";
+import { dispatchVoiceActivationWave } from "./lib/voice-activation.mjs";
+import { messagingActivationStatus, requestMessagingActivation, correctMessagingActivation, cancelMessagingActivation } from "./lib/messaging-activation.mjs";
+import { serviceConnections, serviceSetupView } from "./lib/service-connections.mjs";
+import { dispatchServiceWorker } from "./lib/managed-sms.mjs";
+import { deliveryTenant } from "./lib/managed-consent.mjs";
+import { managedSMSConversations } from "./lib/managed-history.mjs";
+import { dispatchCalendarDeliveryWave } from "./lib/calendar-delivery.mjs";
 
 export const config = { path: "/api/client" };
 
@@ -74,8 +83,13 @@ async function handle(req) {
       listRecords("bookings", c.slug, 100), listRecords("leads", c.slug, 100), listJSON("conversations", c.slug + "/", 60), listJSON("events", c.slug + "/", 300), listRecords("alerts", c.slug, 100), getUsage(c.slug),
     ]);
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
+    const connections=selfService?await serviceConnections(c):null;
+    if(selfService){
+      const sms=await managedSMSConversations(c,{limit:60});
+      for(const conversation of sms){const old=convs.find(row=>row.channel==="sms"&&row.contact===conversation.contact);if(old)Object.assign(old,conversation);else convs.push(conversation);}
+    }
     return json({
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: setupReadiness(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, bookings, leads, events),
@@ -91,6 +105,7 @@ async function handle(req) {
 
   if (req.method === "PUT") {
     let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+    if (selfService && b.legal!==undefined) return json({error:"use_secure_registration",message:"Review legal business details in your texting connection form."},400);
     if (isSelfServiceClient(c) && b.expectedRevision !== configurationRevision(c)) return json({ error: "configuration_changed", message: "Your saved rules changed. Reload before saving so another tab's changes are kept." }, 409);
     const before = JSON.stringify(c);
     const bz = c.business;
@@ -150,6 +165,51 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    const serviceActions = {
+      start_calendar_connection: ["expectedRevision"], complete_calendar_connection: ["state", "code", "error"], disconnect_calendar: [],
+      request_voice_activation: ["expectedRevision", "acceptedAuthority", "policyVersion", "policyDigest", "forwardingMode"],
+      cancel_voice_activation: ["expectedRevision"],
+      resume_services: ["expectedRevision"],
+      request_messaging_activation: ["expectedRevision", "submissionId", "offerVersion", "offerDigest", "programDigest", "acceptedCosts", "authority", "attestLegalAccuracy", "attestConsent", "testPhoneConsent", "legal"],
+      correct_messaging_activation: ["expectedRevision", "operationId", "expectedSubmissionRevision", "submissionId", "offerVersion", "offerDigest", "programDigest", "acceptedCosts", "authority", "attestLegalAccuracy", "attestConsent", "testPhoneConsent", "legal"],
+      cancel_messaging_activation: ["expectedRevision", "operationId"]
+    };
+    if (Object.hasOwn(serviceActions, b?.action || "")) {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
+      if (JSON.stringify(b).length > 12000 || Object.keys(b).some(field => !["action", ...serviceActions[b.action]].includes(field))) return json({ error: "invalid_request" }, 400);
+      const actor = { role: "owner", email: session.email }, body = { ...b, actor }; delete body.action;
+      try {
+        let result;
+        if(b.action==="resume_services"){
+          const updated=await atomicUpdate("clients",c.slug,current=>{
+            if(!ownsCurrent(current))throw new Error("Workspace changed");
+            if(current.status!=="paused" || b.expectedRevision!==configurationRevision(current) || !setupReadiness(current).canActivateWeb)return {result:null};
+            const value={...current,status:current.pausedFrom==="live"?"live":"testing",channels:{...current.channels,web:{active:current.pausedChannels?.web?.active===true}},operationLifecycleVersion:(current.operationLifecycleVersion || 0)+1,pausedAt:null,updatedAt:new Date().toISOString()};
+            return {value,result:value};
+          });
+          if(!updated)return json({error:"not_ready",message:"Review and test your current saved rules before resuming."},409);
+          try{await dispatchVoiceActivationWave();}catch{/* Scheduled recovery resumes accepted phone work. */}
+          try{await dispatchCalendarDeliveryWave();}catch{/* Scheduled recovery resumes saved calendar work. */}
+          return json({ok:true,client:ownerView(updated),connections:await serviceConnections(updated)},202,{"Cache-Control":"no-store"});
+        }
+        if (b.action === "start_calendar_connection") {
+          if (b.expectedRevision !== configurationRevision(c)) return json({ error: "configuration_changed" }, 409);
+          result = await startCalendarConnection(c, session);
+        } else if (b.action === "complete_calendar_connection") result = await completeCalendarConnection(c, session, {state:b.state,...(b.code!==undefined?{code:b.code}:{}),...(b.error!==undefined?{error:b.error}:{})});
+        else if (b.action === "disconnect_calendar") result = await disconnectCalendar(c, session);
+        else if (b.action === "request_voice_activation") result = await requestVoiceActivation(c, body);
+        else if (b.action === "cancel_voice_activation") result = await cancelVoiceActivation(c, body);
+        else if (b.action === "request_messaging_activation") result = await requestMessagingActivation(c, body);
+        else if (b.action === "correct_messaging_activation") result = await correctMessagingActivation(c, body);
+        else result = await cancelMessagingActivation(c, b.operationId, body);
+        if (["request_messaging_activation", "correct_messaging_activation", "cancel_messaging_activation"].includes(b.action)) try { await dispatchServiceWorker("service-activation-background",{slug:c.slug,tenant:deliveryTenant(c)}); } catch { /* Scheduled recovery still owns the saved intent. */ }
+        if (["request_voice_activation", "cancel_voice_activation"].includes(b.action)) try { await dispatchVoiceActivationWave(); } catch { /* The next scheduled wave recovers the saved intent. */ }
+        if (b.action === "complete_calendar_connection") try { await dispatchCalendarDeliveryWave(); } catch { /* Saved future visits are discovered by scheduled recovery. */ }
+        return json({ ok: true, result, connections: await serviceConnections(c) }, 202, { "Cache-Control": "no-store" });
+      } catch (error) {
+        return json({ error: typeof error.code === "string" ? error.code : "service_setup_unavailable", message: error instanceof CalendarError || /ActivationError$/.test(error.constructor?.name || "") ? error.message : "Your service change could not be confirmed. Refresh its status before retrying." }, Number.isInteger(error.status) ? error.status : 503, { "Cache-Control": "no-store" });
+      }
+    }
     if (["request_phone_activation", "cancel_phone_activation"].includes(b?.action)) {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
       const allowed = b.action === "request_phone_activation" ? ["action", "expectedRevision", "submissionId", "offerVersion", "offerDigest", "acceptedCosts", "authority"] : ["action", "expectedRevision", "operationId"];
@@ -207,7 +267,7 @@ async function handle(req) {
         if (b.action === "pause" && !["live", "testing"].includes(current.status)) return { result: { error: "not_active", status: 409, setup } };
         const status = b.action === "pause" ? "paused" : b.action === "cancel" ? "cancelled" : "live";
         const updated = { ...current, status, operationLifecycleVersion: (current.operationLifecycleVersion || 0) + 1, channels: { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
-          ...(status === "live" ? { liveAt: current.liveAt || now, pausedAt: null } : status === "paused" ? { pausedAt: now, pausedFrom: current.status } : { cancelledAt: current.cancelledAt || now, cancelReason: s(b.reason, 300) }) };
+          ...(status === "live" ? { liveAt: current.liveAt || now, pausedAt: null } : status === "paused" ? { pausedAt: now, pausedFrom: current.status,pausedChannels:current.channels } : { cancelledAt: current.cancelledAt || now, cancelReason: s(b.reason, 300) }) };
         return { value: updated, result: { client: updated } };
       });
       if (result.error) return json({ error: result.error, setup: result.setup, ...(result.aiAllowance ? { aiAllowance: result.aiAllowance, message: "Website chat cannot activate while today’s AI allowance is exhausted." } : {}) }, result.status);
@@ -335,9 +395,10 @@ async function exportCSV(c, what) {
     header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure"];
     rows = (await listRecords("leads", c.slug, 2000)).map((l) => [l.id, l.createdAt, l.customer_name, l.phone, l.address, l.issue, l.reason, l.outcome, l.urgency, l.wanted, l.status, l.channel, l.unsure]);
   } else if (what === "conversations") {
-    header = ["channel", "contact", "at", "role", "content", "flag_note"];
+    header = ["channel", "contact", "at", "role", "content", "flag_note", "processing"];
     rows = [];
-    for (const v of await listJSON("conversations", c.slug + "/", 2000)) for (const m of v.messages || []) rows.push([v.channel, v.contact, m.at, m.role, m.content, v.flag?.note || ""]);
+    const conversations=await listJSON("conversations", c.slug + "/", 2000),sms=isSelfServiceClient(c)?await managedSMSConversations(c,{limit:100}):[];
+    for(const v of conversations.filter(v=>!sms.some(managed=>v.channel==="sms"&&managed.contact===v.contact)).concat(sms))for(const m of v.messages || [])rows.push([v.channel,v.contact,m.at,m.role,m.content,v.flag?.note || "",m.processing || ""]);
   } else if (what === "customers") {
     // Jobber's supported import headers; Housecall Pro's wizard maps the same names.
     header = ["First name", "Last name", "Mobile Phone", "Email", "Street", "City", "State", "Zip Code", "Note", "Lead Source", "Tags"];

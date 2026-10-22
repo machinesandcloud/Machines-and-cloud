@@ -11,6 +11,7 @@ import { a2pEnabled, brandStatus, createCampaign, campaignStatus, releaseNumber,
 import { releaseVoice } from "./lib/vapi.mjs";
 import { isSelfServiceClient } from "./lib/setup.mjs";
 import { phoneRecoveryHealth } from "./lib/phone-activation.mjs";
+import { serviceDeliveryHealth } from "./lib/service-health.mjs";
 import { recoverWorkspaceOperations } from "./lib/platform-operations.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
@@ -193,6 +194,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
   // Provider work has its own scheduled function and 15-second aggregate budget.
   // The main scheduler only reads its durable receipt and pending-work counters.
   await block(record, "phoneSetupRecovery", async () => phoneRecoveryHealth());
+  await block(record, "serviceDeliveryRecovery", async () => serviceDeliveryHealth());
   let alerts = 0, lifecycles = 0;
   await block(record, "healthLifecycle", async () => {
     if (!halfHour) return { skipped: "runs at :00 and :30" };

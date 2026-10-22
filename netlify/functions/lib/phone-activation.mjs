@@ -42,6 +42,46 @@ export async function phoneActivationStatus(c) {
   const policy = productionPolicy();
   return { available: policy.enabled, active: false, state: latest?.state || "unavailable", detail: latest ? detail(latest.state) : "Phone setup is not available yet. No number will be purchased from signup or connection preferences.", offer: policy.enabled ? { ...policy.offer, digest: offerDigest(policy.offer) } : null, operation: latest ? phoneActivationView(latest) : null };
 }
+// Server-only resource access. Never include this object in a browser response.
+export async function getAcquiredPhoneResource(c) {
+  if (!validSlug(c?.slug) || !isSupportedSelfServiceClient(c)) return null;
+  const current = await strictRead("clients", c.slug);
+  if (!current || tenant(current) !== tenant(c) || !["testing", "live"].includes(current.status)) return null;
+  const id = `${c.slug}/${hash("first-phone-acquisition:" + tenant(c))}`;
+  const row = await strictRead(STORE, id);
+  if (!row || row.tenantIdentity !== tenant(c) || row.state !== "number_acquired" || row.cancelRequestedAt || row.releasedAt || !row.resource?.id) return null;
+  return { intentId: row.id, id: row.resource.id, number: row.resource.number, correlationId: row.correlationId };
+}
+export async function getPhoneResourceLifecycle(c) {
+  if (!validSlug(c?.slug) || !isSupportedSelfServiceClient(c)) return null;
+  const id = `${c.slug}/${hash("first-phone-acquisition:" + tenant(c))}`;
+  const row = await strictRead(STORE, id);
+  if (!row || row.tenantIdentity !== tenant(c)) return null;
+  return { intentId: id, state: row.state, cancelRequestedAt: row.cancelRequestedAt || null, releasedAt: row.releasedAt || null, resourceId: row.resource?.id || null, cancellationRequested: !!row.cancelRequestedAt, released: !!row.releasedAt,
+    resource: row.resource ? { id: row.resource.id, number: row.resource.number } : null };
+}
+// Activation and release share this conditional document. A cancellation cannot release a
+// number between a child service checking it and attaching a provider resource.
+export async function claimPhoneResourceDependency(c, { kind, operationId }) {
+  if (!["voice", "messaging"].includes(kind) || typeof operationId !== "string" || operationId.length > 200) throw new PhoneActivationError("invalid_dependency", "Invalid service request.");
+  const resource = await getAcquiredPhoneResource(c);
+  if (!resource) throw new PhoneActivationError("number_unavailable", "The business number is not available for activation.");
+  return atomicUpdate(STORE, resource.intentId, row => {
+    if (!row || row.tenantIdentity !== tenant(c) || row.state !== "number_acquired" || row.cancelRequestedAt || row.releasedAt || row.resource?.id !== resource.id) throw new PhoneActivationError("number_unavailable", "The business number changed before activation.");
+    const previous = row.dependencies?.[kind];
+    if (previous && previous.operationId !== operationId) throw new PhoneActivationError("service_conflict", "Another service request is attached to this number.");
+    return { value: { ...row, dependencies: { ...row.dependencies, [kind]: previous || { operationId, claimedAt: iso() } }, updatedAt: iso() }, result: resource };
+  });
+}
+export async function clearPhoneResourceDependency(c, { kind, operationId, cleanupConfirmed }) {
+  if (cleanupConfirmed !== true || !["voice", "messaging"].includes(kind)) throw new PhoneActivationError("cleanup_unconfirmed", "Service cleanup must be confirmed before releasing its number.");
+  const id = `${c.slug}/${hash("first-phone-acquisition:" + tenant(c))}`;
+  return atomicUpdate(STORE, id, row => {
+    if (!row || row.tenantIdentity !== tenant(c) || row.dependencies?.[kind]?.operationId !== operationId) return { result: false };
+    const dependencies = { ...row.dependencies }; delete dependencies[kind];
+    return { value: { ...row, dependencies, updatedAt: iso() }, result: true };
+  });
+}
 function localFixtureContext() {
   try { return process.env.NODE_ENV === "test" && process.env.MC_FAKE_MODEL === "1" && ["localhost", "127.0.0.1", "[::1]"].includes(new URL(process.env.URL).hostname); } catch { return false; }
 }
@@ -175,6 +215,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     const token = randomBytes(16).toString("hex");
     const claimed = await change(row.id, current => {
       if (current.cleanupStartedAt || current.state !== "cleanup_pending") return null;
+      if (Object.keys(current.dependencies || {}).length) return { ...current, reasonCode: "service_cleanup_required" };
       return { ...current, state: "releasing", cleanupStartedAt: iso(), cleanupAttempts: current.cleanupAttempts + 1, cleanupClaim: token };
     });
     if (claimed.cleanupClaim !== token) return claimed;

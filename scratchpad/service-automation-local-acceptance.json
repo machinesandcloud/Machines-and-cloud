@@ -1,0 +1,78 @@
+{
+  "at": "2026-10-22T14:51:23.792Z",
+  "fullBuild": {
+    "passed": 23,
+    "total": 23,
+    "evidence": "service-automation-gate-final.json"
+  },
+  "syntax": {
+    "passed": 208,
+    "total": 208,
+    "evidence": "service-automation-syntax-accepted.json"
+  },
+  "additionalChecks": [
+    {
+      "file": "calendar-client-handler-check.mjs",
+      "passed": true
+    },
+    {
+      "file": "calendar-late-create-independent-check.mjs",
+      "passed": true
+    },
+    {
+      "file": "service-delivery-wave-qa-check.mjs",
+      "passed": true
+    },
+    {
+      "file": "voice-delivery-independent-check.mjs",
+      "passed": true
+    },
+    {
+      "file": "local-server-check.mjs",
+      "passed": true,
+      "correction": "Legacy unauthenticated OAuth path now returns 410; default local mode additionally strips worker/encryption secrets and closes managed gates."
+    }
+  ],
+  "browser": {
+    "passed": 13,
+    "total": 13,
+    "sourceStable": true,
+    "errors": 0,
+    "evidence": "service-connections-ui-root-final.json"
+  },
+  "liveProviderMessages": 0,
+  "deployments": 0,
+  "privateTemporaryCapturesRemoved": true,
+  "localExecutionGates": {
+    "PHONE_ACQUISITION_ENABLED": false,
+    "VOICE_ACTIVATION_ENABLED": false,
+    "SERVICE_DELIVERY_ENABLED": false,
+    "CALENDAR_CONNECTION_ENABLED": false,
+    "CALENDAR_DELIVERY_ENABLED": false
+  },
+  "secretScan": {
+    "realSecretMatches": 0,
+    "envIgnored": true
+  },
+  "sourceManifest": "service-automation-candidate-manifest.json",
+  "providerBlocker": "service-twilio-console-blocker.json",
+  "monitoringRegression": {
+    "passed": 17,
+    "total": 17,
+    "evidence": "service-reconciliation-health-final.json"
+  },
+  "providerReadiness": {
+    "accountStatus": "active",
+    "liveAccountGET": 200,
+    "primaryProfileStatus": "twilio-approved",
+    "primaryProfileRole": "isv_reseller_or_partner",
+    "standardBrandStatus": "APPROVED",
+    "standardBrandIdentityStatus": "VETTED_VERIFIED",
+    "platformCampaignFiled": false,
+    "receipts": [
+      "service-twilio-after-owner-billing.json",
+      "service-provider-carrier-after-billing.json",
+      "service-platform-brand-after-billing.json"
+    ]
+  }
+}

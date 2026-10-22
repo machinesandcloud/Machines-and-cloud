@@ -112,6 +112,24 @@ export async function addRecord(kind, slug, data) {
   await put(kind, `${slug}/${rec.id}`, rec);
   return rec;
 }
+export async function createRecordOnce(kind, slug, data) {
+  return atomicUpdate(kind, `${slug}/${data.id}`, current => {
+    if (current) return { result: current };
+    const rec = { slug, createdAt: now(), ...data };
+    return { value: rec, result: rec };
+  });
+}
+export async function finishStableBookingWindow(slug, bookingId, mutationId) {
+  return atomicUpdate("index", capacityKey(slug), state => {
+    const claim = state?.stableClaims?.[bookingId];
+    if (!claim) return { result: false };
+    if (claim.token !== mutationId || state.mutations?.[bookingId] !== mutationId) throw new Error("Booking recovery identity mismatch");
+    const next = structuredClone(state);
+    next.reservations[bookingId] = claim.slot ? [claim.slot] : [];
+    delete next.mutations[bookingId]; delete next.stableClaims[bookingId];
+    return { value: next, result: true };
+  });
+}
 export const getRecord = (kind, slug, recId) => get(kind, `${slug}/${recId}`);
 export async function saveRecord(kind, rec, { capacityClaim } = {}) {
   if (kind !== "bookings") return put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
@@ -208,7 +226,8 @@ export async function bookingWindowTaken(c, date, window) {
     return { ...(!current ? { value: state } : {}), result: { full: blocked || count >= capacity, count, capacity, ...(blocked ? { blocked: true } : {}) } };
   });
 }
-export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false } = {}) {
+export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false, mutationId = null } = {}) {
+  if (mutationId !== null && !/^[a-f0-9]{64}$/.test(mutationId)) throw new Error("Invalid booking mutation identity");
   let targetDate = date, targetWindow = window;
   if (!requireExisting) {
     try { targetDate = requestedDate(date); }
@@ -216,11 +235,15 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     targetWindow = listedWindow(c, window);
     if (!targetWindow) return { full: true, reason: "invalid_window", message: "Nothing was booked. That is not a listed arrival window. Check availability for a listed window." };
   }
-  const slot = bookingSlot(targetDate, targetWindow), capacity = capacityLimit(c), token = id(12);
+  const slot = bookingSlot(targetDate, targetWindow), capacity = capacityLimit(c), token = mutationId || id(12);
   return atomicUpdate("index", capacityKey(c.slug), async (current) => {
     const state = current || await initialCapacity(c.slug);
     state.mutations ||= {};
-    if (state.mutations[bookingId]) throw new Error("Booking is being updated; reload it and retry");
+    if (state.mutations[bookingId]) {
+      const prior = state.stableClaims?.[bookingId];
+      if (mutationId && prior?.token === mutationId && prior.slot === slot) return { result: prior };
+      throw new Error("Booking is being updated; reload it and retry");
+    }
     const previous = state.reservations[bookingId] || [];
     // Ordinary updates must not resurrect a booking whose cancellation completed after the
     // caller read it. Only explicit creation/rescheduling may acquire a new reservation.
@@ -236,7 +259,9 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     const next = slot && !previous.includes(slot) ? [...previous, slot] : previous;
     if (next.length) state.reservations[bookingId] = next;
     state.mutations[bookingId] = token;
-    return { value: state, result: { token, slot, previous, next, date: targetDate, window: targetWindow } };
+    const claim = { token, slot, previous, next, date: targetDate, window: targetWindow };
+    if (mutationId) { state.stableClaims ||= {}; state.stableClaims[bookingId] = claim; }
+    return { value: state, result: claim };
   });
 }
 export async function finishBookingWindow(slug, bookingId, claim) {
@@ -245,6 +270,7 @@ export async function finishBookingWindow(slug, bookingId, claim) {
     const slots = claim.release || !claim.slot ? [] : [claim.slot];
     if (slots.length) state.reservations[bookingId] = slots; else delete state.reservations[bookingId];
     delete state.mutations[bookingId];
+    if (state.stableClaims) delete state.stableClaims[bookingId];
     return { value: state };
   });
 }

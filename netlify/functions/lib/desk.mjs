@@ -1,7 +1,7 @@
 // What happens when the front desk books a visit or flags a lead for a real client:
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
-import { addRecord, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability } from "./store.mjs";
+import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability } from "./store.mjs";
 import { AvailabilityInputError } from "./availability.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
@@ -9,6 +9,19 @@ import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, ope
 import { getUsage, usageView } from "./usage.mjs";
 import { auditNeedsAttention, actionableAuditReasons } from "./audit-policy.mjs";
 import { isSelfServiceClient } from "./setup.mjs";
+import { deliveryTenant } from "./managed-consent.mjs";
+import { queueManagedRecord, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
+import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-delivery.mjs";
+import { strictRead } from "./accounts.mjs";
+
+async function queueSavedDelivery(c, record, kind) {
+  if (!isSelfServiceClient(c)) return;
+  // Provider work is recoverable from source records; a queue outage cannot roll back a booking.
+  try { await queueManagedRecord(c, record, kind); } catch { /* Background source discovery repairs this gap. */ }
+  if (kind === "bookings") try { await queueCalendarBooking(c, record); } catch { /* Same authoritative-source backfill. */ }
+  if (kind === "bookings") try { await dispatchCalendarDeliveryWave(); } catch { /* Scheduled recovery retries dispatch. */ }
+  try { await dispatchManagedDeliveryWave(); } catch { /* Scheduled recovery retries dispatch. */ }
+}
 
 const H = 3600 * 1000, D = 24 * H;
 const esc = (s) => String(s || "").trim();
@@ -231,18 +244,29 @@ async function calendarFailed(c, b, err, op) {
 export async function bookVisit(c, input, ctx = {}) {
   const portalOnly = isSelfServiceClient(c);
   const phone = e164(input.phone) || esc(input.phone);
-  const bookingId = id(5), type = await customerType(c.slug, phone);
-  const taken = await reserveBookingWindow(c, bookingId, input.date, input.window);
+  const stable = portalOnly && /^[a-f0-9]{64}$/.test(ctx.managedActionId || "");
+  const bookingId = stable ? ctx.managedActionId.slice(0,32) : id(5), type = await customerType(c.slug, phone);
+  if (stable) {
+    const previous = await strictRead("bookings", `${c.slug}/${bookingId}`);
+    if (previous) {
+      if (previous.delivery?.tenantIdentity !== deliveryTenant(c) || previous.managedActionId !== ctx.managedActionId) throw new Error("Booking action identity mismatch");
+      await finishStableBookingWindow(c.slug, bookingId, ctx.managedActionId);
+      await addToIndex("bookings", c.slug, previous.phone, previous.id);
+      await queueSavedDelivery(c, previous, "bookings");
+      return previous;
+    }
+  }
+  const taken = await reserveBookingWindow(c, bookingId, input.date, input.window, undefined, stable ? { mutationId: ctx.managedActionId } : {});
   if (taken.full) {
     if (taken.reason === "full") await logEvent(c.slug, "window_full", { date: taken.availability?.from || normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity });
     return { full: true, reason: taken.reason, message: taken.availability ? fullMessage(c, esc(input.date), esc(input.window), taken.availability, taken.reason) : taken.message || fullMessage(c, esc(input.date), esc(input.window)) };
   }
-  const b = await addRecord("bookings", c.slug, {
+  const b = await (stable ? createRecordOnce : addRecord)("bookings", c.slug, {
     id: bookingId,
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     date: taken.date, dateSaid: esc(input.date), window: taken.window, urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: type,
-    ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false } } : {}),
+    ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) }, ...(stable ? { managedActionId: ctx.managedActionId } : {}) } : {}),
   });
   let canFinish = true;
   try {
@@ -254,9 +278,10 @@ export async function bookVisit(c, input, ctx = {}) {
       const { consentLine } = await import("./config.mjs");
       b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
     }
-    try { await saveRecord("bookings", b, { capacityClaim: taken }); }
+    try { if (!stable) await saveRecord("bookings", b, { capacityClaim: taken }); }
     catch (err) { canFinish = false; throw err; }
-  } finally { if (canFinish) await finishBookingWindow(c.slug, bookingId, taken); }
+  } finally { if (canFinish) { if (stable) await finishStableBookingWindow(c.slug, bookingId, ctx.managedActionId); else await finishBookingWindow(c.slug, bookingId, taken); } }
+  await queueSavedDelivery(c, b, "bookings");
   if (!portalOnly && b.phone && ctx.channel !== "sms") {
     await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
   }
@@ -278,7 +303,7 @@ export async function bookVisit(c, input, ctx = {}) {
 async function recentOpenLead(c, phone, contact) {
   const cutoff = Date.now() - 30 * 60 * 1000;
   const pool = phone ? await recordsFor("leads", c.slug, phone) : await listRecords("leads", c.slug, 60);
-  const leads = pool.filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > cutoff);
+  const leads = pool.filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > cutoff && (!isSelfServiceClient(c) || l.delivery?.tenantIdentity === deliveryTenant(c)));
   return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
 }
 
@@ -335,7 +360,12 @@ export async function flagLead(c, input, ctx = {}) {
   const portalOnly = isSelfServiceClient(c);
   const phone = e164(input.phone) || esc(input.phone);
   const reason = input.reason || "lead";
-  const prior = reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact);
+  const stable = portalOnly && /^[a-f0-9]{64}$/.test(ctx.managedActionId || "");
+  if (stable) {
+    const existing = await strictRead("leads", `${c.slug}/${ctx.managedActionId.slice(0,32)}`);
+    if (existing) { if (existing.managedActionId !== ctx.managedActionId || existing.delivery?.tenantIdentity !== deliveryTenant(c)) throw new Error("Lead identity mismatch"); await queueSavedDelivery(c, existing, "leads"); return existing; }
+  }
+  const prior = stable || reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact);
   if (prior) {
     const changed = [];
     for (const k of ["customer_name", "phone", "address", "issue", "wanted", "unsure"]) { const v = k === "phone" ? phone : esc(input[k]); if (v && v !== prior[k]) { prior[k] = v; changed.push(k); } }
@@ -345,10 +375,11 @@ export async function flagLead(c, input, ctx = {}) {
     if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); await trackCallback(c, prior); }
     if (input.nobook_reason && input.nobook_reason !== "none" && input.nobook_reason !== prior.nobook_reason) prior.nobook_reason = input.nobook_reason;
     if (portalOnly) {
-      prior.delivery = { mode: "portal_only", ownerContactConfirmed: false };
+      prior.delivery = { ...prior.delivery, mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) };
       delete prior.callbackPromise; delete prior.callbackDueAt; delete prior.overdueAt;
     }
     await saveRecord("leads", prior);
+    await queueSavedDelivery(c, prior, "leads");
     if (!portalOnly) {
       if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
       const waiting = (await listRecords("alerts", c.slug, 100)).some((a) => a.leadId === prior.id && a.status === "waiting");
@@ -357,13 +388,15 @@ export async function flagLead(c, input, ctx = {}) {
     await logEvent(c.slug, "lead_updated", { id: prior.id, changed, channel: ctx.channel });
     return prior;
   }
-  const l = await addRecord("leads", c.slug, {
+  const l = await (stable ? createRecordOnce : addRecord)("leads", c.slug, {
+    ...(stable ? { id: ctx.managedActionId.slice(0,32), managedActionId: ctx.managedActionId } : {}),
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
     channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
-    ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false } } : {}),
+    ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) } } : {}),
   });
   await addToIndex("leads", c.slug, l.phone, l.id);
+  await queueSavedDelivery(c, l, "leads");
   if (!portalOnly && reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
     await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
@@ -539,6 +572,7 @@ export async function rescheduleVisit(c, b, date, window) {
     try { await saveRecord("bookings", b, { capacityClaim: claim }); }
     catch (err) { canFinish = false; throw err; }
   } finally { if (canFinish) await finishBookingWindow(c.slug, b.id, claim); }
+  await queueSavedDelivery(c, b, "bookings");
   if (!portalOnly) await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
   await logEvent(c.slug, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
   return b;

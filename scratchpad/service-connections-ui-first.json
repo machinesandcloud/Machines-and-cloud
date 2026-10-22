@@ -1,0 +1,236 @@
+{
+  "at": "2026-10-22T14:02:57.537Z",
+  "mode": "actual owner/admin read handlers + actual browser assets + explicit connection mutation fixtures; no external network",
+  "before": {
+    "desk.html": "59cb768222ddb55f58d23bced4436befcdfacee26f09540f22f4a67b454f6e85",
+    "desk.js": "bbab72a245e5d0b10614545df527539b9683f302129fe3f94ba53c3f9b13bf92",
+    "desk-connections.js": "487d4eab4c92988a739bd06588fc77c2006db9d95d81681f2d07350e730b4eca",
+    "admin.js": "02c948616c57c69a963feec999979c71c38d4e1f8c36c53f0022217d3761e643",
+    "netlify/functions/lib/operator.mjs": "7197d566999ba5a1b493ea3267232883ce6abf9c486367a748d2ccb88c301242"
+  },
+  "checks": [
+    {
+      "name": "Actual owner data renders available connection actions without page errors",
+      "pass": true
+    },
+    {
+      "name": "Voice form requires owner authority and shows the enforceable limits",
+      "pass": true
+    },
+    {
+      "name": "Texting form displays costs and requires every legal, consent and test approval",
+      "pass": true
+    },
+    {
+      "name": "Connection status and legal form fit viewport 375",
+      "pass": true
+    },
+    {
+      "name": "Connection status and legal form fit viewport 1365",
+      "pass": true
+    },
+    {
+      "name": "Forged URL calendar success is stripped without a success claim or completion POST",
+      "pass": true
+    },
+    {
+      "name": "A matching pending Google state requires explicit finish and still uses server status",
+      "pass": true
+    },
+    {
+      "name": "Expired connection actions clear private UI and expose sign-in recovery",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/service-connections-ui-check.mjs:61:477\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/service-connections-ui-check.mjs:51:40)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/service-connections-ui-check.mjs:61:3"
+    },
+    {
+      "name": "Sign-out prevents a late connection response from restoring private state",
+      "pass": false,
+      "error": "locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#portalRecovery') to be visible\u001b[22m\n\u001b[2m    14 × locator resolved to hidden <div hidden=\"\" class=\"card2\" id=\"portalRecovery\">…</div>\u001b[22m\n",
+      "stack": "locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#portalRecovery') to be visible\u001b[22m\n\u001b[2m    14 × locator resolved to hidden <div hidden=\"\" class=\"card2\" id=\"portalRecovery\">…</div>\u001b[22m\n\n    at /Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/service-connections-ui-check.mjs:62:578\n    at async check (/Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/service-connections-ui-check.mjs:51:40)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/service-connections-ui-check.mjs:62:3"
+    },
+    {
+      "name": "Actual admin detail reports the new connection statuses without resource secrets",
+      "pass": true
+    }
+  ],
+  "pageErrors": [],
+  "blocked": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "acceptedAuthority": true,
+        "policyVersion": "fixture_voice_v1",
+        "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "forwardingMode": "use_new_number"
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "submissionId": "c4ae5a43c645588a375f6abe8778b52a",
+        "offerVersion": "fixture_sms_v1",
+        "offerDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "programDigest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Service Shop",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "street": "10 Fixture St",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.test",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Rivera",
+            "email": "owner@example.test",
+            "phone": "+17135550142",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "complete_calendar_connection",
+      "body": {
+        "action": "complete_calendar_connection",
+        "state": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "code": "fixture-code"
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "acceptedAuthority": true,
+        "policyVersion": "fixture_voice_v1",
+        "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "forwardingMode": "forward_business_line"
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "acceptedAuthority": true,
+        "policyVersion": "fixture_voice_v1",
+        "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "forwardingMode": "forward_business_line"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "body": {
+        "action": "sign_out"
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/service-connections-ui-first-states-375.png",
+    "scratchpad/service-connections-ui-first-legal-375.png",
+    "scratchpad/service-connections-ui-first-states-1365.png",
+    "scratchpad/service-connections-ui-first-legal-1365.png"
+  ],
+  "after": {
+    "desk.html": "59cb768222ddb55f58d23bced4436befcdfacee26f09540f22f4a67b454f6e85",
+    "desk.js": "bbab72a245e5d0b10614545df527539b9683f302129fe3f94ba53c3f9b13bf92",
+    "desk-connections.js": "487d4eab4c92988a739bd06588fc77c2006db9d95d81681f2d07350e730b4eca",
+    "admin.js": "02c948616c57c69a963feec999979c71c38d4e1f8c36c53f0022217d3761e643",
+    "netlify/functions/lib/operator.mjs": "7197d566999ba5a1b493ea3267232883ce6abf9c486367a748d2ccb88c301242"
+  },
+  "sourceStable": true,
+  "passed": 8,
+  "total": 10,
+  "ok": false
+}

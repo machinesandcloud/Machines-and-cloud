@@ -127,7 +127,7 @@
     </div>
   </section>
 
-  <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><div id="convs"></div></div></section>
+  <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><p class="muted">Recent conversation previews show up to 12 messages. Managed texting includes the latest 60 contacts; its CSV includes up to 40 messages for each of the latest 100 contacts. Pending replies are labelled separately from delivered messages.</p><div id="convs"></div></div></section>
 
   <section class="pane" id="p-know">
     <div class="review-card" id="reviewCard" hidden><h3>Check your business rules</h3><p>Confirm your services, prices, service area, hours, arrival windows and safety instructions below. Save any edits first. Your review and practice check apply to the saved version; changes require a new check.</p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="reviewRules">I reviewed these saved rules</button> <span id="reviewMessage" class="muted" role="status"></span></div>
@@ -180,6 +180,8 @@
         <p class="muted" id="connectionsMessage" role="status" aria-live="polite"></p>
       </form>
       <div id="connectionJourney"></div>
+      <div id="serviceConnections"></div>
+      <p id="serviceConnectionMessage" class="muted" role="status" aria-live="polite"></p>
     </div>
     <section class="card2" id="phoneSetupCard" hidden aria-labelledby="phoneSetupTitle">
       <div class="workspace-guide-head"><div><h3 id="phoneSetupTitle">Your phone number request</h3><p class="muted" id="phoneSetupDetail"></p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="refreshPhoneSetup">Refresh status</button></div>
@@ -243,6 +245,7 @@
   <p id="phoneCancelMessage" class="muted" role="status" aria-live="polite"></p>
   <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="confirmPhoneCancel">Cancel number request</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="keepPhoneSetup">Keep request</button></div>
 </dialog>
+<script src="desk-connections.js" defer></script>
 <script src="desk.js" defer></script>
 
 </body>

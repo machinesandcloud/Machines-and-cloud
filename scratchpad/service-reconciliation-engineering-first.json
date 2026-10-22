@@ -1,0 +1,92 @@
+{
+  "at": "2026-10-22T14:18:04.198Z",
+  "mode": "actual operator HTTP handler + durable service reconciliation; memory fixture; physical networking disabled",
+  "before": {
+    "netlify/functions/lib/operator.mjs": "29e8a5b20c3532b9ddede303ac6f6fbd009a6761b2043f09b80042c4d0de19dc",
+    "netlify/functions/lib/service-reconciliation.mjs": "81bef68c1f5e1f60c76bcdd98b5fa3f716ce8244d34a30226e6d07d925a69c3e",
+    "netlify/functions/service-reconciliation-scheduler.mjs": "ccd670151bf0304ac9efabccd7657d676f7d429281fa98e97311c3e79bda16dc",
+    "admin.js": "544ceb69ea8962e8ff168a589e9f2176c7c3258fe29c6c8c25a6c9cc6276afc6"
+  },
+  "checks": [
+    {
+      "name": "Owner tokens, cross-origin requests and extra approval fields cannot request operator checks",
+      "pass": true
+    },
+    {
+      "name": "A reasoned current-revision action commits the audit before any dispatch and waits honestly behind gates",
+      "pass": true
+    },
+    {
+      "name": "A stale revision and already-pending request cannot create duplicate check receipts",
+      "pass": true
+    },
+    {
+      "name": "The scheduler repairs a lost job and index projection from the audited client receipt",
+      "pass": true
+    },
+    {
+      "name": "Cancelled workspaces can request checks for retained cleanup without new customer authority",
+      "pass": true
+    },
+    {
+      "name": "Recreated tenant identity cannot execute or see an old operator request",
+      "pass": true
+    },
+    {
+      "name": "Only fixed gated worker URLs are dispatched after the operator audit",
+      "pass": true
+    },
+    {
+      "name": "Repeated dispatch failures stop at three attempts and remain in global health",
+      "pass": true
+    },
+    {
+      "name": "A new successful operator request resolves dispatch failure without altering message or provider IDs",
+      "pass": true
+    },
+    {
+      "name": "Removed operator allowlist membership prevents another action",
+      "pass": true
+    }
+  ],
+  "dispatches": [
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 202
+    }
+  ],
+  "after": {
+    "netlify/functions/lib/operator.mjs": "29e8a5b20c3532b9ddede303ac6f6fbd009a6761b2043f09b80042c4d0de19dc",
+    "netlify/functions/lib/service-reconciliation.mjs": "81bef68c1f5e1f60c76bcdd98b5fa3f716ce8244d34a30226e6d07d925a69c3e",
+    "netlify/functions/service-reconciliation-scheduler.mjs": "ccd670151bf0304ac9efabccd7657d676f7d429281fa98e97311c3e79bda16dc",
+    "admin.js": "544ceb69ea8962e8ff168a589e9f2176c7c3258fe29c6c8c25a6c9cc6276afc6"
+  },
+  "sourceStable": true,
+  "passed": 10,
+  "total": 10,
+  "ok": true
+}

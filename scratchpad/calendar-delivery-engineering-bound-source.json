@@ -1,0 +1,28 @@
+{
+  "check": "calendar-delivery-offline",
+  "at": "2026-10-22T13:39:17.358Z",
+  "passed": 19,
+  "failed": 0,
+  "checks": [
+    "Execution gate off performs no Google requests or discovery writes",
+    "Discovery repairs missing post-booking enqueue and writes one deterministic event",
+    "Repeated discovery and enqueue do not duplicate confirmed delivery",
+    "Reschedule uses PATCH with exact ETag and preserves saved booking",
+    "Lost insert response reconciles the same ID without a second insert",
+    "409 insert conflict reads and reconciles owned exact-ID event",
+    "Foreign event ownership collision never overwrites another event",
+    "Cancellation deletes only the matching event and retains local booking and receipt",
+    "Lost deletion response retries GET404 and confirms cancellation without another delete",
+    "Completed visits preserve calendar history rather than deleting events",
+    "Paused customer saves changes without external writes and resumes latest lifecycle",
+    "Disconnect stops remote work and same-target reconnect resumes retained jobs",
+    "Different-account reconnect retains old event and blocks automatic migration",
+    "Revoked Google refresh grant pauses delivery without deleting local record",
+    "Delayed stale worker cannot overwrite a newer reschedule or receipt",
+    "Concurrent workers claim a job once",
+    "Delivery DTO excludes refresh tokens, target IDs, claim tokens and private metadata",
+    "Foreign tenant and legacy version fail closed",
+    "Scheduled wrapper reports safe bounded counts while gate off"
+  ],
+  "externalRequests": 0
+}

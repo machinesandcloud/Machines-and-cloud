@@ -1,43 +1,17 @@
-// Google Calendar connection. /api/google/auth?c=slug&k=key starts OAuth; Google returns to
-// /api/google/callback with the code and the state we gave it.
-import { isSelfServiceClient } from "./lib/setup.mjs";
-import { getClient, saveClient, logEvent } from "./lib/store.mjs";
-import { authUrl, exchangeCode, googleEnabled } from "./lib/calendar.mjs";
-import { json } from "./lib/agent.mjs";
-
+// Google returns only to a fixed portal landing page. The original signed-in owner
+// explicitly completes the one-use authorization through /api/client.
+import { CalendarError, calendarCallbackDestination } from "./lib/calendar-connection.mjs";
 export const config = { path: ["/api/google/auth", "/api/google/callback"] };
-
-export default async (req) => {
+const headers = { "Cache-Control": "no-store", "Netlify-CDN-Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Robots-Tag": "noindex", "Content-Type": "application/json" };
+export default async req => {
   const url = new URL(req.url);
-  const site = process.env.URL || url.origin;
-  const unavailable = () => json({ error: "google_not_configured", message: "Calendar connection is not switched on yet. Bookings are texted to you in the meantime." }, 503);
-  const blocked = () => json({ error: "calendar_setup_unavailable", message: "Calendar connection is not enabled for this website-only workspace." }, 409);
-
-  if (url.pathname.endsWith("/auth")) {
-    const c = await getClient(url.searchParams.get("c") || "");
-    if (isSelfServiceClient(c)) return blocked();
-    if (!googleEnabled()) return unavailable();
-    if (!c || c.ownerKey !== url.searchParams.get("k")) return json({ error: "forbidden" }, 403);
-    const state = Buffer.from(JSON.stringify({ c: c.slug, k: c.ownerKey })).toString("base64url");
-    return Response.redirect(authUrl(site, state), 302);
-  }
-
-  // callback
-  let st; try { st = JSON.parse(Buffer.from(url.searchParams.get("state") || "", "base64url").toString()); } catch { st = null; }
-  const c = st ? await getClient(st.c) : null;
-  if (isSelfServiceClient(c)) return blocked();
-  if (!googleEnabled()) return unavailable();
-  if (!c || c.ownerKey !== st.k) return json({ error: "forbidden" }, 403);
-  const code = url.searchParams.get("code");
-  if (!code) return Response.redirect(`${site}/desk?c=${c.slug}&k=${c.ownerKey}&calendar=denied`, 302);
+  if (req.method !== "GET") return new Response(JSON.stringify({ error: "method_not_allowed" }), { status: 405, headers: { ...headers, Allow: "GET" } });
+  if (url.pathname.endsWith("/auth")) return new Response(JSON.stringify({ error: "owner_session_required", message: "Connect Calendar from your signed-in workspace." }), { status: 410, headers });
+  if ([...url.searchParams.keys()].some(key => !["state", "code", "error", "scope", "authuser", "prompt", "hd"].includes(key)) || ["state", "code", "error"].some(key => url.searchParams.getAll(key).length > 1)) return new Response(JSON.stringify({ error: "invalid_callback" }), { status: 400, headers });
   try {
-    const tok = await exchangeCode(site, code);
-    c.calendar = { provider: "google", google: { refreshToken: tok.refresh_token, calendarId: "primary", connectedAt: new Date().toISOString() } };
-    await saveClient(c);
-    await logEvent(c.slug, "calendar_connected", {});
-    return Response.redirect(`${site}/desk?c=${c.slug}&k=${c.ownerKey}&calendar=ok`, 302);
-  } catch (err) {
-    console.error("google callback", err);
-    return Response.redirect(`${site}/desk?c=${c.slug}&k=${c.ownerKey}&calendar=error`, 302);
+    const location = await calendarCallbackDestination({ state: url.searchParams.get("state"), code: url.searchParams.get("code"), error: url.searchParams.get("error") });
+    return new Response(null, { status: 303, headers: { ...headers, Location: location } });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error instanceof CalendarError ? error.code : "calendar_unavailable", message: error instanceof CalendarError ? error.message : "Calendar setup could not be confirmed. Return to your workspace and connect again." }), { status: error instanceof CalendarError ? error.status : 503, headers });
   }
 };

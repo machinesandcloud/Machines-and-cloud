@@ -1,0 +1,232 @@
+{
+  "at": "2026-10-22T14:18:51.026Z",
+  "mode": "actual owner/admin read handlers + actual browser assets + explicit connection mutation fixtures; no external network",
+  "before": {
+    "desk.html": "59cb768222ddb55f58d23bced4436befcdfacee26f09540f22f4a67b454f6e85",
+    "desk.js": "accf7bb716aeb511e8183a5fab7cb2657f963155fb2224f93d35d7b468317352",
+    "desk-connections.js": "9a50d0af0b636ed1bdd02c0e1c6003263c3983cf2d2da7f2128f4958c2a1910c",
+    "admin.js": "6f33df445bb2644650e13f7c86ba687f219a10f9b64051c68f23b3150e2c6aaf",
+    "netlify/functions/lib/operator.mjs": "792c73f0a3b3b1a0b5f264952b6f2e749267ba84671e65e6d82bf46a1fb70d05"
+  },
+  "checks": [
+    {
+      "name": "Actual owner data renders available connection actions without page errors",
+      "pass": true
+    },
+    {
+      "name": "Voice form requires owner authority and shows the enforceable limits",
+      "pass": true
+    },
+    {
+      "name": "Texting form displays costs and requires every legal, consent and test approval",
+      "pass": true
+    },
+    {
+      "name": "Connection status and legal form fit viewport 375",
+      "pass": true
+    },
+    {
+      "name": "Connection status and legal form fit viewport 1365",
+      "pass": true
+    },
+    {
+      "name": "Forged URL calendar success is stripped without a success claim or completion POST",
+      "pass": true
+    },
+    {
+      "name": "A matching pending Google state requires explicit finish and still uses server status",
+      "pass": true
+    },
+    {
+      "name": "Expired connection actions clear private UI and expose sign-in recovery",
+      "pass": true
+    },
+    {
+      "name": "Sign-out prevents a late connection response from restoring private state",
+      "pass": true
+    },
+    {
+      "name": "Actual admin detail reports the new connection statuses without resource secrets",
+      "pass": true
+    }
+  ],
+  "pageErrors": [],
+  "blocked": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "acceptedAuthority": true,
+        "policyVersion": "fixture_voice_v1",
+        "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "forwardingMode": "use_new_number"
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "submissionId": "b6b2499c8d5199f2f216cfb44f866301",
+        "offerVersion": "fixture_sms_v1",
+        "offerDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "programDigest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Service Shop",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "street": "10 Fixture St",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.test",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Rivera",
+            "email": "owner@example.test",
+            "phone": "+17135550142",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "complete_calendar_connection",
+      "body": {
+        "action": "complete_calendar_connection",
+        "state": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "code": "fixture-code"
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "acceptedAuthority": true,
+        "policyVersion": "fixture_voice_v1",
+        "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "forwardingMode": "forward_business_line"
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "2f665de21d6d64789534a2b0400de8925f7e9209f9ccd816dbbb973651189982",
+        "acceptedAuthority": true,
+        "policyVersion": "fixture_voice_v1",
+        "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "forwardingMode": "forward_business_line"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "body": {
+        "action": "sign_out"
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/service-connections-ui-session-fixed-states-375.png",
+    "scratchpad/service-connections-ui-session-fixed-legal-375.png",
+    "scratchpad/service-connections-ui-session-fixed-states-1365.png",
+    "scratchpad/service-connections-ui-session-fixed-legal-1365.png"
+  ],
+  "after": {
+    "desk.html": "59cb768222ddb55f58d23bced4436befcdfacee26f09540f22f4a67b454f6e85",
+    "desk.js": "accf7bb716aeb511e8183a5fab7cb2657f963155fb2224f93d35d7b468317352",
+    "desk-connections.js": "9a50d0af0b636ed1bdd02c0e1c6003263c3983cf2d2da7f2128f4958c2a1910c",
+    "admin.js": "6f33df445bb2644650e13f7c86ba687f219a10f9b64051c68f23b3150e2c6aaf",
+    "netlify/functions/lib/operator.mjs": "792c73f0a3b3b1a0b5f264952b6f2e749267ba84671e65e6d82bf46a1fb70d05"
+  },
+  "sourceStable": true,
+  "passed": 10,
+  "total": 10,
+  "ok": true
+}

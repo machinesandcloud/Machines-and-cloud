@@ -1,0 +1,631 @@
+{
+  "at": "2026-10-22T13:45:16.019Z",
+  "mode": "actual messaging engine, actual Twilio adapter, memory and installed SDK intercepted HTTP; zero real network",
+  "sourceBefore": {
+    "netlify/functions/lib/messaging-activation.mjs": "8af00559e56224cc3579eec00a5796a2a301ac00c4727d56dab6a542d1604c86",
+    "netlify/functions/lib/messaging-provider.mjs": "3a25447e562bb6d07dc683a63af6439626c5fead10866d82b7ec7a3182a12550",
+    "netlify/functions/messaging-activation-scheduler.mjs": "dee0a97fe51aa3d519a647aa7b4382c34c0e181d47963cade7bb54dc2bcd7a6f"
+  },
+  "checks": [
+    {
+      "name": "memory: strict customer authority, separate attestations, encrypted legal data and generated program",
+      "pass": true
+    },
+    {
+      "name": "memory: duplicate tabs and concurrent workers create exactly one service and registration chain",
+      "pass": true
+    },
+    {
+      "name": "memory: lost create response is correlated without a second create; partial lookup remains uncertain",
+      "pass": true
+    },
+    {
+      "name": "memory: campaign waits for approved brand and keeps rejected campaign IDs for correction",
+      "pass": false,
+      "error": "Use the existing registration correction instead of creating another registration.",
+      "stack": "Error: Use the existing registration correction instead of creating another registration.\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/lib/messaging-activation.mjs:114:234\n    at atomicUpdate (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/lib/store.mjs:56:24)\n    at async Object.request (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/lib/messaging-activation.mjs:113:17)\n    at async advance (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:84:155)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:111:267\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:72:43)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:106:3)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:124:1"
+    },
+    {
+      "name": "memory: parent cancellation, lost cleanup response and gate-off preserve receipts until confirmed cleanup",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'cancel_pending'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'cancel_pending'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:114:192\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:72:43)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:113:3)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:124:1"
+    },
+    {
+      "name": "memory: foreign tenant, archived and paused customers cannot dispatch or become ready",
+      "pass": true
+    },
+    {
+      "name": "sdk: strict customer authority, separate attestations, encrypted legal data and generated program",
+      "pass": true
+    },
+    {
+      "name": "sdk: duplicate tabs and concurrent workers create exactly one service and registration chain",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost create response is correlated without a second create; partial lookup remains uncertain",
+      "pass": true
+    },
+    {
+      "name": "sdk: campaign waits for approved brand and keeps rejected campaign IDs for correction",
+      "pass": false,
+      "error": "Use the existing registration correction instead of creating another registration.",
+      "stack": "Error: Use the existing registration correction instead of creating another registration.\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/lib/messaging-activation.mjs:114:234\n    at atomicUpdate (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/lib/store.mjs:56:24)\n    at async Object.request (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/lib/messaging-activation.mjs:113:17)\n    at async advance (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:84:155)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:111:267\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:72:43)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:106:3)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:124:24"
+    },
+    {
+      "name": "sdk: parent cancellation, lost cleanup response and gate-off preserve receipts until confirmed cleanup",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'cancel_pending'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'cancel_pending'\n\n    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:114:192\n    at async check (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:72:43)\n    at async suite (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:113:3)\n    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/messaging-activation-check.mjs:124:24"
+    },
+    {
+      "name": "sdk: foreign tenant, archived and paused customers cannot dispatch or become ready",
+      "pass": true
+    },
+    {
+      "name": "production gate, encrypted storage requirement and scheduler default stay closed",
+      "pass": true
+    },
+    {
+      "name": "adapter cannot execute a raw call with product gate closed",
+      "pass": true
+    }
+  ],
+  "conflicts": 5,
+  "providerWrites": [
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/Addresses.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/SupportingDocuments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUd30c4165d0e8f34fff028659bcdfbf4d/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUd30c4165d0e8f34fff028659bcdfbf4d/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUd30c4165d0e8f34fff028659bcdfbf4d/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUd30c4165d0e8f34fff028659bcdfbf4d/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUd30c4165d0e8f34fff028659bcdfbf4d/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUd30c4165d0e8f34fff028659bcdfbf4d"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU386c78c4800ae9bedf6c0aefbd142d02/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU386c78c4800ae9bedf6c0aefbd142d02/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU386c78c4800ae9bedf6c0aefbd142d02/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU386c78c4800ae9bedf6c0aefbd142d02"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG707dfeae4b1ab7238cb81a79673f68ab/Compliance/Usa2p"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG707dfeae4b1ab7238cb81a79673f68ab/PhoneNumbers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa40d6aeccec59add74fa99f1ae894a5e.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/Addresses.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/SupportingDocuments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU651bddde980fa975726359ac743b5e36/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU651bddde980fa975726359ac743b5e36/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU651bddde980fa975726359ac743b5e36/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU651bddde980fa975726359ac743b5e36/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU651bddde980fa975726359ac743b5e36/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU651bddde980fa975726359ac743b5e36"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU5241f75f89e351c4cc5b22babbc554b2/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU5241f75f89e351c4cc5b22babbc554b2/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU5241f75f89e351c4cc5b22babbc554b2/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU5241f75f89e351c4cc5b22babbc554b2"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG79f5b7d4eb443597068d558b051dfcba/Compliance/Usa2p"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG79f5b7d4eb443597068d558b051dfcba/PhoneNumbers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb3406976cefdaca1adc9a36115cf042f.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/Addresses.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/SupportingDocuments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU74277b9a24258aad3c03577953e177b4/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU74277b9a24258aad3c03577953e177b4/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU74277b9a24258aad3c03577953e177b4/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU74277b9a24258aad3c03577953e177b4/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU74277b9a24258aad3c03577953e177b4/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU74277b9a24258aad3c03577953e177b4"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUcb2a2baea8ec1dc0ee7ac21e581fde27/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUcb2a2baea8ec1dc0ee7ac21e581fde27/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUcb2a2baea8ec1dc0ee7ac21e581fde27/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUcb2a2baea8ec1dc0ee7ac21e581fde27"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG3f69322c1c2d8d7119ae70801c3a23db/Compliance/Usa2p"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG3f69322c1c2d8d7119ae70801c3a23db/PhoneNumbers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN13ce37b73b6c433f9f7cae78d76bc805.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/Addresses.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/SupportingDocuments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU9bc5a08563e83a980b3542294287f3a9/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU9bc5a08563e83a980b3542294287f3a9/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU9bc5a08563e83a980b3542294287f3a9/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU9bc5a08563e83a980b3542294287f3a9/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU9bc5a08563e83a980b3542294287f3a9/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU9bc5a08563e83a980b3542294287f3a9"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUfde3b74d21e759a1b904e33331e3fa08/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUfde3b74d21e759a1b904e33331e3fa08/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUfde3b74d21e759a1b904e33331e3fa08/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUfde3b74d21e759a1b904e33331e3fa08"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG6b20356f450f8f435d30c35d1ceae457/Compliance/Usa2p"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG6b20356f450f8f435d30c35d1ceae457/PhoneNumbers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6560d64f2811d8681db125464cadc710.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/Addresses.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/SupportingDocuments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU7033a7e8bbc14923bb580209ae3ad52a/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU7033a7e8bbc14923bb580209ae3ad52a/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU7033a7e8bbc14923bb580209ae3ad52a/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU7033a7e8bbc14923bb580209ae3ad52a/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU7033a7e8bbc14923bb580209ae3ad52a/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BU7033a7e8bbc14923bb580209ae3ad52a"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU50b4b360db9bb4520a6256004d067413/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU50b4b360db9bb4520a6256004d067413/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU50b4b360db9bb4520a6256004d067413/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BU50b4b360db9bb4520a6256004d067413"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MGdf376bfefbd7ddee975e98bf5eee1cf9/Compliance/Usa2p"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MGdf376bfefbd7ddee975e98bf5eee1cf9/PhoneNumbers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN330c1529ee73b40d39bb3243c20eee07.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/Addresses.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/SupportingDocuments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUbd2146f5fdb592c4638a4399f8651808/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUbd2146f5fdb592c4638a4399f8651808/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUbd2146f5fdb592c4638a4399f8651808/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUbd2146f5fdb592c4638a4399f8651808/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUbd2146f5fdb592c4638a4399f8651808/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/CustomerProfiles/BUbd2146f5fdb592c4638a4399f8651808"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/EndUsers"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUe7bbe98fedb14ad824bc00a4771ff430/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUe7bbe98fedb14ad824bc00a4771ff430/EntityAssignments"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUe7bbe98fedb14ad824bc00a4771ff430/Evaluations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/TrustProducts/BUe7bbe98fedb14ad824bc00a4771ff430"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG811e26f2dbcfc6e02e5fb68e0cf35a6c/Compliance/Usa2p"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG811e26f2dbcfc6e02e5fb68e0cf35a6c/PhoneNumbers"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2737f2c9c4bb6e9a1a7c874b52b258e3.json"
+    }
+  ],
+  "blockedNetwork": [],
+  "sourceAfter": {
+    "netlify/functions/lib/messaging-activation.mjs": "8af00559e56224cc3579eec00a5796a2a301ac00c4727d56dab6a542d1604c86",
+    "netlify/functions/lib/messaging-provider.mjs": "3a25447e562bb6d07dc683a63af6439626c5fead10866d82b7ec7a3182a12550",
+    "netlify/functions/messaging-activation-scheduler.mjs": "dee0a97fe51aa3d519a647aa7b4382c34c0e181d47963cade7bb54dc2bcd7a6f"
+  },
+  "passed": 10,
+  "total": 14,
+  "ok": false
+}

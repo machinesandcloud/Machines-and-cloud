@@ -1,0 +1,74 @@
+{
+  "at": "2026-10-22T14:12:52.258Z",
+  "mode": "independent real handler/provider protocol/installed SDK fixtures; fake model only; zero external network",
+  "before": {
+    "netlify/functions/lib/managed-sms.mjs": "f2ed216bd7436e3c06723b166f8dd6751ce667c54b1ba68341f14b85887e5c57",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "7da8cff86976694384cf234bf8a3dd3a869a28305101df2b5c057047e09480c4",
+    "netlify/functions/lib/managed-consent.mjs": "07c9f1cfb5ada1c81ea1b1dcbe792134e0d07bcbc14e7f3c21b6a61c1d983da9",
+    "netlify/functions/client.mjs": "74a437cb1d4a6d4d99cf80750e35262696e42783be78d7ce59f2be1f46822247"
+  },
+  "checks": [
+    {
+      "name": "invalid signatures/accounts/duplicate fields/provider identities are rejected before consent or queue",
+      "pass": true
+    },
+    {
+      "name": "old and future provider messages do not refresh reply authority",
+      "pass": true
+    },
+    {
+      "name": "current service and registration epoch prevent old or foreign service messages entering a reused number's tenant",
+      "pass": true
+    },
+    {
+      "name": "Spanish STOP persists before AI even while paused; duplicate is harmless; START grants no recurring consent",
+      "pass": true
+    },
+    {
+      "name": "provider-verified normal inbound recovers after consent committed but queue projection failed",
+      "pass": true
+    },
+    {
+      "name": "background endpoint requires exact worker key and strict body",
+      "pass": true
+    },
+    {
+      "name": "parallel processors produce one reply and a STOP racing model reservation prevents delivery",
+      "pass": true
+    },
+    {
+      "name": "reply recovery after conversation-history projection failure restores both conversation turns",
+      "pass": true
+    },
+    {
+      "name": "callback cannot bind queued intent or wrong-account/direction/service/old receipt",
+      "pass": true
+    },
+    {
+      "name": "two-way setup proof waits for actual delivered GET and matching inbound nonce",
+      "pass": true
+    },
+    {
+      "name": "customer activation HTTP actions require owner scope, same origin, exact fields and current revision",
+      "pass": true
+    }
+  ],
+  "conflicts": 4,
+  "blocked": [],
+  "dispatches": 12,
+  "providerSends": 4,
+  "after": {
+    "netlify/functions/lib/managed-sms.mjs": "f2ed216bd7436e3c06723b166f8dd6751ce667c54b1ba68341f14b85887e5c57",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "7da8cff86976694384cf234bf8a3dd3a869a28305101df2b5c057047e09480c4",
+    "netlify/functions/lib/managed-consent.mjs": "07c9f1cfb5ada1c81ea1b1dcbe792134e0d07bcbc14e7f3c21b6a61c1d983da9",
+    "netlify/functions/client.mjs": "74a437cb1d4a6d4d99cf80750e35262696e42783be78d7ce59f2be1f46822247"
+  },
+  "sourceStable": true,
+  "passed": 11,
+  "total": 11,
+  "ok": true
+}
