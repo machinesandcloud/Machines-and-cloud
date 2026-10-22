@@ -146,6 +146,11 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     }
     return { due: due.length };
   });
+  const minuteNow = forceHour !== undefined ? 0 : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", minute: "numeric" }).formatToParts(new Date()).find((p) => p.type === "minute")?.value);
+  const brake = !!(await get("health", "brake"))?.on;
+  record.brake = brake;
+  // The brake stops scans and the nightly audit; due tasks above always run first.
+  const halfHour = !brake && (all || minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40));
   await block(record, "tenDlc", async () => {
     if (!a2pEnabled()) return { skipped: "no keys" };
     if (!halfHour) return { skipped: "runs at :00 and :30" };
@@ -175,11 +180,6 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     }
     return { polled };
   });
-  const minuteNow = forceHour !== undefined ? 0 : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", minute: "numeric" }).formatToParts(new Date()).find((p) => p.type === "minute")?.value);
-  const brake = !!(await get("health", "brake"))?.on;
-  record.brake = brake;
-  // The brake (admin page, or Steve after Netlify's 75 percent email): the scans and the nightly audit stop; due customer texts, webhooks, and the digest never do.
-  const halfHour = !brake && (all || minuteNow < 10 || (minuteNow >= 30 && minuteNow < 40));
   let alerts = 0, lifecycles = 0;
   await block(record, "healthLifecycle", async () => {
     if (!halfHour) return { skipped: "runs at :00 and :30" };

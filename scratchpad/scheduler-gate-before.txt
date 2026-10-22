@@ -1,0 +1,25 @@
+scheduler block tenDlc ReferenceError: Cannot access 'halfHour' before initialization
+    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/scheduler.mjs:151:5
+    at block (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/scheduler.mjs:128:27)
+    at run (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/netlify/functions/scheduler.mjs:149:9)
+    at async file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/scheduler-gate-check.mjs:59:18
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+{"name":"actual scheduled :30 configured-key run","tenDlc":{"ok":false,"ms":0,"error":"Cannot access 'halfHour' before initialization"},"due":0,"polls":[],"persistedOK":false,"healthStatus":503,"health":{"ok":false,"lastRunAt":"2026-10-22T01:30:17.755Z","minutesAgo":0,"failingBlocks":["tenDlc: Cannot access 'halfHour' before initialization"]}}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: actual scheduled :30 configured-key run
+
+false !== true
+
+    at file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/scripts/scheduler-gate-check.mjs:65:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0
