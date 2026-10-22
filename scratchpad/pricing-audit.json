@@ -1,0 +1,446 @@
+{
+  "at": "2026-10-22T04:31:05.026Z",
+  "gitHead": "caa3d95",
+  "scope": "Independent read-only repository audit; pure pricing helper invoked; no provider/network/model/account/billing actions",
+  "prices": [
+    {
+      "id": "starter",
+      "monthly": 99,
+      "minutes": 150,
+      "texts": 500,
+      "basePerIncludedMinute": 0.66,
+      "basePerIncludedText": 0.198,
+      "baseCostCeilingFor60PercentGrossMargin": 39.6
+    },
+    {
+      "id": "growth",
+      "monthly": 249,
+      "minutes": 600,
+      "texts": 1500,
+      "basePerIncludedMinute": 0.415,
+      "basePerIncludedText": 0.166,
+      "baseCostCeilingFor60PercentGrossMargin": 99.60000000000001
+    },
+    {
+      "id": "pro",
+      "monthly": 449,
+      "minutes": 1500,
+      "texts": 5000,
+      "basePerIncludedMinute": 0.29933333333333334,
+      "basePerIncludedText": 0.0898,
+      "baseCostCeilingFor60PercentGrossMargin": 179.60000000000002
+    }
+  ],
+  "overage": {
+    "minute": 0.35,
+    "text": 0.03
+  },
+  "newWorkspace": {
+    "freeSetup": true,
+    "planSelection": "future preference only",
+    "billing": "off; /api/billing returns409",
+    "phone": "inactive",
+    "sms": "inactive",
+    "calendar": "inactive",
+    "aiDaily": {
+      "privatePerTenant": 20,
+      "webPerTenant": 50,
+      "combinedGlobalDefault": 50,
+      "timezone": "America/Chicago",
+      "reset": "midnight",
+      "planDependent": false,
+      "failedAcceptedTurnsConsume": true
+    }
+  },
+  "publicScan": {
+    "htmlFiles": 182,
+    "visibleUnlimited": [],
+    "legacyClaims": [
+      {
+        "file": "houston.html",
+        "firstSevenDaysFree": true,
+        "liveInSevenDays": false,
+        "growthLeadReplies": false,
+        "noContract": false,
+        "mostShopsClaim": false
+      },
+      {
+        "file": "industry-home-services.html",
+        "firstSevenDaysFree": true,
+        "liveInSevenDays": true,
+        "growthLeadReplies": true,
+        "noContract": true,
+        "mostShopsClaim": true
+      },
+      {
+        "file": "industry-healthcare.html",
+        "firstSevenDaysFree": true,
+        "liveInSevenDays": true,
+        "growthLeadReplies": true,
+        "noContract": true,
+        "mostShopsClaim": true
+      },
+      {
+        "file": "industry-legal.html",
+        "firstSevenDaysFree": true,
+        "liveInSevenDays": true,
+        "growthLeadReplies": true,
+        "noContract": true,
+        "mostShopsClaim": true
+      },
+      {
+        "file": "industry-automotive.html",
+        "firstSevenDaysFree": true,
+        "liveInSevenDays": true,
+        "growthLeadReplies": true,
+        "noContract": true,
+        "mostShopsClaim": true
+      },
+      {
+        "file": "industry-real-estate.html",
+        "firstSevenDaysFree": true,
+        "liveInSevenDays": true,
+        "growthLeadReplies": true,
+        "noContract": true,
+        "mostShopsClaim": true
+      }
+    ]
+  },
+  "breakpoints": {
+    "formula": "For upper vs lower: deltaPrice = .35*clamp(M-lowerMinutes,0,deltaMinutes) + .03*clamp(T-lowerTexts,0,deltaTexts). Upper cheaper above equality.",
+    "starterToGrowth": {
+      "callOnlyMinutes": 578.5714285714287,
+      "withTextAllowanceDeltaFullyUsedMinutes": 492.8571428571429,
+      "maximumTextSavings": 30,
+      "priceIncrease": 150
+    },
+    "growthToPro": {
+      "callOnlyMinutes": 1171.4285714285716,
+      "withTextAllowanceDeltaFullyUsedMinutes": 871.4285714285714,
+      "maximumTextSavings": 105,
+      "priceIncrease": 200
+    }
+  },
+  "scenarios": [
+    {
+      "minutes": 0,
+      "texts": 0,
+      "costs": {
+        "starter": 99,
+        "growth": 249,
+        "pro": 449
+      },
+      "cheapest": "starter"
+    },
+    {
+      "minutes": 150,
+      "texts": 500,
+      "costs": {
+        "starter": 99,
+        "growth": 249,
+        "pro": 449
+      },
+      "cheapest": "starter"
+    },
+    {
+      "minutes": 493,
+      "texts": 1500,
+      "costs": {
+        "starter": 249.05,
+        "growth": 249,
+        "pro": 449
+      },
+      "cheapest": "growth"
+    },
+    {
+      "minutes": 579,
+      "texts": 500,
+      "costs": {
+        "starter": 249.15,
+        "growth": 249,
+        "pro": 449
+      },
+      "cheapest": "growth"
+    },
+    {
+      "minutes": 600,
+      "texts": 1500,
+      "costs": {
+        "starter": 286.5,
+        "growth": 249,
+        "pro": 449
+      },
+      "cheapest": "growth"
+    },
+    {
+      "minutes": 872,
+      "texts": 5000,
+      "costs": {
+        "starter": 486.7,
+        "growth": 449.2,
+        "pro": 449
+      },
+      "cheapest": "pro"
+    },
+    {
+      "minutes": 1172,
+      "texts": 1500,
+      "costs": {
+        "starter": 486.7,
+        "growth": 449.2,
+        "pro": 449
+      },
+      "cheapest": "pro"
+    },
+    {
+      "minutes": 1188,
+      "texts": 0,
+      "costs": {
+        "starter": 462.3,
+        "growth": 454.8,
+        "pro": 449
+      },
+      "cheapest": "pro"
+    },
+    {
+      "minutes": 1500,
+      "texts": 5000,
+      "costs": {
+        "starter": 706.5,
+        "growth": 669,
+        "pro": 449
+      },
+      "cheapest": "pro"
+    },
+    {
+      "minutes": 2000,
+      "texts": 6000,
+      "costs": {
+        "starter": 911.5,
+        "growth": 874,
+        "pro": 654
+      },
+      "cheapest": "pro"
+    }
+  ],
+  "salesHelper1188": {
+    "routedMinutes": 1188,
+    "planComparison": [
+      {
+        "plan": "starter",
+        "name": "Starter",
+        "monthlyBase": 99,
+        "includedCallMinutes": 150,
+        "estimatedOverageMinutes": 1038,
+        "projectedCallCost": 462.3
+      },
+      {
+        "plan": "growth",
+        "name": "Growth",
+        "monthlyBase": 249,
+        "includedCallMinutes": 600,
+        "estimatedOverageMinutes": 588,
+        "projectedCallCost": 454.8
+      },
+      {
+        "plan": "pro",
+        "name": "Pro",
+        "monthlyBase": 449,
+        "includedCallMinutes": 1500,
+        "estimatedOverageMinutes": 0,
+        "projectedCallCost": 449
+      }
+    ],
+    "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+  },
+  "metering": {
+    "callFormula": "seconds=round((endedAt-startedAt)/1000); minutes=seconds?ceil(seconds/60):0; each report increments calls by1",
+    "callSeconds": [
+      {
+        "actualSeconds": 0.4,
+        "roundedSeconds": 0,
+        "meteredMinutes": 0
+      },
+      {
+        "actualSeconds": 0.5,
+        "roundedSeconds": 1,
+        "meteredMinutes": 1
+      },
+      {
+        "actualSeconds": 1,
+        "roundedSeconds": 1,
+        "meteredMinutes": 1
+      },
+      {
+        "actualSeconds": 59,
+        "roundedSeconds": 59,
+        "meteredMinutes": 1
+      },
+      {
+        "actualSeconds": 60,
+        "roundedSeconds": 60,
+        "meteredMinutes": 1
+      },
+      {
+        "actualSeconds": 60.4,
+        "roundedSeconds": 60,
+        "meteredMinutes": 1
+      },
+      {
+        "actualSeconds": 60.5,
+        "roundedSeconds": 61,
+        "meteredMinutes": 2
+      },
+      {
+        "actualSeconds": 61,
+        "roundedSeconds": 61,
+        "meteredMinutes": 2
+      },
+      {
+        "actualSeconds": 120,
+        "roundedSeconds": 120,
+        "meteredMinutes": 2
+      },
+      {
+        "actualSeconds": 120.5,
+        "roundedSeconds": 121,
+        "meteredMinutes": 3
+      }
+    ],
+    "countedTextTypes": [
+      "reply",
+      "confirmation",
+      "reminder_24h",
+      "reminder_1h",
+      "on_my_way",
+      "text_back",
+      "lead_chase",
+      "review_request",
+      "review_nudge",
+      "quote_check",
+      "payment_reminder",
+      "referral_ask",
+      "fallback_window",
+      "cancelled"
+    ],
+    "knownUncountedCustomerTypes": [
+      "maintenance_reminder",
+      "consent_ask"
+    ],
+    "unit": "one accepted outbound application message, not segments/delivery",
+    "disabledProviderCounting": true,
+    "usageWrites": "get+put; not CAS; no provider-report/message ID uniqueness"
+  },
+  "economics": {
+    "assumptions": "Symbolic only. v=all-in voice cost per metered minute; s=all-in marginal cost per logical customer text including segmentation/replies/alerts/AI; F=fixed+support/web/payment costs.",
+    "growthToProContributionImprovesWhen": "900v +3500s +deltaF <200",
+    "growthToPro60PercentIncrementalGrossMarginWhen": "900v +3500s +deltaF <=80",
+    "fullUse60PercentMarginConstraints": [
+      "150v+500s+F<=39.60",
+      "600v+1500s+F<=99.60",
+      "1500v+5000s+F<=179.60"
+    ],
+    "providerCostsVerifiedByThisAudit": false
+  },
+  "findings": [
+    {
+      "id": "PA-01",
+      "priority": "P1 current copy / P0 before paid activation",
+      "finding": "Six legacy offer pages contradict free untimed web-workspace setup with timed free week, live-in-seven-days and unactivated phone/lead features."
+    },
+    {
+      "id": "PA-02",
+      "priority": "P1",
+      "finding": "Monthly paid plan cards do not disclose plan-independent daily AI ceilings or shared exhaustion. No current visible literal unlimited claim was found."
+    },
+    {
+      "id": "PA-03",
+      "priority": "P1",
+      "finding": "Custom rules and customer CSV export are available to every new workspace; leadPlatforms/software declarations are not enforced paid entitlements; priority support has no measured contract."
+    },
+    {
+      "id": "PA-04",
+      "priority": "P0 before paid activation",
+      "finding": "Meter rounds per call, counts repeated reports again, lacks atomic usage increments and defaults failed reads to zero; not an invoicing ledger."
+    },
+    {
+      "id": "PA-05",
+      "priority": "P0 before paid activation",
+      "finding": "Text meter counts outbound logical sends, not carrier segments; owner/inbound sends and maintenance/consent types are excluded; disabled sends can count."
+    },
+    {
+      "id": "PA-06",
+      "priority": "P0 before paid activation",
+      "finding": "No overage billing reconciliation/tax configuration/proration/price-change contract established. Legacy checkout can fall back to Growth price while storing another plan; missing new-marker webhook guard."
+    },
+    {
+      "id": "PA-07",
+      "priority": "P1 future economics",
+      "finding": "Full-use Pro reduces revenue per bundled unit; margins require measured all-in voice, segment, AI, support/fixed costs. Pricing alone cannot establish profitability."
+    },
+    {
+      "id": "PA-08",
+      "priority": "P1 before sales comparison promise",
+      "finding": "Sales calculator compares only continuous routed minutes; explicit exclusions cover taxes/texts but per-call billing rounding is not modeled."
+    }
+  ],
+  "sourceHashes": {
+    "index.html": "b1e97eaef8586ff9fd3008634742a13c068c44c3ab65cb0a0f829a1665a9e2dc",
+    "onboard.html": "97c69c8db34bbd2137f124b928527fa5f1af9c8bab5527d845c69a13dff80670",
+    "onboard.js": "67c728abd96c4be515f34e59d5e5558974a674afe5d2c8bc0e2841fa7c74d394",
+    "desk.html": "5be684fd291d25731d6bf4757de74d60317fa911a4465045bbdfeecf6520e61a",
+    "desk.js": "d6d0f845683b7f025b4065b7245a31ee6f3994d846f38ce706bcab5e51b6048a",
+    "terms-of-service.html": "e4d33132ce7c2ec544a23cb232c7beda2b5803f94134337c8691e88ea246fe05",
+    "sms-terms.html": "078e1e37e276acb56b28be7ec14fb88548133cbbafa2a42ff180ab3b43763b9c",
+    "about.html": "c99ee48af2598e13267d0b3efa6c5f17a991c4394a8c1e49cd50fad60bdf7904",
+    "houston.html": "6e7f5cab14b7f197caf4c1e8a2cdce2d84c5908058b7346553af60a52aeea7bc",
+    "industry-home-services.html": "12acc04caec7239aa2e9d0faea07f00935aa9d669611362cbf206e95d4862fe6",
+    "industry-healthcare.html": "f33fcae933113f5116d2dc11e725458b60f440348f8670e883190db2e38d4408",
+    "industry-legal.html": "794d48346e481345cd9b94493470e66d772635dcd1b168d6bd2291706f6583cb",
+    "industry-automotive.html": "9d28a374b97936c7d121e8a85d34cf502cb3c42b58ddf45b711ddb7e0b5f9dfa",
+    "industry-real-estate.html": "027bce9446cb46b9bf30b63245c07eec09a88a1c5f95a60aa2305a7b7bbc823f",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "netlify/functions/lib/usage.mjs": "b6a41aefe17751eeed0629ea35d7e4bab3be7649a981a0080f08ebd57cff8dc6",
+    "netlify/functions/lib/billing.mjs": "f27f3ed3541aee0355bea83e3f5278041363e83500c49e4c1e0738d65889cbaa",
+    "netlify/functions/lib/send.mjs": "8809d608390f63f48034dc9fddb8e027b80783ce1a4542d382bd8c713b8be39c",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55",
+    "netlify/functions/lib/sales-desk.mjs": "9b2509510f7f90b2b673c10d50c5104431d9d0d0f1ac371e0f669e5de0ae12a3",
+    "netlify/functions/lib/setup.mjs": "8d336a316c4b2de28c1ba585c28afc7d63a6aa26a05c50b1ac400c3f518fdd30",
+    "netlify/functions/lib/desk.mjs": "a0e35e861e8b5e89b60168287022f64aa80c7b6c1539111ebe76a14d52a8de48",
+    "netlify/functions/lib/fanout.mjs": "7c6fbacfd4fa724974f506bd8331dfb3b91a7093dda2e27295bc112f01c8be46",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c",
+    "netlify/functions/billing.mjs": "22dc5a1cf6fb365757ddce19ecb455d8ccd8c70fb46cd788fddeb86d74c07432",
+    "netlify/functions/stripe-webhook.mjs": "04f9540a3a0e9fd6656b6c20a3d64ac10418ee929484e5f9965f624c39f04134",
+    "netlify/functions/vapi.mjs": "991e30bb34d3da72fa7dba2b39d69e321b879b90b61b7a806595a9de0717fb2f",
+    "netlify/functions/client.mjs": "080efa1f159f3be957791282c9fd03f814152ef72a0ce807b13cc5d7bec84d46",
+    "netlify/functions/scheduler.mjs": "cd7576566e59adab029885ac0c8af9837049f8611b372d0ea50c23977d5bd8a8",
+    "netlify/functions/onboard.mjs": "eb5225030b5dc5ae395337d7a137c90d4c2464ed233bac292f45edc6a6eb0465",
+    "netlify/functions/angi.mjs": "313100088b22a93d2f7273314f0932d254c637fc0b1a5071fa17d9936e8acef7"
+  },
+  "sourceStable": true,
+  "network": {
+    "attempts": 0,
+    "actualExternalRequests": 0,
+    "actualModelRequests": 0
+  },
+  "limits": [
+    "No hosted state verified",
+    "No Stripe catalog or actual charge checked",
+    "No provider rate assumptions asserted",
+    "No runtime/price changes",
+    "No real-model sales rehearsal authorized"
+  ],
+  "calculatorReview": {
+    "initialReturnedReceipt": "scratchpad/pricing-model-qa-first.json",
+    "finalReceipt": "scratchpad/pricing-model-qa-final.json",
+    "finalChecks": 802,
+    "passed": 802,
+    "failed": 0,
+    "returnedIssue": "Impossible support-loaded Starter margin target was clamped to0 minutes",
+    "resolution": "feasible:false/maxMinutes:null and3.66/8.61/13.56 shortfalls; real feasible-zero boundary retained",
+    "scope": "Research arithmetic and unit disclosure accepted; external provider prices, actual usage, paid offers and billing activation not certified",
+    "sourceManifest": "scratchpad/pricing-costs-frozen.json",
+    "laterDocumentSourceBridge": "scratchpad/pricing-model-qa-source-bridge.json",
+    "laterDocumentSourceBridgePassed": 7
+  }
+}

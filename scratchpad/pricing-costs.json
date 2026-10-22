@@ -1,0 +1,1736 @@
+{
+  "asOf": "2026-10-22",
+  "status": "research only; assumptions not provider receipts; billing remains off",
+  "assumptions": {
+    "voiceBands": {
+      "lean": 0.1,
+      "planning": 0.18,
+      "stress": 0.3
+    },
+    "voiceMinuteBasis": "Assumed1:1 published-meter minute and all-in provider-cost minute as a sensitivity proxy only. App-rounded elapsed minutes, per-leg provider-rounded minutes and Vapi duration differ; actual reconciliation and rounding uplift are unmeasured.",
+    "marginDefinition": "Service contribution after modeled service costs and card fees, before acquisition, development, taxes, refunds and other omitted costs; not gross or net margin.",
+    "paymentPercent": 0.029,
+    "paymentFixed": 0.3,
+    "fixedTenantService": 15,
+    "webAIReserve": 5,
+    "optionalSupportReserve": 15,
+    "supportBasis": "15min/mo at assumed$60/h",
+    "sms": {
+      "outgoingSegment": 0.0128,
+      "incomingSegment": 0.0108,
+      "segmentsPerOutgoingMessage": 2,
+      "incomingMessagesPerOutgoing": 0.35,
+      "ownerAlertsPerOutgoing": 0.1,
+      "segmentsPerOwnerAlert": 2,
+      "aiReplyFraction": 0.35,
+      "aiCostPerReply": 0.025
+    },
+    "costPerLogicalText": 0.040690000000000004,
+    "supportedOutgoingSegmentCost": 0.020345000000000002,
+    "additionalStripeBillingIfEnabled": 0.007,
+    "simultaneousAllowanceUtilization": "same25/50/100percent for minutes and outgoing logical texts; not observed customer behavior"
+  },
+  "current": [
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 0.25,
+      "band": "lean",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 37.5,
+      "usedLogicalTexts": 125,
+      "cost": 32.01,
+      "technicalCost": 28.84,
+      "variableCost": 8.84,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 66.99,
+      "serviceContributionMarginPercent": 67.67,
+      "loaded": {
+        "cost": 47.01,
+        "technicalCost": 28.84,
+        "variableCost": 8.84,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 51.99,
+        "serviceContributionMarginPercent": 52.52
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 0.25,
+      "band": "planning",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 37.5,
+      "usedLogicalTexts": 125,
+      "cost": 35.01,
+      "technicalCost": 31.84,
+      "variableCost": 11.84,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 63.99,
+      "serviceContributionMarginPercent": 64.64,
+      "loaded": {
+        "cost": 50.01,
+        "technicalCost": 31.84,
+        "variableCost": 11.84,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 48.99,
+        "serviceContributionMarginPercent": 49.49
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 0.25,
+      "band": "stress",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 37.5,
+      "usedLogicalTexts": 125,
+      "cost": 39.51,
+      "technicalCost": 36.34,
+      "variableCost": 16.34,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 59.49,
+      "serviceContributionMarginPercent": 60.09,
+      "loaded": {
+        "cost": 54.51,
+        "technicalCost": 36.34,
+        "variableCost": 16.34,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 44.49,
+        "serviceContributionMarginPercent": 44.94
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 0.5,
+      "band": "lean",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 75,
+      "usedLogicalTexts": 250,
+      "cost": 40.84,
+      "technicalCost": 37.67,
+      "variableCost": 17.67,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 58.16,
+      "serviceContributionMarginPercent": 58.74,
+      "loaded": {
+        "cost": 55.84,
+        "technicalCost": 37.67,
+        "variableCost": 17.67,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 43.16,
+        "serviceContributionMarginPercent": 43.59
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 0.5,
+      "band": "planning",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 75,
+      "usedLogicalTexts": 250,
+      "cost": 46.84,
+      "technicalCost": 43.67,
+      "variableCost": 23.67,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 52.16,
+      "serviceContributionMarginPercent": 52.68,
+      "loaded": {
+        "cost": 61.84,
+        "technicalCost": 43.67,
+        "variableCost": 23.67,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 37.16,
+        "serviceContributionMarginPercent": 37.53
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 0.5,
+      "band": "stress",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 75,
+      "usedLogicalTexts": 250,
+      "cost": 55.84,
+      "technicalCost": 52.67,
+      "variableCost": 32.67,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 43.16,
+      "serviceContributionMarginPercent": 43.59,
+      "loaded": {
+        "cost": 70.84,
+        "technicalCost": 52.67,
+        "variableCost": 32.67,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 28.16,
+        "serviceContributionMarginPercent": 28.44
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 1,
+      "band": "lean",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 150,
+      "usedLogicalTexts": 500,
+      "cost": 58.52,
+      "technicalCost": 55.35,
+      "variableCost": 35.35,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 40.48,
+      "serviceContributionMarginPercent": 40.89,
+      "loaded": {
+        "cost": 73.52,
+        "technicalCost": 55.35,
+        "variableCost": 35.35,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 25.48,
+        "serviceContributionMarginPercent": 25.74
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 1,
+      "band": "planning",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 150,
+      "usedLogicalTexts": 500,
+      "cost": 70.52,
+      "technicalCost": 67.35,
+      "variableCost": 47.35,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 28.48,
+      "serviceContributionMarginPercent": 28.77,
+      "loaded": {
+        "cost": 85.52,
+        "technicalCost": 67.35,
+        "variableCost": 47.35,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 13.48,
+        "serviceContributionMarginPercent": 13.62
+      }
+    },
+    {
+      "plan": "starter",
+      "price": 99,
+      "utilization": 1,
+      "band": "stress",
+      "includedMinutes": 150,
+      "includedLogicalTexts": 500,
+      "usedMinutes": 150,
+      "usedLogicalTexts": 500,
+      "cost": 88.52,
+      "technicalCost": 85.35,
+      "variableCost": 65.35,
+      "paymentFee": 3.17,
+      "supportReserve": 0,
+      "contribution": 10.48,
+      "serviceContributionMarginPercent": 10.59,
+      "loaded": {
+        "cost": 103.52,
+        "technicalCost": 85.35,
+        "variableCost": 65.35,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": -4.52,
+        "serviceContributionMarginPercent": -4.56
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 0.25,
+      "band": "lean",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 150,
+      "usedLogicalTexts": 375,
+      "cost": 57.78,
+      "technicalCost": 50.26,
+      "variableCost": 30.26,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 191.22,
+      "serviceContributionMarginPercent": 76.8,
+      "loaded": {
+        "cost": 72.78,
+        "technicalCost": 50.26,
+        "variableCost": 30.26,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 176.22,
+        "serviceContributionMarginPercent": 70.77
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 0.25,
+      "band": "planning",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 150,
+      "usedLogicalTexts": 375,
+      "cost": 69.78,
+      "technicalCost": 62.26,
+      "variableCost": 42.26,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 179.22,
+      "serviceContributionMarginPercent": 71.98,
+      "loaded": {
+        "cost": 84.78,
+        "technicalCost": 62.26,
+        "variableCost": 42.26,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 164.22,
+        "serviceContributionMarginPercent": 65.95
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 0.25,
+      "band": "stress",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 150,
+      "usedLogicalTexts": 375,
+      "cost": 87.78,
+      "technicalCost": 80.26,
+      "variableCost": 60.26,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 161.22,
+      "serviceContributionMarginPercent": 64.75,
+      "loaded": {
+        "cost": 102.78,
+        "technicalCost": 80.26,
+        "variableCost": 60.26,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 146.22,
+        "serviceContributionMarginPercent": 58.72
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 0.5,
+      "band": "lean",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 300,
+      "usedLogicalTexts": 750,
+      "cost": 88.04,
+      "technicalCost": 80.52,
+      "variableCost": 60.52,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 160.96,
+      "serviceContributionMarginPercent": 64.64,
+      "loaded": {
+        "cost": 103.04,
+        "technicalCost": 80.52,
+        "variableCost": 60.52,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 145.96,
+        "serviceContributionMarginPercent": 58.62
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 0.5,
+      "band": "planning",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 300,
+      "usedLogicalTexts": 750,
+      "cost": 112.04,
+      "technicalCost": 104.52,
+      "variableCost": 84.52,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 136.96,
+      "serviceContributionMarginPercent": 55,
+      "loaded": {
+        "cost": 127.04,
+        "technicalCost": 104.52,
+        "variableCost": 84.52,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 121.96,
+        "serviceContributionMarginPercent": 48.98
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 0.5,
+      "band": "stress",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 300,
+      "usedLogicalTexts": 750,
+      "cost": 148.04,
+      "technicalCost": 140.52,
+      "variableCost": 120.52,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 100.96,
+      "serviceContributionMarginPercent": 40.55,
+      "loaded": {
+        "cost": 163.04,
+        "technicalCost": 140.52,
+        "variableCost": 120.52,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 85.96,
+        "serviceContributionMarginPercent": 34.52
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 1,
+      "band": "lean",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 600,
+      "usedLogicalTexts": 1500,
+      "cost": 148.56,
+      "technicalCost": 141.04,
+      "variableCost": 121.04,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 100.44,
+      "serviceContributionMarginPercent": 40.34,
+      "loaded": {
+        "cost": 163.56,
+        "technicalCost": 141.04,
+        "variableCost": 121.04,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 85.44,
+        "serviceContributionMarginPercent": 34.31
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 1,
+      "band": "planning",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 600,
+      "usedLogicalTexts": 1500,
+      "cost": 196.56,
+      "technicalCost": 189.04,
+      "variableCost": 169.04,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": 52.44,
+      "serviceContributionMarginPercent": 21.06,
+      "loaded": {
+        "cost": 211.56,
+        "technicalCost": 189.04,
+        "variableCost": 169.04,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 37.44,
+        "serviceContributionMarginPercent": 15.04
+      }
+    },
+    {
+      "plan": "growth",
+      "price": 249,
+      "utilization": 1,
+      "band": "stress",
+      "includedMinutes": 600,
+      "includedLogicalTexts": 1500,
+      "usedMinutes": 600,
+      "usedLogicalTexts": 1500,
+      "cost": 268.56,
+      "technicalCost": 261.03,
+      "variableCost": 241.04,
+      "paymentFee": 7.52,
+      "supportReserve": 0,
+      "contribution": -19.56,
+      "serviceContributionMarginPercent": -7.85,
+      "loaded": {
+        "cost": 283.56,
+        "technicalCost": 261.03,
+        "variableCost": 241.04,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": -34.56,
+        "serviceContributionMarginPercent": -13.88
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 0.25,
+      "band": "lean",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 375,
+      "usedLogicalTexts": 1250,
+      "cost": 121.68,
+      "technicalCost": 108.36,
+      "variableCost": 88.36,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 327.32,
+      "serviceContributionMarginPercent": 72.9,
+      "loaded": {
+        "cost": 136.68,
+        "technicalCost": 108.36,
+        "variableCost": 88.36,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 312.32,
+        "serviceContributionMarginPercent": 69.56
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 0.25,
+      "band": "planning",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 375,
+      "usedLogicalTexts": 1250,
+      "cost": 151.68,
+      "technicalCost": 138.36,
+      "variableCost": 118.36,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 297.32,
+      "serviceContributionMarginPercent": 66.22,
+      "loaded": {
+        "cost": 166.68,
+        "technicalCost": 138.36,
+        "variableCost": 118.36,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 282.32,
+        "serviceContributionMarginPercent": 62.88
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 0.25,
+      "band": "stress",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 375,
+      "usedLogicalTexts": 1250,
+      "cost": 196.68,
+      "technicalCost": 183.36,
+      "variableCost": 163.36,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 252.32,
+      "serviceContributionMarginPercent": 56.2,
+      "loaded": {
+        "cost": 211.68,
+        "technicalCost": 183.36,
+        "variableCost": 163.36,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 237.32,
+        "serviceContributionMarginPercent": 52.85
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 0.5,
+      "band": "lean",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 750,
+      "usedLogicalTexts": 2500,
+      "cost": 210.05,
+      "technicalCost": 196.73,
+      "variableCost": 176.73,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 238.95,
+      "serviceContributionMarginPercent": 53.22,
+      "loaded": {
+        "cost": 225.05,
+        "technicalCost": 196.73,
+        "variableCost": 176.73,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 223.95,
+        "serviceContributionMarginPercent": 49.88
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 0.5,
+      "band": "planning",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 750,
+      "usedLogicalTexts": 2500,
+      "cost": 270.05,
+      "technicalCost": 256.73,
+      "variableCost": 236.73,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 178.95,
+      "serviceContributionMarginPercent": 39.86,
+      "loaded": {
+        "cost": 285.05,
+        "technicalCost": 256.73,
+        "variableCost": 236.73,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 163.95,
+        "serviceContributionMarginPercent": 36.52
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 0.5,
+      "band": "stress",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 750,
+      "usedLogicalTexts": 2500,
+      "cost": 360.05,
+      "technicalCost": 346.73,
+      "variableCost": 326.73,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 88.95,
+      "serviceContributionMarginPercent": 19.81,
+      "loaded": {
+        "cost": 375.05,
+        "technicalCost": 346.73,
+        "variableCost": 326.73,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 73.95,
+        "serviceContributionMarginPercent": 16.47
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 1,
+      "band": "lean",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 1500,
+      "usedLogicalTexts": 5000,
+      "cost": 386.77,
+      "technicalCost": 373.45,
+      "variableCost": 353.45,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": 62.23,
+      "serviceContributionMarginPercent": 13.86,
+      "loaded": {
+        "cost": 401.77,
+        "technicalCost": 373.45,
+        "variableCost": 353.45,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 47.23,
+        "serviceContributionMarginPercent": 10.52
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 1,
+      "band": "planning",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 1500,
+      "usedLogicalTexts": 5000,
+      "cost": 506.77,
+      "technicalCost": 493.45,
+      "variableCost": 473.45,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": -57.77,
+      "serviceContributionMarginPercent": -12.87,
+      "loaded": {
+        "cost": 521.77,
+        "technicalCost": 493.45,
+        "variableCost": 473.45,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": -72.77,
+        "serviceContributionMarginPercent": -16.21
+      }
+    },
+    {
+      "plan": "pro",
+      "price": 449,
+      "utilization": 1,
+      "band": "stress",
+      "includedMinutes": 1500,
+      "includedLogicalTexts": 5000,
+      "usedMinutes": 1500,
+      "usedLogicalTexts": 5000,
+      "cost": 686.77,
+      "technicalCost": 673.45,
+      "variableCost": 653.45,
+      "paymentFee": 13.32,
+      "supportReserve": 0,
+      "contribution": -237.77,
+      "serviceContributionMarginPercent": -52.96,
+      "loaded": {
+        "cost": 701.77,
+        "technicalCost": 673.45,
+        "variableCost": 653.45,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": -252.77,
+        "serviceContributionMarginPercent": -56.3
+      }
+    }
+  ],
+  "revised": [
+    {
+      "id": "starter",
+      "price": 99,
+      "minutes": 150,
+      "outgoingSegments": 250,
+      "band": "lean",
+      "carrierOnlyFloor": {
+        "cost": 41.37,
+        "technicalCost": 38.2,
+        "variableCost": 18.2,
+        "paymentFee": 3.17,
+        "supportReserve": 0,
+        "contribution": 57.63,
+        "serviceContributionMarginPercent": 58.21
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 43.26,
+        "technicalCost": 40.09,
+        "variableCost": 20.09,
+        "paymentFee": 3.17,
+        "supportReserve": 0,
+        "contribution": 55.74,
+        "serviceContributionMarginPercent": 56.31
+      },
+      "withSupport": {
+        "cost": 58.26,
+        "technicalCost": 40.09,
+        "variableCost": 20.09,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 40.74,
+        "serviceContributionMarginPercent": 41.15
+      }
+    },
+    {
+      "id": "starter",
+      "price": 99,
+      "minutes": 150,
+      "outgoingSegments": 250,
+      "band": "planning",
+      "carrierOnlyFloor": {
+        "cost": 53.37,
+        "technicalCost": 50.2,
+        "variableCost": 30.2,
+        "paymentFee": 3.17,
+        "supportReserve": 0,
+        "contribution": 45.63,
+        "serviceContributionMarginPercent": 46.09
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 55.26,
+        "technicalCost": 52.09,
+        "variableCost": 32.09,
+        "paymentFee": 3.17,
+        "supportReserve": 0,
+        "contribution": 43.74,
+        "serviceContributionMarginPercent": 44.18
+      },
+      "withSupport": {
+        "cost": 70.26,
+        "technicalCost": 52.09,
+        "variableCost": 32.09,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 28.74,
+        "serviceContributionMarginPercent": 29.03
+      }
+    },
+    {
+      "id": "starter",
+      "price": 99,
+      "minutes": 150,
+      "outgoingSegments": 250,
+      "band": "stress",
+      "carrierOnlyFloor": {
+        "cost": 71.37,
+        "technicalCost": 68.2,
+        "variableCost": 48.2,
+        "paymentFee": 3.17,
+        "supportReserve": 0,
+        "contribution": 27.63,
+        "serviceContributionMarginPercent": 27.91
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 73.26,
+        "technicalCost": 70.09,
+        "variableCost": 50.09,
+        "paymentFee": 3.17,
+        "supportReserve": 0,
+        "contribution": 25.74,
+        "serviceContributionMarginPercent": 26
+      },
+      "withSupport": {
+        "cost": 88.26,
+        "technicalCost": 70.09,
+        "variableCost": 50.09,
+        "paymentFee": 3.17,
+        "supportReserve": 15,
+        "contribution": 10.74,
+        "serviceContributionMarginPercent": 10.85
+      }
+    },
+    {
+      "id": "growth",
+      "price": 249,
+      "minutes": 400,
+      "outgoingSegments": 750,
+      "band": "lean",
+      "carrierOnlyFloor": {
+        "cost": 77.12,
+        "technicalCost": 69.6,
+        "variableCost": 49.6,
+        "paymentFee": 7.52,
+        "supportReserve": 0,
+        "contribution": 171.88,
+        "serviceContributionMarginPercent": 69.03
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 82.78,
+        "technicalCost": 75.26,
+        "variableCost": 55.26,
+        "paymentFee": 7.52,
+        "supportReserve": 0,
+        "contribution": 166.22,
+        "serviceContributionMarginPercent": 66.76
+      },
+      "withSupport": {
+        "cost": 97.78,
+        "technicalCost": 75.26,
+        "variableCost": 55.26,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 151.22,
+        "serviceContributionMarginPercent": 60.73
+      }
+    },
+    {
+      "id": "growth",
+      "price": 249,
+      "minutes": 400,
+      "outgoingSegments": 750,
+      "band": "planning",
+      "carrierOnlyFloor": {
+        "cost": 109.12,
+        "technicalCost": 101.6,
+        "variableCost": 81.6,
+        "paymentFee": 7.52,
+        "supportReserve": 0,
+        "contribution": 139.88,
+        "serviceContributionMarginPercent": 56.18
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 114.78,
+        "technicalCost": 107.26,
+        "variableCost": 87.26,
+        "paymentFee": 7.52,
+        "supportReserve": 0,
+        "contribution": 134.22,
+        "serviceContributionMarginPercent": 53.9
+      },
+      "withSupport": {
+        "cost": 129.78,
+        "technicalCost": 107.26,
+        "variableCost": 87.26,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 119.22,
+        "serviceContributionMarginPercent": 47.88
+      }
+    },
+    {
+      "id": "growth",
+      "price": 249,
+      "minutes": 400,
+      "outgoingSegments": 750,
+      "band": "stress",
+      "carrierOnlyFloor": {
+        "cost": 157.12,
+        "technicalCost": 149.6,
+        "variableCost": 129.6,
+        "paymentFee": 7.52,
+        "supportReserve": 0,
+        "contribution": 91.88,
+        "serviceContributionMarginPercent": 36.9
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 162.78,
+        "technicalCost": 155.26,
+        "variableCost": 135.26,
+        "paymentFee": 7.52,
+        "supportReserve": 0,
+        "contribution": 86.22,
+        "serviceContributionMarginPercent": 34.63
+      },
+      "withSupport": {
+        "cost": 177.78,
+        "technicalCost": 155.26,
+        "variableCost": 135.26,
+        "paymentFee": 7.52,
+        "supportReserve": 15,
+        "contribution": 71.22,
+        "serviceContributionMarginPercent": 28.6
+      }
+    },
+    {
+      "id": "pro",
+      "price": 449,
+      "minutes": 800,
+      "outgoingSegments": 1500,
+      "band": "lean",
+      "carrierOnlyFloor": {
+        "cost": 132.52,
+        "technicalCost": 119.2,
+        "variableCost": 99.2,
+        "paymentFee": 13.32,
+        "supportReserve": 0,
+        "contribution": 316.48,
+        "serviceContributionMarginPercent": 70.49
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 143.84,
+        "technicalCost": 130.52,
+        "variableCost": 110.52,
+        "paymentFee": 13.32,
+        "supportReserve": 0,
+        "contribution": 305.16,
+        "serviceContributionMarginPercent": 67.96
+      },
+      "withSupport": {
+        "cost": 158.84,
+        "technicalCost": 130.52,
+        "variableCost": 110.52,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 290.16,
+        "serviceContributionMarginPercent": 64.62
+      }
+    },
+    {
+      "id": "pro",
+      "price": 449,
+      "minutes": 800,
+      "outgoingSegments": 1500,
+      "band": "planning",
+      "carrierOnlyFloor": {
+        "cost": 196.52,
+        "technicalCost": 183.2,
+        "variableCost": 163.2,
+        "paymentFee": 13.32,
+        "supportReserve": 0,
+        "contribution": 252.48,
+        "serviceContributionMarginPercent": 56.23
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 207.84,
+        "technicalCost": 194.52,
+        "variableCost": 174.52,
+        "paymentFee": 13.32,
+        "supportReserve": 0,
+        "contribution": 241.16,
+        "serviceContributionMarginPercent": 53.71
+      },
+      "withSupport": {
+        "cost": 222.84,
+        "technicalCost": 194.52,
+        "variableCost": 174.52,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 226.16,
+        "serviceContributionMarginPercent": 50.37
+      }
+    },
+    {
+      "id": "pro",
+      "price": 449,
+      "minutes": 800,
+      "outgoingSegments": 1500,
+      "band": "stress",
+      "carrierOnlyFloor": {
+        "cost": 292.52,
+        "technicalCost": 279.2,
+        "variableCost": 259.2,
+        "paymentFee": 13.32,
+        "supportReserve": 0,
+        "contribution": 156.48,
+        "serviceContributionMarginPercent": 34.85
+      },
+      "withUnmeteredSMSAndReplyAI": {
+        "cost": 303.84,
+        "technicalCost": 290.52,
+        "variableCost": 270.52,
+        "paymentFee": 13.32,
+        "supportReserve": 0,
+        "contribution": 145.16,
+        "serviceContributionMarginPercent": 32.33
+      },
+      "withSupport": {
+        "cost": 318.84,
+        "technicalCost": 290.52,
+        "variableCost": 270.52,
+        "paymentFee": 13.32,
+        "supportReserve": 15,
+        "contribution": 130.16,
+        "serviceContributionMarginPercent": 28.99
+      }
+    }
+  ],
+  "budgets": [
+    {
+      "plan": "starter",
+      "targetMarginPercent": 60,
+      "totalServiceCostBudget": 36.43,
+      "variableBudgetAfter15ServiceAnd5Web": 16.43,
+      "outgoingSegments": 250,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 113,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 63,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 37,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 132,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 73,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 44,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 3.66
+        },
+        "planning": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 3.66
+        },
+        "stress": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 3.66
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 113,
+        "planning": 63,
+        "stress": 37
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 132,
+        "planning": 73,
+        "stress": 44
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": null,
+        "planning": null,
+        "stress": null
+      }
+    },
+    {
+      "plan": "starter",
+      "targetMarginPercent": 65,
+      "totalServiceCostBudget": 31.48,
+      "variableBudgetAfter15ServiceAnd5Web": 11.48,
+      "outgoingSegments": 250,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 63,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 35,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 21,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 82,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 45,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 27,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 8.61
+        },
+        "planning": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 8.61
+        },
+        "stress": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 8.61
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 63,
+        "planning": 35,
+        "stress": 21
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 82,
+        "planning": 45,
+        "stress": 27
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": null,
+        "planning": null,
+        "stress": null
+      }
+    },
+    {
+      "plan": "starter",
+      "targetMarginPercent": 70,
+      "totalServiceCostBudget": 26.53,
+      "variableBudgetAfter15ServiceAnd5Web": 6.53,
+      "outgoingSegments": 250,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 14,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 8,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 4,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 33,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 18,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 11,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 13.56
+        },
+        "planning": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 13.56
+        },
+        "stress": {
+          "feasible": false,
+          "maxMinutes": null,
+          "shortfallAtZeroMinutes": 13.56
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 14,
+        "planning": 8,
+        "stress": 4
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 33,
+        "planning": 18,
+        "stress": 11
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": null,
+        "planning": null,
+        "stress": null
+      }
+    },
+    {
+      "plan": "growth",
+      "targetMarginPercent": 60,
+      "totalServiceCostBudget": 92.08,
+      "variableBudgetAfter15ServiceAnd5Web": 72.08,
+      "outgoingSegments": 750,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 568,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 315,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 189,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 624,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 347,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 208,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 418,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 232,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 139,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 568,
+        "planning": 315,
+        "stress": 189
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 624,
+        "planning": 347,
+        "stress": 208
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": 418,
+        "planning": 232,
+        "stress": 139
+      }
+    },
+    {
+      "plan": "growth",
+      "targetMarginPercent": 65,
+      "totalServiceCostBudget": 79.63,
+      "variableBudgetAfter15ServiceAnd5Web": 59.63,
+      "outgoingSegments": 750,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 443,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 246,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 147,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 500,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 277,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 166,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 293,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 163,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 97,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 443,
+        "planning": 246,
+        "stress": 147
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 500,
+        "planning": 277,
+        "stress": 166
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": 293,
+        "planning": 163,
+        "stress": 97
+      }
+    },
+    {
+      "plan": "growth",
+      "targetMarginPercent": 70,
+      "totalServiceCostBudget": 67.18,
+      "variableBudgetAfter15ServiceAnd5Web": 47.18,
+      "outgoingSegments": 750,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 319,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 177,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 106,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 375,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 208,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 125,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 169,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 94,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 56,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 319,
+        "planning": 177,
+        "stress": 106
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 375,
+        "planning": 208,
+        "stress": 125
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": 169,
+        "planning": 94,
+        "stress": 56
+      }
+    },
+    {
+      "plan": "pro",
+      "targetMarginPercent": 60,
+      "totalServiceCostBudget": 166.28,
+      "variableBudgetAfter15ServiceAnd5Web": 146.28,
+      "outgoingSegments": 1500,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 1157,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 643,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 385,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 1270,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 705,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 423,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 1007,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 559,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 335,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 1157,
+        "planning": 643,
+        "stress": 385
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 1270,
+        "planning": 705,
+        "stress": 423
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": 1007,
+        "planning": 559,
+        "stress": 335
+      }
+    },
+    {
+      "plan": "pro",
+      "targetMarginPercent": 65,
+      "totalServiceCostBudget": 143.83,
+      "variableBudgetAfter15ServiceAnd5Web": 123.83,
+      "outgoingSegments": 1500,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 933,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 518,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 311,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 1046,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 581,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 348,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 783,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 435,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 261,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 933,
+        "planning": 518,
+        "stress": 311
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 1046,
+        "planning": 581,
+        "stress": 348
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": 783,
+        "planning": 435,
+        "stress": 261
+      }
+    },
+    {
+      "plan": "pro",
+      "targetMarginPercent": 70,
+      "totalServiceCostBudget": 121.38,
+      "variableBudgetAfter15ServiceAnd5Web": 101.38,
+      "outgoingSegments": 1500,
+      "capacityWithHiddenSMS": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 708,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 393,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 236,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityCarrierOnlyFloor": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 821,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 456,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 273,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "capacityIncluding15Support": {
+        "lean": {
+          "feasible": true,
+          "maxMinutes": 558,
+          "shortfallAtZeroMinutes": 0
+        },
+        "planning": {
+          "feasible": true,
+          "maxMinutes": 310,
+          "shortfallAtZeroMinutes": 0
+        },
+        "stress": {
+          "feasible": true,
+          "maxMinutes": 186,
+          "shortfallAtZeroMinutes": 0
+        }
+      },
+      "maxIncludedMinutes": {
+        "lean": 708,
+        "planning": 393,
+        "stress": 236
+      },
+      "maxMinutesCarrierOnlyFloor": {
+        "lean": 821,
+        "planning": 456,
+        "stress": 273
+      },
+      "maxMinutesIncluding15Support": {
+        "lean": 558,
+        "planning": 310,
+        "stress": 186
+      }
+    }
+  ],
+  "overages": {
+    "voiceAt49Cents": {
+      "lean": {
+        "marginalMarginPercent": 76.69,
+        "floorAt60Percent": 0.27
+      },
+      "planning": {
+        "marginalMarginPercent": 60.37,
+        "floorAt60Percent": 0.49
+      },
+      "stress": {
+        "marginalMarginPercent": 35.88,
+        "floorAt60Percent": 0.81
+      }
+    },
+    "segmentAt5Cents": {
+      "carrierOnlyMarginPercent": 71.5,
+      "includingDistributedInboundOwnerAndAI": 56.41
+    },
+    "oldLogicalTextAt3Cents": {
+      "cost": 0.04069,
+      "marginalMarginPercent": -38.53
+    }
+  },
+  "webPromptExample": {
+    "assumedFreshInputTokens": 2000,
+    "assumedOutputTokens": 200,
+    "opusInputPerMillion": 4,
+    "opusOutputPerMillion": 20,
+    "singleRequestCost": 0.012,
+    "threeRequestsCost": 0.036
+  }
+}

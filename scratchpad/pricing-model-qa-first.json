@@ -1,0 +1,81 @@
+{
+  "scope": "Independent initial pricing-model decimal recomputation and unit review; no provider rates verified",
+  "sources": {
+    "scripts/pricing-model.mjs": "fb50cdf93c016130f1f8cced16f7d57a5f4786da48fb9db8f43eee80d3377a41",
+    "scratchpad/pricing-costs.json": "10c67519ff57d4eb8d227928c954fae079daf7a98e56b633e03c5677c1c3c89e"
+  },
+  "arithmeticAssertions": 576,
+  "arithmeticFailures": [],
+  "costPerLogicalOutbound": "0.040690",
+  "allocatedCostPerOutgoingSegmentAtTwoSegmentsPerMessage": "0.020345",
+  "planningFullUse": [
+    {
+      "plan": "starter",
+      "serviceGrossMarginPercentBeforePaymentAndSupport": 31.97,
+      "paymentContributionMarginPercent": 28.77,
+      "loadedContributionMarginPercent": 13.62,
+      "loadedContribution": 13.48
+    },
+    {
+      "plan": "growth",
+      "serviceGrossMarginPercentBeforePaymentAndSupport": 24.08,
+      "paymentContributionMarginPercent": 21.06,
+      "loadedContributionMarginPercent": 15.04,
+      "loadedContribution": 37.44
+    },
+    {
+      "plan": "pro",
+      "serviceGrossMarginPercentBeforePaymentAndSupport": -9.9,
+      "paymentContributionMarginPercent": -12.87,
+      "loadedContributionMarginPercent": -16.21,
+      "loadedContribution": -72.77
+    }
+  ],
+  "maskedInfeasibleBudgets": [
+    {
+      "plan": "starter",
+      "target": 60,
+      "field": "maxMinutesIncluding15Support",
+      "capacityBeforeVoice": -3.65725,
+      "shownMaxMinutes": {
+        "lean": 0,
+        "planning": 0,
+        "stress": 0
+      },
+      "reason": "Target impossible even at zero voice; clamped zero masks infeasibility"
+    },
+    {
+      "plan": "starter",
+      "target": 65,
+      "field": "maxMinutesIncluding15Support",
+      "capacityBeforeVoice": -8.60725,
+      "shownMaxMinutes": {
+        "lean": 0,
+        "planning": 0,
+        "stress": 0
+      },
+      "reason": "Target impossible even at zero voice; clamped zero masks infeasibility"
+    },
+    {
+      "plan": "starter",
+      "target": 70,
+      "field": "maxMinutesIncluding15Support",
+      "capacityBeforeVoice": -13.55725,
+      "shownMaxMinutes": {
+        "lean": 0,
+        "planning": 0,
+        "stress": 0
+      },
+      "reason": "Target impossible even at zero voice; clamped zero masks infeasibility"
+    }
+  ],
+  "returnedLimitations": [
+    "marginPercent is post-payment contribution margin, not service gross margin",
+    "additional Stripe Billing .007 is only metadata and not charged in output",
+    "provider voice-minute cost vs per-call rounded customer units not separated",
+    "current logical messages versus future outgoing segments must not be relabeled as equivalent allowances",
+    "incoming segment count assumed one per incoming message; carrier mix and concatenation remain assumptions"
+  ],
+  "actualNetworkRequests": 0,
+  "actualModelRequests": 0
+}

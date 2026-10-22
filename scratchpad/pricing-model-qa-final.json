@@ -1,0 +1,3234 @@
+{
+  "at": "2026-10-22",
+  "scope": "Final independent offline decimal recomputation, infeasibility boundary and unit/label review",
+  "sources": {
+    "scripts/pricing-model.mjs": "c329ae882c9197c73c4beddc8f9ee1eaab99b89f6ccbc6d3a21243fd9e5e34f1",
+    "scratchpad/pricing-costs.json": "48de1d3078a5bc637fa10e4af9eca3da0fcbcae499b1db66fa5a7a32aab0160d",
+    "product/PRICING-COSTS-2026-10-22.md": "02253809012f7c1b3df7ac0aac5e61b97bd428ca1dbe7358a7b93017811e6f83"
+  },
+  "previousReturnedEvidence": "scratchpad/pricing-model-qa-first.json",
+  "summary": {
+    "checks": 802,
+    "passed": 802,
+    "failed": 0,
+    "actualModelRequests": 0,
+    "actualExternalRequests": 0
+  },
+  "checks": [
+    {
+      "name": "Frozen source manifest matches all three released files",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.25/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.25/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.25/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.25/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.25/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.25/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.25/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.5/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.5/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.5/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.5/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.5/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/0.5/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/0.5/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/1/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/1/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/1/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/1/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/1/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current starter/1/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current starter/1/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.25/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.25/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.25/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.25/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.25/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.25/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.25/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.5/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.5/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.5/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.5/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.5/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/0.5/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/0.5/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/1/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/1/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/1/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/1/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/1/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current growth/1/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current growth/1/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.25/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.25/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.25/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.25/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.25/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.25/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.25/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.5/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.5/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.5/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.5/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.5/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/0.5/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/0.5/stress/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/1/lean/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/lean/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/1/lean/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/1/planning/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/planning/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/1/planning/15",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/0/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/0/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/0/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/0/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/0/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/0/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/1/stress/0",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/15/variableCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/15/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/15/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/15/cost",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/15/contribution",
+      "pass": true
+    },
+    {
+      "name": "current pro/1/stress/15/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "explicit contribution field current pro/1/stress/15",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/lean/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/planning/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate starter/stress/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/lean/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/planning/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate growth/stress/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/lean/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/planning/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/carrierOnlyFloor/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/carrierOnlyFloor/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/carrierOnlyFloor/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/carrierOnlyFloor/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/carrierOnlyFloor/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/carrierOnlyFloor/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withUnmeteredSMSAndReplyAI/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withUnmeteredSMSAndReplyAI/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withUnmeteredSMSAndReplyAI/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withUnmeteredSMSAndReplyAI/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withUnmeteredSMSAndReplyAI/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withUnmeteredSMSAndReplyAI/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withSupport/variableCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withSupport/technicalCost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withSupport/paymentFee",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withSupport/cost",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withSupport/contribution",
+      "pass": true
+    },
+    {
+      "name": "candidate pro/stress/withSupport/serviceContributionMarginPercent",
+      "pass": true
+    },
+    {
+      "name": "budget starter/60",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget starter/65",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget starter/70",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility starter/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max starter/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall starter/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget growth/60",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget growth/65",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget growth/70",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility growth/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max growth/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall growth/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget pro/60",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/60/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget pro/65",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/65/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "budget pro/70",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityWithHiddenSMS/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityWithHiddenSMS/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityWithHiddenSMS/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityCarrierOnlyFloor/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityCarrierOnlyFloor/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityCarrierOnlyFloor/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityIncluding15Support/lean",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityIncluding15Support/planning",
+      "pass": true
+    },
+    {
+      "name": "capacity feasibility pro/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity null vs nonnegative max pro/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "capacity shortfall pro/70/capacityIncluding15Support/stress",
+      "pass": true
+    },
+    {
+      "name": "Minute basis explicitly distinguishes rounded app and provider quantities",
+      "pass": true
+    },
+    {
+      "name": "Margin definition explicitly post-card contribution, not gross/net",
+      "pass": true
+    },
+    {
+      "name": "Additional Billing fee exposed as excluded sensitivity",
+      "pass": true
+    },
+    {
+      "name": "Current published units retained starter",
+      "pass": true
+    },
+    {
+      "name": "Current published units retained growth",
+      "pass": true
+    },
+    {
+      "name": "Current published units retained pro",
+      "pass": true
+    },
+    {
+      "name": "Actual pure script regenerates frozen scenario JSON exactly",
+      "pass": true
+    },
+    {
+      "name": "Feasible zero capacity differs from negative infeasibility",
+      "pass": true
+    },
+    {
+      "name": "Released source stable during independent review",
+      "pass": true
+    }
+  ],
+  "importantLimits": [
+    "Provider list prices not independently verified by QA",
+    "Voice bands, SMS mix/encoding/AI, fixed reserve and support are assumptions",
+    "Actual rounded metered minutes vs provider quantities assumed1:1 only; not calibrated",
+    "Additional .7%Billing fee remains excluded from numeric scenarios",
+    "Candidate quantities/rates remain unapproved; current published prices unchanged"
+  ]
+}
