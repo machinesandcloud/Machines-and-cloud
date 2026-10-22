@@ -1,0 +1,127 @@
+{
+  "at": "2026-10-22T21:54:50.460Z",
+  "mode": "independent real Calendar engine; physical network disabled; delayed HTTP insert before remote effect",
+  "before": "2b4a17bc8ad75fc75013880d5de59ce84e272326507107b6f46a3bfcdd326b02",
+  "checks": [
+    {
+      "name": "GET404 cannot confirm cancellation while an older first insert remains unresolved",
+      "pass": true
+    },
+    {
+      "name": "Late old insert is reconciled and removed while the cancelled workspace record is retained",
+      "pass": true
+    }
+  ],
+  "observations": {
+    "beforeLateCreate": {
+      "slug": "independent-late-create",
+      "storageKey": "independent-late-create/1d0c7ebe6413832581e7f73a5844533f07b2f2cf7004109a9cab8f8f685e5770/visit-late",
+      "tenantIdentity": "1d0c7ebe6413832581e7f73a5844533f07b2f2cf7004109a9cab8f8f685e5770",
+      "bookingId": "visit-late",
+      "eventId": "mc13621a8907df0620cdc216dfdad82407d4d5fdc603a10c7f830489c638bdf9b4",
+      "targetId": "owner@calendar.example.test",
+      "connectionId": "faaf3a617359ffcf7a6d951a375a4dfe",
+      "targetHash": "ec4b7fad96d1939eaa8ba8ac0d6f0d057f4b510f5af20692752033783c3041ec",
+      "sourceRevision": "558f36437293f4160b2e7851c38b1114cd0c57d4ca5be536db506e11f6b5c4a7",
+      "desired": {
+        "status": "cancelled",
+        "customer_name": "Alex Fixture",
+        "phone": "+17135550122",
+        "address": "10 Fixture St",
+        "issue": "AC not cooling",
+        "date": "2027-01-15",
+        "window": "8 to 12",
+        "urgency": "this_week",
+        "notes": ""
+      },
+      "version": 2,
+      "lifecycleVersion": 1,
+      "state": "retry",
+      "attempts": 1,
+      "claim": null,
+      "nextAttemptAt": "2026-10-22T21:55:50.471Z",
+      "reasonCode": "creation_unconfirmed",
+      "detail": "An earlier calendar creation is still unconfirmed. Cancellation will keep checking the same reference; no second event will be created.",
+      "createdAt": "2026-10-22T21:54:50.471Z",
+      "updatedAt": "2026-10-22T21:54:50.471Z",
+      "completedAt": null,
+      "createAttempt": {
+        "token": "a1d4482c8c66bd87c226ef9516cd8270",
+        "version": 1,
+        "state": "sending",
+        "startedAt": "2026-10-22T21:54:50.471Z"
+      }
+    },
+    "afterRecovery": {
+      "slug": "independent-late-create",
+      "storageKey": "independent-late-create/1d0c7ebe6413832581e7f73a5844533f07b2f2cf7004109a9cab8f8f685e5770/visit-late",
+      "tenantIdentity": "1d0c7ebe6413832581e7f73a5844533f07b2f2cf7004109a9cab8f8f685e5770",
+      "bookingId": "visit-late",
+      "eventId": "mc13621a8907df0620cdc216dfdad82407d4d5fdc603a10c7f830489c638bdf9b4",
+      "targetId": "owner@calendar.example.test",
+      "connectionId": "faaf3a617359ffcf7a6d951a375a4dfe",
+      "targetHash": "ec4b7fad96d1939eaa8ba8ac0d6f0d057f4b510f5af20692752033783c3041ec",
+      "sourceRevision": "558f36437293f4160b2e7851c38b1114cd0c57d4ca5be536db506e11f6b5c4a7",
+      "desired": {
+        "status": "cancelled",
+        "customer_name": "Alex Fixture",
+        "phone": "+17135550122",
+        "address": "10 Fixture St",
+        "issue": "AC not cooling",
+        "date": "2027-01-15",
+        "window": "8 to 12",
+        "urgency": "this_week",
+        "notes": ""
+      },
+      "version": 2,
+      "lifecycleVersion": 1,
+      "state": "cancelled",
+      "attempts": 2,
+      "claim": null,
+      "nextAttemptAt": null,
+      "reasonCode": null,
+      "detail": "Calendar event cancellation is confirmed. Your workspace record is retained.",
+      "createdAt": "2026-10-22T21:54:50.471Z",
+      "updatedAt": "2026-10-22T21:56:50.471Z",
+      "completedAt": "2026-10-22T21:56:50.471Z",
+      "createAttempt": {
+        "token": "a1d4482c8c66bd87c226ef9516cd8270",
+        "version": 1,
+        "state": "observed",
+        "startedAt": "2026-10-22T21:54:50.471Z",
+        "updatedAt": "2026-10-22T21:54:50.471Z"
+      },
+      "receipt": {
+        "version": 2,
+        "sourceRevision": "558f36437293f4160b2e7851c38b1114cd0c57d4ca5be536db506e11f6b5c4a7",
+        "eventId": "mc13621a8907df0620cdc216dfdad82407d4d5fdc603a10c7f830489c638bdf9b4",
+        "confirmedAt": "2026-10-22T21:56:50.471Z",
+        "action": "cancel"
+      }
+    },
+    "remoteStillExists": false,
+    "localBooking": {
+      "slug": "independent-late-create",
+      "id": "visit-late",
+      "status": "cancelled",
+      "delivery": {
+        "tenantIdentity": "1d0c7ebe6413832581e7f73a5844533f07b2f2cf7004109a9cab8f8f685e5770"
+      },
+      "customer_name": "Alex Fixture",
+      "phone": "+17135550122",
+      "address": "10 Fixture St",
+      "issue": "AC not cooling",
+      "date": "2027-01-15",
+      "window": "8 to 12",
+      "notes": "",
+      "urgency": "this_week",
+      "createdAt": "2026-10-22T21:54:50.471Z"
+    }
+  },
+  "after": "2b4a17bc8ad75fc75013880d5de59ce84e272326507107b6f46a3bfcdd326b02",
+  "sourceStable": true,
+  "externalRequests": 0,
+  "passed": 2,
+  "total": 2,
+  "ok": true
+}

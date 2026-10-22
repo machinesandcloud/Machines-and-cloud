@@ -1,0 +1,222 @@
+{
+  "at": "2026-10-22T21:43:48.201Z",
+  "scope": "Actual Calendar connection/delivery modules and durable CAS implementation in isolated synthetic memory. Every fetch is intercepted by calendar-test-fixtures; no physical network/account/provider/production action. Passing cases are local control evidence only.",
+  "sourceBefore": {
+    "netlify/functions/lib/calendar-execution.mjs": "de5394c70570f7ed998fdb4129ff70ecb384e571db4964d0a33f6a0ca2ef55e5",
+    "netlify/functions/lib/calendar-connection.mjs": "ac335c6398a9ed01801f811a316dc9ba29337274ce9fd6ee128ab23c8c0f25ff",
+    "netlify/functions/lib/calendar-delivery.mjs": "a622a2da91fb3c8d46a5ad7f2cdbe4bd67517b3db208e5386bcf8748a3c65851",
+    "netlify/functions/lib/config.mjs": "fa11f41239c4df4a8bb7cbb51dd2334b00dd76e8281f31ff85af1d012147c1a4",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b"
+  },
+  "harnessHash": "86b40ad26c013029042e5c96a2be72d44bd088843055f801f7d131ff83109507",
+  "checks": [
+    {
+      "name": "Global flags without approved exact cohort remain unavailable and make zero fetches",
+      "pass": true
+    },
+    {
+      "name": "Wrong tenant and recreated same slug cannot reserve quota or complete a grant",
+      "pass": false,
+      "error": "Calendar connection is waiting for its approved service setup.",
+      "stack": "Error: Calendar connection is waiting for its approved service setup.\n    at execution (file:///private/tmp/mc-core-calendar-activation-05e/netlify/functions/lib/calendar-connection.mjs:22:128)\n    at async Module.startCalendarConnection (file:///private/tmp/mc-core-calendar-activation-05e/netlify/functions/lib/calendar-connection.mjs:52:3)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:37:303\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:21:44)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:37:1"
+    },
+    {
+      "name": "Changed Google client and target bindings deny before dispatch",
+      "pass": true
+    },
+    {
+      "name": "Concurrent final request slot admits exactly one physical fetch",
+      "pass": true
+    },
+    {
+      "name": "Same version policy edit cannot reset or increase a retained budget",
+      "pass": true
+    },
+    {
+      "name": "Unknown HTTP outcome consumes quota and retry consumes another slot",
+      "pass": true
+    },
+    {
+      "name": "Policy revocation after reservation prevents physical dispatch without refund",
+      "pass": true
+    },
+    {
+      "name": "Expired policy and operational brake prevent further dispatch",
+      "pass": true
+    },
+    {
+      "name": "Unapproved retained target work blocks initial admission rather than treating census empty",
+      "pass": true
+    },
+    {
+      "name": "Original session and one-use PKCE guards still apply and real calls reject redirects",
+      "pass": true
+    },
+    {
+      "name": "Unexpected primary Calendar identity cannot install connected credentials",
+      "pass": false,
+      "error": "Cannot read properties of null (reading 'used')",
+      "stack": "TypeError: Cannot read properties of null (reading 'used')\n    at file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:46:398\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:21:44)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:46:1"
+    },
+    {
+      "name": "Actual worker syncs only named booking and ignores another tenant and unlisted visit",
+      "pass": false,
+      "error": "Cannot read properties of null (reading 'state')",
+      "stack": "TypeError: Cannot read properties of null (reading 'state')\n    at file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:47:651\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:21:44)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:47:1"
+    },
+    {
+      "name": "Lost create reply recovers the same event with no second create or quota refund",
+      "pass": false,
+      "error": "Cannot read properties of null (reading 'state')",
+      "stack": "TypeError: Cannot read properties of null (reading 'state')\n    at file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:48:350\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:21:44)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:48:1"
+    },
+    {
+      "name": "Exhausted worker budget preserves local visit and cannot bypass through another wave",
+      "pass": false,
+      "error": "Cannot read properties of null (reading 'state')",
+      "stack": "TypeError: Cannot read properties of null (reading 'state')\n    at file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:49:656\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:21:44)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:49:1"
+    },
+    {
+      "name": "Cleanup is limited to named owned event and has no off-gate or expired-policy bypass",
+      "pass": false,
+      "error": "Cannot read properties of null (reading 'state')",
+      "stack": "TypeError: Cannot read properties of null (reading 'state')\n    at file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:50:730\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:21:44)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scratchpad/core-calendar-independent-check.mjs:50:1"
+    },
+    {
+      "name": "Disconnect remains available after budget exhaustion and prevents refresh/data requests",
+      "pass": true
+    },
+    {
+      "name": "Managed prompt follows actual transport and receipt contract without claiming flag availability",
+      "pass": true
+    }
+  ],
+  "calls": [
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://oauth2.googleapis.com",
+      "path": "/token",
+      "method": "POST",
+      "redirect": "error"
+    },
+    {
+      "origin": "https://www.googleapis.com",
+      "path": "/calendar/v3/calendars/primary",
+      "method": "GET",
+      "redirect": "error"
+    }
+  ],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "netlify/functions/lib/calendar-execution.mjs": "de5394c70570f7ed998fdb4129ff70ecb384e571db4964d0a33f6a0ca2ef55e5",
+    "netlify/functions/lib/calendar-connection.mjs": "ac335c6398a9ed01801f811a316dc9ba29337274ce9fd6ee128ab23c8c0f25ff",
+    "netlify/functions/lib/calendar-delivery.mjs": "a622a2da91fb3c8d46a5ad7f2cdbe4bd67517b3db208e5386bcf8748a3c65851",
+    "netlify/functions/lib/config.mjs": "fa11f41239c4df4a8bb7cbb51dd2334b00dd76e8281f31ff85af1d012147c1a4",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 11,
+    "failed": 6
+  },
+  "limits": [
+    "Synthetic memory CAS tests do not establish live cross-instance storage or provider delivery.",
+    "Expired/revoked policy has no cleanup bypass; any retained event needs renewed explicitly approved scope before cleanup.",
+    "No phone/SMS gate, provider account, billing, deployment or actual Google permission was modified."
+  ]
+}

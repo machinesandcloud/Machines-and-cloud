@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-22T21:57:14.370Z",
+  "fingerprints": {
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805"
+  },
+  "checks": {
+    "cohortRenewalClaimAndWaveLifecycle": 21,
+    "connection": 19,
+    "delivery": 27,
+    "actualOwnerApi": 9,
+    "lateCreate": 2
+  },
+  "physicalExternalRequests": 0,
+  "notPublished": true,
+  "activationGatesUnchanged": true,
+  "waveRepair": {
+    "rootReturn": "Generic positive numeric job-lease validator rejected the legitimate completed-wave until:0 release marker, causing later waves to skip indefinitely.",
+    "fixed": "Separate explicit completed-wave marker validation; running and generic job leases retain strict positive numeric rules.",
+    "covered": [
+      "First actual wave completes and releases; next actual wave executes a changed saved visit.",
+      "Failed actual wave releases; later actual wave recovers saved event.",
+      "Published completed marker is reclaimable.",
+      "Live overlap, missing completion timestamp, zero running lease and ISO running lease deny.",
+      "Valid expired numeric running wave is reclaimable."
+    ]
+  },
+  "supersedesForCurrentAcceptance": [
+    "scratchpad/calendar-execution-engineering-numeric-claims-freeze.json",
+    "scratchpad/core-calendar-independent-numeric-claims-final.json"
+  ]
+}

@@ -12,7 +12,7 @@ const googleHandler = (await import('../netlify/functions/google.mjs')).default;
 const { configurationRevision } = await import('../netlify/functions/lib/setup.mjs');
 const { chromium } = await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs');
 const origin = 'https://calendar.example.test', local = 'http://127.0.0.1:8938';
-const files = ['desk-connections.js', 'netlify/functions/client.mjs', 'netlify/functions/google.mjs', 'netlify/functions/lib/calendar-connection.mjs'];
+const files = ['desk-connections.js', 'netlify/functions/client.mjs', 'netlify/functions/google.mjs', 'netlify/functions/lib/calendar-connection.mjs', 'netlify/functions/lib/calendar-delivery.mjs', 'netlify/functions/lib/calendar-execution.mjs', 'scripts/calendar-test-fixtures.mjs', 'scripts/calendar-auto-connect-check.mjs'];
 const fingerprints = () => Object.fromEntries(files.map(file => [file, hash(readFileSync(file))]));
 const before = fingerprints(), source = readFileSync('desk-connections.js'), checks = [], pageErrors = [], contexts = [], releases = [];
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run', '--disable-default-apps', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost, EXCLUDE 127.0.0.1'] });
@@ -109,6 +109,16 @@ try {
     await view.emit(); await view.emit(); await settle(view.page); assert.equal(completionCount(view), 1);
     await view.page.reload(); await view.emit(); await settle(view.page); assert.equal(completionCount(view), 1);
     assert.ok(!await view.page.evaluate(() => JSON.stringify({ body: document.body.innerHTML, storage: { ...sessionStorage }, url: location.href }).includes('dummy-private-refresh')));
+  });
+  await check('A saved Google permission with exhausted delivery allowance shows the server waiting detail, not a future-sync promise', async () => {
+    const item = await seed();
+    f.policies.get(item.client.slug).limits.calendarRead = 1; await f.approve(item.client);
+    const receipt = await grant(item), view = await pageFixture(item, { pending: receipt });
+    await view.page.goto(await callback(item, receipt)); await view.emit(); await waitForMessage(view.page, 'Google Calendar is connected');
+    const current = await ownerData(item), message = await view.page.locator('#serviceConnectionMessage').innerText();
+    assert.equal(current.connections.calendar.connected, true); assert.equal(current.connections.calendar.available, false);
+    assert.ok(message.includes(current.connections.calendar.detail)); assert.doesNotMatch(message, /Future saved visits will sync|Future saved visits sync/);
+    assert.equal(completionCount(view), 1);
   });
   await check('Consent denial is completed automatically without token exchange or a false connected success message', async () => {
     const item = await seed(), receipt = await grant(item), view = await pageFixture(item, { pending: receipt }), before = f.requests.length;

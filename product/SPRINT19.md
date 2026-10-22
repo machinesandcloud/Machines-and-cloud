@@ -1,5 +1,7 @@
 # Sprint 19: trustworthy business-detail editing
 
+**Latest priority:** [Sprint20](SPRINT20.md) is now the primary delivery track after Steve called out unavailable core services. The two editing defects below remain confirmed and open in parallel. This sprint is not accepted as repaired or deployed.
+
 October 22, 2026, Houston. **Selected next implementation slice; not implemented or published by this assessment.** The [PO](PO-NEXT-WORK-2026-10-22.md) and [UI/UX](UIUX-NEXT-WORK-2026-10-22.md) reviews agree that reliable editing takes priority over another visual redesign. Production remains `05e8c5c34656f3257af8a8d3d7e8523dcbd542b3`; the existing Twilio Support request and disabled service gates are unchanged.
 
 ## Customer outcome

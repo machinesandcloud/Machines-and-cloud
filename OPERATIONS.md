@@ -2,6 +2,14 @@
 
 How a shop goes from the pilot form to a live front desk, what runs where, and what Steve has to switch on once.
 
+## Current core-delivery work
+
+[Sprint20](product/SPRINT20.md) advances actual service delivery from published `05e8c5c`. The new Calendar execution policy binds one workspace incarnation, Google OAuth client, actual primary-calendar target and explicit visit IDs to durable request allowances. Both Calendar flags remain required. The policy does not authorize phone, SMS, model requests, emails or provider fees. No live policy is configured by this local work.
+
+An ordinary owner can add a visit or change/cancel a saved visit through the portal in this candidate. Saving the record, preparing a queue entry and confirming an external calendar event are separate outcomes. Customer notifications require their own consent and delivery path. Owner entry does not infer texting consent, certify an AI rehearsal or activate a connection. Cancellation retains the visit/history and reconciles only its matching event. Older generic booking prose below describes legacy paths; it is not a self-service delivery guarantee.
+
+Calendar credentials and private policies belong in Functions environment scope. Netlify freezes function environment values at deploy time; changing these values requires a new build/deploy. Compile the exact tenant/calendar/visit policy and retained-resource census before proposing a one-build live test. Do not promise an environment-only live activation or an unbudgeted second build. See [Netlify function environment documentation](https://docs.netlify.com/build/functions/environment-variables/).
+
 ## Sales adviser revision (local, not published)
 
 `agent-widget.js` is the public M&C AI adviser. `lib/sales-desk.mjs` owns its versioned web-first product facts, exact call-volume calculator, current-workflow fit and optional actions. It can generate useful drafts; no sales tool sends a message, captures a lead, creates an account, books a call or starts a microphone. Contact opens the existing public scheduling page only after the visitor chooses it. The business support inbox is not established as working; the sales adviser must not offer it or the published phone number as a verified contact route. Do not publish the owner's temporary personal provider-contact email.

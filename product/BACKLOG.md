@@ -1,6 +1,17 @@
 # Backlog: Machines & Cloud front desk
 
-Owner: Product Owner. Round12 is current; rounds11 through1 below are historical records. Round11 superseded their blanket feature-freeze instructions. Current production/provider observations are in PRODUCT-STATUS.md, not the older rounds. Evidence shorthand: `F#` = RESEARCH-stakeholder-forums.md source register; `S#n` = RESEARCH-servicing.md ranked item n; `W§n` = RESEARCH-customer-workflow.md section n; `code:` = read in the repo; `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+Owner: Product Owner. Round13 is current; earlier rounds below are historical where superseded. Round11 superseded their blanket feature-freeze instructions. Current production/provider observations are in PRODUCT-STATUS.md, not the older rounds. Evidence shorthand: `F#` = RESEARCH-stakeholder-forums.md source register; `S#n` = RESEARCH-servicing.md ranked item n; `W§n` = RESEARCH-customer-workflow.md section n; `code:` = read in the repo; `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+
+## Round13 (October 22): make the core service work
+
+Steve challenged the sales chatbot's unavailable-capabilities answer. The [PO update](PO-NEXT-WORK-2026-10-22.md#latest-steering-make-core-service-delivery-the-primary-track) selects one real shop completing automatic setup and receiving dependable service as the primary outcome. [Sprint20](SPRINT20.md) is the current implementation track. Preserve truthful product facts while closing the underlying gaps.
+
+1. Finish the current Calendar/owner-visit candidate, independently test Add → move → cancel with recoverable errors, then prepare a specific live signup/owned-calendar acceptance. Calendar and voice need not wait for the M&C support campaign.
+2. Advance phone and dedicated texting in parallel: review the existing unpublished cleanup repairs separately, implement missing exact-tenant/account exposure controls at real provider boundaries, resolve current account access, confirm offers/funding, then prove actual call/fallback and each shop's approved consent-aware messaging path. Calendar policy is not authority for these effects.
+3. Repair Sprint19's two reproduced settings-save defects and prove fresh signup/return; keep these visible alongside activation work.
+4. After a useful core result, implement external busy-time blocking and a narrow Jobber connector. Other lead sources follow actual shop demand. Payments remain parked; full crew dispatch and native FSM integrations are unbuilt.
+
+Standard setup remains included. No provider account was connected, campaign resubmitted, paid effect authorized or production build performed by this backlog update. Local and live acceptance remain separate.
 
 ---
 

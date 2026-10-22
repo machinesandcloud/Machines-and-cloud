@@ -1,0 +1,210 @@
+{
+  "priorHarnessReturn": "independent-first.json retained one incorrect recovery selector (#gate); actual UI uses #portalRecovery. The corrected selector changes no runtime behavior.",
+  "at": "2026-10-22T22:11:16.849Z",
+  "scope": "Independent actual owner client handler, transaction module and fully intercepted actual browser assets. Synthetic memory store only. Fault-only ESM wrappers preserve actual store/CAS/queue implementations and throw at explicitly named boundaries; no application source changes.",
+  "sourceBefore": {
+    "netlify/functions/lib/owner-visits.mjs": "c975bbe06415d7c91ac83960bd16453102e971b2cb0069a0ba1e886ce62ccb61",
+    "netlify/functions/client.mjs": "bf111a320d3bdc611ff0585319062cfb6cd359e1f5527ee0541148c80d8929b6",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/lib/managed-delivery.mjs": "beba0c6fc70597124b41fc7802fa834e17e8ff34b5f048d99581063335b37cd1",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "desk.js": "b6a398b64a45227509540a9158cc8aeba0a95a57b1ae336efd2f1b0d161fd708",
+    "desk.html": "d4cee0672fbcf7ac98d04bda269c00cb43d28590523f9c67a3184e87ac2cf36c",
+    "desk.css": "7ecc69365d478fd2631e84a32ccc323f47e6e676ba6e9009fe7af3c1274702b5"
+  },
+  "harnessHash": "042ca70f40a490a41fcde1d7e915d4f05b71b2d2976679c857a6c3504365c26f",
+  "checks": [
+    {
+      "name": "Owner create rejects anonymous, foreign-session, operator-purpose and foreign/missing-Origin writes",
+      "pass": true
+    },
+    {
+      "name": "Create validates required values, strict callback phone, real date, listed future window and input schema before persistence",
+      "pass": true
+    },
+    {
+      "name": "Create, move and cancel update exact records, slot capacity, history and local notification queues without delivery claims",
+      "pass": true
+    },
+    {
+      "name": "A full or blocked destination keeps original record and capacity unchanged",
+      "pass": true
+    },
+    {
+      "name": "Immutable replay succeeds after stale record/configuration while a changed payload or fresh conflicting submission is rejected",
+      "pass": true
+    },
+    {
+      "name": "Lost booking-CAS and capacity-finalization replies recover same operation without duplicate history/capacity",
+      "pass": true
+    },
+    {
+      "name": "Queue projection failure preserves local save and GET recovery before the exact retry finishes preparation",
+      "pass": true
+    },
+    {
+      "name": "Same-slug replacement cannot expose or mutate the former incarnation visit",
+      "pass": true
+    },
+    {
+      "name": "An aborted create fences a delayed CAS but is absent from owner records and managed notification discovery",
+      "pass": true
+    },
+    {
+      "name": "Lost abort-fence reply recovers exact abort and restores capacity without showing a fabricated visit",
+      "pass": true
+    },
+    {
+      "name": "Concurrent creates cannot exceed one window and conflicting move operations preserve the first exact mutation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary owner UI shows field errors and completes add/move/cancel with honest delivery status",
+      "pass": true
+    },
+    {
+      "name": "Lost UI response and page reload recover the original submission without another create",
+      "pass": true
+    },
+    {
+      "name": "Sign-out during an already-committed held response clears private UI and ignores late completion",
+      "pass": true
+    }
+  ],
+  "faults": [
+    "response lost after booking CAS commit",
+    "response lost after capacity finalize",
+    "queue projection failed before write",
+    "business revision changed after capacity admission",
+    "business revision changed after capacity admission",
+    "response lost after abort-fence CAS commit"
+  ],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "create_visit",
+      "status": 400,
+      "submissionId": "3091952bee0e355bd74bea67f3838e85"
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "create_visit",
+      "status": 200,
+      "submissionId": "57152f2cc60146ba6130186b0f0bc6fb"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "reschedule_visit",
+      "status": 200,
+      "submissionId": "99f9186ceaedfe573069a0095ab0fb9b"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "cancel_visit",
+      "status": 200,
+      "submissionId": "9553d5de39ae771c2d844522eca9d1aa"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "create_visit",
+      "status": 200,
+      "submissionId": "210f8c9cb1fd167d88b0952e4ae89ed2"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "create_visit",
+      "status": 200,
+      "submissionId": "210f8c9cb1fd167d88b0952e4ae89ed2"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "create_visit",
+      "status": 200,
+      "submissionId": "902250a6c6335586949b58a34528eea8"
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200
+    }
+  ],
+  "physicalAttempts": 0,
+  "pageErrors": [],
+  "externalBrowserRequests": [],
+  "screenshots": [
+    "scratchpad/core-owner-visits-independent-second-form-375.png",
+    "scratchpad/core-owner-visits-independent-second-validation-375.png",
+    "scratchpad/core-owner-visits-independent-second-saved-375.png",
+    "scratchpad/core-owner-visits-independent-second-cancelled-375.png",
+    "scratchpad/core-owner-visits-independent-second-form-1440.png"
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/owner-visits.mjs": "51318107f3b0164d95bac9a9d13133d53dd30f501bc26712a1c400e5b50d3c3e",
+    "netlify/functions/client.mjs": "bf111a320d3bdc611ff0585319062cfb6cd359e1f5527ee0541148c80d8929b6",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/lib/managed-delivery.mjs": "beba0c6fc70597124b41fc7802fa834e17e8ff34b5f048d99581063335b37cd1",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "desk.js": "b6a398b64a45227509540a9158cc8aeba0a95a57b1ae336efd2f1b0d161fd708",
+    "desk.html": "d4cee0672fbcf7ac98d04bda269c00cb43d28590523f9c67a3184e87ac2cf36c",
+    "desk.css": "7ecc69365d478fd2631e84a32ccc323f47e6e676ba6e9009fe7af3c1274702b5"
+  },
+  "sourceStable": false,
+  "summary": {
+    "passed": 14,
+    "failed": 0
+  },
+  "limits": [
+    "All records, mailboxes, callback numbers and sessions are synthetic; no outbound provider/model/email/Calendar action was performed.",
+    "Fault-only ESM wrappers throw around actual conditional-store and queue calls; no production source or algorithms are replaced.",
+    "Held-response sign-out is triggered through its actual click listener programmatically because a busy modal correctly prevents pointer access to background navigation.",
+    "No live multi-instance storage, customer consent, delivery or deployment is established."
+  ]
+}

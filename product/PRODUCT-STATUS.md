@@ -14,9 +14,11 @@ All activation gates and environment/billing settings are unchanged; no call, te
 
 ## Current PO and UI/UX next-work decision
 
-The [PO](PO-NEXT-WORK-2026-10-22.md) and [UI/UX](UIUX-NEXT-WORK-2026-10-22.md) reviews select [Sprint19: trustworthy business-detail editing](SPRINT19.md). Independent [offline QA](../scratchpad/next-work-workspace-save-qa.json) reproduced both returned defects in published-source assets and memory-backed handlers: a late save response overwrites newer typing; an invalid supplied callback returns200/“Saved” while retaining the old number. Both are confirmed defects, not repairs or observed production customer losses. No physical network or application change occurred in this review.
+**Primary: [Sprint20](SPRINT20.md), automatic core service delivery.** Steve's later feedback supersedes the earlier editing-first order. The isolated production-based candidate adds a bounded Calendar execution policy, receipt-aware transport instructions and ordinary owner visit controls. It has not been published or connected to a real calendar. Current local proof and remaining live dependencies are in Sprint20; do not convert fixture results into first-shop acceptance.
 
-[Backlog Round12](BACKLOG.md) supersedes the stale “current” priority/provider statements in older rounds. Signup/return acceptance and safe automatic-connection controls continue as launch priorities; actionable request commitments and verified website installation are the next product improvements. Production remains `05e8c5c`, all existing live budgets are closed, and the earlier auth/cleanup runtime remains excluded. This assessment implements no repair or new feature and creates no deploy/provider authority.
+[Sprint19](SPRINT19.md) remains open in parallel. [Offline QA](../scratchpad/next-work-workspace-save-qa.json) reproduced newer typing overwritten by a late save and an invalid callback returning success. These are confirmed defects, not repaired or observed production customer losses. Signup/return, dedicated phone/text delivery and native connectors remain unfinished. The separate company-support campaign cannot block all Calendar/voice work. Billing stays parked.
+
+[Backlog Round13](BACKLOG.md) is current. The candidate passes30 required commands with independent owner17/Calendar36/continuation18; [Sprint20](SPRINT20.md) retains the exact receipts, returned defects and live-test dependencies. Production remains `05e8c5c`, all earlier live budgets are closed, and unrelated main auth/cleanup runtime remains excluded. No new deployment, activation or real delivery is established.
 
 ## Earlier deployed delivery handoff — historical
 

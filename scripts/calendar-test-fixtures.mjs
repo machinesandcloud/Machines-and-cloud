@@ -13,10 +13,23 @@ export async function fixture() {
   Object.assign(process.env, { MC_MEMORY_STORE: "1", MC_FAKE_MODEL: "1", URL: "http://127.0.0.1:8888", PUBLIC_SITE_URL: "https://calendar.example.test", GOOGLE_CLIENT_ID: "dummy-google-client", GOOGLE_CLIENT_SECRET: "dummy-google-secret", CALENDAR_CONNECTION_ENABLED: "true", CALENDAR_DELIVERY_ENABLED: "true", SERVICE_WORKER_KEY: "fixture-calendar-worker-" + "b".repeat(40), CALENDAR_TOKEN_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString("base64") });
   const store = await import("../netlify/functions/lib/store.mjs"), { newClient } = await import("../netlify/functions/lib/config.mjs");
   const connection = await import("../netlify/functions/lib/calendar-connection.mjs"), delivery = await import("../netlify/functions/lib/calendar-delivery.mjs");
+  const execution = await import('../netlify/functions/lib/calendar-execution.mjs');
   const NativeDate = globalThis.Date; let clock = NativeDate.now();
   class FixtureDate extends NativeDate { constructor(...args) { super(...(args.length ? args : [clock])); } static now() { return clock; } }
   globalThis.Date = FixtureDate;
-  const requests = [], events = new Map(); let sequence = 0, target = "owner@calendar.example.test", mode = "normal", onRequest = null;
+  const requests = [], events = new Map(), policies = new Map(); let sequence = 0, target = "owner@calendar.example.test", mode = "normal", onRequest = null;
+  const sha = value => createHash('sha256').update(value).digest('hex');
+  async function approve(client, bookingIds = ['visit-1','visit-late','visit-a','visit-b','visit-c']) {
+    let policy = policies.get(client.slug);
+    if (!policy) {
+      const census = await execution.calendarExecutionCensus(client);
+      assert.equal(census.clean, true, 'Each fixture cohort starts without retained Calendar resources');
+      policy = { version:'fixture_' + client.slug.replaceAll('-','_'), censusMode:'clean_initial', expiresAt:new Date(Date.now() + 30*86400000).toISOString(), tenant:{slug:client.slug,identity:execution.calendarExecutionIdentity(client)}, googleClientIdHash:sha(process.env.GOOGLE_CLIENT_ID),targetIdHash:sha(target),censusDigest:census.digest,bookingIds,limits:Object.fromEntries(['oauthStart','tokenExchange','tokenRefresh','calendarRead','eventCreate','eventUpdate','eventDelete','workerDispatch','totalRequests'].map(action => [action,10000])) };
+      policies.set(client.slug, policy);
+    }
+    process.env.CALENDAR_EXECUTION_POLICY_JSON = JSON.stringify(policy); process.env.CALENDAR_EXECUTION_APPROVED_VERSION = policy.version;
+    return policy;
+  }
   const scopes = "https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly";
   const json = (status, data) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
   globalThis.fetch = async (input, init = {}) => {
@@ -56,10 +69,10 @@ export async function fixture() {
   async function seed(slug = "calendar-shop") {
     const client = { ...newClient({ slug, ownerKey: "permanent-owner-secret", owner: { email: `${slug}@example.test`, phone: "+17135550123" }, business: { name: "Fixture Home Service" } }), onboarding: { version: 1 }, status: "live", operationLifecycleVersion: 1 };
     const sessionHash = createHash("sha256").update(`session:${slug}`).digest("hex"), session = { sessionHash, email: client.owner.email, scope: "onboarding", status: "active", expiresAt: new Date(Date.now() + 3600000).toISOString() };
-    await store.saveClient(client); await store.put("access_sessions", sessionHash, session); return { client, session };
+    await store.saveClient(client); await store.put("access_sessions", sessionHash, session); await approve(client); return { client, session };
   }
-  async function connect(client, session) { const start = await connection.startCalendarConnection(client, session), state = new URL(start.authorizationUrl).searchParams.get("state"); await connection.completeCalendarConnection(client, session, { state, code: "dummy-authorization-code" }); return { start, state }; }
-  return { store, connection, delivery, seed, connect, requests, events, scopes, json, advance: ms => { clock += ms; }, setMode: value => { mode = value; }, setTarget: value => { target = value; }, intercept: callback => { onRequest = callback; } };
+  async function connect(client, session) { await approve(client); const start = await connection.startCalendarConnection(client, session), state = new URL(start.authorizationUrl).searchParams.get("state"); await connection.completeCalendarConnection(client, session, { state, code: "dummy-authorization-code" }); return { start, state }; }
+  return { store, connection, delivery, seed, connect, approve, execution, policies, requests, events, scopes, json, advance: ms => { clock += ms; }, setMode: value => { mode = value; }, setTarget: value => { target = value; }, intercept: callback => { onRequest = callback; } };
 }
 export async function report(name, checks) {
   const result = { check: name, at: new WallDate().toISOString(), passed: checks.length, failed: 0, checks, externalRequests: 0 };

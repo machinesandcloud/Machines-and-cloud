@@ -37,7 +37,7 @@
   </section>
 
   <section class="pane" id="p-leads">
-    <div class="card2"><h3>Bookings <span class="desk-record-count" id="bookingCount">0</span></h3><div id="bookings"></div></div>
+    <div class="card2"><h3>Bookings <span class="desk-record-count" id="bookingCount">0</span> <button type="button" class="btn-pill btn-pill-blue btn-sm" id="newVisit" hidden>Add visit</button></h3><div id="bookings"></div></div>
     <div class="card2"><h3>Callback requests &amp; leads <span class="desk-record-count" id="leadCount">0</span></h3><div id="leads"></div></div>
   </section>
 
@@ -135,6 +135,19 @@
   <div class="walkthrough-head"><span class="muted" id="tourCount"></span><button type="button" class="walkthrough-dismiss" id="closeGuide">Close walkthrough</button></div>
   <h2 id="tourTitle"></h2><p id="tourBody"></p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourAction"></button>
   <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="tourBack">Back</button><button type="button" class="walkthrough-dismiss" id="skipGuide">Skip for now</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourNext">Next</button></div>
+</dialog>
+<dialog class="walkthrough visit-dialog" id="visitDialog" aria-labelledby="visitTitle" aria-describedby="visitDeliveryNote">
+  <div class="visit-dialog-head"><span class="product-eyebrow">CUSTOMER VISIT</span><button type="button" class="walkthrough-dismiss" id="closeVisit" aria-label="Close visit details">Close</button></div>
+  <h2 id="visitTitle">Visit details</h2><p id="visitDetails" class="muted"></p>
+  <p id="visitDeliveryNote" class="visit-delivery-note">Your workspace saves the visit first. Calendar and message delivery appear separately in Connections.</p>
+  <form id="visitChangeForm" novalidate>
+    <div id="newVisitFields" hidden><div class="visit-change-fields"><div class="form-group"><label class="form-label" for="visitName">Customer name</label><input class="form-input" id="visitName" maxlength="120" aria-describedby="visitNameError"><p id="visitNameError" class="visit-field-error"></p></div><div class="form-group"><label class="form-label" for="visitPhone">Callback number</label><input type="tel" class="form-input" id="visitPhone" maxlength="40" aria-describedby="visitPhoneError"><p id="visitPhoneError" class="visit-field-error"></p></div></div><div class="form-group"><label class="form-label" for="visitAddress">Service address</label><input class="form-input" id="visitAddress" maxlength="300" aria-describedby="visitAddressError"><p id="visitAddressError" class="visit-field-error"></p></div><div class="form-group"><label class="form-label" for="visitIssue">What do they need?</label><textarea class="form-input" id="visitIssue" maxlength="500" aria-describedby="visitIssueError"></textarea><p id="visitIssueError" class="visit-field-error"></p></div><p class="muted">Customer texts use their saved messaging permission and your connection status.</p></div>
+    <div class="visit-change-fields"><div class="form-group"><label class="form-label" for="visitDate">Visit date</label><input class="form-input" type="date" id="visitDate" aria-describedby="visitDateError"><p id="visitDateError" class="visit-field-error"></p></div>
+    <div class="form-group"><label class="form-label" for="visitWindow">Arrival window</label><select class="form-input" id="visitWindow" aria-describedby="visitWindowError"></select><p id="visitWindowError" class="visit-field-error"></p></div></div>
+    <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button>
+    <div class="visit-cancel"><label for="visitCancelConfirm"><input type="checkbox" id="visitCancelConfirm"> I want to cancel this visit. Its history will remain in my workspace.</label><button type="button" class="walkthrough-dismiss" id="cancelVisit">Cancel visit</button></div>
+  </form>
+  <p id="visitMessage" role="status" aria-live="polite" tabindex="-1"></p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="retryVisit" hidden>Retry saved change</button>
 </dialog>
 <div class="toast" id="toast"></div>
 <dialog class="walkthrough" id="phoneCancelDialog" aria-labelledby="phoneCancelTitle">

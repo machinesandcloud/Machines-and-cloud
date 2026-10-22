@@ -1,0 +1,39 @@
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+{
+  "ok": false,
+  "passed": 13,
+  "total": 17,
+  "sourceStable": true,
+  "fixtureDispatches": 0,
+  "failures": [
+    {
+      "name": "Only fixed gated worker URLs are dispatched after the operator audit",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'retry'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'retry'\n\n    at file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:30:641\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:21:43)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:30:1"
+    },
+    {
+      "name": "Repeated dispatch failures stop at three attempts and remain in global health",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'needs_attention'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'needs_attention'\n\n    at file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:31:315\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:21:43)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:31:1"
+    },
+    {
+      "name": "A new successful operator request resolves dispatch failure without altering message or provider IDs",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n409 !== 200\n\n    at file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:32:273\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:21:43)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:32:1"
+    },
+    {
+      "name": "A delayed older terminal failure cannot replace a newer successful health watermark",
+      "pass": false,
+      "error": "Cannot read properties of null (reading 'failures')",
+      "stack": "TypeError: Cannot read properties of null (reading 'failures')\n    at file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:33:277\n    at async check (file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:21:43)\n    at async file:///private/tmp/mc-core-calendar-activation-05e/scripts/service-reconciliation-check.mjs:33:1"
+    }
+  ],
+  "output": null
+}

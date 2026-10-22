@@ -100,5 +100,23 @@ for (const channel of ["sms", "test", "web", "voice"]) {
 }
 assert.match(voicePrompt(c), /begin the customer-facing reply with the safety script before callback promises, fees, tool outcomes, or questions/);
 assert.match(voicePrompt(c), /State the current result without inventing why it changed/);
+// A managed customer conversation must not inherit the old workspace-only denial.
+// The transport does not certify a separate notification or calendar outcome.
+const managed = structuredClone(c); managed.onboarding = { version: 1 };
+const transportLabels = { web: "website chat", sms: "text messaging", voice: "a phone call", test: "the owner's private rehearsal" };
+for (const [channel, label] of Object.entries(transportLabels)) {
+  const prompt = buildSystemPrompt(managed, channel);
+  assert.ok(prompt.includes(`The current conversation uses ${label}.`));
+  assert.doesNotMatch(prompt, /workspace operates website chat only|Phone answering, SMS, automatic alerts and calendar sync are not active/);
+  assert.match(prompt, /distinguish a saved workspace record, queued delivery, confirmed delivery and failed or unconfirmed delivery/);
+  assert.match(prompt, /Never describe a queued text, reminder or calendar update as delivered/);
+  assert.match(prompt, /whether or when a person will respond is not confirmed/);
+  assert.doesNotMatch(prompt, /A booking already alerts the owner with every detail/);
+}
+const { managedAssistantBody } = await import("../netlify/functions/lib/voice-provider.mjs");
+const assistant = managedAssistantBody(managed, { correlationId: "offline-managed-prompt", inputRevision: "offline-rules", policy: { model: "offline-test-model", maxDurationSeconds: 90 }, site: "https://voice.example.test" });
+assert.match(assistant.model.messages[0].content, /The current conversation uses a phone call/);
+assert.doesNotMatch(assistant.model.messages[0].content, /workspace operates website chat only/);
+assert.match(assistant.model.messages[0].content, /A workspace record is not proof of a text, email, calendar sync or human callback/);
 assert.equal(queue.length, 0); assert.equal(unexpected, 0);
 console.log("AGENT DELIVERY OK: withheld preambles, preserved tool history, delivery contract/reminders, error results and all-channel safety/snapshot rules (offline SDK fixtures; model semantics unproven)");

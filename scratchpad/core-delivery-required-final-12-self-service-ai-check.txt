@@ -1,0 +1,67 @@
+agent API error {
+  name: 'InternalServerError',
+  status: 500,
+  message: 'Offline injected model failure'
+}
+agent API error {
+  name: 'InternalServerError',
+  status: 500,
+  message: 'Offline injected model failure'
+}
+{
+  "ok": true,
+  "checks": 43,
+  "casConflicts": 6652,
+  "cases": [
+    "memory: concurrent private ceiling",
+    "memory: concurrent web/global ceiling",
+    "memory: one global ceiling for both modes and all tenants",
+    "memory: global exhaustion closes another tenant without leaking other usage",
+    "memory: one last shared slot across modes",
+    "memory: DST reset 2030-03-10T06:00:00Z",
+    "memory: DST reset 2030-11-03T05:00:00Z",
+    "memory: operator kill switch",
+    "memory: unauthorized test not charged",
+    "memory: invalid input not charged",
+    "memory: private denial precedes model/test writes",
+    "memory: public denial precedes model/conversation writes",
+    "memory: public availability exposes no private quota",
+    "memory: owner receives quota but not other tenant records",
+    "memory: exhausted quota cannot activate chat",
+    "memory: failed SDK/model attempt remains charged",
+    "memory: next accepted private turn charges again",
+    "memory: actual public handler consumes same global document",
+    "memory: legacy client remains outside new budget",
+    "memory: homepage practice remains outside new budget",
+    "sdk: concurrent private ceiling",
+    "sdk: concurrent web/global ceiling",
+    "sdk: one global ceiling for both modes and all tenants",
+    "sdk: global exhaustion closes another tenant without leaking other usage",
+    "sdk: one last shared slot across modes",
+    "sdk: DST reset 2030-03-10T06:00:00Z",
+    "sdk: DST reset 2030-11-03T05:00:00Z",
+    "sdk: operator kill switch",
+    "sdk: unauthorized test not charged",
+    "sdk: invalid input not charged",
+    "sdk: private denial precedes model/test writes",
+    "sdk: public denial precedes model/conversation writes",
+    "sdk: public availability exposes no private quota",
+    "sdk: owner receives quota but not other tenant records",
+    "sdk: exhausted quota cannot activate chat",
+    "sdk: failed SDK/model attempt remains charged",
+    "sdk: next accepted private turn charges again",
+    "sdk: actual public handler consumes same global document",
+    "sdk: midnight is recomputed inside an actual CAS retry",
+    "sdk: unreadable budget fails before SDK/history",
+    "sdk: ambiguous committed reservation is retained without model call",
+    "sdk: legacy client remains outside new budget",
+    "sdk: homepage practice remains outside new budget"
+  ],
+  "actualExternalRequests": 0,
+  "backends": [
+    "memory",
+    "installed Blobs SDK protocol double"
+  ],
+  "model": "in-process streaming SDK fixture; no actual inference",
+  "budgetUnit": "accepted logical chat turn; bounded internal agent/SDK retries included in that turn"
+}

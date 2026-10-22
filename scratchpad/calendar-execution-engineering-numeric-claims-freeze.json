@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-22T21:55:03.918Z",
+  "fingerprints": {
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "2b4a17bc8ad75fc75013880d5de59ce84e272326507107b6f46a3bfcdd326b02"
+  },
+  "checks": {
+    "cohortRenewalAndClaimValidation": 18,
+    "connection": 19,
+    "delivery": 27,
+    "actualOwnerApi": 9,
+    "lateCreate": 2
+  },
+  "physicalExternalRequests": 0,
+  "notPublished": true,
+  "activationGatesUnchanged": true,
+  "claimValidation": {
+    "authoritativeCurrentWorkerFormat": "positive finite safe integer millisecond timestamp with 32-hex token",
+    "noClaim": "admissible",
+    "validExpiredNumeric": "admissible",
+    "activeNumeric": "denied",
+    "allISOStrings": "denied as unsupported",
+    "missingOrMalformed": "denied",
+    "classification": "Defensive retained-row validation gap. The current Calendar worker emits numeric deadlines; this was not a reproduced bypass from a current-worker-produced ISO claim."
+  },
+  "expiryComparisonInspection": "New policy/OAuth expiries use Date.parse; request deadlines require finite numbers; retained claims now share explicit numeric validation in census, per-job claim admission and worker-wave lease admission.",
+  "supersedesForCurrentAcceptance": [
+    "scratchpad/calendar-execution-engineering-renewal-freeze.json",
+    "scratchpad/core-calendar-independent-renewal-final.json"
+  ],
+  "remainingLimits": [
+    "No ordinary owner visit reschedule/cancel controls added.",
+    "Retained renewal requires still-usable connected Google permission; it does not reauthorize disconnected/revoked grants.",
+    "No phone/SMS/third-party connector activation."
+  ]
+}

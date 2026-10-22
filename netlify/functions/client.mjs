@@ -32,10 +32,13 @@ import { dispatchCalendarDeliveryWave } from "./lib/calendar-delivery.mjs";
 import { serviceOnboardingStatus, requestServiceOnboarding, cancelServiceOnboarding, ServiceOnboardingError } from "./lib/service-onboarding.mjs";
 import { dispatchServiceOnboarding } from "./lib/service-onboarding-dispatch.mjs";
 
+import { changeOwnerVisit, ownerVisitView, pendingOwnerVisitChange, pendingOwnerVisitCreations, OwnerVisitError } from "./lib/owner-visits.mjs";
+
 export const config = { path: "/api/client" };
 
 const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", Vary: "Origin" } : {});
 const s = (v, n = 300) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+const visibleOwnerBooking = (client, booking) => !booking.ownerVisitCreationAborted && (!isSelfServiceClient(client) || booking.delivery?.tenantIdentity === deliveryTenant(client));
 const arr = (v, n = 40) => (Array.isArray(v) ? v : String(v || "").split(/[\n;]+/)).map((x) => s(x, 160)).filter(Boolean).slice(0, n);
 
 export default async (req) => {
@@ -84,6 +87,7 @@ async function handle(req) {
     const [bookings, leads, convs, events, alerts, usage] = await Promise.all([
       listRecords("bookings", c.slug, 100), listRecords("leads", c.slug, 100), listJSON("conversations", c.slug + "/", 60), listJSON("events", c.slug + "/", 300), listRecords("alerts", c.slug, 100), getUsage(c.slug),
     ]);
+    const ownerBookings = selfService ? await Promise.all(bookings.filter(booking => visibleOwnerBooking(c, booking)).map(async booking => ({ ...booking, ownerVisit: ownerVisitView(booking), pendingVisitChange: await pendingOwnerVisitChange(c, booking.id) }))) : bookings;
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     const connections=selfService?await serviceConnections(c):null;
     if(selfService){
@@ -91,10 +95,10 @@ async function handle(req) {
       for(const conversation of sms){const old=convs.find(row=>row.channel==="sms"&&row.contact===conversation.contact);if(old)Object.assign(old,conversation);else convs.push(conversation);}
     }
     return json({
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, serviceOnboarding: await serviceOnboardingStatus(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: bookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, serviceOnboarding: await serviceOnboardingStatus(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
-      today: todayStrip(c, bookings, leads, events),
+      today: todayStrip(c, ownerBookings, leads, events),
       health: lineHealth(c, events, await lastInbound(c.slug)),
       availabilityBlocks,
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
@@ -167,6 +171,14 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if (["create_visit", "reschedule_visit", "cancel_visit"].includes(b?.action)) {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
+      try { return json(await changeOwnerVisit(c, session, b), 200, { "Cache-Control": "no-store" }); }
+      catch (error) {
+        if (error instanceof OwnerVisitError) return json({ error: error.code, message: error.message, field: error.field }, error.status, { "Cache-Control": "no-store" });
+        return json({ error: "visit_outcome_uncertain", message: "The visit change could not be confirmed. Retry the same saved change." }, 503, { "Cache-Control": "no-store" });
+      }
+    }
     const serviceActions = {
       request_service_onboarding: ["expectedRevision", "submissionId", "offerDigest", "acceptedCosts", "authority", "forwardingMode", "legal", "attestLegalAccuracy", "attestConsent", "testPhoneConsent"],
       cancel_service_onboarding: ["expectedRevision", "operationId"],
@@ -398,7 +410,7 @@ async function exportCSV(c, what) {
   let header, rows;
   if (what === "bookings") {
     header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "date", "window", "urgency", "status", "outcome", "customerType", "channel", "notes", "unsure", "consent.at", "consent.channel"];
-    rows = (await listRecords("bookings", c.slug, 2000)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel]);
+    rows = (await listRecords("bookings", c.slug, 2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel]);
   } else if (what === "leads") {
     header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure"];
     rows = (await listRecords("leads", c.slug, 2000)).map((l) => [l.id, l.createdAt, l.customer_name, l.phone, l.address, l.issue, l.reason, l.outcome, l.urgency, l.wanted, l.status, l.channel, l.unsure]);
@@ -411,7 +423,7 @@ async function exportCSV(c, what) {
     // Jobber's supported import headers; Housecall Pro's wizard maps the same names.
     header = ["First name", "Last name", "Mobile Phone", "Email", "Street", "City", "State", "Zip Code", "Note", "Lead Source", "Tags"];
     const byPhone = new Map();
-    const all = [...(await listRecords("bookings", c.slug, 2000)).map((b) => ({ ...b, kind: "booking" })), ...(await listRecords("leads", c.slug, 2000)).filter((l) => l.status !== "spam").map((l) => ({ ...l, kind: "lead" }))].sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+    const all = [...(await listRecords("bookings", c.slug, 2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => ({ ...b, kind: "booking" })), ...(await listRecords("leads", c.slug, 2000)).filter((l) => l.status !== "spam").map((l) => ({ ...l, kind: "lead" }))].sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
     for (const r of all) {
       if (!r.phone) continue;
       const cur = byPhone.get(r.phone) || { name: "", address: "", issues: [], refs: [] };

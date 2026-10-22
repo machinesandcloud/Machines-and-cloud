@@ -1,0 +1,96 @@
+{
+  "at": "2026-10-22T21:51:29.492Z",
+  "scope": "Local browser + actual client/Google handlers + memory store; Google/provider responses intercepted, zero live calls or emails.",
+  "before": {
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "73402205431f08ea3f87b52526550061fdbe3daeb9db908a4f4756fafac64251",
+    "netlify/functions/google.mjs": "d31458a0798eea59219ebf6a2d3bfd668bedc2b2abfa18d299600cc20cb4b32f",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a"
+  },
+  "after": {
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "73402205431f08ea3f87b52526550061fdbe3daeb9db908a4f4756fafac64251",
+    "netlify/functions/google.mjs": "d31458a0798eea59219ebf6a2d3bfd668bedc2b2abfa18d299600cc20cb4b32f",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a"
+  },
+  "sourceStable": true,
+  "checks": [
+    {
+      "name": "Starting Calendar records only a fresh state, slug, expiry and non-secret owner-session binding before the Google redirect",
+      "pass": true
+    },
+    {
+      "name": "A valid same-session Google consent return connects automatically through the real authenticated handler once, with PKCE and encrypted credentials",
+      "pass": true
+    },
+    {
+      "name": "A saved Google permission with exhausted delivery allowance shows the server waiting detail, not a future-sync promise",
+      "pass": true
+    },
+    {
+      "name": "Consent denial is completed automatically without token exchange or a false connected success message",
+      "pass": true
+    },
+    {
+      "name": "A missing browser receipt never submits the Google callback",
+      "pass": true
+    },
+    {
+      "name": "A different valid owner session cannot automatically process the original sign-in callback",
+      "pass": true
+    },
+    {
+      "name": "different_slug: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "different_state: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "expired_receipt: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "duplicate_state: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "code_and_denial: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "Legacy browser receipts retain an explicit completion action, protected by the same real server checks",
+      "pass": true
+    },
+    {
+      "name": "An authenticated event for another workspace is not enough to automatically complete this return",
+      "pass": true
+    },
+    {
+      "name": "Revoking the owner session before callback completion fails closed without token exchange",
+      "pass": true
+    },
+    {
+      "name": "server_expiry: authoritative state checks override an otherwise matching browser receipt",
+      "pass": true
+    },
+    {
+      "name": "newer_grant: authoritative state checks override an otherwise matching browser receipt",
+      "pass": true
+    },
+    {
+      "name": "A lost browser completion response refreshes status and never automatically replays a one-use grant",
+      "pass": true
+    },
+    {
+      "name": "Sign out during an in-flight continuation clears private UI and ignores the late response",
+      "pass": true
+    }
+  ],
+  "pageErrors": [],
+  "physicalRequests": 0,
+  "passed": 18,
+  "failed": 0,
+  "ok": true
+}

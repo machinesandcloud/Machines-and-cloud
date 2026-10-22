@@ -1,0 +1,132 @@
+{
+  "at": "2026-10-22T22:15:04.405Z",
+  "mode": "actual operator HTTP handler + durable service reconciliation; memory fixture; physical networking disabled",
+  "before": {
+    "netlify/functions/lib/operator.mjs": "a60c37ef5e93ed2187b5349fdcb54b027f198106d34aa43cf4a28e5bf56ced97",
+    "netlify/functions/lib/service-reconciliation.mjs": "dd56945cc88e09a14362c4581a62894a632e498170619861a2ddd403d3be8a27",
+    "netlify/functions/service-reconciliation-scheduler.mjs": "ccd670151bf0304ac9efabccd7657d676f7d429281fa98e97311c3e79bda16dc",
+    "netlify/functions/lib/service-health.mjs": "7e23e5f6200b186be17fe05641e35f6ada8654103e91da2ffb0ac28a547fa880",
+    "netlify/functions/scheduler.mjs": "c33d75ba5f5dd47b93e337255fbfa4722af6166d045575393f6a1f314d46fa57",
+    "netlify/functions/health.mjs": "6dd03b5986b40a0552e9e83551e4d5b93d728be6c6e9685fcc6a6caad5405f5b",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "admin.js": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d"
+  },
+  "checks": [
+    {
+      "name": "Owner tokens, cross-origin requests and extra approval fields cannot request operator checks",
+      "pass": true
+    },
+    {
+      "name": "A reasoned current-revision action commits the audit before any dispatch and waits honestly behind gates",
+      "pass": true
+    },
+    {
+      "name": "A stale revision and already-pending request cannot create duplicate check receipts",
+      "pass": true
+    },
+    {
+      "name": "The scheduler repairs a lost job and index projection from the audited client receipt",
+      "pass": true
+    },
+    {
+      "name": "Cancelled workspaces can request checks for retained cleanup without new customer authority",
+      "pass": true
+    },
+    {
+      "name": "Recreated tenant identity cannot execute or see an old operator request",
+      "pass": true
+    },
+    {
+      "name": "Enabled keys without cohort approval wait; an exact approved policy dispatches only the audited fixed worker",
+      "pass": true
+    },
+    {
+      "name": "Repeated dispatch failures stop at three attempts and remain in global health",
+      "pass": true
+    },
+    {
+      "name": "A new successful operator request resolves dispatch failure without altering message or provider IDs",
+      "pass": true
+    },
+    {
+      "name": "A delayed older terminal failure cannot replace a newer successful health watermark",
+      "pass": true
+    },
+    {
+      "name": "Removed operator allowlist membership prevents another action",
+      "pass": true
+    },
+    {
+      "name": "Admin pause and resume preserve a phone-only testing workspace without activating website chat",
+      "pass": true
+    },
+    {
+      "name": "A fresh installation with closed execution gates and no service-check work keeps main health green",
+      "pass": true
+    },
+    {
+      "name": "A retained dispatch exception fails main health after the active queue is empty",
+      "pass": true
+    },
+    {
+      "name": "A stale scanner with pending operator checks fails the monitored main health endpoint",
+      "pass": true
+    },
+    {
+      "name": "A failed recovery scan fails main health even with no projected pending request",
+      "pass": true
+    },
+    {
+      "name": "A later resolved watermark and successful pending scan restore monitored main health",
+      "pass": true
+    }
+  ],
+  "dispatches": [
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 503
+    },
+    {
+      "path": "/api/calendar-delivery-background",
+      "status": 202
+    }
+  ],
+  "after": {
+    "netlify/functions/lib/operator.mjs": "a60c37ef5e93ed2187b5349fdcb54b027f198106d34aa43cf4a28e5bf56ced97",
+    "netlify/functions/lib/service-reconciliation.mjs": "dd56945cc88e09a14362c4581a62894a632e498170619861a2ddd403d3be8a27",
+    "netlify/functions/service-reconciliation-scheduler.mjs": "ccd670151bf0304ac9efabccd7657d676f7d429281fa98e97311c3e79bda16dc",
+    "netlify/functions/lib/service-health.mjs": "7e23e5f6200b186be17fe05641e35f6ada8654103e91da2ffb0ac28a547fa880",
+    "netlify/functions/scheduler.mjs": "c33d75ba5f5dd47b93e337255fbfa4722af6166d045575393f6a1f314d46fa57",
+    "netlify/functions/health.mjs": "6dd03b5986b40a0552e9e83551e4d5b93d728be6c6e9685fcc6a6caad5405f5b",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "admin.js": "7baae9f91948f31ad7bef81e8e1d5866518d94e4ca01fa5813425630dfb3fd8d"
+  },
+  "sourceStable": true,
+  "passed": 17,
+  "total": 17,
+  "ok": true
+}

@@ -127,7 +127,7 @@
       if(result.serviceOnboarding)data.serviceOnboarding=result.serviceOnboarding;
       if(result.phoneActivation)data.phoneActivation=result.phoneActivation;
       if (dialog.open) dialog.close(); data.connections = result.connections; render(data);
-      message.textContent = action === 'complete_calendar_connection' ? result.result?.denied ? 'Calendar access was not granted. Your existing settings are unchanged.' : result.connections.calendar.connected ? 'Google Calendar is connected. Future saved visits will sync in the background.' : 'Your calendar status is saved. Check its next step above.' : 'Your change is saved. Its status above shows what happens next.';
+      message.textContent = action === 'complete_calendar_connection' ? result.result?.denied ? 'Calendar access was not granted. Your existing settings are unchanged.' : result.connections.calendar.connected ? 'Google Calendar is connected. ' + (result.connections.calendar.detail || 'Check each visit’s delivery status above.') : 'Your calendar status is saved. Check its next step above.' : 'Your change is saved. Its status above shows what happens next.';
     } catch (error) {
       if (expectedGeneration === generation) {
         if (action === 'complete_calendar_connection') { clearCalendarReturn(); if (data) render(data); document.dispatchEvent(new CustomEvent('mc:desk-refresh')); }

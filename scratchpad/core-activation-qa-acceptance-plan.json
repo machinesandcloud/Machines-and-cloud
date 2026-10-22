@@ -1,0 +1,214 @@
+{
+  "at": "2026-10-22T21:39:06.818791+00:00",
+  "scope": "Independent offline source assessment and proposed acceptance matrix; no candidate control implementation was available to test. This is not a passed test suite or live acceptance.",
+  "publishedCheckout": "/tmp/mc-campaign-redacted-e997",
+  "publishedHEAD": "05e8c5c34656f3257af8a8d3d7e8523dcbd542b3",
+  "source": {
+    "netlify/functions/lib/access.mjs": {
+      "publishedSHA256": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/phone-activation.mjs": {
+      "publishedSHA256": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/phone-twilio.mjs": {
+      "publishedSHA256": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/voice-activation.mjs": {
+      "publishedSHA256": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/voice-provider.mjs": {
+      "publishedSHA256": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/messaging-activation.mjs": {
+      "publishedSHA256": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/messaging-provider.mjs": {
+      "publishedSHA256": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+      "mainIdentical": false
+    },
+    "netlify/functions/lib/service-onboarding.mjs": {
+      "publishedSHA256": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8",
+      "mainIdentical": true
+    },
+    "netlify/functions/lib/calendar-connection.mjs": {
+      "publishedSHA256": "c9e2f36051eaff42e94d7fddcb1cfd0549b468ff9cb12bfd2a607e434ecb79aa",
+      "mainIdentical": true
+    },
+    "netlify/functions/lib/calendar-delivery.mjs": {
+      "publishedSHA256": "bd365e029f3fc30d1e8f8a703ae4631a264c8826176903f95dd728d6f4929b02",
+      "mainIdentical": true
+    },
+    "netlify/functions/lib/managed-sms.mjs": {
+      "publishedSHA256": "d6ce48097e42a521c434db5a4d01f8a146b81824b7f71cbf179fba4e6db3310d",
+      "mainIdentical": true
+    },
+    "netlify/functions/lib/managed-delivery.mjs": {
+      "publishedSHA256": "a0b50d3d6b245759af4c6f40895916a9cbc52e5195e1822779a89e11b19b48f8",
+      "mainIdentical": true
+    }
+  },
+  "confirmedSourceFindings": [
+    {
+      "finding": "Global service flags and policy digests exist but no exact-tenant/cohort/effect admission ledger in inspected published paths.",
+      "examples": [
+        "phone-activation productionPolicy/productionEngine",
+        "messaging-activation policy/production",
+        "calendarConnectionEnabled/calendarDeliveryEnabled"
+      ]
+    },
+    {
+      "finding": "Calendar token/data fetches omit redirect:error; an exact physical attempt budget must address automatic redirects.",
+      "examples": [
+        "calendar-connection.mjs googleJson",
+        "calendar-delivery.mjs requestGoogle"
+      ]
+    },
+    {
+      "finding": "Actual primary Calendar ID is read after token exchange and retained as targetId/targetHash; proposed policy must bind to it.",
+      "examples": [
+        "calendar-connection.mjs completeCalendarConnection"
+      ]
+    },
+    {
+      "finding": "Main access/number/voice/texting engines/providers differ from published source. Older cleanup/authentication repairs cannot be assumed deployed or wholesale copied.",
+      "examples": [
+        "product/SPRINT14.md",
+        "source mainIdentical flags"
+      ]
+    },
+    {
+      "finding": "Prior live StageA closed before owner signup; exact challenge already consumed before rejected exchange. Earlier consumer/session and live root cause remain unknown.",
+      "examples": [
+        "product/HOSTED-ONBOARDING-ACCEPTANCE.md",
+        "scratchpad/signin-readonly-diagnosis-20261022.json"
+      ]
+    }
+  ],
+  "calendarFirstCandidateAcceptance": [
+    {
+      "id": "default_deny",
+      "requiredOutcome": "No policy, malformed policy, expired policy or global flag only permits zero token/data/provider fetches.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "exact_tenant",
+      "requiredOutcome": "Named tenant admitted; another tenant, same-slug replacement, changed owner email/key or lifecycle cannot consume quota or dispatch.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "binding",
+      "requiredOutcome": "Changed Google client identity or actual primary Calendar target denies new work. Literal primary is not account identity.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "all_entry_points",
+      "requiredOutcome": "Status/start/complete, direct standalone API, refresh, foreground worker, scheduled wave, recovery and dispatch all apply the same fence.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "oauth_guards",
+      "requiredOutcome": "Existing one-use state/PKCE, original verified session, epoch, expiry and tenant/lifecycle checks remain mandatory; wrong session/state makes no token request.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "atomic_quota",
+      "requiredOutcome": "Two concurrent admissions for last request slot cause at most one physical request; independent category and total limits cannot overflow.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "reservation_before_effect",
+      "requiredOutcome": "Durable CAS reservation precedes fetch. Storage unavailable or ambiguous CAS acknowledgment cannot produce an unmetered attempt.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "unknown_and_retry",
+      "requiredOutcome": "Timeout/HTTP failure/crash after admission consumes quota. Retry/reconciliation consumes another permitted attempt; no reset/refund/replacement create.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "revoke_race",
+      "requiredOutcome": "Policy revoke, expiry, brake, disconnect, pause or lifecycle change between reservation and effect prevents the physical request without restoring quota.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "redirects",
+      "requiredOutcome": "Token/data requests reject redirects or meter and validate each hop; no default-follow hidden requests or credential/code forwarding.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "census",
+      "requiredOutcome": "Retained intents, bookings, outbox and jobs are bounded/inventoried; changed or partial census prevents rollout and unrelated retained work cannot resume.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "calendar_event_identity",
+      "requiredOutcome": "Exactly one deterministic test event ID is used; lost-create reply, 409 and later reload reconcile it without another event.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "calendar_ownership",
+      "requiredOutcome": "Remote metadata, exact target and ETag prevent changing unrelated or manually conflicting events.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "local_record_survival",
+      "requiredOutcome": "Failed/deferred Calendar operation retains authoritative local visit and exposes waiting/retry/needs-attention without declaring sync.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "cancellation_and_stop",
+      "requiredOutcome": "Canceled/removed visit cannot create a late event; pause/disconnect stop new writes while keeping exact outstanding IDs and receipts.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "cleanup",
+      "requiredOutcome": "Explicit cleanup scope and budget permits only known test-owned event/resource reconciliation/deletion; does not admit create, send, token to other target or new contacts. Expired ordinary policy must not strand unclear recurring resources.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "privacy",
+      "requiredOutcome": "No OAuth code, token, verifier, credential, account identifier or unrestricted policy document leaks into DTO/URL/log/receipt; store hashed bindings only where adequate.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "ui_truth",
+      "requiredOutcome": "Owner/admin distinguish unavailable, customer action needed, waiting approval, limit reached and actual receipt-confirmed active; one named pilot never makes other tenants appear available.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "other_core_channels",
+      "requiredOutcome": "Calendar-only fence cannot authorize Twilio/Vapi/managed SMS/model/email. These require their complete transport fences and separately accepted budgets before gates change.",
+      "status": "proposed_not_executed"
+    },
+    {
+      "id": "release_and_live_proof",
+      "requiredOutcome": "Exact candidate includes only intended changes based on05e; focused local proof is separate from one approved publication and named actual Calendar/signup/provider acceptance.",
+      "status": "proposed_not_executed"
+    }
+  ],
+  "freshControlledSignupPlan": {
+    "candidate": "Use exact current isolated candidate based on05e8c5c, never the old b9 target or main wholesale. Rehearse current published assets plus actual candidate handlers in memory before requesting live execution.",
+    "authority": "All earlier signup/release/read budgets closed. A new exact recipient/alias, runtime manifest and capped request/email ledger is needed; none is created by this plan.",
+    "steps": [
+      "Verify exact READY target and seven paid-service flags remain off using separately approved metadata allowance.",
+      "Use isolated owner/operator/anonymous contexts; count every first-party fetch/redirect/autosave before transport; block all model, voice, SMS, Calendar and other email paths.",
+      "Read only newly authorized email message text without opening/previewing/submitting its link; capture original token only in memory; one observed owner Continue/exchange.",
+      "Save early inquiry and unchecked marketing preference; verify email, all required answers, per-field errors and one workspace after repeated completion; preserve latest pending edits.",
+      "Verify return/signout/revoked session, anonymous/wrong-purpose/wrong-owner denials, mobile375px and desktop, actual operator retrieval by exact server-generated tenant binding.",
+      "Use one audited cancellation and revoke only test sessions if authorized; no delete or paid activation.",
+      "Only after free signup succeeds, scope a separately metered real web-practice/activation proof; phone/SMS/Calendar need distinct named targets and provider receipts."
+    ],
+    "budget": "Do not reuse old ceilings automatically; propose a fresh manifest after offline request counts. Prior160-site/4-email/2-metadata ceiling is historical and fully closed."
+  },
+  "notDone": [
+    "No control code written or tested here.",
+    "No physical network/browser/account/production request; no provider/model/email/call/text/calendar action.",
+    "No environment/gate/deploy or application edit; this new evidence-plan file only."
+  ]
+}

@@ -50,7 +50,7 @@ async function indexPending(job) {
   });
 }
 export async function queueManagedRecord(c, record, kind = "bookings") {
-  if (!isSupportedSelfServiceClient(c) || !["bookings", "leads"].includes(kind) || record?.slug !== c.slug || record.status === "spam") return;
+  if (!isSupportedSelfServiceClient(c) || !["bookings", "leads"].includes(kind) || record?.slug !== c.slug || record.status === "spam" || record.ownerVisitCreationAborted === true) return;
   const current = await currentClient(c), saved = await strictRead(kind, `${c.slug}/${record.id}`);
   if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c)) return;
   const rev = revision(saved), source = { kind, id: saved.id, revision: rev }, eventId = `${kind}:${saved.id}:${rev}`;

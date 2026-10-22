@@ -1,0 +1,104 @@
+{
+  "at": "2026-10-22T22:11:23.155Z",
+  "scope": "Local browser + actual client/Google handlers + memory store; Google/provider responses intercepted, zero live calls or emails.",
+  "before": {
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "bf111a320d3bdc611ff0585319062cfb6cd359e1f5527ee0541148c80d8929b6",
+    "netlify/functions/google.mjs": "d31458a0798eea59219ebf6a2d3bfd668bedc2b2abfa18d299600cc20cb4b32f",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "scripts/calendar-test-fixtures.mjs": "9e4a4eaf9286cd91a789a5faa3d85f1511f0ea2c2004519a487c8930b5183f67",
+    "scripts/calendar-auto-connect-check.mjs": "b2e5ee350e7617e47e0c1197c6b3888b3d69f44645a5a9f99f059c0a26c85729"
+  },
+  "after": {
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "bf111a320d3bdc611ff0585319062cfb6cd359e1f5527ee0541148c80d8929b6",
+    "netlify/functions/google.mjs": "d31458a0798eea59219ebf6a2d3bfd668bedc2b2abfa18d299600cc20cb4b32f",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "scripts/calendar-test-fixtures.mjs": "9e4a4eaf9286cd91a789a5faa3d85f1511f0ea2c2004519a487c8930b5183f67",
+    "scripts/calendar-auto-connect-check.mjs": "b2e5ee350e7617e47e0c1197c6b3888b3d69f44645a5a9f99f059c0a26c85729"
+  },
+  "sourceStable": true,
+  "checks": [
+    {
+      "name": "Starting Calendar records only a fresh state, slug, expiry and non-secret owner-session binding before the Google redirect",
+      "pass": true
+    },
+    {
+      "name": "A valid same-session Google consent return connects automatically through the real authenticated handler once, with PKCE and encrypted credentials",
+      "pass": true
+    },
+    {
+      "name": "A saved Google permission with exhausted delivery allowance shows the server waiting detail, not a future-sync promise",
+      "pass": true
+    },
+    {
+      "name": "Consent denial is completed automatically without token exchange or a false connected success message",
+      "pass": true
+    },
+    {
+      "name": "A missing browser receipt never submits the Google callback",
+      "pass": true
+    },
+    {
+      "name": "A different valid owner session cannot automatically process the original sign-in callback",
+      "pass": true
+    },
+    {
+      "name": "different_slug: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "different_state: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "expired_receipt: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "duplicate_state: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "code_and_denial: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "Legacy browser receipts retain an explicit completion action, protected by the same real server checks",
+      "pass": true
+    },
+    {
+      "name": "An authenticated event for another workspace is not enough to automatically complete this return",
+      "pass": true
+    },
+    {
+      "name": "Revoking the owner session before callback completion fails closed without token exchange",
+      "pass": true
+    },
+    {
+      "name": "server_expiry: authoritative state checks override an otherwise matching browser receipt",
+      "pass": true
+    },
+    {
+      "name": "newer_grant: authoritative state checks override an otherwise matching browser receipt",
+      "pass": true
+    },
+    {
+      "name": "A lost browser completion response refreshes status and never automatically replays a one-use grant",
+      "pass": true
+    },
+    {
+      "name": "Sign out during an in-flight continuation clears private UI and ignores the late response",
+      "pass": true
+    }
+  ],
+  "pageErrors": [],
+  "physicalRequests": 0,
+  "passed": 18,
+  "failed": 0,
+  "ok": true
+}

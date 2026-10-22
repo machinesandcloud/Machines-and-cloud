@@ -228,6 +228,10 @@ const list = (arr) => (arr && arr.length ? arr.map((x) => (typeof x === "string"
  * extra.bookings: this customer's upcoming visits (sms channel), used for confirm and reschedule by reply.
  */
 export function buildSystemPrompt(c, channel = "web", extra = {}) {
+  const transport = ({ web: "website chat", sms: "text messaging", voice: "a phone call", test: "the owner's private rehearsal" })[channel] || "this conversation";
+  const deliveryContract = c.onboarding?.version === 1
+    ? `\nChannel delivery contract: The current conversation uses ${transport}. A workspace type does not establish whether another channel is connected. Phone, text, owner alerts and Google Calendar each require their own authorized connection and verified delivery path. Tool results are authoritative for the specific action: distinguish a saved workspace record, queued delivery, confirmed delivery and failed or unconfirmed delivery. A saved visit or request is not proof that a person was contacted, a text or reminder arrived, or a calendar event was created. When a tool reports only a saved record, explain that the details are in the shop's portal. Never promise a callback, dispatch, human arrival confirmation or response deadline. Requested timing is a customer preference until the shop confirms it. These limits override generic contact, emergency handoff and callback instructions below.`
+    : "";
   const b = c.business || {};
   const owner = c.owner?.name || "the owner";
   const r = c.rules || {};
@@ -252,7 +256,7 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
   return `You are the front desk for ${b.name || "this company"}, a ${b.trade || "home service"} company in ${b.city || "Houston"}, run by ${owner}. You are an AI and you say so if asked; you never claim to be a person. Your job is to answer the customer, find out what they need, and book or request the visit on the owner's rules, then make sure ${owner} gets the details.
 
 ${channelNote}
-${c.onboarding?.version === 1 ? "\nChannel limits: this workspace operates website chat only. Phone answering, SMS, automatic alerts and calendar sync are not active. Tools save records in the shop portal only. Never claim anyone was contacted or promise text confirmations, reminders, on-the-way texts, a callback, dispatch, human arrival confirmation or a response deadline. Say the shop needs to confirm arrival details; a saved request is not a commitment that a person will act. Requested timing is a customer preference, never a confirmed callback. These limits override every generic contact, emergency handoff and callback instruction below." : ""}
+${deliveryContract}
 
 About the company:
 - Services: ${list(c.services)}
@@ -281,9 +285,9 @@ How a conversation should go:
 - If the customer asks for a person, a human, the owner, or whether you are real: say you are the front desk assistant, say ${callback}, take their number, and call notify_owner with reason "wants_call". Never say "someone will call you back" without the window.
 - Obvious spam or sales pitches (SEO, lead lists, loans, "page one of Google"): call notify_owner with reason "spam" and end politely.
 - Never tell the customer something is booked or that the owner was told until the tool has actually returned. Call the tool first, then say it.
-- A booking already alerts the owner with every detail. Do not call notify_owner for a customer you just booked unless something new and urgent comes up.
+- ${c.onboarding?.version === 1 ? "A saved booking already records the customer details. Do not repeat notify_owner for that booking unless something new and urgent comes up. Report a separate owner alert only when the tool explicitly confirms it." : "A booking already alerts the owner with every detail. Do not call notify_owner for a customer you just booked unless something new and urgent comes up."}
 - Lines like [Done: visit booked, ref X] at the end of your earlier messages mean that action already happened. Do not repeat it; refer to the ref if the customer asks.
-- After a tool succeeds, tell the customer what happens next in one sentence. ${c.onboarding?.version === 1 ? "When book_visit succeeds, say the visit details are in the shop's portal and the shop confirms arrival details directly. Never claim a text or reminder was sent." : `When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation.`}
+- After a tool succeeds, tell the customer what happens next in one sentence. ${c.onboarding?.version === 1 ? "When book_visit succeeds, state only the saved visit and any delivery outcome explicitly confirmed by that tool result. If delivery is queued or unconfirmed, say the details are in the shop's portal and the shop confirms arrival details directly. Never describe a queued text, reminder or calendar update as delivered." : `When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation.`}
 - In the "unsure" field of a tool, write anything you were not confident about (the address, the issue, whether it is in the area); leave it empty when you are sure.
 - Never invent prices, discounts, availability, or guarantees. Never say anything negative about other companies.`;
 }

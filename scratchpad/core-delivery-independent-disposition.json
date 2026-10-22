@@ -1,0 +1,173 @@
+{
+  "at": "2026-10-22T22:20:57.908013+00:00",
+  "reviewer": "Independent QA subagent /root/api_automation_architecture",
+  "scope": "Read-only final source/receipt/proposal review followed by this requested evidence write. No source tests rerun or application/config/account changes in this review.",
+  "verdict": "LOCAL_CANDIDATE_ACCEPTED_FOR_REVIEW",
+  "errors": [],
+  "publishedBaseline": "05e8c5c34656f3257af8a8d3d7e8523dcbd542b3",
+  "checkoutHEADAtReview": "08715f0d7360a7b239d4c5fdd417b5bdcc4b0636",
+  "candidateRuntimeAndRequiredCheckSHA256": {
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "desk.css": "ce11f3271e8d1051651f24cba25fc5c950a620d5a4edc4d5be0625177a843b59",
+    "desk.html": "86733b75dcf267756408cf6596de91604036ab53481164b7bfc83da65e24ac1a",
+    "desk.js": "e2e0ed198499702d34d19af9332ecc92acbad6d33a8c551c23ed7ad708f5fede",
+    "netlify.toml": "16c35723f52396e25b32a0625587886f95bde7ab2fee25b7ac4295c7108c2a78",
+    ".env.example": "9a37ae596c0b9937fabdc9066726d1fe8be4047639dab75e5854e6d30ab3addb",
+    "netlify/functions/chat.mjs": "bee39cda4c9a9c6a17daa71f00c240f69251dff6a2f2e9b1eca21f49c177249b",
+    "netlify/functions/client.mjs": "bf111a320d3bdc611ff0585319062cfb6cd359e1f5527ee0541148c80d8929b6",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "netlify/functions/lib/owner-visits.mjs": "ee232fce3aec54d785de35a08bd0c95fbbabbb2c327cb321a2fc902c74675440",
+    "netlify/functions/lib/config.mjs": "fa11f41239c4df4a8bb7cbb51dd2334b00dd76e8281f31ff85af1d012147c1a4",
+    "netlify/functions/lib/managed-delivery.mjs": "beba0c6fc70597124b41fc7802fa834e17e8ff34b5f048d99581063335b37cd1",
+    "scripts/calendar-execution-check.mjs": "df598bb61274f91566a69440368262d22431d435a67d466ae9c20f42058fc590",
+    "scripts/owner-visits-check.mjs": "39f449b3373e860488cd8c5ffa9840841bc33e6ba13d2745384b518c035d2b79",
+    "scripts/agent-delivery-check.mjs": "1e19e06153ee173f38da4375fcabf7ef1943ea7102e98fc6f7777568f4dc8b39"
+  },
+  "acceptanceReceipts": {
+    "ownerTransactionsAndUI": {
+      "receipt": "scratchpad/core-owner-visits-independent-final.json",
+      "receiptSHA256": "1466ea0f2c7fa12f175c938d9593f120b0176e02577148c042d75f3058ae1284",
+      "passed": 17,
+      "failed": 0,
+      "sourceStable": true,
+      "recordedHashField": "sourceAfter",
+      "recordedSourceFiles": 8,
+      "currentSourceMismatches": [],
+      "currentSourceMatches": true
+    },
+    "calendarControlsAndWorkerLifecycle": {
+      "receipt": "scratchpad/core-calendar-independent-wave-final-accepted.json",
+      "receiptSHA256": "daefcc8034b6c594c36d87867590279e2b589d4a995bcf094f9d0f4a077735ae",
+      "passed": 36,
+      "failed": 0,
+      "sourceStable": true,
+      "recordedHashField": "sourceAfter",
+      "recordedSourceFiles": 8,
+      "currentSourceMismatches": [],
+      "currentSourceMatches": true
+    },
+    "calendarConsentFrontend": {
+      "receipt": "scratchpad/core-calendar-auto-connect-final.json",
+      "receiptSHA256": "3e82f35a7d743a2981e246eb6918564e54fe2bbdd9c6640ff3f9ebeba7389046",
+      "passed": 18,
+      "failed": 0,
+      "sourceStable": true,
+      "recordedHashField": "after",
+      "recordedSourceFiles": 8,
+      "currentSourceMismatches": [],
+      "currentSourceMatches": true
+    },
+    "requiredOfflineBuildGate": {
+      "receipt": "scratchpad/core-delivery-required-final-result.json",
+      "receiptSHA256": "850189b53e549ec5b7cbef4cddad4b9890d0a7f5d4d8bc3f726751447785d83b",
+      "passed": 30,
+      "failed": 0,
+      "sourceStable": true,
+      "recordedHashField": "after",
+      "recordedSourceFiles": 382,
+      "currentSourceMismatches": [],
+      "currentSourceMatches": true
+    }
+  },
+  "excludedBaselineRuntime": {
+    "netlify/functions/lib/access.mjs": {
+      "currentSHA256": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+      "baselineSHA256": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/phone-activation.mjs": {
+      "currentSHA256": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+      "baselineSHA256": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/phone-twilio.mjs": {
+      "currentSHA256": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+      "baselineSHA256": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/voice-activation.mjs": {
+      "currentSHA256": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+      "baselineSHA256": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/voice-provider.mjs": {
+      "currentSHA256": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+      "baselineSHA256": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/messaging-activation.mjs": {
+      "currentSHA256": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db",
+      "baselineSHA256": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/messaging-provider.mjs": {
+      "currentSHA256": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+      "baselineSHA256": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+      "byteIdenticalToPublishedBaseline": true
+    },
+    "netlify/functions/lib/platform-sms.mjs": {
+      "currentSHA256": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+      "baselineSHA256": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+      "byteIdenticalToPublishedBaseline": true
+    }
+  },
+  "meaningfulBehaviorAcceptedLocally": [
+    "Owner Add/move/cancel writes exact tenant-bound records and capacity, validates callback/date/window, preserves immutable operation replay and recovers uncertain record/capacity/abort/queue/lock outcomes.",
+    "Actual375px/desktop owner controls, linked red field errors, reload after lost response and late committed-response sign-out fence passed in isolated browser fixtures.",
+    "Calendar exact-tenant/client/target/named-visit policy, immutable CAS request budgets, reviewed retained renewal, malformed lease rejection and repeated successful/failed wave lifecycle passed with intercepted Google responses.",
+    "Shared prompt follows actual conversation transport and server-confirmed outcomes; saved records and queued work do not imply delivered notifications, human response or Calendar success. Private owner rehearsal remains a preview."
+  ],
+  "uiEvidence": {
+    "screenshotPrefix": "scratchpad/core-owner-visits-independent-final-",
+    "screenshots": [
+      "form-375.png",
+      "validation-375.png",
+      "saved-375.png",
+      "cancelled-375.png",
+      "form-1440.png"
+    ],
+    "redErrorComputedColor": "rgb(170, 36, 56)",
+    "wording": [
+      "CUSTOMER VISIT",
+      "Your workspace saves the visit first. Calendar and message delivery appear separately in Connections.",
+      "We'll check availability when you save."
+    ],
+    "visualReview": "Mobile validation and desktop normal form inspected; no visual blocker."
+  },
+  "executionAndAuthority": {
+    "localTestsOnly": true,
+    "productionPublicationPerformed": false,
+    "environmentOrGateChangesPerformed": false,
+    "providerCallsPerformed": false,
+    "actualEmailsTextsCallsModelsPurchasesBillingChanges": false,
+    "publicationOrActivationAuthorityCreatedByThisArtifact": false,
+    "allEarlierExternalBudgetsRemainClosed": true,
+    "noLiveReadinessClaim": true
+  },
+  "liveProofProposalReview": {
+    "proposal": "scratchpad/core-calendar-live-proof-proposal.json",
+    "proposalSHA256AtReview": "4600c58a249c58295cc273371d63e0578a5f2ca2b42445dfe3de89827489ab74",
+    "status": "proposal_only_not_authorized_not_executed",
+    "amendmentsRecorded": [
+      "Actual owned primary Calendar ID must be obtained from that Calendar settings before hashing; not inferred from login email.",
+      "New guarded-deployment environment snapshot staging must be established; old05e unfenced functions must retain their prior values.",
+      "Worker dispatch10/total29 plus at most3 named private worker POSTs are explicit; natural scheduling and failures consume allowances.",
+      "Exact three-store global census and bounded direct inspection, cleanup reserve and60-minute expiry/closed-tenant post-test disposition are stated."
+    ],
+    "remainingExecutionPrerequisites": [
+      "Fresh controller/immutable ledger is being implemented and is not established by this read-only review. It must enforce exact target runtime, recipients/actions/counts, safe message reading and allowed transport before any live execution.",
+      "The exact committed release target and owner approval must be obtained before publication or account/Calendar activity.",
+      "Environment snapshot semantics, current production prerequisites, actual mailbox/sign-in, owner Google consent, live storage and real event create/update/delete still require separately authorized verification."
+    ],
+    "noAutomaticAuthorityOrAllowanceReuse": true
+  },
+  "stageSeparation": [
+    "This artifact accepts a locally checked application candidate; it is not a push, deployment, published verification or completed customer signup.",
+    "Calendar worker tests and owner transaction/UI tests retain their stated fixture limits; no real Google permission, provider event, customer notification or cross-instance storage result is established.",
+    "An unchanged provider engine or a saved registration is not proof that phone/SMS service is active. All phone/SMS/carrier/billing/account support work remains outside this candidate review.",
+    "Earlier29/32 Calendar receipts and unstable/intermediate owner receipts remain historical. Use Calendar36 and Owner17 final receipts linked above."
+  ],
+  "receiptSelectionCorrection": "Earlier chat mistakenly selected core-calendar-auto-connect-second.json (old client hash). The authoritative final receipt used here is core-calendar-auto-connect-final.json; all4 current fingerprints are verified, with no rerun needed."
+}
