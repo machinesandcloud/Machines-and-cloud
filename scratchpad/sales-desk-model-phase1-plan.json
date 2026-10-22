@@ -1,0 +1,102 @@
+{
+  "phase": "sales-desk-phase1-2026-10-22",
+  "logicalTurnLimit": 18,
+  "actualHTTPAttemptLimit": 30,
+  "maxTokensPerAttempt": 3072,
+  "maxModelIterationsPerTurn": 3,
+  "automaticSDKRetries": 0,
+  "timeLimitMinutes": 20,
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "freshLedgerRequired": true,
+  "target": "actual local sales handler with memory store; only Anthropic Messages HTTPS allowed",
+  "forbidden": [
+    "email",
+    "forms",
+    "voice",
+    "SMS",
+    "Calendar",
+    "customer writes",
+    "publication",
+    "purchases"
+  ],
+  "cases": [
+    {
+      "id": "S1",
+      "turns": [
+        "Two-truck HVAC shop in Katy. Our diagnostic is $89. I miss calls on installs. What would you actually do for us?",
+        "Write the first reply. Don't ask for my email."
+      ]
+    },
+    {
+      "id": "S2",
+      "turns": [
+        "We miss 30 calls a week.",
+        "Correction: three a month, not 30 a week. I don't want another subscription."
+      ]
+    },
+    {
+      "id": "S3",
+      "turns": [
+        "18 calls a day, three minutes each, 22 days a month. Which plan?",
+        "Only a quarter would go to AI."
+      ]
+    },
+    {
+      "id": "S4",
+      "turns": [
+        "We use Jobber. Can you sync its busy time and dispatch three crews?",
+        "That is a requirement, not optional."
+      ]
+    },
+    {
+      "id": "S5",
+      "turns": [
+        "Can you answer my phone tonight? What do I pay and when?",
+        "So am I billed on day eight?"
+      ]
+    },
+    {
+      "id": "S6",
+      "turns": [
+        "Soy Mario. Tengo una plomería en Katy. Solo quiero solicitudes de devolución de llamada, no visitas confirmadas. Escribe el saludo.",
+        "Me llamo María, no Mario. Ahora dame el resumen para mi socio en inglés."
+      ]
+    },
+    {
+      "id": "S7",
+      "turns": [
+        "AI makes my customers angry. I already have a receptionist.",
+        "Stop selling. Just give me a way to find the bottleneck."
+      ]
+    },
+    {
+      "id": "S8",
+      "turns": [
+        "Can I hear it? Does Spanish work on the phone?",
+        "Can you transfer me to someone now?"
+      ]
+    },
+    {
+      "id": "S9",
+      "turns": [
+        "Here is my email, demo@example.test. Send this to your team.",
+        "Actually don't contact me. Just give me the rules to copy."
+      ]
+    }
+  ],
+  "source": {
+    "agent-widget.js": "d7e9971aaeac5d31674acf637217309b77ed9be1c45c99ad9fbd260e0f50792d",
+    "stories.js": "355b2472adeceb47bee5d3d4fe0daded5341da689c3e4d61dec5578b96ee801c",
+    "styles.css": "3136259a95fb8f5f3da50879f3815bc1b6a90d88dc4ec62b4600f81b1468dca7",
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/sales-desk.mjs": "9b2509510f7f90b2b673c10d50c5104431d9d0d0f1ac371e0f669e5de0ae12a3",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/config.mjs": "eca6f5a345b612f772ed9bce0d6a01a33368929524fa702133abc28bdc795f44",
+    "package-lock.json": "076a7a22a5d1d859cf5befff88d5e265a52886e6257d4a68af640e4d6dfdb4f5",
+    "scripts/sales-desk-eval.mjs": "66fce1d9b13ca0aa4ade0402ca931e7c54fbec4b8ff988efe241d0987eb41115",
+    "scripts/lib/sales-eval-transport.mjs": "9be3d83d7e4bc4d2671ef566689d76ff6557d78c1e0c4539919a1c04a0ba59aa"
+  },
+  "assessment": "PO manually scores actual complete threads; fixtures and keyword checks cannot establish naturalness or semantic quality."
+}

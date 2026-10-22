@@ -1,0 +1,109 @@
+{
+  "reviewer": "Independent Product Owner",
+  "scope": "Final current local sales UI/model-context/tool contract; no actual semantic inference or hosted sales acceptance",
+  "method": "Visually inspect five saved QA captures, read actual prompt/tool implementations and independent UI/backend/agent/budget receipts, compare recorded hashes against current source; no network/browser/endpoint/model/provider/mic request by PO.",
+  "decision": "ACCEPT current sales UI and offline grounded truth/tool/math/transport contracts, including exact contact cleanup. Actual-model semantic quality and hosted sales remain unaccepted; no execution/publication authorization granted.",
+  "ui": {
+    "artifact": "scratchpad/sales-desk-ui-final.json",
+    "summary": {
+      "checks": 50,
+      "passed": 50,
+      "failed": 0,
+      "actualModelRequests": 0,
+      "actualExternalRequests": 0
+    },
+    "source": {
+      "agent-widget.js": "d7e9971aaeac5d31674acf637217309b77ed9be1c45c99ad9fbd260e0f50792d",
+      "styles.css": "3136259a95fb8f5f3da50879f3815bc1b6a90d88dc4ec62b4600f81b1468dca7",
+      "site-refresh.css": "1eb9cc5181786bc29b8ae348f0dd8cc807fad970893ae7d513f73186840dad2c",
+      "stories.js": "355b2472adeceb47bee5d3d4fe0daded5341da689c3e4d61dec5578b96ee801c",
+      "index.html": "b1e97eaef8586ff9fd3008634742a13c068c44c3ab65cb0a0f829a1665a9e2dc"
+    },
+    "currentDifferences": []
+  },
+  "backend": {
+    "artifact": "scratchpad/sales-desk-backend-qa-final.json",
+    "summary": {
+      "checks": 48,
+      "passed": 48,
+      "failed": 0,
+      "interceptedSDKRequests": 30,
+      "actualExternalRequests": 0
+    },
+    "source": {
+      "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+      "netlify/functions/lib/sales-desk.mjs": "218f6fb462fc9b55ec75576a6b908ac7898ac636d74ce8bfaf594f12d44879df",
+      "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+      "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7"
+    },
+    "currentDifferences": [
+      "netlify/functions/lib/sales-desk.mjs"
+    ]
+  },
+  "visuallyInspected": [
+    {
+      "path": "scratchpad/sales-desk-current-390-844.png",
+      "sha256": "343c70f88c200411dc3f4bba03bbcca4c1c1f82eddc9c01b7986763cafb85c96"
+    },
+    {
+      "path": "scratchpad/sales-desk-current-320-720.png",
+      "sha256": "d3728389104176044d4e5518d877a70808568e8fae98bbe99363c77895df674d"
+    },
+    {
+      "path": "scratchpad/sales-desk-current-1440-960.png",
+      "sha256": "a0ae4c516bb3abb8e57c1afd6972d46da7ded26df2c783e7a5c8e6a8a441f43c"
+    },
+    {
+      "path": "scratchpad/sales-desk-current-390-380.png",
+      "sha256": "36e7cd49e1caa84ea723013871c16464ef0f92314e42a24226c6f6745429b16a"
+    },
+    {
+      "path": "scratchpad/sales-desk-planning-receipt-390.png",
+      "sha256": "116c0179b3060bb84197b4b447a8fc44256847362daf4e17a09a513f51d4f459"
+    }
+  ],
+  "supportingOfflineReceipts": [
+    "scratchpad/sales-desk-tools-check.json",
+    "scratchpad/sales-budget-check.json",
+    "scratchpad/architect-sales-agent-review.json"
+  ],
+  "importantRecommendations": [
+    "No material prompt change remains pending before the separately authorized actual-model phase. Evaluate channel-specific Spanish voice claims and hypothetical phone-cost planning in actual replies; explicit instruction alone cannot prove semantic compliance."
+  ],
+  "limits": [
+    "All quoted advice in reviewed rendered examples is authored fixture output, not actual-model quality.",
+    "S1–S9 qualitative rubric not scored or accepted from fixtures.",
+    "Short viewport shows only part of initial greeting but conversation scrolls and controls remain usable.",
+    "New sales code not published; prior b65 workspace publication does not include it.",
+    "No new model/provider budget or publication authorization granted by PO."
+  ],
+  "publicationReconciliation": {
+    "receipt": "scratchpad/customer-platform-publication-b65.json",
+    "commit": "b65c0f4fef06d8f4e44e2a04101698034bd14842",
+    "deploy": "6ad98d7be2a7b05658217178",
+    "proof": "One approved automatic build +25 bounded read-onlyGETs/captured-byte render; no complete live signup/email/current-platform inference."
+  },
+  "preparedActualModelPlan": {
+    "artifact": "scratchpad/sales-desk-model-phase1-plan.json",
+    "status": "Prepared and harness-reviewed; user authorization not yet granted",
+    "logicalTurns": 18,
+    "actualHTTPAttempts": 30,
+    "maximumMinutes": 20,
+    "maxOutputTokensPerAttempt": 3072,
+    "maxIterations": 3,
+    "retries": 0,
+    "sourceChangeRequiresBridgeOrUpdatedFreeze": true,
+    "architectReview": "scratchpad/architect-sales-eval-plan-review.json",
+    "sourceMatchesContactCorrection": true
+  },
+  "contactCorrection": {
+    "artifact": "scratchpad/sales-desk-contact-source-bridge.json",
+    "checks": 15,
+    "toolRerunArtifact": "scratchpad/sales-desk-tools-contact-final.json",
+    "toolChecks": 32,
+    "oldSalesFactsSHA256": "218f6fb462fc9b55ec75576a6b908ac7898ac636d74ce8bfaf594f12d44879df",
+    "currentSalesFactsSHA256": "9b2509510f7f90b2b673c10d50c5104431d9d0d0f1ac371e0f669e5de0ae12a3",
+    "independentPOVerification": "Reversing only company contact-field line reproduces prior accepted source exactly; no runtime edit or provider/model request by PO.",
+    "boundary": "Prior50UI/48backend evidence preserved at prior source; exact bridge closes one-line change without claiming a full rerun."
+  }
+}

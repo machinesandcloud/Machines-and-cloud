@@ -1,0 +1,141 @@
+{
+  "startedAt": "2026-10-22T04:18:23.015Z",
+  "commit": "b65c0f4fef06d8f4e44e2a04101698034bd14842",
+  "deployId": "6ad98d7be2a7b05658217178",
+  "priorReports": [
+    "scratchpad/customer-platform-hosted-b65.json",
+    "scratchpad/customer-platform-hosted-b65-browser-final.json"
+  ],
+  "explanation": "Netlify Pretty URLs changed literal source href=\"onboard.html\" to deployed href='/onboard' and Sign in to /onboard?signin=1. The original regex/exact href assertions were invalid for this published HTML. All earlier raw failures remain. This target uses saved deployed HTML and previously SHA-verified asset bytes. One remaining actual GET checks the clean route first redirect; its www target is not followed under the25 GET ceiling.",
+  "checks": [
+    {
+      "name": "Deployed clean signup route redirects to expected www/onboard.html",
+      "ok": false
+    },
+    {
+      "name": "Actual deployed signup CTA resolves to clean /onboard route",
+      "ok": true
+    },
+    {
+      "name": "Actual deployed mobile menu opens and Sign in targets clean secure route",
+      "ok": true
+    },
+    {
+      "name": "Captured deployed CTA interaction reaches captured email gate through declared alias fixture",
+      "ok": true
+    },
+    {
+      "name": "No API or non-GET requests attempted",
+      "ok": true
+    },
+    {
+      "name": "No browser JavaScript errors",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://machinesandcloud.com/onboard",
+      "status": 200,
+      "location": null,
+      "at": "2026-10-22T04:18:24.078Z"
+    }
+  ],
+  "browser": {
+    "intercepted": [
+      {
+        "method": "GET",
+        "path": "/",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "https://fonts.googleapis.com",
+        "disposition": "blocked"
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/site-refresh.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/photos/hero-hvac.jpg",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/logo-dark.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/script.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/agent-widget.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/stories.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/onboard",
+        "disposition": "captured-signup-alias-fixture"
+      },
+      {
+        "method": "GET",
+        "path": "https://fonts.googleapis.com",
+        "disposition": "blocked"
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/logo-dark.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/onboard.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "disposition": "verified-deployed-bytes"
+      }
+    ],
+    "errors": []
+  },
+  "finishedAt": "2026-10-22T04:18:24.664Z",
+  "summary": {
+    "earlierHostedGetRequests": 24,
+    "additionalHostedGetRequests": 1,
+    "aggregateHostedGetRequests": 25,
+    "maximumHostedGetRequests": 25,
+    "passed": 5,
+    "failed": 1,
+    "browserNetworkRequestsSent": 0
+  }
+}

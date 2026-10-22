@@ -1,6 +1,6 @@
 # Customer activation and service architecture
 
-Architect: software architect. Recorded October 22, 2026 UTC, against the local `bb8d515` baseline. This is the implementation contract for the self-service mandate, not evidence that the target is deployed or provider-approved. [SELF-SERVICE.md](SELF-SERVICE.md) owns product priorities; QA owns independent journey acceptance. The baseline audit used source and synthetic local checks only.
+Architect: software architect. Recorded October 22, 2026 UTC, against the local `bb8d515` baseline. The baseline audit and implementation contract below are historical source evidence; the dated publication disposition at the end records the subsequent bounded release. Provider approval and live service acceptance remain separate. [SELF-SERVICE.md](SELF-SERVICE.md) owns product priorities; QA owns independent journey acceptance. The baseline audit used source and synthetic local checks only.
 
 ## Decision and first delivery
 
@@ -39,7 +39,7 @@ Architecture returned the unlimited free-owner test path as a release blocker. *
 
 The architect independently accepted the implementation and reran **43 checks**, `scratchpad/architect-self-service-ai-review.txt`, using memory plus the installed Blobs SDK protocol double, 6,652 conditional conflicts, retry-time midnight/DST cases and injected model/storage failures. Zero actual external requests occurred. The unit is an accepted logical turn; the existing agent loop and SDK retry limits bound its internal requests. It is **not a dollar cap**, an actual inference result, or a new allowance for legacy/homepage modes. Final receipt: `scratchpad/architect-budget-package-review.json`, matching the unchanged 25-file `customer-platform-budget-frozen.json` source map.
 
-The same independent read review accepts the new static publishing boundary: Netlify publishes `dist`, while function source remains in `netlify/functions`. The packager copies browser HTML/CSS, explicit entry scripts/configuration and the public assets tree, checks local HTML dependencies and source/output hashes, and excludes credentials, product/business instructions, test evidence, scripts, packages and function source. The current package has **217 browser files and 182 HTML pages**, with every current source/output hash matching, no forbidden private entries and no symlinks. This is local package/configuration proof; a hosted release still needs the separately approved deployment and bounded route/header checks.
+The same independent read review accepts the new static publishing boundary: Netlify publishes `dist`, while function source remains in `netlify/functions`. The packager copies browser HTML/CSS, explicit entry scripts/configuration and the public assets tree, checks local HTML dependencies and source/output hashes, and excludes credentials, product/business instructions, test evidence, scripts, packages and function source. The current package has **217 browser files and 182 HTML pages**, with every current source/output hash matching, no forbidden private entries and no symlinks. This records the local package/configuration proof at that review. The subsequent separately approved publication and bounded route/header checks are recorded in the dated disposition below; live authenticated state transitions and service delivery remain unverified.
 
 Billing stays parked. Trial/card claims cannot be fulfilled by collecting a plan choice; the future payment decision must be explicit. This contract authorizes implementation and local tests, not a deployment, number purchase, carrier filing, delivered email, model request or provider pass.
 
@@ -178,3 +178,12 @@ Local, committed, deployed, real-email, provider, live-store and first-customer 
 3. Complete retained reminder failures, calendar cancellation/repair and honest callback completion before declaring automated service delivery accepted.
 4. Obtain a named-shop end-to-end gate and customer week. Replace mandatory founder review with instrumented automatic checks and an Operations exception path; do not delete a safety gate merely to remove a human step.
 5. Reconcile public plan/trial claims with the explicitly approved commercial lifecycle. Billing remains parked until that decision; no first-slice payment activation is implied.
+
+
+## October 21, 11:14 p.m. Houston: publication disposition
+
+The [publication receipt](../scratchpad/customer-platform-publication-b65.json) confirms exact approved `b65c0f4fef06d8f4e44e2a04101698034bd14842` at READY deploy `6ad98d7be2a7b05658217178`, published `2026-10-22T04:14:20.228Z`, one automatic build and no manual trigger. This supersedes the baseline/prepublication production pointer without changing the historical source reviews above. Later sales-chatbot work was excluded.
+
+[Bounded hosted evidence](../scratchpad/customer-platform-hosted-b65-final-disposition.json) covers 25 GETs, 12 exact approved asset hashes, five absent private paths, clean signup route 200 and one health 200/ok with natural scheduler `04:10:18.616Z`. Captured deployed HTML and hash-verified assets render signup/owner gates and mobile menu in system Chrome with actual browser network denied. Raw unavailable-Chromium, literal-href and expected-redirect harness returns remain preserved with their scoped dispositions; this is not a new full customer-journey pass.
+
+The deployment does not establish delivered verification email, completed live signup, live Blobs correctness/revocation, actual private/customer AI replies, installed customer-site exchange or autonomous phone/SMS/Calendar delivery. The demo callback-prompt correction is published but actual-model compliance was not rerun. Those operational contracts and acceptance gates remain open; the spent one-build/read-only scope grants no further release, purchase or model/provider phase.

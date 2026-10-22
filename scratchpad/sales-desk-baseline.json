@@ -1,0 +1,1064 @@
+{
+  "at": "2026-10-22T04:05:09.029Z",
+  "mode": "actual local source/chat handler + intercepted SDK/UI replies; no real network",
+  "sourceBefore": {
+    "agent-widget.js": "b38e13d353e3c87e4a863d2adefb0dbc6509970b43a46fbd5a4709a919b7ba62",
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4",
+    "styles.css": "80ada5b50daac3207a66ec1c3b783bbe53817da9769751160eb20183692dd6ee",
+    "site-refresh.css": "1eb9cc5181786bc29b8ae348f0dd8cc807fad970893ae7d513f73186840dad2c",
+    "index.html": "b1e97eaef8586ff9fd3008634742a13c068c44c3ab65cb0a0f829a1665a9e2dc"
+  },
+  "checks": [
+    {
+      "name": "390px sales panel stays within viewport",
+      "pass": true,
+      "detail": {
+        "x": 8,
+        "y": 128,
+        "right": 382,
+        "bottom": 768,
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "390px launcher opens with keyboard focus in composer",
+      "pass": true
+    },
+    {
+      "name": "390px Escape closes and restores launcher focus",
+      "pass": true
+    },
+    {
+      "name": "320px sales panel stays within viewport",
+      "pass": true,
+      "detail": {
+        "x": 8,
+        "y": 128,
+        "right": 312,
+        "bottom": 768,
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "name": "320px launcher opens with keyboard focus in composer",
+      "pass": false
+    },
+    {
+      "name": "320px Escape closes and restores launcher focus",
+      "pass": true
+    },
+    {
+      "name": "1440px sales panel stays within viewport",
+      "pass": true,
+      "detail": {
+        "x": 1044,
+        "y": 210,
+        "right": 1424,
+        "bottom": 770,
+        "width": 1440,
+        "height": 844
+      }
+    },
+    {
+      "name": "1440px launcher opens with keyboard focus in composer",
+      "pass": true
+    },
+    {
+      "name": "1440px Escape closes and restores launcher focus",
+      "pass": true
+    },
+    {
+      "name": "Eleventh ordinary exchange remains a valid conversation",
+      "pass": false,
+      "detail": {
+        "statuses": [
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          400
+        ],
+        "lastRoles": [
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user"
+        ]
+      }
+    },
+    {
+      "name": "Failed send restores a retryable customer draft",
+      "pass": false
+    },
+    {
+      "name": "Retry after outage recovers without invalid consecutive users",
+      "pass": false,
+      "detail": {
+        "statuses": [
+          503,
+          400
+        ],
+        "roles": [
+          "user",
+          "user"
+        ]
+      }
+    },
+    {
+      "name": "Enter while a reply is pending preserves the next draft",
+      "pass": false
+    },
+    {
+      "name": "New chat during pending reply cancels or truthfully disables reset",
+      "pass": false
+    },
+    {
+      "name": "Pending completion does not reopen a closed panel",
+      "pass": true
+    },
+    {
+      "name": "Stream EOF without done is reported incomplete and not committed as success",
+      "pass": false,
+      "detail": {
+        "stored": [
+          {
+            "role": "user",
+            "content": "Synthetic stream recovery request"
+          },
+          {
+            "role": "assistant",
+            "content": "Partial answer with no completion marker"
+          }
+        ],
+        "visible": "Hi, I'm the Machines & Cloud front desk. I'm an AI, the same one we set up for your shop. Ask me about plans, the phone, or how it would work for your business.\n\nSynthetic stream recovery request\n\nPartial answer with no completion marker"
+      }
+    },
+    {
+      "name": "Late stream data cannot mutate completed answer",
+      "pass": false,
+      "detail": {
+        "stored": [
+          {
+            "role": "user",
+            "content": "Synthetic stream recovery request"
+          },
+          {
+            "role": "assistant",
+            "content": "Completed answer."
+          }
+        ],
+        "visible": "Hi, I'm the Machines & Cloud front desk. I'm an AI, the same one we set up for your shop. Ask me about plans, the phone, or how it would work for your business.\n\nSynthetic stream recovery request\n\nDraft LATE CORRUPTION"
+      }
+    },
+    {
+      "name": "Late stream data cannot mutate failed answer",
+      "pass": false,
+      "detail": {
+        "stored": [
+          {
+            "role": "user",
+            "content": "Synthetic stream recovery request"
+          },
+          {
+            "role": "assistant",
+            "content": "Partial"
+          }
+        ],
+        "visible": "Hi, I'm the Machines & Cloud front desk. I'm an AI, the same one we set up for your shop. Ask me about plans, the phone, or how it would work for your business.\n\nSynthetic stream recovery request\n\nPartial LATE ERROR CORRUPTION\n\nSomething went wrong on my end. Please try that again, or email support@machinesandcloud.com."
+      }
+    },
+    {
+      "name": "Visible longer answer is not silently truncated before next turn",
+      "pass": false,
+      "detail": {
+        "visibleReplyCharacters": 1896,
+        "upstreamAssistantCharacters": 1500,
+        "correctionRetained": false
+      }
+    },
+    {
+      "name": "An actual setup link opens the local signup entry without submission",
+      "pass": true
+    },
+    {
+      "name": "Customer correction reaches actual handler in complete recent context",
+      "pass": true
+    },
+    {
+      "name": "Malformed browser history recovers without breaking chat",
+      "pass": false,
+      "detail": [
+        {
+          "case": "corrupt-session",
+          "message": "transcript.forEach is not a function"
+        }
+      ]
+    },
+    {
+      "name": "Sales product facts do not promise unavailable automated website import/phone delivery",
+      "pass": false
+    },
+    {
+      "name": "Sales desk does not force a founder lead form for self-service setup",
+      "pass": false
+    },
+    {
+      "name": "Browser footer does not invent conversational logging/founder follow-up",
+      "pass": false
+    },
+    {
+      "name": "No real external fetch/form/provider/model request occurred",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Sales source stayed unchanged during baseline",
+      "pass": true
+    }
+  ],
+  "cases": [
+    {
+      "name": "viewport-390",
+      "requests": [],
+      "mode": "actual"
+    },
+    {
+      "name": "viewport-320",
+      "requests": [],
+      "mode": "actual"
+    },
+    {
+      "name": "viewport-1440",
+      "requests": [],
+      "mode": "actual"
+    },
+    {
+      "name": "eleventh-turn",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 6"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 6"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 7"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 6"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 7"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 8"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 6"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 7"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 8"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 9"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic owner question 1"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 6"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 7"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 8"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 9"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 10"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 2"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 3"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 4"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 5"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 6"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 7"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 8"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 9"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 10"
+            },
+            {
+              "role": "assistant",
+              "content": "A short fixture answer."
+            },
+            {
+              "role": "user",
+              "content": "Synthetic owner question 11"
+            }
+          ],
+          "mode": "actual",
+          "status": 400
+        }
+      ],
+      "mode": "actual"
+    },
+    {
+      "name": "failed-send-retry",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "I run a plumbing shop and miss calls."
+            }
+          ],
+          "mode": "offline",
+          "status": 503
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "I run a plumbing shop and miss calls."
+            },
+            {
+              "role": "user",
+              "content": "I run a plumbing shop and miss calls."
+            }
+          ],
+          "mode": "actual",
+          "status": 400
+        }
+      ],
+      "mode": "actual"
+    },
+    {
+      "name": "pending-draft-reset",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "First pending message"
+            }
+          ],
+          "mode": "hold"
+        }
+      ],
+      "mode": "hold"
+    },
+    {
+      "name": "stream-partial",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stream recovery request"
+            }
+          ],
+          "mode": "partial"
+        }
+      ],
+      "mode": "partial"
+    },
+    {
+      "name": "stream-late",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stream recovery request"
+            }
+          ],
+          "mode": "late"
+        }
+      ],
+      "mode": "late"
+    },
+    {
+      "name": "stream-error-late",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Synthetic stream recovery request"
+            }
+          ],
+          "mode": "error-late"
+        }
+      ],
+      "mode": "error-late"
+    },
+    {
+      "name": "context-length",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Please draft a detailed handoff plan."
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Please draft a detailed handoff plan."
+            },
+            {
+              "role": "assistant",
+              "content": "Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice. Detailed advice.  The corrected fee is $89."
+            },
+            {
+              "role": "user",
+              "content": "Use the corrected fee you just stated."
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        }
+      ],
+      "mode": "actual"
+    },
+    {
+      "name": "links-and-corrections",
+      "requests": [
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "How do I start?"
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        },
+        {
+          "messages": [
+            {
+              "role": "user",
+              "content": "How do I start?"
+            },
+            {
+              "role": "assistant",
+              "content": "Start here: http://127.0.0.1:8898/onboard.html"
+            },
+            {
+              "role": "user",
+              "content": "Correction: Cypress, not Katy, and $99, not $89."
+            }
+          ],
+          "mode": "actual",
+          "status": 200
+        }
+      ],
+      "mode": "actual"
+    },
+    {
+      "name": "corrupt-session",
+      "requests": [],
+      "mode": "actual"
+    }
+  ],
+  "externalBrowserBlocked": [
+    {
+      "case": "viewport-390",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "viewport-320",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "viewport-1440",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "eleventh-turn",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "failed-send-retry",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "pending-draft-reset",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "stream-partial",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "stream-late",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "stream-error-late",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "context-length",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "links-and-corrections",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "links-and-corrections",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    },
+    {
+      "case": "corrupt-session",
+      "origin": "https://fonts.googleapis.com",
+      "pathname": "/css2"
+    }
+  ],
+  "pageErrors": [
+    {
+      "case": "corrupt-session",
+      "message": "transcript.forEach is not a function"
+    }
+  ],
+  "sourceAfter": {
+    "agent-widget.js": "b38e13d353e3c87e4a863d2adefb0dbc6509970b43a46fbd5a4709a919b7ba62",
+    "netlify/functions/chat.mjs": "7e6aefd199605131d8dc38368a1e0ad310f16e89eed4924e076ad06374c5697e",
+    "netlify/functions/lib/agent.mjs": "c71bc3a8e3b49c8e84d265b7a8ca478d9a5016b04c63c076b8a6b272bb0bafa4",
+    "styles.css": "80ada5b50daac3207a66ec1c3b783bbe53817da9769751160eb20183692dd6ee",
+    "site-refresh.css": "1eb9cc5181786bc29b8ae348f0dd8cc807fad970893ae7d513f73186840dad2c",
+    "index.html": "b1e97eaef8586ff9fd3008634742a13c068c44c3ab65cb0a0f829a1665a9e2dc"
+  },
+  "summary": {
+    "checks": 27,
+    "passed": 13,
+    "failed": 14,
+    "interceptedModelRequests": 14,
+    "actualExternalRequests": 0
+  }
+}

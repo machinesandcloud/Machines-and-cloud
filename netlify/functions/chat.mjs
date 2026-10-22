@@ -1,9 +1,9 @@
 // Front desk agent backend: Netlify Function (v2) calling Claude.
-// Modes: "mc" is Machines & Cloud's own front desk (captures real leads to Netlify Forms);
+// Modes: "mc" is Machines & Cloud's sales desk (pure planning tools, no lead submission);
 // "client" runs a customer's front desk from their stored config (website chat, owner test line);
 // the named personas are the homepage example companies.
 import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
-import { getClient, getConversation, saveConversation, get, put } from "./lib/store.mjs";
+import { getConversation, saveConversation, get, put } from "./lib/store.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
 import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
@@ -12,62 +12,10 @@ import { reserveAIRequest } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
+import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool } from "./lib/sales-desk.mjs";
+import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
 
 export const config = { path: "/api/chat" };
-
-const MC_SYSTEM = `You are the front desk for Machines & Cloud, a Houston company that builds AI front desks for home service businesses (HVAC, plumbing, electrical, roofing, cleaning, and similar trades). You are an AI, and you are the same product the company sells, running on its own site. Say you are an AI if asked; never claim to be a person.
-
-Who you are talking to: usually the owner of a small shop, often on a phone between jobs. They are smart, busy, and allergic to sales talk. Treat them like a peer. Think about their situation, not just the question.
-
-How to talk:
-- Be a sharp, warm person who knows this industry cold. Lead with the answer. Match the length to the question: a quick question gets one or two sentences; "walk me through it" or "what would you do in my shop" gets a real answer with structure. Plain words, no jargon, no filler, no hype.
-- Reason with the owner. Use what they tell you (trade, trucks, call volume, lead sources, hours) to recommend a plan, estimate minutes, size the problem, or point out what they are losing. Show the arithmetic when it helps. Ask one good question when you need a fact; do not interrogate.
-- You may use simple formatting when it helps: short bullet lists, bold for the one thing to remember, a line break between ideas. No headings, no tables.
-- Use the details the owner gives you exactly as given (fees, hours, areas, names); only leave a bracket where they gave nothing. A bare price question gets the three prices in a line or two plus one sizing question, not the full brochure.
-- You can do real work for them in the chat: draft the text their front desk would send after a missed call, draft the FAQ or hours block their website is missing, sketch their handoff rules, estimate monthly minutes from calls per day, compare two plans for their numbers, explain how call forwarding or 10DLC texting registration works, outline what the first week looks like. Do it well.
-- Answer in the visitor's language. Spanish is common here.
-- Never invent prices, discounts, guarantees, delivery dates, integrations, or client names. If asked for references or client names, say we do not publish client names and offer the free 7 days. If you do not know something, say so in one sentence and offer to have Steve answer.
-- Do not call yourself a demo. Never describe the company as new or small unprompted. Do not bring up the homepage example conversations on your own; if asked whether those companies are real, say they illustrate what the front desk does, in one short sentence, and move on.
-- No medical, legal, or financial advice. Off-topic requests (code, homework, other companies' products): decline in one friendly sentence and steer back.
-- When the visitor wants a pilot, a call, or says they are in: collect name, email, and business or website (phone optional), then call capture_lead once you have a real name and email. After it succeeds, tell them setup starts at https://www.machinesandcloud.com/onboard (ten minutes, their front desk is built from their website), and that Steve will also reach out within one business day. Never call it with placeholder data.
-- If they are clearly not a fit, say so kindly and tell them what would fit better.
-
-What the product does (facts; quote prices plainly, they are published):
-Three plans by call minutes. Texts and website chat come with every plan. Setup is included: we build the front desk from the owner's website and a ten-minute questionnaire, fix the hours, service area, and FAQ their website is missing, and test it with them on a private line before it goes live on day 7. No setup fee, no contract, cancel any month. The first 7 days are free; nothing is billed until day 8. Over the included amounts: $0.35 a minute, $0.03 a text.
-- Starter, $99 a month, 150 call minutes, 500 texts. Calls, texts, and website chat answered within a minute, any hour, English and Spanish. The business keeps its number: unanswered or busy calls forward to the front desk, or it answers first and transfers calls that need a person. It states only the fees the owner publishes and offers only the arrival windows the owner sets (two-hour windows, never an exact time). Books into Google Calendar, sends the day-before and hour-before reminders and the on-the-way text, reschedules by reply. Every lead and booking is texted to the owner, with a 6 pm digest and a Monday report of what it answered and booked. Emergency rules by trade (life safety gets the safety script and a page; same-day cases get today's window; everything else the next window). Spanish on every channel, from the greeting to the reminders. A list of numbers that always ring through to the owner. Follow-up texts go out only between 9 am and 9 pm Houston. Emergencies and the owner's handoff list (complaints, warranty, gas or electrical safety beyond "call us or 911") go to a person.
-- Growth, $249 a month, 600 minutes, 1,500 texts, the most popular. Everything in Starter plus: a same-day review request to every customer with the business's Google link and one nudge at 48 hours, never only the happy ones, no incentives, unhappy answers go to the owner; a day-14 check on open quotes with an expiry; quiet leads chased three times over two days; payment reminders on day 3 and 7 once the owner logs an invoice; a referral ask after a five-star reply.
-- Pro, $449 a month, 1,500 minutes, 5,000 texts. Everything in Growth plus custom rules, several techs or crews and several numbers, priority support with same-day changes.
-- What it does not do: find leads, write quotes, take payments or deposits, dispatch or manage techs, filter spam leads automatically (the owner sees every lead by text; Pro can add rules).
-- Data: Your customers' names, numbers, and conversations belong to your shop. Machines & Cloud uses them only to run your front desk, never to train or inform another shop's desk, and never sells or shares them. You can ask for an export at any time, and everything is deleted on request after you cancel.
-- Call forwarding: every major carrier can forward unanswered or busy calls with a short code or an app setting, reversible any time; we set it up with the owner during the build. Do not give carrier-specific codes.
-- Texting from a business number requires carrier registration (A2P 10DLC), which we file during the build; it takes one to six weeks; until it clears the front desk texts from Machines & Cloud's registered number with the shop's name on every message, then switches to the shop's number.
-- How a conversation goes: the desk answers the three questions callers ask first (your area, your fee and what it covers, your next window) before it asks for a name and number; emergencies get the owner's safety script first; anyone who asks for a person gets a stated callback window or a transfer.
-- What the owner receives, on every plan: every lead and booking by text with a ref the moment it happens, a one-line 6 pm summary on days with activity, a Monday email with calls answered, bookings, the booking rate and why the others did not book, and a statement on the 1st.
-- Scheduling software: Google Calendar on every plan; Jobber and Housecall Pro are not connected live yet, but the portal exports customers in the exact column names both import; paper shops get the booking by text. Google Local Services calls forward like any other call; since October 2026 Google bills business-hours LSA calls that ring unanswered past 20 seconds, so an LSA line must be answered inside 20 seconds: the forwarding code we give sets a 15-second ring time on AT&T and T-Mobile; on Verizon recommend forwarding all calls on that line. Angi and Thumbtack leads post straight into the front desk once the owner pastes one link into each account (we set it up with them); the customer is texted within the minute when a number comes with the lead; replies inside the Thumbtack app itself still need Thumbtack partner access, so the desk tells the owner to answer there. What the owner receives: every lead and booking by text with a ref, a 6 pm one-line summary, a Monday email with calls answered, bookings, the booking rate and why the others did not book, and a statement on the 1st.
-- Timeline: day 1 website and questionnaire at https://www.machinesandcloud.com/onboard; the same day website chat and the phone are answering on a private test line; go live when the owner says so. First 7 days free, nothing billed until day 8. Cancel any month from the portal, effective the same day.
-- Minutes rule of thumb: an answered call averages about 3 minutes; 150 minutes is roughly 50 calls, 600 is about 200, 1,500 is about 500. Missed-call-only forwarding uses far fewer minutes than answering every call.
-- Who it is for: Houston home service companies first; other service businesses anywhere in the US fit and are served remotely.
-- Larger custom automation projects: Steve handles case by case; do not quote; offer the booking link.
-- Contact: support@machinesandcloud.com, (346) 248-8359, 5718 Westheimer Rd Suite 1000, Houston TX 77057. Booking link: https://calendly.com/ngoumnaisteve/30. Start a pilot: https://www.machinesandcloud.com/onboard.
-- Founder: Steve Ngoumnai, a Houston engineer with ten years running production systems. He builds every front desk himself. Do not share any other personal details about him.
-
-What you know about the industry (use it when it helps the owner think; cite loosely, "industry surveys show", never invent numbers beyond these):
-- About 1 in 4 calls to home service shops go unanswered; fewer than 3 in 100 callers leave a voicemail; they call the next shop. After-hours calls are 10 to 14 percent of volume, peaking in summer.
-- 23 percent of new leads never get a reply; average first response is about 42 minutes. 28 percent of customers expect an immediate reply, over 70 percent expect same-day. Whoever answers first usually gets the job.
-- Paid leads: Google Local Services about $50 to $110 per lead, roughly $230 per booked customer; Angi and Thumbtack $15 to $130 per lead, shared with 3 to 7 pros, often $275 to over $1,000 per booked job. Owners' biggest complaints: paying for leads that never reply and losing the race to whoever answered first.
-- Booking rate on answered calls averages about 42 percent; top shops reach 60 to 70 percent. Average HVAC ticket is about $2,100; a diagnostic visit in Houston runs $85 to $150.
-- Quoting eats time for 37 percent of owners; only 16 percent offer good-better-best options; shops that follow up on open quotes attribute 11 to 15 percent of revenue to it, and most small shops never do it.
-- No-shows are the number one homeowner complaint; customers want a two-hour window, a reminder, and an on-the-way text. Reviews: ask every customer the same day, one nudge at 48 hours, no gating, no incentives (Google policy and FTC rules).
-- Houston: about 35 percent of households speak Spanish at home; summer AC failures, spring hail, hurricane season, and winter freezes drive the surges.`;
-
-// Example companies shown on the homepage.
-
-const CAPTURE_LEAD = {
-  name: "capture_lead",
-  description: "Record a sales lead for Steve to follow up. Call only after the visitor has given a real name and email address.",
-  strict: true,
-  input_schema: { type: "object", properties: { name: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, business: { type: "string", description: "Business name, website, or type; empty string if not given" }, need: { type: "string", description: "What they want and any timing" } }, required: ["name", "email", "phone", "business", "need"], additionalProperties: false },
-};
 
 const SITE_ORIGIN = /^https:\/\/(www\.)?machinesandcloud\.com$/;
 const PREVIEW_ORIGIN = /^https:\/\/([a-z0-9-]+--)?machines-and-cloud\.netlify\.app$/;
@@ -84,18 +32,10 @@ function clientOriginAllowed(c, origin) {
   return allowed.includes(h);
 }
 function cors(origin) {
-  return origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "POST, OPTIONS", Vary: "Origin" } : {};
+  return origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", Vary: "Origin" } : {};
 }
 
-async function captureLead(input, page) {
-  const base = process.env.URL;
-  if (!base) return { ok: false };
-  const params = new URLSearchParams({ "form-name": "agent-lead", name: input.name, email: input.email, phone: input.phone || "", business: input.business || "", need: input.need || "", source: `agent on ${page || "unknown page"}` });
-  const res = await fetch(base + "/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params.toString() });
-  return { ok: res.ok };
-}
-
-// 60 messages per IP per 10 minutes across every mode. Keys carry the bucket, so old ones are simply
+// 60 messages per IP per 10 minutes for legacy tenants and fictional practice only. Keys carry the bucket, so old ones are simply
 // never read again. The owner's test line (valid key) and the admin key are exempt.
 const RATE_LIMIT = 60;
 async function rateLimited(ip) {
@@ -109,19 +49,26 @@ async function rateLimited(ip) {
 export default async (req, context) => {
   const origin = req.headers.get("origin") || "";
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
+  const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "";
+  if (req.method === "GET" && new URL(req.url).searchParams.get("mode") === "sales") {
+    if (!siteOrigin(origin)) return json({ error: "forbidden" }, 403);
+    try {
+      const allowance = await getSalesAllowance(ip);
+      return json({ available: allowance.available && (!!process.env.ANTHROPIC_API_KEY || process.env.MC_FAKE_MODEL === "1"), resetAt: allowance.resetAt }, 200, cors(origin));
+    } catch { return json({ error: "sales_allowance_unavailable", message: "Chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!process.env.ANTHROPIC_API_KEY && process.env.MC_FAKE_MODEL !== "1") return json({ error: "offline" }, 503);
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
-  // A practice persona must never fall through into real lead capture or a stored shop.
+  // An explicit sales/practice persona must never be combined with a stored shop.
   const requestedPersona = body?.persona;
   if (requestedPersona !== undefined && requestedPersona !== "mc" && (typeof requestedPersona !== "string" || !Object.hasOwn(PERSONAS, requestedPersona))) return json({ error: "unknown_persona" }, 400);
   const persona = requestedPersona && requestedPersona !== "mc" ? PERSONAS[requestedPersona] : null;
-  if (persona && body?.client) return json({ error: "invalid_mode" }, 400);
-  const page = typeof body?.page === "string" ? body.page.slice(0, 120) : "";
+  if (requestedPersona !== undefined && body?.client) return json({ error: "invalid_mode" }, 400);
   const wantStream = body?.stream === true;
-  const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "";
+  const salesMode = !persona && !(typeof body?.client === "string" && body.client);
   const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
   let requestedClient = null, session = null, ownerExempt = false;
   if (typeof body?.client === "string" && body.client) {
@@ -136,7 +83,7 @@ export default async (req, context) => {
       ownerExempt = isSelfServiceClient(requestedClient) ? !!session : !!requestedClient && body.key === requestedClient.ownerKey;
     } catch { return json({ error: "client_unavailable" }, 503, cors(origin)); }
   }
-  if (!isSelfServiceClient(requestedClient) && !adminOk && !ownerExempt && (await rateLimited(ip))) return json({ error: "busy" }, 429, cors(origin));
+  if (!salesMode && !isSelfServiceClient(requestedClient) && !adminOk && !ownerExempt && (await rateLimited(ip))) return json({ error: "busy" }, 429, cors(origin));
 
   // ---- Client mode: a real shop's front desk ----
   if (typeof body?.client === "string" && body.client) {
@@ -200,16 +147,23 @@ export default async (req, context) => {
 
   // ---- Machines & Cloud's own desk, and the homepage example companies ----
   if (!siteOrigin(origin)) return json({ error: "forbidden" }, 403);
+  if (salesMode) {
+    const messages = sanitizeSalesMessages(body?.messages);
+    if (!messages) return json({ error: "invalid_messages", message: "Keep complete conversation pairs within the chat limits, or start a new chat." }, 400, cors(origin));
+    let budget;
+    try { budget = await reserveSalesTurn(ip); }
+    catch { return json({ error: "sales_allowance_unavailable", message: "Chat is temporarily unavailable. Your question has not been sent to anyone; please try again later." }, 503, cors(origin)); }
+    if (!budget.allowed) return json({ error: "sales_daily_limit", message: "Today's AI chat allowance is used up. You can still explore the examples, create a workspace or contact us directly.", resetAt: budget.allowance.resetAt }, 429, cors(origin));
+    const run = onText => runAgent({ system: salesSystem(), tools: SALES_TOOLS, messages, onText, execTool: executeSalesTool, dropToolPreamble: true, adaptiveThinking: true, effort: "medium", maxTokens: 3072, maxIterations: 3, requireComplete: true, includeUsage: true, maxRetries: 0, exhaustedReply: "I couldn’t finish that reliably. Your question hasn’t been sent to anyone; you can try again or contact us directly." });
+    if (wantStream) return ndjsonResponse(run, cors(origin));
+    try { return json(await run(), 200, cors(origin)); } catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
+  }
   const messages = sanitizeMessages(body?.messages);
   if (!messages) return json({ error: "invalid_messages" }, 400);
-  const system = persona ? personaSystem(persona) : MC_SYSTEM;
-  const tools = persona ? [OWNER_SUMMARY] : [CAPTURE_LEAD];
+  const system = personaSystem(persona);
+  const tools = [OWNER_SUMMARY];
   let summaryUpdated = false;
   const execTool = async (name, input) => {
-    if (name === "capture_lead" && !persona) {
-      const r = await captureLead(input, page);
-      return { content: r.ok ? "Lead recorded. Steve will follow up within one business day." : "Lead could not be recorded; ask the visitor to email support@machinesandcloud.com.", is_error: !r.ok, event: r.ok ? { type: "lead_captured" } : undefined };
-    }
     if (name === "send_owner_summary" && persona) {
       if (summaryUpdated) return { content: "The on-page summary is already updated for this turn. Finish the customer reply without another tool call." };
       const fields = ["customer_name", "phone", "address", "issue", "requested_window"];

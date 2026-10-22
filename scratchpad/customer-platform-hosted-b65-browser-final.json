@@ -1,0 +1,263 @@
+{
+  "startedAt": "2026-10-22T04:17:07.513Z",
+  "commit": "b65c0f4fef06d8f4e44e2a04101698034bd14842",
+  "deployId": "6ad98d7be2a7b05658217178",
+  "scope": "Targeted correction of unavailable bundled Chromium and quote-dependent HTML regex. System Chrome; only 3 new HTML GETs. Browser networking fully intercepted. Asset bytes are pinned source bytes already SHA-equal to actual deployed responses in original report.",
+  "original": "scratchpad/customer-platform-hosted-b65.json",
+  "originalHostedGetRequests": 21,
+  "additionalHostedRequests": [
+    {
+      "method": "GET",
+      "url": "https://machinesandcloud.com/",
+      "at": "2026-10-22T04:17:08.208Z",
+      "status": 200,
+      "sha256": "195a41230869ec84be2b3c376dd981cdf3f5e3079c5734a60e2cf3c12069b314",
+      "bytes": 27543,
+      "contentType": "text/html; charset=UTF-8"
+    },
+    {
+      "method": "GET",
+      "url": "https://machinesandcloud.com/onboard.html",
+      "at": "2026-10-22T04:17:08.507Z",
+      "status": 200,
+      "sha256": "c8f04056e79cf9877b96545e0b46a8897fb4da2ffacb5dd8e0ad03f89dae1b96",
+      "bytes": 14816,
+      "contentType": "text/html; charset=UTF-8"
+    },
+    {
+      "method": "GET",
+      "url": "https://machinesandcloud.com/desk.html",
+      "at": "2026-10-22T04:17:08.597Z",
+      "status": 200,
+      "sha256": "7f59a74f7bc0f58991ded45248686b340fed3a8b47e894b83999eff130ca91f2",
+      "bytes": 28085,
+      "contentType": "text/html; charset=UTF-8"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Targeted captured HTML / returns200",
+      "ok": true
+    },
+    {
+      "name": "Targeted captured HTML /onboard.html returns200",
+      "ok": true
+    },
+    {
+      "name": "Targeted captured HTML /desk.html returns200",
+      "ok": true
+    },
+    {
+      "name": "Deployed homepage CTA resolves to self-service onboard.html",
+      "ok": false
+    },
+    {
+      "name": "Deployed homepage states website-first, separate phone/text setup and no subscription",
+      "ok": true
+    },
+    {
+      "name": "Deployed mobile menu opens and secure Sign in link is visible",
+      "ok": false
+    },
+    {
+      "name": "Deployed signup email gate visible at 320px",
+      "ok": true
+    },
+    {
+      "name": "Deployed signup business form hidden before verification at 320px",
+      "ok": true
+    },
+    {
+      "name": "Deployed signup has no horizontal overflow at 320px",
+      "ok": true
+    },
+    {
+      "name": "Deployed signup email gate visible at 1440px",
+      "ok": true
+    },
+    {
+      "name": "Deployed signup business form hidden before verification at 1440px",
+      "ok": true
+    },
+    {
+      "name": "Deployed signup has no horizontal overflow at 1440px",
+      "ok": true
+    },
+    {
+      "name": "Deployed owner page asks uncredentialed visitor to sign in",
+      "ok": true
+    },
+    {
+      "name": "Deployed owner data stays hidden without credentials",
+      "ok": true
+    },
+    {
+      "name": "No API requests attempted in browser proof",
+      "ok": true
+    },
+    {
+      "name": "No non-GET requests attempted in browser proof",
+      "ok": true
+    },
+    {
+      "name": "No browser JavaScript errors",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "browser": {
+    "intercepted": [
+      {
+        "method": "GET",
+        "path": "/",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "https://fonts.googleapis.com",
+        "disposition": "blocked"
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/site-refresh.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/photos/hero-hvac.jpg",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/logo-dark.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/script.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/agent-widget.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/stories.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/onboard.html",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "https://fonts.googleapis.com",
+        "disposition": "blocked"
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/logo-dark.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/onboard.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/onboard.html",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "https://fonts.googleapis.com",
+        "disposition": "blocked"
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/logo-dark.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/onboard.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/desk.html",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "https://fonts.googleapis.com",
+        "disposition": "blocked"
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/logo-dark.png",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/desk.js",
+        "disposition": "verified-deployed-bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/assets/favicon.png",
+        "disposition": "verified-deployed-bytes"
+      }
+    ],
+    "errors": []
+  },
+  "finishedAt": "2026-10-22T04:17:09.639Z",
+  "summary": {
+    "originalHostedGetRequests": 21,
+    "additionalHostedGetRequests": 3,
+    "aggregateHostedGetRequests": 24,
+    "maximumHostedGetRequests": 25,
+    "passed": 15,
+    "failed": 2,
+    "browserNetworkRequestsSent": 0
+  }
+}

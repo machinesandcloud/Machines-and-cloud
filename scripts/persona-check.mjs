@@ -248,7 +248,7 @@ assert.equal(bounded.events.length, 1); assert.deepEqual(bounded.events[0].data,
 fixtures = [{ text: "Machines & Cloud can help with your front desk." }]; wire = [];
 const mc = await send({ persona: "mc", messages: [{ role: "user", content: "Tell me about your service." }] });
 assert.equal(mc.status, 200); assert.deepEqual((await mc.json()).events, []);
-assert.deepEqual(wire[0].tools.map(tool => tool.name), ["capture_lead"], "MC retains its original sales tool");
+assert.deepEqual(wire[0].tools.map(tool => tool.name), ["estimate_call_volume", "assess_workflow_fit", "suggest_next_step"], "MC has planning and visitor-selected actions, with no automatic capture");
 assert.equal(unexpected, 0); assert.deepEqual(await snapshot(), initial);
 assert.deepEqual(sourceSnapshot(), source, "verification sources must stay stable throughout the run");
 console.log(`PERSONA OK: 18 progressive/correction turns + ${jobTranscripts.length} callback/isolation/question jobs; requested-action schema/fail-closed controls, safety, origin/validation/rate controls, SDK tool guards and MC control; zero business writes or external requests (offline fake + SDK fixtures, not live semantic proof)`);

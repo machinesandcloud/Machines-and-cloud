@@ -597,6 +597,15 @@
   window.addEventListener('pagehide', function () { pause(); cancelRequest(); stopVoice(false); });
   motion.addEventListener('change', function () { if (mode === 'watch') { pause(); watchStart(); } });
   render(false); el('controls').hidden = false; wrap.classList.add('site-demo-ready');
+  // A visitor-selected sales action opens the matching illustration, never its microphone.
+  function showExample(value, focus) {
+    if (['sms', 'call', 'spanish'].indexOf(value) >= 0) { scenario = value; mode = 'live'; autoStarted = true; render(false); }
+    wrap.scrollIntoView({ block: 'start', behavior: 'instant' });
+    if (focus) (scenario === 'call' && mode === 'live' ? el('voice-start') : mode === 'live' ? input : el('mode-live')).focus({ preventScroll: true });
+  }
+  document.addEventListener('mc:show-example', function (event) { showExample(event.detail && event.detail.scenario, true); });
+  var selectedExample = new URLSearchParams(window.location.search).get('example');
+  if (['sms', 'call', 'spanish'].indexOf(selectedExample) >= 0) showExample(selectedExample, false);
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) { composerVisible = entries[0].isIntersecting; launcherVisibility(); }, { threshold: 0 }).observe(el('live'));
     new IntersectionObserver(function (entries) {

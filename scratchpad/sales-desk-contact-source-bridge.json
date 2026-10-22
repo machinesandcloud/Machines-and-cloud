@@ -1,0 +1,105 @@
+{
+  "at": "2026-10-22T04:23:49.723Z",
+  "scope": "one-line contact-fact cleanup; pure runtime + exact source bridge",
+  "checks": [
+    {
+      "name": "Accepted backend source unchanged: netlify/functions/chat.mjs",
+      "pass": true
+    },
+    {
+      "name": "Exact reversal of only the contact company line reproduces accepted backend source",
+      "pass": true
+    },
+    {
+      "name": "Accepted backend source unchanged: netlify/functions/lib/sales-budget.mjs",
+      "pass": true
+    },
+    {
+      "name": "Accepted backend source unchanged: netlify/functions/lib/agent.mjs",
+      "pass": true
+    },
+    {
+      "name": "Accepted UI source unchanged: agent-widget.js",
+      "pass": true
+    },
+    {
+      "name": "Accepted UI source unchanged: styles.css",
+      "pass": true
+    },
+    {
+      "name": "Accepted UI source unchanged: site-refresh.css",
+      "pass": true
+    },
+    {
+      "name": "Accepted UI source unchanged: stories.js",
+      "pass": true
+    },
+    {
+      "name": "Accepted UI source unchanged: index.html",
+      "pass": true
+    },
+    {
+      "name": "Company exposes only name and location",
+      "pass": true
+    },
+    {
+      "name": "Actual sales system offers no literal email address",
+      "pass": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "name": "Actual sales system offers no literal phone number",
+      "pass": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "name": "Contact remains fixed visitor-chosen public Calendly route: en",
+      "pass": true
+    },
+    {
+      "name": "Contact remains fixed visitor-chosen public Calendly route: es",
+      "pass": true
+    },
+    {
+      "name": "Pure inspection performed no external/model/provider request",
+      "pass": true
+    }
+  ],
+  "previousBackend": "scratchpad/sales-desk-backend-qa-final.json",
+  "previousUI": "scratchpad/sales-desk-ui-final.json",
+  "sources": {
+    "netlify/functions/chat.mjs": {
+      "previousSHA256": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+      "currentSHA256": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+      "reconstructedPreviousSHA256": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015"
+    },
+    "netlify/functions/lib/sales-desk.mjs": {
+      "previousSHA256": "218f6fb462fc9b55ec75576a6b908ac7898ac636d74ce8bfaf594f12d44879df",
+      "currentSHA256": "9b2509510f7f90b2b673c10d50c5104431d9d0d0f1ac371e0f669e5de0ae12a3",
+      "reconstructedPreviousSHA256": "218f6fb462fc9b55ec75576a6b908ac7898ac636d74ce8bfaf594f12d44879df"
+    },
+    "netlify/functions/lib/sales-budget.mjs": {
+      "previousSHA256": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+      "currentSHA256": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+      "reconstructedPreviousSHA256": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b"
+    },
+    "netlify/functions/lib/agent.mjs": {
+      "previousSHA256": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+      "currentSHA256": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+      "reconstructedPreviousSHA256": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7"
+    }
+  },
+  "currentBackendFingerprint": "f6fc3b3505ff55a72a4c96985f8ce3ddad3c1d6c7f60ff475fcf8e5fafe1bd25",
+  "uiFingerprintUnchanged": "04a9797dbdbd256fa7e20803fe229ec2c78f256cc1052c13b4c7452f8f114903",
+  "summary": {
+    "checks": 15,
+    "passed": 15,
+    "failed": 0,
+    "actualModelRequests": 0,
+    "actualExternalRequests": 0
+  }
+}

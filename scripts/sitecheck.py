@@ -1,16 +1,26 @@
 import re, os, sys, glob
 from urllib.parse import urlparse
+from html.parser import HTMLParser
 root = sys.argv[1]
 os.chdir(root)
 html = sorted(glob.glob("*.html"))
 noindex = {f for f in html if re.search(r'name="robots" content="noindex', open(f, encoding="utf-8", errors="replace").read())}
 print(f"noindex pages (excluded from sitemap/redirect/canonical checks): {sorted(noindex)}")
-files = set(os.listdir(".")) | {"assets/"+f for f in os.listdir("assets")}
+files = set(os.listdir(".")) | {os.path.join(base, name) for base, _, names in os.walk("assets") for name in names}
+class References(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.refs = []
+    def handle_starttag(self, tag, attrs):
+        self.refs.extend(value for name, value in attrs if name in ("href", "src") and value)
 broken = {}
 for f in html:
     s = open(f, encoding="utf-8", errors="replace").read()
-    for m in re.findall(r'(?:href|src)="([^"#?]+)', s):
+    parsed = References()
+    parsed.feed(s)
+    for m in parsed.refs:
         if m.startswith(("http", "mailto:", "tel:", "data:", "//")): continue
+        m = urlparse(m).path
         if m.startswith("/"): m = m[1:]
         if m and m not in files:
             broken.setdefault(m, []).append(f)
@@ -40,3 +50,4 @@ for f in html:
     if not c: bad_canon.append((f,"MISSING"))
     elif c.group(1)!=exp: bad_canon.append((f,c.group(1)))
 print(f"\nCanonical mismatches: {len(bad_canon)} {bad_canon[:8]}")
+sys.exit(bool(broken or missing_file or not_in_sitemap or noredir or bad_canon))

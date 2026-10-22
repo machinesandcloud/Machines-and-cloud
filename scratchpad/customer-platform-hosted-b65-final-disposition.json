@@ -1,0 +1,56 @@
+{
+  "completedAt": "2026-10-22T04:19:23.034127+00:00",
+  "commit": "b65c0f4fef06d8f4e44e2a04101698034bd14842",
+  "deployId": "6ad98d7be2a7b05658217178",
+  "status": "accepted for bounded public deployed-byte, static UI and read-only route/health scope",
+  "aggregateHostedGetRequests": 25,
+  "maximumHostedGetRequests": 25,
+  "hostedNonGetRequests": 0,
+  "browserActualNetworkRequests": 0,
+  "healthRequests": 1,
+  "health": {
+    "status": 200,
+    "data": {
+      "ok": true,
+      "lastRunAt": "2026-10-22T04:10:18.616Z",
+      "minutesAgo": 5,
+      "failingBlocks": []
+    }
+  },
+  "evidenceStages": [
+    {
+      "file": "scratchpad/customer-platform-hosted-b65.json",
+      "passed": 34,
+      "rawFailuresPreserved": 2,
+      "disposition": "One quoted-href assertion is invalid after Pretty URL rewriting; bundled Chromium was absent before browser started."
+    },
+    {
+      "file": "scratchpad/customer-platform-hosted-b65-browser-final.json",
+      "passed": 15,
+      "rawFailuresPreserved": 2,
+      "disposition": "System Chrome succeeds. Literal onboard.html href selectors are invalid after Netlify rewrites links to /onboard; targeted DOM checks below pass."
+    },
+    {
+      "file": "scratchpad/customer-platform-hosted-b65-adjudication.json",
+      "passed": 5,
+      "rawFailuresPreserved": 1,
+      "disposition": "Actual clean /onboard is200, with no redirect. The expected301 assumption from an unforced source redirect was invalid because Pretty URLs directly serves the existing HTML. Raw HTTP record confirms availability. Five corrected deployed DOM/interaction/error checks pass."
+    }
+  ],
+  "observedFacts": [
+    "Published deploy is READY at exact approved commit. One automatic build completed without error; no manual trigger.",
+    "All12 requested CSS, JS and image asset bodies SHA-match pinned approved source bytes.",
+    "Five private paths return404: setup instructions, package.json, function source, evidence manifest and .env.",
+    "Actual homepage CTA /onboard returns200. Deployed Sign in DOM targets /onboard?signin=1.",
+    "Captured deployed HTML and SHA-verified asset bytes render cleanly in system Chrome. Mobile menu opens,320/1440 signup email gates hide unverified business form,390 owner gate hides data without credentials.",
+    "No browser JavaScript errors, API attempts or non-GET requests occurred in final captured-byte runs.",
+    "One actual health GET returned200/ok, last natural scheduler04:10:18.616Z, no failing blocks."
+  ],
+  "limits": [
+    "Captured-byte browser requests are intercepted; backend state transitions were not exercised.",
+    "Clean /onboard response body was not retained for a hash comparison; its status200 is recorded. Explicit /onboard.html response body is retained and rendered.",
+    "No live verification email, sign-in completion, Blobs creation/CAS/revocation, owner private test or customer AI message was sent.",
+    "Phone/SMS/Calendar automation and actual-model compliance of callback wording remain unverified.",
+    "No current sales chatbot work was included in this release."
+  ]
+}

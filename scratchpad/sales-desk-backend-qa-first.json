@@ -1,0 +1,557 @@
+{
+  "at": "2026-10-22T04:17:52.546Z",
+  "mode": "memory + installed Anthropic SDK HTTP double; zero actual model/provider",
+  "sourceBefore": {
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/sales-desk.mjs": "218f6fb462fc9b55ec75576a6b908ac7898ac636d74ce8bfaf594f12d44879df",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7"
+  },
+  "checks": [
+    {
+      "name": "Ordinary multi-turn request 1 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 2 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 3 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 4 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 5 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 6 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 7 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 8 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 9 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 10 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 11 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Ordinary multi-turn request 12 passes real sales validation",
+      "pass": true
+    },
+    {
+      "name": "Actual SDK context retains first shop facts past eleven turns",
+      "pass": true
+    },
+    {
+      "name": "Helpful long answer is preserved without the old1500-character truncation",
+      "pass": true
+    },
+    {
+      "name": "Latest explicit correction reaches actual SDK after full prior context",
+      "pass": true
+    },
+    {
+      "name": "Total volume before choosing coverage: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "Total volume is1188 without inventing missed or routed minutes",
+      "pass": false
+    },
+    {
+      "name": "Correct selected AI share: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "AI quarter is297 routed while missed share stays unknown",
+      "pass": false
+    },
+    {
+      "name": "Original missed estimate: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "Corrected missed estimate: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "Corrected count and period replace390 with9 without invented revenue",
+      "pass": false
+    },
+    {
+      "name": "Required native integration: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "Unmet must-haves remain not-current-fit despite useful website interest",
+      "pass": false
+    },
+    {
+      "name": "Optional illustrative next step: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "Action returns a constrained visible choice without starting microphone/call",
+      "pass": true
+    },
+    {
+      "name": "Old lead-capture tool is unavailable: actual SDK tool loop returns only intended final reply",
+      "pass": true
+    },
+    {
+      "name": "Removed capture tool cannot submit a form or produce captured event",
+      "pass": true
+    },
+    {
+      "name": "Sales tools never mutate customer/tenant stores",
+      "pass": true
+    },
+    {
+      "name": "Actual SDK sees authoritative current web-only/billing/contact boundaries",
+      "pass": true
+    },
+    {
+      "name": "Invalid sales history fails before SDK/budget spend",
+      "pass": true
+    },
+    {
+      "name": "Invalid sales history fails before SDK/budget spend",
+      "pass": true
+    },
+    {
+      "name": "Invalid sales history fails before SDK/budget spend",
+      "pass": true
+    },
+    {
+      "name": "Rejected histories do not consume model calls or allowance",
+      "pass": true
+    },
+    {
+      "name": "Last logical sales allowance admits exactly one concurrent turn",
+      "pass": true,
+      "detail": [
+        200,
+        429
+      ]
+    },
+    {
+      "name": "No external provider, lead form, customer action or actual model request escaped",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Sales backend source stayed stable throughout QA",
+      "pass": true
+    }
+  ],
+  "cases": [
+    {
+      "name": "Total volume before choosing coverage",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "That is1188 total monthly minutes; routed volume is not known yet.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 18,
+                  "period": "day",
+                  "count_kind": "total",
+                  "routing": "unknown",
+                  "average_minutes": 3,
+                  "workdays_per_month": 22,
+                  "missed_percent": null,
+                  "routed_percent": null
+                },
+                "monthlyCount": 396,
+                "totalMinutes": 1188,
+                "missedMinutes": null,
+                "routedMinutes": null,
+                "assumptions": [],
+                "missing": [
+                  "Which calls should be covered: all calls or only missed calls?"
+                ],
+                "planComparison": [],
+                "lowestPublishedCallCostPlan": null,
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "{\"kind\":\"call_volume\",\"planningOnly\":true,\"phoneActive\":false,\"billingActive\":false,\"input\":{\"call_count\":18,\"period\":\"day\",\"count_kind\":\"total\",\"routing\":\"unknown\",\"average_minutes\":3,\"workdays_per_month\":22,\"missed_percent\":null,\"routed_percent\":null},\"monthlyCount\":396,\"totalMinutes\":1188,\"missedMinutes\":null,\"routedMinutes\":null,\"assumptions\":[],\"missing\":[\"Which calls should be covered: all calls or only missed calls?\"],\"planComparison\":[],\"lowestPublishedCallCostPlan\":null,\"limits\":\"Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription.\"}\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "name": "Correct selected AI share",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "Only297 minutes would be routed; this does not establish missed calls.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 18,
+                  "period": "day",
+                  "count_kind": "total",
+                  "routing": "selected_share",
+                  "average_minutes": 3,
+                  "workdays_per_month": 22,
+                  "missed_percent": null,
+                  "routed_percent": 25
+                },
+                "monthlyCount": 396,
+                "totalMinutes": 1188,
+                "missedMinutes": null,
+                "routedMinutes": 297,
+                "assumptions": [],
+                "missing": [],
+                "planComparison": [
+                  {
+                    "plan": "starter",
+                    "name": "Starter",
+                    "monthlyBase": 99,
+                    "includedCallMinutes": 150,
+                    "estimatedOverageMinutes": 147,
+                    "projectedCallCost": 150.45
+                  },
+                  {
+                    "plan": "growth",
+                    "name": "Growth",
+                    "monthlyBase": 249,
+                    "includedCallMinutes": 600,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 249
+                  },
+                  {
+                    "plan": "pro",
+                    "name": "Pro",
+                    "monthlyBase": 449,
+                    "includedCallMinutes": 1500,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 449
+                  }
+                ],
+                "lowestPublishedCallCostPlan": "starter",
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "{\"kind\":\"call_volume\",\"planningOnly\":true,\"phoneActive\":false,\"billingActive\":false,\"input\":{\"call_count\":18,\"period\":\"day\",\"count_kind\":\"total\",\"routing\":\"selected_share\",\"average_minutes\":3,\"workdays_per_month\":22,\"missed_percent\":null,\"routed_percent\":25},\"monthlyCount\":396,\"totalMinutes\":1188,\"missedMinutes\":null,\"routedMinutes\":297,\"assumptions\":[],\"missing\":[],\"planComparison\":[{\"plan\":\"starter\",\"name\":\"Starter\",\"monthlyBase\":99,\"includedCallMinutes\":150,\"estimatedOverageMinutes\":147,\"projectedCallCost\":150.45},{\"plan\":\"growth\",\"name\":\"Growth\",\"monthlyBase\":249,\"includedCallMinutes\":600,\"estimatedOverageMinutes\":0,\"projectedCallCost\":249},{\"plan\":\"pro\",\"name\":\"Pro\",\"monthlyBase\":449,\"includedCallMinutes\":1500,\"estimatedOverageMinutes\":0,\"projectedCallCost\":449}],\"lowestPublishedCallCostPlan\":\"starter\",\"limits\":\"Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription.\"}\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "name": "Original missed estimate",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "Planning estimate:390 missed minutes in an average month.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 30,
+                  "period": "week",
+                  "count_kind": "missed",
+                  "routing": "missed_only",
+                  "average_minutes": 3,
+                  "workdays_per_month": null,
+                  "missed_percent": null,
+                  "routed_percent": null
+                },
+                "monthlyCount": 130,
+                "totalMinutes": null,
+                "missedMinutes": 390,
+                "routedMinutes": 390,
+                "assumptions": [
+                  "Monthly average uses 52 weeks divided by 12; it is not an exact count for a particular month."
+                ],
+                "missing": [],
+                "planComparison": [
+                  {
+                    "plan": "starter",
+                    "name": "Starter",
+                    "monthlyBase": 99,
+                    "includedCallMinutes": 150,
+                    "estimatedOverageMinutes": 240,
+                    "projectedCallCost": 183
+                  },
+                  {
+                    "plan": "growth",
+                    "name": "Growth",
+                    "monthlyBase": 249,
+                    "includedCallMinutes": 600,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 249
+                  },
+                  {
+                    "plan": "pro",
+                    "name": "Pro",
+                    "monthlyBase": 449,
+                    "includedCallMinutes": 1500,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 449
+                  }
+                ],
+                "lowestPublishedCallCostPlan": "starter",
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "{\"kind\":\"call_volume\",\"planningOnly\":true,\"phoneActive\":false,\"billingActive\":false,\"input\":{\"call_count\":30,\"period\":\"week\",\"count_kind\":\"missed\",\"routing\":\"missed_only\",\"average_minutes\":3,\"workdays_per_month\":null,\"missed_percent\":null,\"routed_percent\":null},\"monthlyCount\":130,\"totalMinutes\":null,\"missedMinutes\":390,\"routedMinutes\":390,\"assumptions\":[\"Monthly average uses 52 weeks divided by 12; it is not an exact count for a particular month.\"],\"missing\":[],\"planComparison\":[{\"plan\":\"starter\",\"name\":\"Starter\",\"monthlyBase\":99,\"includedCallMinutes\":150,\"estimatedOverageMinutes\":240,\"projectedCallCost\":183},{\"plan\":\"growth\",\"name\":\"Growth\",\"monthlyBase\":249,\"includedCallMinutes\":600,\"estimatedOverageMinutes\":0,\"projectedCallCost\":249},{\"plan\":\"pro\",\"name\":\"Pro\",\"monthlyBase\":449,\"includedCallMinutes\":1500,\"estimatedOverageMinutes\":0,\"projectedCallCost\":449}],\"lowestPublishedCallCostPlan\":\"starter\",\"limits\":\"Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription.\"}\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "name": "Corrected missed estimate",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "That correction gives nine minutes a month; no subscription was started.",
+          "events": [
+            {
+              "type": "sales_estimate",
+              "data": {
+                "kind": "call_volume",
+                "planningOnly": true,
+                "phoneActive": false,
+                "billingActive": false,
+                "input": {
+                  "call_count": 3,
+                  "period": "month",
+                  "count_kind": "missed",
+                  "routing": "missed_only",
+                  "average_minutes": 3,
+                  "workdays_per_month": null,
+                  "missed_percent": null,
+                  "routed_percent": null
+                },
+                "monthlyCount": 3,
+                "totalMinutes": null,
+                "missedMinutes": 9,
+                "routedMinutes": 9,
+                "assumptions": [],
+                "missing": [],
+                "planComparison": [
+                  {
+                    "plan": "starter",
+                    "name": "Starter",
+                    "monthlyBase": 99,
+                    "includedCallMinutes": 150,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 99
+                  },
+                  {
+                    "plan": "growth",
+                    "name": "Growth",
+                    "monthlyBase": 249,
+                    "includedCallMinutes": 600,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 249
+                  },
+                  {
+                    "plan": "pro",
+                    "name": "Pro",
+                    "monthlyBase": 449,
+                    "includedCallMinutes": 1500,
+                    "estimatedOverageMinutes": 0,
+                    "projectedCallCost": 449
+                  }
+                ],
+                "lowestPublishedCallCostPlan": "starter",
+                "limits": "Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "{\"kind\":\"call_volume\",\"planningOnly\":true,\"phoneActive\":false,\"billingActive\":false,\"input\":{\"call_count\":3,\"period\":\"month\",\"count_kind\":\"missed\",\"routing\":\"missed_only\",\"average_minutes\":3,\"workdays_per_month\":null,\"missed_percent\":null,\"routed_percent\":null},\"monthlyCount\":3,\"totalMinutes\":null,\"missedMinutes\":9,\"routedMinutes\":9,\"assumptions\":[],\"missing\":[],\"planComparison\":[{\"plan\":\"starter\",\"name\":\"Starter\",\"monthlyBase\":99,\"includedCallMinutes\":150,\"estimatedOverageMinutes\":0,\"projectedCallCost\":99},{\"plan\":\"growth\",\"name\":\"Growth\",\"monthlyBase\":249,\"includedCallMinutes\":600,\"estimatedOverageMinutes\":0,\"projectedCallCost\":249},{\"plan\":\"pro\",\"name\":\"Pro\",\"monthlyBase\":449,\"includedCallMinutes\":1500,\"estimatedOverageMinutes\":0,\"projectedCallCost\":449}],\"lowestPublishedCallCostPlan\":\"starter\",\"limits\":\"Planning only for separately activated phone service. Text usage, taxes and other costs are excluded. No booking, revenue, profit or recovered-job estimate is implied. Workspace setup starts no subscription.\"}\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "name": "Required native integration",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "The current workspace is not a fit for those requirements.",
+          "events": [
+            {
+              "type": "sales_fit",
+              "data": {
+                "kind": "workflow_fit",
+                "fit": "not_current_fit",
+                "required": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "gaps": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "interests": [
+                  {
+                    "feature": "website_chat",
+                    "currentSupport": true,
+                    "detail": "Available after the owner’s review, private test and activation checks."
+                  }
+                ],
+                "usefulCurrentFeatures": [
+                  {
+                    "feature": "website_chat",
+                    "currentSupport": true,
+                    "detail": "Available after the owner’s review, private test and activation checks."
+                  }
+                ],
+                "caveat": "Website chat still requires owner review, a private AI test and activation. A useful website component does not satisfy an unmet must-have. Daily AI limits apply; no channel or paid subscription is activated by this assessment."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "{\"kind\":\"workflow_fit\",\"fit\":\"not_current_fit\",\"required\":[{\"feature\":\"jobber_sync\",\"currentSupport\":false,\"detail\":\"No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established.\"},{\"feature\":\"dispatch\",\"currentSupport\":false,\"detail\":\"Technician dispatch or crew routing is not provided.\"}],\"gaps\":[{\"feature\":\"jobber_sync\",\"currentSupport\":false,\"detail\":\"No native live connection. Customer CSVs are available; busy-time synchronization and automatic import are not established.\"},{\"feature\":\"dispatch\",\"currentSupport\":false,\"detail\":\"Technician dispatch or crew routing is not provided.\"}],\"interests\":[{\"feature\":\"website_chat\",\"currentSupport\":true,\"detail\":\"Available after the owner’s review, private test and activation checks.\"}],\"usefulCurrentFeatures\":[{\"feature\":\"website_chat\",\"currentSupport\":true,\"detail\":\"Available after the owner’s review, private test and activation checks.\"}],\"caveat\":\"Website chat still requires owner review, a private AI test and activation. A useful website component does not satisfy an unmet must-have. Daily AI limits apply; no channel or paid subscription is activated by this assessment.\"}\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "name": "Optional illustrative next step",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "You can choose the English plumbing example.",
+          "events": [
+            {
+              "type": "sales_action",
+              "action": "see_example",
+              "label": "See an example",
+              "href": "/?example=call#demo-wrap",
+              "scenario": "call",
+              "language": "en"
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "Optional action shown for the visitor to choose. Nothing was opened, sent, booked or activated. Do not claim a person was contacted.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    },
+    {
+      "name": "Old lead-capture tool is unavailable",
+      "result": {
+        "status": 200,
+        "data": {
+          "reply": "Nothing was submitted. Here is a rule to review.",
+          "events": [],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 20,
+            "outputTokens": 20,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          }
+        }
+      },
+      "toolResult": "That sales tool is not available. No external action was performed.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps."
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/chat.mjs": "4a52d73b26fb3b3c5a5d43c6b531e57344019e10e15c95616c5feee8e9e83015",
+    "netlify/functions/lib/sales-desk.mjs": "218f6fb462fc9b55ec75576a6b908ac7898ac636d74ce8bfaf594f12d44879df",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7"
+  },
+  "summary": {
+    "checks": 37,
+    "passed": 33,
+    "failed": 4,
+    "interceptedSDKRequests": 28,
+    "actualExternalRequests": 0
+  }
+}
