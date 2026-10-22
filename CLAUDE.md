@@ -12,17 +12,20 @@ The function needs `ANTHROPIC_API_KEY`; without it `/api/chat` returns 503 `{"er
 
 ## Site structure (two-page site, rebuilt from scratch 2026-10-18)
 - Built from `RESEARCH-customer-workflow.md` (the full owner workflow: lead sources and costs, channels, quoting, closing, booking, confirming, delivery, payment, follow-up, tools, Houston) and `RESEARCH-customer-journey.md`. The services are named for the workflow stages where small shops lose work.
-- Core pages (in nav): `index` (full-bleed blurred photo hero `.hero-full` modeled on Sameday; headline "Stop losing jobs to the shop that answered first." with a PAS subhead (problem stat, solution, who it is for) per Shapiro's clear-not-clever and Harry Dry's visualizable/falsifiable tests; body carries `hero-photo` so the nav links are white over the photo; one white pill CTA; "Watch it answer" `#watch` with the looping missed-call example in `#demo-wrap`; "Where the jobs leak out" `#leaks`; "Plans" `#plans` with Starter/Growth/Pro cards and the setup and "what it does not do" footnotes; "One week with a front desk" `#week` with a trade photo on each example; "The rules" `#rules` as a photo band; nine FAQs with no prices (incl. timelines and whose data it is); pilot form `#pilot` as a photo band with the form alone). No "how it works" section (removed 2026-10-19 at Steve's request) and no example disclaimer anywhere: Steve's rule is never to write meta commentary a real company would not write ("these are examples", "the companies are fictional"). and `about`. `thank-you` (noindex) is the form redirect. `houston` is hidden but live.
+- Core pages (refreshed 2026-10-21): `index` uses a solid white header, a crisp HVAC photo beside ink/blue copy, three owner benefits (`#leaks`), one user-controlled text/phone/Spanish walkthrough (`#week`, `#demo-wrap`), concise Starter/Growth/Pro plans (`#plans`), owner rules (`#rules`), native FAQ (`#faq`) and the pilot form (`#pilot`). `about` and `thank-you` share this typography and layout in `site-refresh.css`; all three carry `body.theme-light.site-refresh`. The previous blurred `.hero-full` and `hero-photo` class are no longer used on the homepage. No how-it-works section; Steve removed that section in an earlier review.
+- Core first-load rule: the headline and product example are visible without JavaScript. Shared `script.js` navigation uses explicit hidden/inert/ARIA state, a compact opaque mobile panel, close/backdrop/Escape handling, focus containment/restoration, and resize/page-show reset. Shared navigation styles remain in `styles.css`, including support for legacy light/dark pages. The dedicated refresh stylesheet must not override mobile menu visibility.
 - Price rule (Steve): each price appears once on the homepage, in the plans section. The FAQ and the steps carry no prices. No "we are new / no logos" copy anywhere; no footer trust line.
 - Retired via 301 to index anchors: `services`, `pricing` (-> `#plans`), `how-it-works` (-> `#how`), `demo` (-> `#demo-wrap`), `contact` (-> `#pilot`).
 - SEO pages stay live and out of the nav. Never delete them without asking.
 - Nav: Plans, See it work, About (+ "Start a free pilot" to `index.html#pilot`). Footer `.footer-simple`: logo, email, phone, LinkedIn, one small line of links (Houston, Industries, Locations, Guides, Insights, Privacy, Terms). Inlined on every page; regex-replace `<footer class="footer footer-simple">.*?</footer>` to change. Light pages use logo-dark.png in nav and footer.
 
 ## The interactive demo
-- `stories.js` plays scripted example conversations (`SCENES`) in any element with `data-scene="<id>"` when it scrolls into view. Each scene has a `channel` (`sms`, `call`, `lead`, `web`) that sets its look (SMS bubbles, call transcript with timer, Thumbtack lead card, website chat), optional `loop`, `notes`, and `lead`. The owner's phone panel is the same for all. No API needed. Never call them "scenes" or "samples" in visible copy (Steve: sounds fake); the page says "examples" once, in a footnote.
+- `stories.js` controls the homepage's three `[data-example]` buttons. Text, phone and Spanish examples update a readable conversation plus the owner's summary; they do not autoplay, call an API or accept chat input. The default text example is real HTML and remains readable without JavaScript. Do not turn these illustrations into customer proof, add invented testimonials, or introduce a fake input widget. The real AI remains in `agent-widget.js`; the refresh gives its mobile launcher a compact accessible icon.
 - `demo.js` was deleted. The persona mode of `/api/chat` (fictional companies) still exists in `chat.mjs` and can be reused for an inline live demo later; nothing on the site calls it now.
 - `netlify/functions/chat.mjs`: persona briefs live in `PERSONAS`; each fictional company has published prices, hours, service area, and owner rules. Persona mode uses a strict `send_owner_summary` tool whose input is returned to the page as an `owner_notification` event (never posted anywhere). The `mc` persona keeps `capture_lead` -> Netlify Forms `agent-lead`. To add a company: add a brief in `PERSONAS` and a scenario in `demo.js` (same id).
 - Founder privacy rule applies to every persona prompt.
+
+Local browser verification for the core refresh: `node scripts/site-ui-check.mjs --base http://127.0.0.1:<port> --playwright /path/to/playwright/index.mjs` against an existing isolated local server. The script blocks external/API traffic and records source hashes, screenshots and actual interactions; local form checks, if enabled, fulfill requests inside the browser without forwarding them. See `product/SITE-REFRESH.md` for the evidence and limits.
 
 ## Generator
 The core pages were produced by one-off generator scripts in the 2026-10-18 session (not committed). Treat the HTML as the source of truth; edit it directly.
@@ -31,7 +34,7 @@ The core pages were produced by one-off generator scripts in the 2026-10-18 sess
 - Three plans by call minutes, setup included, no setup fee, first 7 days free with a card on file (nothing charged until day 8), no contract:
   - Starter $99/month: 150 minutes, 500 texts. Calls, texts, website chat; existing number; published fees and windows only; Google Calendar booking, reminders, on-the-way text, reschedule by reply; owner alerts; handoff list.
   - Growth $249/month (most popular): 600 minutes, 1,500 texts. Adds Angi, Thumbtack, Google LSA leads; review requests; day-14 quote check; quiet-lead chase; payment reminders; referral ask; Jobber or Housecall Pro.
-  - Pro $449/month: 1,500 minutes, 5,000 texts. Adds maintenance and seasonal reminders, custom rules, several crews and numbers, weekly report, priority support.
+  - Pro $449/month: 1,500 minutes, 5,000 texts. Adds customer-requested maintenance reminders, custom rules, more included call/text volume, and priority support. The refreshed homepage does not promise multi-number routing or a same-day support deadline.
   - Overage $0.35/minute, $0.03/text.
 - Anchors: Rosie $49/250 min to $299/2,000; Dialzara $29 to $349; Goodcall $79 to $299; Jobber AI receptionist $29 add-on; Sameday $449/500 min and $789/1,000; Smith.ai human $300/30 calls; Ruby $250/50 min; NiceJob about $75; Podium $399 to $599. We sit between self-serve and Sameday, done-for-you, with follow-up bundled.
 - The earlier $1,497 build fee and $397/$297/$197 structure are gone. Hard cost per client is roughly $30 to $100 a month; setup time (about four hours) is unpaid and covered by the card-on-file trial.
@@ -48,7 +51,7 @@ Shared copy to keep in sync on a price change: `index.html` (plans cards, plans 
 ## Conventions
 - Canonical URL form in code: `https://www.machinesandcloud.com/<page>.html`. Every page has canonical, OG/Twitter meta, JSON-LD `@graph` (WebPage + BreadcrumbList; home adds Organization, WebSite, LocalBusiness, Service, FAQPage).
 - `script.js` is one IIFE with section banners; features are guarded by element-existence checks. The old scripted "M&C Guide" fake companion was removed; never add a fake chat widget.
-- `styles.css` is large and mostly legacy; new sections are appended at the end under dated banners. Design tokens at the top.
+- `styles.css` is large and mostly legacy; shared changes use dated scoped sections. `site-refresh.css` owns the three refreshed core marketing pages and loads after it. Keep new core-page rules scoped to `.site-refresh` or `site-` classes so legacy SEO and product portals retain their layouts. Design tokens are at the top of `styles.css`.
 - Contact form (`contact.html`) and the agent lead form both use Netlify Forms. Keep the hidden `form-name` inputs.
 - Copy rules: no em dashes, no invented stats or client names, no prototype words (scene, sample, fictional, try to break it) in visible copy, no "we are new" language, no personal details about Steve beyond the one sentence on the about page.
 - No analytics tag yet (see ANALYTICS-SETUP.md). Calendly link: calendly.com/ngoumnaisteve/30.
@@ -62,10 +65,14 @@ Shared copy to keep in sync on a price change: `index.html` (plans cards, plans 
 ## Checks before committing
 ```
 python3 -I scripts/sitecheck.py .       # broken local links, sitemap, redirects, canonicals (skips noindex pages)
-node --check script.js agent-widget.js netlify/functions/chat.mjs
+node --check script.js
+node --check stories.js
+node --check agent-widget.js
+node --check netlify/functions/chat.mjs
 ```
 
-## Theme (2026-10-19)
+## Theme (2026-10-21 core refresh; legacy light pages retained)
+- Current index/About/thank-you use white, ink, restrained blue, crisp images and `site-refresh.css`. This supersedes the previous photo-overlay homepage direction. The earlier notes below describe retained legacy light pages/assets, not an instruction to restore the old homepage.
 - Core pages carry `body.theme-light`: white background (#FFFFFF, Sameday's exact page color; alternate sections #F3F4F6, borders #E5E7EB), ink text, terracotta eyebrows, white cards, dark device panels for the examples. Steve rejected the earlier cream (#FBF8F3) on 2026-10-19; do not bring beige back. Styles are the appended "Warm light theme" block at the end of `styles.css`; everything is scoped under `.theme-light`, so the 145 legacy SEO pages stay dark and untouched. Pages on the light theme: index, about, thank-you, 404, houston, industries, industry-home-services, -healthcare, -legal, -automotive, -real-estate.
 - Light pages use `assets/logo-dark.png` (nav and footer); dark pages keep `assets/logo.png`.
 - Photos in `assets/photos/` are Pexels (free license, no attribution required): hero-hvac (homepage hero background via `.hero-bg`), plumber, electrician, roofer, cleaning (one per weekly example, `.week-photo` inside `.week-head.has-photo`), roof-house (about page `.about-photo`). Modeled on Sameday's bright photo-led look at Steve's request; no fake customer or team photos.

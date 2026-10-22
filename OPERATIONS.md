@@ -2,6 +2,12 @@
 
 How a shop goes from the pilot form to a live front desk, what runs where, and what Steve has to switch on once.
 
+## Public marketing pages
+
+The October 21 refresh covers `index.html`, `about.html` and `thank-you.html`, with page styling in `site-refresh.css`. Shared navigation in `script.js` and `styles.css` also supports the retained light/dark SEO pages. The mobile menu is explicitly hidden/inert until opened, with dismissal controls, focus handling and scroll restoration. Homepage copy is visible before JavaScript; the default walkthrough is HTML, and `stories.js` switches its three channel views without model or provider calls. The compact mobile launcher opens the existing real agent widget.
+
+The pilot form retains Netlify's `contact` name and honeypot, plus the hidden `agent-lead` registration. Name/email are required; website/phone are optional. On success, the shared form handler prefills onboarding; an unsuccessful response keeps the fields and offers retry. Local acceptance intercepts both responses in the browser, so it creates no real lead. After an approved deployment that changes forms, verify both registered form names in Netlify before claiming hosted submission acceptance. Research, before/after evidence and independent acceptance are in `RESEARCH-site-design.md` and `product/SITE-REFRESH.md`.
+
 ## The flow
 
 1. **Pilot form** on the homepage posts to Netlify Forms (Steve gets the email) and sends the owner to `/onboard` with name, email, website, and phone prefilled. The plan buttons go straight to `/onboard?plan=...`.

@@ -4,6 +4,8 @@ Updated **2026-10-21**. **Product Owner is accountable for the final working pro
 
 **Decision: owner-controlled availability (A) is accepted locally. The product is not approved for the first live shop.** Continue useful feature delivery and launch work in parallel; billing stays parked. [Round 11](BACKLOG.md#round-11-2026-10-21-own-the-outcome-and-keep-improving-the-product) supersedes the historical blanket feature freeze.
 
+**Public-site refresh:** the PO and PM also accept the redesigned homepage, About, thank-you and shared navigation locally; [SITE-REFRESH.md](SITE-REFRESH.md) records 509 passing browser checks, corrected visual/motion defects and the exact source hashes. Publication remains a distinct gate: Netlify last observed production at `638d161`, already deployed on October 21. The reviewable batch includes three pending commits plus the new site work; an additional same-day push needs the explicit daily-build exception. Local design acceptance does not close the product's provider or first-shop gates.
+
 ## What each evidence stage establishes
 
 | Stage | Current evidence | Limit still open |

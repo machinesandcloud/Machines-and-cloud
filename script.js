@@ -12,6 +12,8 @@
   const navbar = document.getElementById('navbar');
 
   function updateNavbar() {
+    // The mobile dialog fixes the body in place. Keep the header's pre-open state.
+    if (document.body.classList.contains('nav-open')) return;
     if (window.scrollY > 50) {
       navbar.classList.add('scrolled');
     } else {
@@ -30,31 +32,144 @@
   const navToggle = document.getElementById('navToggle');
   const navMenu = document.getElementById('navMenu');
 
-  if (navToggle && navMenu) {
-    navToggle.addEventListener('click', function() {
-      const isOpen = navMenu.classList.contains('is-open');
-      navMenu.classList.toggle('is-open');
-      navToggle.classList.toggle('is-active');
-      document.body.classList.toggle('nav-open', !isOpen);
-    });
+  if (navbar && navToggle && navMenu) {
+    const mobileNav = window.matchMedia('(max-width: 1024px)');
+    const backdrop = document.createElement('div');
+    backdrop.className = 'nav-backdrop';
+    backdrop.hidden = true;
+    backdrop.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(backdrop);
 
-    // Close on link click
-    navMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('is-open');
-        navToggle.classList.remove('is-active');
-        document.body.classList.remove('nav-open');
-      });
-    });
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'nav-menu-close';
+    closeButton.textContent = 'Close menu';
+    navMenu.prepend(closeButton);
 
-    // Close on escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && navMenu.classList.contains('is-open')) {
-        navMenu.classList.remove('is-open');
-        navToggle.classList.remove('is-active');
-        document.body.classList.remove('nav-open');
+    navToggle.type = 'button';
+    navToggle.setAttribute('aria-controls', navMenu.id);
+    navMenu.tabIndex = -1;
+    let isOpen = false;
+    let returnFocus = null;
+    let scrollPosition = null;
+    let previousScrollTop = '';
+    let lastMenuFocus = null;
+    const inertBefore = new Map();
+
+    function backgroundInert() {
+      // Preserve the navigation's ancestor path and toggle while disabling the page.
+      for (let branch = navMenu; branch && branch !== document.body; branch = branch.parentElement) {
+        for (const sibling of branch.parentElement.children) {
+          if (sibling === branch || sibling === backdrop || sibling.contains(navToggle)) continue;
+          inertBefore.set(sibling, sibling.inert);
+          sibling.inert = true;
+        }
+      }
+    }
+
+    function focusableLinks() {
+      return [...navMenu.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.hidden && !element.inert && element.getClientRects().length);
+    }
+
+    function closeMenu({ restoreFocus = true } = {}) {
+      const wasOpen = isOpen;
+      isOpen = false;
+      navMenu.classList.remove('is-open');
+      navToggle.classList.remove('is-active');
+      navToggle.setAttribute('aria-expanded', 'false');
+      navToggle.setAttribute('aria-label', 'Open menu');
+      backdrop.hidden = true;
+      document.body.classList.remove('nav-open');
+      for (const [element, wasInert] of inertBefore) element.inert = wasInert;
+      inertBefore.clear();
+      if (scrollPosition) {
+        if (previousScrollTop) document.body.style.setProperty('--nav-scroll-top', previousScrollTop);
+        else document.body.style.removeProperty('--nav-scroll-top');
+        window.scrollTo({ ...scrollPosition, behavior: 'instant' });
+        scrollPosition = null;
+      }
+      const mobile = mobileNav.matches;
+      const hidingDesktopFocus = !mobile && (document.activeElement === closeButton || document.activeElement === navToggle);
+      closeButton.hidden = !mobile;
+      navMenu.hidden = mobile;
+      navMenu.inert = mobile;
+      if (mobile) {
+        navMenu.setAttribute('aria-hidden', 'true');
+        navMenu.setAttribute('role', 'dialog');
+        navMenu.setAttribute('aria-label', 'Site navigation');
+      } else {
+        navMenu.removeAttribute('aria-hidden');
+        navMenu.removeAttribute('role');
+        navMenu.removeAttribute('aria-label');
+      }
+      navMenu.removeAttribute('aria-modal');
+      if (wasOpen && restoreFocus && mobile && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
+      else if (wasOpen && restoreFocus && hidingDesktopFocus) navMenu.querySelector('a[href]')?.focus({ preventScroll: true });
+      returnFocus = null;
+      updateNavbar();
+    }
+
+    function openMenu() {
+      if (!mobileNav.matches || isOpen) return;
+      returnFocus = navToggle;
+      scrollPosition = { left: window.scrollX, top: window.scrollY };
+      previousScrollTop = document.body.style.getPropertyValue('--nav-scroll-top');
+      navMenu.style.setProperty('--nav-top', `${Math.ceil(navbar.getBoundingClientRect().bottom) + 8}px`);
+      document.body.style.setProperty('--nav-scroll-top', `${-scrollPosition.top}px`);
+      isOpen = true;
+      navMenu.hidden = false;
+      navMenu.inert = false;
+      navMenu.removeAttribute('aria-hidden');
+      navMenu.setAttribute('aria-modal', 'true');
+      navMenu.classList.add('is-open');
+      navToggle.classList.add('is-active');
+      navToggle.setAttribute('aria-expanded', 'true');
+      navToggle.setAttribute('aria-label', 'Close menu');
+      document.body.classList.add('nav-open');
+      backdrop.hidden = false;
+      backgroundInert();
+      closeButton.focus({ preventScroll: true });
+    }
+
+    navToggle.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
+    closeButton.addEventListener('click', () => closeMenu());
+    backdrop.addEventListener('click', () => closeMenu());
+    navMenu.addEventListener('click', event => { if (event.target.closest('a[href]')) closeMenu(); });
+    document.addEventListener('keydown', event => {
+      if (!isOpen) return;
+      if (event.key === 'Escape') { event.preventDefault(); closeMenu(); }
+      if (event.key !== 'Tab') return;
+      const items = focusableLinks();
+      const first = items[0] || navMenu;
+      const last = items.at(-1) || navMenu;
+      if (event.shiftKey && (document.activeElement === first || !navMenu.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !navMenu.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
       }
     });
+    document.addEventListener('focusin', event => {
+      if (navMenu.contains(event.target)) lastMenuFocus = event.target;
+      else if (event.target !== document.body) lastMenuFocus = null;
+      if (isOpen && !navMenu.contains(event.target)) closeButton.focus({ preventScroll: true });
+    });
+    mobileNav.addEventListener('change', () => {
+      // Responsive CSS can hide the focused link before the media-query event arrives.
+      const hidingFocusedMenu = mobileNav.matches && (navMenu.contains(document.activeElement) || (document.activeElement === document.body && lastMenuFocus));
+      const hidingFocusedButton = !mobileNav.matches && (document.activeElement === closeButton || document.activeElement === navToggle);
+      closeMenu({ restoreFocus: false });
+      if (hidingFocusedMenu) navToggle.focus({ preventScroll: true });
+      else if (hidingFocusedButton) navMenu.querySelector('a[href]')?.focus({ preventScroll: true });
+    });
+    window.addEventListener('resize', () => { if (isOpen) closeMenu(); });
+    window.addEventListener('pagehide', () => closeMenu({ restoreFocus: false }));
+    window.addEventListener('pageshow', () => {
+      const hidingFocusedMenu = mobileNav.matches && (navMenu.contains(document.activeElement) || (document.activeElement === document.body && lastMenuFocus));
+      closeMenu({ restoreFocus: false });
+      if (hidingFocusedMenu) navToggle.focus({ preventScroll: true });
+    });
+    closeMenu({ restoreFocus: false });
   }
 
   // ============================================
@@ -252,7 +367,7 @@
 
         window.scrollTo({
           top: targetPosition,
-          behavior: 'smooth'
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
         });
       }
     });

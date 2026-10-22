@@ -9078,6 +9078,62 @@ body.theme-light::before { opacity: 0.025; }
 .footer-simple .footer-logo img { height: 36px; width: auto; }
 .footer-simple-contact { display: flex; gap: var(--space-6); flex-wrap: wrap; font-size: var(--text-sm); }
 .footer-simple-contact a { color: var(--color-neutral-300); }
+
+/* ============================================
+   Shared navigation repair (2026-10-21)
+   Explicit mobile visibility and an opaque, readable dialog on either page theme.
+   ============================================ */
+.navbar-menu[hidden], .nav-backdrop[hidden], .nav-menu-close[hidden] { display: none !important; }
+.navbar::after { display: none; }
+.nav-backdrop { position: fixed; inset: 0; z-index: 10010; background: rgba(15,23,42,0.48); }
+.nav-menu-close { display: none; }
+.navbar-toggle:focus-visible, .nav-menu-close:focus-visible, .navbar a:focus-visible { outline: 3px solid #2563EB; outline-offset: 4px; }
+
+@media (max-width: 1024px) {
+  body.nav-open { position: fixed; top: var(--nav-scroll-top, 0px); left: 0; right: 0; width: 100%; height: 100%; overflow: hidden; }
+  body.nav-open .navbar { z-index: 10020; }
+  /* A backdrop-filter on the header would make it the fixed panel's containing block. */
+  body.nav-open .navbar, body.nav-open.theme-light .navbar.scrolled { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .navbar-toggle { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+  .navbar .navbar-menu {
+    display: none; visibility: hidden; pointer-events: none;
+    position: fixed; top: var(--nav-top, 96px); right: max(16px, env(safe-area-inset-right)); left: auto; bottom: auto;
+    width: min(380px, calc(100vw - 32px)); max-width: 380px; height: auto;
+    max-height: calc(100vh - var(--nav-top, 96px) - 16px);
+    max-height: calc(100dvh - var(--nav-top, 96px) - 16px);
+    padding: 16px; gap: 16px; align-items: stretch;
+    transform: none; transition: none;
+    background: #FFFFFF; color: #17243B; border: 1px solid #D8DFE9; border-radius: 18px;
+    box-shadow: 0 24px 64px rgba(15,23,42,0.22);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  .navbar .navbar-menu.is-open:not([hidden]) { display: flex; visibility: visible; pointer-events: auto; }
+  .nav-menu-close { display: inline-flex; align-self: flex-end; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid #D8DFE9; border-radius: 10px; background: #FFFFFF; color: #17243B; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .nav-menu-close:hover { background: #F1F5F9; }
+  .navbar .navbar-links { align-items: stretch; gap: 4px; }
+  .navbar .navbar-menu .navbar-links a,
+  .theme-light.hero-photo .navbar:not(.scrolled) .navbar-menu .navbar-links a { display: flex; align-items: center; min-height: 48px; padding: 12px; color: #17243B; text-shadow: none; font-size: 17px; line-height: 1.4; }
+  .navbar .navbar-menu .navbar-links a:hover,
+  .navbar .navbar-menu .navbar-links a.active,
+  .theme-light.hero-photo .navbar:not(.scrolled) .navbar-menu .navbar-links a:hover,
+  .theme-light.hero-photo .navbar:not(.scrolled) .navbar-menu .navbar-links a.active { background: #EFF6FF; color: #1D4ED8; }
+  .navbar .navbar-menu .navbar-links a::after { display: none; }
+  .navbar .navbar-menu .navbar-cta { margin-top: 0; gap: 12px; }
+  .navbar .navbar-menu .navbar-cta .btn { min-height: 48px; background: #1D4ED8; color: #FFFFFF; border: 1px solid #1D4ED8; border-radius: 12px; box-shadow: none; white-space: normal; text-align: center; }
+  .navbar .navbar-menu .navbar-cta .btn:hover { background: #1E40AF; color: #FFFFFF; border-color: #1E40AF; }
+  .navbar .navbar-menu .nav-group-label { color: #475569; border-color: #D8DFE9; }
+  .navbar .navbar-menu .dropdown-label span { color: inherit; }
+  .navbar .navbar-menu .dropdown-label span:last-child { color: #475569; }
+}
+
+@media (min-width: 1025px) {
+  .nav-backdrop { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar, .navbar-toggle span, .nav-backdrop, .nav-menu-close { transition: none; animation: none; }
+}
 .footer-simple-bottom { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid rgba(255,255,255,0.08); font-size: var(--text-xs); color: var(--color-neutral-500); }
 .footer-simple-links { display: flex; gap: var(--space-4); flex-wrap: wrap; }
 .footer-simple-links a { color: var(--color-neutral-500); }
