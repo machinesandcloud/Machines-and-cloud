@@ -33,6 +33,8 @@ The campaign still displays the old HELP snapshot. Its relevance to vetting and 
 
 All activation gates and environment/billing settings are unchanged; no call, text, email, model request, purchase or carrier submission occurred in this release phase. **Do not push main wholesale:** older cleanup/access-link runtime remains unpublished. Future release work starts from published `05e8c5c`; this build/read approval is fully spent. Full automatic customer phone/text/Calendar delivery still needs separately scoped actual acceptance.
 
+**Next selected product slice: [Sprint19](product/SPRINT19.md), trustworthy business-detail editing.** [PO](product/PO-NEXT-WORK-2026-10-22.md) and [UI/UX](product/UIUX-NEXT-WORK-2026-10-22.md) reviewed the exact published source; [independent isolated QA](scratchpad/next-work-workspace-save-qa.json) reproduced pending-save edit loss and invalid-phone false success, with zero physical network. These are open defects; no repair is implemented. [Backlog Round12](product/BACKLOG.md) ranks subsequent signup acceptance, safe connection controls, request commitments and verified website installation. Preserve the existing design, draft semantics and review/activation gates. New release work starts from published `05e8c5c`, excluding older unrelated main runtime; closed budgets stay closed.
+
 ## Earlier release and provider observations — historical
 
 The following receipts retain their original timestamps and scope. Current production and campaign disposition are above.

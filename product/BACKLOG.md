@@ -1,6 +1,23 @@
 # Backlog: Machines & Cloud front desk
 
-Owner: Product Owner. Round 11 is current; rounds 10 through 1 below are preserved historical records. Round 11 explicitly supersedes their blanket feature-freeze instructions. Evidence shorthand: `F#` = RESEARCH-stakeholder-forums.md source register; `S#n` = RESEARCH-servicing.md ranked item n; `W§n` = RESEARCH-customer-workflow.md section n; `code:` = read in the repo; `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+Owner: Product Owner. Round12 is current; rounds11 through1 below are historical records. Round11 superseded their blanket feature-freeze instructions. Current production/provider observations are in PRODUCT-STATUS.md, not the older rounds. Evidence shorthand: `F#` = RESEARCH-stakeholder-forums.md source register; `S#n` = RESEARCH-servicing.md ranked item n; `W§n` = RESEARCH-customer-workflow.md section n; `code:` = read in the repo; `S1-nn` = a sprint 1 ticket in product/SPRINT.md.
+
+---
+
+# Round12 (2026-10-22): finish reliable owner work and automatic delivery
+
+The [PO review](PO-NEXT-WORK-2026-10-22.md) and [UI/UX review](UIUX-NEXT-WORK-2026-10-22.md) assess published `05e8c5c`, the current journey evidence and fresh official competitor guidance. There is substantial useful work beyond the Twilio Support wait. Preserve the accepted application design; improve completion and recovery. These priorities do not assert production acceptance or authorize live effects.
+
+| Order | Outcome | Current decision and proof |
+|---|---|---|
+| 1 · P0 immediate | **Trustworthy business-detail editing.** Saving a correction must not erase newer typing or claim an invalid number was saved. | [Sprint19](SPRINT19.md) is the selected next implementation slice. [Independent QA](../scratchpad/next-work-workspace-save-qa.json) reproduced both failures in actual published assets with memory-backed handlers and zero physical network. Defects are confirmed; no repair is implemented yet. Explicit incomplete drafts remain distinct from invalid supplied input. |
+| 2 · P0 parallel | **Complete signup, return access and the first useful result.** | Prepare fresh current-source hosted acceptance; earlier consumed-link failure and diagnosis remain retained and their request/email budgets closed. Do not equate static checks with a completed customer journey or silently bundle unpublished authentication work. |
+| 3 · P0 before paid connections | **Automatic setup with exact-tenant eligibility, accepted account exposure and recoverable cleanup.** | Existing coordinator/workers are published, execution remains off and actual provider delivery is unaccepted. Build/review missing pilot isolation/cost controls and census retained work before activation. Company campaign clarification is separately tracked in ticket30031927; it cannot register a shop. |
+| 4 · P1 next feature | **Useful request detail and explicit follow-through.** | Extend existing requests with call/visit/quote intent, owner, due time, transcript/context and owner-reported attempted/reached completion. Acknowledge means seen, not contacted. Existing self-service paths skip legacy callback timers; add a clear commitment contract rather than duplicate a generic queue. Preserve/repair legacy reporting separately. |
+| 5 · P1 | **Guided website installation and a verified first customer request.** | Tailored platform instructions, safe specialist handoff and distinct readiness/activation/install/first-request evidence. Copying an embed snippet does not prove installation. No automatic website connector or paid specialist fulfillment is claimed. |
+| 6 · P1/P2 after those slices | **External calendar conflicts, current AI/Spanish quality and evidence from real usage.** | Scope busy-time freshness/races/consent; prepare bounded current-source model/human review; measure actual setup/request outcomes without secret or transcript collection. Owner-maintained blocks remain the stated present limitation. |
+
+The reviews cite current official Goodcall, Jobber, Intercom and accessibility material; existing public operator anecdotes support focused follow-through and capacity needs. These are discovery inputs, not private competitor trials or customer interviews. No new code, provider request, deployment, activation or campaign resubmission occurred in this assessment. Standard setup stays included; billing and unlaunched specialist/Enterprise delivery remain parked. The PO accepts actual customer outcomes, QA independently returns defects, and PM keeps source/publication/live-proof stages distinct.
 
 ---
 
