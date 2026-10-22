@@ -15,6 +15,9 @@
   .ad .ev { font-size: 12px; font-family: ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 420px; overflow: auto; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px; background: #F9FAFB; }
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1E2433; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; display: none; }
   @media (max-width: 800px) { .ad table { display: block; overflow-x: auto; } }
+  .ad .prospects-table-scroll { max-width: 100%; overflow-x: auto; border-radius: 6px; }
+  .ad .prospects-table-scroll:focus-visible { outline: 2px solid #2455E6; outline-offset: 3px; }
+  .ad .prospects-table-scroll table { display: table; min-width: 650px; }
 </style>
 </head>
 <body class="theme-light" data-no-widget>
@@ -23,6 +26,13 @@
   <p class="muted" id="keyRow">Admin key: <input class="key" id="key" type="password" placeholder="paste the admin key once"> <button class="btn" id="keyGo">Load</button> <span id="msg"></span></p>
   <p><button class="btn" id="runNow">Run the scheduler now</button> <button class="btn" id="lastRun">Last run</button> <button class="btn" id="brakeBtn">Brake: off</button> <span class="muted" id="runMsg"></span></p>
   <p class="muted">Brake: press it when Netlify's 75 percent credit email arrives. The nightly audit and the half-hour scans stop; customer texts, webhooks, reminders, and the digest keep going. Press again to release.</p>
+  <section aria-labelledby="prospectsTitle">
+    <h2 id="prospectsTitle">Website inquiries</h2>
+    <p class="muted">Details saved when someone starts setup. The marketing export includes only verified contacts who confirmed email updates and have no suppression.</p>
+    <p><button type="button" class="btn" id="refreshProspects" disabled>Refresh inquiries</button> <button type="button" class="btn" id="exportMarketing" disabled>Export marketing list</button> <button type="button" class="btn" id="exportProspects" disabled>Export all inquiries</button></p>
+    <p class="muted" id="prospectsStatus" role="status">Load with the key.</p>
+    <div id="prospects"></div>
+  </section>
   <h2>Needs me</h2><div id="needs" class="muted">Load with the key.</div>
   <div id="shops"></div>
   <h2>Events, last 24 hours, every shop</h2>
@@ -38,8 +48,62 @@
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function rel(iso) { if (!iso) return 'none'; var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; }
   function api(body, method) { return fetch(API_BASE + '/api/admin' + (method === 'GET' ? '?full=1' : ''), { method: method || 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: method === 'GET' ? undefined : JSON.stringify(body) }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || r.status); return d; }); }); }
+  var prospectsGeneration = 0;
+  function prospectControls(disabled) { ['refreshProspects', 'exportMarketing', 'exportProspects'].forEach(function (id) { $(id).disabled = disabled; }); }
+  async function prospectRequest(audience, format, requestKey) {
+    var controller = new AbortController(), timer = setTimeout(function () { controller.abort(); }, 20000);
+    try {
+      var response = await fetch(API_BASE + '/api/intake?audience=' + audience + '&format=' + format, { headers: { 'x-admin-key': requestKey }, signal: controller.signal });
+      if (!response.ok) throw new Error('Could not load inquiries. Check your access and try again.');
+      return format === 'csv' ? response.blob() : response.json();
+    } finally { clearTimeout(timer); }
+  }
+  async function loadProspects() {
+    var version = ++prospectsGeneration, requestKey = key;
+    $('prospects').replaceChildren(); prospectControls(true);
+    if (!requestKey) { $('prospectsStatus').textContent = 'Load with the key.'; return; }
+    $('prospectsStatus').textContent = 'Loading inquiries…';
+    try {
+      var result = await prospectRequest('all', 'json', requestKey);
+      if (version !== prospectsGeneration || key !== requestKey) return;
+      if (!result.ok || !Array.isArray(result.prospects)) throw new Error('The inquiry list could not be read. Try again.');
+      var rows = result.prospects, eligible = rows.filter(function (row) { return row.marketingEligible === true; }).length;
+      $('prospectsStatus').textContent = rows.length + ' inquiries · ' + eligible + ' eligible for marketing email. No campaign has been sent.';
+      if (rows.length) {
+        var table = document.createElement('table'), head = table.createTHead().insertRow();
+        ['Contact', 'Business', 'Main goal', 'Email verified', 'Email updates'].forEach(function (label) { var th = document.createElement('th'); th.scope = 'col'; th.textContent = label; head.appendChild(th); });
+        var body = table.createTBody();
+        rows.forEach(function (row) {
+          var tr = body.insertRow();
+          [String(row.name || '') + (row.name ? ' · ' : '') + String(row.email || ''), row.business || '', String(row.goal || '').replace(/_/g, ' '), row.emailVerifiedAt ? 'Verified' : 'Not verified', row.suppressed ? 'Unsubscribed' : row.marketingEligible ? 'Confirmed' : row.marketingRequested ? 'Not confirmed' : 'Not requested'].forEach(function (value) { tr.insertCell().textContent = value; });
+        });
+        var scroll = document.createElement('div'); scroll.className = 'prospects-table-scroll'; scroll.tabIndex = 0;
+        scroll.setAttribute('role', 'region'); scroll.setAttribute('aria-label', 'Website inquiries; scroll to see all columns');
+        scroll.appendChild(table); $('prospects').appendChild(scroll);
+      }
+    } catch (error) {
+      if (version === prospectsGeneration && key === requestKey) $('prospectsStatus').textContent = error.name === 'AbortError' ? 'Loading took too long. Try again.' : error.message;
+    } finally { if (version === prospectsGeneration && key === requestKey) prospectControls(false); }
+  }
+  async function exportProspects(audience) {
+    if (!key) return;
+    var requestKey = key, version = prospectsGeneration; prospectControls(true);
+    try {
+      var blob = await prospectRequest(audience, 'csv', requestKey);
+      if (version !== prospectsGeneration || key !== requestKey) return;
+      var url = URL.createObjectURL(blob), link = document.createElement('a');
+      link.href = url; link.download = audience === 'eligible' ? 'marketing-contacts.csv' : 'all-inquiries.csv'; link.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      $('prospectsStatus').textContent = audience === 'eligible' ? 'Marketing list downloaded. No email has been sent.' : 'All inquiries downloaded. This includes contacts who are not eligible for marketing email.';
+    } catch (error) { if (version === prospectsGeneration && key === requestKey) $('prospectsStatus').textContent = 'The export could not be completed. Please try again.'; }
+    finally { if (version === prospectsGeneration && key === requestKey) prospectControls(false); }
+  }
+  $('refreshProspects').addEventListener('click', loadProspects);
+  $('exportMarketing').addEventListener('click', function () { exportProspects('eligible'); });
+  $('exportProspects').addEventListener('click', function () { exportProspects('all'); });
   function load() {
     if (!key) return;
+    loadProspects();
     $('msg').textContent = 'loading';
     api(null, 'GET').then(function (d) {
       try { sessionStorage.setItem('mc_admin_key', key); } catch (e) { /* ignore */ }
@@ -58,7 +122,7 @@
         if (c.status === 'live' && dom <= 7 && lc.invoicedFor !== lastMonth && c.liveDays !== null && c.liveDays >= 1) needs.push(link + ': statement and invoice due for ' + lastMonth + ' <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="invoicedFor" data-val="' + lastMonth + '">Invoiced</button>');
         if (c.status === 'live' && c.liveDays === 6 && !lc.day7Sent) needs.push(link + ': day-7 email tomorrow (the draft lands in your inbox)');
         if (c.status === 'live' && c.liveDays !== null && c.liveDays >= 7 && !lc.day7Sent) needs.push(link + ': day-7 "what I changed" email due (the free-week-over email waits on it) <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="day7Sent">Sent</button>');
-        if (!lc.onboardingCallAt && c.newShopDays <= 7 && c.status !== 'cancelled') needs.push(link + ': new shop, onboarding call promised within one business day <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="onboardingCallAt">Called</button>');
+        if (!c.selfService && !lc.onboardingCallAt && c.newShopDays <= 7 && c.status !== 'cancelled') needs.push(link + ': new shop, onboarding call promised within one business day <button class="btn" data-slug="' + esc(c.slug) + '" data-stamp="onboardingCallAt">Called</button>');
         if (c.spanishReviewPending && c.status === 'live') needs.push(link + ': Spanish texts still waiting for the reviewer'); });
       $('needs').innerHTML = needs.length ? needs.map(function (n) { return '<div>' + n + '</div>'; }).join('') : 'Nothing needs you.';
       $('shops').innerHTML = d.clients.length ? '<table><tr><th>Shop</th><th>Status</th><th>Plan</th><th>Live since</th><th>Texting</th><th>Usage</th><th>Errors 24 h</th><th>Last inbound</th><th>Flags</th><th>Waiting</th><th>Callbacks</th><th>Actions</th></tr>' + d.clients.map(function (c) {

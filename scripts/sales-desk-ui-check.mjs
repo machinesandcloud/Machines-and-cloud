@@ -3,7 +3,11 @@ import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
 import { createHash } from 'node:crypto';
 const root = resolve('.'), base = 'http://127.0.0.1:8898', storageKey = 'mc_sales_desk_v3';
-const files = ['agent-widget.js', 'styles.css', 'site-refresh.css', 'stories.js', 'index.html'];
+const outputIndex = process.argv.indexOf('--output');
+const output = outputIndex < 0 ? 'scratchpad/sales-desk-ui-first.json' : process.argv[outputIndex + 1];
+if (!/^scratchpad\/[a-z0-9_-]+\.json$/i.test(output || '')) throw new Error('QA output must remain under scratchpad');
+const capturePrefix = output.replace(/\.json$/, '');
+const files = ['agent-widget.js', 'styles.css', 'site-refresh.css', 'stories.js', 'index.html', 'signup-intake.js'];
 const hashes = () => Object.fromEntries(files.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 const report = { at: new Date().toISOString(), mode: 'all static and HTTP responses fulfilled locally; no actual model or provider', sourceBefore: hashes(), checks: [], cases: [], pageErrors: [], externalBlocked: [], blockedAPI: [] };
 const check = (name, pass, detail) => report.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
@@ -63,7 +67,7 @@ try {
     check(`${width}×${height} keyboard wraps within modal`, await focusables.first().evaluate(n => n === document.activeElement));
     await s.page.keyboard.press('Escape');
     check(`${width}×${height} Escape restores page and launcher focus`, !await s.page.locator('#mcAgentPanel').isVisible() && !await s.page.locator('main').evaluate(n => n.inert) && await s.page.locator('#mcAgentLauncher').evaluate(n => n === document.activeElement));
-    await s.page.locator('#mcAgentLauncher').click(); await s.page.screenshot({ path: `scratchpad/sales-desk-current-${width}-${height}.png` });
+    await s.page.locator('#mcAgentLauncher').click(); await s.page.screenshot({ path: `${capturePrefix}-${width}-${height}.png` });
     await s.context.close();
   }
   {
@@ -118,7 +122,7 @@ try {
     s.events = [{ type: 'sales_action', action: 'start_workspace', href: 'https://evil.invalid', label: 'Create workspace' }, { type: 'sales_action', action: 'start_workspace' }, { type: 'sales_action', action: '__proto__' }, { type: 'sales_action', action: 'see_example', scenario: 'call', href: '/api/admin' }, { type: 'sales_action', action: 'contact', href: 'https://evil.invalid' }];
     await s.send('Show my optional next steps');
     const actions = await s.page.locator('.mc-agent-action').evaluateAll(nodes => nodes.map(n => ({ label: n.textContent, href: n.getAttribute('href') })));
-    check('Structured actions are deduplicated, allowlisted and ignore supplied destinations', actions.length === 3 && actions.some(a => a.href === '/onboard') && actions.some(a => a.href === '/?example=call#demo-wrap') && actions.some(a => a.href === 'https://calendly.com/ngoumnaisteve/30'), actions);
+    check('Structured actions are deduplicated, allowlisted and ignore supplied destinations', actions.length === 3 && actions.some(a => a.href === '/#pilot') && actions.some(a => a.href === '/?example=call#demo-wrap') && actions.some(a => a.href === 'https://calendly.com/ngoumnaisteve/30'), actions);
     check('Contact opens only visitor-chosen fixed calendar without booking automatically', await s.page.locator('.mc-agent-action[href^="https://calendly.com/"]').getAttribute('target') === '_blank' && /noopener/.test(await s.page.locator('.mc-agent-action[href^="https://calendly.com/"]').getAttribute('rel')));
     check('Reply markup cannot inject HTML, script links or external/API/credential destinations', await s.page.locator('#mcAgentMessages img').count() === 0 && await s.page.locator('#mcAgentMessages a[href^="javascript:"],#mcAgentMessages a[href^="https://evil.invalid"],#mcAgentMessages a[href^="/api/"],#mcAgentMessages a[href*="session="]').count() === 0);
     await s.page.locator('.mc-agent-copy').last().click();
@@ -129,8 +133,8 @@ try {
     await s.page.locator('.mc-agent-action[href^="/?example="]').click();
     check('Explicit example action selects real English plumbing without auto microphone', !await s.page.locator('#mcAgentPanel').isVisible() && await s.page.locator('[data-example="call"]').getAttribute('aria-pressed') === 'true' && await s.page.evaluate(() => window.__salesMicRequests) === 0);
     await s.page.locator('#mcAgentLauncher').evaluate(n => n.click());
-    const nav = s.page.waitForURL('**/onboard'); await s.page.locator('.mc-agent-action[href="/onboard"]').click(); await nav;
-    check('Explicit setup action reaches actual verified email entry', await s.page.locator('#access-gate').isVisible() && report.blockedAPI.length === 0); await s.context.close();
+    await s.page.locator('.mc-agent-action[href="/#pilot"]').click();
+    check('Explicit setup action closes the chat and focuses the preliminary form', !await s.page.locator('#mcAgentPanel').isVisible() && await s.page.locator('#intake-name').evaluate(n => n === document.activeElement) && report.blockedAPI.length === 0); await s.context.close();
   }
   {
     const s = await pageFor('planning-receipts');
@@ -142,7 +146,7 @@ try {
     await s.send('Only a quarter goes to AI.');
     await s.page.locator('.mc-agent-card').last().locator('summary').click();
     check('Corrected planning receipt displays297routed with missing share honest', /297/.test(await s.page.locator('.mc-agent-card').last().innerText()) && /Not established/.test(await s.page.locator('.mc-agent-card').last().innerText()) && /Planning only/.test(await s.page.locator('.mc-agent-card').last().innerText()));
-    await s.page.screenshot({ path: 'scratchpad/sales-desk-planning-receipt-390.png' });
+    await s.page.screenshot({ path: `${capturePrefix}-planning-receipt-390.png` });
     await s.page.reload(); await s.page.locator('#mcAgentLauncher').click();
     check('Reload preserves completed conversation and its actual planning receipt', await s.page.locator('.mc-agent-card').count() === 2 && (await s.saved()).turns.length === 4);
     s.reply = 'Current workflow does not meet native Jobber synchronization as a requirement.';
@@ -160,11 +164,10 @@ try {
   }
   check('No uncaught browser errors in functional acceptance', report.pageErrors.length === 0, report.pageErrors);
   check('No forbidden API/submission route was invoked', report.blockedAPI.length === 0, report.blockedAPI);
-} catch (error) { report.fatal = String(error.stack || error); const page = browser.contexts().at(-1)?.pages().at(-1); if (page) await page.screenshot({ path: 'scratchpad/sales-desk-ui-return.png' }).catch(() => {}); }
+} catch (error) { report.fatal = String(error.stack || error); const page = browser.contexts().at(-1)?.pages().at(-1); if (page) await page.screenshot({ path: `${capturePrefix}-return.png` }).catch(() => {}); }
 finally {
   for (const row of report.cases) for (const key of ['page', 'context', 'release', 'waitIdle', 'begin', 'send', 'saved']) delete row[key];
   await browser.close(); report.sourceAfter = hashes(); check('UI source stayed unchanged during acceptance', JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter));
   report.summary = { checks: report.checks.length, passed: report.checks.filter(row => row.pass).length, failed: report.checks.filter(row => !row.pass).length, actualModelRequests: 0, actualExternalRequests: 0 };
-  const index = process.argv.indexOf('--output'), output = index < 0 ? 'scratchpad/sales-desk-ui-first.json' : process.argv[index + 1]; if (!output?.startsWith('scratchpad/')) throw new Error('QA output must remain under scratchpad');
   writeFileSync(output, JSON.stringify(report, null, 2)); console.log(JSON.stringify({ output, ...report.summary, fatal: report.fatal || null }));
 }

@@ -16,7 +16,7 @@
   ];
   // Navigation is chosen by an explicit visitor click, never by arbitrary model URLs.
   var ACTIONS = {
-    start_workspace: { href: '/onboard', label: 'Set up a workspace' },
+    start_workspace: { href: '/#pilot', label: 'Get started' },
     see_example: { href: '/#demo-wrap', label: 'Try an example' },
     contact: { href: 'https://calendly.com/ngoumnaisteve/30', label: 'Choose a time to talk' }
   };
@@ -166,6 +166,13 @@
         var def = ACTIONS[event.action], a = el('a', 'mc-agent-action', typeof event.label === 'string' && event.label.length <= 60 ? event.label : def.label);
         a.href = def.href;
         if (event.action === 'contact') { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+        if (event.action === 'start_workspace') {
+          a.addEventListener('click', function (e) {
+            close();
+            var intake = document.getElementById('signup-intake');
+            if (intake) { e.preventDefault(); intake.scrollIntoView({ block: 'center', behavior: 'instant' }); document.getElementById('intake-name').focus({ preventScroll: true }); }
+          });
+        }
         if (event.action === 'see_example') {
           var scenario = ['sms', 'call', 'spanish'].indexOf(event.scenario) >= 0 ? event.scenario : 'none';
           if (scenario !== 'none') a.href = '/?example=' + scenario + '#demo-wrap';

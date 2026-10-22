@@ -1,4 +1,5 @@
 import { AccessError, accessOriginAllowed, requestAccessLink, exchangeAccessToken, getAccessSession, getAccessState, saveAccessDraft, revokeAccessSession } from "./lib/access.mjs";
+import { IntakeError, attachIntake } from "./lib/intake.mjs";
 export const config = { path: "/api/access" };
 const reply = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
 
@@ -16,15 +17,16 @@ export default async (req, context) => {
     if (raw.length > (req.method === "PUT" ? 26000 : 1024)) return reply({ error: "invalid_request" }, 413);
     let body; try { body = JSON.parse(raw); } catch { return reply({ error: "bad_json" }, 400); }
     if (!body || typeof body !== "object" || Array.isArray(body)) return reply({ error: "invalid_request" }, 400);
-    if (req.method === "POST" && body.action === "request_link") return reply(await requestAccessLink(body.email, context?.ip || req.headers.get("x-nf-client-connection-ip"), body.plan), 202);
+    if (req.method === "POST" && body.action === "request_link") return reply(await requestAccessLink(body.email, context?.ip || req.headers.get("x-nf-client-connection-ip"), body.plan, body.intake), 202);
     if (req.method === "POST" && body.action === "exchange") return reply(await exchangeAccessToken(body.token, context?.ip || req.headers.get("x-nf-client-connection-ip")));
     const session = await getAccessSession(req);
     if (!session) return reply({ error: "sign_in_required", message: "Sign in to continue." }, 401);
+    if (body.action === "attach_intake") { await attachIntake(session, body.intake); return reply(await getAccessState(session)); }
     if (req.method === "PUT") return reply(await saveAccessDraft(session, body));
     if (body.action === "sign_out") return reply(await revokeAccessSession(session));
     return reply({ error: "invalid_action" }, 400);
   } catch (error) {
-    if (error instanceof AccessError) return reply({ error: error.code, message: error.message }, error.status);
+    if (error instanceof AccessError || error instanceof IntakeError) return reply({ error: error.code, message: error.message }, error.status);
     console.error("access operation unavailable");
     return reply({ error: "access_unavailable", message: "We could not confirm this request. Please try again; if a sign-in link was used, request a new one." }, 503);
   }

@@ -1,0 +1,88 @@
+{
+  "at": "2026-10-22T06:32:45.637Z",
+  "mode": "browser/API fixtures; no actual email, model or provider",
+  "sourceBefore": {
+    "onboard.html": "ddc9ceee7e5c3ebebf22dadf09ae4cb75102b93e31ae62f8472e0ec6a98e8607",
+    "onboard.js": "5743a266e76f5d0830f3a9fd31744bc82943a975f32d7e7ef1b1b0a0473f0581"
+  },
+  "checks": [
+    {
+      "name": "Invalid callback is stopped on its first step: 12345",
+      "pass": true
+    },
+    {
+      "name": "Invalid callback is stopped on its first step: +44 207 123 4567",
+      "pass": true
+    },
+    {
+      "name": "Invalid callback is stopped on its first step: +1 713 555 0100 ext 22",
+      "pass": true
+    },
+    {
+      "name": "Invalid callback is stopped on its first step: 7135550100+",
+      "pass": true
+    },
+    {
+      "name": "Early phone validation never attempts account creation",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: 7135550100",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: (713) 555-0100",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: 1 713 555 0100",
+      "pass": true
+    },
+    {
+      "name": "Server-compatible callback format advances: +1 (713) 555-0100",
+      "pass": true
+    },
+    {
+      "name": "Final server callback error reveals its earlier step and focuses the field",
+      "pass": true
+    },
+    {
+      "name": "Routed server error retains its message and all questionnaire answers",
+      "pass": true
+    },
+    {
+      "name": "Editing a corrected field clears its stale invalid marker",
+      "pass": true
+    },
+    {
+      "name": "Nested business-name error maps to business rather than the owner name",
+      "pass": true
+    },
+    {
+      "name": "Unknown server field keeps the current step with a readable error",
+      "pass": true
+    },
+    {
+      "name": "Recovery source remained stable during verification",
+      "pass": true
+    },
+    {
+      "name": "No browser page errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "blockedExternal": [
+    "https://fonts.googleapis.com"
+  ],
+  "pageErrors": [],
+  "sourceAfter": {
+    "onboard.html": "ddc9ceee7e5c3ebebf22dadf09ae4cb75102b93e31ae62f8472e0ec6a98e8607",
+    "onboard.js": "5743a266e76f5d0830f3a9fd31744bc82943a975f32d7e7ef1b1b0a0473f0581"
+  },
+  "summary": {
+    "passed": 16,
+    "failed": 0,
+    "total": 16
+  }
+}

@@ -58,6 +58,7 @@ check('Public preferences expose Coverage and Follow-through at the unchanged ra
   assert.deepEqual(SALES_FACTS.plans, [{ id: 'starter', name: 'Coverage', monthly: 99, includedCallMinutes: 150, includedTexts: 500 }, { id: 'growth', name: 'Follow-through', monthly: 249, includedCallMinutes: 600, includedTexts: 1500 }]);
   assert.deepEqual(SALES_FACTS.commercial.publishedOverage, { callMinute: 0.35, text: 0.03 });
   assert.match(SALES_FACTS.commercial.planScope, /not carrier SMS segments/); assert.match(SALES_FACTS.commercial.planScope, /Pro is held out of new selection/);
+  assert.match(SALES_FACTS.commercial.enterprise, /custom pricing/); assert.match(SALES_FACTS.commercial.enterprise, /no enterprise price, allowance, integration, SLA or multi-location capability is established/);
 });
 check('Public pricing changes preserve all legacy plan IDs, usage amounts and follow-up entitlements', () => {
   assert.deepEqual(PLANS, {
@@ -113,7 +114,7 @@ check('Native Jobber must-have is a current non-fit even with useful website cha
 check('Web/manual availability fit preserves activation prerequisites', () => { const x = assessWorkflowFit({ required_features: ['website_chat', 'manual_availability'], interested_features: [] }); assert.equal(x.fit, 'current_fit'); assert.match(x.caveat, /private AI test/); });
 check('Interesting feature alone does not become a requirement or fit conclusion', () => assert.equal(assessWorkflowFit({ required_features: [], interested_features: ['phone_answering'] }).fit, 'clarify'));
 check('Invalid/unknown feature is rejected', () => assert.throws(() => assessWorkflowFit({ required_features: ['send_email_now'], interested_features: [] })));
-check('Spanish action has fixed signup path and no server send', () => { const e = suggestNextStep({ action: 'start_workspace', scenario: 'call', language: 'es' }); assert.equal(e.href, '/onboard.html'); assert.equal(e.scenario, 'none'); assert.equal(e.label, 'Crear mi espacio'); });
+check('Spanish action reaches the fixed preliminary form without a server send', () => { const e = suggestNextStep({ action: 'start_workspace', scenario: 'call', language: 'es' }); assert.equal(e.href, '/#pilot'); assert.equal(e.scenario, 'none'); assert.equal(e.label, 'Comenzar'); });
 check('Example action has canonical homepage container', () => assert.equal(suggestNextStep({ action: 'see_example', scenario: 'spanish', language: 'en' }).href, '/?example=spanish#demo-wrap'));
 check('Contact offers the fixed scheduling link without implying no chat processing', () => {
   const x = executeSalesTool('suggest_next_step', { action: 'contact', scenario: 'none', language: 'en' });

@@ -29,5 +29,13 @@ export function setupReadiness(c) {
     { id: "sms", label: "Text messages", status: "waiting_provider", detail: "Not active. Sender approval and delivery checks are incomplete.", action: { tab: "setup", label: "View channel setup" } },
   ];
   const next = blockers[0];
-  return { version: 1, revision, stage: c.build?.status === "failed" ? "attention" : ["pending", "queued", "running"].includes(c.build?.status) ? "building" : ready ? "ready" : "review", canActivateWeb: ready, steps, channels: { web, voice: pending("voice"), sms: pending("sms") }, next: next ? { id: next.id, tab: next.tab, label: next.label } : { id: "activate", tab: "setup", label: "Activate website chat" } };
+  const desiredChannels = Array.isArray(c.onboarding?.desiredChannels) ? c.onboarding.desiredChannels : ["web"];
+  const channelFacts = [
+    { id: "web", label: "Website chat", detail: web.active ? "Customer chat is active on your website." : ready ? "Your current rules are ready to activate on your website." : "Review your business rules and complete a private test before activating customer chat.", nextStep: web.active ? "Open customer chat" : next?.label || "Activate website chat", status: web.active ? "active" : "needs_action" },
+    { id: "voice", label: "Phone answering", detail: "Your preference is saved. Phone connection is not available yet; calls have not been routed or tested.", nextStep: "Phone connection will appear here when available", status: "pending_activation" },
+    { id: "sms", label: "Text messages", detail: "Your preference is saved. Text messaging is not available yet; sender registration and delivery checks are still required.", nextStep: "Text connection will appear here when available", status: "pending_activation" },
+    { id: "calendar", label: "Calendar", detail: "Your preference is saved. Calendar sync is not available yet; no external calendar is connected or updated.", nextStep: "Calendar connection will appear here when available", status: "pending_activation" },
+  ];
+  const connectionJourney = { title: "Your connections", channels: channelFacts.map(row => ({ ...row, requested: desiredChannels.includes(row.id), status: row.status === "active" || desiredChannels.includes(row.id) ? row.status : "not_selected", ...(!desiredChannels.includes(row.id) && row.status !== "active" ? { detail: "You have not requested this connection.", nextStep: "Choose your connections during setup" } : {}) })) };
+  return { version: 1, revision, stage: c.build?.status === "failed" ? "attention" : ["pending", "queued", "running"].includes(c.build?.status) ? "building" : ready ? "ready" : "review", canActivateWeb: ready, steps, channels: { web, voice: pending("voice"), sms: pending("sms") }, connectionJourney, next: next ? { id: next.id, tab: next.tab, label: next.label } : { id: "activate", tab: "setup", label: "Activate website chat" } };
 }

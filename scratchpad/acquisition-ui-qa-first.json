@@ -1,0 +1,455 @@
+{
+  "at": "2026-10-22T06:20:24.349Z",
+  "mode": "same-origin browser requests fulfilled from actual repo/handlers; memory only; no external requests",
+  "checks": [
+    {
+      "name": "Preliminary entry has one submit action and unchecked optional email choice",
+      "pass": true
+    },
+    {
+      "name": "Only preliminary name, email and business are required; goals include follow-up",
+      "pass": true
+    },
+    {
+      "name": "Early form has explicit labels, autocomplete and live status",
+      "pass": true
+    },
+    {
+      "name": "Keyboard follows the short form and skips the hidden bot field",
+      "pass": false,
+      "detail": [
+        "intake-name",
+        "intake-email",
+        "intake-business",
+        "intake-goal",
+        "intake-marketing",
+        ""
+      ]
+    },
+    {
+      "name": "Preliminary form is readable and contained at 320px",
+      "pass": true,
+      "detail": {
+        "x": 16,
+        "right": 304,
+        "width": 320,
+        "overflow": false,
+        "fontSize": 16,
+        "buttonHeight": 48
+      }
+    },
+    {
+      "name": "Preliminary form is readable and contained at 390px",
+      "pass": true,
+      "detail": {
+        "x": 20,
+        "right": 370,
+        "width": 390,
+        "overflow": false,
+        "fontSize": 16,
+        "buttonHeight": 48
+      }
+    },
+    {
+      "name": "Preliminary form is readable and contained at 1440px",
+      "pass": false,
+      "detail": {
+        "x": 810.84375,
+        "right": 1300,
+        "width": 1440,
+        "overflow": false,
+        "fontSize": 14,
+        "buttonHeight": 50
+      }
+    },
+    {
+      "name": "Failed capture keeps answers and never claims progress or emails",
+      "pass": true
+    },
+    {
+      "name": "Lost response preserves page while actual lead is already durable",
+      "pass": true
+    },
+    {
+      "name": "Pending capture blocks duplicate submissions accessibly",
+      "pass": true
+    },
+    {
+      "name": "Successful retry reuses one submission and redirects only after durable save",
+      "pass": true
+    },
+    {
+      "name": "Next page carries email without PII or handoff in current address and sends nothing automatically",
+      "pass": true
+    },
+    {
+      "name": "Mailbox link is scrubbed and remains pending until explicit Continue",
+      "pass": true
+    },
+    {
+      "name": "Verified questionnaire keeps preliminary name/business/goal and optional marketing unchecked",
+      "pass": true
+    },
+    {
+      "name": "Verification does not enroll the captured contact",
+      "pass": true
+    },
+    {
+      "name": "Optional verified browser opt-in is separately persisted without sending mail",
+      "pass": true
+    },
+    {
+      "name": "Withdrawing optional email choice persists before continuation",
+      "pass": true
+    },
+    {
+      "name": "Single full setup does not ask to retype captured name or business",
+      "pass": true
+    },
+    {
+      "name": "Full setup recovery preserves preliminary answers and all desired connections",
+      "pass": true
+    },
+    {
+      "name": "Full setup remains contained at 320px",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "width": 320,
+        "labelCount": 31
+      }
+    },
+    {
+      "name": "Full setup remains contained at 390px",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "width": 390,
+        "labelCount": 31
+      }
+    },
+    {
+      "name": "Full setup remains contained at 1440px",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "width": 1440,
+        "labelCount": 31
+      }
+    },
+    {
+      "name": "One create keeps selected connections without provider activation or billing",
+      "pass": true
+    },
+    {
+      "name": "Workspace presents requested connections in one place",
+      "pass": true
+    },
+    {
+      "name": "Unified setup hides duplicate legacy provider/purchase and delivery-test controls",
+      "pass": true
+    },
+    {
+      "name": "Connection preferences save in the same workspace without activation",
+      "pass": true
+    },
+    {
+      "name": "Inquiry data stays hidden before admin authority",
+      "pass": true
+    },
+    {
+      "name": "Admin distinguishes captured inquiry from eligible audience and no campaign",
+      "pass": false
+    },
+    {
+      "name": "Default marketing export excludes unchecked contact",
+      "pass": true
+    },
+    {
+      "name": "Explicit all-inquiries export includes contact with non-eligible status",
+      "pass": true
+    },
+    {
+      "name": "Unavailable handoff storage still reaches secure email gate without exposed details",
+      "pass": true
+    },
+    {
+      "name": "Mailbox link is scrubbed and remains pending until explicit Continue",
+      "pass": true
+    },
+    {
+      "name": "Opaque fallback handoff restores answers after same-email proof without session intake storage",
+      "pass": true
+    },
+    {
+      "name": "Source bytes stayed stable through browser QA",
+      "pass": true
+    },
+    {
+      "name": "No server network calls or browser script errors",
+      "pass": true,
+      "detail": {
+        "blockedServer": [],
+        "pageErrors": []
+      }
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/intake",
+      "query": "",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/intake",
+      "query": "",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "query": "",
+      "status": 202,
+      "action": "request_link"
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "query": "",
+      "status": 200,
+      "action": "exchange"
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/onboard",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intake",
+      "query": "?audience=all&format=json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intake",
+      "query": "?audience=eligible&format=csv",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/intake",
+      "query": "?audience=all&format=csv",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/intake",
+      "query": "",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "query": "",
+      "status": 202,
+      "action": "request_link"
+    },
+    {
+      "method": "POST",
+      "path": "/api/access",
+      "query": "",
+      "status": 200,
+      "action": "exchange"
+    },
+    {
+      "method": "GET",
+      "path": "/api/access",
+      "query": "",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/acquisition-ui-qa-first-entry-320.png",
+    "scratchpad/acquisition-ui-qa-first-entry-390.png",
+    "scratchpad/acquisition-ui-qa-first-entry-1440.png",
+    "scratchpad/acquisition-ui-qa-first-setup-320.png",
+    "scratchpad/acquisition-ui-qa-first-setup-390.png",
+    "scratchpad/acquisition-ui-qa-first-setup-1440.png",
+    "scratchpad/acquisition-ui-qa-first-connections-390.png"
+  ],
+  "sourceBefore": {
+    "index.html": "ab0399a2ddf71f7585bc5ad8ae4734ac31713995669b1e9c7e4c2814b1d34ec1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "site-refresh.css": "7c6119c9a585024f0e40cc66f1175ade6ac74ea3a6470e0d04d112f1337584e9",
+    "onboard.html": "ddc9ceee7e5c3ebebf22dadf09ae4cb75102b93e31ae62f8472e0ec6a98e8607",
+    "onboard.js": "b77ecbe076685f35a4f02e54f884155d70cbfcefd1c195dc6923158effff837a",
+    "desk.html": "697160f67d3aa3972297098991040ee8712f126afd0e627d0c8231544b2c5cc9",
+    "desk.js": "e10e2d73c5297b4d2ac45a0ed5249fe1bfcde14278b2142d242efd7d447e4e91",
+    "admin.html": "8c3cd0dbc6d448ed7614311084a1dde42ae5748e930a5141695361c5c2cdd41e",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "96b47285df2ab7ba55eceb1a48eccc9c8c08110f5734e1e0081501266382bbc5",
+    "netlify/functions/onboard.mjs": "9a8960090a63ef7e4d75c2b56a25a5f9101da341cae878a945cbf1e19d4c43e1",
+    "netlify/functions/client.mjs": "de56e44b9d2006001b5251eccac00980e70a9cba30642d33b804e5f097aa05cb",
+    "netlify/functions/lib/setup.mjs": "be087f0dd61144b8796a299ddc3d6a9cb369692cc77ba94d512bdaee1653918e"
+  },
+  "sourceAfter": {
+    "index.html": "ab0399a2ddf71f7585bc5ad8ae4734ac31713995669b1e9c7e4c2814b1d34ec1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "site-refresh.css": "7c6119c9a585024f0e40cc66f1175ade6ac74ea3a6470e0d04d112f1337584e9",
+    "onboard.html": "ddc9ceee7e5c3ebebf22dadf09ae4cb75102b93e31ae62f8472e0ec6a98e8607",
+    "onboard.js": "b77ecbe076685f35a4f02e54f884155d70cbfcefd1c195dc6923158effff837a",
+    "desk.html": "697160f67d3aa3972297098991040ee8712f126afd0e627d0c8231544b2c5cc9",
+    "desk.js": "e10e2d73c5297b4d2ac45a0ed5249fe1bfcde14278b2142d242efd7d447e4e91",
+    "admin.html": "8c3cd0dbc6d448ed7614311084a1dde42ae5748e930a5141695361c5c2cdd41e",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "96b47285df2ab7ba55eceb1a48eccc9c8c08110f5734e1e0081501266382bbc5",
+    "netlify/functions/onboard.mjs": "9a8960090a63ef7e4d75c2b56a25a5f9101da341cae878a945cbf1e19d4c43e1",
+    "netlify/functions/client.mjs": "de56e44b9d2006001b5251eccac00980e70a9cba30642d33b804e5f097aa05cb",
+    "netlify/functions/lib/setup.mjs": "be087f0dd61144b8796a299ddc3d6a9cb369692cc77ba94d512bdaee1653918e"
+  },
+  "summary": {
+    "passed": 32,
+    "failed": 3,
+    "total": 35
+  }
+}

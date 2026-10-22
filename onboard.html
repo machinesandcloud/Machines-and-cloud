@@ -44,6 +44,14 @@
     .access-card .btn-pill { margin-top: 14px; min-height: 44px; }
     .access-signed-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; font-size: 13px; }
     .access-signed-in button { background: none; border: 0; color: #2459df; padding: 10px; cursor: pointer; }
+    .ob .connection-picks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+    .ob .connection-picks label { display: flex; gap: 9px; align-items: center; min-height: 44px; padding: 10px 12px; border: 1px solid #dbe3ef; border-radius: 10px; font-size: 14px; cursor: pointer; }
+    .ob .connection-picks input { width: 17px; height: 17px; accent-color: #2459df; }
+    .ob .setup-availability { padding: 12px 14px; border-radius: 10px; background: #f0f5ff; font-size: 13px; line-height: 1.6; color: #405879; }
+    .ob .email-preference { display: flex; align-items: flex-start; gap: 10px; margin: 8px 0; color: #40516c; font-size: 14px; line-height: 1.6; cursor: pointer; }
+    .ob .email-preference input { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 3px; accent-color: #2459df; }
+    .ob .intake-notice { padding: 12px 14px; border-left: 3px solid #2459df; background: #f0f5ff; color: #405879; line-height: 1.6; }
+    @media (max-width: 420px) { .ob .connection-picks { grid-template-columns: 1fr; } }
   .hours-rows{display:grid;gap:6px;margin-top:8px}.hours-row{display:grid;grid-template-columns:44px 1fr 24px 1fr;align-items:center;gap:8px;font-size:14px}.hours-row input{padding:8px;border:1px solid #D1D5DB;border-radius:8px;font:inherit}
 </style>
 </head>
@@ -51,36 +59,42 @@
 <nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
 <main class="ob">
   <h1>Set up your front desk</h1>
-  <p class="lead">Create your workspace, add your shop’s rules, and try your front desk before customers use it. Your answers are saved as you go.</p>
-  <p class="hint">This setup prepares website chat. Phone answering, texting and calendar sync are not active. No payment is taken and no subscription starts.</p>
+  <p class="lead">Make it yours: your services, your schedule and the way you look after customers. We’ll guide you through each step.</p>
+  <p id="intake-notice" class="intake-notice" role="status" hidden></p>
   <section id="access-gate" class="access-card" aria-labelledby="access-title">
-    <h2 id="access-title">Start with your email</h2><p>Sign in or create your workspace with a secure email link. No password to remember.</p>
-    <form id="access-form"><label class="form-label" for="access-email">Your email</label><input class="form-input" id="access-email" type="email" autocomplete="email" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Email me a sign-in link</button></form>
+    <h2 id="access-title">Save your place</h2><p id="access-intro">We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.</p>
+    <form id="access-form"><label class="form-label" for="access-email">Work email</label><input class="form-input" id="access-email" type="email" autocomplete="email" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Email me a sign-in link</button></form>
     <button class="btn-pill btn-pill-blue" id="access-verify" type="button" hidden>Continue securely</button><p id="access-status" role="status" aria-live="polite"></p>
   </section>
   <div id="access-signed-in" class="access-signed-in" hidden><span id="access-identity"></span><button type="button" id="access-sign-out">Sign out</button></div>
   <p id="draft-status" class="hint" role="status" aria-live="polite" hidden></p>
-  <div class="ob-steps" hidden><span class="on">1 You</span><span>2 Shop</span><span>3 Prices and windows</span><span>4 Rules</span></div>
+  <div class="ob-steps" hidden><span class="on">1 Your front desk</span><span>2 Your business</span><span>3 Prices and schedule</span><span>4 Your preferences</span></div>
   <form id="ob" novalidate hidden>
     <p hidden><input name="botfield" tabindex="-1" autocomplete="off"></p>
-    <fieldset class="on" data-step="1"><legend>You</legend>
+    <input type="hidden" id="primaryGoal" name="primaryGoal">
+    <fieldset class="on" data-step="1"><legend>Your front desk</legend>
       <div class="row">
         <div class="form-group"><label class="form-label" for="name">Your name</label><input class="form-input" id="name" name="name" required autocomplete="name"></div>
         <div class="form-group"><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email" readonly></div>
       </div>
       <div class="row">
-        <div class="form-group"><label class="form-label" for="phone">Your contact cell</label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555 0100" autocomplete="tel"><span class="hint" style="display:block;margin-top:4px">Saved as your shop’s callback contact. This setup does not call or text you.</span></div>
-        <div class="form-group"><label class="form-label" for="website">Your website (leave blank if you do not have one yet)</label><input class="form-input" id="website" name="website" type="url" placeholder="https://"><span class="hint" style="display:block;margin-top:4px">Saved for reference. Your desk uses the answers you enter here; this setup does not import your website.</span></div>
+        <div class="form-group"><label class="form-label" for="phone">Your contact cell</label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555 0100" autocomplete="tel"><span class="hint" style="display:block;margin-top:4px">The callback number you want saved with your business.</span></div>
+        <div class="form-group"><label class="form-label" for="website">Business website <span>(optional)</span></label><input class="form-input" id="website" name="website" type="url" placeholder="https://"><span class="hint" style="display:block;margin-top:4px">For reference. Next, you’ll add the answers your front desk should use.</span></div>
       </div>
+      <p class="form-label" id="connection-preferences-label">Where would you like help?</p>
+      <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked>Website inquiries</label><label><input type="checkbox" name="desiredChannels" value="voice">Phone calls</label><label><input type="checkbox" name="desiredChannels" value="sms">Text messages</label><label><input type="checkbox" name="desiredChannels" value="calendar">Calendar scheduling</label></div>
+      <p class="setup-availability">You can prepare and test website chat now. Phone, text and calendar connections aren’t available yet. Your choices are saved in this setup; nothing is activated or charged here.</p>
       <p class="hint">Plan preference for later activation</p>
       <div class="plans-pick">
         <label><input type="radio" name="plan" value="starter"> <b>Coverage</b> $99/month</label>
         <label class="on"><input type="radio" name="plan" value="growth" checked> <b>Follow-through</b> $249/month</label>
       </div>
       <p id="plan-preference-note" class="hint" role="status" hidden></p>
-      <p class="hint">Billing is off during this setup. Selecting a plan does not start a subscription. Phone, texting and other integrations require separate setup and verification before use.</p>
+      <p class="hint">Free to set up. No card required. You’ll review paid service terms before any subscription starts.</p>
+      <p class="form-label" id="email-preference-label">Email updates <span>(optional)</span></p>
+      <label class="email-preference" for="setup-marketing"><input type="checkbox" id="setup-marketing"><span>Email me practical tips, product updates and offers from Machines &amp; Cloud. Unsubscribe anytime.</span></label><p class="hint">You can finish setup either way. <a href="privacy-policy.html">Privacy Policy</a></p>
     </fieldset>
-    <fieldset data-step="2"><legend>Your shop</legend>
+    <fieldset data-step="2"><legend>Your business</legend>
       <div class="row">
         <div class="form-group"><label class="form-label" for="business">Business name</label><input class="form-input" id="business" name="business" required></div>
         <div class="form-group"><label class="form-label" for="trade">Trade</label><input class="form-input" id="trade" name="trade" placeholder="HVAC, plumbing, electrical, roofing, cleaning" list="trades"><datalist id="trades"><option>HVAC</option><option>Plumbing</option><option>Electrical</option><option>Roofing</option><option>Cleaning</option><option>Landscaping</option><option>Pest control</option><option>Garage doors</option><option>Handyman</option></datalist></div>
@@ -106,7 +120,7 @@
       <div class="form-group"><label class="form-label" for="windows">Arrival windows you offer (one per line)</label><textarea class="form-input" id="windows" name="windows" placeholder="8 to 12&#10;12 to 5"></textarea></div>
       <div class="form-group"><label class="form-label" for="faq">Questions customers ask, with your answer (one per line: Question? Answer)</label><textarea class="form-input" id="faq" name="faq" placeholder="Do you charge a service call fee? $89, waived if you go ahead with the repair.&#10;Are you licensed and insured? Yes, TACLA 12345C."></textarea></div>
     </fieldset>
-    <fieldset data-step="4"><legend>Rules</legend>
+    <fieldset data-step="4"><legend>Your preferences</legend>
       <div class="form-group"><label class="form-label" for="handoff">Always hand these to a person (one per line)</label><textarea class="form-input" id="handoff" name="handoff" placeholder="Complaints about past work&#10;Warranty questions&#10;Commercial jobs"></textarea></div>
       <div class="form-group"><label class="form-label" for="never">Never do (one per line; the basics are already in)</label><textarea class="form-input" id="never" name="never" placeholder="Never quote a replacement price&#10;No window units"></textarea></div>
       <div class="form-group"><label class="form-label" for="tier0">Emergencies, tier 0: life safety (one per line; prefilled for your trade, edit freely)</label><textarea class="form-input" id="tier0" name="tier0"></textarea><span class="hint">The front desk gives your safety script and collects a phone number and address for an urgent request in your workspace. Phone and text alerts are not active.</span></div>
@@ -122,8 +136,8 @@
     <h2 style="margin-top:0">Building your front desk</h2>
     <p class="status" id="buildStatus">Your answers are saved. Preparing your front desk.</p>
     <p><b>Your workspace</b> (you can sign in again with your email):<br><a class="portal" id="portalLink" href="#"></a></p>
-    <p class="status">Review your saved rules, try an isolated practice conversation, and follow the setup checklist. Website chat, phone, and texting each show their own status; no channel is active until its requirements are met. No payment is taken during this setup.</p>
-    <p><a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my portal</a></p>
+    <p class="status">Your answers and connection preferences are together in one workspace. Follow your checklist to review, test and get ready for customer inquiries.</p>
+    <p><a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my workspace</a></p>
   </section>
 </main>
 <script src="onboard.js" defer></script>

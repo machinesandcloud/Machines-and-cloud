@@ -1,0 +1,699 @@
+{
+  "at": "2026-10-22T06:15:44.347Z",
+  "sourceBefore": {
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "9b5ce30b3d85e138949f3c9f8b4de14cd052669be4b67635110cf4e3e3c63b5e",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+  },
+  "mode": "fake/memory and installed SDK protocol double; no live network",
+  "checks": [
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: mailbox token stored under hash, no raw token field",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: simultaneous exchange grants exactly one session",
+      "pass": true,
+      "detail": [
+        200,
+        410
+      ]
+    },
+    {
+      "name": "memory: session stored under hash with onboarding scope",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: token replay rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: altered token rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: missing proof cannot read saved setup",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: wrong proof cannot read saved setup",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: verified identity starts with empty draft",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: competing draft writes cannot silently overwrite",
+      "pass": true,
+      "detail": [
+        200,
+        409
+      ]
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: saved draft can be reloaded",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: unrecognized draft fields rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: distinct mailbox cannot read first mailbox draft",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: expired mailbox link rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: expired session rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: existing and unknown link requests have identical generic response",
+      "pass": true
+    },
+    {
+      "name": "memory: request never exposes credentials or tokens",
+      "pass": true
+    },
+    {
+      "name": "memory: requesting access cannot alter existing client",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: proven existing mailbox recovers exact existing workspace",
+      "pass": true
+    },
+    {
+      "name": "memory: no arbitrary redirect is accepted or leaked",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: disallowed origin rejected before mutation",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: missing origin mutation rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: malformed JSON rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: oversized request rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: array request rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: wrong method rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: email send rate is bounded",
+      "pass": true,
+      "detail": [
+        202,
+        202,
+        202,
+        429
+      ]
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: IP send rate is bounded",
+      "pass": true,
+      "detail": [
+        202,
+        202,
+        202,
+        202,
+        202,
+        429
+      ]
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "memory: sign out revokes the current session",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: mailbox token stored under hash, no raw token field",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: simultaneous exchange grants exactly one session",
+      "pass": true,
+      "detail": [
+        200,
+        410
+      ]
+    },
+    {
+      "name": "blobs: session stored under hash with onboarding scope",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: token replay rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: altered token rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: missing proof cannot read saved setup",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: wrong proof cannot read saved setup",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: verified identity starts with empty draft",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: competing draft writes cannot silently overwrite",
+      "pass": true,
+      "detail": [
+        200,
+        409
+      ]
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: saved draft can be reloaded",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: unrecognized draft fields rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: distinct mailbox cannot read first mailbox draft",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: expired mailbox link rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: expired session rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: existing and unknown link requests have identical generic response",
+      "pass": true
+    },
+    {
+      "name": "blobs: request never exposes credentials or tokens",
+      "pass": true
+    },
+    {
+      "name": "blobs: requesting access cannot alter existing client",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: proven existing mailbox recovers exact existing workspace",
+      "pass": true
+    },
+    {
+      "name": "blobs: no arbitrary redirect is accepted or leaked",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: disallowed origin rejected before mutation",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: missing origin mutation rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: malformed JSON rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: oversized request rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: array request rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: wrong method rejected",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: email send rate is bounded",
+      "pass": true,
+      "detail": [
+        202,
+        202,
+        202,
+        429
+      ]
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: IP send rate is bounded",
+      "pass": true,
+      "detail": [
+        202,
+        202,
+        202,
+        202,
+        202,
+        429
+      ]
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: sign out revokes the current session",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: access_rate GET error fails closed without delivery",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: access_rate PUT error fails closed without delivery",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: access_tokens GET error fails closed without delivery",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: access_sessions GET error fails closed without delivery",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: session write failure does not disclose a usable session",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: consumed proof stays consumed after failed session projection",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: mail transport rejection is not reported sent",
+      "pass": true
+    },
+    {
+      "name": "Access response is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "blobs: failed-delivery token cannot authenticate",
+      "pass": true
+    },
+    {
+      "name": "Installed SDK conditional conflicts were actually exercised",
+      "pass": true,
+      "detail": 2
+    },
+    {
+      "name": "No real external fetch escaped the fixture allow-list",
+      "pass": true
+    },
+    {
+      "name": "Missing production mail config refuses entry before token or network",
+      "pass": true
+    },
+    {
+      "name": "Source stayed unchanged during acceptance",
+      "pass": true
+    }
+  ],
+  "outbound": [],
+  "mailFixtureCount": 15,
+  "sourceAfter": {
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "9b5ce30b3d85e138949f3c9f8b4de14cd052669be4b67635110cf4e3e3c63b5e",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+  },
+  "loggedErrors": [
+    "access operation unavailable",
+    "access operation unavailable",
+    "access operation unavailable",
+    "access operation unavailable",
+    "access operation unavailable",
+    "resend failed 503 [object Object]"
+  ],
+  "sdkConflicts": 2,
+  "summary": {
+    "checks": 155,
+    "passed": 155,
+    "failed": 0
+  }
+}

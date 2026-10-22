@@ -2,10 +2,10 @@
 import { PUBLIC_PLANS } from './config.mjs';
 
 export const SALES_FACTS = Object.freeze({
-  version: 'web-workspace-2026-10-22-two-plan-preferences',
+  version: 'web-workspace-2026-10-22-guided-intake-enterprise',
   company: { name: 'Machines & Cloud', location: 'Houston, Texas' },
   workspace: {
-    signup: 'Verify your email, save your shop answers and open your private workspace. No founder call or hand-edited setup is required.',
+    signup: 'Start with your name, email, business and optional goal. Your answers carry through email verification into one guided setup. Choose the website, phone, text and calendar connections you want there; a choice does not activate an unverified channel. No founder call or hand-edited setup is required.',
     draft: 'Built from your saved answers; automatic website import is not enabled.',
     ready: 'Review saved rules, complete a private AI test, then deliberately activate eligible website chat. Daily AI allowances apply.',
     operation: 'Website conversations save visits and callback requests in the owner portal using recorded availability. The shop must review requests and confirm the next step. No exact arrival or human response deadline is promised.',
@@ -33,7 +33,8 @@ export const SALES_FACTS = Object.freeze({
     status: 'Workspace setup is free, requires no card and starts no paid subscription or timed trial. A plan selection is a preference only.',
     publishedOverage: { callMinute: 0.35, text: 0.03 },
     limits: 'Published monthly plans and usage rates describe activated service. Selecting one does not switch on phone, texting, integrations or billing. There is no automatic day-eight charge.',
-    planScope: 'Coverage and Follow-through are the two public future-service preferences. The numeric allowances and rates are unchanged; texts mean customer-outbound application messages, not carrier SMS segments. Pro is held out of new selection. Legacy plan IDs remain compatible and do not activate paid service. Editable business rules and customer CSV exports are available in the free workspace, not paid-only upgrades.',
+    planScope: 'Coverage and Follow-through are the two fixed-price public future-service preferences. Enterprise is a third custom-pricing option for a requirements conversation; it is not an automatically provisioned plan. The numeric allowances and rates are unchanged; texts mean customer-outbound application messages, not carrier SMS segments. Pro is held out of new selection. Legacy plan IDs remain compatible and do not activate paid service. Editable business rules and customer CSV exports are available in the free workspace, not paid-only upgrades.',
+    enterprise: 'For larger or multi-location home-service teams, offer an optional requirements conversation through the public scheduling action. Scope and custom pricing must be discussed; no enterprise price, allowance, integration, SLA or multi-location capability is established. Never imply the conversation purchases or activates a plan.',
   },
   practice: 'Three fictional shop situations have Watch and typed AI: HVAC while busy, after-hours plumbing and Spanish cleaning. English plumbing also has an explicit microphone voice practice, up to 90 seconds when available. Practice creates no actual visit, message or owner contact. It does not prove live phone/SMS delivery for a customer shop.',
   salesPrivacy: {
@@ -193,7 +194,7 @@ export function suggestNextStep(input) {
   if (!['start_workspace', 'see_example', 'contact'].includes(input.action) || !['sms', 'call', 'spanish', 'none'].includes(input.scenario) || !['en', 'es'].includes(input.language)) throw new Error('invalid_action');
   const es = input.language === 'es';
   const actions = {
-    start_workspace: { label: es ? 'Crear mi espacio' : 'Create my workspace', href: '/onboard.html' },
+    start_workspace: { label: es ? 'Comenzar' : 'Get started', href: '/#pilot' },
     see_example: { label: es ? 'Ver un ejemplo' : 'See an example', href: '/#demo-wrap' },
     contact: { label: es ? 'Elegir una hora para hablar' : 'Choose a time to talk', href: 'https://calendly.com/ngoumnaisteve/30' },
   };

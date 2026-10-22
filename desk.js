@@ -68,18 +68,36 @@
     $('workspaceGuide').hidden = false; $('reviewCard').hidden = false;
     var allowance = d.aiAllowance, limited = allowance && !allowance.available;
     var operational = setup.channels.web.ready && setup.channels.web.active && !limited;
-    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Website chat paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress · website chat not active';
+    $('legacyConnectionDetails').hidden = true; $('legacyDeliveryTests').hidden = true;
+    var journey = setup.connectionJourney;
+    var wantsWeb = !journey || !Array.isArray(journey.channels) || journey.channels.some(function (channel) { return channel.id === 'web' && channel.requested; });
+    $('connectionsCard').hidden = !journey || !Array.isArray(journey.channels);
+    if (journey && Array.isArray(journey.channels)) {
+      var states = { active: 'Connected', needs_action: 'Setup needed', pending_activation: 'Not connected yet', not_selected: 'Not selected', limited: 'Daily limit reached' };
+      $('connectionPreferences').querySelectorAll('input[name="connection"]').forEach(function (field) { field.checked = journey.channels.some(function (channel) { return channel.id === field.value && channel.requested; }); });
+      $('connectionJourney').innerHTML = journey.channels.map(function (channel) {
+        var state = channel.status, detail = channel.detail, next = channel.nextStep;
+        if (channel.id === 'web' && state === 'active' && !operational) {
+          state = limited ? 'limited' : 'needs_action';
+          detail = limited ? 'Your settings are saved, but customer AI replies are unavailable for the rest of today.' : 'Your settings are saved, but website chat cannot answer customers until its setup checks pass.';
+          next = limited ? 'More AI replies become available after the daily reset at midnight Houston time.' : 'Complete the review and test requirements in this setup.';
+        }
+        return '<div class="setup-step"><div><strong>' + esc(channel.label) + ' · ' + esc(states[state] || 'Not connected yet') + '</strong><p>' + esc(detail) + '</p>' + (channel.requested && next ? '<p><b>Next:</b> ' + esc(next) + '</p>' : '') + '</div></div>';
+      }).join('');
+    }
+    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Website chat paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
     $('status').className = 'st' + (operational ? ' live' : '');
     $('guideTitle').textContent = operational ? 'Your website front desk' : 'Set up your front desk';
-    $('guideIntro').textContent = operational ? 'Customer requests appear under Leads and bookings. Keep your rules and blocked time up to date.' : 'Your answers created this workspace automatically. Review the saved rules and try a private test before activating website chat.';
+    $('guideIntro').textContent = operational ? 'Customer requests appear under Leads and bookings. Keep your rules and blocked time up to date.' : wantsWeb ? 'Your answers are saved. Review the rules, try a private conversation and follow your connection setup here.' : 'Your answers and connection preferences are saved. Follow their next steps under Setup. You can add website chat if you want it.';
     $('channelStates').innerHTML = '<span class="channel-state">Website chat: ' + (operational ? 'active' : client.status === 'paused' ? 'paused' : 'not active') + '</span><span class="channel-state">Phone: not active</span><span class="channel-state">Text messages: not active</span>';
     var revision = setup.revision, proof = client.setupProof || {};
     var tasks = [
       { label: 'Review your saved business rules', done: proof.reviewedRevision === revision, detail: proof.reviewedRevision === revision ? 'Your review is saved for this version.' : 'Check services, area, prices, hours and safety instructions.', tab: 'know', button: 'Review rules' },
       { label: 'Try a private customer conversation', done: proof.testedRevision === revision && proof.testMode === 'live', detail: proof.testedRevision === revision && proof.testMode === 'fake' ? 'A simulated test is saved. A working AI service and a new test are required before activation.' : proof.testedRevision === revision && proof.testMode === 'live' ? 'A private AI test completed using these rules.' : 'Practice a request safely; no real visit or message is created.', tab: 'test', button: 'Try your desk' },
       { label: 'Set your availability', done: false, detail: 'Block time already booked elsewhere. Review it whenever your schedule changes.', tab: 'availability', button: 'Check availability' },
+      { label: 'Choose your customer connections', done: false, detail: 'Website, phone, text and calendar preferences share one setup. Check the next step for each connection.', tab: 'setup', button: 'View connections' },
       { label: 'Activate and install website chat', done: operational, detail: limited ? 'Your saved checks are kept. More AI replies become available at midnight Houston time.' : operational ? 'Website chat is active. Install it on your site, then check a customer conversation.' : setup.canActivateWeb ? 'Checks are complete. Activate chat, then install the code on your website.' : 'Complete the requirements below before customers can use your chat.', tab: 'setup', button: 'View setup' }
-    ];
+    ].filter(function (task) { return task.label !== 'Activate and install website chat' || wantsWeb || operational; });
     $('setupSteps').innerHTML = tasks.map(function (task) { return '<div class="setup-step"><div><strong>' + (task.done ? '✓ ' : '') + esc(task.label) + '</strong><p>' + esc(task.detail) + '</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" data-route="' + task.tab + '">' + esc(task.button) + '</button></div>'; }).join('');
     $('setupSteps').querySelectorAll('button').forEach(function (button) { button.addEventListener('click', function () { routeTo(button.dataset.route); }); });
     $('reviewRules').disabled = cfgDirty || client.status === 'cancelled';
@@ -103,13 +121,24 @@
     var disabledNames = ['owner.backupPhone', 'phone.transferTo', 'phone.forwarding', 'rules.bypass', 'rules.consentAsk', 'digest.text', 'rules.ackMinutes', 'rules.callbackHours', 'rules.callbackAfterHours'];
     disabledNames.forEach(function (name) { var field = $('cfg').elements[name]; if (field) { field.disabled = true; field.closest('.form-group').hidden = true; } });
     var messages = setup.channels.web.blockers.map(function (blocker) { return blocker.detail; });
-    $('setupMessage').textContent = limited ? 'The daily AI allowance has been used. Your settings and records are saved. More replies become available at midnight Houston time.' : messages.length ? 'Before activation: ' + messages.join(' ') : operational ? 'Website chat is active. Phone and text messages remain inactive.' : 'Ready to activate website chat using the button above.';
+    $('setupMessage').textContent = !wantsWeb && !operational ? 'Your connection preferences are saved. Check Your connections for the next step; website chat is optional.' : limited ? 'The daily AI allowance has been used. Your settings and records are saved. More replies become available at midnight Houston time.' : messages.length ? 'Before activation: ' + messages.join(' ') : operational ? 'Website chat is active. Phone and text messages remain inactive.' : 'Ready to activate website chat using the button above.';
     if (!guideStarted) {
       guideStarted = true;
       var seen = false; try { seen = localStorage.getItem('mc-walkthrough-v1:' + slug) === 'seen'; } catch (error) { /* Optional preference only. */ }
       if (!seen) openTour();
     }
   }
+  $('connectionPreferences').addEventListener('submit', async function (event) {
+    event.preventDefault(); if (!data || !data.setup || $('saveConnections').disabled) return;
+    var selected = Array.prototype.map.call($('connectionPreferences').querySelectorAll('input[name="connection"]:checked'), function (field) { return field.value; });
+    $('saveConnections').disabled = true; $('connectionsMessage').textContent = 'Saving your preferences…';
+    try {
+      await action('save_connection_preferences', { desiredChannels: selected });
+      if (leaving) return;
+      await load(); if (!leaving) $('connectionsMessage').textContent = 'Preferences saved. Each connection shows its next step below.';
+    } catch (error) { if (!leaving) $('connectionsMessage').textContent = 'Your preferences could not be saved. Try again.'; }
+    finally { if (!leaving) $('saveConnections').disabled = false; }
+  });
   $('reviewRules').addEventListener('click', function () {
     if (!data || !data.setup || cfgDirty) return;
     $('reviewRules').disabled = true; $('reviewMessage').textContent = 'Saving your review…';

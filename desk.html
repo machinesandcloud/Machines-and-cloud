@@ -17,7 +17,7 @@
     .tabs { display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 18px; padding-bottom: 4px; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } .tabs button { white-space: nowrap; flex: 0 0 auto; }
     .tabs button { border: 1px solid #E5E7EB; background: #fff; color: #1E2433; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
     .tabs button.on { background: #1E2433; color: #fff; border-color: #1E2433; }
-    .pane { display: none; } .pane.on { display: block; }
+    .pane { display: none; scroll-margin-top: 100px; } .pane.on { display: block; }
     .card2 { border: 1px solid #E5E7EB; border-radius: 20px; background: #fff; padding: 20px; margin-bottom: 16px; min-width: 0; max-width: 100%; box-sizing: border-box; }
     .dk, .pane, .tblwrap, .chat, .conv, pre.snip { min-width: 0; max-width: 100%; box-sizing: border-box; }
     @media (max-width: 600px) { .dk { padding: 90px 14px 60px; } .dk-head { flex-direction: column; align-items: flex-start; gap: 10px; } .dk h1 { font-size: 22px; } .card2 { padding: 14px; border-radius: 14px; } }
@@ -161,19 +161,34 @@
   </section>
 
   <section class="pane" id="p-setup">
+    <div class="card2" id="connectionsCard" hidden>
+      <h3>Your connections</h3>
+      <p class="muted">Choose the connections you want to use. Saving preferences does not turn them on; each connection shows its status below.</p>
+      <form id="connectionPreferences">
+        <fieldset style="border:0;padding:0;margin:16px 0"><legend class="muted">Connections you want to use</legend><div class="channel-states">
+          <label class="channel-state"><input type="checkbox" name="connection" value="web"> Website chat</label>
+          <label class="channel-state"><input type="checkbox" name="connection" value="voice"> Phone answering</label>
+          <label class="channel-state"><input type="checkbox" name="connection" value="sms"> Text messaging</label>
+          <label class="channel-state"><input type="checkbox" name="connection" value="calendar"> Google Calendar</label>
+        </div></fieldset>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveConnections">Save preferences</button>
+        <p class="muted" id="connectionsMessage" role="status" aria-live="polite"></p>
+      </form>
+      <div id="connectionJourney"></div>
+    </div>
     <div class="grid2">
       <div class="card2"><h3>Line health</h3><div id="health" class="muted"></div></div>
       <div class="card2"><h3>Checklist</h3><div id="checklist"></div>
-        <h3 style="margin-top:18px">Your front desk number</h3><p id="numberText" class="muted"></p>
+        <div id="legacyConnectionDetails"><h3 style="margin-top:18px">Your front desk number</h3><p id="numberText" class="muted"></p>
         <h3 style="margin-top:18px">Forward your calls (one minute, from your business cell)</h3><div id="fwd" class="muted"></div>
         <h3 style="margin-top:18px">Texting registration</h3><p id="tenDlc" class="muted"></p>
         <div id="legalForm" style="display:none"><form id="legal"><div class="grid2"><div class="form-group"><label class="form-label">Legal business name</label><input class="form-input" name="legalName"></div><div class="form-group"><label class="form-label">EIN</label><input class="form-input" name="ein"></div><div class="form-group"><label class="form-label">Business type</label><select class="form-input" name="businessType"><option value="llc">LLC</option><option value="corp">Corporation</option><option value="sole">Sole proprietorship</option><option value="partnership">Partnership</option><option value="nonprofit">Non-profit</option></select></div><div class="form-group"><label class="form-label">Street address</label><input class="form-input" name="street"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" name="city"></div><div class="form-group"><label class="form-label">State and ZIP</label><div style="display:flex;gap:8px"><input class="form-input" name="state" maxlength="2" style="width:70px"><input class="form-input" name="zip"></div></div></div><button type="submit" class="btn-pill btn-pill-blue btn-sm">Save and file registration</button> <span class="muted" id="legalMsg"></span></form></div>
-        <h3 style="margin-top:18px">Phone answering</h3><p id="voiceText" class="muted"></p>
+        <h3 style="margin-top:18px">Phone answering</h3><p id="voiceText" class="muted"></p></div>
       </div>
       <div class="card2"><h3>Add the chat to your website</h3><p id="installStatus" class="muted"></p><p class="muted">Paste this one line before <code>&lt;/body&gt;</code> on every page, or send it to whoever runs your site. It only works on your domain.</p><pre class="snip" id="snippet"></pre><button type="button" class="btn-pill btn-pill-dark btn-sm" id="copySnippet">Copy installation code</button> <span class="muted" id="copyMessage" role="status"></span>
         <h3 style="margin-top:18px">Paste this on your website too</h3><p class="muted">Most trade websites are missing hours, a service area, and answers to the first five questions. Here is yours, written from what your front desk knows. Copy it onto your contact or FAQ page.</p><pre class="snip" id="siteBlock" style="white-space:pre-wrap"></pre>
-        <h3 style="margin-top:18px">Calendar</h3><p><a class="btn-pill btn-pill-dark btn-sm" id="calBtn" href="#">Connect Google Calendar</a> <span class="muted" id="calText"></span></p>
-        <h3 style="margin-top:18px">Texts to your cell</h3><p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="testSms">Send me a test text</button> <span class="muted" id="smsText"></span></p>
+        <div id="legacyDeliveryTests"><h3 style="margin-top:18px">Calendar</h3><p><a class="btn-pill btn-pill-dark btn-sm" id="calBtn" href="#">Connect Google Calendar</a> <span class="muted" id="calText"></span></p>
+        <h3 style="margin-top:18px">Texts to your cell</h3><p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="testSms">Send me a test text</button> <span class="muted" id="smsText"></span></p></div>
       </div>
     </div>
   </section>
@@ -183,7 +198,7 @@
         <form id="acct"><div class="form-group"><label class="form-label">Your average job value (optional)</label><div style="display:flex;gap:8px;align-items:center"><input class="form-input" name="rules.avgTicket" placeholder="450" style="max-width:140px"> <button type="submit" class="btn-pill btn-pill-dark btn-sm">Save</button> <span class="muted" id="acctMsg"></span></div><p class="muted" style="margin:6px 0 0">With it, your monthly statement says what the jobs that would have gone to voicemail were worth, and compares with last month.</p></div></form>
         <div id="textCommands"><h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every alert names the one reply it needs: <code>ok REF</code> to acknowledge, <code>called REF</code> when you have reached someone who asked for a call, <code>otw REF</code> on the way, <code>done REF</code> when the job is finished, <code>cancel REF</code>. A bare <code>ok</code>, <code>called</code>, <code>otw</code>, or <code>done</code> works when only one job fits. Also <code>invoice REF 450</code> if they still owe you (payment reminders on day 3 and 7), <code>paid REF</code> to stop them, <code>quote REF 1450</code> when you sent a quote. Follow-up texts only go out between 9 am and 9 pm (noon to 9 pm on Sunday).</p></div>
       </div>
-      <div class="card2"><h3>Your data</h3><p class="muted" id="dataPolicy"></p><p class="muted">Download: <a id="expBookings" href="#">bookings</a>, <a id="expLeads" href="#">leads</a>, <a id="expConvs" href="#">conversations</a> (CSV, opens in Excel or Sheets), or <a id="expCustomers" href="#">customers</a> in the column names Jobber and Housecall Pro import.</p><p class="muted">Texting terms your customers can read: <a id="policyLink" href="#" target="_blank" rel="noopener"></a></p>
+      <div class="card2"><h3>Your data</h3><p class="muted" id="dataPolicy"></p><p class="muted">Download: <a id="expBookings" href="#">bookings</a>, <a id="expLeads" href="#">leads</a>, <a id="expConvs" href="#">conversations</a> (CSV, opens in Excel or Sheets), or <a id="expCustomers" href="#">customers</a> as a CSV for manual handoff. Check your scheduling software’s import requirements before uploading.</p><p class="muted">Texting terms your customers can read: <a id="policyLink" href="#" target="_blank" rel="noopener"></a></p>
         <h3 style="margin-top:18px">Service</h3><p class="muted">Pause or resume from the buttons at the top. To end the service: <button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelBtn2">Cancel service</button></p>
       </div>
     </div>

@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { getAccessSession, accessOriginAllowed, accessSite } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail, findVerifiedAccount, ensureVerifiedAccount, AccountError } from "./lib/accounts.mjs";
 import { setupReadiness } from "./lib/setup.mjs";
+import { INTAKE_GOALS, INTAKE_CHANNELS } from "./lib/intake.mjs";
 
 export const config = { path: "/api/onboard" };
 
@@ -61,7 +62,9 @@ async function handle(req) {
   if (!/^\+1\d{10}$/.test(phone)) return json({ error: "missing_fields", field: "owner.phone", message: "Add a valid cell number for callback requests. Phone and text service remain inactive until separately verified." }, 400);
 
   const c = newClient({ slug: slugify(s(b.business), website), ownerKey: secret(), owner: { name: s(b.name), email, phone }, business: { name: s(b.business, 120), website } });
-  c.onboarding = { version: 1, verifiedEmail: email, verifiedAt: session.createdAt };
+  if (b.primaryGoal !== undefined && b.primaryGoal !== "" && !INTAKE_GOALS.includes(b.primaryGoal)) return json({ error: "invalid_goal" }, 400);
+  if (b.desiredChannels !== undefined && (!Array.isArray(b.desiredChannels) || b.desiredChannels.length > 4 || new Set(b.desiredChannels).size !== b.desiredChannels.length || b.desiredChannels.some(value => !INTAKE_CHANNELS.includes(value)))) return json({ error: "invalid_channels" }, 400);
+  c.onboarding = { version: 1, verifiedEmail: email, verifiedAt: session.createdAt, primaryGoal: b.primaryGoal || "", desiredChannels: b.desiredChannels || ["web"] };
   c.channels = { web: { active: false }, voice: { active: false }, sms: { active: false } };
   const bz = c.business;
   Object.assign(bz, {

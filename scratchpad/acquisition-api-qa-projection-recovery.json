@@ -1,0 +1,234 @@
+{
+  "at": "2026-10-22T06:34:13.855Z",
+  "mode": "independent actual handlers; memory plus intercepted installed Blobs SDK; no external requests",
+  "checks": [
+    {
+      "name": "memory: durable capture creates prospect plus opaque hashed handoff and no account/mail",
+      "pass": true
+    },
+    {
+      "name": "memory: double submit and retries return same handoff without duplicate/overwrite",
+      "pass": true
+    },
+    {
+      "name": "memory: anonymous repeat cannot change prior identity, preference or suppression",
+      "pass": true
+    },
+    {
+      "name": "memory: handoff cannot read lead, sign in, or create account without mailbox proof",
+      "pass": true
+    },
+    {
+      "name": "memory: email request explicit, generic and wrong-email handoff does not carry answers",
+      "pass": true
+    },
+    {
+      "name": "memory: verified exchange is one-use, moves original answers to draft, not marketing enrollment",
+      "pass": true
+    },
+    {
+      "name": "memory: one-use handoff cannot overwrite edited answers or move to another session",
+      "pass": true
+    },
+    {
+      "name": "memory: marketing needs separate authenticated affirmative choice; suppression cannot reset",
+      "pass": true
+    },
+    {
+      "name": "memory: initial unchecked or changed verified preference can be affirmed later without an implicit permanent unsubscribe",
+      "pass": true
+    },
+    {
+      "name": "memory: verified legitimate handoff replaces poisoned anonymous display identity and preserves intentionally blank saved answers",
+      "pass": true
+    },
+    {
+      "name": "memory: account create retains desired connections and returning lead cannot alter existing owner",
+      "pass": true,
+      "detail": {
+        "selected": [
+          "voice",
+          "calendar"
+        ],
+        "active": {
+          "web": {
+            "active": false
+          },
+          "voice": {
+            "active": false
+          },
+          "sms": {
+            "active": false
+          }
+        }
+      }
+    },
+    {
+      "name": "memory: expired handoff and sign-in proof do not adopt answers",
+      "pass": true
+    },
+    {
+      "name": "memory: protected all/eligible exports distinguish consent and neutralize formulas",
+      "pass": true,
+      "detail": {
+        "allRows": 5,
+        "eligibleRows": 0
+      }
+    },
+    {
+      "name": "memory: invalid origin, media, fields, large payload and bot cannot save a prospect",
+      "pass": true
+    },
+    {
+      "name": "sdk: durable capture creates prospect plus opaque hashed handoff and no account/mail",
+      "pass": true
+    },
+    {
+      "name": "sdk: double submit and retries return same handoff without duplicate/overwrite",
+      "pass": true
+    },
+    {
+      "name": "sdk: anonymous repeat cannot change prior identity, preference or suppression",
+      "pass": true
+    },
+    {
+      "name": "sdk: handoff cannot read lead, sign in, or create account without mailbox proof",
+      "pass": true
+    },
+    {
+      "name": "sdk: email request explicit, generic and wrong-email handoff does not carry answers",
+      "pass": true
+    },
+    {
+      "name": "sdk: verified exchange is one-use, moves original answers to draft, not marketing enrollment",
+      "pass": true
+    },
+    {
+      "name": "sdk: one-use handoff cannot overwrite edited answers or move to another session",
+      "pass": true
+    },
+    {
+      "name": "sdk: marketing needs separate authenticated affirmative choice; suppression cannot reset",
+      "pass": true
+    },
+    {
+      "name": "sdk: initial unchecked or changed verified preference can be affirmed later without an implicit permanent unsubscribe",
+      "pass": true
+    },
+    {
+      "name": "sdk: verified legitimate handoff replaces poisoned anonymous display identity and preserves intentionally blank saved answers",
+      "pass": true
+    },
+    {
+      "name": "sdk: account create retains desired connections and returning lead cannot alter existing owner",
+      "pass": true,
+      "detail": {
+        "selected": [
+          "voice",
+          "calendar"
+        ],
+        "active": {
+          "web": {
+            "active": false
+          },
+          "voice": {
+            "active": false
+          },
+          "sms": {
+            "active": false
+          }
+        }
+      }
+    },
+    {
+      "name": "sdk: expired handoff and sign-in proof do not adopt answers",
+      "pass": true
+    },
+    {
+      "name": "sdk: protected all/eligible exports distinguish consent and neutralize formulas",
+      "pass": true,
+      "detail": {
+        "allRows": 5,
+        "eligibleRows": 0
+      }
+    },
+    {
+      "name": "sdk: invalid origin, media, fields, large payload and bot cannot save a prospect",
+      "pass": true
+    },
+    {
+      "name": "sdk: failed opt-out projection immediately excludes old opt-in from eligible export",
+      "pass": true
+    },
+    {
+      "name": "sdk: later verified opt-out wins an older delayed opt-in and exports fail closed",
+      "pass": true
+    },
+    {
+      "name": "sdk: post-exchange projection failure leaves usable verified session for safe retry",
+      "pass": true
+    },
+    {
+      "name": "sdk: failed prospect projection returns failure and same-key retry completes durable capture",
+      "pass": true
+    },
+    {
+      "name": "sdk: concurrent anonymous identities cannot overwrite the winning prospect",
+      "pass": true
+    },
+    {
+      "name": "runtime sources stable through QA",
+      "pass": true
+    },
+    {
+      "name": "no unexpected provider/model/hosted requests",
+      "pass": true
+    }
+  ],
+  "interceptedMail": [
+    {
+      "recipientCount": 1,
+      "subject": "Your Machines & Cloud sign-in link",
+      "kind": "intercepted fixture, not sent"
+    },
+    {
+      "recipientCount": 1,
+      "subject": "Your Machines & Cloud sign-in link",
+      "kind": "intercepted fixture, not sent"
+    },
+    {
+      "recipientCount": 1,
+      "subject": "Your Machines & Cloud sign-in link",
+      "kind": "intercepted fixture, not sent"
+    }
+  ],
+  "blockedNetwork": [],
+  "conflicts": 4,
+  "sourceBefore": {
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "9510ea343387c8f7c8c8940c26004dab12ca78fb7d429a9eb242c259c2f2ab82",
+    "netlify/functions/onboard.mjs": "9a8960090a63ef7e4d75c2b56a25a5f9101da341cae878a945cbf1e19d4c43e1",
+    "netlify/functions/client.mjs": "de56e44b9d2006001b5251eccac00980e70a9cba30642d33b804e5f097aa05cb",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "be087f0dd61144b8796a299ddc3d6a9cb369692cc77ba94d512bdaee1653918e",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+  },
+  "sourceAfter": {
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "9510ea343387c8f7c8c8940c26004dab12ca78fb7d429a9eb242c259c2f2ab82",
+    "netlify/functions/onboard.mjs": "9a8960090a63ef7e4d75c2b56a25a5f9101da341cae878a945cbf1e19d4c43e1",
+    "netlify/functions/client.mjs": "de56e44b9d2006001b5251eccac00980e70a9cba30642d33b804e5f097aa05cb",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/setup.mjs": "be087f0dd61144b8796a299ddc3d6a9cb369692cc77ba94d512bdaee1653918e",
+    "netlify/functions/lib/store.mjs": "c810c87446b1f4e6410ef3c399445a66999d8f49a4e07daa1690059af4ed0d1c"
+  },
+  "summary": {
+    "passed": 35,
+    "failed": 0,
+    "total": 35
+  }
+}

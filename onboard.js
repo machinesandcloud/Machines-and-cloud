@@ -38,12 +38,33 @@
   var gate = document.getElementById('access-gate'), gateStatus = document.getElementById('access-status'), accessForm = document.getElementById('access-form');
   var draftStatus = document.getElementById('draft-status'), verifiedToken = new URLSearchParams(location.hash.slice(1)).get('verify');
   var storageKey = 'mc-onboarding-session-v1';
+  var intakeStorageKey = 'mc-signup-intake-v1', intakeToken = new URLSearchParams(location.hash.slice(1)).get('intake');
+  var intakeNotice = document.getElementById('intake-notice'), intakeSaved = null;
+  var marketingField = document.getElementById('setup-marketing'), marketingVersion = 0, marketingSavedVersion = 0;
+  if (!/^[a-f0-9]{64}$/.test(intakeToken || '')) intakeToken = null;
+  try {
+    var storedIntake = JSON.parse(sessionStorage.getItem(intakeStorageKey) || 'null');
+    if (storedIntake && /^[a-f0-9]{64}$/.test(storedIntake.handoff || '') && new Date(storedIntake.expiresAt).getTime() > Date.now()) {
+      if (!intakeToken && !verifiedToken && q.get('signin') !== '1') intakeToken = storedIntake.handoff;
+      if (intakeToken === storedIntake.handoff) intakeSaved = storedIntake;
+    }
+  } catch (error) { /* An opaque URL handoff still works without browser storage. */ }
+  if (intakeToken) {
+    intakeNotice.hidden = false; intakeNotice.textContent = 'Your business details are saved. Confirm your email to carry them into your setup.';
+    document.getElementById('access-intro').textContent = 'We’ll email a secure link to the address you entered. Open it to continue with your saved details.';
+    if (intakeSaved && typeof intakeSaved.email === 'string') document.getElementById('access-email').value = intakeSaved.email;
+    else document.getElementById('access-intro').textContent = 'Enter the same email you used a moment ago. We’ll send a secure link to continue with your saved details.';
+  }
   if (location.hash || ['email', 'name', 'phone', 'business'].some(function (key) { return q.has(key); })) {
     history.replaceState(null, '', location.pathname + (PLAN_IDS.indexOf(q.get('plan')) >= 0 ? '?plan=' + encodeURIComponent(q.get('plan')) : ''));
   }
   function setSession(value) {
     session = value;
     try { if (value) sessionStorage.setItem(storageKey, value); else sessionStorage.removeItem(storageKey); } catch (error) { /* In-memory sign-in still works if browser storage is disabled. */ }
+  }
+  function clearIntake() {
+    intakeToken = null; intakeSaved = null;
+    try { sessionStorage.removeItem(intakeStorageKey); } catch (error) { /* Preference storage is optional. */ }
   }
   function gateOnly(message) {
     gate.hidden = false; form.hidden = true; document.querySelector('.ob-steps').hidden = true;
@@ -76,21 +97,26 @@
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     var fields = {}; new FormData(form).forEach(function (value, key) {
       if (key === 'botfield' || key === 'email') return;
-      if (key === 'leadSources') (fields.leadSources = fields.leadSources || []).push(value); else fields[key] = value;
+      if (key === 'leadSources' || key === 'desiredChannels') (fields[key] = fields[key] || []).push(value); else fields[key] = value;
     });
     if (!fields.leadSources) fields.leadSources = [];
+    if (!fields.desiredChannels) fields.desiredChannels = [];
     return fields;
   }
   async function saveDraft() {
     clearTimeout(saveTimer);
     if (!session || restoring) return;
     if (saving) { saveAgain = true; await saving; if (dirty) return saveDraft(); return; }
-    var snapshot = collect(), step = i, generation = accessGeneration;
+    var snapshot = collect(), step = i, generation = accessGeneration, preferenceVersion = marketingVersion;
+    var saveBody = { fields: snapshot, step: step, revision: revision };
+    if (preferenceVersion > marketingSavedVersion) saveBody.marketingConsent = marketingField.checked;
     draftStatus.textContent = 'Saving your answers…'; draftStatus.hidden = false;
-    var pending = request('/api/access', 'PUT', { fields: snapshot, step: step, revision: revision }).then(function (result) {
+    var pending = request('/api/access', 'PUT', saveBody).then(function (result) {
       if (generation !== accessGeneration) return;
-      revision = result.draft.revision; dirty = JSON.stringify(collect()) !== JSON.stringify(snapshot) || i !== step;
-      draftStatus.textContent = 'Saved. You can leave and continue later.';
+      revision = result.draft.revision;
+      if (!result.marketingPending && Object.prototype.hasOwnProperty.call(saveBody, 'marketingConsent')) marketingSavedVersion = preferenceVersion;
+      dirty = JSON.stringify(collect()) !== JSON.stringify(snapshot) || i !== step || marketingVersion !== preferenceVersion;
+      draftStatus.textContent = result.marketingPending ? 'Your answers are saved. Your email preference could not be confirmed; it will retry when you save or continue.' : 'Saved. You can leave and continue later.';
     }).catch(function (error) { if (generation !== accessGeneration) return; dirty = true; draftStatus.textContent = error.message + ' Your changes are still on this page.'; throw error; });
     saving = pending;
     try { await pending; } finally { if (saving === pending) saving = null; }
@@ -103,6 +129,7 @@
     saveTimer = setTimeout(function () { saveDraft().catch(function () {}); }, 700);
   }
   form.addEventListener('input', scheduleSave); form.addEventListener('change', scheduleSave);
+  marketingField.addEventListener('change', function () { marketingVersion++; scheduleSave(); });
   function restore(fields) {
     restoring = true; hoursTouched = false;
     Object.keys(fields || {}).forEach(function (name) {
@@ -132,11 +159,26 @@
     var generation = accessGeneration;
     var state = await request('/api/access');
     if (generation !== accessGeneration) return;
+    if (intakeToken) {
+      try {
+        state = await request('/api/access', 'POST', { action: 'attach_intake', intake: intakeToken });
+        if (generation !== accessGeneration) return;
+        clearIntake(); intakeNotice.hidden = false; intakeNotice.textContent = 'Your business details are ready below.';
+      } catch (error) {
+        if (generation !== accessGeneration) return;
+        gateOnly(error.message);
+        document.getElementById('access-identity').textContent = 'Signed in as ' + state.email;
+        document.getElementById('access-signed-in').hidden = false;
+        intakeNotice.hidden = false; intakeNotice.textContent = 'Your details are saved, but couldn’t be added to this account. Sign out and use the email you entered, or request a new sign-in link below.';
+        return;
+      }
+    }
     form.elements.email.value = state.email; form.elements.email.readOnly = true;
     document.getElementById('access-identity').textContent = 'Signed in as ' + state.email; document.getElementById('access-signed-in').hidden = false;
     gate.hidden = true;
     if (state.existing) { workspace(state.existing.portal, 'Welcome back. Open your workspace to continue setup or manage your front desk.'); return; }
     revision = state.draft.revision || 0; restore(state.draft.fields || {});
+    marketingField.checked = !!(state.marketing && state.marketing.preference === true); marketingVersion = 0; marketingSavedVersion = 0;
     form.hidden = false; document.querySelector('.ob-steps').hidden = false; draftStatus.hidden = false;
     draftStatus.textContent = revision ? 'Your saved answers have been restored.' : 'Your answers will save automatically.'; show(state.draft.step || 0, false);
   }
@@ -144,7 +186,12 @@
     var generation = accessGeneration;
     event.preventDefault(); var button = document.getElementById('access-send'); if (!accessForm.reportValidity()) return;
     button.disabled = true; gateStatus.textContent = 'Preparing your sign-in email…';
-    try { var result = await request('/api/access', 'POST', { action: 'request_link', email: document.getElementById('access-email').value, plan: form.elements.plan.value }); if (generation === accessGeneration) gateStatus.textContent = result.message; }
+    try {
+      var body = { action: 'request_link', email: document.getElementById('access-email').value, plan: form.elements.plan.value };
+      if (intakeToken) body.intake = intakeToken;
+      var result = await request('/api/access', 'POST', body);
+      if (generation === accessGeneration) gateStatus.textContent = result.message;
+    }
     catch (error) { if (generation === accessGeneration) gateStatus.textContent = error.name === 'AbortError' ? 'That request timed out. You can request another link.' : error.message; }
     finally { button.disabled = false; }
   });
@@ -152,7 +199,7 @@
   verifyButton.addEventListener('click', async function () {
     var generation = accessGeneration;
     verifyButton.disabled = true; gateStatus.textContent = 'Checking your sign-in link…';
-    try { var result = await request('/api/access', 'POST', { action: 'exchange', token: verifiedToken }); if (generation !== accessGeneration) return; setSession(result.session); verifiedToken = null; verifyButton.hidden = true; accessForm.hidden = false; await signedIn(); }
+    try { var result = await request('/api/access', 'POST', { action: 'exchange', token: verifiedToken }); if (generation !== accessGeneration) return; setSession(result.session); verifiedToken = null; clearIntake(); intakeNotice.hidden = true; verifyButton.hidden = true; accessForm.hidden = false; await signedIn(); }
     catch (error) { if (generation === accessGeneration) { gateStatus.textContent = error.message; verifyButton.hidden = true; accessForm.hidden = false; } }
     finally { if (generation === accessGeneration) verifyButton.disabled = false; }
   });
@@ -161,12 +208,30 @@
     try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
     if (generation !== accessGeneration) return;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); form.reset(); revision = 0; dirty = false; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); form.reset(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
   function valid() {
-    var invalid = Array.from(steps[i].querySelectorAll('[required]')).find(function (field) { var bad = !field.value.trim() || !field.checkValidity(); field.classList.toggle('error', bad); return bad; });
-    if (invalid) { err.textContent = 'Check the highlighted field.'; invalid.focus(); return false; } return true;
+    var invalid = Array.from(steps[i].querySelectorAll('[required]')).find(function (field) {
+      var bad = !field.value.trim() || !field.checkValidity() || (field.name === 'phone' && !validCallbackNumber(field.value));
+      field.classList.toggle('error', bad); if (bad) field.setAttribute('aria-invalid', 'true'); else field.removeAttribute('aria-invalid'); return bad;
+    });
+    if (invalid) { err.textContent = invalid.name === 'phone' ? 'Add a valid US callback number, including the area code.' : 'Check the highlighted field.'; invalid.focus(); return false; } return true;
   }
+  function validCallbackNumber(value) {
+    // Match onboard.mjs's trimmed 30-character input and send.mjs's e164 normalization.
+    var digits = String(value || '').trim().slice(0, 30).replace(/[^\d+]/g, '');
+    var normalized = digits.charAt(0) === '+' ? digits : digits.length === 10 ? '+1' + digits : '+' + digits;
+    return /^\+1\d{10}$/.test(normalized);
+  }
+  function revealFieldError(path) {
+    var names = { 'owner.name': 'name', 'owner.email': 'email', 'owner.phone': 'phone', 'business.name': 'business', 'business.website': 'website' };
+    var name = names[path] || String(path).split('.').pop(), field = form.elements[name];
+    if (!field || field.nodeType !== 1) return;
+    var step = steps.indexOf(field.closest('fieldset'));
+    if (step >= 0) show(step, true);
+    field.classList.add('error'); field.setAttribute('aria-invalid', 'true'); field.focus();
+  }
+  form.addEventListener('input', function (event) { if (event.target.classList) { event.target.classList.remove('error'); event.target.removeAttribute('aria-invalid'); } });
   back.addEventListener('click', async function () { if (i > 0) { show(i - 1, true); dirty = true; await saveDraft().catch(function () {}); } });
   next.addEventListener('click', async function () {
     if (!session || !valid()) return; next.disabled = true;
@@ -183,14 +248,14 @@
       workspace(result.portal);
     } catch (error) {
       if (generation !== accessGeneration) return;
+      if (error.field) revealFieldError(error.field);
       err.textContent = error.name === 'AbortError' ? 'The request timed out. Your saved answers are kept. Retry to continue the same workspace.' : error.message;
-      if (error.field) { var field = form.elements[error.field.split('.').pop()]; if (field) field.classList.add('error'); }
     } finally { if (generation === accessGeneration) { next.disabled = false; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; } }
   });
   form.addEventListener('submit', function (event) { event.preventDefault(); next.click(); });
   function showVerification(token) {
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
-    saving = null; saveAgain = false; dirty = false; revision = 0; form.reset(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false;
+    saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false;
     setSession(null); gateOnly('Confirm to continue securely. This link works once and expires after 20 minutes.');
     accessForm.hidden = true; verifyButton.hidden = false; document.getElementById('access-title').textContent = 'Continue to your workspace';
   }

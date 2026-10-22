@@ -26,7 +26,7 @@ export default async (req) => {
     const out = []; const stream = [];
     for (const sl of slugs) {
       const c = await getClient(sl); if (!c) continue;
-      const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${c.slug}&k=${c.ownerKey}`, policy: `${process.env.URL}/policy?c=${c.slug}` };
+      const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, selfService: c.onboarding?.version === 1, owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${c.slug}&k=${c.ownerKey}`, policy: `${process.env.URL}/policy?c=${c.slug}` };
       if (full) {
         const [events, alerts, leads, convs, usage] = await Promise.all([listJSON("events", c.slug + "/", 400), listJSON("alerts", c.slug + "/", 100), listJSON("leads", c.slug + "/", 200), listJSON("conversations", c.slug + "/", 100), getUsage(c.slug)]);
         const h = lineHealth(c, events);

@@ -17,6 +17,7 @@ import { dailyDigest, lineHealth, ackAlertsFor, weeklyReport, monthlyReport } fr
 import { getUsage, usageView } from "./lib/usage.mjs";
 import { updateVoicePrompt, detachVoice, attachVoice } from "./lib/vapi.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
+import { INTAKE_CHANNELS } from "./lib/intake.mjs";
 
 export const config = { path: "/api/client" };
 
@@ -146,6 +147,18 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if (b?.action === "save_connection_preferences") {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
+      if (JSON.stringify(b).length > 1024) return json({ error: "invalid_request" }, 413);
+      if (Object.keys(b).some(field => !["action", "desiredChannels"].includes(field)) || !Array.isArray(b.desiredChannels) || b.desiredChannels.length > 4 || new Set(b.desiredChannels).size !== b.desiredChannels.length || b.desiredChannels.some(value => !INTAKE_CHANNELS.includes(value))) return json({ error: "invalid_channels" }, 400);
+      const updated = await atomicUpdate("clients", c.slug, current => {
+        if (!ownsCurrent(current)) return { result: null };
+        const value = { ...current, onboarding: { ...current.onboarding, desiredChannels: [...b.desiredChannels] }, updatedAt: new Date().toISOString() };
+        return { value, result: value };
+      });
+      if (!updated) return json({ error: "forbidden" }, 403);
+      return json({ ok: true, setup: setupReadiness(updated) }, 200, { "Cache-Control": "no-store" });
+    }
     if (b.action === "availability_block" || b.action === "availability_unblock") {
       try { return json(await setAvailabilityBlock(c, b.date, b.window, b.action === "availability_block")); }
       catch (err) { return err instanceof AvailabilityInputError ? json({ error: err.code, message: err.message }, 400) : json({ error: "availability_unavailable", message: "The schedule change could not be confirmed. Reload availability before trying again." }, 503); }
