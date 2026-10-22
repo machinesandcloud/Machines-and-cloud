@@ -1,0 +1,131 @@
+{
+  "phase": "second approved email; original active session untouched",
+  "startedAt": "2026-10-22T13:15:55.848Z",
+  "recipient": "ngoumnaisteve@gmail.com",
+  "scope": "One operator email; provider delivery metadata; one-use exchange; one authenticated readonly GET; signout. No tenant edits, model, voice, purchase or billing.",
+  "checks": [
+    {
+      "name": "Hosted operator request accepted by mail provider",
+      "pass": true
+    },
+    {
+      "name": "Email provider read credential is present",
+      "pass": true
+    },
+    {
+      "name": "Exact approved send found in provider records",
+      "pass": true
+    },
+    {
+      "name": "Retrieved record matches the exact approved message",
+      "pass": true
+    },
+    {
+      "name": "Sent link has fixed admin destination and opaque proof",
+      "pass": true
+    },
+    {
+      "name": "Actual one-use operator exchange succeeds",
+      "pass": true
+    },
+    {
+      "name": "Actual operator can read the hosted customer dashboard",
+      "pass": true
+    },
+    {
+      "name": "Authenticated dashboard is not cacheable",
+      "pass": true
+    },
+    {
+      "name": "Dashboard has no credential-bearing DTO fields",
+      "pass": true
+    },
+    {
+      "name": "Second approved message is delivered to the receiving server",
+      "pass": true
+    },
+    {
+      "name": "Temporary verification session is revoked",
+      "pass": true
+    }
+  ],
+  "providerReads": [
+    {
+      "method": "GET",
+      "path": "/emails?limit=5",
+      "at": "2026-10-22T13:15:56.807Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/emails/01a163c1-05af-78c3-8347-f16852f232d2",
+      "at": "2026-10-22T13:15:57.125Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/emails/01a163c1-05af-78c3-8347-f16852f232d2",
+      "at": "2026-10-22T13:16:27.795Z",
+      "status": 200
+    }
+  ],
+  "authenticationActions": [
+    {
+      "method": "POST",
+      "path": "/api/manage",
+      "action": "request_link",
+      "at": "2026-10-22T13:15:55.849Z",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/manage",
+      "action": "exchange",
+      "at": "2026-10-22T13:15:57.285Z",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/manage",
+      "action": "sign_out",
+      "at": "2026-10-22T13:16:28.090Z",
+      "status": 200
+    }
+  ],
+  "emailAttempts": 1,
+  "email": {
+    "id": "01a163c1-05af-78c3-8347-f16852f232d2",
+    "createdAt": "2026-10-22 13:15:56.885000+00",
+    "from": "Machines & Cloud <desk@machinesandcloud.com>",
+    "to": "ngoumnaisteve@gmail.com",
+    "subject": "Your Machines & Cloud sign-in link",
+    "lastEvent": "delivered"
+  },
+  "providerDeliveryInitially": "queued",
+  "operatorSession": {
+    "email": "ngoumnaisteve@gmail.com",
+    "expiresAt": "2026-10-22T21:15:57.486Z",
+    "tokenPersisted": false,
+    "revoked": true
+  },
+  "dashboard": {
+    "status": 200,
+    "customerCount": 0,
+    "total": 0,
+    "hasNextPage": false,
+    "rawCustomerDataPersisted": false,
+    "operator": "ngoumnaisteve@gmail.com",
+    "sha256": "91cd87436f962ec95e96e7ee4054944e488f23034d71b917ec4abddc8d31716b",
+    "cacheControl": "no-store"
+  },
+  "finishedAt": "2026-10-22T13:16:28.576Z",
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "emailAttempts": 1,
+    "maximumEmailAttempts": 2,
+    "authPosts": 3,
+    "providerReadRequests": 3,
+    "hostedGETsTotal": 24
+  }
+}

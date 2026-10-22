@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your front desk | Machines &amp; Cloud</title>
+  <meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dk { max-width: 1100px; margin: 0 auto; padding: 100px 20px 80px; }
+    .dk-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .dk h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0; }
+    .dk .st { display: inline-block; font-size: 12px; padding: 5px 12px; border-radius: 999px; background: #F3F4F6; color: #1E2433; margin-left: 8px; vertical-align: middle; }
+    .dk .st.live { background: #DCFCE7; color: #166534; }
+    .tabs { display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 18px; padding-bottom: 4px; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } .tabs button { white-space: nowrap; flex: 0 0 auto; }
+    .tabs button { border: 1px solid #E5E7EB; background: #fff; color: #1E2433; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
+    .tabs button.on { background: #1E2433; color: #fff; border-color: #1E2433; }
+    .pane { display: none; scroll-margin-top: 100px; } .pane.on { display: block; }
+    .card2 { border: 1px solid #E5E7EB; border-radius: 20px; background: #fff; padding: 20px; margin-bottom: 16px; min-width: 0; max-width: 100%; box-sizing: border-box; }
+    .dk, .pane, .tblwrap, .chat, .conv, pre.snip { min-width: 0; max-width: 100%; box-sizing: border-box; }
+    @media (max-width: 600px) { .dk { padding: 90px 14px 60px; } .dk-head { flex-direction: column; align-items: flex-start; gap: 10px; } .dk h1 { font-size: 22px; } .card2 { padding: 14px; border-radius: 14px; } }
+    .card2 h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
+    .chat { display: flex; flex-direction: column; height: min(520px, 60vh); border: 1px solid #E5E7EB; border-radius: 16px; overflow: hidden; background: #F9FAFB; }
+    .chat .m { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .chat .b { max-width: 84%; padding: 10px 13px; border-radius: 14px; white-space: pre-wrap; font-size: 14px; }
+    .chat .b.u { align-self: flex-end; background: #2563EB; color: #fff; } .chat .b.a { align-self: flex-start; background: #fff; border: 1px solid #E5E7EB; }
+    .chat .b.s { align-self: center; background: #FEF3C7; color: #92400E; font-size: 12px; border-radius: 999px; }
+    .chat form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #E5E7EB; background: #fff; }
+    .chat textarea { flex: 1; resize: none; min-height: 40px; padding: 10px; border: 1px solid #D1D5DB; border-radius: 10px; font: inherit; }
+    .tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; } .tbl { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 13px; } .tbl th, .tbl td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #F3F4F6; vertical-align: top; } .tbl th { color: #5B6273; font-weight: 600; }
+    .muted { color: #5B6273; font-size: 13px; }
+    .check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F3F4F6; } .check:last-child { border: 0; }
+    .check .dot { width: 12px; height: 12px; border-radius: 50%; background: #D1D5DB; margin-top: 4px; flex: none; } .check .dot.ok { background: #16A34A; } .check .dot.wait { background: #F59E0B; }
+    .dk .form-group { margin-bottom: 12px; } .hours-rows{display:grid;gap:6px;margin-top:8px}.hours-row{display:grid;grid-template-columns:44px 1fr 24px 1fr;align-items:center;gap:8px;font-size:13px}.hours-row input{padding:6px;border:1px solid #D1D5DB;border-radius:8px;font:inherit} .tag-overdue{display:inline-block;padding:2px 8px;border-radius:999px;background:#FEE2E2;color:#991B1B;font-size:12px;margin-left:6px} .dk textarea.form-input { min-height: 70px; resize: vertical; }
+    pre.snip { background: #1E2433; color: #E5E7EB; padding: 12px; border-radius: 10px; font-size: 12px; overflow-x: auto; }
+    .conv { border: 1px solid #F3F4F6; border-radius: 12px; padding: 10px; margin-bottom: 10px; font-size: 13px; } .conv b { display: block; margin-bottom: 4px; } .conv div { margin: 3px 0; } .conv .u { color: #1E2433; } .conv .a { color: #5B6273; }
+    .btn-sm { padding: 8px 14px; font-size: 13px; }
+    .availability-form { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto; gap: 12px; align-items: end; margin-top: 18px; }
+    .availability-form .form-group { margin: 0; min-width: 0; }
+    .availability-form input, .availability-form select { width: 100%; min-width: 0; box-sizing: border-box; }
+    .availability-row { display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+    .availability-row button, .availability-form button { min-height: 44px; flex: none; }
+    .availability-message { min-height: 20px; margin-top: 12px; }
+    @media (max-width: 600px) { .availability-form { grid-template-columns: 1fr; } .availability-form button { justify-self: start; } .availability-row { align-items: flex-start; flex-wrap: wrap; } }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1E2433; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; display: none; }
+    [hidden] { display:none !important; }
+    .workspace-guide { background:#f5f8ff; border-color:#d5e2fb; }
+    .workspace-guide-head { display:flex; align-items:start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .workspace-guide h2 { margin:0 0 8px; font-size:1.3rem; }
+    .workspace-guide p { margin:8px 0; }
+    .channel-states { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+    .channel-state { padding:7px 12px; border:1px solid #d5e2fb; background:#fff; border-radius:8px; font-size:13px; }
+    .setup-step { display:flex; gap:12px; justify-content:space-between; align-items:center; padding:12px 0; border-top:1px solid #d5e2fb; }
+    .setup-step p { margin:4px 0; font-size:13px; color:#475569; }
+    .setup-step button { flex:none; }
+    #workspaceOperations .setup-step > div { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+    #workspaceOperations code { white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
+    #phoneSetupProgress, #phoneSetupOffer { overflow-wrap:anywhere; }
+    #phoneSetupForm .check { margin:14px 0; font-size:14px; }
+    #phoneSetupForm .check input { flex:none; margin-top:5px; min-width:18px; min-height:18px; }
+    .review-card { border:1px solid #d5e2fb; padding:18px; border-radius:16px; background:#f5f8ff; margin-bottom:18px; }
+    .review-card p { margin:0 0 12px; }
+    #testPreview { white-space:pre-wrap; overflow-wrap:anywhere; background:#f5f8ff; padding:16px; border-radius:12px; font-size:14px; }
+    dialog.walkthrough { margin:auto; width:min(540px,calc(100% - 28px)); max-height:calc(100dvh - 32px); overflow:auto; padding:26px; border:1px solid #d5e2fb; border-radius:22px; color:#16263f; box-sizing:border-box; }
+    dialog.walkthrough::backdrop { background:rgba(17,35,60,.48); }
+    .walkthrough h2 { margin:14px 0; font-size:1.55rem; }
+    .walkthrough p { line-height:1.65; }
+    .walkthrough-head,.walkthrough-actions { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .walkthrough-actions { border-top:1px solid #e1e7f0; padding-top:18px; margin-top:20px; }
+    .walkthrough button,.workspace-guide button,.review-card button { min-height:44px; }
+    .walkthrough-dismiss { border:0; background:transparent; text-decoration:underline; color:#475569; cursor:pointer; padding:8px; }
+    .guide-target { outline:3px solid #93b4ff; outline-offset:4px; }
+    @media(max-width:600px) { .setup-step { align-items:flex-start; flex-wrap:wrap; } dialog.walkthrough { padding:20px; } }
+  </style>
+</head>
+<body class="theme-light" data-no-widget>
+<nav class="navbar scrolled" id="navbar"><div class="container"><div class="navbar-inner"><a class='navbar-logo' href='/'><img src="assets/logo-dark.png" alt="Machines & Cloud"></a></div></div></nav>
+<main class="dk">
+  <div class="dk-head"><div><h1 id="title">Your front desk</h1><span class="st" id="status">loading</span></div><div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="deskSignOut" hidden>Sign out</button><div id="liveBtns" style="display:inline-block;margin-left:8px"></div></div></div>
+  <div id="portalRecovery" class="card2" hidden><h2>Open your workspace securely</h2><p id="recoveryMessage">Sign in with the email you used during setup.</p><a class='btn-pill btn-pill-blue' href='/onboard?signin=1'>Email me a sign-in link</a> <button type="button" class="btn-pill btn-pill-dark" id="retryLoad">Try again</button></div>
+  <div id="portalContent" hidden>
+  <section class="card2 workspace-guide" id="workspaceGuide" hidden aria-labelledby="guideTitle">
+    <div class="workspace-guide-head"><div><h2 id="guideTitle">Set up your front desk</h2><p id="guideIntro">Review your rules, try a private conversation, then activate website chat.</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="openGuide">Show me around</button></div>
+    <div class="channel-states" id="channelStates" aria-label="Channel status"></div>
+    <p class="muted" id="aiAllowance" role="status"></p><div id="setupSteps"></div><p class="muted" id="setupMessage" role="status" aria-live="polite"></p>
+  </section>
+  <div class="tabs"><button data-t="today" id="tabToday" style="display:none">Today</button><button class="on" data-t="test" id="tabTest">Test it</button><button data-t="leads">Leads and bookings</button><button data-t="availability">Availability</button><button data-t="convs">Conversations</button><button data-t="know">What it knows</button><button data-t="setup">Setup</button><button data-t="account">Account</button></div>
+
+  <section class="pane" id="p-today">
+    <div class="card2"><h3>Today</h3><div class="grid2" id="today"></div></div>
+    <div class="card2"><h3>Needs you</h3><div id="needsYou" class="muted"></div></div>
+    <div class="card2"><h3>Last 24 hours</h3><div id="todayEvents" class="muted"></div></div>
+  </section>
+
+  <section class="pane on" id="p-test">
+    <div class="grid2">
+      <div class="card2"><h3>Talk to it as a customer</h3><p class="muted">This is a private practice conversation. It does not reserve real visits, contact anyone, or change your calendar. Try a booking request, a service you do not offer, or Spanish; fix any wrong answer under What it knows.</p>
+        <div class="chat"><div class="m" id="msgs"></div><form id="chatForm"><textarea id="chatIn" aria-label="Practice customer message" rows="1" placeholder="Type like a customer would"></textarea><button type="submit" class="btn-pill btn-pill-blue btn-sm">Send</button></form></div>
+        <p class="muted" style="margin-top:8px"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="newChat">New customer</button></p>
+      </div>
+      <div class="card2"><h3>Your practice result</h3><p class="muted">A preview of the details your desk would collect. Practice results stay separate from customer leads and bookings.</p><div id="testPreview" role="status" aria-live="polite">Send a practice message to see the result here.</div><h3 style="margin-top:18px">Recent service activity</h3><div id="liveEvents" class="muted">No service activity yet.</div>
+        <h3 style="margin-top:18px">Draft notes</h3><div id="missing" class="muted"></div></div>
+    </div>
+  </section>
+
+  <section class="pane" id="p-leads">
+    <div class="card2"><h3>Bookings</h3><div id="bookings"></div></div>
+    <div class="card2"><h3>Leads handed to you</h3><div id="leads"></div></div>
+  </section>
+
+  <section class="pane" id="p-availability">
+    <div class="card2">
+      <h3>Time you are unavailable</h3>
+      <p class="muted">Block a day or arrival window for other jobs, time off or a closure. Keep work booked elsewhere up to date here.</p>
+      <p class="muted">Existing visits stay booked. This changes the availability offered to new customers.</p>
+      <form id="availabilityForm" class="availability-form">
+        <div class="form-group"><label class="form-label" for="availabilityDate">Date (Houston time)</label><input id="availabilityDate" class="form-input" type="date" required></div>
+        <div class="form-group"><label class="form-label" for="availabilityWindow">Time to block</label><select id="availabilityWindow" class="form-input"><option value="">Whole day</option></select></div>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="availabilitySubmit">Block time</button>
+      </form>
+      <p id="availabilityMessage" class="muted availability-message" role="status" aria-live="polite"></p>
+      <h3 style="margin-top:20px">Blocked time</h3>
+      <div id="availabilityBlocks" class="muted">Loading availability…</div>
+    </div>
+  </section>
+
+  <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><div id="convs"></div></div></section>
+
+  <section class="pane" id="p-know">
+    <div class="review-card" id="reviewCard" hidden><h3>Check your business rules</h3><p>Confirm your services, prices, service area, hours, arrival windows and safety instructions below. Save any edits first. Your review and practice check apply to the saved version; changes require a new check.</p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="reviewRules">I reviewed these saved rules</button> <span id="reviewMessage" class="muted" role="status"></span></div>
+    <form id="cfg">
+      <div class="grid2">
+        <div class="card2"><h3>Shop</h3>
+          <div class="form-group"><label class="form-label">Business name</label><input class="form-input" name="business.name"></div>
+          <div class="form-group"><label class="form-label">Trade</label><input class="form-input" name="business.trade"></div>
+          <div class="form-group"><label class="form-label">Hours</label><input class="form-input" name="business.hours"><div id="hoursRows" class="hours-rows"></div><span class="muted" id="hoursNote"></span></div>
+          <div class="form-group"><label class="form-label">After hours</label><input class="form-input" name="business.afterHours"></div>
+          <div class="form-group"><label class="form-label">Service area (one per line)</label><textarea class="form-input" name="business.serviceArea"></textarea></div>
+          <div class="form-group"><label class="form-label">Not served</label><textarea class="form-input" name="business.notServed"></textarea></div>
+          <div class="form-group"><label class="form-label">Spanish</label><select class="form-input" name="business.spanish"><option value="yes">Yes</option><option value="no">No</option></select></div>
+          <div class="form-group"><label class="form-label">Licenses</label><input class="form-input" name="business.licenses"></div>
+          <div class="form-group"><label class="form-label">Services (one per line)</label><textarea class="form-input" name="services"></textarea></div>
+        </div>
+        <div class="card2"><h3>Prices, windows, rules</h3>
+          <div class="form-group"><label class="form-label">Published prices (what: amount (note), one per line)</label><textarea class="form-input" name="fees"></textarea></div>
+          <div class="form-group"><label class="form-label">Arrival windows (one per line)</label><textarea class="form-input" name="windows"></textarea></div>
+          <div class="form-group"><label class="form-label">Visits per window (one per crew)</label><input class="form-input" name="rules.windowCapacity" type="number" min="1" max="20" style="max-width:120px"><p class="muted" style="margin:6px 0 0">When a window holds this many visits, the front desk offers the next one instead of double-booking.</p></div>
+          <div class="form-group"><label class="form-label">Hand to a person (one per line)</label><textarea class="form-input" name="rules.handoff"></textarea></div>
+          <div class="form-group"><label class="form-label">Numbers that always ring through to you (one per line, up to 20)</label><textarea class="form-input" name="rules.bypass" placeholder="Property managers, commercial accounts, family"></textarea><p class="muted" style="margin:6px 0 0">Calls from these numbers ring your cell and leave you a voicemail instead of reaching the front desk. Their texts are passed to you unanswered.</p></div>
+          <div class="form-group"><label class="form-label">Never (one per line)</label><textarea class="form-input" name="rules.never"></textarea></div>
+          <div class="form-group"><label class="form-label">Emergencies, tier 0: life safety (one per line). The front desk gives your safety script, takes only a phone and address, and pages you.</label><textarea class="form-input" name="rules.emergencies.tier0"></textarea></div>
+          <div class="form-group"><label class="form-label">Emergencies, tier 1: same day (one per line). Booked today or handed to you today; with an infant, elderly, or medically dependent person in the home it is treated as tier 0.</label><textarea class="form-input" name="rules.emergencies.tier1"></textarea></div>
+          <div class="form-group"><label class="form-label">Everything else</label><input class="form-input" name="rules.emergencies.tier2"></div>
+          <div class="form-group"><label class="form-label">Your safety script, in your words</label><textarea class="form-input" name="rules.emergencies.script" placeholder="Gas smell: leave the house, call CenterPoint or 911, then us."></textarea></div>
+          <div class="form-group"><label class="form-label">Notes for the front desk</label><textarea class="form-input" name="summary"></textarea></div>
+          <div class="form-group"><label class="form-label" for="allowedOrigins">Websites allowed to use your chat (one full address per line)</label><textarea class="form-input" id="allowedOrigins" name="widget.allowedOrigins" placeholder="https://yourshop.com"></textarea><p class="muted">Include your website before installing the chat there. This does not import or change your website.</p></div><div class="form-group"><label class="form-label">Website chat greeting</label><input class="form-input" name="widget.greeting"></div>
+        </div>
+      </div>
+      <div class="card2"><h3>Questions and answers</h3><p class="muted">One per line: Question? Answer. Your saved answers are the source. Review or remove any unanswered question before using it with customers.</p><textarea class="form-input" name="faq" style="min-height:220px"></textarea></div>
+      <div class="card2"><h3>You</h3><div class="grid2"><div class="form-group"><label class="form-label">Your name</label><input class="form-input" name="owner.name"></div><div class="form-group"><label class="form-label">Your contact cell</label><input class="form-input" name="owner.phone"></div><div class="form-group"><label class="form-label">Backup number for urgent alerts</label><input class="form-input" name="owner.backupPhone" placeholder="A second phone, not your cell"></div><div class="form-group" id="transferGroup"><label class="form-label">Transfer calls that need you to</label><input class="form-input" name="phone.transferTo" placeholder="Your cell"></div><div class="form-group"><label class="form-label">Acknowledge urgent alerts within</label><select class="form-input" name="rules.ackMinutes"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select></div><div class="form-group"><label class="form-label">Which calls the front desk takes</label><select class="form-input" name="phone.forwarding"><option value="missed">Only the ones I miss</option><option value="all">All of them, transfer the ones that need me</option><option value="none">None, texts and chat only</option></select></div><div class="form-group"><label class="form-label">Callback promise during hours</label><input class="form-input" name="rules.callbackHours" placeholder="within 30 minutes"></div><div class="form-group"><label class="form-label">Callback promise after hours</label><input class="form-input" name="rules.callbackAfterHours" placeholder="by 8 am tomorrow"></div><div class="form-group"><label class="form-label">Google review link</label><input class="form-input" name="business.reviewLink"></div><div class="form-group"><label class="form-label">Payment link</label><input class="form-input" name="business.payLink"></div><div class="form-group"><label class="form-label">Maintenance reminders</label><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="rules.consentAsk"> After a happy review reply, ask the customer once whether they want a text when their next tune-up is due (they must reply YES before any such text goes out)</label></div><div class="form-group"><label class="form-label">Daily digest by text</label><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="digest.text"> Text me the 6 pm summary (the email always comes; quiet days are email only)</label></div></div><p class="muted" id="handoffNote" style="margin:10px 0 0">Contact methods depend on the channels shown as active under Setup.</p></div>
+      <p><button type="submit" class="btn-pill btn-pill-blue">Save changes</button> <span class="muted" id="saveMsg"></span></p>
+    </form>
+  </section>
+
+  <section class="pane" id="p-setup">
+    <div class="card2" id="connectionsCard" hidden>
+      <h3>Your connections</h3>
+      <p class="muted">Choose the connections you want to use. Saving preferences does not turn them on; each connection shows its status below.</p>
+      <form id="connectionPreferences">
+        <fieldset style="border:0;padding:0;margin:16px 0"><legend class="muted">Connections you want to use</legend><div class="channel-states">
+          <label class="channel-state"><input type="checkbox" name="connection" value="web"> Website chat</label>
+          <label class="channel-state"><input type="checkbox" name="connection" value="voice"> Phone answering</label>
+          <label class="channel-state"><input type="checkbox" name="connection" value="sms"> Text messaging</label>
+          <label class="channel-state"><input type="checkbox" name="connection" value="calendar"> Google Calendar</label>
+        </div></fieldset>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveConnections">Save preferences</button>
+        <p class="muted" id="connectionsMessage" role="status" aria-live="polite"></p>
+      </form>
+      <div id="connectionJourney"></div>
+    </div>
+    <section class="card2" id="phoneSetupCard" hidden aria-labelledby="phoneSetupTitle">
+      <div class="workspace-guide-head"><div><h3 id="phoneSetupTitle">Your phone number request</h3><p class="muted" id="phoneSetupDetail"></p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="refreshPhoneSetup">Refresh status</button></div>
+      <div id="phoneSetupProgress"></div>
+      <form id="phoneSetupForm" hidden>
+        <h3 style="margin-top:18px">Reserve a number for your business</h3>
+        <p class="muted">This request is for a number only. Phone answering and customer text messages stay inactive until their connections and delivery are verified.</p>
+        <div id="phoneSetupOffer" class="muted"></div>
+        <label class="check"><input type="checkbox" id="phoneAuthority" required><span id="phoneAuthorityText"></span></label>
+        <label class="check"><input type="checkbox" id="phoneCosts" required><span id="phoneCostsText"></span></label>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestPhoneSetup">Request a number</button>
+      </form>
+      <button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelPhoneSetup" hidden>Cancel number request</button>
+      <p class="muted" id="phoneSetupMessage" role="status" aria-live="polite"></p>
+    </section>
+    <section class="card2" id="backgroundWork" hidden aria-labelledby="backgroundWorkTitle">
+      <div class="workspace-guide-head"><div><h3 id="backgroundWorkTitle">Workspace updates</h3><p class="muted">Refresh your desk from the business answers you have saved. This keeps your answers and customer records, and does not activate connections or contact anyone.</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="refreshBackgroundWork">Refresh status</button></div>
+      <div id="workspaceOperations"></div>
+      <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestWorkspaceRefresh">Refresh saved workspace</button>
+      <p class="muted" id="workspaceOperationMessage" role="status" aria-live="polite"></p>
+    </section>
+    <div class="grid2">
+      <div class="card2"><h3>Line health</h3><div id="health" class="muted"></div></div>
+      <div class="card2"><h3>Checklist</h3><div id="checklist"></div>
+        <div id="legacyConnectionDetails"><h3 style="margin-top:18px">Your front desk number</h3><p id="numberText" class="muted"></p>
+        <h3 style="margin-top:18px">Forward your calls (one minute, from your business cell)</h3><div id="fwd" class="muted"></div>
+        <h3 style="margin-top:18px">Texting registration</h3><p id="tenDlc" class="muted"></p>
+        <div id="legalForm" style="display:none"><form id="legal"><div class="grid2"><div class="form-group"><label class="form-label">Legal business name</label><input class="form-input" name="legalName"></div><div class="form-group"><label class="form-label">EIN</label><input class="form-input" name="ein"></div><div class="form-group"><label class="form-label">Business type</label><select class="form-input" name="businessType"><option value="llc">LLC</option><option value="corp">Corporation</option><option value="sole">Sole proprietorship</option><option value="partnership">Partnership</option><option value="nonprofit">Non-profit</option></select></div><div class="form-group"><label class="form-label">Street address</label><input class="form-input" name="street"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" name="city"></div><div class="form-group"><label class="form-label">State and ZIP</label><div style="display:flex;gap:8px"><input class="form-input" name="state" maxlength="2" style="width:70px"><input class="form-input" name="zip"></div></div></div><button type="submit" class="btn-pill btn-pill-blue btn-sm">Save and file registration</button> <span class="muted" id="legalMsg"></span></form></div>
+        <h3 style="margin-top:18px">Phone answering</h3><p id="voiceText" class="muted"></p></div>
+      </div>
+      <div class="card2"><h3>Add the chat to your website</h3><p id="installStatus" class="muted"></p><p class="muted">Paste this one line before <code>&lt;/body&gt;</code> on every page, or send it to whoever runs your site. It only works on your domain.</p><pre class="snip" id="snippet"></pre><button type="button" class="btn-pill btn-pill-dark btn-sm" id="copySnippet">Copy installation code</button> <span class="muted" id="copyMessage" role="status"></span>
+        <h3 style="margin-top:18px">Paste this on your website too</h3><p class="muted">Most trade websites are missing hours, a service area, and answers to the first five questions. Here is yours, written from what your front desk knows. Copy it onto your contact or FAQ page.</p><pre class="snip" id="siteBlock" style="white-space:pre-wrap"></pre>
+        <div id="legacyDeliveryTests"><h3 style="margin-top:18px">Calendar</h3><p><a class="btn-pill btn-pill-dark btn-sm" id="calBtn" href="#">Connect Google Calendar</a> <span class="muted" id="calText"></span></p>
+        <h3 style="margin-top:18px">Texts to your cell</h3><p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="testSms">Send me a test text</button> <span class="muted" id="smsText"></span></p></div>
+      </div>
+    </div>
+  </section>
+  <section class="pane" id="p-account">
+    <div class="grid2">
+      <div class="card2"><h3>This month</h3><p class="muted" id="usage"></p>
+        <form id="acct"><div class="form-group"><label class="form-label">Your average job value (optional)</label><div style="display:flex;gap:8px;align-items:center"><input class="form-input" name="rules.avgTicket" placeholder="450" style="max-width:140px"> <button type="submit" class="btn-pill btn-pill-dark btn-sm">Save</button> <span class="muted" id="acctMsg"></span></div><p class="muted" style="margin:6px 0 0">With it, your monthly statement says what the jobs that would have gone to voicemail were worth, and compares with last month.</p></div></form>
+        <div id="textCommands"><h3 style="margin-top:18px">Commands you can text back</h3><p class="muted">Every alert names the one reply it needs: <code>ok REF</code> to acknowledge, <code>called REF</code> when you have reached someone who asked for a call, <code>otw REF</code> on the way, <code>done REF</code> when the job is finished, <code>cancel REF</code>. A bare <code>ok</code>, <code>called</code>, <code>otw</code>, or <code>done</code> works when only one job fits. Also <code>invoice REF 450</code> if they still owe you (payment reminders on day 3 and 7), <code>paid REF</code> to stop them, <code>quote REF 1450</code> when you sent a quote. Follow-up texts only go out between 9 am and 9 pm (noon to 9 pm on Sunday).</p></div>
+      </div>
+      <div class="card2"><h3>Your data</h3><p class="muted" id="dataPolicy"></p><p class="muted">Download: <a id="expBookings" href="#">bookings</a>, <a id="expLeads" href="#">leads</a>, <a id="expConvs" href="#">conversations</a> (CSV, opens in Excel or Sheets), or <a id="expCustomers" href="#">customers</a> as a CSV for manual handoff. Check your scheduling software’s import requirements before uploading.</p><p class="muted">Texting terms your customers can read: <a id="policyLink" href="#" target="_blank" rel="noopener"></a></p>
+        <h3 style="margin-top:18px">Service</h3><p class="muted">Pause or resume from the buttons at the top. To end the service: <button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelBtn2">Cancel service</button></p>
+      </div>
+    </div>
+  </section>
+  </div>
+</main>
+<dialog class="walkthrough" id="guideDialog" aria-labelledby="tourTitle" aria-describedby="tourBody">
+  <div class="walkthrough-head"><span class="muted" id="tourCount"></span><button type="button" class="walkthrough-dismiss" id="closeGuide">Close walkthrough</button></div>
+  <h2 id="tourTitle"></h2><p id="tourBody"></p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourAction"></button>
+  <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="tourBack">Back</button><button type="button" class="walkthrough-dismiss" id="skipGuide">Skip for now</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="tourNext">Next</button></div>
+</dialog>
+<div class="toast" id="toast"></div>
+<dialog class="walkthrough" id="phoneCancelDialog" aria-labelledby="phoneCancelTitle">
+  <h2 id="phoneCancelTitle">Cancel this number request?</h2>
+  <p>If a number has already been reserved, the platform will request its release. Phone answering stays inactive. The request and its resource receipt stay recorded until release is confirmed.</p>
+  <p class="muted">Cancellation can remain pending while provider execution is unavailable.</p>
+  <p id="phoneCancelMessage" class="muted" role="status" aria-live="polite"></p>
+  <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="confirmPhoneCancel">Cancel number request</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="keepPhoneSetup">Keep request</button></div>
+</dialog>
+<script src="desk.js" defer></script>
+
+</body>
+</html>

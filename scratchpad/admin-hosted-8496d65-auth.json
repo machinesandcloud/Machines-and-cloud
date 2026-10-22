@@ -1,0 +1,77 @@
+{
+  "startedAt": "2026-10-22T13:09:37.262Z",
+  "recipient": "ngoumnaisteve@gmail.com",
+  "scope": "One operator email; provider delivery metadata; one-use exchange; one authenticated readonly GET; signout. No tenant edits, model, voice, purchase or billing.",
+  "checks": [
+    {
+      "name": "Hosted operator request accepted by mail provider",
+      "pass": true
+    },
+    {
+      "name": "Email provider read credential is present",
+      "pass": true
+    },
+    {
+      "name": "Exact approved send found in provider records",
+      "pass": true
+    },
+    {
+      "name": "Receiving mail server accepted the sign-in message",
+      "pass": false
+    },
+    {
+      "name": "Approved sign-in verification completed",
+      "pass": false,
+      "error": "Receiving mail server accepted the sign-in message"
+    }
+  ],
+  "providerReads": [
+    {
+      "method": "GET",
+      "path": "/emails?limit=5",
+      "at": "2026-10-22T13:09:38.288Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/emails?limit=5",
+      "at": "2026-10-22T13:09:43.983Z",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/emails?limit=5",
+      "at": "2026-10-22T13:09:49.133Z",
+      "status": 200
+    }
+  ],
+  "authenticationActions": [
+    {
+      "method": "POST",
+      "path": "/api/manage",
+      "action": "request_link",
+      "at": "2026-10-22T13:09:37.262Z",
+      "status": 202
+    }
+  ],
+  "emailAttempts": 1,
+  "email": {
+    "id": "01a163bb-3ef0-7b27-af71-aa55bc45e4bc",
+    "createdAt": "2026-10-22 13:09:38.350000+00",
+    "from": "Machines & Cloud <desk@machinesandcloud.com>",
+    "to": "ngoumnaisteve@gmail.com",
+    "subject": "Your Machines & Cloud sign-in link",
+    "lastEvent": "queued"
+  },
+  "error": "Receiving mail server accepted the sign-in message",
+  "finishedAt": "2026-10-22T13:09:49.310Z",
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "emailAttempts": 1,
+    "maximumEmailAttempts": 2,
+    "authPosts": 1,
+    "providerReadRequests": 3,
+    "hostedGETsTotal": 22
+  }
+}

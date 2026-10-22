@@ -1,0 +1,71 @@
+{
+  "startedAt": "2026-10-22T13:12:02.075Z",
+  "priorReceipt": "scratchpad/admin-hosted-8496d65-auth.json",
+  "priorReceiptSha256": "476ccae9c18cdebe93af5ffa223e49c66cbfb856145d3aaaa3dff2d741912358",
+  "sameEmailId": "01a163bb-3ef0-7b27-af71-aa55bc45e4bc",
+  "recipient": "ngoumnaisteve@gmail.com",
+  "newEmails": 0,
+  "checks": [
+    {
+      "name": "Read exact approved provider email",
+      "pass": true
+    },
+    {
+      "name": "Provider record matches exact ID, recipient and subject",
+      "pass": true
+    },
+    {
+      "name": "Receiving server accepted the approved sign-in message",
+      "pass": true
+    },
+    {
+      "name": "Fixed admin return and opaque proof",
+      "pass": true
+    },
+    {
+      "name": "Hosted operator email exchange succeeds",
+      "pass": false
+    },
+    {
+      "name": "Same-email sign-in reconciliation completed",
+      "pass": false,
+      "error": "Hosted operator email exchange succeeds"
+    }
+  ],
+  "authenticationActions": [
+    {
+      "method": "POST",
+      "path": "/api/manage",
+      "action": "exchange",
+      "at": "2026-10-22T13:12:02.476Z",
+      "status": 410
+    }
+  ],
+  "providerReads": [
+    {
+      "method": "GET",
+      "path": "/emails/01a163bb-3ef0-7b27-af71-aa55bc45e4bc",
+      "at": "2026-10-22T13:12:02.076Z",
+      "status": 200
+    }
+  ],
+  "acceptance": "returned",
+  "email": {
+    "id": "01a163bb-3ef0-7b27-af71-aa55bc45e4bc",
+    "createdAt": "2026-10-22 13:09:38.350000+00",
+    "lastEvent": "delivered",
+    "to": "ngoumnaisteve@gmail.com",
+    "subject": "Your Machines & Cloud sign-in link"
+  },
+  "error": "Hosted operator email exchange succeeds",
+  "finishedAt": "2026-10-22T13:12:03.093Z",
+  "summary": {
+    "passed": 4,
+    "failed": 2,
+    "newEmails": 0,
+    "totalEmailAttempts": 1,
+    "authPostsTotal": 2,
+    "readOnlyHostedGETsTotal": 23,
+    "providerReadRequestsTotal": 4
+  }
+}

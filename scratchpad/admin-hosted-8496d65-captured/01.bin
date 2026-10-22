@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="mc-api-base" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
+<title>Operations | Machines &amp; Cloud</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="admin.css">
+<script src="admin.js" defer></script>
+</head>
+<body data-no-widget>
+<section id="login" class="login-wrap" aria-labelledby="loginTitle">
+  <a class='login-logo' href='/'>Machines &amp; Cloud</a>
+  <p class="eyebrow" style="margin-top:36px">Operations</p>
+  <h1 id="loginTitle">Welcome back.</h1>
+  <p class="muted">Sign in to manage customers, follow their setup and resolve issues.</p>
+  <form id="loginForm">
+    <div class="field"><label for="adminEmail">Your work email</label><input id="adminEmail" type="email" autocomplete="email" required maxlength="254" placeholder="you@company.com"></div>
+    <button class="btn primary" id="requestLink" type="submit">Email me a sign-in link</button>
+  </form>
+  <div id="verifyPanel" class="notice" hidden><p>Your sign-in link is ready. Continue to confirm access to this browser.</p><button class="btn primary" type="button" id="verifyLink">Continue securely</button></div>
+  <p id="loginStatus" class="page-status" role="status" aria-live="polite"></p>
+  <p class="muted">Access is limited to authorized operators. Customer sign-in does not grant access to this portal.</p>
+</section>
+<div id="app" class="app-shell" hidden>
+  <aside class="side">
+    <a class='brand' href='/'>Machines &amp; Cloud<span>Customer operations</span></a>
+    <nav aria-label="Operations"><button type="button" data-view="overview" aria-current="page">Overview</button><button type="button" data-view="customers">Customers</button><button type="button" data-view="issues">Issues</button><button type="button" data-view="activity">Activity</button><button type="button" data-view="inquiries">Inquiries</button><button type="button" data-view="system">System</button></nav>
+    <div class="side-footer">A clear view of every customer.<br>Actions stay attached to the account.</div>
+  </aside>
+  <main class="main-area" id="mainContent">
+    <div class="topbar"><p id="operator"></p><div class="topbar-actions"><span class="timestamp" id="lastUpdated"></span><button class="btn small" type="button" id="refreshAll">Refresh</button><button class="btn small quiet" type="button" id="signOut">Sign out</button></div></div>
+    <p class="muted" id="scopeNotice" hidden></p><div id="appStatus" class="notice" role="status" aria-live="polite" hidden></div>
+    <section id="view-overview" class="view" aria-labelledby="overviewTitle"><header class="page-head"><p class="eyebrow">Your business at a glance</p><h1 id="overviewTitle" tabindex="-1">Overview</h1><p>See what needs attention, then go straight to the customer.</p></header><div id="summary" class="stat-grid"></div><div class="two-columns"><div class="panel"><div class="panel-head"><h2>Needs attention</h2><button class="btn small" data-go="issues" type="button">View all issues</button></div><div id="overviewIssues"></div></div><div class="panel"><div class="panel-head"><h2>Recent activity</h2><button class="btn small" data-go="activity" type="button">View activity</button></div><div id="overviewActivity"></div></div></div></section>
+    <section id="view-customers" class="view" hidden aria-labelledby="customersTitle"><header class="page-head"><p class="eyebrow">Customer management</p><h1 id="customersTitle" tabindex="-1">Customers</h1><p>Find a business, review its connections and help it move forward.</p></header><div id="customerList"><form class="filters" id="customerFilters" role="search"><div class="field"><label for="customerSearch">Find a customer</label><input id="customerSearch" type="search" placeholder="Business, email or account" autocomplete="off"></div><div class="field"><label for="customerStatus">Service status</label><select id="customerStatus"><option value="all">All customers</option><option value="testing">In setup</option><option value="live">Live</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select></div></form><p id="customerCount" class="muted" role="status"></p><div id="customers"></div><p><button class="btn" id="loadMoreCustomers" type="button" hidden>Load more customers</button></p></div><div id="customerDetail" hidden></div></section>
+    <section id="view-issues" class="view" hidden aria-labelledby="issuesTitle"><header class="page-head"><p class="eyebrow">Keep customers moving</p><h1 id="issuesTitle" tabindex="-1">Issues</h1><p>Current checks and recorded issues, with the account context to investigate.</p></header><div class="panel" id="issues"></div></section>
+    <section id="view-activity" class="view" hidden aria-labelledby="activityTitle"><header class="page-head"><p class="eyebrow">What happened</p><h1 id="activityTitle" tabindex="-1">Activity</h1><p>Saved activity across loaded accounts. Refresh to check for updates.</p></header><div class="panel" id="activity"></div></section>
+    <section id="view-inquiries" class="view" hidden aria-labelledby="prospectsTitle"><header class="page-head"><p class="eyebrow">People getting started</p><h1 id="prospectsTitle" tabindex="-1">Inquiries</h1><p>Details saved before signup is complete. Email eligibility is shown separately.</p></header><div class="panel"><div class="actions"><button class="btn" type="button" id="refreshProspects">Refresh inquiries</button><button class="btn" type="button" id="exportMarketing">Export marketing list</button><button class="btn" type="button" id="exportProspects">Export all inquiries</button></div><p id="prospectsStatus" class="muted" role="status" style="margin-top:16px"></p><div id="prospects"></div></div></section>
+    <section id="view-system" class="view" hidden aria-labelledby="systemTitle"><header class="page-head"><p class="eyebrow">Platform status</p><h1 id="systemTitle" tabindex="-1">System</h1><p>Recorded scheduler results and connection availability.</p></header><div id="system"></div></section>
+  </main>
+</div>
+<dialog id="actionDialog" aria-labelledby="actionTitle"><form id="actionForm" class="action-form"><div><p class="eyebrow">Customer support</p><h2 id="actionTitle"></h2><p id="actionDescription" class="muted"></p></div><div id="rulesFields" hidden><div class="field"><label for="ruleServices">Services, one per line</label><textarea id="ruleServices" maxlength="12000" rows="5"></textarea></div><div class="field"><label for="ruleServiceArea">Service area, one place per line</label><textarea id="ruleServiceArea" maxlength="6000" rows="3"></textarea></div><div class="field"><label for="ruleNotServed">Areas not served, one per line</label><textarea id="ruleNotServed" maxlength="6000" rows="3"></textarea></div><div class="field"><label for="ruleSummary">Business instructions</label><textarea id="ruleSummary" maxlength="4000" rows="4"></textarea></div></div><div class="field" id="noteField" hidden><label for="actionNote">Internal note</label><textarea id="actionNote" maxlength="2000" rows="4"></textarea></div><div class="field"><label for="actionReason">Reason for this action</label><textarea id="actionReason" required maxlength="300" rows="3" placeholder="What are you resolving?"></textarea></div><p id="actionStatus" class="page-status" role="status" aria-live="polite"></p><div class="actions"><button class="btn primary" type="submit" id="actionSubmit">Confirm</button><button class="btn" type="button" id="actionCancel">Cancel</button></div></form></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<noscript><p style="padding:24px">Enable JavaScript to sign in to this private operations portal.</p></noscript>
+</body>
+</html>
