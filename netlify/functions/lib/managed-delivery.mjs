@@ -7,6 +7,7 @@ import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant, mayDeliverManagedSMS } from "./managed-consent.mjs";
 import { arrivalInstant } from "./service-time.mjs";
 import { reserveManagedSMS, assertManagedSMSReservation, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
+import { reserveManagedEmail, assertManagedEmailReservation, assertManagedEmailDispatchPolicy, ManagedEmailBudgetError } from './managed-email-budget.mjs';
 const hash = s => createHash("sha256").update(s).digest("hex");
 const stamp = () => new Date().toISOString();
 const STORE = "managed_deliveries";
@@ -56,7 +57,8 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   const current = await currentClient(c), saved = await strictRead(kind, `${c.slug}/${record.id}`);
   if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c) || !belongsToWorkspace(c, saved) || saved.websiteSetupCheck || saved.simulation) return;
   const rev = revision(saved), source = { kind, id: saved.id, revision: rev }, eventId = `${kind}:${saved.id}:${rev}`;
-  const body = `${current.business.name}: ${kind === "bookings" ? "Visit" : "Customer request"} ${saved.id}\n${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
+  const requestedVisit = kind === 'bookings' && saved.status === 'booked' && ['web','sms','call','voice'].includes(saved.channel);
+  const body = `${current.business.name}: ${kind === "bookings" ? requestedVisit ? "Visit request" : "Visit" : "Customer request"} ${saved.id}\n${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
   await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, source, preserveSnapshot: true });
   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
   const cancelled = saved.status === "cancelled";
@@ -66,7 +68,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
     const start = arrivalInstant(saved.date, saved.window);
     for (const [purpose, hours] of [["reminder_24h", 24], ["reminder_1h", 1]]) {
       const due = start - hours * 3600000;
-      if (due > Date.now()) await queueManagedMessage(current, { eventId: `${eventId}:${purpose}`, channel: "sms", purpose, to: saved.phone, body: `${current.business.name}: reminder of visit ${saved.id} on ${saved.date}, ${saved.window}. Reply here if anything changes. Reply STOP to end texts.`, source, dueAt: new Date(due).toISOString(), preserveSnapshot: true });
+      if (due > Date.now()) await queueManagedMessage(current, { eventId: `${eventId}:${purpose}`, channel: "sms", purpose, to: saved.phone, body: `${current.business.name}: reminder of ${requestedVisit ? "your requested visit" : "visit"} ${saved.id} on ${saved.date}, ${saved.window}.${requestedVisit ? " The shop confirms arrival details directly." : ""} Reply here if anything changes. Reply STOP to end texts.`, source, dueAt: new Date(due).toISOString(), preserveSnapshot: true });
     }
   }
 }
@@ -114,6 +116,8 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
     async send(job, c) {
       if (job.channel === "email") {
         if (!process.env.RESEND_API_KEY || !process.env.FROM_EMAIL) throw new Error("Email not configured");
+        await assertManagedEmailReservation(c, job, job.emailBudget);
+        assertManagedEmailDispatchPolicy(job.emailBudget);
         const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.purpose === "owner_booking" ? "Your front desk: visit update" : "Your front desk: customer request", text: job.body }) });
         if (!response.ok || typeof data.id !== "string") throw new Error("Email result unconfirmed");
         return { id: data.id, status: "accepted" };
@@ -180,7 +184,11 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     }
     if (Date.parse(job.dueAt) > Date.now()) return job;
     if (job.channel === "email" && job.to !== c.owner.email) return change(id, row => ({ ...row, state: "superseded", reasonCode: "owner_changed" }));
-    let smsBudget=null;
+    let smsBudget=null,emailBudget=null;
+    if (job.channel === 'email') {
+      try { emailBudget = await reserveManagedEmail(c, job); }
+      catch(error) { return change(id,row=>row.attemptStartedAt?null:{...row,state:'waiting_platform',reasonCode:error instanceof ManagedEmailBudgetError?error.code:'email_budget_storage_unavailable',detail:error instanceof ManagedEmailBudgetError?error.message:'Your request is saved. Owner notifications are waiting for their approved sending allowance.'}); }
+    }
     if (job.channel === "sms") {
       const binding=await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c));
       if (!binding) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: "sms_not_ready" }));
@@ -191,7 +199,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       catch(error) { return change(id,row=>row.attemptStartedAt?null:{...row,state:"waiting_platform",reasonCode:error instanceof ManagedSMSBudgetError?error.code:"sms_budget_storage_unavailable",detail:error instanceof ManagedSMSBudgetError?error.message:"Texting is waiting for its platform sending allowance to be confirmed. Your message remains saved."}); }
     }
     const token = randomBytes(16).toString("hex");
-    job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", detail:null, ...(smsBudget?{smsBudget}:{}), attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
+    job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", detail:null, ...(smsBudget?{smsBudget}:{}), ...(emailBudget?{emailBudget}:{}), attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (job.claim?.token !== token) return job;
     // Reread lifecycle, source and consent after acquiring the exclusive send claim.
     const latest = await strictRead("clients", c.slug);
@@ -204,6 +212,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     }
     try {
       if(job.channel==='sms')await assertManagedSMSReservation(latest,job,job.smsBudget);
+      if(job.channel==='email')await assertManagedEmailReservation(latest,job,job.emailBudget);
       if(job.purpose==='activation_probe'&&!await probeFor(latest,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
       const receipt = await provider.send(job, latest);
       if (!receipt?.id) throw new Error("Missing receipt");
@@ -213,7 +222,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     } catch(error) {
       // Budget assertions reject before transport. Keep their conservative
       // reservation, but allow a later approved policy to resume the saved job.
-      if(error instanceof ManagedSMSBudgetError)return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
+      if(error instanceof ManagedSMSBudgetError || error instanceof ManagedEmailBudgetError)return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
       return change(id, row => !row.providerId && !terminal(row.state) && row.claim?.token === token ? { ...row, state: "uncertain", claim: null, reasonCode: "provider_result_unconfirmed" } : null);
     }
   }

@@ -1,0 +1,101 @@
+{
+  "sourceBefore": {
+    "netlify/functions/lib/managed-actions.mjs": "6305fd04c5d2a1e3aceb3a0d0c0ea1d220dbe6ed974f2418821477f5523913dc",
+    "netlify/functions/lib/managed-delivery.mjs": "5c4a7ad96722f5378b2a4f668e413da812f3a4a3309d6e6cb4ffe9c3cdc90a9b",
+    "netlify/functions/lib/managed-consent.mjs": "f0655527fd4deb409647e979af9232dcc771445032594b08645df1389c4c40ba",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/client.mjs": "f9948749a77dfae049c393809309f780c07cf75b4d63dd5d07078ce70e879617"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/managed-actions.mjs": "6305fd04c5d2a1e3aceb3a0d0c0ea1d220dbe6ed974f2418821477f5523913dc",
+    "netlify/functions/lib/managed-delivery.mjs": "5c4a7ad96722f5378b2a4f668e413da812f3a4a3309d6e6cb4ffe9c3cdc90a9b",
+    "netlify/functions/lib/managed-consent.mjs": "f0655527fd4deb409647e979af9232dcc771445032594b08645df1389c4c40ba",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/client.mjs": "f9948749a77dfae049c393809309f780c07cf75b4d63dd5d07078ce70e879617"
+  },
+  "sourceStable": true,
+  "check": "managed-delivery-independent-negative-paths",
+  "at": "2026-10-23T20:46:40.995Z",
+  "passed": 15,
+  "failed": 3,
+  "checks": [
+    {
+      "name": "Repeated old START cannot reverse a newer STOP",
+      "ok": true
+    },
+    {
+      "name": "Changed source ownership suppresses send even when booking facts are identical",
+      "ok": true
+    },
+    {
+      "name": "Execution gate closed prevents provider status requests",
+      "ok": true
+    },
+    {
+      "name": "Late accepted status cannot downgrade a confirmed delivered receipt",
+      "ok": true
+    },
+    {
+      "name": "Unknown POST outcome never re-sends the same outbox intent",
+      "ok": false,
+      "failure": "Expected values to be strictly equal:\n\n0 !== 1\n"
+    },
+    {
+      "name": "Re-queueing identical semantic intent is stable across object key order",
+      "ok": true
+    },
+    {
+      "name": "A persistent uncertain job keeps worker health failing after the cursor advances",
+      "ok": true
+    },
+    {
+      "name": "Same managed booking action replay has one record and releases its capacity mutation",
+      "ok": true
+    },
+    {
+      "name": "Two independent managed actions cannot overbook one arrival slot",
+      "ok": true
+    },
+    {
+      "name": "A business rename does not permanently break recovery of an existing intent",
+      "ok": true
+    },
+    {
+      "name": "A new self-service request does not adopt an older unowned open lead",
+      "ok": true
+    },
+    {
+      "name": "Fractional-hour arrival windows schedule reminders at the actual minute",
+      "ok": true
+    },
+    {
+      "name": "An early verified delivery callback cannot be downgraded by its delayed POST response",
+      "ok": false,
+      "failure": "The delayed POST receipt overwrote an already verified delivery callback\n+ actual - expected\n\n+ 'waiting_platform'\n- 'delivered'\n"
+    },
+    {
+      "name": "A timed-out POST cannot erase an early callback's verified provider receipt",
+      "ok": false,
+      "failure": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'waiting_platform'\n- 'delivered'\n"
+    },
+    {
+      "name": "A signed YES arriving before a delayed consent-ask receipt keeps its exact proof",
+      "ok": true
+    },
+    {
+      "name": "STOP defeats a delayed ask receipt and unrelated inbound clears its pending ask",
+      "ok": true
+    },
+    {
+      "name": "A repeated ask-delivery callback cannot revive consent after an unrelated reply",
+      "ok": true
+    },
+    {
+      "name": "A first delayed ask receipt cannot recreate a prompt after unrelated conversation",
+      "ok": true
+    }
+  ],
+  "physicalExternalRequests": 0
+}

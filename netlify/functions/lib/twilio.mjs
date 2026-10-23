@@ -7,7 +7,7 @@ import { policyUrls } from "./config.mjs";
 const SID = process.env.TWILIO_ACCOUNT_SID;
 const TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const PRIMARY = process.env.TWILIO_PRIMARY_PROFILE_SID;
-const NOTIFY_EMAIL = process.env.TWILIO_NOTIFY_EMAIL || process.env.STEVE_EMAIL || "support@machinesandcloud.com";
+const NOTIFY_EMAIL = process.env.TWILIO_NOTIFY_EMAIL || process.env.STEVE_EMAIL || "ngoumnaisteve@gmail.com";
 const POLICY_SECONDARY = "RNdfbf3fae0e1107f8aded0e7cead80bf5";
 const POLICY_A2P = "RNb0d4771c2c98518d916a3d4cd70a8f8b";
 

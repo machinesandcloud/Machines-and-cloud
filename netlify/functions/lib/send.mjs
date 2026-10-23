@@ -8,7 +8,7 @@ const TW_SID = process.env.TWILIO_ACCOUNT_SID;
 const TW_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const RESEND = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || "Machines & Cloud <desk@machinesandcloud.com>";
-export const STEVE_EMAIL = process.env.STEVE_EMAIL || "support@machinesandcloud.com";
+export const STEVE_EMAIL = process.env.STEVE_EMAIL || "ngoumnaisteve@gmail.com";
 export const STEVE_PHONE = process.env.STEVE_PHONE || "";
 
 export const smsEnabled = () => Boolean(TW_SID && TW_TOKEN);

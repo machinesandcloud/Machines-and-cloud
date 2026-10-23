@@ -50,7 +50,7 @@ export const SALES_FACTS = Object.freeze({
     contact: 'This sales chat creates no lead or contact request and does not notify a human sales team. Declining contact creates no contact request here; it cannot guarantee nobody will contact the visitor by any other route.',
     limits: 'Do not promise that nothing was saved, stored, sent or shared, that nobody will contact the visitor, or that provider data was deleted. Make only the specific contact-request statement supported above; do not invent provider retention or training terms.',
   },
-  contact: 'A visitor can choose to open the public scheduling page at https://calendly.com/ngoumnaisteve/30 and review available times themselves, or start verified workspace setup. Opening that page does not reserve a call. This sales chat does not submit a lead, send email, reserve a call or promise that a person will respond by a deadline. The published support email currently has no verified working inbox; do not offer it as a working contact path.',
+  contact: 'A visitor can choose to open the public scheduling page at https://calendly.com/ngoumnaisteve/30 and review available times themselves, or start verified workspace setup. Opening that page does not reserve a call. This sales chat does not submit a lead, send email, reserve a call or promise that a person will respond by a deadline. The published support contact is ngoumnaisteve@gmail.com. Visitors can email that address themselves; this chat does not send an email or promise a response time.',
 });
 
 const FEATURES = Object.keys(SALES_FACTS.channels);

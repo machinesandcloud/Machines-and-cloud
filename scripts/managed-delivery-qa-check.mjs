@@ -13,7 +13,16 @@ const sourceBefore = fingerprints();
 const checks = [];
 async function check(name, test) { try { await test(); checks.push({ name, ok: true }); } catch (error) { checks.push({ name, ok: false, failure: String(error.message).slice(0,1200) }); } }
 const sid = digit => `SM${digit.repeat(32)}`;
-async function queue(c, eventId) { return delivery.queueManagedMessage(c, { eventId, channel: "email", purpose: "owner_booking", to: c.owner.email, body: "A saved visit" }); }
+const emailCohort = new Map(), emailHash = value => createHash('sha256').update(value).digest('hex');
+async function queue(c, eventId) {
+  // This suite exercises post-admission delivery races. Explicit synthetic
+  // mailbox/cohort authority keeps those assertions reachable after admission.
+  c.onboarding.verifiedEmail = c.owner.email; await f.store.saveClient(c);
+  emailCohort.set(c.slug, { slug:c.slug, identity:consent.deliveryTenant(c), emailHash:emailHash(c.owner.email) });
+  const policy={version:'qa_managed_email_v1',expiresAt:new Date(Date.now()+86400000).toISOString(),mode:'cohort',providerCredentialHash:emailHash(process.env.RESEND_API_KEY),senderHash:emailHash(process.env.FROM_EMAIL),accountLimit:100,tenantLimit:20,tenants:[...emailCohort.values()]};
+  process.env.MANAGED_EMAIL_BUDGET_POLICY_JSON=JSON.stringify(policy);process.env.MANAGED_EMAIL_BUDGET_APPROVED_VERSION=policy.version;
+  return delivery.queueManagedMessage(c, { eventId, channel: "email", purpose: "owner_booking", to: c.owner.email, body: "A saved visit" });
+}
 f.intercept(async call => {
   if (call.url === "https://api.resend.com/emails" && call.method === "POST") return f.json(200, { id: "dummy-qa-email" });
   if (call.url.startsWith("https://api.resend.com/emails/") && call.method === "GET") { const id=decodeURIComponent(call.url.split("/").at(-1)),jobs=await f.store.listJSON("managed_deliveries","",1000),job=jobs.find(row=>row.providerId===id); assert.ok(job,"Provider status fixture must match a real saved outbox job"); return f.json(200,{id,to:[job.to],last_event:"delivered"}); }

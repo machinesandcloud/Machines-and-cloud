@@ -1,0 +1,203 @@
+{
+  "reviewedOn": "2026-10-23",
+  "role": "Software Architect",
+  "source": {
+    "published": "47e3c64163d20166970b6d309fbf6045a9de33b2",
+    "reviewBase": "83aea654",
+    "checkout": "/tmp/mc-production-readiness-47e"
+  },
+  "decision": "Complete customer production service is not ready. Published mechanism, provider configuration, delivered outcome and sustainable operations remain separate.",
+  "noExternalEffects": true,
+  "configurationEvidence": "scratchpad/launch-closure-publication-20261023.json beforeEnvironment and afterEnvironment are the closed publication snapshot, not a fresh live configuration read.",
+  "blockingFacts": [
+    {
+      "id": "service-mail",
+      "observed": "SERVICE_DELIVERY_ENABLED absent in publication snapshot. Managed new-tenant owner mail is queued but cannot dispatch. Source had only a global delivery gate, which could release other retained owner messages during a supposedly one-tenant proof.",
+      "source": [
+        "netlify/functions/lib/managed-delivery.mjs:15",
+        "netlify/functions/lib/managed-delivery.mjs:175"
+      ],
+      "repair": "Existing managed outbox now has exact verified tenant/mailbox admission and a durable cumulative owner-email send reservation. Independent QA pending. Legacy send.mjs and verification links unchanged.",
+      "driver": "Architect implements; independent QA accepts; Root coordinates publication/configuration scope."
+    },
+    {
+      "id": "calendar",
+      "observed": "Connection/delivery flags true, but prior execution policy expired and CALENDAR_SELF_SERVICE_ENABLED absent. An ordinary new customer is not admitted to sync. Branding verified does not equal sensitive-scope authorization or actual event delivery.",
+      "source": [
+        "netlify/functions/lib/calendar-execution.mjs:29",
+        "netlify/functions/lib/calendar-self-service.mjs:23",
+        "netlify/functions/lib/calendar-connection.mjs:22"
+      ],
+      "next": "Fresh owned consent and exact same-event create/move/cancel with ordinary scheduled recovery under a new explicit tenant policy; then approved general service policy/capacity for onboarding."
+    },
+    {
+      "id": "calendar-busy",
+      "observed": "Availability checks only owner-entered blocks and retained front-desk reservations. Existing unrelated Google events are not imported or checked for conflicts.",
+      "source": [
+        "netlify/functions/lib/availability.mjs:65",
+        "netlify/functions/lib/desk.mjs:242"
+      ],
+      "decision": "Outbound front-desk visit sync is the implemented scope. Existing-calendar double-booking protection is a separate missing functional product, not something a successful write test establishes. PO must align the offer and finish required conflict behavior."
+    },
+    {
+      "id": "phone",
+      "observed": "PHONE_ACQUISITION_ENABLED false and VOICE_ACTIVATION_ENABLED absent. Valid phone/voice offers, resource budget and real routing/fallback/first call have no current accepted production outcome.",
+      "source": [
+        "netlify/functions/lib/phone-activation.mjs:331",
+        "netlify/functions/lib/voice-activation.mjs:25"
+      ],
+      "next": "Current bounded exact-tenant resource/voice policy, customer routing/cost permission, provider capacity and owned fallback proof before one actual dedicated shop call."
+    },
+    {
+      "id": "sms",
+      "observed": "MESSAGING_ACTIVATION_ENABLED absent. Per-shop registration/program/sender approval and two-way/consent/reminder/STOP/HELP receipts remain unaccepted. Company campaign FAILED is not a substitute for dedicated shop registration.",
+      "source": [
+        "netlify/functions/lib/messaging-activation.mjs:61",
+        "netlify/functions/lib/messaging-provider.mjs:8"
+      ],
+      "eligibility": "Current registration adapter supports US LLC/corporation/partnership with EIN. It rejects sole proprietor, territories and special registrations; customer eligibility must be clear before paid acceptance, and PO must choose whether broader target support blocks launch."
+    },
+    {
+      "id": "billing",
+      "observed": "Published production snapshot has no Stripe runtime key, approved offer or distinct M&C webhook signing secret. Billing/live/portal gates absent. Key was saved locally only. Prior TEST proof did not complete payment/subscription.",
+      "source": [
+        "netlify/functions/lib/workspace-billing.mjs:26",
+        "netlify/functions/lib/workspace-billing.mjs:35"
+      ],
+      "next": "Approved selected-service limits/terms plus actual TEST lifecycle and dedicated provider webhook/signature proof before live paid acceptance. Preserve shared merchant Zari identity and unrelated existing routes."
+    },
+    {
+      "id": "ai-capacity",
+      "observed": "Default budget shares 50 accepted logical AI turns/day across every new tenant;20 private and50 public per tenant are additional ceilings, not subscription entitlements. Failed/ambiguous starts consume them.",
+      "source": [
+        "netlify/functions/lib/self-service-ai.mjs:8"
+      ],
+      "next": "Measure actual customer/Spanish behavior, chosen cohort load and unit cost; approve and enforce commercial allowance/capacity before paid launch."
+    },
+    {
+      "id": "operations",
+      "observed": "Fresh18-GET public review records health200/ok at20:39:58Z with lastRunAt20:30:20Z, after publication20:28:55Z. This accepts basic post-release scheduler liveness only. Actual delivered-service/incident/support receipt, backup operator, restore/custody and funded hosting continuity remain unaccepted.",
+      "next": "OM proves ordinary scheduled operation, one actual incident/support receipt and recovery without duplicate provider work; preserve disabled auto recharge.",
+      "evidence": "scratchpad/readiness-public-review.json /api/health; captured api/health"
+    }
+  ],
+  "directRepair": {
+    "files": [
+      "netlify/functions/lib/managed-email-budget.mjs",
+      "netlify/functions/lib/managed-delivery.mjs",
+      "scripts/managed-email-budget-check.mjs"
+    ],
+    "stage": "Implemented locally; author14/14 and independent emailadmission8/8 accepted. Final reminder-only string delta independently reviewed via same-source bridge/full journey before final acceptance. No publication or production configuration change.",
+    "configuration": {
+      "policy": "MANAGED_EMAIL_BUDGET_POLICY_JSON",
+      "approval": "MANAGED_EMAIL_BUDGET_APPROVED_VERSION",
+      "shape": [
+        "version",
+        "expiresAt",
+        "mode",
+        "providerCredentialHash",
+        "senderHash",
+        "accountLimit",
+        "tenantLimit",
+        "tenants"
+      ],
+      "cohortRow": [
+        "slug",
+        "identity",
+        "emailHash"
+      ]
+    },
+    "invariants": [
+      "Only supported self-service owner_lead/owner_booking email uses the new admission. Access/sign-in and legacy send algorithms remain unchanged by this repair; Root separately corrected fallback support-contact strings in send.mjs/twilio.mjs.",
+      "Verified onboarding mailbox, normalized owner and exact tenant identity must match; cohort has email hash as well as identity.",
+      "Stable cumulative managed_email_budgets/resend:managed-owner:v1 ledger never resets on policy version or expiry renewal; malformed or changed provider/sender custody fails closed.",
+      "One immutable job reserves before an exclusive send claim; same-job replay consumes no second slot. Unknown provider result never resends.",
+      "Recheck authority/policy before adapter and immediately before actual Resend POST. Existing known provider receipts can reconcile after new-send policy closes.",
+      "Reservation counts managed owner-email sends only; not all Resend traffic, mailbox delivery, account spend or provider status reads. Capacity1000 is a bounded implementation cap, not production scale proof."
+    ],
+    "authorReceipt": "scratchpad/readiness-email-author-final.json",
+    "physicalExternalRequests": 0,
+    "regressionDisposition": {
+      "preserved": "scratchpad/readiness-managed-delivery-qa-check-first.log",
+      "originalResult": "15/18;3 post-admission send-race cases stopped safely at waiting_platform because their synthetic fixtures lacked new explicit mailbox/cohort authority.",
+      "fixtureChange": "Only scripts/managed-delivery-qa-check.mjs queue helper supplies verified synthetic owner and explicit exact dummy email policy. Assertions unchanged; no runtime bypass.",
+      "replacement": "scratchpad/readiness-managed-delivery-qa-check-repaired.log",
+      "replacementResult": "18/18;sourceStabletrue;physical0",
+      "otherAffectedChecks": {
+        "serviceOnboarding": "33/33; scratchpad/readiness-service-onboarding-check-first.log",
+        "independentServiceOnboarding": "41/41; scratchpad/readiness-service-onboarding-qa-check-first.log",
+        "selfServiceScheduler": "55checks;newTenantExternalRequests0;legacyIntercepted9;realNetwork0; scratchpad/readiness-self-service-scheduler-check-first.log"
+      },
+      "additionalPreservedFailures": {
+        "managedSMS": "scratchpad/readiness-managed-sms-qa-check-first.log;24/25;one phone-only owner-email delivery fixture had no verified mailbox/cohort policy.",
+        "deliveryWaves": "scratchpad/readiness-service-delivery-wave-qa-check-first.log;6/10;four intended post-admission delivery/receipt cases stopped at waiting_platform."
+      },
+      "additionalExplicitFixtureRepairs": {
+        "managedSMS": "Only phone-only case receives verified synthetic mailbox +2send exact cohort; assertions unchanged. Final25/25 at scratchpad/readiness-managed-sms-qa-check-final.log.",
+        "deliveryWaves": "Only queue helper receives verified synthetic mailbox+current synthetic cohort; assertions unchanged. Final10/10 at scratchpad/readiness-service-delivery-wave-qa-check-final.log."
+      },
+      "finalManagedDelivery": "scratchpad/readiness-managed-delivery-qa-check-final.log;18/18, physical0, source stable"
+    },
+    "independentReceipt": "scratchpad/readiness-email-independent-final.json",
+    "reminderScope": {
+      "changed": "Only new owner-email headings/reminder bodies for statusbooked with customer-origin web/sms/call/voice distinguish a visit request and say shop confirms arrival details.",
+      "preserved": "Confirmed/on_the_way/owner-origin wording, statuses, capacity, existing retained immutable payloads and provider permission gates.",
+      "tests": "Author14thstate groups cover7newstate/channel combinations and exact retained snapshot preservation; local synthetic records only."
+    },
+    "buildGate": "netlify.toml adds node scripts/managed-email-budget-check.mjs after existing SMS budget check; no build/deploy run by Architect.",
+    "originalAuthorReceipt": "scratchpad/readiness-email-author-first.json"
+  },
+  "smallestNextActualOutcome": {
+    "state": "Prepared scope only; previous publication/provider/email/model allowances are closed. Existing request guard needs selective current-source adaptation and offline rehearsal before execution.",
+    "reuse": [
+      "scripts/launch-journey-qa-check.mjs for actual-handler offline rehearsal; never point this memory/double runner at production.",
+      "Historical scripts/hosted-onboarding-guard.mjs and -check.mjs exist tracked in main only. Selectively review/copy verification infrastructure; do not import private main runtime or reuse old approval/checkpoint.",
+      "scratchpad/core-calendar-live-controller.mjs for the later separately scoped owned-Calendar lifecycle, after updating exact source/static routes/fixture and supplying guarded browser adapters."
+    ],
+    "recipientProposal": {
+      "owner": "ngoumnaisteve+mc-launch-47e-20261023@gmail.com",
+      "operator": "ngoumnaisteve@gmail.com",
+      "callbackDataOnly": "+17135550142",
+      "fixture": "M&C Internal Production Acceptance 2026-10-23"
+    },
+    "target": {
+      "platformOrigin": "https://machinesandcloud.com",
+      "siteId": "f87916f1-bcc4-4171-a96f-2900cbf0b6dc",
+      "tenant": "One new server-generated slug bound to the exact verified alias; stop on collision.",
+      "installedWebsite": "An exact owner-authorized external HTTPS website origin is still required. Do not silently install on another project or register a domain/build. machinesandcloud.com and its canonical Netlify origin are deliberately ineligible as external installation proof."
+    },
+    "sequence": [
+      "Read exact published revision/gates and privately census retained managed email work; source/gate mismatch stops.",
+      "Request one operator and up to three alias verification emails. Read only phase-generated messages, exchange once through ordinary automatic customer sign-in, verify initial identity absent before collecting new draft.",
+      "Use normal early inquiry, continue through onboarding with synthetic business facts, marketing unchecked; verify errors, saved canonical values, reload, sign-out and fresh returning access. One workspace, no duplicate.",
+      "Install embed only on exact authorized external origin, using a reviewed change with precise rollback; review/test the real saved rules before web activation.",
+      "Run one private live-AI conversation and one installed visitor conversation under separately metered inference cap. Complete one retained callback request or visit; match exact owner receipt and no invented confirmed appointment.",
+      "Observe ordinary scheduled owner mail using exact tenant/email hash cohort and cumulative maximum2 managed owner-email send slots; reconcile same provider IDs, then operate the same retained request through follow-through and admin inspection.",
+      "Pause/close test workspace through ordinary UI, remove only installed test snippet, revoke only newly created sessions, retain records/receipts and close the phase. Any unknown effect stops replacement attempts."
+    ],
+    "proposedCaps": {
+      "verificationEmails": 4,
+      "managedOwnerEmailNewSends": 2,
+      "newWorkspaces": 1,
+      "intakes": 1,
+      "logicalAITurns": 12,
+      "directAnthropicRequestsIncludingTools": 30,
+      "modelOutputTokensPerRequest": 3072,
+      "sitePhysicalRequestsIncludingRedirectsAndAssets": 200,
+      "siteMutationAttemptsIncluded": 45,
+      "metadataReads": 4,
+      "externalWebsiteModification": "One explicitly reviewed installation and one exact rollback only; exact host/provider action budget unresolved until target is known.",
+      "providerActivation": "No phone/SMS/Calendar/Stripe activation in this first proof.",
+      "paymentVoiceSMSCalendarPurchases": 0,
+      "deployments": "No implicit build. Any repaired-source publication and production policy environment writes must be concretely scoped after independent acceptance."
+    },
+    "unresolvedPrerequisites": [
+      "Independent email admission acceptance and current exact build/source required.",
+      "External website ownership, exact origin, installation authority and rollback method not yet established.",
+      "Current request/model/backend effect guards must be rehearsed; merely browser-side request counting does not cap backend tool-loop/provider attempts.",
+      "Finite owner-mail send cap does not cap automatic receipt-status reads; observe/control their permitted proof window separately.",
+      "Need fresh explicit effects scope for verification mail/inference/installed-site mutation/policy configuration; no closed allowance reuse."
+    ],
+    "acceptance": "Actual received owner link automatically reaches their saved workspace; correct data survives reload/return; installed real AI produces exactly one ordinary retained request; exact owner receipt arrives; owner/admin can act and recover; QA and PO independently observe desktop/mobile. This accepts only the demonstrated slice, not all services or general launch."
+  }
+}

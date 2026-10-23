@@ -456,7 +456,7 @@
         .catch(() => {
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;
-          setStatus('Something went wrong sending this. Email support@machinesandcloud.com and we will reply within one business day.', true);
+          setStatus('We couldn’t confirm your message was sent. Your answers are still here. Please try again, or email ngoumnaisteve@gmail.com for help.', true);
         });
     });
 

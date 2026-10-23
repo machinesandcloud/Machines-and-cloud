@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-23T20:43:55.848Z",
+  "checks": [
+    {
+      "name": "Missing approval defers managed mail before claiming or sending",
+      "pass": true
+    },
+    {
+      "name": "Exact cohort admits one verified owner and retains another tenant unsent",
+      "pass": true
+    },
+    {
+      "name": "Unverified mailbox, stale identity and altered recipient are rejected",
+      "pass": true
+    },
+    {
+      "name": "Same-job replay is one reservation; immutable body cannot reuse it",
+      "pass": true
+    },
+    {
+      "name": "Concurrent distinct jobs cannot exceed account or tenant allowance",
+      "pass": true
+    },
+    {
+      "name": "New policy version and expiry renewal do not replenish spent capacity",
+      "pass": true
+    },
+    {
+      "name": "Expired policies, sender or credential changes cannot authorize dispatch",
+      "pass": true
+    },
+    {
+      "name": "Corrupt cumulative totals cannot become a fresh allowance",
+      "pass": true
+    },
+    {
+      "name": "Lost provider response consumes one reservation and never re-sends",
+      "pass": true
+    },
+    {
+      "name": "Existing provider receipt reconciles after new-send policy closes",
+      "pass": true
+    },
+    {
+      "name": "Ordinary worker transport reserves exact target before intercepted Resend POST",
+      "pass": true
+    },
+    {
+      "name": "Legacy/access email path remains outside managed owner admission",
+      "pass": true
+    }
+  ],
+  "physicalExternalRequests": 0,
+  "sourceBefore": {
+    "netlify/functions/lib/managed-email-budget.mjs": "4b2f4b4bef2f38aa7a43e882c3a99fcf5c6b9875906f8fbf996b1cfe0c4202b0",
+    "netlify/functions/lib/managed-delivery.mjs": "5c4a7ad96722f5378b2a4f668e413da812f3a4a3309d6e6cb4ffe9c3cdc90a9b",
+    "scripts/managed-email-budget-check.mjs": "9af343a708931630f09f1a053a071cd1ce919a903cc96c6e3fe5b4bd277fea70"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/managed-email-budget.mjs": "4b2f4b4bef2f38aa7a43e882c3a99fcf5c6b9875906f8fbf996b1cfe0c4202b0",
+    "netlify/functions/lib/managed-delivery.mjs": "5c4a7ad96722f5378b2a4f668e413da812f3a4a3309d6e6cb4ffe9c3cdc90a9b",
+    "scripts/managed-email-budget-check.mjs": "9af343a708931630f09f1a053a071cd1ce919a903cc96c6e3fe5b4bd277fea70"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 12,
+    "failed": 0
+  }
+}
