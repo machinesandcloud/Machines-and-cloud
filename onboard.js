@@ -18,11 +18,28 @@
   // Emergency tiers prefilled by trade (same table as the server); the owner can edit every line.
   var T0 = 'Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space';
   var T1 = { hvac: 'No cooling when the forecast high is 90°F or more\nNo cooling with an infant, elderly, or medically dependent person in the home\nNo heat when it is at or below freezing outside\nWater pouring from the air handler', plumbing: 'Uncontrolled water (a burst pipe, a leak that will not stop)\nNo water in the house\nSewage backup\nLeaking water heater\nNo hot water with an infant, elderly, or medically dependent person in the home', electrical: "Loss of power from the home's own system, not a utility outage\nA hot outlet, switch, or breaker\nPartial power or flickering across the house\nExposed or damaged wiring", roofing: 'Active leak during rain\nStorm or tree damage with the interior exposed\nTarping after hail or wind', cleaning: '', other: '' };
-  function tradeKey(t) { t = (t || '').toLowerCase(); return /hvac|air|cool|heat|a\/c|ac\b/.test(t) ? 'hvac' : /plumb|drain|water heater|sewer/.test(t) ? 'plumbing' : /electr/.test(t) ? 'electrical' : /roof/.test(t) ? 'roofing' : /clean|maid|janitor/.test(t) ? 'cleaning' : 'other'; }
+  function tradeKey(t) { t = (t || '').toLowerCase(); return /\b(?:hvac|air|cool(?:ing)?|heat(?:ing)?|a\/c|ac)\b/.test(t) ? 'hvac' : /plumb|drain|water heater|sewer/.test(t) ? 'plumbing' : /electr/.test(t) ? 'electrical' : /roof/.test(t) ? 'roofing' : /clean|maid|janitor/.test(t) ? 'cleaning' : 'other'; }
   var t0 = form.elements['tier0'], t1 = form.elements['tier1'], touched = { t0: false, t1: false };
   t0.addEventListener('input', function () { touched.t0 = true; }); t1.addEventListener('input', function () { touched.t1 = true; });
-  function fillTiers() { if (!touched.t0) t0.value = T0; if (!touched.t1) t1.value = T1[tradeKey(form.elements['trade'].value)] || ''; }
-  form.elements['trade'].addEventListener('change', fillTiers); form.elements['trade'].addEventListener('blur', fillTiers); fillTiers();
+  var tradeSelect = form.elements.trade, customTrade = form.elements.customTrade, customTradeGroup = document.getElementById('custom-trade-group');
+  function effectiveTrade() { return tradeSelect.value === 'other' ? customTrade.value.trim() : tradeSelect.value; }
+  function fillTiers() { if (!touched.t0) t0.value = T0; if (!touched.t1) t1.value = T1[tradeKey(effectiveTrade())] || ''; }
+  function updateTrade(focusCustom) {
+    var other = tradeSelect.value === 'other';
+    customTradeGroup.hidden = !other; customTrade.disabled = !other; customTrade.required = other;
+    if (!other) { setFieldError(customTrade, ''); if (!steps[i].querySelector('[aria-invalid="true"]')) setErrorSummary(''); }
+    fillTiers();
+    if (other && focusCustom) customTrade.focus();
+  }
+  function restoreTrade(value) {
+    value = typeof value === 'string' ? value : '';
+    var preset = Array.from(tradeSelect.options).some(function (option) { return option.value && option.value !== 'other' && option.value === value; });
+    tradeSelect.value = preset ? value : value ? 'other' : '';
+    customTrade.value = preset ? '' : value;
+    updateTrade(false);
+  }
+  tradeSelect.addEventListener('change', function () { updateTrade(true); });
+  customTrade.addEventListener('input', fillTiers); customTrade.addEventListener('blur', fillTiers); updateTrade(false);
   // Structured hours: seven rows, prefilled from the hours sentence (same parser as the server, simplified).
   var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], DI = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   function clock(str, isClose) { var m = String(str).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/i); if (!m) return null; var h = +m[1], mi = +(m[2] || 0), ap = (m[3] || '').toLowerCase(); if (ap.charAt(0) === 'p' && h < 12) h += 12; else if (ap.charAt(0) === 'a' && h === 12) h = 0; else if (!ap) { if (isClose && h <= 9) h += 12; else if (!isClose && h < 5) h += 12; } return (h < 10 ? '0' : '') + h + ':' + (mi < 10 ? '0' : '') + mi; }
@@ -103,6 +120,19 @@
     back.style.visibility = i ? 'visible' : 'hidden'; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; setErrorSummary('');
     if (frame) { window.scrollTo({ top: 0, behavior: 'instant' }); steps[i].querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
   }
+  var connectionDescriptions = {
+    web: {label:'Website chat',summary:'Add the front desk to your website',automation:'Prepare your front desk from your answers and keep incoming requests in your workspace.',owner:'Add one snippet to your website, then follow the guided check.',ready:'Your website check succeeds and customer chat is active.'},
+    voice: {label:'Phone answering',summary:'Use your existing number or a new front desk line',automation:'After approval, prepare your number, answering assistant and fallback routing.',owner:'Review the usage terms once. Forward your existing line if selected, then place a test call.',ready:'Your current business rules and a successful call confirm the route.'},
+    sms: {label:'Text messaging',summary:'Text from your dedicated front desk number',automation:'Prepare your shop’s sender registration and track the carrier review.',owner:'Confirm legal details and customer opt-in, approve the costs, then reply to the setup test.',ready:'Carriers approve the registration and the test reply confirms delivery.'},
+    calendar: {label:'Google Calendar',summary:'Authorize the calendar for saved visits',automation:'Connect saved visits to the Google calendar you authorize.',owner:'Choose your Google account and approve calendar access.',ready:'Google permission is saved and visit sync is confirmed.',note:'Other Google events do not block time in your workspace automatically.'}
+  };
+  function updateConnectionPreview(changed) {
+    var plan=document.getElementById('selected-connection-plan'),selected=Array.from(form.querySelectorAll('input[name="desiredChannels"]:checked')).map(function(field){return field.value;}),open=plan.querySelector('details[open]')?.dataset.channel;
+    document.getElementById('connection-preview-count').textContent=selected.length+' connection'+(selected.length===1?'':'s')+' selected';
+    if(changed?.checked)open=changed.value;
+    if(!selected.includes(open))open=selected[0];
+    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id];return '<details class="connection-preview-card" data-channel="'+id+'"'+(id===open?' open':'')+'><summary><strong>'+row.label+'</strong><span>'+row.summary+'</span></summary><dl><div><dt>We handle</dt><dd>'+row.automation+'</dd></div><div><dt>Your one-time part</dt><dd>'+row.owner+'</dd></div><div><dt>Ready when</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose a connection above to see its setup path.</p>';
+  }
   function updatePhoneSetup() {
     var section = document.getElementById('phone-routing-settings'), existing = document.getElementById('existing-phone-fields'), mode = form.elements.phoneSetupMode;
     if (!section || !existing || !mode) return;
@@ -116,14 +146,15 @@
       if (field.disabled) setFieldError(field, '');
     });
   }
-  form.addEventListener('change', updatePhoneSetup);
-  updatePhoneSetup();
+  form.addEventListener('change', function(event){updatePhoneSetup();if(event.target.name==='desiredChannels')updateConnectionPreview(event.target);});
+  updatePhoneSetup(); updateConnectionPreview();
   function collect() {
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     var fields = {}; new FormData(form).forEach(function (value, key) {
       if (key === 'botfield' || key === 'email') return;
       if (key === 'leadSources' || key === 'desiredChannels') (fields[key] = fields[key] || []).push(value); else fields[key] = value;
     });
+    fields.trade = effectiveTrade(); delete fields.customTrade;
     if (!fields.leadSources) fields.leadSources = [];
     if (!fields.desiredChannels) fields.desiredChannels = [];
     return fields;
@@ -158,7 +189,7 @@
   function restore(fields) {
     restoring = true; hoursTouched = false;
     Object.keys(fields || {}).forEach(function (name) {
-      if (name === 'plan') return; // A retired preference must not clear both current choices.
+      if (name === 'plan' || name === 'trade') return; // Restore plan and trade choices with their dedicated controls.
       form.querySelectorAll('[name]').forEach(function (field) {
         if (field.name !== name) return;
         if (field.type === 'radio') field.checked = field.value === fields[name];
@@ -169,10 +200,10 @@
     var savedPlan = fields.plan;
     selectPlan(PLAN_IDS.indexOf(savedPlan) >= 0 || savedPlan === 'pro' ? savedPlan : retiredPlanHint ? 'pro' : form.elements.plan.value);
     if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = true; hoursRows.querySelectorAll('input').forEach(function (field) { field.value = hours[field.dataset.d]?.[field.dataset.k] || ''; }); } catch (error) { fillHours(); } } else fillHours();
-    touched.t0 = !!fields.tier0; touched.t1 = !!fields.tier1; fillTiers(); fwdUI();
+    touched.t0 = !!fields.tier0; touched.t1 = !!fields.tier1; restoreTrade(fields.trade); fillTiers(); fwdUI();
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
     restoring = false; dirty = false;
-    updatePhoneSetup();
+    updatePhoneSetup(); updateConnectionPreview();
   }
   function workspace(portal, text) {
     document.body.dataset.setupState = 'ready';
@@ -182,7 +213,7 @@
     document.getElementById('buildStatus').textContent = text || 'Your business details are saved. Review them, try a private customer conversation, then finish your selected connections.';
     document.getElementById('portalLink').textContent = 'Open your private workspace'; document.getElementById('portalLink').href = portal; document.getElementById('goPortal').href = portal;
     document.getElementById('goPortal').textContent = text ? 'Open my workspace' : 'Review my front desk';
-    if (!text) document.getElementById('goPortal').href = portal + '#know';
+    if (!text) { var connectionPortal=portal.split('#')[0]+'#setup';document.getElementById('goPortal').href=connectionPortal;document.getElementById('goPortal').textContent='Continue my connections';document.getElementById('buildStatus').textContent='Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.';document.getElementById('portalLink').href=portal.split('#')[0]+'#today';document.getElementById('portalLink').textContent='Open workspace overview'; }
   }
   async function signedIn() {
     var generation = accessGeneration;
@@ -238,7 +269,7 @@
     try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
     if (generation !== accessGeneration) return;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); form.reset(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); form.reset(); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
   function setErrorSummary(message) {
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
@@ -247,8 +278,9 @@
     if (field.disabled) return '';
     var value = field.value.trim();
     if (field.required && !value) {
-      return { name: 'Enter your name.', email: 'Confirm your email to continue.', phone: 'Enter your contact cell, including the area code.', business: 'Enter your business name.', businessNumber: 'Enter the business number your customers call.', trade: 'Choose your trade.', services: 'Add at least one service your business offers.', serviceArea: 'Add a town, neighborhood or ZIP code you serve.', hours: 'Add your business hours, or enter them under Review each day.', windows: 'Add at least one arrival window you offer.' }[field.name] || 'Fill in this field.';
+      return { name: 'Enter your name.', email: 'Confirm your email to continue.', phone: 'Enter your contact cell, including the area code.', business: 'Enter your business name.', businessNumber: 'Enter the business number your customers call.', trade: 'Choose your trade.', customTrade: 'Enter your trade.', services: 'Add at least one service your business offers.', serviceArea: 'Add a town, neighborhood or ZIP code you serve.', hours: 'Add your business hours, or enter them under Review each day.', windows: 'Add at least one arrival window you offer.' }[field.name] || 'Fill in this field.';
     }
+    if (field.name === 'customTrade' && value.length > 80) return 'Use 80 characters or fewer for your trade.';
     if (value && field.name === 'phone' && !validCallbackNumber(value)) return 'Enter a valid US cell number, including the area code, such as (713) 555-0100.';
     if (value && field.name === 'businessNumber' && !validCallbackNumber(value)) return 'Enter a valid US business number, including the area code.';
     if (value && field.name === 'businessNumber' && field.required && value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '') === form.elements.phone.value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '')) return 'Use a separate contact cell above so calls can reach you without looping back to the front desk. You can also choose a new front desk number.';
@@ -310,6 +342,7 @@
   function revealFieldError(path, message) {
     var names = { 'owner.name': 'name', 'owner.email': 'email', 'owner.phone': 'phone', 'business.name': 'business', 'business.website': 'website', 'phone.businessNumber': 'businessNumber' };
     var name = names[path] || String(path).split('.').pop(), field = form.elements[name];
+    if (name === 'trade' && tradeSelect.value === 'other') field = customTrade;
     if (!field || field.nodeType !== 1) return false;
     var step = steps.indexOf(field.closest('fieldset'));
     if (step >= 0) show(step, false);
@@ -350,7 +383,7 @@
   });
   function showVerification(token) {
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
-    saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
+    saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); updateTrade(false); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
     updatePhoneSetup();
     setSession(null); gateOnly('Confirm to continue securely. This link works once and expires after 20 minutes.');
     accessForm.hidden = true; verifyButton.hidden = false; document.getElementById('access-title').textContent = 'Continue to your workspace';

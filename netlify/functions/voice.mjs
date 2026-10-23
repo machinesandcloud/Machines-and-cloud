@@ -40,7 +40,7 @@ export default async (req) => {
   if (!c) {
     // A customer calling back the shared texting number: ring the shop that texted them.
     const mc = e164(process.env.MC_TWILIO_NUMBER || "");
-    if (mc && to === mc && from) { const { get, getClient } = await import("./lib/store.mjs"); const slug = await get("index", "bridge:" + from); const shop = slug ? await getClient(slug) : null; if (shop) { await logEvent(shop.slug, "bridge_callback", { from }); return xml(fallbackTwiml(shop)); } }
+    if (mc && to === mc && from) { const { get, getClient } = await import("./lib/store.mjs"); const slug = await get("index", "bridge:" + from); const shop = slug ? await getClient(slug) : null; if (shop) { await logEvent(shop, "bridge_callback", { from }); return xml(fallbackTwiml(shop)); } }
     return xml(`<Say>Sorry, this number is not in service.</Say><Hangup/>`);
   }
   const name = c.business?.name || "the office";
@@ -49,7 +49,7 @@ export default async (req) => {
   if (path.endsWith("/recorded")) {
     const link = String(params.RecordingUrl || "");
     await notifyOwner(c, `VIP voicemail from ${from || "unknown"}: ${link ? link + ".mp3" : "(no recording)"}${params.RecordingDuration ? ` (${params.RecordingDuration} s)` : ""}`, { type: "owner_note" });
-    await logEvent(c.slug, "vip_voicemail", { from, url: link, sid: params.RecordingSid || "", seconds: Number(params.RecordingDuration) || null });
+    await logEvent(c, "vip_voicemail", { from, url: link, sid: params.RecordingSid || "", seconds: Number(params.RecordingDuration) || null });
     return xml(`<Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`);
   }
 
@@ -59,12 +59,12 @@ export default async (req) => {
     const direct = !cellIsForwardedLine(c) && c.owner?.phone;
     const intro = direct ? `${owner} could not pick up.` : `This is ${esc(name)}.`;
     const record = `<Say voice="Polly.Joanna">${intro} Please leave a message after the tone and ${owner} will call you back.</Say><Record maxLength="120" playBeep="true" action="${esc(sigUrl.replace(/\/api\/voice.*$/, "/api/voice/recorded"))}" method="POST"/><Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`;
-    await logEvent(c.slug, "vip_call", { from, rang: direct ? "cell" : "voicemail" });
+    await logEvent(c, "vip_call", { from, rang: direct ? "cell" : "voicemail" });
     return xml(direct ? `<Dial timeout="25">${esc(c.owner.phone)}</Dial>${record}` : record);
   }
 
   if (!ACTIVE.includes(c.status)) {
-    await logEvent(c.slug, "call_while_paused", { from, status: c.status });
+    await logEvent(c, "call_while_paused", { from, status: c.status });
     return xml(fallbackTwiml(c));
   }
 
@@ -77,7 +77,7 @@ export default async (req) => {
   if (c.phone?.voiceForwardTo) {
     const dest = c.phone.voiceForwardTo;
     const inner = dest.startsWith("sip:") ? `<Dial timeout="25"><Sip>${esc(dest)}</Sip></Dial>` : `<Dial timeout="25">${esc(dest)}</Dial>`;
-    await logEvent(c.slug, "call_forwarded", { from }); await noteInbound(c.slug, "call");
+    await logEvent(c, "call_forwarded", { from }); await noteInbound(c, "call");
     return xml(inner);
   }
 
@@ -87,10 +87,10 @@ export default async (req) => {
     : `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say>`;
   let textBack = "not attempted";
   if (c.phone?.textBack !== false && from) {
-    const conv = await getConversation(c.slug, "sms", from);
+    const conv = await getConversation(c, "sms", from);
     const recent = [...conv.messages].reverse().find((m) => m.system === "missed-call text-back");
-    if (await optedOut(from)) { textBack = "skipped"; await logEvent(c.slug, "text_back_skipped", { from, reason: "opted_out" }); }
-    else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; await logEvent(c.slug, "text_back_skipped", { from, reason: "recent" }); }
+    if (await optedOut(from)) { textBack = "skipped"; await logEvent(c, "text_back_skipped", { from, reason: "opted_out" }); }
+    else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; await logEvent(c, "text_back_skipped", { from, reason: "recent" }); }
     else {
       const text = c.business?.spanish
         ? `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda ${name}. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.`
@@ -104,6 +104,6 @@ export default async (req) => {
     }
   }
   await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${textBack === "sent" || textBack === "logged" ? "Text-back sent; I will take it from here and text you the lead." : textBack === "skipped" ? "They were texted recently or opted out, so no text-back." : "No texting sender yet, so no text-back."}`, { type: "owner_note" });
-  await logEvent(c.slug, "missed_call", { from, textBack }); await noteInbound(c.slug, "call");
+  await logEvent(c, "missed_call", { from, textBack }); await noteInbound(c, "call");
   return xml(`${say}<Hangup/>`);
 };

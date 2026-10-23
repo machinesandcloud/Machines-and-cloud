@@ -1,0 +1,154 @@
+{
+  "at": "2026-10-23T01:33:17.875Z",
+  "scope": "Independent actual product DOM + actual API handlers, SDK and Blobs protocol doubles. Explicit transport drops follow actual durable tool completion. No physical network or real inference.",
+  "sourceBefore": {
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/store.mjs": "83d4a5ac409da4d9e75d21f5070114761c5e89e0141067a99df524ccf8355417",
+    "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+    "netlify/functions/lib/operator.mjs": "70bffff5c192a01107ac667f41e3214d26a89c32eec50ff463bf42c08157b08f",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk.js": "89c8950bd5f72d9825de8a4c3c068df70497912d86bd10581daaade1a1aa72dd",
+    "embed.js": "5fc0e12410d8a8ec880c8647874c810e3015adff5f4437080d6e7c9503fc4a17",
+    "netlify/functions/client.mjs": "6c1785b1dd380332a461067aab6e031ecd7f073ce92f67977c36f32191eb4ad8",
+    "netlify/functions/chat.mjs": "75c486c539935c0fca8df95a54490cad90bbf91708f27d299fa88ca66b0eeb80",
+    "netlify/functions/lib/website-installation.mjs": "f700ab2aef9c4635b3502768c5556dd5702f6d40c0a2516002388654a657d72e",
+    "netlify/functions/website-installation.mjs": "63ba4b008f38f9c0a10474aa5414db0e1e4d055665a2d2539f6d54b090af9e8b"
+  },
+  "harnessHash": "5a49fc4041f6e349186229d62379bf24cc1f9ac11af9335bd83e19324163954c",
+  "checks": [
+    {
+      "name": "320px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+      "pass": true
+    },
+    {
+      "name": "390px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+      "pass": true
+    },
+    {
+      "name": "1440px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+      "pass": true
+    },
+    {
+      "name": "Private practice pending state disables Send, suppresses repeated Enter and preserves newer typing",
+      "pass": true
+    },
+    {
+      "name": "Installed customer-chat Send has an obvious disabled pending state and cannot dispatch a duplicate request",
+      "pass": false,
+      "error": "Customer-chat disabled Send needs visible styling",
+      "stack": "AssertionError [ERR_ASSERTION]: Customer-chat disabled Send needs visible styling\n    at file:///private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser.mjs:58:645\n    at async check (file:///private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser.mjs:39:113)\n    at async file:///private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser.mjs:57:2",
+      "visible": {
+        "title": "Fixture customer website"
+      }
+    },
+    {
+      "name": "Operator customer detail uses actual tenant-filtered records with no prior private transcript or lead",
+      "pass": false,
+      "error": "The input did not match the regular expression /CURRENT-PUBLIC|AC running/. Input:\n\n'Loading customer details…'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /CURRENT-PUBLIC|AC running/. Input:\n\n'Loading customer details…'\n\n    at file:///private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser.mjs:61:850\n    at async check (file:///private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser.mjs:39:113)\n    at async file:///private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser.mjs:60:2",
+      "visible": {
+        "title": "Operations | Machines & Cloud"
+      }
+    },
+    {
+      "name": "A prior-owner portal clears private content/token after real foreign-owner refresh instead of reviving it",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-current-tenant-320.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-current-tenant-390.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-current-tenant-1440.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-private-send-recovered-390.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-failure-4.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-failure-5.png"
+  ],
+  "pageErrors": [],
+  "forbiddenRequests": [],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/chat",
+      "method": "POST",
+      "status": 200,
+      "publicNoBearer": true,
+      "setup": false
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 403,
+      "error": "forbidden"
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/store.mjs": "83d4a5ac409da4d9e75d21f5070114761c5e89e0141067a99df524ccf8355417",
+    "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+    "netlify/functions/lib/operator.mjs": "70bffff5c192a01107ac667f41e3214d26a89c32eec50ff463bf42c08157b08f",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk.js": "89c8950bd5f72d9825de8a4c3c068df70497912d86bd10581daaade1a1aa72dd",
+    "embed.js": "5fc0e12410d8a8ec880c8647874c810e3015adff5f4437080d6e7c9503fc4a17",
+    "netlify/functions/client.mjs": "6c1785b1dd380332a461067aab6e031ecd7f073ce92f67977c36f32191eb4ad8",
+    "netlify/functions/chat.mjs": "75c486c539935c0fca8df95a54490cad90bbf91708f27d299fa88ca66b0eeb80",
+    "netlify/functions/lib/website-installation.mjs": "f700ab2aef9c4635b3502768c5556dd5702f6d40c0a2516002388654a657d72e",
+    "netlify/functions/website-installation.mjs": "63ba4b008f38f9c0a10474aa5414db0e1e4d055665a2d2539f6d54b090af9e8b"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 5,
+    "failed": 2,
+    "total": 7,
+    "physicalNetwork": 0,
+    "actualModelRequests": 0,
+    "mockSDKRequests": 12,
+    "pageErrors": 0,
+    "forbiddenRequests": 0
+  }
+}

@@ -1,7 +1,7 @@
 // What happens when the front desk books a visit or flags a lead for a real client:
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
-import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability } from "./store.mjs";
+import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability, assertCurrentWorkspace, listWorkspaceRecords } from "./store.mjs";
 import { AvailabilityInputError } from "./availability.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
@@ -15,13 +15,23 @@ import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-d
 import { strictRead } from "./accounts.mjs";
 
 async function queueSavedDelivery(c, record, kind) {
-  if (!isSelfServiceClient(c)) return;
+  if (!isSelfServiceClient(c) || record.websiteSetupCheck || record.simulation) return;
   // Provider work is recoverable from source records; a queue outage cannot roll back a booking.
   try { await queueManagedRecord(c, record, kind); } catch { /* Background source discovery repairs this gap. */ }
   if (kind === "bookings") try { await queueCalendarBooking(c, record); } catch { /* Same authoritative-source backfill. */ }
-  if (kind === "bookings") try { await dispatchCalendarDeliveryWave(); } catch { /* Scheduled recovery retries dispatch. */ }
+  if (kind === "bookings") try { await dispatchCalendarDeliveryWave(c); } catch { /* Scheduled recovery retries dispatch. */ }
   try { await dispatchManagedDeliveryWave(); } catch { /* Scheduled recovery retries dispatch. */ }
 }
+
+import { workspaceTenant, belongsToWorkspace } from "./workspace-identity.mjs";
+
+async function workspaceRows(c,kind,limit,complete=false){
+  if(kind==='events')return (await (await import('./store.mjs')).listJSON(kind,isSelfServiceClient(c)?`${c.slug}/${workspaceTenant(c)}/`:c.slug+'/',limit)).filter(row=>belongsToWorkspace(c,row));
+  const page = await listWorkspaceRecords(c,kind,limit);
+  if (complete && isSelfServiceClient(c) && page.listing.incomplete) throw Object.assign(new Error("A complete report is unavailable while saved history needs reconciliation."), {code:"history_incomplete"});
+  return page.records;
+}
+async function workspaceConversations(c,limit){return (await (await import('./store.mjs')).listJSON('conversations',isSelfServiceClient(c)?`${c.slug}/${workspaceTenant(c)}/`:c.slug+'/',limit)).filter(row=>belongsToWorkspace(c,row));}
 
 const H = 3600 * 1000, D = 24 * H;
 const esc = (s) => String(s || "").trim();
@@ -101,8 +111,8 @@ export async function runConsentAsk(c, task) {
   if (!(r.ok || r.logged)) return "send failed";
   cust.consentAskedAt = new Date().toISOString(); cust.consentWording = wording; cust.language = b?.language || "en";
   await saveCustomer(cust);
-  const conv = await getConversation(c.slug, "sms", phone); conv.messages.push({ role: "assistant", content: wording, at: new Date().toISOString(), system: "consent_ask" }); await saveConversation(conv);
-  await logEvent(c.slug, "consent_asked", { phone, id: b?.id });
+  const conv = await getConversation(c, "sms", phone); conv.messages.push({ role: "assistant", content: wording, at: new Date().toISOString(), system: "consent_ask" }); await saveConversation(conv);
+  await logEvent(c, "consent_asked", { phone, id: b?.id });
   return r.ok ? "sent" : "logged";
 }
 // A YES or SI from a number asked inside the last 7 days: store the consent record. Returns the reply or null.
@@ -116,7 +126,7 @@ export async function noteConsentReply(c, phone, text, conv) {
   if (Date.now() - new Date(cust.consentAskedAt).getTime() > 7 * D) return null;
   cust.marketingConsent = { at: new Date().toISOString(), channel: "sms", wording: cust.consentWording, reply: text.trim().slice(0, 40), number: c.phone?.twilioNumber || process.env.MC_TWILIO_NUMBER || "" };
   await saveCustomer(cust);
-  await logEvent(c.slug, "marketing_consent", { phone });
+  await logEvent(c, "marketing_consent", { phone });
   return str("consent_yes", { language: cust.language })(c);
 }
 
@@ -129,11 +139,14 @@ const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action",
 
 // "Existing customer" means a visit that happened: marked done or paid, or dated before today and
 // not cancelled. Leads, spam records, and future bookings do not count.
-export async function customerType(slug, phone, at) {
+export async function customerType(target, phone, at) {
+  const c=typeof target==="string"?null:target,slug=c?c.slug:target;
+  if(c)await assertCurrentWorkspace(c);
   if (!phone) return "new";
   const today = at ? new Date(new Date(at).toLocaleString("en-US", { timeZone: "America/Chicago" })) : visitDate("today"); today.setHours(0, 0, 0, 0);
-  const recs = await recordsFor("bookings", slug, phone);
-  const had = recs.some((b) => b.phone === phone && (["done", "paid"].includes(b.status) || (b.date && b.status !== "cancelled" && bookingDay(b).getTime() < today.getTime())));
+  const recs = await recordsFor("bookings", target, phone);
+  const had = recs.some((b) => (!c||belongsToWorkspace(c,b))&&!b.websiteSetupCheck && b.phone === phone && (["done", "paid"].includes(b.status) || (b.date && b.status !== "cancelled" && bookingDay(b).getTime() < today.getTime())));
+  if(c)await assertCurrentWorkspace(c);
   return had ? "existing" : "new";
 }
 
@@ -214,7 +227,7 @@ export async function runVisitCheck(c, task) {
   if (!PLANS[c.plan]?.followUp && !b.invoicedAt) return "nothing waits on done";
   b.visitCheckedAt = new Date().toISOString(); await saveRecord("bookings", b);
   await notifyOwner(c, `${c.business.name} front desk: Did the visit for ${b.customer_name || b.phone} at ${b.address || "their address"} (${when(b)}) happen? Reply "done ${b.id}" if it did, or "cancel ${b.id}" if it did not.`, { type: "owner_note" });
-  await logEvent(c.slug, "visit_check", { id: b.id });
+  await logEvent(c, "visit_check", { id: b.id });
   return "asked";
 }
 
@@ -238,39 +251,46 @@ export async function availabilityToolResult(c, input) {
 }
 async function calendarFailed(c, b, err, op) {
   console.error("calendar", op, err);
-  await logEvent(c.slug, "calendar_failed", { id: b.id, op, error: String(err?.message || err).slice(0, 200) });
+  await logEvent(c, "calendar_failed", { id: b.id, op, error: String(err?.message || err).slice(0, 200) });
 }
 
+async function savedRecordEvidence(ctx, kind, record) {
+  if (typeof ctx.onSavedRecord !== 'function') return;
+  try { await ctx.onSavedRecord(kind, record); } catch { console.error('website_installation_evidence_unavailable', kind); }
+}
 export async function bookVisit(c, input, ctx = {}) {
+  await assertCurrentWorkspace(c);
   const portalOnly = isSelfServiceClient(c);
   const phone = e164(input.phone) || esc(input.phone);
   const stable = portalOnly && /^[a-f0-9]{64}$/.test(ctx.managedActionId || "");
-  const bookingId = stable ? ctx.managedActionId.slice(0,32) : id(5), type = await customerType(c.slug, phone);
+  const bookingId = stable ? ctx.managedActionId.slice(0,32) : id(5), type = await customerType(c, phone);
   if (stable) {
     const previous = await strictRead("bookings", `${c.slug}/${bookingId}`);
     if (previous) {
-      if (previous.delivery?.tenantIdentity !== deliveryTenant(c) || previous.managedActionId !== ctx.managedActionId) throw new Error("Booking action identity mismatch");
-      await finishStableBookingWindow(c.slug, bookingId, ctx.managedActionId);
-      await addToIndex("bookings", c.slug, previous.phone, previous.id);
+      if (!belongsToWorkspace(c,previous) || previous.managedActionId !== ctx.managedActionId) throw new Error("Booking action identity mismatch");
+      await finishStableBookingWindow(c, bookingId, ctx.managedActionId);
+      await addToIndex("bookings", c, previous.phone, previous.id);
+      await savedRecordEvidence(ctx, 'bookings', previous);
       await queueSavedDelivery(c, previous, "bookings");
       return previous;
     }
   }
   const taken = await reserveBookingWindow(c, bookingId, input.date, input.window, undefined, stable ? { mutationId: ctx.managedActionId } : {});
   if (taken.full) {
-    if (taken.reason === "full") await logEvent(c.slug, "window_full", { date: taken.availability?.from || normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity });
+    if (taken.reason === "full") await logEvent(c, "window_full", { date: taken.availability?.from || normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity });
     return { full: true, reason: taken.reason, message: taken.availability ? fullMessage(c, esc(input.date), esc(input.window), taken.availability, taken.reason) : taken.message || fullMessage(c, esc(input.date), esc(input.window)) };
   }
   const b = await (stable ? createRecordOnce : addRecord)("bookings", c.slug, {
     id: bookingId,
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     date: taken.date, dateSaid: esc(input.date), window: taken.window, urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
-    channel: ctx.channel || "web", status: "booked", outcome: "booked", customerType: type,
+    channel: ctx.channel || "web", contact: ctx.contact || '', status: "booked", outcome: "booked", customerType: type,
+    ...(ctx.websiteSetupCheck ? { websiteSetupCheck: { ...ctx.websiteSetupCheck } } : {}),
     ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) }, ...(stable ? { managedActionId: ctx.managedActionId } : {}) } : {}),
   });
   let canFinish = true;
   try {
-    await addToIndex("bookings", c.slug, b.phone, b.id);
+    await addToIndex("bookings", c, b.phone, b.id);
     if (!portalOnly) {
       try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
       await scheduleReminders(c, b);
@@ -280,20 +300,21 @@ export async function bookVisit(c, input, ctx = {}) {
     }
     try { if (!stable) await saveRecord("bookings", b, { capacityClaim: taken }); }
     catch (err) { canFinish = false; throw err; }
-  } finally { if (canFinish) { if (stable) await finishStableBookingWindow(c.slug, bookingId, ctx.managedActionId); else await finishBookingWindow(c.slug, bookingId, taken); } }
+  } finally { if (canFinish) { if (stable) await finishStableBookingWindow(c, bookingId, ctx.managedActionId); else await finishBookingWindow(c, bookingId, taken); } }
+  await savedRecordEvidence(ctx, 'bookings', b);
   await queueSavedDelivery(c, b, "bookings");
   if (!portalOnly && b.phone && ctx.channel !== "sms") {
     await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
   }
   if (!portalOnly) await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
-  await logEvent(c.slug, "booking", { id: b.id, channel: ctx.channel });
+  await logEvent(c, "booking", { id: b.id, channel: ctx.channel, ...(ctx.websiteSetupCheck ? { setupCheck: true } : {}) });
   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
   const since = Date.now() - D;
-  const candidates = b.phone ? await recordsFor("leads", c.slug, b.phone) : await listRecords("leads", c.slug, 100);
-  for (const l of candidates.filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) {
-    l.status = "booked"; l.bookingId = b.id; await saveRecord("leads", l);
+  const candidates = b.phone ? await recordsFor("leads", c, b.phone) : await workspaceRows(c,"leads",100);
+  for (const l of candidates.filter((l) => belongsToWorkspace(c,l)&&(ctx.websiteSetupCheck ? l.websiteSetupCheck?.checkId === ctx.websiteSetupCheck.checkId : !l.websiteSetupCheck) && l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) {
+    await assertCurrentWorkspace(c);l.status = "booked"; l.bookingId = b.id; await saveRecord("leads", l);
     await ackAlertsFor(c, l.id, "booking");
-    await logEvent(c.slug, "lead_closed", { id: l.id, by: "booking", bookingId: b.id });
+    await logEvent(c, "lead_closed", { id: l.id, by: "booking", bookingId: b.id });
   }
   return b;
 }
@@ -302,8 +323,8 @@ export async function bookVisit(c, input, ctx = {}) {
 // opening a second one (and a second escalation chain).
 async function recentOpenLead(c, phone, contact) {
   const cutoff = Date.now() - 30 * 60 * 1000;
-  const pool = phone ? await recordsFor("leads", c.slug, phone) : await listRecords("leads", c.slug, 60);
-  const leads = pool.filter((l) => l.status === "open" && new Date(l.createdAt).getTime() > cutoff && (!isSelfServiceClient(c) || l.delivery?.tenantIdentity === deliveryTenant(c)));
+  const pool = phone ? await recordsFor("leads", c, phone) : await workspaceRows(c,"leads",60);
+  const leads = pool.filter((l) => !l.websiteSetupCheck && l.status === "open" && new Date(l.createdAt).getTime() > cutoff && belongsToWorkspace(c,l));
   return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
 }
 
@@ -352,24 +373,25 @@ export async function runCallbackCheck(c, task) {
   l.overdueAt = new Date().toISOString(); await saveRecord("leads", l);
   const at = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" }).format(new Date(l.createdAt));
   await notifyOwner(c, `${c.business.name} front desk: Overdue callback. ${l.customer_name || "A customer"} ${l.phone} was promised a call ${l.callbackPromise || ""} at ${at}${l.issue ? " about " + l.issue : ""}. Reply "called ${l.id}" when you have reached them.`, { type: "owner_note" });
-  await logEvent(c.slug, "callback_overdue", { id: l.id });
+  await logEvent(c, "callback_overdue", { id: l.id });
   return "overdue";
 }
 
 export async function flagLead(c, input, ctx = {}) {
+  await assertCurrentWorkspace(c);
   const portalOnly = isSelfServiceClient(c);
   const phone = e164(input.phone) || esc(input.phone);
   const reason = input.reason || "lead";
   const stable = portalOnly && /^[a-f0-9]{64}$/.test(ctx.managedActionId || "");
   if (stable) {
     const existing = await strictRead("leads", `${c.slug}/${ctx.managedActionId.slice(0,32)}`);
-    if (existing) { if (existing.managedActionId !== ctx.managedActionId || existing.delivery?.tenantIdentity !== deliveryTenant(c)) throw new Error("Lead identity mismatch"); await queueSavedDelivery(c, existing, "leads"); return existing; }
+    if (existing) { if (existing.managedActionId !== ctx.managedActionId || !belongsToWorkspace(c,existing)) throw new Error("Lead identity mismatch"); await savedRecordEvidence(ctx, 'leads', existing); await queueSavedDelivery(c, existing, "leads"); return existing; }
   }
   const prior = stable || reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact);
   if (prior) {
     const changed = [];
     for (const k of ["customer_name", "phone", "address", "issue", "wanted", "unsure"]) { const v = k === "phone" ? phone : esc(input[k]); if (v && v !== prior[k]) { prior[k] = v; changed.push(k); } }
-    const ct = await customerType(c.slug, prior.phone); if (ct !== prior.customerType) { prior.customerType = ct; changed.push("customer"); }
+    const ct = await customerType(c, prior.phone); if (ct !== prior.customerType) { prior.customerType = ct; changed.push("customer"); }
     const escalate = (reason === "emergency" || input.urgency === "emergency") && prior.urgency !== "emergency";
     if (escalate) { prior.urgency = "emergency"; prior.reason = "emergency"; prior.outcome = "needs_action"; changed.push("urgency"); }
     if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); await trackCallback(c, prior); }
@@ -378,24 +400,28 @@ export async function flagLead(c, input, ctx = {}) {
       prior.delivery = { ...prior.delivery, mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) };
       delete prior.callbackPromise; delete prior.callbackDueAt; delete prior.overdueAt;
     }
+    await assertCurrentWorkspace(c);
     await saveRecord("leads", prior);
+    await savedRecordEvidence(ctx, 'leads', prior);
     await queueSavedDelivery(c, prior, "leads");
     if (!portalOnly) {
       if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
-      const waiting = (await listRecords("alerts", c.slug, 100)).some((a) => a.leadId === prior.id && a.status === "waiting");
+      const waiting = (await workspaceRows(c,"alerts",100)).some((a) => a.leadId === prior.id && a.status === "waiting");
       if (!waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
     }
-    await logEvent(c.slug, "lead_updated", { id: prior.id, changed, channel: ctx.channel });
+    await logEvent(c, "lead_updated", { id: prior.id, changed, channel: ctx.channel });
     return prior;
   }
   const l = await (stable ? createRecordOnce : addRecord)("leads", c.slug, {
     ...(stable ? { id: ctx.managedActionId.slice(0,32), managedActionId: ctx.managedActionId } : {}),
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
-    channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c.slug, phone),
+    channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c, phone),
+    ...(ctx.websiteSetupCheck ? { websiteSetupCheck: { ...ctx.websiteSetupCheck } } : {}),
     ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) } } : {}),
   });
-  await addToIndex("leads", c.slug, l.phone, l.id);
+  await addToIndex("leads", c, l.phone, l.id);
+  await savedRecordEvidence(ctx, 'leads', l);
   await queueSavedDelivery(c, l, "leads");
   if (!portalOnly && reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
@@ -408,21 +434,22 @@ export async function flagLead(c, input, ctx = {}) {
       await scheduleFollowUp(c, new Date(Date.now() + 48 * H), "lead_chase", { leadId: l.id, n: 3 });
     }
   }
-  await logEvent(c.slug, "lead", { id: l.id, reason, channel: ctx.channel });
+  await logEvent(c, "lead", { id: l.id, reason, channel: ctx.channel, ...(ctx.websiteSetupCheck ? { setupCheck: true } : {}) });
   return l;
 }
 
 // What the voice assistant should know before it says hello: the caller's name from the most recent
 // booking or lead with that number, whether they are an existing customer, and any upcoming visit.
 export async function callerContext(c, phone, at) {
+  await assertCurrentWorkspace(c);
   const out = { customerName: "", isExisting: "new", upcomingVisit: "" };
   if (!phone) return out;
-  const recs = (await recordsFor("bookings", c.slug, phone)).concat(await recordsFor("leads", c.slug, phone)).filter((r) => r.phone === phone && r.customer_name && r.status !== "spam").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+  const recs = (await recordsFor("bookings", c, phone)).concat(await recordsFor("leads", c, phone)).filter((r) => belongsToWorkspace(c,r)&&r.phone === phone && r.customer_name && r.status !== "spam").sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   if (recs.length) out.customerName = recs[recs.length - 1].customer_name.split(" ")[0];
-  out.isExisting = await customerType(c.slug, phone, at) === "existing" ? "existing customer" : "new";
+  out.isExisting = await customerType(c, phone, at) === "existing" ? "existing customer" : "new";
   const up = await upcomingBookings(c, phone, at);
   if (up.length) { const b = up[0]; out.upcomingVisit = `${b.date ? friendlyDate(b.date) : "today"}, ${b.window}${b.issue ? ", for the " + b.issue.replace(/[.\s]+$/, "") : ""}`; }
-  return out;
+  await assertCurrentWorkspace(c);return out;
 }
 
 // A lead posted by Angi or Thumbtack: one lead per platform id, the owner alerted, and the customer
@@ -436,10 +463,10 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
   const p = e164(phone);
   const l = await addRecord("leads", c.slug, {
     customer_name: esc(name), phone: p, email: esc(email), address: esc(address), issue: esc(task).slice(0, 300), reason: "lead", urgency: "this_week", wanted: "", language: "en", unsure: "",
-    nobook_reason: "none", channel: source, contact: p || pid, source, sourceId: pid, raw: raw ? JSON.stringify(raw).slice(0, 4000) : "", status: "open", outcome: "needs_action", customerType: await customerType(c.slug, p),
+    nobook_reason: "none", channel: source, contact: p || pid, source, sourceId: pid, raw: raw ? JSON.stringify(raw).slice(0, 4000) : "", status: "open", outcome: "needs_action", customerType: await customerType(c, p),
   });
   if (pid) await put("index", `platform:${c.slug}:${source}:${pid}`, l.id);
-  await addToIndex("leads", c.slug, l.phone, l.id);
+  await addToIndex("leads", c, l.phone, l.id);
   const label = source === "angi" ? "Angi" : source === "thumbtack" ? "Thumbtack" : source;
   let summary = ownerSummary(c, "lead", l);
   if (!p) summary += (source === "thumbtack" ? " No phone number comes with Thumbtack leads. Reply in the Thumbtack app." : " No phone number came with this lead; reply on the platform.");
@@ -450,29 +477,29 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
     const first = (l.customer_name || "").split(" ")[0];
     const r = await sendSMS({ to: p, client: c, type: "text_back", body: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request${l.issue ? " about " + l.issue.slice(0, 80) : ""}. What is going on, and when works for a visit? We offer ${(c.windows || []).join(" or ")}. Reply STOP to opt out.` });
     texted = !!(r.ok || r.logged);
-    if (texted) { const conv = await getConversation(c.slug, "sms", p); conv.messages.push({ role: "assistant", content: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request. What is going on, and when works for a visit?`, at: new Date().toISOString(), system: "platform-lead text-back" }); await saveConversation(conv); }
+    if (texted) { const conv = await getConversation(c, "sms", p); conv.messages.push({ role: "assistant", content: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request. What is going on, and when works for a visit?`, at: new Date().toISOString(), system: "platform-lead text-back" }); await saveConversation(conv); }
   }
   if (PLANS[c.plan]?.followUp && p && texted) {
     await scheduleFollowUp(c, new Date(Date.now() + 4 * H), "lead_chase", { leadId: l.id, n: 1 });
     await scheduleFollowUp(c, new Date(Date.now() + 26 * H), "lead_chase", { leadId: l.id, n: 2 });
   }
-  await logEvent(c.slug, "platform_lead", { id: l.id, source, texted });
+  await logEvent(c, "platform_lead", { id: l.id, source, texted });
   return { ok: true, id: l.id, texted };
 }
 
 // ---- Acknowledge and escalate ----
 export async function openAlert(c, lead, kind) {
   if (isSelfServiceClient(c)) return { status: "channel_not_active" };
-  const a = await addRecord("alerts", c.slug, { leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
+  const a = await addRecord("alerts", c.slug, { ...(isSelfServiceClient(c)?{tenantIdentity:workspaceTenant(c)}:{}),leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
   const mins = Number(c.rules?.ackMinutes) || 10;
   await scheduleTask(c.slug, new Date(Date.now() + mins * 60 * 1000), "escalate", { alertId: a.id });
-  await logEvent(c.slug, "alert_opened", { id: a.id, leadId: lead.id, kind });
+  await logEvent(c, "alert_opened", { id: a.id, leadId: lead.id, kind });
   return a;
 }
 
 export async function ackAlertsFor(c, recordId, by = "owner") {
-  const alerts = (await listRecords("alerts", c.slug, 200)).filter((a) => a.leadId === recordId && a.status === "waiting");
-  for (const a of alerts) { a.status = "acked"; a.ackedAt = new Date().toISOString(); a.ackedBy = by; await saveRecord("alerts", a); await logEvent(c.slug, "alert_acked", { id: a.id, by }); }
+  const alerts = (await workspaceRows(c,"alerts",200)).filter((a) => belongsToWorkspace(c,a)&&a.leadId === recordId && a.status === "waiting");
+  for (const a of alerts) { a.status = "acked"; a.ackedAt = new Date().toISOString(); a.ackedBy = by; await saveRecord("alerts", a); await logEvent(c, "alert_acked", { id: a.id, by }); }
   if (alerts.length) { const ids = new Set(alerts.map((a) => a.id)); await cancelTasks(c.slug, (t) => t.type === "escalate" && ids.has(t.data?.alertId)); }
   return alerts.length;
 }
@@ -523,7 +550,7 @@ export async function runEscalation(c, task) {
   }
   a.history.push({ step: a.step, how, at: new Date().toISOString() });
   await saveRecord("alerts", a);
-  await logEvent(c.slug, "escalated", { id: a.id, step: a.step, how, kind: a.kind });
+  await logEvent(c, "escalated", { id: a.id, step: a.step, how, kind: a.kind });
   if (a.status === "waiting") await scheduleTask(c.slug, new Date(Date.now() + mins * 60 * 1000), "escalate", { alertId: a.id });
   return `step ${a.step}: ${how}`;
 }
@@ -540,14 +567,15 @@ export function bookingDay(b) {
   return visitDate(b.date);
 }
 export async function upcomingBookings(c, phone, at) {
+  await assertCurrentWorkspace(c);
   if (!phone) return [];
   const today = at ? new Date(new Date(at).toLocaleString("en-US", { timeZone: "America/Chicago" })) : visitDate("today"); today.setHours(0, 0, 0, 0);
-  return (await recordsFor("bookings", c.slug, phone)).filter((b) => b.phone === phone && ["booked", "on_the_way", "confirmed"].includes(b.status) && (!b.date || bookingDay(b).getTime() >= today.getTime()));
+  const rows=(await recordsFor("bookings", c, phone)).filter((b) => belongsToWorkspace(c,b)&&b.phone === phone && ["booked", "on_the_way", "confirmed"].includes(b.status) && (!b.date || bookingDay(b).getTime() >= today.getTime()));await assertCurrentWorkspace(c);return rows;
 }
 
 export async function confirmVisit(c, b) {
   b.confirmedAt = new Date().toISOString(); b.status = b.status === "booked" ? "confirmed" : b.status; await saveRecord("bookings", b);
-  await logEvent(c.slug, "confirmed", { id: b.id });
+  await logEvent(c, "confirmed", { id: b.id });
   return b;
 }
 
@@ -571,16 +599,16 @@ export async function rescheduleVisit(c, b, date, window) {
     }
     try { await saveRecord("bookings", b, { capacityClaim: claim }); }
     catch (err) { canFinish = false; throw err; }
-  } finally { if (canFinish) await finishBookingWindow(c.slug, b.id, claim); }
+  } finally { if (canFinish) await finishBookingWindow(c, b.id, claim); }
   await queueSavedDelivery(c, b, "bookings");
   if (!portalOnly) await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
-  await logEvent(c.slug, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
+  await logEvent(c, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
   return b;
 }
 
 export async function cancelRequest(c, b) {
   await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" });
-  await logEvent(c.slug, "cancel_requested", { id: b.id });
+  await logEvent(c, "cancel_requested", { id: b.id });
   return b;
 }
 
@@ -589,14 +617,14 @@ export async function cancelRequest(c, b) {
 async function bareCandidates(c, cmd) {
   const today = visitDate("today"); today.setHours(0, 0, 0, 0);
   if (cmd === "ok") {
-    const alerts = (await listRecords("alerts", c.slug, 100)).filter((a) => a.status === "waiting"); const ids = [...new Set(alerts.map((a) => a.leadId))]; const out = []; for (const id of ids) { const l = await getRecord("leads", c.slug, id); if (l) out.push(l); }
+    const alerts = (await workspaceRows(c,"alerts",100)).filter((a) => a.status === "waiting"); const ids = [...new Set(alerts.map((a) => a.leadId))]; const out = []; for (const id of ids) { const l = await getRecord("leads", c.slug, id); if (l&&belongsToWorkspace(c,l)) out.push(l); }
     if (out.length) return out;
     // Nothing waiting: the newest lead from the last 24 hours that asked for an ok and has none.
-    const recent = (await listRecords("leads", c.slug, 100)).filter((l) => l.status === "open" && !l.ackedAt && Date.now() - new Date(l.createdAt).getTime() < D && (l.reason === "emergency" || l.urgency === "emergency")).sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+    const recent = (await workspaceRows(c,"leads",100)).filter((l) => l.status === "open" && !l.ackedAt && Date.now() - new Date(l.createdAt).getTime() < D && (l.reason === "emergency" || l.urgency === "emergency")).sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
     return recent.length ? [recent[recent.length - 1]] : [];
   }
-  if (cmd === "called") return (await listRecords("leads", c.slug, 200)).filter((l) => l.status === "open" && l.callbackDueAt && !l.calledAt);
-  const bookings = (await listRecords("bookings", c.slug, 300)).filter((b) => ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date);
+  if (cmd === "called") return (await workspaceRows(c,"leads",200)).filter((l) => l.status === "open" && l.callbackDueAt && !l.calledAt);
+  const bookings = (await workspaceRows(c,"bookings",300)).filter((b) => ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date);
   if (cmd === "otw") return bookings.filter((b) => b.status !== "on_the_way" && bookingDay(b).getTime() === today.getTime());
   if (cmd === "done") { const past = bookings.filter((b) => bookingDay(b).getTime() < today.getTime() || b.visitCheckedAt); return past.length ? past : bookings.filter((b) => bookingDay(b).getTime() === today.getTime()); }
   return [];
@@ -614,7 +642,7 @@ export async function ownerCommand(c, text) {
   if (!m) return null;
   const [, cmdRaw, id, rest] = m; const cmd = cmdRaw.toLowerCase();
   const b = (await getRecord("bookings", c.slug, id)) || (await getRecord("leads", c.slug, id));
-  if (!b) return `No record ${id}. Check the ref on the summary text.`;
+  if (!b||!belongsToWorkspace(c,b)) return `No record ${id}. Check the ref on the summary text.`;
   const plan = PLANS[c.plan] || PLANS.growth;
   const acked = await ackAlertsFor(c, b.id);
   if (cmd === "ok" || cmd === "okay") { if (!b.ackedAt) { b.ackedAt = new Date().toISOString(); await saveRecord(b.reason ? "leads" : "bookings", b); } return `Got it, ${b.customer_name || b.phone} is yours.`; }
@@ -622,12 +650,12 @@ export async function ownerCommand(c, text) {
     b.calledAt = new Date().toISOString(); if (b.status === "open") b.status = "called";
     await saveRecord(b.reason ? "leads" : "bookings", b);
     await cancelTasks(c.slug, (t) => t.type === "callback_check" && t.data?.leadId === b.id);
-    await logEvent(c.slug, "called", { id: b.id, kept: b.callbackDueAt ? b.calledAt <= b.callbackDueAt : null });
+    await logEvent(c, "called", { id: b.id, kept: b.callbackDueAt ? b.calledAt <= b.callbackDueAt : null });
     return `Logged: you reached ${b.customer_name || b.phone}.`;
   }
   const blocked = b.phone ? await optedOut(b.phone) : false;
   if (cmd === "otw") {
-    if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
+    if (blocked) { await logEvent(c, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
     // Persist under the booking's CAS ownership before sending; a competing move/cancel must
     // reject before an on-the-way text can claim this operation succeeded.
     b.status = "on_the_way"; await saveRecord("bookings", b);
@@ -639,7 +667,7 @@ export async function ownerCommand(c, text) {
     b.status = "done"; b.doneAt = new Date().toISOString(); await saveRecord("bookings", b);
     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
     if (plan.followUp && b.phone && !blocked && !reviewLink(c)) {
-      await logEvent(c.slug, "review_skipped", { id: b.id, reason: "no_review_link" });
+      await logEvent(c, "review_skipped", { id: b.id, reason: "no_review_link" });
       return `Marked done. No review request went out: add your Google review link on the portal (Setup, Google review link) to start review requests. If they still owe you, text "invoice ${b.id} amount".`;
     }
     if (plan.followUp && b.phone && !blocked) {
@@ -656,7 +684,7 @@ export async function ownerCommand(c, text) {
   if (cmd === "invoice") {
     if (!plan.followUp) return `Payment reminders are on the Growth and Pro plans.`;
     if (!b.phone) return `No phone number on ${id}, nothing to send.`;
-    if (blocked) { await logEvent(c.slug, "sms_blocked", { to: b.phone, type: "payment_reminder" }); return `${b.customer_name || b.phone} opted out of texts; no reminders.`; }
+    if (blocked) { await logEvent(c, "sms_blocked", { to: b.phone, type: "payment_reminder" }); return `${b.customer_name || b.phone} opted out of texts; no reminders.`; }
     b.invoicedAt = new Date().toISOString(); if (rest) b.amount = /^\$/.test(rest.trim()) ? rest.trim() : "$" + rest.trim().replace(/^\$/, "");
     if (b.status === "paid") b.status = "done";
     await saveRecord("bookings", b);
@@ -687,7 +715,7 @@ export async function ownerCommand(c, text) {
 // has no reply yet, classify the text; a negative reply stops the nudge and the referral ask and
 // reaches the owner as NEEDS ACTION; a positive one unlocks the referral ask.
 export async function noteReviewReply(c, phone, text) {
-  const recs = (await recordsFor("bookings", c.slug, phone)).filter((b) => b.phone === phone && b.reviewAskedAt && !b.reviewReply).sort((a, b) => (a.reviewAskedAt || "").localeCompare(b.reviewAskedAt || ""));
+  const recs = (await recordsFor("bookings", c, phone)).filter((b) => belongsToWorkspace(c,b)&&b.phone === phone && b.reviewAskedAt && !b.reviewReply).sort((a, b) => (a.reviewAskedAt || "").localeCompare(b.reviewAskedAt || ""));
   const b = recs[recs.length - 1];
   if (!b) return null;
   let sentiment = "none";
@@ -710,7 +738,7 @@ export async function noteReviewReply(c, phone, text) {
       if (!cust.consentAskedAt && !cust.marketingConsent && !cust.consentScheduledAt) { cust.consentScheduledAt = new Date().toISOString(); await saveCustomer(cust); await scheduleFollowUp(c, new Date(Date.now() + 60 * 60 * 1000), "consent_ask", { bookingId: b.id, phone }); }
     }
   }
-  await logEvent(c.slug, "review_reply", { id: b.id, sentiment });
+  await logEvent(c, "review_reply", { id: b.id, sentiment });
   return { booking: b, sentiment };
 }
 
@@ -718,6 +746,7 @@ export async function noteReviewReply(c, phone, text) {
 const houstonDay = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso));
 
 export function lineHealth(c, events = [], pointer = null) {
+  events=events.filter(row=>belongsToWorkspace(c,row));if(isSelfServiceClient(c)&&pointer&&!belongsToWorkspace(c,pointer))pointer=null;
   const latest = (types, kind) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); const p = pointer?.[kind] || null; return [e, p].filter(Boolean).sort().pop() || null; };
   const since = Date.now() - D;
   const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed", "calendar_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
@@ -732,17 +761,18 @@ export function lineHealth(c, events = [], pointer = null) {
 }
 
 export async function dailyDigest(c, events) {
+  if(events)events=events.filter(row=>belongsToWorkspace(c,row));
   const today = houstonDay(new Date().toISOString());
   // The nightly audit runs at 9 pm, after the 6 pm digest. Carry those findings into
   // the next digest using Houston calendar days, including 23/25-hour DST days.
   const previousDay = visitDate(today); previousDay.setDate(previousDay.getDate() - 1);
   const auditSince = new Date(houstonISO(previousDay, 18)).getTime();
-  const auditFindings = (events || (await listRecords("events", c.slug, 300))).filter((e) => e.type === "auto_flag" && auditNeedsAttention(e.data) && new Date(e.at).getTime() > auditSince && new Date(e.at).getTime() <= Date.now());
+  const auditFindings = (events || (await workspaceRows(c,"events",300))).filter((e) => e.type === "auto_flag" && auditNeedsAttention(e.data) && new Date(e.at).getTime() > auditSince && new Date(e.at).getTime() <= Date.now());
   const sameDay = (r) => houstonDay(r.createdAt || r.at) === today;
-  const bookings = (await listRecords("bookings", c.slug, 300)).filter(sameDay);
-  const leads = (await listRecords("leads", c.slug, 300)).filter(sameDay);
-  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 200)).filter((v) => v.flag && houstonDay(v.flag.at) === today);
-  const ev = events || (await listRecords("events", c.slug, 300));
+  const bookings = (await workspaceRows(c,"bookings",300,true)).filter(row => !row.websiteSetupCheck && sameDay(row));
+  const leads = (await workspaceRows(c,"leads",300,true)).filter(row => !row.websiteSetupCheck && sameDay(row));
+  const convs = (await workspaceConversations(c,200)).filter((v) => !String(v.contact).startsWith('websitecheck_') && v.flag && houstonDay(v.flag.at) === today);
+  const ev = events || (await workspaceRows(c,"events",300));
   const h = lineHealth(c, ev);
   const t = (iso) => (iso ? new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" }).format(new Date(iso)) : "none");
   const needs = leads.filter((l) => l.outcome === "needs_action" && l.status === "open");
@@ -798,7 +828,7 @@ export async function classifierEval(c, models = ["claude-opus-5-5", "claude-hai
 }
 export async function autoFlagDay(c, debug = false) {
   const today = houstonDay(new Date().toISOString()); const raws = [];
-  const convs = (await (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && v.autoFlag?.day !== today && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
+  const convs = (await workspaceConversations(c,300)).filter((v) => ["sms", "web", "call", "test"].includes(v.channel) && v.autoFlag?.day !== today && (v.messages || []).some((m) => m.role === "user" && houstonDay(m.at) === today));
   if (!convs.length) return debug ? { n: 0, raws } : 0;
   let n = 0;
   for (const v of convs.slice(0, 40)) {
@@ -809,7 +839,7 @@ export async function autoFlagDay(c, debug = false) {
       const reasons = r.reasons;
       v.autoFlag = { at: new Date().toISOString(), day: today, reasons, test: v.channel === "test" };
       await (await import("./store.mjs")).saveConversation(v);
-      if (reasons.length) { const finding = { channel: v.channel, contact: v.contact, reasons, test: v.channel === "test" }; await logEvent(c.slug, "auto_flag", finding); if (auditNeedsAttention(finding)) n++; }
+      if (reasons.length) { const finding = { channel: v.channel, contact: v.contact, reasons, test: v.channel === "test" }; await logEvent(c, "auto_flag", finding); if (auditNeedsAttention(finding)) n++; }
     } catch (err) { console.error("autoflag", err); if (debug) raws.push({ contact: v.contact, error: String(err?.message || err) }); }
   }
   return debug ? { n, raws } : n;
@@ -817,7 +847,7 @@ export async function autoFlagDay(c, debug = false) {
 // Day 7: the "what I changed" email, drafted for Steve to edit and send.
 export async function day7Draft(c) {
   const since = Date.now() - 7 * D;
-  const events = (await listRecords("events", c.slug, 1000)).filter((e) => new Date(e.at).getTime() > since);
+  const events = (await workspaceRows(c,"events",1000)).filter((e) => new Date(e.at).getTime() > since);
   const w = await weeklyReport(c);
   const changes = events.filter((e) => e.type === "config_updated").length;
   const flags = events.filter((e) => e.type === "flagged").length;
@@ -842,10 +872,10 @@ export async function monthlyReport(c, month) {
   const inMonth = (iso) => iso && new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso)).slice(0, 7) === m;
   const bypass = new Set(c.rules?.bypass || []);
   const [bookings, leads, events, convs, usage] = await Promise.all([
-    listRecords("bookings", c.slug, 1000), listRecords("leads", c.slug, 1000), listRecords("events", c.slug, 3000),
-    (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 1000), getUsage(c.slug, m),
+    workspaceRows(c,"bookings",1000,true), workspaceRows(c,"leads",1000,true), workspaceRows(c,"events",3000),
+    workspaceConversations(c,1000), getUsage(c, m),
   ]);
-  const mb = bookings.filter((b) => inMonth(b.createdAt)), ml = leads.filter((l) => inMonth(l.createdAt)), me = events.filter((e) => inMonth(e.at));
+  const mb = bookings.filter((b) => !b.websiteSetupCheck && inMonth(b.createdAt)), ml = leads.filter((l) => !l.websiteSetupCheck && inMonth(l.createdAt)), me = events.filter((e) => !e.data?.setupCheck && inMonth(e.at));
   const spamNumbers = new Set(ml.filter((l) => l.status === "spam").map((l) => l.phone).filter(Boolean));
   const answered = me.filter((e) => e.type === "call_ended" && !spamNumbers.has(e.data?.from)).length;
   const textedBack = me.filter((e) => e.type === "missed_call" && ["sent", "logged"].includes(e.data?.textBack)).length;
@@ -870,7 +900,7 @@ export async function monthlyReport(c, month) {
   if (avg) {
     const pm = new Date(y, mo - 2, 1); const pmKey = `${pm.getFullYear()}-${String(pm.getMonth() + 1).padStart(2, "0")}`;
     const inPrev = (iso) => iso && new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso)).slice(0, 7) === pmKey;
-    const pb = bookings.filter((b) => inPrev(b.createdAt)).length, pe = events.filter((e) => inPrev(e.at));
+    const pb = bookings.filter((b) => !b.websiteSetupCheck && inPrev(b.createdAt)).length, pe = events.filter((e) => !e.data?.setupCheck && inPrev(e.at));
     const pCalls = pe.filter((e) => e.type === "call_ended").length + pe.filter((e) => e.type === "missed_call").length;
     const curCalls = answered + me.filter((e) => e.type === "missed_call").length;
     if (pb || pCalls) compare = `Compared with last month: calls ${pCalls} then, ${curCalls} now; bookings ${pb} then, ${mb.length} now.`;
@@ -900,12 +930,12 @@ export async function weeklyReport(c) {
   const inWin = (iso) => iso && new Date(iso).getTime() > since;
   const bypass = new Set(c.rules?.bypass || []);
   const [bookings, leads, events, convs, usage] = await Promise.all([
-    listRecords("bookings", c.slug, 500), listRecords("leads", c.slug, 500), listRecords("events", c.slug, 2000),
-    (await import("./store.mjs")).listJSON("conversations", c.slug + "/", 500), getUsage(c.slug),
+    workspaceRows(c,"bookings",500,true), workspaceRows(c,"leads",500,true), workspaceRows(c,"events",2000),
+    workspaceConversations(c,500), getUsage(c),
   ]);
-  const wb = bookings.filter((b) => inWin(b.createdAt)), wl = leads.filter((l) => inWin(l.createdAt)), we = events.filter((e) => inWin(e.at));
+  const wb = bookings.filter((b) => !b.websiteSetupCheck && inWin(b.createdAt)), wl = leads.filter((l) => !l.websiteSetupCheck && inWin(l.createdAt)), we = events.filter((e) => !e.data?.setupCheck && inWin(e.at));
   const spamContacts = new Set(wl.filter((l) => l.status === "spam").map((l) => l.phone || l.contact));
-  const wc = convs.filter((v) => inWin(v.updatedAt) && (v.messages || []).some((m) => m.role === "user" && inWin(m.at)));
+  const wc = convs.filter((v) => !String(v.contact).startsWith('websitecheck_') && inWin(v.updatedAt) && (v.messages || []).some((m) => m.role === "user" && inWin(m.at)));
   const actionable = wc.filter((v) => !bypass.has(v.contact) && !spamContacts.has(v.contact));
   const spamNumbers = new Set(wl.filter((l) => l.status === "spam").map((l) => l.phone).filter(Boolean));
   const answered = we.filter((e) => e.type === "call_ended" && !spamNumbers.has(e.data?.from)).length;

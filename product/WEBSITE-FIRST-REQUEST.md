@@ -96,3 +96,11 @@ Arrange source/origin correction before final rules review and rehearsal where p
 Architect defines the shared origin/evidence contract and keeps server observations separate from authority. Engineer extends the current handlers and embed with the smallest durable state/hook above. UI/UX makes the owner complete the path with one action at a time. QA independently exercises the real public path and failure cases. PO accepts a saved, useful request and a clear owner next action. OM and Marketing/Sales describe only the installed/active capabilities actually observed.
 
 **Ready local work:** after Sprint19 acceptance, implement the owner guide and bounded observation/evidence storage with synthetic origin fixtures, then the ordinary public-chat completion hook and stream recovery. No new account credential, public crawl, provider activation or paid build is needed to begin that local slice.
+
+## Local implementation acceptance, October22
+
+The guided owner card and installed-widget check are implemented. Independent QA passed14actual-handler and17browser groups with stable source, no physical/model requests and no browser errors. The permanent backend contract check passed17groups, the focused embed suite passed10groups, and all32required local commands passed together. [Independent acceptance](../scratchpad/website-installation-independent-acceptance.json). [Combined gate](../scratchpad/installation-required-final.json).
+
+The same exact saved request is reconciled after lost evidence writes, with no model replay. Valid answer completion and a matching browser acknowledgment are required to complete the check. Sample traffic stays labeled and excluded from ordinary customer counts/exports. Expired and invalid checks remain in separate blocked history after reload. The setup sample uses the shop's actual saved service/area, with editable synthetic contact details.
+
+This acceptance is local. It establishes no hosted installation, real inference, provider delivery or first customer result. Netlify is paused for exhausted account credits. The separate confirmed same-slug tenant-replacement defect must be repaired and verified before launch.

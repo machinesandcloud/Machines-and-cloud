@@ -1,0 +1,36 @@
+{
+  "ok": false,
+  "summary": {
+    "passed": 30,
+    "failed": 4,
+    "total": 34
+  },
+  "sourceStable": true,
+  "failures": [
+    {
+      "name": "Closed selected gates reject acceptance before number intent, legal storage or provider work",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\ntrue !== false\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\ntrue !== false\n\n    at file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:163:12\n    at async check (file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:84:5)\n    at async file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:159:1"
+    },
+    {
+      "name": "Accepted plan stops before dispatch after voice_policy",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n1 !== 0\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 0\n\n    at file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:319:10\n    at async check (file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:84:5)\n    at async file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:305:127"
+    },
+    {
+      "name": "Accepted plan stops before dispatch after sms_policy",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n1 !== 0\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 0\n\n    at file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:319:10\n    at async check (file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:84:5)\n    at async file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:305:127"
+    },
+    {
+      "name": "Before dispatch, changed rules can be reviewed again without duplicating paid setup",
+      "pass": false,
+      "error": "This approval was already used for different connection details.",
+      "stack": "Error: This approval was already used for different connection details.\n    at Object.request (file:///private/tmp/mc-connection-journey-645/netlify/functions/lib/service-onboarding.mjs:194:74)\n    at async file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:429:50\n    at async check (file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:84:5)\n    at async file:///private/tmp/mc-connection-journey-645/scripts/service-onboarding-qa-check.mjs:425:1"
+    }
+  ],
+  "output": null
+}

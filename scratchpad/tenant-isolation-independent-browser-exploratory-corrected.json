@@ -1,0 +1,151 @@
+{
+  "at": "2026-10-23T01:34:07.095Z",
+  "scope": "Independent actual product DOM + actual API handlers, SDK and Blobs protocol doubles. Explicit transport drops follow actual durable tool completion. No physical network or real inference.",
+  "sourceBefore": {
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/store.mjs": "aca72e0c242e936e49ca55da052c04c5ebd5cb18f23466b11b46cfbf6b39075f",
+    "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+    "netlify/functions/lib/operator.mjs": "ee8ee18e58612cfed8fa4b26fd9e5162d52d370d90b820a43be05461e2d48450",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk.js": "89c8950bd5f72d9825de8a4c3c068df70497912d86bd10581daaade1a1aa72dd",
+    "embed.js": "5fc0e12410d8a8ec880c8647874c810e3015adff5f4437080d6e7c9503fc4a17",
+    "netlify/functions/client.mjs": "cab8505de2b7fcbf5a607119888daee6d243a7912d3e09a0ff15f21fc6f8392a",
+    "netlify/functions/chat.mjs": "75c486c539935c0fca8df95a54490cad90bbf91708f27d299fa88ca66b0eeb80",
+    "netlify/functions/lib/website-installation.mjs": "f700ab2aef9c4635b3502768c5556dd5702f6d40c0a2516002388654a657d72e",
+    "netlify/functions/website-installation.mjs": "63ba4b008f38f9c0a10474aa5414db0e1e4d055665a2d2539f6d54b090af9e8b"
+  },
+  "harnessHash": "43e68a3f12fe9f8f0d0d320066fb86b14079851755a1831c6dbfd18c81875acb",
+  "checks": [
+    {
+      "name": "320px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+      "pass": true
+    },
+    {
+      "name": "390px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+      "pass": true
+    },
+    {
+      "name": "1440px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+      "pass": true
+    },
+    {
+      "name": "Private practice pending state disables Send, suppresses repeated Enter and preserves newer typing",
+      "pass": true
+    },
+    {
+      "name": "Installed customer-chat Send has an obvious disabled pending state and cannot dispatch a duplicate request",
+      "pass": true
+    },
+    {
+      "name": "Operator customer detail uses actual tenant-filtered records with no prior private transcript or lead",
+      "pass": true
+    },
+    {
+      "name": "A prior-owner portal clears private content/token after real foreign-owner refresh instead of reviving it",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-corrected-current-tenant-320.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-corrected-current-tenant-390.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-corrected-current-tenant-1440.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-corrected-private-send-recovered-390.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-corrected-public-send-recovered-390.png",
+    "/private/tmp/mc-tenant-isolation-6dab/scratchpad/tenant-isolation-independent-browser-exploratory-corrected-operator-current-390.png"
+  ],
+  "pageErrors": [],
+  "forbiddenRequests": [],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/chat",
+      "method": "POST",
+      "status": 200,
+      "publicNoBearer": true,
+      "setup": false
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/chat",
+      "method": "POST",
+      "status": 200,
+      "publicNoBearer": true,
+      "setup": false
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 403,
+      "error": "forbidden"
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/store.mjs": "aca72e0c242e936e49ca55da052c04c5ebd5cb18f23466b11b46cfbf6b39075f",
+    "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+    "netlify/functions/lib/operator.mjs": "ee8ee18e58612cfed8fa4b26fd9e5162d52d370d90b820a43be05461e2d48450",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk.js": "89c8950bd5f72d9825de8a4c3c068df70497912d86bd10581daaade1a1aa72dd",
+    "embed.js": "5fc0e12410d8a8ec880c8647874c810e3015adff5f4437080d6e7c9503fc4a17",
+    "netlify/functions/client.mjs": "cab8505de2b7fcbf5a607119888daee6d243a7912d3e09a0ff15f21fc6f8392a",
+    "netlify/functions/chat.mjs": "75c486c539935c0fca8df95a54490cad90bbf91708f27d299fa88ca66b0eeb80",
+    "netlify/functions/lib/website-installation.mjs": "f700ab2aef9c4635b3502768c5556dd5702f6d40c0a2516002388654a657d72e",
+    "netlify/functions/website-installation.mjs": "63ba4b008f38f9c0a10474aa5414db0e1e4d055665a2d2539f6d54b090af9e8b"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "physicalNetwork": 0,
+    "actualModelRequests": 0,
+    "mockSDKRequests": 12,
+    "pageErrors": 0,
+    "forbiddenRequests": 0
+  }
+}

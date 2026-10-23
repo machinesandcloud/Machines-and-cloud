@@ -120,7 +120,7 @@ async function clientRequest(f, body, { token = f.token, slug = f.c.slug } = {})
 async function acceptance(f, extra = {}) {
   const status = await onboarding.serviceOnboardingStatus(f.c);
   assert.ok(status.offer, 'The fixture must expose a concrete reviewed offer.');
-  return { expectedRevision: f.revision, submissionId: sha('qa-submit:' + f.c.slug), offerDigest: status.offer.digest, acceptedCosts: true, authority: true,
+  return { expectedRevision: f.revision, submissionId: sha('qa-submit:' + f.c.slug + ':' + f.revision), offerDigest: status.offer.digest, acceptedCosts: true, authority: true,
     ...(f.c.onboarding.desiredChannels.includes('voice') ? { forwardingMode: 'forward_business_line' } : {}),
     ...(f.c.onboarding.desiredChannels.includes('sms') ? { legal: legal(), attestLegalAccuracy: true, attestConsent: true, testPhoneConsent: true } : {}), ...extra };
 }
@@ -156,11 +156,19 @@ async function advanceNumber(f) {
   throw new Error('Synthetic number did not reach durable number_acquired.');
 }
 
-await check('Closed selected gates reject acceptance before number intent, legal storage or provider work', async () => {
+await check('Closed common number gate blocks setup; a closed child never authorizes stale full-scope acceptance', async () => {
   for (const gate of ['PHONE_ACQUISITION_ENABLED', 'VOICE_ACTIVATION_ENABLED', 'MESSAGING_ACTIVATION_ENABLED', 'SERVICE_DELIVERY_ENABLED']) {
     const f = await fresh('gate'), body = await acceptance(f), before = report.providerRequests.length;
     process.env[gate] = 'false';
-    assert.equal((await onboarding.serviceOnboardingStatus(f.c)).available, false);
+    const status = await onboarding.serviceOnboardingStatus(f.c);
+    if (gate === 'PHONE_ACQUISITION_ENABLED') {
+      assert.equal(status.available, false);
+      assert.equal(status.offer, null);
+    } else {
+      assert.equal(status.available, true);
+      assert.deepEqual(status.offer.scopeChannels, gate === 'VOICE_ACTIVATION_ENABLED' ? ['sms'] : ['voice']);
+      assert.deepEqual(status.acceptedChannels, []);
+    }
     await assert.rejects(() => onboarding.requestServiceOnboarding(f.c, { ...body, actor: actor(f) }), error => error.status >= 400 && error.status < 500);
     assert.deepEqual(await strictRead('clients', f.c.slug), f.c);
     assert.deepEqual(await children(f), { number: null, voice: null, messaging: null });
@@ -301,8 +309,45 @@ await check('SMS-only setup creates no voice intent and does not require Vapi cr
   assert.ok(rows.messaging?.id);
   assert.equal(rows.voice, null);
 });
+await check('Actual owner API approves only available answering, then separately authorizes texting on the same number', async () => {
+  const f = await fresh('api-scoped');
+  process.env.MESSAGING_ACTIVATION_ENABLED = 'false';
+  const first = await onboarding.serviceOnboardingStatus(f.c);
+  assert.deepEqual(first.offer.scopeChannels, ['voice']);
+  const firstBody = { action: 'request_service_onboarding', expectedRevision: f.revision, submissionId: sha('partial-voice:' + f.c.slug), offerDigest: first.offer.digest, acceptedChannels: ['voice'], acceptedCosts: true, authority: true, forwardingMode: 'forward_business_line' };
+  const response = await clientRequest(f, firstBody);
+  assert.equal(response.status, 202, JSON.stringify(response.data));
+  assert.deepEqual(response.data.serviceOnboarding.acceptedChannels, ['voice']);
+  const initial = await strictRead('service_onboarding_intents', response.data.result.id);
+  assert.equal(initial.privateData, null, 'Answering-only authority must not store unsubmitted texting registration.');
+  assert.deepEqual(initial.requestedChannels, ['voice']);
+  const before = report.providerRequests.length;
+  await advanceNumber(f); await continuePlan(f);
+  assert.ok((await children(f)).voice?.id);
+  assert.equal((await children(f)).messaging, null);
+  process.env.MESSAGING_ACTIVATION_ENABLED = 'true';
+  await continuePlan(f);
+  assert.equal((await children(f)).messaging, null, 'Opening a gate does not authorize the deferred child.');
+  const second = await onboarding.serviceOnboardingStatus(f.c);
+  assert.deepEqual(second.offer.scopeChannels, ['sms']);
+  assert.equal(second.offer.numberCostAlreadyAccepted, true);
+  const secondBody = { action: 'request_service_onboarding', expectedRevision: f.revision, submissionId: sha('partial-sms:' + f.c.slug), offerDigest: second.offer.digest, acceptedChannels: ['sms'], acceptedCosts: true, authority: true, legal: legal(), attestLegalAccuracy: true, attestConsent: true, testPhoneConsent: true };
+  assert.equal((await clientRequest(f, { ...secondBody, acceptedChannels: ['voice', 'sms'] })).status, 400);
+  assert.equal((await children(f)).messaging, null);
+  const added = await clientRequest(f, secondBody);
+  assert.equal(added.status, 202, JSON.stringify(added.data));
+  assert.equal(added.data.result.id, response.data.result.id);
+  assert.deepEqual(added.data.serviceOnboarding.acceptedChannels, ['voice', 'sms']);
+  await continuePlan(f);
+  const rows = await children(f);
+  assert.ok(rows.messaging?.id);
+  assert.equal(numberPurchases(before), 1, 'Adding the separate texting approval must reuse the acquired number.');
+  const replay = await clientRequest(f, secondBody);
+  assert.equal(replay.status, 202);
+  assert.equal(numberPurchases(before), 1);
+});
 
-for (const change of ['business_rules', 'voice_policy', 'sms_policy', 'number_offer', 'tenant_identity', 'paused_lifecycle']) await check('Accepted plan stops before dispatch after ' + change, async () => {
+for (const change of ['business_rules', 'voice_policy', 'sms_policy', 'voice_credential', 'number_offer', 'tenant_identity', 'paused_lifecycle']) await check('Accepted setup retains per-channel authority after ' + change, async () => {
   const f = await fresh('changed'), body = await acceptance(f), before = report.providerRequests.length;
   await onboarding.requestServiceOnboarding(f.c, { ...body, actor: actor(f) });
   if (change === 'business_rules') await store.put('clients', f.c.slug, { ...f.c, summary: 'Owner changed the accepted service rules.' });
@@ -310,13 +355,25 @@ for (const change of ['business_rules', 'voice_policy', 'sms_policy', 'number_of
   if (change === 'paused_lifecycle') await store.put('clients', f.c.slug, { ...f.c, status: 'paused', operationLifecycleVersion: 1, pausedAt: new Date(now).toISOString() });
   if (change === 'voice_policy') { const p = JSON.parse(process.env.VOICE_ACTIVATION_POLICY_JSON); p.maxDailyCalls++; process.env.VOICE_ACTIVATION_POLICY_JSON = JSON.stringify(p); }
   if (change === 'sms_policy') { const p = JSON.parse(process.env.MESSAGING_ACTIVATION_OFFER_JSON); p.campaignMonthlyCents++; process.env.MESSAGING_ACTIVATION_OFFER_JSON = JSON.stringify(p); }
+  if (change === 'voice_credential') process.env.VAPI_API_KEY = 'qa-rotated-synthetic-vapi-key';
   if (change === 'number_offer') { const p = JSON.parse(process.env.PHONE_ACTIVATION_OFFER_JSON); p.monthlyCents++; process.env.PHONE_ACTIVATION_OFFER_JSON = JSON.stringify(p); }
   await continuePlan(f);
   await phone.recoverPhoneActivations({ limit: 1, deadlineAt: now + 14000 });
+  if (['voice_policy', 'sms_policy', 'voice_credential'].includes(change)) await continuePlan(f);
   const state = await children(f);
-  assert.equal(state.voice, null);
-  assert.equal(state.messaging, null);
-  assert.equal(numberPurchases(before), 0);
+  if (change === 'voice_policy' || change === 'voice_credential') {
+    assert.equal(state.voice, null, 'Changed answering authority must not create a voice child.');
+    assert.ok(state.messaging?.id, 'Previously approved texting may continue independently.');
+    assert.equal(numberPurchases(before), 1);
+  } else if (change === 'sms_policy') {
+    assert.ok(state.voice?.id, 'Previously approved answering may continue independently.');
+    assert.equal(state.messaging, null, 'Changed texting costs must not create a texting child.');
+    assert.equal(numberPurchases(before), 1);
+  } else {
+    assert.equal(state.voice, null);
+    assert.equal(state.messaging, null);
+    assert.equal(numberPurchases(before), 0);
+  }
   const status = await onboarding.serviceOnboardingStatus(await strictRead('clients', f.c.slug));
   assert.equal(['complete', 'active'].includes(status.operation?.state), false);
 });
@@ -423,9 +480,10 @@ await check('Actual worker review-needed result is a customer action without a g
   const health = await onboarding.serviceOnboardingHealth(); assert.equal(health.ok, true); assert.equal(health.waitingCustomer, 1); assert.equal(health.unresolved, 0); assert.equal((await children(f)).number, null);
 });
 await check('Before dispatch, changed rules can be reviewed again without duplicating paid setup', async () => {
-  const f = await fresh('reapprove'); await submit(f);
+  const f = await fresh('reapprove'), oldBody = await acceptance(f); await onboarding.requestServiceOnboarding(f.c, { ...oldBody, actor: actor(f) });
   f.c = { ...f.c, summary: 'Owner approved a clearer plumbing intake policy.' }; f.revision = configurationRevision(f.c); f.c.setupProof = { reviewedRevision: f.revision, testedRevision: f.revision, testMode: 'live' }; await store.put('clients', f.c.slug, f.c);
   const changed = await onboarding.serviceOnboardingStatus(f.c); assert.equal(changed.operation.state, 'needs_review'); assert.equal(changed.available, true);
+  await assert.rejects(() => submit(f, { submissionId: oldBody.submissionId }), error => error.status === 409 && error.code === 'submission_conflict');
   const before = report.providerRequests.length; await submit(f); await advanceNumber(f); await continuePlan(f); const state = await children(f); assert.ok(state.voice?.id && state.messaging?.id); assert.equal(numberPurchases(before), 1);
 });
 await check('A missing primary plan is restored from its encrypted pre-dispatch admission', async () => {

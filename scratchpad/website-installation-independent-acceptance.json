@@ -1,0 +1,86 @@
+{
+  "at": "2026-10-23T01:17:56.273Z",
+  "status": "accepted for offline G2 behavior only",
+  "summary": {
+    "actualHandlerGroups": 14,
+    "browserGroups": 17,
+    "total": 31,
+    "actualExternalRequests": 0,
+    "actualModelRequests": 0,
+    "mockSDKRequests": 37,
+    "pageErrors": 0,
+    "forbiddenRequests": 0,
+    "sourceStable": true
+  },
+  "runtimeHashes": {
+    "netlify/functions/client.mjs": "79aea33c784ad69b76e6f5fad96bb426a9dc67e43bf69aea04074b3517e31ba9",
+    "netlify/functions/chat.mjs": "9494ff06ce0fb7500b97bff3d3e1af332819ab94c4b9c474683ee46122dfceee",
+    "netlify/functions/lib/desk.mjs": "cd4e5dd96874e928e5ee1803a2d5486df3053867b97a5a0163afb4bd93e39947",
+    "netlify/functions/lib/website-installation.mjs": "f700ab2aef9c4635b3502768c5556dd5702f6d40c0a2516002388654a657d72e",
+    "netlify/functions/website-installation.mjs": "63ba4b008f38f9c0a10474aa5414db0e1e4d055665a2d2539f6d54b090af9e8b",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk.js": "89c8950bd5f72d9825de8a4c3c068df70497912d86bd10581daaade1a1aa72dd",
+    "embed.js": "58a04f296b6b4cbb7167aa9c102da8308b9b2bb24770fbe55350b5a16b08eebc"
+  },
+  "evidence": [
+    {
+      "path": "scratchpad/website-installation-independent-api-expanded.json",
+      "sha": "772b5c52bf6178b6fd43f3002cce5e6c60e97e0cb5ffa294e7a5ed5eff119940"
+    },
+    {
+      "path": "scratchpad/website-installation-independent-browser-confirmed.json",
+      "sha": "9c50f640cf6d1e3cc0ad2193a678b43cd2a253c3ceb153a8ef32139e1b35ed8d"
+    }
+  ],
+  "harnesses": [
+    {
+      "path": "scratchpad/website-installation-independent-fixture.mjs",
+      "sha": "101e423e0e0c9484ba4d7d65ba047757bd87269e17ab58346b72a7d77d7c000b"
+    },
+    {
+      "path": "scratchpad/website-installation-independent-api.mjs",
+      "sha": "cf4c9ea267885e810bed5d477346d5681f7ea6d2d20b8ee3894d1cebcb317c31"
+    },
+    {
+      "path": "scratchpad/website-installation-independent-browser.mjs",
+      "sha": "64df7077cb852ce4da70ab01929d5d04af6c573d4631639d77c6af1f7bb47b9d"
+    }
+  ],
+  "retainedFindings": [
+    {
+      "finding": "Expired tombstone selected ordinary visitor history",
+      "baseline": "scratchpad/website-installation-independent-browser-first.json",
+      "status": "fixed and independently retested"
+    },
+    {
+      "finding": "Pending-turn reload sent forbidden turnId on observe",
+      "baseline": "scratchpad/website-installation-pending-reload-baseline.json",
+      "status": "fixed and independently retested"
+    },
+    {
+      "finding": "Old success-copy expectations after UI wording changed",
+      "baseline": "scratchpad/website-installation-independent-browser-accepted.json",
+      "status": "fixture corrected; actual DTO/ack outcomes remained correct"
+    }
+  ],
+  "separateLaunchBlocker": {
+    "finding": "Same-slug incarnation replacement exposes old leads/transcripts/events and feeds old same-contact transcript to model",
+    "evidence": "scratchpad/tenant-incarnation-independent-baseline.json",
+    "status": "confirmed; not part of G2 runtime scope"
+  },
+  "limits": [
+    "Installed SDK and Blobs HTTP protocols were replaced in process; no real inference or durable hosted storage established.",
+    "Browser requests were intercepted and dispatched to actual isolated handlers; no customer website installed and no hosted end-to-end delivery established.",
+    "No production readiness or publication acceptance claimed. Provider account availability and tenant-incarnation isolation remain separate launch gates."
+  ],
+  "screenshots": [
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-owner-320.png",
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-owner-390.png",
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-owner-1440.png",
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-embed-320.png",
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-embed-390.png",
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-embed-1440.png",
+    "/private/tmp/mc-website-installation-659/scratchpad/website-installation-independent-browser-confirmed-saved-unconfirmed-390.png"
+  ]
+}

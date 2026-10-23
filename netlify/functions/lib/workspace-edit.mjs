@@ -8,7 +8,7 @@ const own = (value, key) => Object.hasOwn(value || {}, key);
 const plain = value => !!value && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
 const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const editable = {
-  business: ['name', 'trade', 'city', 'serviceArea', 'notServed', 'hours', 'afterHours', 'spanish', 'licenses', 'googlePlaceId', 'reviewLink', 'payLink'],
+  business: ['name', 'website', 'trade', 'city', 'serviceArea', 'notServed', 'hours', 'afterHours', 'spanish', 'licenses', 'googlePlaceId', 'reviewLink', 'payLink'],
   owner: ['name', 'phone', 'backupPhone'], phone: ['businessNumber', 'transferTo', 'forwarding', 'carrier'],
   widget: ['greeting', 'allowedOrigins'], digest: ['text'],
   rules: ['never', 'handoff', 'emergencies', 'ackMinutes', 'callbackHours', 'callbackAfterHours', 'windowCapacity', 'consentAsk', 'emergency247', 'hours', 'bypass', 'avgTicket'],
@@ -116,7 +116,7 @@ export function parseWorkspacePatch(input, { operator = false } = {}) {
     if (normalized !== undefined) { const derived = parseHours(normalized); if (derived) hours(derived, path); }
     return normalized;
   };
-  const business = { name: text(120), trade: text(80), city: text(80), serviceArea: list(), notServed: list(), hours: readableHours, afterHours: text(300), spanish: bool, licenses: text(200), googlePlaceId: text(120), reviewLink: link(), payLink: link() };
+  const business = { name: text(120), website: link(), trade: text(80), city: text(80), serviceArea: list(), notServed: list(), hours: readableHours, afterHours: text(300), spanish: bool, licenses: text(200), googlePlaceId: text(120), reviewLink: link(), payLink: link() };
   const schema = {
     business: object(operator ? Object.fromEntries(['name', 'city', 'serviceArea', 'notServed'].map(key => [key, business[key]])) : business),
     services: list(60), fees: rows(30, fee, ['label', 'amount']), windows: list(8), faq: rows(40, faq, ['q', 'a']), summary: text(2000, false, true),

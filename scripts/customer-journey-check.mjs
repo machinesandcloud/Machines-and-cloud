@@ -34,7 +34,7 @@ try {
   await page.locator('#next').click();
   check('Signup shows actionable required-field validation before advancing', /highlighted/.test(await page.locator('#err').innerText()) && await page.locator('[data-step="1"]').isVisible());
   await page.locator('#name').fill(seed.name); await page.locator('#email').fill(seed.email); await page.locator('#phone').fill(seed.phone);
-  await page.locator('#next').click(); await page.locator('#business').fill(seed.business); await page.locator('#trade').fill('HVAC'); await page.locator('#hours').fill(seed.hours); await page.locator('#serviceArea').fill('Katy');
+  await page.locator('#next').click(); await page.locator('#business').fill(seed.business); await page.locator('#trade').selectOption('HVAC'); await page.locator('#hours').fill(seed.hours); await page.locator('#serviceArea').fill('Katy');
   await page.locator('#spanish').selectOption('no'); await page.locator('#next').click();
   await page.locator('#fees').fill(seed.fees); await page.locator('#windows').fill(seed.windows); await page.locator('#next').click();
   await page.locator('#notes').fill('Synthetic QA shop; no real customers.'); await page.locator('#next').click(); await page.locator('#forwarding').selectOption('none');

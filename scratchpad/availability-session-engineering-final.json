@@ -1,0 +1,433 @@
+{
+  "at": "2026-10-23T01:57:00.996Z",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "desk.js": "6de9602ca248b0a4c7cd098874a103e28e1ad98d8da8bd5f39d8ab64b5e7425e",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6"
+  },
+  "checks": [
+    {
+      "name": "Actual expired-session401 clears private state at 320",
+      "pass": true
+    },
+    {
+      "name": "Actual expired-session401 clears private state at 390",
+      "pass": true
+    },
+    {
+      "name": "Actual expired-session401 clears private state at 1440",
+      "pass": true
+    },
+    {
+      "name": "Actual replaced-owner403 on unblock clears state and keeps its saved block",
+      "pass": true
+    },
+    {
+      "name": "Empty auth response is handled before JSON parsing",
+      "pass": true
+    },
+    {
+      "name": "Non-auth 409 retains draft and confirmed blocks, then permits deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth 503 retains draft and confirmed blocks, then permits deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth network retains draft and confirmed blocks, then permits deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth malformed retains draft and confirmed blocks, then permits deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Late response after canonical expiry cannot restore private state",
+      "pass": true
+    },
+    {
+      "name": "Late body after canonical expiry cannot restore private state",
+      "pass": true
+    },
+    {
+      "name": "Late error after canonical expiry cannot restore private state",
+      "pass": true
+    },
+    {
+      "name": "Pending request deduplicates keyboard submissions and preserves newer typing",
+      "pass": true
+    },
+    {
+      "name": "Failed signout frees controls; obsolete completion cannot unlock a newer request",
+      "pass": true
+    },
+    {
+      "name": "Successful signout ignores a late accepted availability response",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "availability-session-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-1",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 401
+    },
+    {
+      "slug": "availability-session-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-2",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 401
+    },
+    {
+      "slug": "availability-session-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-3",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 401
+    },
+    {
+      "slug": "availability-session-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-4",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-4",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 403
+    },
+    {
+      "slug": "availability-session-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-5",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "fixture": "auth-empty",
+      "status": 401
+    },
+    {
+      "slug": "availability-session-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-6",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-6",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "fixture": 409,
+      "status": 409
+    },
+    {
+      "slug": "availability-session-6",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "fixture": 503,
+      "status": 503
+    },
+    {
+      "slug": "availability-session-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-8",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-8",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "fixture": "network",
+      "status": "aborted"
+    },
+    {
+      "slug": "availability-session-8",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-9",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-9",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "fixture": "malformed",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-9",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-10",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-11",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-12",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-13",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-14",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-14",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-14",
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 503,
+      "fixture": "signout503"
+    },
+    {
+      "slug": "availability-session-14",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-14",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-27",
+      "window": "12 to 5",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-15",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-15",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2026-10-26",
+      "window": "8 to 12",
+      "status": 200
+    },
+    {
+      "slug": "availability-session-15",
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "desk.js": "6de9602ca248b0a4c7cd098874a103e28e1ad98d8da8bd5f39d8ab64b5e7425e",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 15,
+    "failed": 0
+  }
+}

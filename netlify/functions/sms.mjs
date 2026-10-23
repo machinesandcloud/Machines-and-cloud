@@ -42,14 +42,14 @@ export default async (req) => {
   if (c.owner?.phone && from === c.owner.phone) {
     if (/^help$/i.test(body)) return twiml(HELP);
     const reply = await ownerCommand(c, body);
-    if (reply) { await logEvent(c.slug, "owner_command", { body }); return twiml(reply); }
+    if (reply) { await logEvent(c, "owner_command", { body }); return twiml(reply); }
     return twiml(`Did not catch that. ${HELP}`);
   }
 
   // Numbers on the owner's always-ring-through list: relay the text, never answer it.
   if ((c.rules?.bypass || []).includes(from)) {
     await notifyOwner(c, `VIP text from ${from}: ${body.slice(0, 600)}`, { type: "owner_note" });
-    await logEvent(c.slug, "vip_text", { from });
+    await logEvent(c, "vip_text", { from });
     return twiml("");
   }
 
@@ -58,7 +58,7 @@ export default async (req) => {
     if (await optedOut(from)) return twiml(""); // already out: one confirmation is all CTIA allows, so repeats are silent
     await recordOptOut(from, c.slug, body.slice(0, 80));
     const n = await cancelTasksForNumber(from);
-    await logEvent(c.slug, "opt_out", { from, cancelled: n, viaTwilio: !!params.OptOutType });
+    await logEvent(c, "opt_out", { from, cancelled: n, viaTwilio: !!params.OptOutType });
     await notifyOwner(c, `${name} front desk: ${from} opted out of texts. Nothing more will be sent to them.`, { type: "owner_note" });
     // "cancel" from someone with a visit on the books is also a cancellation request: the owner decides.
     let told = "";
@@ -72,14 +72,14 @@ export default async (req) => {
     return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
   }
   if (await optedOut(from)) {
-    if (START_RE.test(body)) { await clearOptOut(from); await logEvent(c.slug, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
+    if (START_RE.test(body)) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
     return twiml(""); // opted out: no replies, no model
   }
 
   // Paused or cancelled: one reply per number per 24 hours pointing at the main line, no model.
   if (!ACTIVE.includes(c.status)) {
     if (c.status === "paused" || c.status === "cancelled") {
-      const conv = await getConversation(c.slug, "sms", from);
+      const conv = await getConversation(c, "sms", from);
       const last = [...conv.messages].reverse().find((m) => m.system === "paused-reply");
       if (last && Date.now() - new Date(last.at).getTime() < 24 * 3600 * 1000) return twiml("");
       const msg = `${name}: this line is not being answered right now. Please call ${c.phone?.businessNumber || "our main line"}.`;
@@ -90,9 +90,9 @@ export default async (req) => {
     return twiml(`Thanks for texting ${name}. Please call ${c.phone?.businessNumber || "our main line"} and we will help right away.`);
   }
 
-  await logEvent(c.slug, "sms_inbound", { from }); await noteInbound(c.slug);
+  await logEvent(c, "sms_inbound", { from }); await noteInbound(c);
   try { await noteReviewReply(c, from, body); } catch (err) { console.error("review reply", err); }
-  const conv = await getConversation(c.slug, "sms", from);
+  const conv = await getConversation(c, "sms", from);
   // A YES to the marketing-consent ask: record it and answer without the model.
   try {
     const consentReply = await noteConsentReply(c, from, body, conv);
@@ -128,7 +128,7 @@ export default async (req) => {
   await saveConversation(conv);
   try {
     await fetch(`${new URL(req.url).origin}/.netlify/functions/sms-agent-background`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": process.env.ADMIN_KEY || "" }, body: JSON.stringify({ slug: c.slug, from }) });
-  } catch (err) { console.error("could not start sms agent", err); await logEvent(c.slug, "sms_agent_failed", { from, error: "background start failed" }); }
+  } catch (err) { console.error("could not start sms agent", err); await logEvent(c, "sms_agent_failed", { from, error: "background start failed" }); }
   return twiml("");
 };
 

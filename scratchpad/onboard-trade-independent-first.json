@@ -1,0 +1,468 @@
+{
+  "at": "2026-10-23T02:07:17.768Z",
+  "scope": "Actual local access/onboarding handlers with synthetic preverified sessions and memory storage; real trade form DOM. No signup email, provider, model or physical network request.",
+  "sourceBefore": {
+    "onboard.html": "6f6d9717c7da84d9a887a7fc75759a75ce1bd6c7877190387634b064f7cc714a",
+    "onboard.js": "707288d91c90a98f514f69496abac13c038516e49e5c6f27ba03706582bf59b0",
+    "onboard.css": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6"
+  },
+  "harnessHash": "14a64e5dd4c43c1582e1bc823533ac6427834af3f35ffbd7088aab3c62d7fd26",
+  "checks": [
+    {
+      "name": "Native presets include a blank prompt and allow a real named choice without a custom field",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n'' !== 'HVAC'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'' !== 'HVAC'\n\n    at file:///private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent.mjs:32:533\n    at async check (file:///private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent.mjs:23:60)\n    at async file:///private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent.mjs:31:2",
+      "state": {
+        "step": "2",
+        "trade": "",
+        "custom": "",
+        "focus": "trade",
+        "error": ""
+      }
+    },
+    {
+      "name": "320px Other blank/whitespace shows an associated error and focuses the custom field",
+      "pass": true
+    },
+    {
+      "name": "390px Other blank/whitespace shows an associated error and focuses the custom field",
+      "pass": true
+    },
+    {
+      "name": "1440px Other blank/whitespace shows an associated error and focuses the custom field",
+      "pass": true
+    },
+    {
+      "name": "320px custom trade autosaves canonical text and restores it through the actual draft handler",
+      "pass": true
+    },
+    {
+      "name": "390px custom trade autosaves canonical text and restores it through the actual draft handler",
+      "pass": true
+    },
+    {
+      "name": "1440px custom trade autosaves canonical text and restores it through the actual draft handler",
+      "pass": true
+    },
+    {
+      "name": "Actual synthetic workspace stores canonical Tree service without the UI-only custom field",
+      "pass": true
+    },
+    {
+      "name": "Actual synthetic workspace stores canonical Solar panel installation without the UI-only custom field",
+      "pass": true
+    },
+    {
+      "name": "Other to preset to Other preserves the unsent custom label in the same tab",
+      "pass": true
+    },
+    {
+      "name": "Saved nonpreset trade and original casing restore through Other without normalization loss",
+      "pass": true
+    },
+    {
+      "name": "Custom trade80-character boundary accepts ordinary typing but rejects an overlong supplied DOM value",
+      "pass": true
+    },
+    {
+      "name": "Actual server trade rejection returns to the preset control with correct error focus",
+      "pass": true
+    },
+    {
+      "name": "Actual server trade rejection returns to the custom control with correct error focus",
+      "pass": true
+    },
+    {
+      "name": "Edited safety tiers survive later trade changes and restored custom drafts",
+      "pass": false,
+      "error": "locator.fill: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[name=\"tier1\"]')\u001b[22m\n\u001b[2m    - locator resolved to <textarea id=\"tier1\" name=\"tier1\" class=\"form-input\"></textarea>\u001b[22m\n\u001b[2m    - fill(\"Always ask the owner about our specialist work\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    10 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "stack": "locator.fill: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[name=\"tier1\"]')\u001b[22m\n\u001b[2m    - locator resolved to <textarea id=\"tier1\" name=\"tier1\" class=\"form-input\"></textarea>\u001b[22m\n\u001b[2m    - fill(\"Always ask the owner about our specialist work\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    10 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent.mjs:56:109\n    at async check (/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent.mjs:23:60)\n    at async file:///private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent.mjs:55:2",
+      "state": {
+        "step": "4",
+        "trade": "HVAC",
+        "custom": "",
+        "focus": "",
+        "error": ""
+      }
+    },
+    {
+      "name": "Repair trade negative and HVAC positive cases agree in browser defaults and actual server configuration",
+      "pass": true
+    },
+    {
+      "name": "Signout reset clears and disables the custom input rather than leaving an active hidden required field",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Tree service",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Tree service",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Tree service",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Tree service",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Tree service",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/onboard",
+      "method": "POST",
+      "status": 200,
+      "trade": "Tree service",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/onboard",
+      "method": "POST",
+      "status": 200,
+      "trade": "Solar panel installation",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Flooring",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Historic window restoration",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Historic WINDOW restoration",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Historic WINDOW restoration",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "plumbing",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "plumbing",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Roofing",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/onboard",
+      "method": "POST",
+      "status": 400,
+      "field": "trade",
+      "trade": "Roofing",
+      "containsCustomTrade": false,
+      "explicitFixture": "Actual handler supplied blank trade to exercise server error routing"
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "status": 200,
+      "trade": "Stained glass restoration",
+      "containsCustomTrade": false
+    },
+    {
+      "path": "/api/onboard",
+      "method": "POST",
+      "status": 400,
+      "field": "business.trade",
+      "trade": "Stained glass restoration",
+      "containsCustomTrade": false,
+      "explicitFixture": "Actual handler supplied blank trade to exercise server error routing",
+      "fieldAliasFixture": "Actual trade rejection projected as business.trade compatibility field"
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "status": 200,
+      "action": "sign_out"
+    }
+  ],
+  "screenshots": [
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-failure-0.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-other-error-320.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-other-error-390.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-other-error-1440.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-custom-restored-320.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-custom-restored-390.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-custom-restored-1440.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/onboard-trade-independent-first-failure-14.png"
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "syntheticWorkspaces": [
+    {
+      "slug": "fixture-services-8-dfbb",
+      "trade": "Tree service"
+    },
+    {
+      "slug": "fixture-services-9-0957",
+      "trade": "Solar panel installation"
+    }
+  ],
+  "sourceAfter": {
+    "onboard.html": "6f6d9717c7da84d9a887a7fc75759a75ce1bd6c7877190387634b064f7cc714a",
+    "onboard.js": "707288d91c90a98f514f69496abac13c038516e49e5c6f27ba03706582bf59b0",
+    "onboard.css": "482a58a53946c1f81ffb50dd7a92282e3f1c2009211f0242b2692abbafd0bd33",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 15,
+    "failed": 2,
+    "total": 17,
+    "physicalNetwork": 0,
+    "actualModelRequests": 0,
+    "mockSDKRequests": 0,
+    "pageErrors": 0,
+    "forbiddenRequests": 0,
+    "syntheticWorkspaces": 2
+  }
+}

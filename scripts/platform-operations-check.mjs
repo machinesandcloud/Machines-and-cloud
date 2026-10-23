@@ -124,7 +124,7 @@ async function suite(mode) {
   });
   if (mode === "sdk") {
     await check(prefix + "durable queue repairs missing operation projection after failed second write", async () => {
-      const target = await client(mode, "intent"), id = `${target.slug}/workspace_rebuild/${configurationRevision(target)}`;
+      const target = await client(mode, "intent"), id = operations.workspaceOperationId(target, configurationRevision(target));
       fault = { kind: "site:workspace_operations", key: id, method: "PUT" }; await assert.rejects(() => queued(target)); fault = null;
       assert.ok((await read("platform_operations", "active_queue_v1")).intents[id]); assert.equal(await read("workspace_operations", id), null);
       await operations.recoverWorkspaceOperations(); assert.equal((await read("workspace_operations", id)).state, "succeeded");
@@ -214,6 +214,32 @@ async function suite(mode) {
       fault = { kind: "site:platform_operations", key: "active_queue_v1", method: "GET" }; await assert.rejects(() => operations.recoverWorkspaceOperations()); fault = null;
     });
   }
+  await check(prefix + "same-rules replacement gets its own rebuild and current requests resume one operation", async () => {
+    const old = await client(mode, "tenant-replacement"), oldWork = await queued(old), oldRow = await opRead(oldWork);
+    const replacement = { ...old, ownerKey: old.ownerKey + "-replacement" };
+    assert.equal(configurationRevision(replacement), configurationRevision(old));
+    await store.put("clients", old.slug, replacement);
+    const current = await Promise.all([queued(replacement), queued(replacement), queued(replacement)]);
+    assert.ok(current.every(row => row.id === current[0].id)); assert.notEqual(current[0].id, oldWork.id);
+    assert.deepEqual(await opRead(oldWork), oldRow);
+    assert.deepEqual((await operations.listWorkspaceOperations(replacement)).map(row => row.id), [current[0].id]);
+    await assert.rejects(() => operations.retryWorkspaceOperation(replacement, oldWork.id, requestOptions(replacement)), error => error.code === "operation_not_found");
+    await operations.recoverWorkspaceOperations();
+    const saved = await read("clients", replacement.slug); assert.equal(saved.ownerKey, replacement.ownerKey); assert.equal(saved.build.operationId, current[0].id);
+  });
+  await check(prefix + "exact-current historical operation and missing projection resume without a second rebuild", async () => {
+    for (const missing of [false, true]) {
+      const target = await client(mode, missing ? "legacy-intent" : "legacy-operation"), modern = await queued(target), raw = await opRead(modern);
+      const legacyId = `${target.slug}/workspace_rebuild/${configurationRevision(target)}`, legacy = { ...raw, id: legacyId };
+      const queue = await read("platform_operations", "active_queue_v1"), intent = queue.intents[modern.id]; delete queue.intents[modern.id];
+      queue.intents[legacyId] = { ...intent, id: legacyId }; await store.put("platform_operations", "active_queue_v1", queue);
+      await store.del("workspace_operations", modern.id); if (!missing) await store.put("workspace_operations", legacyId, legacy);
+      const resumed = await Promise.all([queued(target), queued(target)]);
+      assert.ok(resumed.every(row => row.id === legacyId)); assert.equal(await opRead(modern), null);
+      await operations.recoverWorkspaceOperations(); assert.equal((await read("clients", target.slug)).build.operationId, legacyId);
+      const rows = await operations.listWorkspaceOperations(target); assert.equal(rows.length, 1); assert.equal(rows[0].id, legacyId);
+    }
+  });
   await check(prefix + "fair cursor reaches later customers beyond fifty candidates with bounded execution", async () => {
     const batch = []; for (let i = 0; i < 65; i++) { const target = await client(mode, "fair-" + String(i).padStart(2, "0")); batch.push(await queued(target)); }
     const scans = []; for (let i = 0; i < 3; i++) scans.push(await operations.recoverWorkspaceOperations());

@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { normalizeAccountEmail, strictRead } from './accounts.mjs';
 import { getAccessSession } from './access.mjs';
-import { atomicUpdate, list } from './store.mjs';
+import { atomicUpdate, list, assertCurrentWorkspace, listWorkspaceRecords } from './store.mjs';
 import { configurationRevision, setupReadiness, isSupportedSelfServiceClient as isSelfServiceClient } from './setup.mjs';
 import { getAIAllowance } from './self-service-ai.mjs';
 import { listWorkspaceOperations, queueWorkspaceRebuild, retryWorkspaceOperation } from './platform-operations.mjs';
@@ -11,6 +11,8 @@ import { deliveryTenant } from './managed-consent.mjs';
 import { managedSMSConversations } from './managed-history.mjs';
 import { queueServiceReconciliation, runServiceReconciliation, serviceReconciliationView } from './service-reconciliation.mjs';
 import { parseWorkspacePatch, WorkspaceEditError } from './workspace-edit.mjs';
+
+import { workspaceTenant, belongsToWorkspace } from './workspace-identity.mjs';
 
 export class OperatorError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
@@ -35,7 +37,7 @@ const closedStatus = status => ['cancelled', 'archived'].includes(status);
 const sanitizedActivity = row => ({ at: row.at || null, type: trim(row.type || row.action, 80), detail: trim(row.reason || '', 300), actor: trim(row.actor, 254) });
 export async function customerView(c, detail = false) {
   const selfService = isSelfServiceClient(c); let setup = selfService ? setupReadiness(c) : null;
-  const [operations, aiAllowance, phoneActivation, services] = await Promise.all([selfService ? listWorkspaceOperations(c.slug) : [], selfService ? getAIAllowance(c) : null, selfService ? phoneActivationStatus(c) : null, selfService ? serviceConnections(c) : null]);
+  const [operations, aiAllowance, phoneActivation, services] = await Promise.all([selfService ? listWorkspaceOperations(c) : [], selfService ? getAIAllowance(c) : null, selfService ? phoneActivationStatus(c) : null, selfService ? serviceConnections(c) : null]);
   if (services) setup=serviceSetupView(c,services);
   const issues = [];
   if (c.build?.status === 'failed') issues.push({ id: 'draft', severity: 'high', title: 'Desk draft needs repair', detail: 'Saved customer answers are retained. Queue a workspace rebuild.' });
@@ -56,11 +58,11 @@ export async function customerView(c, detail = false) {
     const service=services && ({voice:services.voice,sms:services.messaging,calendar:services.calendar})[row.id];
     return service?{...row,status:service.active?'active':service.status || service.state,detail:service.operation?.detail || service.detail || row.detail}:row;
   });
-  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, issues, aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
+  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, issues, aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
   if (detail) {
     for (const operation of operations) {
       const raw = await strictRead('workspace_operations', operation.id);
-      if (!raw) continue;
+      if (!raw||!belongsToWorkspace(c,raw)) continue;
       row.activity.push(sanitizedActivity({ at: raw.createdAt, type: 'workspace_refresh_requested', actor: raw.requestedBy?.email, reason: raw.reason }));
       for (const retry of (raw.retryHistory || []).slice(-20)) row.activity.push(sanitizedActivity({ at: retry.at, type: 'workspace_refresh_retry', actor: retry.actor?.email, reason: retry.reason }));
     }
@@ -68,8 +70,12 @@ export async function customerView(c, detail = false) {
     row.rules = { business: { name: c.business?.name || '', city: c.business?.city || '', serviceArea: c.business?.serviceArea || [], notServed: c.business?.notServed || [] }, services: c.services || [], fees: c.fees || [], windows: c.windows || [], faq: c.faq || [], summary: c.summary || '' };
     row.records = {};
     for (const kind of ['bookings', 'leads', 'conversations']) {
-      const keys = (await list(kind, c.slug + '/')).sort().slice(-100);
-      let records = (await Promise.all(keys.map(key => strictRead(kind, key)))).filter(Boolean);
+      let records;
+      if(kind==='conversations'){
+        const prefix=selfService?`${c.slug}/${workspaceTenant(c)}/`:c.slug+'/';
+        const keys=(await list(kind,prefix)).sort().slice(-100);
+        records=(await Promise.all(keys.map(key=>strictRead(kind,key)))).filter(record=>record&&belongsToWorkspace(c,record));
+      }else{const page=await listWorkspaceRecords(c,kind,100);records=page.records;row.recordListing ||= {};row.recordListing[kind]=page.listing;}
       if (kind === 'conversations' && selfService) {
         const sms = await managedSMSConversations(c, { limit: 60 });
         records = records.filter(record => !sms.some(managed => record.channel === 'sms' && managed.contact === record.contact)).concat(sms);
@@ -78,9 +84,9 @@ export async function customerView(c, detail = false) {
       row.metrics[kind] = records.length;
       row.records[kind] = records.map(record => ({ id: record.id || null, at: record.updatedAt || record.createdAt || null, status: record.status || null, name: trim(record.name, 120), phone: trim(record.phone || record.contact, 40), issue: trim(record.issue || record.service || record.reason, 500), date: trim(record.date, 40), window: trim(record.window, 80), channel: trim(record.channel, 20), messages: kind === 'conversations' ? (record.messages || []).slice(-20).map(m => ({ role: m.role, content: trim(m.content, 4000), at: m.at || null, ...(m.processing ? { processing: trim(m.processing, 40) } : {}) })) : undefined }));
     }
-    row.metrics.scope = 'Latest 100 records per category; conversations include up to 60 recent texting contacts.';
+    row.metrics.scope = Object.values(row.recordListing || {}).some(listing => listing.incomplete) ? 'Counts cover the records shown; history is incomplete. Setup checks are excluded.' : 'Latest 100 records per category; conversations include up to 60 recent texting contacts.';
   } else row.metrics.scope = 'Open setup issues; records load with customer details';
-  return row;
+  await assertCurrentWorkspace(c);return row;
 }
 export async function customerPage(cursor = '') {
   if (cursor && !/^[a-z0-9-]{1,40}$/.test(cursor)) throw new OperatorError('invalid_cursor', 'Reload the customer list.');
@@ -130,9 +136,9 @@ export async function supportAction(session, body) {
     }
     if (patch) for (const [key, item] of Object.entries(patch)) value[key] = key === 'business' ? { ...value.business, ...item } : item;
     if (['pause','resume','cancel_service'].includes(body.action)) value.operationLifecycleVersion = (current.operationLifecycleVersion || 0) + 1;
-    const audit = { id: eventId, at, actor: session.email, action: body.action, reason, fields: patch ? Object.keys(patch) : [] };
+    const audit = { tenantIdentity:workspaceTenant(current),id: eventId, at, actor: session.email, action: body.action, reason, fields: patch ? Object.keys(patch) : [] };
     if (body.action === 'reconcile_services' && (current.management?.serviceReconciliations || []).some(row => ['queued','running','retry','waiting_platform'].includes(row.state))) throw new OperatorError('checks_already_queued', 'Service checks are already queued. Review their saved status before requesting another check.', 409);
-    value.management = { ...value.management, revision: (value.management?.revision || 0) + 1, audit: [...(value.management?.audit || []), audit].slice(-100), notes: body.action === 'save_note' ? [...(value.management?.notes || []), { id: eventId, at, actor: session.email, text: body.text.trim() }].slice(-100) : value.management?.notes || [] };
+    value.management = { ...value.management, revision: (value.management?.revision || 0) + 1, audit: [...(value.management?.audit || []), audit].slice(-100), notes: body.action === 'save_note' ? [...(value.management?.notes || []), { tenantIdentity:workspaceTenant(current),id: eventId, at, actor: session.email, text: body.text.trim() }].slice(-100) : value.management?.notes || [] };
     if (body.action === 'reconcile_services') value.management.serviceReconciliations = [...(value.management?.serviceReconciliations || []), { id:eventId,at,actor:session.email,reason,tenant:deliveryTenant(current),sequence:value.management.revision,state:'queued' }].slice(-20);
     value.updatedAt = at;
     return { value, result: value };

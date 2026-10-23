@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "groups": [
+    {
+      "name": "Available phone can be approved while SMS is unavailable; unsigned texting never starts",
+      "ok": true
+    },
+    {
+      "name": "Available texting can be approved while voice is unavailable; no forwarding data is demanded",
+      "ok": true
+    },
+    {
+      "name": "Deferred SMS requires a new exact offer and legal authority, then reuses one acquired number",
+      "ok": true
+    },
+    {
+      "name": "A failed shared number acquisition never fabricates a child handoff",
+      "ok": true
+    },
+    {
+      "name": "Losing one gate after both approvals still hands the other accepted child to its engine",
+      "ok": true
+    },
+    {
+      "name": "Changed voice terms do not stop previously accepted SMS or silently renew phone authority",
+      "ok": true
+    },
+    {
+      "name": "Rotating voice credentials does not become authority to rebuild voice or stall accepted texting",
+      "ok": true
+    },
+    {
+      "name": "Explicit scope, subset data and current offer are validated before a paid admission",
+      "ok": true
+    },
+    {
+      "name": "Exact earlier approval receipts remain replayable after a later channel is added; changed content refuses",
+      "ok": true
+    },
+    {
+      "name": "Cancellation after first channel dominates a later approval and retains common number cleanup",
+      "ok": true
+    },
+    {
+      "name": "A retained v1 authority continues and cancels without being reinterpreted as incremental v2 consent",
+      "ok": true
+    }
+  ],
+  "passed": 11,
+  "total": 11,
+  "sourceStable": true,
+  "sourceHashes": {
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "scripts/connection-admissions-check.mjs": "6817cfce25e749ee61a67394e54e4b171001d5858c9d1cad1c3ad9a5d40afcb6"
+  },
+  "mode": "conditional memory storage and existing-engine dependency fixtures; physical networking denied",
+  "physicalNetworkRequests": 0,
+  "providerDeliveryAcceptance": false
+}

@@ -1,0 +1,581 @@
+{
+  "at": "2026-10-23T03:53:58.321Z",
+  "scope": "Actual local verified-session onboarding and private owner GET with installed SDK/storage protocol double. No real account/provider/model/email/network operation. Local default-disabled platform configuration is not a hosted configuration observation.",
+  "sourceBefore": {
+    "onboard.html": "1578d3c24ffba4f89149c86bdf49a2408706be47bf19fdb79295124b89d67392",
+    "onboard.js": "c2e42d0e5fa112508562710b7b0be53c4a430b880d644b032aa4ed993385e709",
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/lib/service-connections.mjs": "7f7364eeee7db8574871cb06537545486a474f5d3f947e1dae3cf6b98392dc7e",
+    "netlify/functions/lib/service-onboarding.mjs": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290"
+  },
+  "checks": [
+    {
+      "channel": "web",
+      "pass": true,
+      "savedPreferenceOnly": true
+    },
+    {
+      "channel": "voice",
+      "pass": true,
+      "savedPreferenceOnly": true
+    },
+    {
+      "channel": "sms",
+      "pass": true,
+      "savedPreferenceOnly": true
+    },
+    {
+      "channel": "calendar",
+      "pass": true,
+      "savedPreferenceOnly": true
+    }
+  ],
+  "channels": [
+    {
+      "channel": "web",
+      "slug": "connection-web-fixture-c332",
+      "onboardStatus": 200,
+      "saved": {
+        "desiredChannels": [
+          "web"
+        ],
+        "phoneSetupMode": "forward_business_line",
+        "businessNumber": "+17135550197",
+        "carrier": "att",
+        "forwarding": "missed",
+        "website": "https://customer-a.fixture.invalid",
+        "allowedOrigins": [],
+        "legalFieldsPresent": [
+          "businessType",
+          "city",
+          "state"
+        ],
+        "status": "testing"
+      },
+      "journey": [
+        {
+          "id": "web",
+          "label": "Website chat",
+          "detail": "Review your business rules and complete a private test before activating customer chat.",
+          "nextStep": "Review what the desk knows",
+          "status": "needs_action",
+          "requested": true
+        },
+        {
+          "id": "voice",
+          "label": "Phone answering",
+          "detail": "Review your connection below.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": false,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "sms",
+          "label": "Text messages",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": false,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "calendar",
+          "label": "Calendar",
+          "detail": "Connect your Google calendar to sync saved visits.",
+          "nextStep": "Review the connection below",
+          "status": "not_connected",
+          "requested": false,
+          "active": false,
+          "ready": false
+        }
+      ],
+      "setupChannels": {
+        "web": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "review",
+              "label": "Review what the desk knows",
+              "detail": "Save your review of the current business rules.",
+              "tab": "know"
+            },
+            {
+              "id": "test",
+              "label": "Try your desk",
+              "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+              "tab": "test"
+            }
+          ]
+        },
+        "voice": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "voice",
+              "label": "Phone setup is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Review your connection below."
+        },
+        "sms": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "sms",
+              "label": "Text messaging is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service."
+        },
+        "calendar": {
+          "active": false,
+          "ready": false,
+          "status": "not_connected",
+          "detail": "Connect your Google calendar to sync saved visits."
+        }
+      },
+      "coordinator": {
+        "available": false,
+        "requestedChannels": [],
+        "reasonCode": "no_service_requested"
+      },
+      "providerMutationRows": {
+        "phone_activation_intents": 0,
+        "voice_activation_intents": 0,
+        "messaging_activation": 0,
+        "calendar_connections": 0,
+        "calendar_oauth": 0,
+        "service_onboarding_intents": 0,
+        "managed_deliveries": 0,
+        "calendar_deliveries": 0
+      }
+    },
+    {
+      "channel": "voice",
+      "slug": "connection-voice-fixture-60ad",
+      "onboardStatus": 200,
+      "saved": {
+        "desiredChannels": [
+          "voice"
+        ],
+        "phoneSetupMode": "forward_business_line",
+        "businessNumber": "+17135550197",
+        "carrier": "att",
+        "forwarding": "missed",
+        "website": "https://customer-a.fixture.invalid",
+        "allowedOrigins": [],
+        "legalFieldsPresent": [
+          "businessType",
+          "city",
+          "state"
+        ],
+        "status": "testing"
+      },
+      "journey": [
+        {
+          "id": "web",
+          "label": "Website chat",
+          "detail": "You have not requested this connection.",
+          "nextStep": "Choose your connections during setup",
+          "status": "not_selected",
+          "requested": false
+        },
+        {
+          "id": "voice",
+          "label": "Phone answering",
+          "detail": "Review your connection below.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": true,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "sms",
+          "label": "Text messages",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": false,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "calendar",
+          "label": "Calendar",
+          "detail": "Connect your Google calendar to sync saved visits.",
+          "nextStep": "Review the connection below",
+          "status": "not_connected",
+          "requested": false,
+          "active": false,
+          "ready": false
+        }
+      ],
+      "setupChannels": {
+        "web": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "review",
+              "label": "Review what the desk knows",
+              "detail": "Save your review of the current business rules.",
+              "tab": "know"
+            },
+            {
+              "id": "test",
+              "label": "Try your desk",
+              "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+              "tab": "test"
+            }
+          ]
+        },
+        "voice": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "voice",
+              "label": "Phone setup is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Review your connection below."
+        },
+        "sms": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "sms",
+              "label": "Text messaging is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service."
+        },
+        "calendar": {
+          "active": false,
+          "ready": false,
+          "status": "not_connected",
+          "detail": "Connect your Google calendar to sync saved visits."
+        }
+      },
+      "coordinator": {
+        "available": false,
+        "requestedChannels": [
+          "voice"
+        ],
+        "reasonCode": "service_unavailable"
+      },
+      "providerMutationRows": {
+        "phone_activation_intents": 0,
+        "voice_activation_intents": 0,
+        "messaging_activation": 0,
+        "calendar_connections": 0,
+        "calendar_oauth": 0,
+        "service_onboarding_intents": 0,
+        "managed_deliveries": 0,
+        "calendar_deliveries": 0
+      }
+    },
+    {
+      "channel": "sms",
+      "slug": "connection-sms-fixture-27c5",
+      "onboardStatus": 200,
+      "saved": {
+        "desiredChannels": [
+          "sms"
+        ],
+        "phoneSetupMode": "forward_business_line",
+        "businessNumber": "+17135550197",
+        "carrier": "att",
+        "forwarding": "missed",
+        "website": "https://customer-a.fixture.invalid",
+        "allowedOrigins": [],
+        "legalFieldsPresent": [
+          "businessType",
+          "city",
+          "state"
+        ],
+        "status": "testing"
+      },
+      "journey": [
+        {
+          "id": "web",
+          "label": "Website chat",
+          "detail": "You have not requested this connection.",
+          "nextStep": "Choose your connections during setup",
+          "status": "not_selected",
+          "requested": false
+        },
+        {
+          "id": "voice",
+          "label": "Phone answering",
+          "detail": "Review your connection below.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": false,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "sms",
+          "label": "Text messages",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": true,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "calendar",
+          "label": "Calendar",
+          "detail": "Connect your Google calendar to sync saved visits.",
+          "nextStep": "Review the connection below",
+          "status": "not_connected",
+          "requested": false,
+          "active": false,
+          "ready": false
+        }
+      ],
+      "setupChannels": {
+        "web": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "review",
+              "label": "Review what the desk knows",
+              "detail": "Save your review of the current business rules.",
+              "tab": "know"
+            },
+            {
+              "id": "test",
+              "label": "Try your desk",
+              "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+              "tab": "test"
+            }
+          ]
+        },
+        "voice": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "voice",
+              "label": "Phone setup is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Review your connection below."
+        },
+        "sms": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "sms",
+              "label": "Text messaging is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service."
+        },
+        "calendar": {
+          "active": false,
+          "ready": false,
+          "status": "not_connected",
+          "detail": "Connect your Google calendar to sync saved visits."
+        }
+      },
+      "coordinator": {
+        "available": false,
+        "requestedChannels": [
+          "sms"
+        ],
+        "reasonCode": "service_unavailable"
+      },
+      "providerMutationRows": {
+        "phone_activation_intents": 0,
+        "voice_activation_intents": 0,
+        "messaging_activation": 0,
+        "calendar_connections": 0,
+        "calendar_oauth": 0,
+        "service_onboarding_intents": 0,
+        "managed_deliveries": 0,
+        "calendar_deliveries": 0
+      }
+    },
+    {
+      "channel": "calendar",
+      "slug": "connection-calendar-fixture-8532",
+      "onboardStatus": 200,
+      "saved": {
+        "desiredChannels": [
+          "calendar"
+        ],
+        "phoneSetupMode": "forward_business_line",
+        "businessNumber": "+17135550197",
+        "carrier": "att",
+        "forwarding": "missed",
+        "website": "https://customer-a.fixture.invalid",
+        "allowedOrigins": [],
+        "legalFieldsPresent": [
+          "businessType",
+          "city",
+          "state"
+        ],
+        "status": "testing"
+      },
+      "journey": [
+        {
+          "id": "web",
+          "label": "Website chat",
+          "detail": "You have not requested this connection.",
+          "nextStep": "Choose your connections during setup",
+          "status": "not_selected",
+          "requested": false
+        },
+        {
+          "id": "voice",
+          "label": "Phone answering",
+          "detail": "Review your connection below.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": false,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "sms",
+          "label": "Text messages",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+          "nextStep": "Review the connection below",
+          "status": "unavailable",
+          "requested": false,
+          "active": false,
+          "ready": false
+        },
+        {
+          "id": "calendar",
+          "label": "Calendar",
+          "detail": "Connect your Google calendar to sync saved visits.",
+          "nextStep": "Review the connection below",
+          "status": "not_connected",
+          "requested": true,
+          "active": false,
+          "ready": false
+        }
+      ],
+      "setupChannels": {
+        "web": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "review",
+              "label": "Review what the desk knows",
+              "detail": "Save your review of the current business rules.",
+              "tab": "know"
+            },
+            {
+              "id": "test",
+              "label": "Try your desk",
+              "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+              "tab": "test"
+            }
+          ]
+        },
+        "voice": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "voice",
+              "label": "Phone setup is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Review your connection below."
+        },
+        "sms": {
+          "ready": false,
+          "active": false,
+          "blockers": [
+            {
+              "id": "sms",
+              "label": "Text messaging is not active",
+              "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+              "tab": "setup"
+            }
+          ],
+          "status": "unavailable",
+          "detail": "Texting setup is not available yet. Preferences do not purchase or register service."
+        },
+        "calendar": {
+          "active": false,
+          "ready": false,
+          "status": "not_connected",
+          "detail": "Connect your Google calendar to sync saved visits."
+        }
+      },
+      "coordinator": {
+        "available": false,
+        "requestedChannels": [],
+        "reasonCode": "no_service_requested"
+      },
+      "providerMutationRows": {
+        "phone_activation_intents": 0,
+        "voice_activation_intents": 0,
+        "messaging_activation": 0,
+        "calendar_connections": 0,
+        "calendar_oauth": 0,
+        "service_onboarding_intents": 0,
+        "managed_deliveries": 0,
+        "calendar_deliveries": 0
+      }
+    }
+  ],
+  "sourceAfter": {
+    "onboard.html": "1578d3c24ffba4f89149c86bdf49a2408706be47bf19fdb79295124b89d67392",
+    "onboard.js": "c2e42d0e5fa112508562710b7b0be53c4a430b880d644b032aa4ed993385e709",
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/lib/service-connections.mjs": "7f7364eeee7db8574871cb06537545486a474f5d3f947e1dae3cf6b98392dc7e",
+    "netlify/functions/lib/service-onboarding.mjs": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "physicalNetwork": 0,
+    "modelRequests": 0
+  }
+}

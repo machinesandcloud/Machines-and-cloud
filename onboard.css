@@ -151,3 +151,21 @@ body:not([data-setup-state="questions"]) .onboard-workspace-note{max-width:500px
 
 @media(max-width:900px){body[data-setup-state="questions"] .onboard-welcome{display:none}}
 @media(min-width:601px) and (max-width:900px){.ob .row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}}
+
+/* Selected connections explain the real setup path before the workspace is created. */
+.onboarding-page .connection-preview { margin:18px 0; padding:18px; border:1px solid #d9e4f4; border-radius:16px; background:#f7faff; }
+.onboarding-page .connection-preview-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.onboarding-page .connection-preview-heading h4 { margin:0; color:#203a60; font-size:14px; line-height:1.45; }
+.onboarding-page #connection-preview-count { flex:none; margin:2px 0 0; font-size:10px; color:#637da2; white-space:nowrap; }
+.onboarding-page .connection-preview-intro { font-size:12px; line-height:1.7; color:#627692; margin:10px 0 15px; }
+.onboarding-page .connection-preview-card { border-top:1px solid #dfE7f3; padding:12px 0; }
+.onboarding-page .connection-preview-card:last-child { padding-bottom:0; }
+.onboarding-page .connection-preview-card summary { cursor:pointer; min-height:44px; color:#28456c; font-size:12px; }
+.onboarding-page .connection-preview-card summary strong { margin-left:4px; font-size:13px; }
+.onboarding-page .connection-preview-card summary span { display:block; margin:5px 0 0 18px; color:#6a7e9a; font-size:11px; line-height:1.5; }
+.onboarding-page .connection-preview-card dl { display:grid; gap:10px; margin:14px 0 5px; }
+.onboarding-page .connection-preview-card dl>div { display:grid; grid-template-columns:105px minmax(0,1fr); gap:12px; }
+.onboarding-page .connection-preview-card dt { color:#4f6b94; font-size:10px; font-weight:650; padding-top:2px; }
+.onboarding-page .connection-preview-card dd { margin:0; color:#344d70; font-size:12px; line-height:1.6; }
+.onboarding-page .connection-preview-note,.onboarding-page .connection-preview-empty { color:#677c99; font-size:11px; line-height:1.6; margin:12px 0 0; }
+@media(max-width:480px) { .onboarding-page .connection-preview { padding:15px; } .onboarding-page .connection-preview-heading { display:block; } .onboarding-page #connection-preview-count { margin-top:5px; } .onboarding-page .connection-preview-card dl>div { grid-template-columns:1fr; gap:3px; } }

@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-23T01:07:40.285Z",
+  "scope": "Actual embed DOM with explicit observation/stream/receipt fixtures; no model, provider or real handler outcome claimed.",
+  "checks": [
+    {
+      "name": "ordinary",
+      "ok": true
+    },
+    {
+      "name": "complete",
+      "ok": true
+    },
+    {
+      "name": "failure",
+      "ok": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'true' !== 'false'\n\n    at file:///private/tmp/mc-website-installation-659/scratchpad/website-installation-embed-ui-check.mjs:50:45"
+    }
+  ],
+  "physicalNetwork": 0,
+  "pageErrors": [],
+  "requests": [
+    {
+      "scenario": "ordinary",
+      "path": "/api/client",
+      "method": "GET",
+      "authorization": false
+    },
+    {
+      "scenario": "ordinary",
+      "path": "/api/chat",
+      "method": "POST",
+      "authorization": false
+    },
+    {
+      "scenario": "complete",
+      "path": "/api/client",
+      "method": "GET",
+      "authorization": false
+    },
+    {
+      "scenario": "complete",
+      "path": "/api/website-installation",
+      "method": "POST",
+      "action": "observe",
+      "authorization": false
+    },
+    {
+      "scenario": "complete",
+      "path": "/api/chat",
+      "method": "POST",
+      "authorization": false
+    },
+    {
+      "scenario": "complete",
+      "path": "/api/website-installation",
+      "method": "POST",
+      "action": "acknowledge",
+      "authorization": false
+    }
+  ],
+  "sourceBefore": "99dceb1eaf85e9372ea8523f714b6abee44b17746326118dae2cfdaeb140f62c",
+  "harnessHash": "7b9bacc04e5f3f668d058a01a30e6866948b022680ba55535f07598c82bd96f1",
+  "sourceAfter": "99dceb1eaf85e9372ea8523f714b6abee44b17746326118dae2cfdaeb140f62c",
+  "sourceStable": true,
+  "summary": {
+    "passed": 2,
+    "failed": 1
+  }
+}

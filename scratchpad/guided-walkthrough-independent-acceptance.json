@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-23T03:32:19.208943+00:00",
+  "disposition": "Accepted for local six-step guided walkthrough scope; no application defect remains in this acceptance. This is not hosted verification.",
+  "runtimeSource": {
+    "desk.js": "c84fa32bfe96191176212996407a6aa10a8964f6ae4fa790fa21c055a7b390fe",
+    "desk.html": "b1717a24de6d825ab7492cfcd6893143631891637591da86ca568420277d59f3",
+    "desk.css": "5b77b01f94ba6255c0246a1aac47cf2bbb96afaacd1fc69806414d9526ec22d5"
+  },
+  "sourceStable": true,
+  "allTestedSource": {
+    "desk.js": "c84fa32bfe96191176212996407a6aa10a8964f6ae4fa790fa21c055a7b390fe",
+    "desk.html": "b1717a24de6d825ab7492cfcd6893143631891637591da86ca568420277d59f3",
+    "desk.css": "5b77b01f94ba6255c0246a1aac47cf2bbb96afaacd1fc69806414d9526ec22d5",
+    "product-ui.css": "3d4d7b288c1b9207cb09d30929890fad56a01f6bcde4fb894ac7895da20b838b",
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea"
+  },
+  "functional": {
+    "receipt": "scratchpad/guided-walkthrough-independent-confirmed.json",
+    "summary": {
+      "passed": 26,
+      "failed": 0,
+      "total": 26,
+      "physicalNetwork": 0,
+      "actualModelRequests": 0,
+      "mockSDKRequests": 0,
+      "pageErrors": 0,
+      "forbiddenRequests": 0
+    },
+    "groups": 26
+  },
+  "visual": "scratchpad/guided-walkthrough-po-review.json",
+  "engineeringFreeze": "scratchpad/guided-walkthrough-footer-freeze.json",
+  "retainedBaseline": "scratchpad/guided-walkthrough-independent-baseline.json",
+  "retainedFirstFinalAttempt": {
+    "receipt": "scratchpad/guided-walkthrough-independent-first.json",
+    "result": "22/26",
+    "classification": [
+      "Three no-preference fixture slugs exceeded the real40-character c-query limit and correctly returned404; shortened only fixture labels.",
+      "A strict every-key activeElement-in-dialog assertion rejected native Chrome BODY/address-bar focus boundaries. Bare native HTML reproduces the same boundary while :modal stays true and background .focus() is rejected. Final checks preserve native modality, forbid background application focus, verify rejected background focus, Escape restoration and reopen."
+    ],
+    "applicationEdits": 0
+  },
+  "keyboardControlDiagnosis": "scratchpad/guided-walkthrough-native-focus-diagnosis.json",
+  "acceptedBehavior": [
+    "Next and Back route to Overview, Business rules, Practice, Availability, Website installation and Requests, resolving real current DOM anchors.",
+    "Every checked feature has a bright cutout; four dimming panes exclude it; coach avoids it and stays in the viewport.",
+    "320/390/1440 normal and reduced motion; compact320x480,390x540 and390x240; all footer controls visible and hit-tested before automatic scrolling.",
+    "Tiny-screen middle-only explanation scroll retains its position through re-layout while fixed footer and highlight geometry remain stable; keyboard Next works.",
+    "Actual spotlight animation under normal motion; no running tour animation after reduced-motion preference changes.",
+    "First-visit walkthrough works with a hidden next-step banner; Close/Skip/Finish/reopen and native keyboard/browser boundaries remain usable.",
+    "Explicit Explore closes/navigates without an action; rapid Next/Back, resize, browser Back/hash routes and target replacement with background refresh do not retain stale geometry.",
+    "Unsaved configuration and practice text remain intact without persisted client mutations or model calls.",
+    "Actual local401/403, successful/failed signout, transient503 recovery and late successful GET cannot retain or resurrect tour/private content improperly.",
+    "Visit modal retains its compact layout, editable unsent form and keyboard close."
+  ],
+  "effects": {
+    "physicalNetwork": 0,
+    "modelRequests": 0,
+    "providerRequests": 0,
+    "emails": 0,
+    "pageErrors": 0,
+    "forbiddenRequests": 0,
+    "applicationEdits": 0
+  },
+  "limitations": [
+    "Sessions and workspaces are synthetic; storage uses the installed SDK against an in-process protocol double.",
+    "Transient503 and failed-signout cases explicitly adapt local transport responses; expired/foreign session rejection and successful signout use actual local handlers.",
+    "The target-replacement case explicitly clones a DOM anchor then invokes the actual handler-backed background refresh; it is a browser lifecycle fixture, not proof of a hosted rerender.",
+    "Native Chrome may report BODY when keyboard focus reaches browser chrome. No background application control received focus while the dialog remained modal.",
+    "No production deployment or hosted/provider acceptance was performed."
+  ]
+}

@@ -40,7 +40,7 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   if (isSelfServiceClient(client)) return { ok: false, reason: "channel_not_active" };
   to = e164(to);
   if (!to || !body) return { ok: false, reason: "missing" };
-  if (!force && (await optedOut(to))) { if (client) await logEvent(client.slug, "sms_blocked", { to, type }); return { ok: false, reason: "opted_out" }; }
+  if (!force && (await optedOut(to))) { if (client) await logEvent(client, "sms_blocked", { to, type }); return { ok: false, reason: "opted_out" }; }
   let text = body.slice(0, 1500);
   let service = messagingServiceSid;
   if (client) {
@@ -56,7 +56,7 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   if (client && mode === "bridge") { try { await put("index", "bridge:" + to, client.slug); } catch { /* ignore */ } }
   if (!smsEnabled() || (!from && !service)) {
     console.log(`[sms:disabled] to=${to} from=${from || service || "-"} :: ${text}`);
-    if (client) await logEvent(client.slug, "sms_sent", { to, type, sender: mode, ok: false, logged: true, preview: text.slice(0, 300) });
+    if (client) await logEvent(client, "sms_sent", { to, type, sender: mode, ok: false, logged: true, preview: text.slice(0, 300) });
     if (client && !smsEnabled()) await countText(client, type);
     return { ok: false, reason: "disabled", logged: true };
   }
@@ -69,7 +69,7 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) console.error("twilio send failed", res.status, data?.message);
-  if (client) await logEvent(client.slug, res.ok ? "sms_sent" : "sms_failed", { to, type, sender: mode, ok: res.ok, sid: data?.sid, code: data?.code, message: data?.message, preview: text.slice(0, 300) });
+  if (client) await logEvent(client, res.ok ? "sms_sent" : "sms_failed", { to, type, sender: mode, ok: res.ok, sid: data?.sid, code: data?.code, message: data?.message, preview: text.slice(0, 300) });
   if (client && res.ok) await countText(client, type);
   return { ok: res.ok, sid: data?.sid, error: data?.message };
 }

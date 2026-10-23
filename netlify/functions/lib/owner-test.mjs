@@ -1,10 +1,12 @@
 // The private owner's rehearsal has no route to real shop tools or delivery providers.
 // It writes only labeled test history and a revision-bound setup receipt.
 import { runAgent, toApiMessages } from "./agent.mjs";
-import { atomicUpdate, id } from "./store.mjs";
+import { atomicUpdate, id, assertCurrentWorkspace } from "./store.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
 import { addDays, isElapsedWindow, listedWindow, listedWindows, requestedDate } from "./availability.mjs";
 import { configurationRevision } from "./setup.mjs";
+
+import { workspaceTenant, supportedWorkspace, belongsToWorkspace, WorkspaceIdentityError } from './workspace-identity.mjs';
 
 const PREFIX = "Test preview: ";
 const clean = (value, limit = 300) => typeof value === "string" ? value.trim().slice(0, limit) : "";
@@ -12,7 +14,7 @@ const previewPhone = (value) => {
   const digits = clean(value, 30).replace(/\D/g, "");
   return digits.length === 10 ? `+1${digits}` : digits.length === 11 && digits.startsWith("1") ? `+${digits}` : "";
 };
-const testKey = (slug, contact) => `${slug}/${contact}`;
+const testKey = (client, contact) => supportedWorkspace(client) ? `${client.slug}/${workspaceTenant(client)}/${contact}` : `${client.slug}/${contact}`;
 
 export function ownerTestAvailability(client, input) {
   const from = requestedDate(input?.date);
@@ -65,9 +67,11 @@ export function ownerTestTool(client, name, input) {
 }
 
 export async function runOwnerTest({ client, contact, messages, onText }) {
+  await assertCurrentWorkspace(client);
   const revision = configurationRevision(client);
-  const key = testKey(client.slug, contact);
+  const key = testKey(client, contact);
   const prior = await atomicUpdate("owner_tests", key, (state) => ({ result: state }));
+  if (prior && supportedWorkspace(client) && (!belongsToWorkspace(client, prior) || prior.contact !== contact)) throw new WorkspaceIdentityError();
   const last = messages[messages.length - 1];
   const currentMessages = [...(prior?.messages || []), { role: "user", content: last.content, at: new Date().toISOString() }];
   let prefixSent = false;
@@ -81,24 +85,28 @@ export async function runOwnerTest({ client, contact, messages, onText }) {
   }));
   let toolFailed = false;
   const testMode = process.env.MC_FAKE_MODEL === "1" ? "fake" : "live";
+  await assertCurrentWorkspace(client);
   const out = await runAgent({ system, tools, messages: toApiMessages(currentMessages), onText: forward,
     execTool: async (name, input) => {
+      await assertCurrentWorkspace(client);
       const result = ownerTestTool(client, name, input);
       if (result.is_error) toolFailed = true;
       return result;
     }, maxTokens: 1500, dropToolPreamble: true });
+  await assertCurrentWorkspace(client);
   const reply = PREFIX + out.reply;
   const completedAt = new Date().toISOString();
   const test = {
-    slug: client.slug, contact, simulation: true, testMode, revision, updatedAt: completedAt,
+    slug: client.slug, contact, ...(supportedWorkspace(client) ? { tenantIdentity: workspaceTenant(client) } : {}), simulation: true, testMode, revision, updatedAt: completedAt,
     messages: [...currentMessages, { role: "assistant", content: reply, at: completedAt }].slice(-40),
     previews: [...(prior?.previews || []), ...out.events].slice(-30),
   };
   await atomicUpdate("owner_tests", key, () => ({ value: test }));
   // A stale test must not certify newer owner rules. Preserve every unrelated client field.
   const proofRecorded = await atomicUpdate("clients", client.slug, (current) => {
-    if (toolFailed || !current || current.ownerKey !== client.ownerKey || configurationRevision(current) !== revision) return { result: false };
+    if (toolFailed || !current || current.ownerKey !== client.ownerKey || supportedWorkspace(client) && (!supportedWorkspace(current) || workspaceTenant(current) !== workspaceTenant(client)) || configurationRevision(current) !== revision) return { result: false };
     return { value: { ...current, setupProof: { ...current.setupProof, testedRevision: revision, testedAt: completedAt, testMode } }, result: true };
   });
+  await assertCurrentWorkspace(client);
   return { reply, events: out.events, simulation: true, test: { revision, completedAt, proofRecorded, testMode } };
 }

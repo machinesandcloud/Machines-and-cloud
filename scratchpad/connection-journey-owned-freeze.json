@@ -1,0 +1,57 @@
+{
+  "at": "2026-10-23T04:16:46.006328+00:00",
+  "worktree": "/tmp/mc-connection-journey-645",
+  "base": "645daeb1914f393b3c79b6b31a848a9b90685546",
+  "scope": "Four-channel customer journey, onboarding explanation/handoff, pure service projection and bounded status UI; no activation, provider account, hosting or model changes",
+  "ownedFiles": {
+    "onboard.html": "1578d3c24ffba4f89149c86bdf49a2408706be47bf19fdb79295124b89d67392",
+    "onboard.js": "1e9b97d3a5ab8a5a693426a133e08bb4acaecf1ca7da7375bf9e84d33d726217",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "9e59281fd1492406c2f2f4c41c563918f826d6c2b08afa478afa685b9fc7f89a",
+    "desk-connections.js": "167412c3bfc4ee3cbc137ffae6426a55e47e4a3b651c191f2d311220bb1b2af3",
+    "netlify/functions/lib/connection-journey.mjs": "2c7fa519ca43b61a079cc87967e3926a84c895b2f053be064f47a2b5192c9fb3",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "scripts/connection-journey-check.mjs": "016f51c583a22ebb456e0f6ae5836f6b2378819d43ebcd889bb6526d3e1ec4d9",
+    "scripts/connection-journey-ui-check.mjs": "3853f6a7b6f2399ab71772e6c5fed088c55e45fe439f4afaa6e50e174f976dc2"
+  },
+  "dependencies": {
+    "forwarding": "scratchpad/connection-root-source-freeze-v2.json",
+    "coordinator": "scratchpad/connection-onboarding-claim-final-freeze.json"
+  },
+  "checks": {
+    "pure": {
+      "receipt": "scratchpad/connection-journey-pure-final.json",
+      "sha256": "006f152c19ad0f5a91fd111add73bc2d4dc72ccb91edd0b692dc1b28c3c23d98",
+      "passed": 22,
+      "failed": 0
+    },
+    "actualHandlerAndDom": {
+      "receipt": "scratchpad/connection-journey-engineering-final.json",
+      "sha256": "cebf9f7cfde31aedd48d564b01d08ae139708520c00ec83d7a70f301de760000",
+      "passed": 5,
+      "failed": 0,
+      "sourceStable": true,
+      "physicalNetwork": 0,
+      "pageErrors": 0,
+      "forbidden": 0
+    },
+    "syntax": "passed",
+    "diffCheck": "passed"
+  },
+  "automaticStatusReads": {
+    "maximumPerPage": 6,
+    "backoffSeconds": [
+      15,
+      30,
+      60,
+      60,
+      60,
+      60
+    ],
+    "only": "Real queued/connecting saved operations",
+    "paused": "Hidden/off Connections/recovery/busy/native dialog; no unaccepted or platform-wait polling",
+    "manual": "Check saved status remains an explicit read"
+  },
+  "authorization": "Approval form uses only quote.scopeChannels and exact acceptedChannels; later service approval preserves existing number; forwarding changes calls only",
+  "independentAcceptance": "Pending; no whole-product or hosted acceptance claimed"
+}

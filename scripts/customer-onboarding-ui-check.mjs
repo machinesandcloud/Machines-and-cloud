@@ -80,7 +80,7 @@ try {
   check('Empty required fields keep customer in current step with guidance', /highlighted/.test(await page.locator('#err').innerText()) && await page.locator('[data-step="1"]').isVisible());
   await page.locator('#name').fill('QA Browser Owner'); await page.locator('#phone').fill('7135550101');
   await page.locator('#next').click(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
-  await page.locator('#business').fill('QA Browser Air'); await page.locator('#trade').fill('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#hours').fill('Mon to Fri 8 am to 5 pm'); await page.locator('#serviceArea').fill('Katy'); await page.locator('#spanish').selectOption('no');
+  await page.locator('#business').fill('QA Browser Air'); await page.locator('#trade').selectOption('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#hours').fill('Mon to Fri 8 am to 5 pm'); await page.locator('#serviceArea').fill('Katy'); await page.locator('#spanish').selectOption('no');
   await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor(); await page.reload(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
   check('Saved answers and wizard position survive reload', await page.locator('#business').inputValue() === 'QA Browser Air' && await page.locator('#services').inputValue() === 'AC repair');
   await shot(page, 'draft-390');

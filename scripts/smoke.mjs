@@ -22,6 +22,13 @@ for (const dir of ["", "lib/"]) for (const f of readdirSync(new URL(dir, root)))
 console.log("imported", Object.keys(mods).length, "modules");
 // 2. Seed one live shop with a booking, a lead, and a callback alert.
 const { newClient } = mods["lib/config.mjs"]; const store = mods["lib/store.mjs"]; const desk = mods["lib/desk.mjs"];
+// A repair business must not inherit HVAC safety suggestions from the letters in "repair".
+for (const trade of ["Appliance repair", "Chair repair", "Window & door repair"]) {
+  if (newClient({ business: { trade } }).rules.emergencies.tier1.length) fail("unexpected urgent defaults for " + trade);
+}
+for (const trade of ["HVAC", "Air conditioning", "A/C", "AC repair", "Heating and cooling"]) {
+  if (!newClient({ business: { trade } }).rules.emergencies.tier1.some(line => line.startsWith("No cooling"))) fail("missing HVAC defaults for " + trade);
+}
 const c = newClient({ slug: "smoke-shop", ownerKey: "k", owner: { name: "Dana Whitfield", email: "owner@example.com", phone: "+12815550199" }, business: { name: "Smoke HVAC", website: "https://example.com", trade: "HVAC", hours: "Mon-Fri 7am-7pm" } });
 c.status = "live"; c.liveAt = new Date(Date.now() - 8 * 86400000).toISOString(); c.plan = "growth"; c.phone.twilioNumber = "+17135550111"; c.phone.businessNumber = "+12815550100"; c.business.reviewLink = "https://g.page/r/x/review"; c.lifecycle = { day7Sent: "2026-10-19T00:00:00Z" };
 await store.saveClient(c); await store.indexClient(c);

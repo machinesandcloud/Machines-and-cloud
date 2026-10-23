@@ -1,0 +1,149 @@
+{
+  "phase": "sales-positioning-2026-10-22-r3",
+  "mode": "run",
+  "source": {
+    "agent-widget.js": "10d8d67bacbf9c47d11c72c40ada5bc2edbbfedeff3ff595e7e9030f9d4c6b52",
+    "stories.js": "6017df642157784932360deb79462d0ffdfa7191f8b4fcf8d69ea777ce74b51d",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/chat.mjs": "9494ff06ce0fb7500b97bff3d3e1af332819ab94c4b9c474683ee46122dfceee",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/sales-desk.mjs": "7ee107a2f2229930f4319f88b8a502bb117d12cf73ee13a496b16ac0dc95eade",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/config.mjs": "fa11f41239c4df4a8bb7cbb51dd2334b00dd76e8281f31ff85af1d012147c1a4",
+    "package-lock.json": "076a7a22a5d1d859cf5befff88d5e265a52886e6257d4a68af640e4d6dfdb4f5",
+    "scripts/sales-positioning-eval.mjs": "d797247092921e311cacd1803f0dd93fb4db0c1438b858f3eaae61596de958c4",
+    "scripts/lib/sales-eval-transport.mjs": "9be3d83d7e4bc4d2671ef566689d76ff6557d78c1e0c4539919a1c04a0ba59aa"
+  },
+  "threads": [
+    {
+      "id": "broad-fit",
+      "seed": [],
+      "turns": [
+        {
+          "user": "Help me figure out whether your front desk would fit my shop.",
+          "status": 200,
+          "latencyMs": 3062,
+          "reply": "We built Machines & Cloud to help busy home-service shops answer website visitors while the team is out on a job. It uses your own services, hours and approved prices. Customer requests and conversations are saved in one place, so you can follow up with the full details in front of you. What kind of shop do you run?",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 95,
+            "outputTokens": 121,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 7122
+          }
+        }
+      ]
+    },
+    {
+      "id": "plumbing-value",
+      "seed": [],
+      "turns": [
+        {
+          "user": "I run a two-truck plumbing shop in Dallas. Our website visitors keep asking about the service area and our $89 callout fee while we are on jobs. How would you help?",
+          "status": 200,
+          "latencyMs": 4441,
+          "reply": "We'd give your website visitors approved answers to those questions while your two trucks are out. You set your service area and the $89 callout fee, and the chat uses only those answers.\n\n**Example:** A visitor asks, \"Do you cover [neighborhood], and what's the trip charge?\" The chat checks your service-area list and replies: \"Yes, we serve [area]. Our callout fee is $89.\" It can then take their job details and a callback request. You'd see the saved conversation in your portal when you're off the job, so you could follow up and confirm the next step yourself.",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 131,
+            "outputTokens": 300,
+            "cacheReadTokens": 7122,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "required-jobber",
+      "seed": [],
+      "turns": [
+        {
+          "user": "We need native Jobber busy-time sync and technician dispatch. Those are must-haves. Does your product include them?",
+          "status": 200,
+          "latencyMs": 5389,
+          "reply": "No, we don't support either one today, so we wouldn't be a good fit for your must-haves right now.\n\n- **Native Jobber busy-time sync:** We have no native Jobber connection, and we can't read busy times from Jobber or any other outside calendar or field-service tool.\n- **Technician dispatch:** We don't dispatch technicians or route crews.\n\nBoth of these requirements are unmet.",
+          "events": [
+            {
+              "type": "sales_fit",
+              "data": {
+                "kind": "workflow_fit",
+                "fit": "not_current_fit",
+                "required": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Owners can download a CSV for manual handoff; successful Jobber import, busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "external_busy_time",
+                    "currentSupport": false,
+                    "detail": "No external calendar or field-service busy-time synchronization. Use manual Availability blocks."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "gaps": [
+                  {
+                    "feature": "jobber_sync",
+                    "currentSupport": false,
+                    "detail": "No native live connection. Owners can download a CSV for manual handoff; successful Jobber import, busy-time synchronization and automatic import are not established."
+                  },
+                  {
+                    "feature": "external_busy_time",
+                    "currentSupport": false,
+                    "detail": "No external calendar or field-service busy-time synchronization. Use manual Availability blocks."
+                  },
+                  {
+                    "feature": "dispatch",
+                    "currentSupport": false,
+                    "detail": "Technician dispatch or crew routing is not provided."
+                  }
+                ],
+                "interests": [],
+                "usefulCurrentFeatures": [],
+                "caveat": "Website chat still requires owner review, a private AI test and activation. A useful website component does not satisfy an unmet must-have. Daily AI limits apply; no channel or paid subscription is activated by this assessment."
+              }
+            }
+          ],
+          "usage": {
+            "requests": 2,
+            "inputTokens": 934,
+            "outputTokens": 281,
+            "cacheReadTokens": 14244,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "existing-receptionist",
+      "seed": [],
+      "turns": [
+        {
+          "user": "We already have a receptionist. Why would we add this?",
+          "status": 200,
+          "latencyMs": 3575,
+          "reply": "A receptionist and our website front desk do different jobs. When your receptionist is on another call, at lunch or done for the day, website visitors can still get answers about your services, hours and the prices you've approved. Each conversation and request is saved, so your receptionist can pick up with the customer's needs already noted. You stay in control of what it says.\n\nWhere does your front desk get stretched most: after hours, during busy call stretches or with website inquiries?",
+          "events": [],
+          "usage": {
+            "requests": 1,
+            "inputTokens": 92,
+            "outputTokens": 188,
+            "cacheReadTokens": 7122,
+            "cacheWriteTokens": 0
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "completedAt": "2026-10-23T01:48:23.664Z",
+  "logicalTurns": 4,
+  "actualHTTPAttempts": 5,
+  "realModelRequests": 5
+}

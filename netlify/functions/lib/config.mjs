@@ -143,7 +143,7 @@ export const EMERGENCY_TIERS = {
 };
 export function tradeKey(trade) {
   const t = String(trade || "").toLowerCase();
-  if (/hvac|air|cool|heat|a\/c|ac\b/.test(t)) return "hvac";
+  if (/\b(?:hvac|air|cool(?:ing)?|heat(?:ing)?|a\/c|ac)\b/.test(t)) return "hvac";
   if (/plumb|drain|water heater|sewer/.test(t)) return "plumbing";
   if (/electr/.test(t)) return "electrical";
   if (/roof/.test(t)) return "roofing";

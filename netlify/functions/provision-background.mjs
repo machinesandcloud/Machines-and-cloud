@@ -67,7 +67,7 @@ export default async (req) => {
   c.provision.status = notes.length ? "partial" : "done";
   c.provision.finishedAt = new Date().toISOString();
   await saveClient(c);
-  await logEvent(c.slug, "provisioned", { steps: c.provision.steps });
+  await logEvent(c, "provisioned", { steps: c.provision.steps });
 
   // 4. Tell the owner what to do (one thing: forwarding) and Steve what is left.
   const portal = `${site}/desk?c=${c.slug}&k=${c.ownerKey}`;

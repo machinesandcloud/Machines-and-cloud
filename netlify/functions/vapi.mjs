@@ -1,6 +1,6 @@
 // Vapi server webhook: picks the assistant for an incoming call (with what we know about the caller),
 // runs our tools during the call, and files the transcript and the minutes when the call ends.
-import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, listRecords, noteInbound } from "./lib/store.mjs";
+import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, recordsFor, noteInbound } from "./lib/store.mjs";
 import { bookVisit, flagLead, callerContext, cellIsForwardedLine, availabilityToolResult } from "./lib/desk.mjs";
 import { json } from "./lib/agent.mjs";
 import { e164 } from "./lib/send.mjs";
@@ -40,10 +40,10 @@ export default async (req) => {
   // Incoming call: which assistant, and what we already know about this caller.
   if (m.type === "assistant-request") {
     const assistantId = c.voice?.assistantId;
-    if (!assistantId || c.voice?.detached || !["testing", "live"].includes(c.status)) { await logEvent(c.slug, "assistant_request_failed", { from: caller, reason: !assistantId ? "no_assistant" : c.voice?.detached ? "detached" : c.status }); return json({ error: `${c.business?.name || "This line"} is not answering calls right now. Please call back during business hours.` }); }
+    if (!assistantId || c.voice?.detached || !["testing", "live"].includes(c.status)) { await logEvent(c, "assistant_request_failed", { from: caller, reason: !assistantId ? "no_assistant" : c.voice?.detached ? "detached" : c.status }); return json({ error: `${c.business?.name || "This line"} is not answering calls right now. Please call back during business hours.` }); }
     const owner = c.owner?.name || "the owner";
     if (caller && (c.rules?.bypass || []).includes(caller)) {
-      await logEvent(c.slug, "vip_call", { from: caller, rang: !cellIsForwardedLine(c) && c.owner?.phone ? "cell" : "assistant" });
+      await logEvent(c, "vip_call", { from: caller, rang: !cellIsForwardedLine(c) && c.owner?.phone ? "cell" : "assistant" });
       if (!cellIsForwardedLine(c) && c.owner?.phone) return json({ destination: { type: "number", number: c.owner.phone, message: `Connecting you to ${owner}.` } });
       return json({ assistantId, assistantOverrides: { firstMessage: `This is ${c.business?.name || "the front desk"}. Please leave a message after the tone and ${owner} will call you back.`, variableValues: { customerName: "", isExisting: "", upcomingVisit: "", vip: "yes" } } });
     }
@@ -51,7 +51,7 @@ export default async (req) => {
     const first = ctx.upcomingVisit
       ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, your visit is ${ctx.upcomingVisit}. How can I help?`
       : ctx.customerName ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, how can I help today?` : standardGreeting(c);
-    await logEvent(c.slug, "call_started", { from: caller, known: !!ctx.customerName }); await noteInbound(c.slug, "call");
+    await logEvent(c, "call_started", { from: caller, known: !!ctx.customerName }); await noteInbound(c, "call");
     return json({ assistantId, assistantOverrides: { firstMessage: first, variableValues: { customerName: ctx.customerName, isExisting: ctx.isExisting, upcomingVisit: ctx.upcomingVisit, vip: "" } } });
   }
 
@@ -65,7 +65,7 @@ export default async (req) => {
         else if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); if (b.full) { results.push({ toolCallId: t.id, result: b.message }); continue; } results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. The owner has the details and the customer will get a text reminder.` }); }
         else if (name === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `The owner has been texted, reference ${l.id}.` }); }
         else results.push({ toolCallId: t.id, error: "Unknown tool." });
-      } catch (err) { console.error("vapi tool", name, err); await logEvent(c.slug, "vapi_tool_failed", { name, error: String(err?.message || err).slice(0, 200) }); results.push({ toolCallId: t.id, error: "The tool failed. Apologize and take the caller's number for a callback." }); }
+      } catch (err) { console.error("vapi tool", name, err); await logEvent(c, "vapi_tool_failed", { name, error: String(err?.message || err).slice(0, 200) }); results.push({ toolCallId: t.id, error: "The tool failed. Apologize and take the caller's number for a callback." }); }
     }
     return json({ results });
   }
@@ -73,19 +73,19 @@ export default async (req) => {
   if (m.type === "end-of-call-report") {
     const transcript = m?.artifact?.transcript || "";
     const msgs = (m?.artifact?.messages || []).filter((x) => x.role === "user" || x.role === "bot" || x.role === "assistant").map((x) => ({ role: x.role === "user" ? "user" : "assistant", content: String(x.message || x.content || "").slice(0, 1500), at: new Date().toISOString() }));
-    const conv = await getConversation(c.slug, "call", caller || callId);
+    const conv = await getConversation(c, "call", caller || callId);
     conv.messages.push(...(msgs.length ? msgs : [{ role: "assistant", content: transcript.slice(0, 4000), at: new Date().toISOString() }]));
     conv.summary = m?.analysis?.summary || "";
     conv.endedReason = m.endedReason;
     await saveConversation(conv);
     const seconds = m.startedAt && m.endedAt ? Math.max(0, Math.round((new Date(m.endedAt) - new Date(m.startedAt)) / 1000)) : null;
-    await logEvent(c.slug, "call_ended", { from: caller, reason: m.endedReason, seconds }); await noteInbound(c.slug, "call");
-    if (isVoiceFailure(m.endedReason)) await logEvent(c.slug, "voice_failed", { from: caller, reason: m.endedReason });
+    await logEvent(c, "call_ended", { from: caller, reason: m.endedReason, seconds }); await noteInbound(c, "call");
+    if (isVoiceFailure(m.endedReason)) await logEvent(c, "voice_failed", { from: caller, reason: m.endedReason });
     try { await addUsage(c, { minutes: seconds ? Math.ceil(seconds / 60) : 0, calls: 1 }); } catch (err) { console.error("usage", err); }
-    if (/transfer/i.test(String(m.endedReason || ""))) await logEvent(c.slug, "transferred", { from: caller });
+    if (/transfer/i.test(String(m.endedReason || ""))) await logEvent(c, "transferred", { from: caller });
     // A call that produced neither a booking nor a lead still deserves an owner note when we know the number.
     if (caller) {
-      const recent = (await listRecords("leads", c.slug, 20)).concat(await listRecords("bookings", c.slug, 20)).filter((r) => r.phone === caller && Date.now() - new Date(r.createdAt).getTime() < 15 * 60 * 1000);
+      const recent = (await recordsFor("leads", c, caller)).concat(await recordsFor("bookings", c, caller)).filter((r) => r.phone === caller && Date.now() - new Date(r.createdAt).getTime() < 15 * 60 * 1000);
       if (!recent.length && conv.summary) await flagLead(c, { customer_name: "", phone: caller, address: "", issue: conv.summary.slice(0, 200), reason: "question", urgency: "flexible", wanted: "", language: "en", unsure: "" }, { channel: "call", contact: caller });
     }
     return json({ ok: true });

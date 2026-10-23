@@ -12,8 +12,19 @@
   var BASE = (me && me.getAttribute('data-api')) || (me.src || '').replace(/\/embed\.js.*$/, '') || 'https://www.machinesandcloud.com';
   var ENDPOINT = BASE + '/api/chat';
   var STORE = 'mc_desk_' + slug;
+  var CHECK_STORE='mc_website_setup_'+slug, setupCheck=null, setupInvalid=false, setupStorageId=null, checkReady=false, configReady=false;
+  try {
+    var checkHash=location.hash.match(/^#mc-website-check=([a-f0-9]{32})\.([a-f0-9]{64})$/);
+    if(checkHash){setupCheck={id:checkHash[1],challenge:checkHash[2],origin:location.origin,contact:'websitecheck_'+checkHash[1],expiresAt:null,pending:null};history.replaceState(history.state,'',location.pathname+location.search);sessionStorage.setItem(CHECK_STORE,JSON.stringify(setupCheck));}
+    else if(location.hash.indexOf('#mc-website-check=')===0)setupInvalid=true;
+    else{var prior=JSON.parse(sessionStorage.getItem(CHECK_STORE)||'null');if(prior&&prior.ended===true&&prior.origin===location.origin){setupInvalid=true;setupStorageId=/^[a-f0-9]{32}$/.test(prior.id||'')?prior.id:null;}else if(prior&&/^[a-f0-9]{32}$/.test(prior.id)&&/^[a-f0-9]{64}$/.test(prior.challenge)&&prior.origin===location.origin)setupCheck=prior;}
+  } catch(error){if(location.hash.indexOf('#mc-website-check=')===0)setupInvalid=true;}
+  if(setupCheck||setupInvalid)STORE+=':setup:'+(setupCheck?setupCheck.id:setupStorageId||'invalid');
+  function persistCheck(){if(!setupCheck)return;try{sessionStorage.setItem(CHECK_STORE,JSON.stringify(setupCheck));}catch(error){/* In-memory recovery remains available. */}}
+
   var state = { contact: null, transcript: [] };
   try { var saved = JSON.parse(sessionStorage.getItem(STORE) || 'null'); if (saved && saved.contact) state = saved; } catch (e) { /* ignore */ }
+  if(setupCheck)state.contact=setupCheck.contact;
   if (!state.contact) state.contact = 'w' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
   function persist() { try { sessionStorage.setItem(STORE, JSON.stringify({ contact: state.contact, transcript: state.transcript.slice(-20) })); } catch (e) { /* ignore */ } }
 
@@ -35,7 +46,9 @@
     '#mcDesk form{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e7eb;background:#fff}' +
     '#mcDesk textarea{flex:1;resize:none;min-height:40px;max-height:110px;padding:10px;border:1px solid #d1d5db;border-radius:10px;font:inherit}' +
     '#mcDesk button.s{padding:0 16px;border:0;border-radius:10px;background:#2563EB;color:#fff;font-weight:600;cursor:pointer}' +
+    '#mcDesk button.s:disabled{background:#dbe2ee;color:#69788e;cursor:not-allowed;box-shadow:none}' +
     '#mcDesk .f{margin:0;padding:0 12px 8px;font-size:10px;color:#6b7280;background:#fff}' +
+    '#mcDesk .check{padding:12px 14px;background:#edf4ff;border-bottom:1px solid #d8e4f5;color:#233f65;font-size:12px}#mcDesk .check b{display:block;margin-bottom:5px}#mcDesk .check p{margin:5px 0;line-height:1.5}#mcDesk .check button,#mcDesk .check a{font:inherit;min-height:32px;padding:6px 9px;margin:5px 6px 0 0;border:1px solid #c9d7eb;border-radius:8px;background:#fff;color:#214ca8;cursor:pointer}#mcDesk .check button:disabled{opacity:.6;cursor:wait}' +
     '@media(max-width:480px){#mcDesk .p{position:fixed;left:8px;right:8px;bottom:70px;width:auto;height:min(76vh,600px)}}';
   var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
@@ -46,6 +59,7 @@
     '<p class="f">For urgent help, use the shop’s contact details on this website.</p></section>';
   document.body.appendChild(root);
   var launcher = root.querySelector('.l'), panel = root.querySelector('.p'), list = root.querySelector('.m'), form = root.querySelector('form'), input = root.querySelector('textarea'), sendBtn = root.querySelector('.s');
+  var checkBanner=null,checkMessage=null,checkStatusButton=null,checkAckButton=null,sampleButton=null,sampleDetails={service:'',area:''};
   var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?', available: false };
   var busy = false, rendered = false;
 
@@ -54,23 +68,40 @@
   function typing() { var el = document.createElement('div'); el.className = 'b a t'; el.innerHTML = '<span></span><span></span><span></span>'; list.appendChild(el); list.scrollTop = list.scrollHeight; return el; }
   function render() { list.innerHTML = ''; add('a', cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); }); rendered = true; }
 
-  function unavailable(message) { cfg.available = false; cfg.greeting = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true; if (rendered) render(); }
+  function unavailable(message) { configReady=false;cfg.available = false; cfg.greeting = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true; if (rendered) render(); }
+  function checkNote(text){if(checkMessage)checkMessage.textContent=text;}
+  function checkControls(){var available=configReady&&(!setupCheck&&!setupInvalid||checkReady&&!setupCheck.pending);cfg.available=!!available;input.disabled=!available;sendBtn.disabled=busy||!available;if(sampleButton)sampleButton.disabled=!available;}
+  function checkPayload(action,extra){return Object.assign({action:action,client:slug,checkId:setupCheck.id,challenge:setupCheck.challenge},extra||{});}
+  async function checkRequest(action,extra){var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);try{var response=await fetch(BASE+'/api/website-installation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(checkPayload(action,extra)),signal:controller.signal}),result=await response.json();if(!response.ok||result.error){var error=new Error(result.message||'The website check could not be confirmed. Return to your workspace.');error.status=response.status;throw error;}return result;}finally{clearTimeout(timeout);}}
+  async function acknowledgeCheck(){var focused=document.activeElement===checkAckButton,pending=setupCheck&&setupCheck.pending;if(!pending||!pending.completionRef)return;checkAckButton.disabled=true;try{await checkRequest('acknowledge',{turnId:pending.id,completionRef:pending.completionRef});if(setupCheck.pending!==pending)return;setupCheck.pending=null;persistCheck();checkAckButton.hidden=true;checkNote(pending.record?'Your sample request is saved. Open your workspace to review it.':'Answer confirmed. Continue the sample conversation until a callback request is saved.');}catch(error){checkNote('The answer arrived, but its check receipt is not confirmed. Retry the receipt without sending the message again.');checkAckButton.hidden=false;}finally{checkAckButton.disabled=false;checkControls();if(focused&&document.activeElement===document.body&&root.classList.contains('open')){if(!checkAckButton.hidden)checkAckButton.focus();else if(!input.disabled)input.focus();else checkStatusButton.focus();}}}
+  async function checkStatus(observe){if(!setupCheck)return;var focused=document.activeElement===checkStatusButton;checkStatusButton.disabled=true;try{var pending=setupCheck.pending,result=await checkRequest(observe&&!pending?'observe':'status',pending?{turnId:pending.id}:{}),check=result.check;if(!check||check.id!==setupCheck.id||check.origin!==location.origin||check.contact!==setupCheck.contact)throw new Error('This check belongs to a different website. Return to your workspace.');sampleDetails={service:typeof check.sample?.service==='string'?check.sample.service.slice(0,160):'',area:typeof check.sample?.area==='string'?check.sample.area.slice(0,160):''};setupCheck.expiresAt=check.expiresAt;checkReady=!!check.observed&&check.chatAvailable===true;persistCheck();
+      if(pending){if(check.turn?.answerObserved){setupCheck.pending=null;persistCheck();checkAckButton.hidden=true;checkNote(check.turn.record?'Your sample request is saved. Open your workspace to review it.':'The previous answer is confirmed. You can continue the sample conversation.');}else{checkNote(check.turn?.record?'Your sample request is saved; its answer is not confirmed. Open your workspace before sending it again.':'The previous message may already have been processed. Check its outcome in your workspace before sending it again.');if(pending.completionRef)checkAckButton.hidden=false;}}
+      else checkNote(check.chatAvailable?'Widget found. Try the sample request below, then send it when you are ready.':('Widget found. '+(check.reason||'Finish your setup in the workspace before trying a request.')));
+    }catch(error){checkReady=false;if([401,403,410].includes(error.status)){setupInvalid=true;setupCheck.challenge='';setupCheck.pending=null;try{sessionStorage.setItem(CHECK_STORE,JSON.stringify({ended:true,id:setupCheck.id,origin:location.origin}));}catch(storageError){/* The in-memory challenge is cleared. */}}checkNote(error.message||'The check is unavailable. Return to your workspace to start again.');}finally{checkStatusButton.disabled=setupInvalid;checkControls();if(focused&&document.activeElement===document.body&&root.classList.contains('open')){if(!checkStatusButton.disabled)checkStatusButton.focus();else checkBanner.querySelector('a').focus();}}}
+  if(setupCheck||setupInvalid){
+    checkBanner=document.createElement('div');checkBanner.className='check';checkBanner.innerHTML='<b>Website setup check</b><p role="status" aria-live="polite"></p><p>Creates a labeled sample request using your customer-chat allowance. Your usual request notifications may run.</p><button type="button" data-check-sample>Use sample details</button><button type="button" data-check-status>Check saved status</button><button type="button" data-check-ack hidden>Retry check receipt</button><a target="_blank" rel="noopener noreferrer">Open my workspace</a>';
+    list.before(checkBanner);checkMessage=checkBanner.querySelector('[role="status"]');sampleButton=checkBanner.querySelector('[data-check-sample]');checkStatusButton=checkBanner.querySelector('[data-check-status]');checkAckButton=checkBanner.querySelector('[data-check-ack]');checkBanner.querySelector('a').href=BASE+'/desk.html?c='+encodeURIComponent(slug)+'#leads';root.querySelector('.h small').textContent='Website setup check';
+    sampleButton.addEventListener('click',function(){input.value="Hi, I'm Alex Test. I'd like a callback about "+(sampleDetails.service||"one of your services")+(sampleDetails.area?" in "+sampleDetails.area:"")+". My number is (713) 555-0142. This is a setup check.";input.focus();});checkStatusButton.addEventListener('click',function(){checkStatus(false);});checkAckButton.addEventListener('click',acknowledgeCheck);
+    if(setupInvalid){checkNote('This setup check is invalid or has ended. Return to your workspace to start again.');sampleButton.disabled=true;checkStatusButton.disabled=true;}else{checkNote('Checking this website…');checkStatus(true);}
+  }
   fetch(BASE + '/api/client?c=' + encodeURIComponent(slug)).then(function (r) { if (!r.ok) throw new Error('unavailable'); return r.json(); }).then(function (d) {
     if (!d || !d.name) throw new Error('unavailable');
     if (d && d.name) { cfg.name = d.name; cfg.greeting = d.greeting || cfg.greeting; root.querySelector('.h b').textContent = cfg.name; }
     if (d.webAvailable === false || d.status === 'paused' || d.status === 'cancelled') { unavailable(); return; }
-    cfg.available = true; input.disabled = false; sendBtn.disabled = false;
+    configReady=true;checkControls();
     if (rendered) render();
   }).catch(function () { unavailable(); });
 
   function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); if (!rendered) render(); setTimeout(function () { input.focus(); }, 50); }
-  function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); }
+  function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); launcher.focus(); }
+  root.addEventListener('keydown',function(event){if(event.key==='Escape'&&root.classList.contains('open')){event.preventDefault();close();}});
   launcher.addEventListener('click', function () { root.classList.contains('open') ? close() : open(); });
   root.querySelector('.x').addEventListener('click', close);
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var text = input.value.trim(); if (!text || busy) return;
+    var text = input.value.trim(); if (!text || busy || !cfg.available || input.disabled) return;
+    if(setupCheck){var bytes=new Uint8Array(16);crypto.getRandomValues(bytes);setupCheck.pending={id:Array.from(bytes).map(function(value){return value.toString(16).padStart(2,'0');}).join(''),completionRef:null,record:null};persistCheck();}
     busy = true; sendBtn.disabled = true; input.value = '';
     state.transcript.push({ role: 'user', content: text }); persist(); add('user', text);
     var tp = typing(), bubble = null, full = '', done = false, reader = null;
@@ -85,20 +116,21 @@
     });
     function bounded(promise) { return Promise.race([promise, deadline]); }
     function delta(t) { if (!bubble) { tp.remove(); bubble = add('a', ''); } full += t; bubble.textContent = full; list.scrollTop = list.scrollHeight; }
-    function finish(reply) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; state.transcript.push({ role: 'assistant', content: reply }); persist(); }
-    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status'); }
+    function finish(reply,events) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; state.transcript.push({ role: 'assistant', content: reply }); persist();if(setupCheck){var receipt=Array.isArray(events)&&events.find(function(event){return event.type==='website_check'&&event.checkId===setupCheck.id&&event.turnId===setupCheck.pending?.id&&/^[a-f0-9]{64}$/.test(event.completionRef||'');});if(receipt){setupCheck.pending.completionRef=receipt.completionRef;setupCheck.pending.record=receipt.record||null;persistCheck();acknowledgeCheck();}else checkNote('The answer arrived, but this check has no matching receipt. Check the saved outcome in your workspace.');} }
+    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status');if(setupCheck)checkNote('The reply was interrupted. Your request may already be saved; check its status before sending it again.'); }
     function release() {
       clearTimeout(timer);
       // A terminal packet completes the turn; do not wait indefinitely for the connection to close.
       if (reader) { try { var cancelled = reader.cancel(); if (cancelled && cancelled.catch) cancelled.catch(function () {}); } catch (e) { /* already closed */ } }
-      busy = false; sendBtn.disabled = !cfg.available; if (root.classList.contains('open')) input.focus();
+      busy = false;checkControls();if(root.classList.contains('open')){if(!input.disabled)input.focus();else if(setupCheck&&checkStatusButton&&!checkStatusButton.disabled)checkStatusButton.focus();else if(bubble){bubble.tabIndex=-1;bubble.focus();}}
     }
-    var request = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, contact: state.contact, messages: state.transcript.slice(-20), page: location.pathname, stream: true }) };
+    var body={client:slug,contact:state.contact,messages:state.transcript.slice(-20),page:location.pathname,stream:true};if(setupCheck)body.websiteCheck={checkId:setupCheck.id,challenge:setupCheck.challenge,turnId:setupCheck.pending.id};
+    var request = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
     if (abort) request.signal = abort.signal;
     bounded(fetch(ENDPOINT, request))
       .then(function (res) {
         var type = res.headers.get('content-type') || '';
-        if (!res.ok) { if (res.status === 429) { cfg.available = false; input.disabled = true; } fail(res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : undefined); return; }
+        if (!res.ok) { if (res.status === 429) { configReady=false;cfg.available = false; input.disabled = true; } fail(res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : undefined); return; }
         if (type.indexOf('ndjson') !== -1 && res.body && res.body.getReader) {
           reader = res.body.getReader(); var dec = new TextDecoder(), buf = '';
           function packet(line) {
@@ -106,7 +138,7 @@
             var value; try { value = JSON.parse(line); } catch (e) { fail(interrupted); return; }
             if (!value || typeof value !== 'object') { fail(interrupted); return; }
             if (value.t === 'delta' && typeof value.text === 'string') delta(value.text);
-            else if (value.t === 'done') finish(value.reply);
+            else if (value.t === 'done') finish(value.reply,value.events);
             else fail(interrupted);
           }
           return (function pump() { return bounded(reader.read()).then(function (r) {
@@ -117,7 +149,7 @@
             return pump();
           }); })();
         }
-        return bounded(res.json()).then(function (d) { if (d && d.t === 'done') finish(d.reply); else fail(interrupted); });
+        return bounded(res.json()).then(function (d) { if (d && d.t === 'done') finish(d.reply,d.events); else fail(interrupted); });
       })
       .catch(function () { fail(interrupted); })
       .then(release, release);

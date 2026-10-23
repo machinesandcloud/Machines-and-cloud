@@ -117,7 +117,7 @@ export default async (req) => {
     c.status = "testing";
     c.widget.greeting = c.widget.greeting || `Hi, this is the ${b.name || "front desk"}. What can we help with today?`;
     await saveClient(c);
-    await logEvent(c.slug, "built", { pages: pages.length, missing: c.build.missing });
+    await logEvent(c, "built", { pages: pages.length, missing: c.build.missing });
     const base = process.env.URL || "";
     const portal = `${base}/desk?c=${c.slug}&k=${c.ownerKey}`;
     await sendEmail({ to: c.owner.email, subject: `${b.name || "Your front desk"} is ready to test`, text: `Your front desk is built from ${c.business.website ? c.business.website + " and " : ""}your answers. Test it here, read what it knows, and fix anything wrong:\n${portal}\n\nWhat your website is missing (we filled it from your answers where we could): ${c.build.notes || "nothing major"}.${c.rules?.hours ? "" : "\n\nWe could not read your hours; the front desk is using 7 am to 7 pm until you fill in the rows on your portal (What it knows, Hours)."}` });

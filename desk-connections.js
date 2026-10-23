@@ -57,47 +57,89 @@
     details.state = details.state.toUpperCase(); details.representative = representative; return details;
   }
   function submissionId() { var bytes = new Uint8Array(16); crypto.getRandomValues(bytes); return Array.from(bytes).map(function (byte) { return byte.toString(16).padStart(2,'0'); }).join(''); }
-  function setupPlan(d) {
+  function hasJourney(d) { return Array.isArray(d.setup?.connectionJourney?.channels) && d.setup.connectionJourney.channels.every(function(row){return typeof row.automation==='string'&&typeof row.ownerTask==='string'&&typeof row.readyWhen==='string'&&row.action;}); }
+  function journeyAction(row,seen) {
+    var action=row.action,key=action.kind+':'+action.target;
+    if(action.kind==='wait')return '<span class="connection-guide-wait">'+esc(action.label||row.nextStep)+'</span>';
+    if(seen[key])return '<button type="button" class="connection-guide-link" data-journey-jump="'+esc(seen[key])+'">'+esc(action.kind==='route'?(action.target==='know'?'Use the shared business review above':'Use the shared private practice above'):'Included in the shared service review above')+'</button>';
+    if(action.kind==='route'&&['know','test','setup'].includes(action.target)){seen[key]=row.id;return '<button type="button" class="btn-pill btn-pill-blue btn-sm" data-journey-route="'+action.target+'">'+esc(action.label)+'</button>';}
+    var allowed=['review_setup','review_voice','review_sms','start_calendar','show_phone_steps','show_text_steps','show_calendar_steps'];
+    if(action.kind==='connection'&&allowed.includes(action.target)){seen[key]=row.id;return button(action.target,action.label);}
+    return '<span class="connection-guide-wait">'+esc(row.nextStep)+'</span>';
+  }
+  function renderJourney(d) {
+    if(!hasJourney(d))return false;
+    var node=$('connectionJourney'),expanded=node.querySelector('[data-journey-detail][aria-expanded="true"]')?.dataset.journeyDetail,seen={};
+    var rows=d.setup.connectionJourney.channels.filter(function(row){return row.requested||row.retained;}),counts={};
+    function actionKey(row){return row.action.kind+':'+row.action.target;}
+    rows.forEach(function(row){var key=actionKey(row);if(row.action.kind!=='wait')counts[key]=(counts[key]||0)+1;});
+    var shared=[];rows.forEach(function(row){var key=actionKey(row);if(counts[key]>1&&!shared.some(function(item){return actionKey(item)===key;}))shared.push(row);});
+    var sharedHtml=shared.map(function(row){return '<div class="connection-guide-shared" id="connection-guide-shared-'+row.id+'"><div><strong>Start here once</strong><p>'+esc(row.nextStep)+'</p></div>'+journeyAction(row,seen)+'</div>';}).join('');
+    var purpose={web:'Prepare the front desk for your website.',voice:'Answer through your existing business line or a dedicated front desk number.',sms:'Text from your dedicated front desk number.',calendar:'Keep saved visits on the Google calendar you authorize.'};
+    node.innerHTML='<section class="connection-guide" aria-labelledby="connectionOverviewTitle">'+sharedHtml+'<div class="connection-guide-grid">'+rows.map(function(row){var badge=row.status==='not_selected'?'Not selected':row.responsibility==='complete'?(row.id==='calendar'?'Google connected':'Connection verified'):row.responsibility==='carrier'?'Carrier review':row.responsibility==='platform'?(row.status==='working'?'Setting up in background':'Waiting for service'):'Your next step',common=counts[actionKey(row)]>1,open=expanded===row.id;return '<article class="connection-guide-card" id="connection-guide-'+row.id+'" data-channel="'+row.id+'" data-responsibility="'+row.responsibility+'"><header><h4>'+esc(row.label)+'</h4><span class="connection-guide-badge">'+esc(badge)+'</span></header><p class="connection-guide-detail">'+esc(common?purpose[row.id]:row.nextStep)+'</p><div class="connection-guide-actions">'+(common?'<span class="connection-guide-shared-note">Shared first step above</span>':journeyAction(row,seen))+'<button type="button" class="connection-guide-disclosure" data-journey-detail="'+row.id+'" aria-expanded="'+open+'" aria-controls="connection-guide-flow-'+row.id+'">What happens next <span aria-hidden="true">'+(open?'−':'+')+'</span></button></div><div class="connection-guide-flow" id="connection-guide-flow-'+row.id+'"'+(open?'':' hidden')+'><p>'+esc(row.detail)+'</p><dl><div><dt>We handle</dt><dd>'+esc(row.automation)+'</dd></div><div><dt>Your one-time part</dt><dd>'+esc(row.ownerTask)+'</dd></div><div><dt>Ready when</dt><dd>'+esc(row.readyWhen)+'</dd></div></dl></div></article>';}).join('')+'</div>'+(rows.length?'':'<p>Choose a connection above to see its setup path.</p>')+'<div class="connection-guide-refresh"><p id="connectionRefreshStatus">Check saved setup progress at any time.</p>'+button('check_status','Check saved status')+'</div></section>';
+    return true;
+  }
+  function revealConnectionStep(id) { var target=$(id);if(!target)return;var parent=target.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}target.hidden=false;target.tabIndex=-1;target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});target.focus({preventScroll:true}); }
+
+  function setupPlan(d,guideShown) {
     var plan = d.serviceOnboarding;
     if (!plan || !plan.requestedChannels || !plan.requestedChannels.length) return '';
     if ((plan.reasonCode === 'existing_setup' || plan.legacySetup) && !plan.operation) return '';
-    var operation = plan.operation, content = '<div class="connection-plan"><div class="connection-plan-heading"><div><p class="connection-eyebrow">Your connection setup</p><h4>One review. We handle the setup.</h4></div><span class="connection-badge">' + esc(operation ? labelState(operation.state) : plan.available ? 'Ready to review' : 'Not available yet') + '</span></div>';
-    content += '<p>Your saved business details carry into setup. Review the costs and permissions once; we prepare your number and selected services in the background.</p>';
+    var operation = plan.operation, content = '<div class="connection-plan"><div class="connection-plan-heading"><div><p class="connection-eyebrow">Your connection setup</p><h4>Approved setup progress</h4></div><span class="connection-badge">' + esc(operation ? labelState(operation.state) : plan.available ? 'Ready to review' : 'Not available yet') + '</span></div>';
+    content += '<p>Your saved review covers only the services you approved. We prepare those connections in the background; other selected services wait for their own available review.</p>';
     if (operation) {
       content += '<p role="status">' + esc(operation.detail) + '</p><ol class="connection-progress"><li>Business details saved</li><li>' + (d.phoneActivation?.operation?.state === 'number_acquired' ? 'Front desk number reserved' : operation.numberRequested ? 'Number request saved' : 'Number setup awaiting approval') + '</li>';
-      if (plan.requestedChannels.includes('voice')) content += '<li>' + esc(d.connections.voice.active ? 'Phone answering verified' : operation.voiceRequested ? 'Phone answering setup requested' : 'Phone answering follows number setup') + '</li>';
-      if (plan.requestedChannels.includes('sms')) content += '<li>' + esc(d.connections.messaging.active ? 'Text messaging verified' : operation.messagingRequested ? 'Text registration requested' : 'Text registration follows number setup') + '</li>';
+      if ((operation.requestedChannels || plan.acceptedChannels || plan.requestedChannels).includes('voice')) content += '<li>' + esc(d.connections.voice.active ? 'Phone answering verified' : operation.voiceRequested ? 'Phone answering setup requested' : 'Phone answering follows number setup') + '</li>';
+      if ((operation.requestedChannels || plan.acceptedChannels || plan.requestedChannels).includes('sms')) content += '<li>' + esc(d.connections.messaging.active ? 'Text messaging verified' : operation.messagingRequested ? 'Text registration requested' : 'Text registration follows number setup') + '</li>';
       content += '</ol>';
       if (operation.nextAction === 'review_existing_connections') content += '<p>Review the connection details below to finish any requested correction or verification.</p>';
       if (!operation.cancellationRequested && !['cancelled','complete','completed'].includes(operation.state)) content += '<button type="button" class="btn-pill btn-pill-dark btn-sm" data-connection="cancel_setup">Cancel connection setup</button>';
     }
     var proof = d.client.setupProof || {}, reviewed = proof.reviewedRevision === d.configurationRevision, tested = proof.testedRevision === d.configurationRevision && proof.testMode === 'live';
-    if (plan.available && (!operation || operation.state === 'needs_review')) content += !reviewed ? '<p>First check the business details your front desk will use.</p>' + button('review_business', 'Review business details') : !tested ? '<p>Try a private customer conversation before connecting your services.</p>' + button('try_frontdesk', 'Try your front desk') : button('review_setup', operation ? 'Review updated setup' : 'Review and connect');
-    else if (!operation) content += '<p class="connection-note">Phone and text connections are not available yet. Your choices are saved; nothing is being purchased or activated.</p>';
-    return content + '</div>';
+    if (!guideShown && plan.available && (!operation || operation.state === 'needs_review')) content += !reviewed ? '<p>First check the business details your front desk will use.</p>' + button('review_business', 'Review business details') : !tested ? '<p>Try a private customer conversation before connecting your services.</p>' + button('try_frontdesk', 'Try your front desk') : button('review_setup', operation ? 'Review updated setup' : 'Review and connect');
+    else if (!guideShown && !operation) content += '<p class="connection-note">Phone and text connections are not available yet. Your choices are saved; nothing is being purchased or activated.</p>';
+    if(guideShown&&!operation)return '';
+    return guideShown?'<details class="connection-guide-management"><summary>Manage approved phone and text setup</summary>'+content+'</div></details>':content+'</div>';
   }
   function render(d) {
-    if (!d.connections) return; data = d;
-    var c = d.connections, requested = d.client.onboarding.desiredChannels || [], html = setupPlan(d), coordinated = !!d.serviceOnboarding && !d.serviceOnboarding.legacySetup && d.serviceOnboarding.reasonCode !== 'existing_setup';
+    if (!d.connections) return; var wasRefreshing=connectionRefreshInFlight;data = d;
+    var guideShown=renderJourney(d), c = d.connections, requested = d.client.onboarding.desiredChannels || [], html = setupPlan(d,guideShown), coordinated = !!d.serviceOnboarding && !d.serviceOnboarding.legacySetup && d.serviceOnboarding.reasonCode !== 'existing_setup';
     var numberCard = $('phoneSetupCard');
     if (numberCard && coordinated && (d.serviceOnboarding.requestedChannels || []).length) numberCard.hidden = true;
-    if(c.voice.active || c.messaging.active){$('status').textContent='Front desk active';html+='<p>'+button('pause_services','Pause front desk')+'</p>';}
-    else if(d.client.status==='paused' && (requested.indexOf('voice')>=0 || requested.indexOf('sms')>=0))html+='<p>'+button('resume_services','Resume connections')+'</p>';
-    if (requested.indexOf('calendar') >= 0 || c.calendar.connected || calendarReturn) html += '<div class="setup-step"><div><h4>Keep visits on your calendar</h4><p>' + esc(c.calendar.detail) + '</p><p>Your other Google events do not set availability. Block unavailable time in your workspace.</p>' + (calendarReturn ? button('finish_calendar', 'Finish connecting Google Calendar') : c.calendar.connected ? button('disconnect_calendar', 'Disconnect Calendar') : c.calendar.available ? button('start_calendar', c.calendar.reconnectRequired ? 'Reconnect Google Calendar' : 'Connect Google Calendar') : '<p>Calendar connection is being prepared. Your preference is saved.</p>') + '</div></div>';
-    if ((!coordinated && requested.indexOf('voice') >= 0) || c.voice.operation) html += '<div class="setup-step"><div><h4>Answer your calls</h4><p>' + esc(c.voice.operation ? c.voice.operation.detail : 'Your answering service is prepared after a number is reserved and you review the usage terms.') + '</p>' + (!coordinated && c.voice.available && (!c.voice.operation || ['needs_review','suspended','waiting_platform'].includes(c.voice.state)) && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_voice', 'Review phone answering') : '') + (c.voice.operation && c.voice.operation.state !== 'cancelled' ? button('cancel_voice', 'Disconnect phone answering') : '') + '</div></div>';
-    if (c.voice.operation?.number && c.voice.operation.forwardingMode === 'forward_business_line' && c.voice.forwarding) {
-      html += '<div class="setup-step"><div><h4>Keep your existing business number</h4><p>' + esc(c.voice.forwarding.short) + '</p><p>' + esc(c.voice.forwarding.note) + '</p>';
-      (c.voice.forwarding.codes || []).forEach(function (code) { if (/^[*#\d]+$/.test(code)) html += '<a class="btn-pill btn-pill-dark btn-sm" href="tel:' + esc(code.replace(/#/g,'%23')) + '">' + esc('Dial ' + code) + '</a> '; });
-      html += '<p>Make a test call from another phone to confirm calls reach your front desk.</p></div></div>';
+    if(c.voice.active || c.messaging.active){$('status').textContent='Front desk active';if(!guideShown)html+='<p>'+button('pause_services','Pause front desk')+'</p>';}
+    else if(!guideShown&&d.client.status==='paused' && (requested.indexOf('voice')>=0 || requested.indexOf('sms')>=0))html+='<p>'+button('resume_services','Resume connections')+'</p>';
+    if ((!guideShown && requested.indexOf('calendar') >= 0) || c.calendar.connected || calendarReturn) html += '<div class="setup-step" id="calendarConnectionSteps"><div><h4>Keep visits on your calendar</h4><p>' + esc(c.calendar.detail) + '</p><p>Your other Google events do not set availability. Block unavailable time in your workspace.</p>' + (calendarReturn ? button('finish_calendar', 'Finish connecting Google Calendar') : c.calendar.connected ? button('disconnect_calendar', 'Disconnect Calendar') : c.calendar.available ? button('start_calendar', c.calendar.reconnectRequired ? 'Reconnect Google Calendar' : 'Connect Google Calendar') : '<p>Calendar connection is being prepared. Your preference is saved.</p>') + '</div></div>';
+    if ((!guideShown && !coordinated && requested.indexOf('voice') >= 0) || c.voice.operation) html += '<div class="setup-step" id="phoneConnectionSteps"><div><h4>Answer your calls</h4><p>' + esc(c.voice.operation ? c.voice.operation.detail : 'Your answering service is prepared after a number is reserved and you review the usage terms.') + '</p>' + (!coordinated && c.voice.available && (!c.voice.operation || ['needs_review','suspended','waiting_platform'].includes(c.voice.state)) && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_voice', 'Review phone answering') : '') + (c.voice.operation && c.voice.operation.state !== 'cancelled' ? button('cancel_voice', 'Disconnect phone answering') : '') + '</div></div>';
+    if (c.voice.operation?.number && c.voice.forwarding) {
+      var forwarding=c.voice.forwarding;
+      html += '<div class="setup-step" id="phoneRoutingSteps"><div><h4>'+(forwarding.manualCarrierStep?'Route your business line':'Test your new front desk number')+'</h4><p>'+esc(forwarding.short)+'</p>';
+      if(forwarding.sourceNumber)html+='<p><strong>Business line:</strong> '+esc(forwarding.sourceNumber)+'<br><strong>Front desk destination:</strong> '+esc(forwarding.targetNumber)+'</p>';
+      if(forwarding.steps?.length)html+='<ol class="connection-guide-instructions">'+forwarding.steps.map(function(step){return'<li>'+esc(step)+'</li>';}).join('')+'</ol>';
+      if(forwarding.note)html+='<p>'+esc(forwarding.note)+'</p>';
+      var official=(forwarding.guides||[]).filter(function(guide){try{var url=new URL(guide.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&['www.att.com','www.verizon.com','www.t-mobile.com'].includes(url.hostname);}catch(error){return false;}});
+      if(official.length)html+='<div class="connection-guide-links">'+official.map(function(guide){return'<a href="'+esc(guide.url)+'" target="_blank" rel="noopener noreferrer">'+esc(guide.label)+' ↗</a>';}).join('')+'</div>';
+      if(forwarding.needsBusinessNumber)html+=button('review_business','Review business details');
+      html+='</div></div>';
     }
-    if ((!coordinated && requested.indexOf('sms') >= 0) || c.messaging.operation) html += '<div class="setup-step"><div><h4>Text customers from your business number</h4><p>' + esc(c.messaging.detail) + '</p>' + (c.messaging.available && (!coordinated || c.messaging.operation?.customerAction === 'correct_registration') && (!c.messaging.operation || c.messaging.operation.customerAction === 'correct_registration') && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_sms', c.messaging.operation ? 'Review registration details' : 'Review texting setup') : '') + (c.messaging.operation && !c.messaging.operation.cancellationRequested && c.messaging.operation.state !== 'cancelled' ? button('cancel_sms', 'Disconnect texting') : '') + '</div></div>';
+    if ((!guideShown && !coordinated && requested.indexOf('sms') >= 0) || c.messaging.operation) html += '<div class="setup-step" id="textConnectionSteps"><div><h4>Text from your front desk number</h4><p>' + esc(c.messaging.detail) + '</p>' + (c.messaging.available && (!coordinated || c.messaging.operation?.customerAction === 'correct_registration') && (!c.messaging.operation || c.messaging.operation.customerAction === 'correct_registration') && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_sms', c.messaging.operation ? 'Review registration details' : 'Review texting setup') : '') + (c.messaging.operation && !c.messaging.operation.cancellationRequested && c.messaging.operation.state !== 'cancelled' ? button('cancel_sms', 'Disconnect texting') : '') + '</div></div>';
     if (c.delivery.total || c.calendarDelivery.total) html += '<details><summary>Recent delivery status</summary><p>Saved requests stay in your workspace. Provider acceptance and confirmed delivery are tracked separately.</p><ul>' + c.delivery.jobs.map(function (j) { return '<li>' + esc(labelState(j.purpose)) + ' · ' + esc(labelState(j.state)) + '</li>'; }).concat(c.calendarDelivery.jobs.map(function (j) { return '<li>Calendar visit ' + esc(j.bookingId) + ' · ' + esc(labelState(j.state)) + '</li>'; })).join('') + '</ul></details>';
-    container.innerHTML = html;
-    var states = $('channelStates'); if (states) states.innerHTML = '<span class="channel-state">Website chat: ' + (d.webAvailable ? 'active' : 'not active') + '</span><span class="channel-state">Phone: ' + (c.voice.active ? 'active' : esc(labelState(c.voice.state))) + '</span><span class="channel-state">Texts: ' + (c.messaging.active ? 'active' : esc(labelState(c.messaging.state))) + '</span><span class="channel-state">Calendar: ' + esc(labelState(c.calendar.status)) + '</span>';
+    container.innerHTML = html;var controls=$('connectionServiceDetails');if(controls)controls.hidden=!html.trim();
+    connectionRefreshInFlight=false;if(wasRefreshing&&message.textContent==='Checking saved connection status…')message.textContent='Saved connection status updated.';scheduleConnectionRefresh();
+    var states = $('channelStates');
+    if(states&&hasJourney(d)){var statusLabels={ready_for_website:'ready for website setup',active:'verified',connected:'permission saved · ready to sync',needs_action:'setup needed',waiting_platform:'waiting for service',waiting_carrier:'carrier review',working:'setup in progress',paused:'paused',closed:'workspace cancelled',cleanup_pending:'checking cleanup',cleanup_uncertain:'checking cleanup',cancel_pending:'checking cleanup',cancelled:'disconnected'};states.innerHTML=d.setup.connectionJourney.channels.filter(function(row){return row.requested||row.retained;}).map(function(row){return '<span class="channel-state">'+esc(row.label)+': '+esc(statusLabels[row.status]||labelState(row.status))+'</span>';}).join('');}
+    else if(states) states.innerHTML = '<span class="channel-state">Website chat: ' + (d.webAvailable ? 'active' : 'not active') + '</span><span class="channel-state">Phone: ' + (c.voice.active ? 'active' : esc(labelState(c.voice.state))) + '</span><span class="channel-state">Texts: ' + (c.messaging.active ? 'active' : esc(labelState(c.messaging.state))) + '</span><span class="channel-state">Google permission: ' + esc(labelState(c.calendar.status)) + '</span>' + (c.calendar.connected ? '<span class="channel-state">Calendar delivery: ' + (c.calendarDelivery.enabled ? 'ready to sync' : 'waiting for service') + '</span>' : '');
   }
+  var connectionRefreshTimer=null,connectionAutoReads=0,connectionRefreshInFlight=false;
+  var connectionRefreshDelays=[15000,30000,60000,60000,60000,60000];
+  function connectionRefreshStop(){if(connectionRefreshTimer)clearTimeout(connectionRefreshTimer);connectionRefreshTimer=null;}
+  function connectionHasWork(){if(!data)return false;var states=['queued','running','awaiting_number','waiting_number','connecting','preparing','creating_assistant','importing_number','configuring_routing','uncertain'];return [data.serviceOnboarding?.operation,data.phoneActivation?.operation,data.connections?.voice?.operation,data.connections?.messaging?.operation].some(function(operation){return operation&&states.includes(operation.state);});}
+  function connectionCanRefresh(){return data&&currentSession()&&document.body.dataset.activePage==='setup'&&document.body.dataset.workspaceState==='ready'&&!$('portalContent').hidden&&document.visibilityState==='visible'&&!busy&&!connectionRefreshInFlight&&!document.querySelector('dialog[open]')&&connectionHasWork();}
+  function scheduleConnectionRefresh(){connectionRefreshStop();var status=$('connectionRefreshStatus');if(status)status.textContent=connectionAutoReads>=6?'Automatic status checks paused. You can check saved status again below.':connectionHasWork()?'Progress updates while setup is running. The background setup continues if you leave this page.':'Check saved setup progress at any time.';if(connectionAutoReads>=6||!connectionCanRefresh())return;var expectedGeneration=generation;connectionRefreshTimer=setTimeout(function(){connectionRefreshTimer=null;if(expectedGeneration!==generation||!connectionCanRefresh())return;connectionAutoReads++;connectionRefreshInFlight=true;document.querySelectorAll('[data-connection="check_status"]').forEach(function(button){button.disabled=true;});document.dispatchEvent(new CustomEvent('mc:desk-refresh'));},connectionRefreshDelays[connectionAutoReads]);}
+  document.addEventListener('visibilitychange',scheduleConnectionRefresh);window.addEventListener('hashchange',scheduleConnectionRefresh);document.addEventListener('close',scheduleConnectionRefresh,true);
+  new MutationObserver(scheduleConnectionRefresh).observe(document.body,{attributes:true,attributeFilter:['data-active-page','data-workspace-state']});
   document.addEventListener('mc:desk', function (event) { render(event.detail); if (calendarNotice) { message.textContent = calendarNotice; calendarNotice = ''; } continueCalendarReturn(event.detail); });
-  $('deskSignOut').addEventListener('click', function () { generation++; data = null; calendarReturn = null; if (dialog.open) dialog.close(); dialog.innerHTML = ''; container.innerHTML = ''; });
-  document.addEventListener('mc:session-expired',function () { generation++; data = null; calendarReturn = null; if (dialog.open) dialog.close(); dialog.innerHTML = ''; });
+  $('deskSignOut').addEventListener('click', function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; if (dialog.open) dialog.close(); dialog.innerHTML = ''; container.innerHTML = ''; });
+  document.addEventListener('mc:session-expired',function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; if (dialog.open) dialog.close(); dialog.innerHTML = ''; });
   function review(title, content, submitLabel, onSubmit) {
     dialog.innerHTML = '<form id="connectionForm"><h2 id="connectionTitle">' + esc(title) + '</h2>' + content + '<p id="connectionDialogMessage" role="status" aria-live="polite"></p><div class="walkthrough-actions"><button type="submit" class="btn-pill btn-pill-blue btn-sm">' + esc(submitLabel) + '</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="connectionBack">Back</button></div></form>';
     $('connectionBack').onclick = function () { if (!busy) dialog.close(); };
@@ -111,8 +153,9 @@
     message.textContent = action === 'complete_calendar_connection' ? (fields.error ? 'Confirming your calendar choice…' : 'Connecting your Google Calendar…') : 'Saving your connection…'; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     try {
       var response = await fetch(base + '/api/client?c=' + encodeURIComponent(slug), { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + session }, body:JSON.stringify(Object.assign({ action:action }, fields || {})),signal:controller.signal });
-      var result = await response.json(); if (generation !== expectedGeneration) return;
+      if (generation !== expectedGeneration) return;
       if (response.status===401 || response.status===403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+      var result = await response.json(); if (generation !== expectedGeneration) return;
       if (!response.ok || !result.ok) throw new Error(result.message || 'The connection could not be confirmed. Refresh its status before retrying.');
       if (action === 'start_calendar_connection') {
         var destination = new URL(result.result.authorizationUrl); if (destination.protocol !== 'https:' || destination.hostname !== 'accounts.google.com') throw new Error('Google connection address could not be verified.');
@@ -124,6 +167,7 @@
       if (action === 'complete_calendar_connection') clearCalendarReturn();
       if(!result.connections){document.dispatchEvent(new CustomEvent('mc:desk-refresh'));if(dialog.open)dialog.close();message.textContent='Your change is saved. Refreshing connection status…';return;}
       if(result.client)data.client=result.client;
+      if(result.setup)data.setup=result.setup;
       if(result.serviceOnboarding)data.serviceOnboarding=result.serviceOnboarding;
       if(result.phoneActivation)data.phoneActivation=result.phoneActivation;
       if (dialog.open) dialog.close(); data.connections = result.connections; render(data);
@@ -134,28 +178,35 @@
         (dialog.open ? $('connectionDialogMessage') : message).textContent = error.name==='AbortError'?'The request timed out. Your change may be saved; refresh its status before retrying.':error.message;
       }
     }
-    finally { clearTimeout(timeout); busy = false; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); }
+    finally { clearTimeout(timeout); if(generation===expectedGeneration){busy = false; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = false; });scheduleConnectionRefresh();} }
   }
   function check(name, text) { return '<label style="display:flex;gap:10px;margin:16px 0"><input type="checkbox" name="' + name + '" required><span>' + esc(text) + '</span></label>'; }
   function field(name, label, value, type, optional) { return '<div class="form-group"><label class="form-label">' + esc(label) + '<input class="form-input" name="' + name + '" value="' + esc(value || '') + '" type="' + (type || 'text') + '" maxlength="500"' + (optional ? '' : ' required') + '></label></div>'; }
-  container.addEventListener('click', function (event) {
-    var target = event.target.closest('[data-connection]'); if (!target || busy || !data) return;
+  function handleConnectionClick(event) {
+    var target = event.target.closest('[data-connection],[data-journey-route],[data-journey-jump],[data-journey-detail]'); if (!target || busy || !data) return;
+    if(target.dataset.journeyDetail){var selected=target.dataset.journeyDetail,open=target.getAttribute('aria-expanded')!=='true';$('connectionJourney').querySelectorAll('[data-journey-detail]').forEach(function(button){var expanded=open&&button.dataset.journeyDetail===selected;button.setAttribute('aria-expanded',String(expanded));button.querySelector('span').textContent=expanded?'−':'+';$('connection-guide-flow-'+button.dataset.journeyDetail).hidden=!expanded;});return;}
+    if(target.dataset.journeyJump){revealConnectionStep('connection-guide-'+target.dataset.journeyJump);return;}
+    if(target.dataset.journeyRoute){var tab=target.dataset.journeyRoute;if(!['know','test','setup'].includes(tab))return;document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:tab}}));if(tab==='setup')requestAnimationFrame(function(){revealConnectionStep('websiteInstallStep');});return;}
+    if(target.dataset.connection==='show_phone_steps'){revealConnectionStep('phoneRoutingSteps');return;}
+    if(target.dataset.connection==='show_text_steps'){revealConnectionStep('textConnectionSteps');return;}
+    if(target.dataset.connection==='show_calendar_steps'){revealConnectionStep('calendarConnectionSteps');return;}
     var action = target.dataset.connection, c = data.connections, revision = data.configurationRevision;
+    if(action==='check_status'){if(connectionRefreshInFlight)return;connectionRefreshStop();connectionRefreshInFlight=true;target.disabled=true;message.textContent='Checking saved connection status…';document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
     if (action === 'review_business' || action === 'try_frontdesk') return document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: action === 'review_business' ? 'know' : 'test' } }));
     if (action === 'cancel_setup') return review('Cancel connection setup?', '<p>We stop new setup and reconcile any number or services already requested. Your business details and customer records remain saved.</p>', 'Cancel setup', function () { request('cancel_service_onboarding', { expectedRevision: revision, operationId: data.serviceOnboarding.operation.id }); });
     if (action === 'review_setup') {
-      var plan = data.serviceOnboarding, quote = plan.offer, chosen = plan.requestedChannels;
+      var plan = data.serviceOnboarding, quote = plan.offer, chosen = (quote && quote.scopeChannels || plan.authorizableChannels || plan.requestedChannels).slice();
       if (!plan.available || !quote) return;
-      var content = '<p>Review your selected services below. After you approve, number reservation and provider setup continue without another setup submission.</p><h3>Your front desk number</h3><p>' + money(quote.number.oneTimeCents) + ' one-time and ' + money(quote.number.monthlyCents) + ' per month.</p><p>' + esc(quote.number.authorityText) + '</p>';
+      var content = '<p>Review only the services listed below. After approval, we continue their setup in the background. Other selected services wait for their own available review.</p><h3>Your front desk number</h3>'+(quote.numberCostAlreadyAccepted?'<p>Your existing dedicated number is retained. This review does not purchase a second number.</p>':'<p>'+money(quote.number.oneTimeCents)+' one-time and '+money(quote.number.monthlyCents)+' per month.</p><p>'+esc(quote.number.authorityText)+'</p>');
       if (chosen.includes('voice')) content += '<h3>Phone answering</h3><p>' + esc(quote.voice.usageDisclosure) + '</p><p>' + esc(quote.voice.authorityText) + '</p><p>Up to ' + esc(quote.voice.maxDailyCalls) + ' calls and ' + esc(quote.voice.maxDailyMinutes) + ' minutes per day, with a ' + esc(quote.voice.maxDurationSeconds) + '-second call limit.</p><label class="form-label">Customers reach your front desk<select class="form-input" name="forwardingMode"><option value="forward_business_line"' + (data.client.onboarding.phoneSetupMode !== 'use_new_number' ? ' selected' : '') + '>Through my existing business number</option><option value="use_new_number"' + (data.client.onboarding.phoneSetupMode === 'use_new_number' ? ' selected' : '') + '>On the new front desk number</option></select></label>';
       if (chosen.includes('sms')) {
-        content += '<h3>Customer texting</h3><p>Brand filing: ' + money(quote.messaging.brandRegistrationCents) + '. Campaign filing: ' + money(quote.messaging.campaignRegistrationCents) + '. Campaign registration: ' + money(quote.messaging.campaignMonthlyCents) + ' per month.</p><p>' + esc(quote.messaging.usageDisclosure) + '</p><p>' + esc(quote.messaging.authorityText) + '</p><details><summary>Your texts and customer consent</summary><p>' + esc(quote.program.description) + '</p><p>' + esc(quote.program.messageFlow) + '</p>' + quote.program.messageSamples.map(function (sample) { return '<p>' + esc(sample) + '</p>'; }).join('') + '</details>' + registrationFields(data.client);
+        content += '<h3>Customer texting</h3><p>Texts use your dedicated front desk number. Forwarding an existing line changes calls only.</p><p>Brand filing: ' + money(quote.messaging.brandRegistrationCents) + '. Campaign filing: ' + money(quote.messaging.campaignRegistrationCents) + '. Campaign registration: ' + money(quote.messaging.campaignMonthlyCents) + ' per month.</p><p>' + esc(quote.messaging.usageDisclosure) + '</p><p>' + esc(quote.messaging.authorityText) + '</p><details><summary>Your texts and customer consent</summary><p>' + esc(quote.program.description) + '</p><p>' + esc(quote.program.messageFlow) + '</p>' + quote.program.messageSamples.map(function (sample) { return '<p>' + esc(sample) + '</p>'; }).join('') + '</details>' + registrationFields(data.client);
         content += check('accuracy','These registered business details are accurate and I am authorized to register this business.') + check('consumerConsent','My business will obtain and record customer agreement before appointment texts. Customers can book without texting consent.') + check('testConsent','Send a setup verification text to my saved owner mobile number. I will reply to confirm delivery.');
       }
-      content += check('costs','I accept the number, registration and recurring usage costs shown for my selected services.') + check('authority','I authorize Machines & Cloud to reserve my business number and set up the selected services under the terms shown above.');
+      content += check('costs','I accept the costs and usage terms shown for the services in this review.') + check('authority',quote.numberCostAlreadyAccepted?'I authorize Machines & Cloud to set up only the services listed in this review using my existing dedicated front desk number.':'I authorize Machines & Cloud to reserve my dedicated front desk number and set up only the services listed in this review.');
       var requestId = submissionId();
       return review('Review your front desk connections', content, 'Approve and start setup', function (form) {
-        var body = { expectedRevision: revision, submissionId: requestId, offerDigest: quote.digest, acceptedCosts: true, authority: true };
+        var body = { expectedRevision: revision, submissionId: requestId, offerDigest: quote.digest, acceptedChannels:chosen, acceptedCosts: true, authority: true };
         if (chosen.includes('voice')) body.forwardingMode = form.get('forwardingMode');
         if (chosen.includes('sms')) Object.assign(body, { legal: registrationDetails(form), attestLegalAccuracy: true, attestConsent: true, testPhoneConsent: true });
         request('request_service_onboarding', body);
@@ -181,5 +232,7 @@
       if (sms.operation) { body.operationId = sms.operation.id; body.expectedSubmissionRevision = sms.operation.submissionRevision; }
       request(sms.operation ? 'correct_messaging_activation' : 'request_messaging_activation',body);
     });
-  });
+  }
+  container.addEventListener('click',handleConnectionClick);
+  $('connectionJourney').addEventListener('click',handleConnectionClick);
 })();

@@ -1,6 +1,7 @@
 // Durable, local-only workspace repair. No provider, model, email or billing adapters.
 import { createHash, randomBytes } from "node:crypto";
-import { atomicUpdate, list } from "./store.mjs";
+import { atomicUpdate, list, assertCurrentWorkspace } from "./store.mjs";
+import { belongsToWorkspace } from "./workspace-identity.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient } from "./setup.mjs";
 
@@ -17,8 +18,9 @@ const identity = c => hash(JSON.stringify([c.slug, c.ownerKey, normalizeAccountE
 const lifecycle = c => hash(JSON.stringify([c.status, c.pausedAt || null, c.cancelledAt || null, c.liveAt || null, c.operationLifecycleVersion || 0]));
 const receiptMatches = (receipt, row) => receipt?.id === row.id && receipt.inputRevision === row.inputRevision && receipt.generation >= (row.requestGeneration || 0);
 const lifecycleStopped = (c, row) => c.status === "cancelled" || (row.requestedLifecycle ? lifecycle(c) !== row.requestedLifecycle : c.status === "paused");
-const operationId = (slug, revision) => `${slug}/${KIND}/${revision}`;
-const validId = value => typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}\/workspace_rebuild\/[a-f0-9]{64}$/.test(value);
+const legacyOperationId = (slug, revision) => `${slug}/${KIND}/${revision}`;
+export const workspaceOperationId = (client, revision) => `${client.slug}/${KIND}/${identity(client)}/${revision}`;
+const validId = value => typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}\/workspace_rebuild\/(?:[a-f0-9]{64}\/)?[a-f0-9]{64}$/.test(value);
 const stateDetail = row => ({
   queued: "Your saved business answers are queued for a workspace refresh. You can leave this page.",
   running: "Your workspace is being refreshed from your saved business answers.",
@@ -129,7 +131,18 @@ async function syncFailure(row) {
 
 export async function queueWorkspaceRebuild(c, { actor, reason, expectedRevision } = {}) {
   const requested = audit(actor, reason), current = await currentClient(c, expectedRevision, requested.actor), at = iso(Date.now());
-  const id = operationId(current.slug, expectedRevision), prior = await strictRead(OPERATIONS, id);
+  let id = workspaceOperationId(current, expectedRevision), prior = await strictRead(OPERATIONS, id);
+  if (!prior) {
+    // Resume a pre-upgrade operation only with proof of its originating incarnation.
+    // A foreign row at the former slug/revision key remains archived; it cannot block this owner.
+    const legacyId = legacyOperationId(current.slug, expectedRevision), legacy = await strictRead(OPERATIONS, legacyId);
+    const matches = row => row?.id === legacyId && row.slug === current.slug && row.inputRevision === expectedRevision && row.tenantIdentity === identity(current);
+    if (matches(legacy)) { id = legacyId; prior = legacy; }
+    else if (!legacy) {
+      const queue = validateQueue(await strictRead(QUEUE, ACTIVE)), intent = queue.intents[legacyId];
+      if (matches(intent)) { id = legacyId; prior = await ensureOperation(intent); }
+    }
+  }
   if (prior && prior.tenantIdentity !== identity(current)) throw new WorkspaceOperationError("operation_conflict", "The saved refresh belongs to a different workspace.");
   const newLifecycle = lifecycle(current);
   const explicitRepair = prior && ((prior.requestedLifecycle !== newLifecycle && prior.state !== "succeeded") || (prior.state === "succeeded" && current.build?.status !== "built"));
@@ -152,13 +165,16 @@ export async function queueWorkspaceRebuild(c, { actor, reason, expectedRevision
   return workspaceOperationView(await ensureOperation(intent));
 }
 
-export async function listWorkspaceOperations(slug) {
+export async function listWorkspaceOperations(target) {
+  const client = typeof target === "string" ? null : target, slug = client ? client.slug : target;
+  if (client) await assertCurrentWorkspace(client);
   if (!slugValid(slug)) throw new WorkspaceOperationError("invalid_workspace", "Choose a customer workspace.", 400);
   const queue = validateQueue(await strictRead(QUEUE, ACTIVE));
-  for (const intent of Object.values(queue.intents).filter(row => row.slug === slug)) await ensureOperation(intent);
+  for (const intent of Object.values(queue.intents).filter(row => row.slug === slug && (!client || belongsToWorkspace(client,row)))) await ensureOperation(intent);
   const keys = await list(OPERATIONS, slug + "/");
   const rows = await Promise.all(keys.map(key => strictRead(OPERATIONS, key)));
-  return rows.filter(Boolean).sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id)).slice(0, 20).map(workspaceOperationView);
+  if (client) await assertCurrentWorkspace(client);
+  return rows.filter(row => row && (!client || belongsToWorkspace(client,row))).sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id)).slice(0, 20).map(workspaceOperationView);
 }
 
 export async function retryWorkspaceOperation(c, id, { actor, reason, expectedRevision } = {}) {

@@ -1,5 +1,20 @@
 # UI/UX engineering mission
 
+## Current workspace direction: customer tasks first
+
+The October 23 review found that eight equal navigation destinations and repeated setup surfaces made the customer workspace hard to follow. The active candidate is `/tmp/mc-workspace-simplicity-b082`, based on accepted connection candidate `b0820e5`; it excludes the unfinished G7 request-follow-through checkpoint. Publication and functional acceptance are recorded in `LAUNCH-READINESS.md`.
+
+Use four main destinations: **Home**, **Inbox**, **Schedule** and **Front desk**. Keep **Account** as a separate persistent control. Inbox contains Requests and Conversations. Schedule owns saved visits and blocked time. Front desk contains Connections, Business details and Test answers. Existing eight route tokens/deep links are preserved internally; they do not require eight competing navigation buttons.
+
+Home shows one genuine next action, or an accurate waiting status with no pretend task. Daily pages show the work the owner came to do. Setup, pause/resume and testing controls do not appear globally above every page. Account owns service controls, maintenance, usage and exports. First entry does not open a tutorial automatically; the animated six-step Quick tour remains available on request.
+
+Connections has one selected-service guide. Shared review happens once. Changing service choices, installation details and provider controls open when needed. Business editing uses five named expandable sections within the same form and save path. Validation opens the relevant section and focuses the invalid field. Navigation, background refresh and slow save responses preserve unsaved business edits and connection choices. Installation remains unverified until its actual evidence exists; a code copy is not completion.
+
+This structure was informed by official [Jobber navigation](https://getjobber.zendesk.com/hc/en-us/articles/360033836333-Navigating-Jobber) and [Housecall Pro CSR AI](https://help.housecallpro.com/en/articles/9740104-csr-ai-overview) guidance: operational outcomes and service configuration have distinct homes. These are documentation observations, not competitor-account tests or proof of our implementation.
+
+The before-map and immutable baseline renders are retained in `scratchpad/workspace-simplicity-before-map.json`. PO accepted the first actual desktop/mobile structure with a small duplicate-heading cleanup. Final local acceptance now covers real handler/DOM navigation, focus, saved records, closed-section validation, slow/conflicting saves, choice preservation, manual tour and session recovery: 19 independent groups plus the 37-command required gate. See `scratchpad/workspace-simplicity-root-acceptance.json` for the exact source, bridges and evidence boundary.
+
+
 The UI/UX engineer owns whether a customer can understand and complete the product’s main journeys with confidence. This role works with the Product Owner, Architect, Engineer, QA and Marketing/Sales; it does not treat a working API or an approved screenshot as proof of a usable product.
 
 The ongoing mission is to turn customer jobs into clear language, short forms, coherent navigation and reliable interactions. Start with what the customer wants to do, reveal the next useful detail at the right moment, carry answers forward, and make recovery straightforward. Keep mobile, keyboard access, loading, empty states and errors part of the design from the beginning.

@@ -1,0 +1,27 @@
+// Next-slice baseline only. Actual handler, isolated browser, every request fulfilled locally.
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,existsSync,statSync} from 'node:fs';
+import {resolve,extname} from 'node:path';
+import * as f from './tenant-isolation-independent-fixture.mjs';
+const {chromium}=await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs');
+const output=process.argv[2]||'scratchpad/availability-session-expiry-baseline.json';if(existsSync(output))throw Error('Preserve baseline evidence');
+const files=['desk.js','desk.html','netlify/functions/client.mjs'],hashes=()=>Object.fromEntries(files.map(file=>[file,f.sha(readFileSync(file))]));
+const report={at:new Date().toISOString(),scope:'Next-slice availability expiry baseline; no application changes',before:hashes(),requests:[],pageErrors:[],forbidden:[],findings:[]};
+const x=await f.fixture('availability-expiry');
+const browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-background-networking','--disable-component-update','--disable-sync','--no-first-run','--host-resolver-rules=MAP * ~NOTFOUND']});
+const context=await browser.newContext({viewport:{width:390,height:900},serviceWorkers:'block'});context.setDefaultTimeout(6000);
+await context.addInitScript(({origin,token,slug})=>{if(location.origin===origin){sessionStorage.setItem('mc-onboarding-session-v1',token);localStorage.setItem('mc-walkthrough-v1:'+slug,'seen');}},{origin:f.ownerOrigin,token:x.token,slug:x.c.slug});
+await context.routeWebSocket('**/*',socket=>socket.close());
+await context.route('**/*',async route=>{const request=route.request(),url=new URL(request.url());if(url.origin!==f.ownerOrigin){if(['fonts.googleapis.com','fonts.gstatic.com'].includes(url.hostname))return route.fulfill({status:200,contentType:'text/css',body:''});report.forbidden.push(url.origin);return route.abort('blockedbyclient');}
+ if(url.pathname.startsWith('/api/')){const method=request.method(),body=method==='GET'?undefined:request.postData();if(!f.handlers[url.pathname])return route.fulfill({status:403,body:'{}'});const response=await f.handlers[url.pathname](new Request(url,{method,headers:request.headers(),...(body?{body}:{})}),{ip:'192.0.2.88'});report.requests.push({method,path:url.pathname,action:body?JSON.parse(body).action:null,status:response.status});return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});}
+ const root=resolve('.'),path=resolve(root,url.pathname.slice(1));if(!path.startsWith(root+'/')||!existsSync(path)||statSync(path).isDirectory())return route.fulfill({status:404,body:''});return route.fulfill({contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.svg':'image/svg+xml'})[extname(path)]||'application/octet-stream',body:readFileSync(path)});
+});
+const page=await context.newPage();page.on('pageerror',error=>report.pageErrors.push(error.message));
+try{await page.goto(f.ownerOrigin+'/desk.html?c='+x.c.slug);await page.waitForFunction(()=>document.body.dataset.workspaceState==='ready');await page.locator('[data-t="availability"]').click();
+ const row=await f.store.get('access_sessions',f.accessHash(x.token));await f.store.put('access_sessions',f.accessHash(x.token),{...row,expiresAt:new Date(Date.now()-1000).toISOString()});
+ await page.locator('#availabilityDate').fill('2026-11-04');await page.locator('#availabilityWindow').selectOption('8 to 12');await page.locator('#availabilitySubmit').click();await page.waitForFunction(()=>document.getElementById('availabilityMessage').textContent.includes('Could not save availability'));
+ const visible=await page.evaluate(()=>({state:document.body.dataset.workspaceState,portalHidden:document.getElementById('portalContent').hidden,privateDomRetained:!!document.querySelector('#cfg [name="owner.phone"]')?.value,tokenRetained:!!sessionStorage.getItem('mc-onboarding-session-v1'),message:document.getElementById('availabilityMessage').textContent}));
+ assert.ok(report.requests.some(row=>row.action==='availability_block'&&row.status===401));assert.equal(visible.state,'ready');assert.equal(visible.portalHidden,false);assert.equal(visible.privateDomRetained,true);assert.equal(visible.tokenRetained,true);
+ report.findings.push({confirmed:true,name:'Expired session on availability action retains private portal and bearer',observed:visible,expected:'Canonical session-expired cleanup removes bearer and private DOM; no availability mutation'});
+ await page.screenshot({path:'scratchpad/availability-session-expiry-baseline-390.png',fullPage:true});
+}catch(error){report.failure=error.stack;}finally{report.after=hashes();report.sourceStable=JSON.stringify(report.before)===JSON.stringify(report.after);report.physicalNetwork=f.effects.physicalNetwork;report.modelRequests=f.effects.modelRequests;await browser.close();writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({output,confirmed:report.findings.length,sourceStable:report.sourceStable,physicalNetwork:report.physicalNetwork,modelRequests:report.modelRequests,pageErrors:report.pageErrors.length,failure:report.failure||null}));if(report.failure||!report.sourceStable||report.physicalNetwork||report.modelRequests||report.forbidden.length||report.pageErrors.length)process.exitCode=1;}

@@ -24,7 +24,7 @@ export default async (req) => {
   let c = null;
   for (const n of nums) { c = await clientByNumber(n); if (c) break; }
   const isSms = /\/api\/sms|Messages|\/sms\b/i.test(url + text) || /^3\d{4}$/.test(code);
-  if (c) await logEvent(c.slug, "twilio_error", { code, kind: isSms ? "sms" : "voice", url: url.slice(0, 200), sid: params.Sid || payload.resource_sid || "", level: params.Level || "" });
+  if (c) await logEvent(c, "twilio_error", { code, kind: isSms ? "sms" : "voice", url: url.slice(0, 200), sid: params.Sid || payload.resource_sid || "", level: params.Level || "" });
   else console.warn("twilio alert for no shop", code, url);
   return new Response("ok");
 };

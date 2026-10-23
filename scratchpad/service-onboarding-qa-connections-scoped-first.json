@@ -1,0 +1,414 @@
+{
+  "at": "2026-10-23T04:17:21.669Z",
+  "scope": "Actual API handlers and production orchestration/child modules with isolated memory storage and intercepted synthetic number-provider HTTP. This proves durable intent/continuation and authority, not real provider service delivery.",
+  "sourceBefore": {
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "netlify/functions/client.mjs": "0bbbc255d1eeac03c4e6286ebd857280d9a2b4132822d2168fd5a851378dc48d",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/service-activation-background.mjs": "c4e2ebcccb76c515c3ee18aec18cc39045c5002566e2569bd0b6d0e5d0a1f4c7",
+    "netlify/functions/service-onboarding-background.mjs": "336c3744db3a86fe3af50feaf3de60ae5655b164361df84f3c91bed076c64cb5",
+    "netlify/functions/service-onboarding-scheduler.mjs": "ee0c4c66944121f69f5b57563b91be14589d2946c52795bc17375be7ab0cc95a",
+    "netlify/functions/phone-activation-scheduler.mjs": "47c3390228f3ac280e07c1ad9fcc339a84f36b7ad707e45f302f1420234d378d",
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/voice-activation.mjs": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+    "netlify/functions/lib/messaging-activation.mjs": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db"
+  },
+  "checks": [
+    {
+      "name": "Closed common number gate blocks setup; a closed child never authorizes stale full-scope acceptance",
+      "pass": true
+    },
+    {
+      "name": "Missing cost, authority and each texting attestation fail before a financial intent",
+      "pass": true
+    },
+    {
+      "name": "A bad legal registration is rejected before a number purchase is queued",
+      "pass": true
+    },
+    {
+      "name": "Wrong owner, stale configuration and stale offer cannot authorize setup",
+      "pass": true
+    },
+    {
+      "name": "Unreviewed or simulated private practice cannot authorize paid connection setup",
+      "pass": true
+    },
+    {
+      "name": "Actual API rejects anonymous/cross-owner requests and body-supplied actor authority",
+      "pass": true
+    },
+    {
+      "name": "Actual authenticated draft saves and restores the selected phone mode and business-line details",
+      "pass": true
+    },
+    {
+      "name": "Actual version-2 signup rejects every missing core business fact before tenant creation",
+      "pass": true
+    },
+    {
+      "name": "Actual version-2 signup rejects unparseable hours and a business-line callback loop",
+      "pass": true
+    },
+    {
+      "name": "One actual API acceptance survives retries and background continuation creates both child intents",
+      "pass": true
+    },
+    {
+      "name": "Voice-only setup works with texting/delivery unavailable and creates no texting intent",
+      "pass": true
+    },
+    {
+      "name": "SMS-only setup creates no voice intent and does not require Vapi credentials",
+      "pass": true
+    },
+    {
+      "name": "Actual owner API approves only available answering, then separately authorizes texting on the same number",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after business_rules",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after voice_policy",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after sms_policy",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after voice_credential",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after number_offer",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after tenant_identity",
+      "pass": true
+    },
+    {
+      "name": "Accepted setup retains per-channel authority after paused_lifecycle",
+      "pass": true
+    },
+    {
+      "name": "Ambiguous number result before remote effect never authorizes a second purchase",
+      "pass": true
+    },
+    {
+      "name": "Ambiguous number result after remote effect never authorizes a second purchase",
+      "pass": true
+    },
+    {
+      "name": "Cancellation before worker dispatch prevents every new provider resource",
+      "pass": true
+    },
+    {
+      "name": "Cancellation after automatic child creation retains their identities and propagates stop",
+      "pass": true
+    },
+    {
+      "name": "Existing texting activation handler rejects missing/bogus worker authority and foreign tenant without mutation",
+      "pass": true
+    },
+    {
+      "name": "New coordinator worker enforces auth/tenant/body and an authorized invocation queues the number",
+      "pass": true
+    },
+    {
+      "name": "Actual dedicated scheduler wiring advances the saved plan through number acquisition into both child intents",
+      "pass": true
+    },
+    {
+      "name": "Actual two-minute scheduler services 25 pending admissions in five bounded distinct waves",
+      "pass": true
+    },
+    {
+      "name": "Actual scheduler stops selecting candidates when its one shared deadline expires",
+      "pass": true
+    },
+    {
+      "name": "Actual worker review-needed result is a customer action without a global outage",
+      "pass": true
+    },
+    {
+      "name": "Before dispatch, changed rules can be reviewed again without duplicating paid setup",
+      "pass": true
+    },
+    {
+      "name": "A missing primary plan is restored from its encrypted pre-dispatch admission",
+      "pass": true
+    },
+    {
+      "name": "A missing post-dispatch plan cannot be reconstructed into another number or child request",
+      "pass": true
+    },
+    {
+      "name": "A cancellation racing the actual number-child request prevents later child creation",
+      "pass": true
+    },
+    {
+      "name": "Only synthetic verified child proofs yield active, retire the queue, and remain cancellable",
+      "pass": true
+    },
+    {
+      "name": "All external networking was denied; no email, model or service delivery was requested",
+      "pass": true
+    }
+  ],
+  "attemptedNetwork": [],
+  "providerRequests": [
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    },
+    {
+      "method": "GET",
+      "origin": "https://pricing.twilio.com",
+      "path": "/v1/PhoneNumbers/Countries/US"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/AvailablePhoneNumbers/US/Local.json"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.twilio.com",
+      "path": "/2010-04-01/Accounts/[TWILIO_ACCOUNT_ID_REDACTED:b288f9282c0f]/IncomingPhoneNumbers.json"
+    }
+  ],
+  "backgroundRequests": [],
+  "sourceAfter": {
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "netlify/functions/client.mjs": "0bbbc255d1eeac03c4e6286ebd857280d9a2b4132822d2168fd5a851378dc48d",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/service-activation-background.mjs": "c4e2ebcccb76c515c3ee18aec18cc39045c5002566e2569bd0b6d0e5d0a1f4c7",
+    "netlify/functions/service-onboarding-background.mjs": "336c3744db3a86fe3af50feaf3de60ae5655b164361df84f3c91bed076c64cb5",
+    "netlify/functions/service-onboarding-scheduler.mjs": "ee0c4c66944121f69f5b57563b91be14589d2946c52795bc17375be7ab0cc95a",
+    "netlify/functions/phone-activation-scheduler.mjs": "47c3390228f3ac280e07c1ad9fcc339a84f36b7ad707e45f302f1420234d378d",
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/voice-activation.mjs": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+    "netlify/functions/lib/messaging-activation.mjs": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 36,
+    "failed": 0,
+    "total": 36
+  },
+  "ok": true
+}

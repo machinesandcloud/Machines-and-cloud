@@ -3,7 +3,7 @@
 // "client" runs a customer's front desk from their stored config (website chat, owner test line);
 // the named personas are the homepage example companies.
 import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
-import { getConversation, saveConversation, get, put } from "./lib/store.mjs";
+import { getConversation, saveConversation, get, put, assertCurrentWorkspace } from "./lib/store.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
 import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
@@ -14,6 +14,9 @@ import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
 import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool } from "./lib/sales-desk.mjs";
 import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
+import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordContext, noteWebsiteRecord, finishWebsiteTurn, failWebsiteTurn, WebsiteInstallationError } from './lib/website-installation.mjs';
+
+import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
 
 export const config = { path: "/api/chat" };
 
@@ -105,20 +108,35 @@ export default async (req, context) => {
     const contact = String(body.contact || "anon").slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "");
     const incoming = sanitizeMessages(body?.messages);
     if (!incoming) return json({ error: "invalid_messages" }, 400);
+    if (body.websiteCheck !== undefined && (!isSelfServiceClient(c) || isOwner || channel !== 'web')) return json({ error: 'invalid_website_check', message: 'Use the installed public widget for a website setup check.' }, 400, cors(origin));
+    const fence = async () => {
+      const current = await assertCurrentWorkspace(c);
+      if (isSelfServiceClient(c) && channel === 'web') {
+        const web = setupReadiness(current).channels.web;
+        if (!web.ready || !web.active) throw new WorkspaceIdentityError();
+      }
+    };
+    try { await fence(); } catch (error) { return json({ error: error.code || 'client_unavailable' }, error.status || 503, cors(origin)); }
+    let websiteContext = null;
+    try { websiteContext = await claimWebsiteTurn(c, body.websiteCheck, contact, origin); }
+    catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message }, error.status, cors(origin)); return json({ error: 'website_check_unavailable' }, 503, cors(origin)); }
     if (isSelfServiceClient(c)) {
       let budget;
       try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web"); }
-      catch { return json({ error: "ai_allowance_unavailable", message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
-      if (!budget.allowed) return json({ error: "ai_daily_limit", message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin));
+      catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable", message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
+      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit", message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin)); }
     }
     if (channel === "test") {
       const runTest = (onText) => runOwnerTest({ client: c, contact, messages: incoming, onText });
       if (wantStream) return ndjsonResponse(runTest, cors(origin));
       try { return json(await runTest(), 200, cors(origin)); }
-      catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
+      catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
     }
     // Persist the conversation so the owner can read it and the desk keeps context across reloads.
-    const conv = await getConversation(c.slug, channel, contact);
+    let conv;
+    try { conv = await getConversation(c, channel, contact); }
+    catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: error.code || 'client_unavailable' }, error.status || 503, cors(origin)); }
+    if (websiteContext) conv.websiteSetupCheck = { checkId: websiteContext.checkId, origin };
     const last = incoming[incoming.length - 1];
     conv.messages.push({ role: "user", content: last.content, at: new Date().toISOString() });
     const history = toApiMessages(conv.messages);
@@ -127,22 +145,33 @@ export default async (req, context) => {
       ...tool, description: tool.name === "book_visit" ? "Save a visit in the shop portal after the customer accepts a real available window. Connected services may process it separately; this result does not confirm text, calendar or owner-contact delivery." : tool.name === "notify_owner" ? "Save a callback, handoff or emergency request in the shop portal. Separate contact delivery and human response or timing are not confirmed by this result." : tool.description,
     });
     const execTool = async (name, input) => {
+      await fence();
+      await validateWebsiteTurn(websiteContext);
+      const recordOptions = kind => ({ channel, contact, ...websiteRecordContext(websiteContext), ...(websiteContext ? { managedActionId: websiteActionId(websiteContext, kind) } : {}), ...(isSelfServiceClient(c) ? { onSavedRecord: (recordKind, record) => noteWebsiteRecord(c, recordKind, record, { context: websiteContext, origin, contact }) } : {}) });
       if (name === "get_availability") return availabilityToolResult(c, input);
-      if (name === "book_visit") { const b = await bookVisit(c, input, { channel, contact }); if (b.full) return { content: b.message }; return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly.` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
-      if (name === "notify_owner") { const l = await flagLead(c, input, { channel, contact }); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
+      if (name === "book_visit") { const b = await bookVisit(c, input, recordOptions('bookings')); if (b.full) return { content: b.message }; return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly.` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id } }; }
+      if (name === "notify_owner") { const l = await flagLead(c, input, recordOptions('leads')); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
       return { content: "Unknown tool.", is_error: true };
     };
     const finish = async (out) => {
+      await fence();
       // Record what the tools did inside the stored turn, so later turns know it already happened.
       const done = (out.events || []).map((e) => e.type === "booking" ? `[Done: ${isSelfServiceClient(c) ? "visit saved in portal" : "visit booked"}, ref ${e.id}]` : e.type === "lead" ? `[Done: ${isSelfServiceClient(c) ? "request saved in portal, human contact unconfirmed" : "owner notified"}, ref ${e.id}]` : "").filter(Boolean).join(" ");
       conv.messages.push({ role: "assistant", content: done ? out.reply + "\n" + done : out.reply, at: new Date().toISOString() });
-      await saveConversation(conv); return out;
+      await saveConversation(conv);
+      await fence();
+      return finishWebsiteTurn(websiteContext, out);
     };
     // dropToolPreamble: a turn that calls a tool shows the customer only the text written after the tool
     // returned, so planning lines never reach the chat (the final turn still streams word by word).
-    const run = (onText) => runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true }).then(finish);
+    const run = async (onText) => {
+      try {
+        await fence();
+        return await finish(await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true }));
+      } catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} throw error; }
+    };
     if (wantStream) return ndjsonResponse(run, cors(origin));
-    try { return json(await run(), 200, cors(origin)); } catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
+    try { return json(await run(), 200, cors(origin)); } catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
   }
 
   // ---- Machines & Cloud's own desk, and the homepage example companies ----

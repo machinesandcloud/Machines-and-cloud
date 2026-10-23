@@ -1,0 +1,75 @@
+{
+  "at": "2026-10-23T01:52:39.649775+00:00",
+  "scope": "Local Machines & Cloud sales adviser positioning; no publication or hosted/customer acceptance",
+  "source": {
+    "netlify/functions/lib/sales-desk.mjs": "e2bee9d6b73bfea7d67544774491b2f258797fc28e766dde46103d4129521653"
+  },
+  "steps": [
+    {
+      "command": "node scripts/sales-desk-check.mjs",
+      "exitCode": 0,
+      "log": "scratchpad/sales-positioning-final-sales-desk.txt",
+      "sha256": "b1e06856f3c652d6f9044fa867e563e64c091f3dd8478f24610c110c54ffa55c"
+    },
+    {
+      "command": "node scripts/sales-agent-check.mjs",
+      "exitCode": 0,
+      "log": "scratchpad/sales-positioning-final-sales-agent.txt",
+      "sha256": "4ded3491505295b2648fed8f5aab4b3e5a742ccf3188245fbf3ae362c97b7f10"
+    }
+  ],
+  "backend": "scratchpad/sales-positioning-backend-final.json",
+  "phases": [
+    {
+      "phase": "sales-positioning-2026-10-22-r2",
+      "logicalTurns": 6,
+      "actualHTTPAttempts": 7,
+      "output": "scratchpad/sales-positioning-r2.json",
+      "outputHash": "4515ed19caf771184394897f903833b08a7350fba9de82f38d16d08b07b6154b",
+      "ledger": "scratchpad/sales-positioning-r2-ledger.json",
+      "ledgerHash": "3e92631b8ff0d4add04e4d7a8e88a7990286ba96c740203629f68eadb4e32bf9",
+      "logicalTurnLimit": 6,
+      "httpAttemptLimit": 12,
+      "maxTokensPerAttempt": 3072,
+      "timeLimitMinutes": 12,
+      "source": "9c9cb37fdd3e3925cc0ae962c605fd7c796ca361435f84110476dae7f9ccae15"
+    },
+    {
+      "phase": "sales-positioning-2026-10-22-r3",
+      "logicalTurns": 4,
+      "actualHTTPAttempts": 5,
+      "output": "scratchpad/sales-positioning-r3.json",
+      "outputHash": "d7afcc5c51d375bcd7d1c993d822a089b5eb03de5132b2595af9c92e5f1a771b",
+      "ledger": "scratchpad/sales-positioning-r3-ledger.json",
+      "ledgerHash": "3470ca7c2be8079598c53a5a2c6a7332499f2656cf5e9d2d55050ccfa06d7641",
+      "logicalTurnLimit": 4,
+      "httpAttemptLimit": 8,
+      "maxTokensPerAttempt": 3072,
+      "timeLimitMinutes": 8,
+      "source": "7ee107a2f2229930f4319f88b8a502bb117d12cf73ee13a496b16ac0dc95eade"
+    },
+    {
+      "phase": "sales-positioning-2026-10-22-r4",
+      "logicalTurns": 2,
+      "actualHTTPAttempts": 2,
+      "output": "scratchpad/sales-positioning-r4.json",
+      "outputHash": "ecee1907a55fc41d88d31d12668c25e64e18855d9e0fdcbfa09f26bb1ccecf63",
+      "ledger": "scratchpad/sales-positioning-r4-ledger.json",
+      "ledgerHash": "1b9f3cd454c18d0ec9287746a92f1442f4e0152444fcc75b65241752bb1e00b6",
+      "logicalTurnLimit": 2,
+      "httpAttemptLimit": 4,
+      "maxTokensPerAttempt": 3072,
+      "timeLimitMinutes": 5,
+      "source": "e2bee9d6b73bfea7d67544774491b2f258797fc28e766dde46103d4129521653"
+    }
+  ],
+  "totalLogicalTurns": 12,
+  "totalActualHTTPAttempts": 14,
+  "finalStaffClarification": "Final prompt differs from r3 model prompt only by owner-controlled saved detail and explicit no separate staff account/assignment/delivery; r4 checks that exact final prompt with a receptionist two-turn thread. r2 Spanish and complete scope replies retain their older prompt-stage scope.",
+  "limits": [
+    "No real customer conversation, customer/signup write, email, call, SMS, Calendar operation, purchase, billing change or Netlify request.",
+    "Generated replies vary; these bounded synthetic examples do not establish all model behavior or superiority.",
+    "Earlier ledgers remain closed; no unused slots reused.",
+    "Netlify account restoration remains required before publication."
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "at": "2026-10-23T01:59:42.232Z",
+  "status": "Accepted for tested offline availability session and recovery behavior",
+  "base": "e461ad1b6e604174fde1d07fcdbdbc4722ec9154",
+  "headAtFreeze": "bd4b4ae6b5f70c04fd91b05f9de981f20e63b58f",
+  "summary": {
+    "passed": 20,
+    "failed": 0,
+    "total": 20,
+    "physicalNetwork": 0,
+    "actualModelRequests": 0,
+    "mockSDKRequests": 0,
+    "pageErrors": 0,
+    "forbiddenRequests": 0
+  },
+  "sourceStable": true,
+  "freezeManifest": {
+    "path": "scratchpad/availability-session-freeze.json",
+    "sha": "05e8e008a9d82617c87b8e8340f571c5aae1943d954428b3f418282d6e187569"
+  },
+  "runtimeHashes": {
+    "desk.js": "6de9602ca248b0a4c7cd098874a103e28e1ad98d8da8bd5f39d8ab64b5e7425e",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/sales-desk.mjs": "e2bee9d6b73bfea7d67544774491b2f258797fc28e766dde46103d4129521653"
+  },
+  "evidence": {
+    "path": "scratchpad/availability-independent-confirmed.json",
+    "sha": "bd15231b2df4c3ac2c70743083f67372400f6cb336ab561594a442d87cddcc14"
+  },
+  "harness": {
+    "path": "scratchpad/availability-independent.mjs",
+    "sha": "559b57404313caab9bf268142c7be7315a07b95cfb4a67fa6bf67a5eba87d109"
+  },
+  "originalDefect": {
+    "path": "scratchpad/availability-independent-original-baseline.json",
+    "sha": "abe5a6c5fb6572c43219b3e4a73685fe8995ae60c32ea1c304fb8da0c87f1267",
+    "finding": "Actual availability401 retained private DOM and owner bearer at original desk9c99 source",
+    "status": "Fixed and independently retested for real401 and403 at320/390/1440, before malformed body parsing"
+  },
+  "retainedFixtureCorrection": {
+    "path": "scratchpad/availability-independent-final.json",
+    "finding": "Uppercase bodyError fixture label produced an invalid synthetic slug, so that case never reached the action; lowercase label fixed",
+    "appChange": false
+  },
+  "screenshots": [
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-auth-320-401.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-auth-320-403.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-auth-390-401.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-auth-390-403.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-auth-1440-401.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-auth-1440-403.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-keyboard-320.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-keyboard-390.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-confirmed-keyboard-1440.png"
+  ],
+  "limits": [
+    "Actual owner/access handlers and browser DOM used SDK storage protocol fixtures with all browser traffic intercepted; no hosted storage acceptance.",
+    "No real or mock model request, provider call, signup email, purchase or deployment occurred.",
+    "Non-auth409 and transport/body ambiguity are explicit labeled fixtures; real400 and503 paths use the actual handler with malformed supplied window or storage fault.",
+    "This verifies session cleanup, stale completion fences, draft preservation and deliberate retry, rather than a broader portal redesign or provider-delivery readiness."
+  ]
+}

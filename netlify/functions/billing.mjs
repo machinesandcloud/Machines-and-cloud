@@ -17,7 +17,7 @@ export default async (req) => {
   try {
     c.plan = plan; await saveClient(c);
     const link = await checkoutUrl({ site: process.env.URL || url.origin, client: c, plan });
-    await logEvent(c.slug, "checkout_started", { plan });
+    await logEvent(c, "checkout_started", { plan });
     return Response.redirect(link, 303);
   } catch (err) {
     console.error("checkout failed", err);

@@ -199,7 +199,7 @@ try {
   for (const value of ['voice', 'sms', 'calendar']) await page.locator('[name=desiredChannels][value=' + value + ']').check();
   await page.locator('#phone').fill('7135550142'); await page.locator('#next').click(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
   check('Single full setup does not ask to retype captured name or business', await page.locator('#name').inputValue() === 'QA Saved Owner' && await page.locator('#business').inputValue() === 'QA Saved Air');
-  await page.locator('#trade').fill('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#hours').fill('Mon-Fri 8am-5pm'); await page.locator('#serviceArea').fill('Katy');
+  await page.locator('#trade').selectOption('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#hours').fill('Mon-Fri 8am-5pm'); await page.locator('#serviceArea').fill('Katy');
   await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor(); await page.reload(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
   check('Full setup recovery preserves preliminary answers and all desired connections', await page.locator('#name').inputValue() === 'QA Saved Owner' && await page.locator('#business').inputValue() === 'QA Saved Air' && await page.locator('[name=desiredChannels]:checked').count() === 4 && !await page.locator('#setup-marketing').isChecked());
   for (const width of [320, 390, 1440]) {

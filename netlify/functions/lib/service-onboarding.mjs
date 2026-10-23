@@ -57,6 +57,7 @@ function queueValue(value) {
 }
 function operationView(row, state = row.state, reasonCode = row.reasonCode) {
   return { id: row.id, state, detail: details[state] || details.uncertain, reasonCode: reasonCode || null, requestedChannels: [...row.requestedChannels],
+    desiredChannels:[...desiredChannels(row)],acceptedChannels:[...authorizedChannels(row)],version:row.version,
     createdAt: row.createdAt, updatedAt: row.updatedAt, cancellationRequested: !!row.cancelRequestedAt,
     numberRequested: !!row.steps?.number?.acknowledgedAt, voiceRequested: !!row.steps?.voice?.acknowledgedAt, messagingRequested: !!row.steps?.sms?.acknowledgedAt,
     nextCheckAt: row.nextCheckAt || null };
@@ -78,16 +79,18 @@ const defaultStatuses = async c => {
 };
 const childStore = { number: 'phone_activation_intents', voice: 'voice_activation_intents', sms: 'messaging_activation' };
 const childIds = c => ({ number: `${c.slug}/${hash('first-phone-acquisition:' + tenant(c))}`, voice: `${c.slug}/${hash('managed-voice-v1:' + tenant(c))}`, sms: `${c.slug}/${hash('messaging-v1:' + tenant(c))}` });
-function quote(c, status) {
-  const requested = channels(c), available = requested.length > 0 && status.number.available === true && !!status.number.offer &&
+function quote(c, status, requested = channels(c), prior = null) {
+  const numberAccepted = !!prior?.offer?.number && !prior.cancelRequestedAt;
+  const available = requested.length > 0 && (numberAccepted || status.number.available === true && !!status.number.offer) &&
     (!requested.includes('voice') || status.voice.available === true && !!status.voice.offer) &&
     (!requested.includes('sms') || status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && !!keyBytes());
   if (!available) return null;
-  const offer = { number: status.number.offer, voice: requested.includes('voice') ? status.voice.offer : null, messaging: requested.includes('sms') ? status.messaging.offer : null, program: requested.includes('sms') ? status.messaging.program : null };
-  return { ...offer, digest: digest({ requestedChannels: requested, number: offer.number.digest, voice: offer.voice?.digest || null, messaging: offer.messaging?.digest || null, program: offer.program?.digest || null }) };
+  const offer = { number: numberAccepted ? prior.offer.number : status.number.offer, voice: requested.includes('voice') ? status.voice.offer : null, messaging: requested.includes('sms') ? status.messaging.offer : null, program: requested.includes('sms') ? status.messaging.program : null };
+  return { ...offer, scopeChannels:[...requested], numberCostAlreadyAccepted:numberAccepted, digest: digest({ requestedChannels: requested, number: offer.number.digest, numberCostAlreadyAccepted:numberAccepted, voice: offer.voice?.digest || null, messaging: offer.messaging?.digest || null, program: offer.program?.digest || null }) };
 }
+function legacyQuote(c,facts){const offer=quote(c,facts);return offer?{...offer,digest:digest({requestedChannels:channels(c),number:offer.number.digest,voice:offer.voice?.digest||null,messaging:offer.messaging?.digest||null,program:offer.program?.digest||null})}:null;}
 function requestShape(body, requested) {
-  const allowed = ['actor', 'expectedRevision', 'submissionId', 'offerDigest', 'acceptedCosts', 'authority', ...(requested.includes('voice') ? ['forwardingMode'] : []), ...(requested.includes('sms') ? ['legal', 'attestLegalAccuracy', 'attestConsent', 'testPhoneConsent'] : [])];
+  const allowed = ['actor', 'expectedRevision', 'submissionId', 'offerDigest', 'acceptedCosts', 'authority', 'acceptedChannels', ...(requested.includes('voice') ? ['forwardingMode'] : []), ...(requested.includes('sms') ? ['legal', 'attestLegalAccuracy', 'attestConsent', 'testPhoneConsent'] : [])];
   if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !allowed.includes(key)) || JSON.stringify(body).length > 14000 || !/^[a-f0-9]{64}$/.test(body.expectedRevision || '') || !/^[a-f0-9]{32,64}$/i.test(body.submissionId || '') || !/^[a-f0-9]{64}$/.test(body.offerDigest || '') || body.acceptedCosts !== true || body.authority !== true || requested.includes('sms') && ![body.attestLegalAccuracy, body.attestConsent, body.testPhoneConsent].every(value => value === true)) throw new ServiceOnboardingError('acceptance_required', 'Review the current costs, permissions and selected connections before continuing.', 400);
   if (requested.includes('voice') && !['forward_business_line', 'use_new_number'].includes(body.forwardingMode)) throw new ServiceOnboardingError('invalid_forwarding', 'Choose how customers should reach your front desk.', 400);
 }
@@ -96,10 +99,28 @@ function requirements(c, body, requested) {
   if (!['testing', 'live'].includes(c.status) || !reviewed(c) || !c.business?.trade || !c.services?.length || !c.business?.serviceArea?.length || !c.rules?.hours || !c.windows?.length || !/^\+1\d{10}$/.test(c.owner?.phone || '') || loopCheck(c)) throw new ServiceOnboardingError('setup_incomplete', 'Complete, review and privately test your current business answers before connecting services.');
   if (requested.includes('voice') && body.forwardingMode === 'forward_business_line' && (!/^\+1\d{10}$/.test(c.phone?.businessNumber || '') || c.phone.businessNumber === c.owner.phone)) throw new ServiceOnboardingError('unsafe_forwarding', 'Add your business line and a separate contact cell before forwarding calls.', 400);
 }
-function samePlan(row, c) { return row.tenantIdentity === tenant(c) && row.inputRevision === configurationRevision(c) && row.lifecycle === lifecycle(c) && digest(row.requestedChannels) === digest(channels(c)); }
+function samePlan(row, c) { return row.tenantIdentity === tenant(c) && row.inputRevision === configurationRevision(c) && row.lifecycle === lifecycle(c) && digest(desiredChannels(row)) === digest(channels(c)); }
 const binding = requested => ({ accountSid: process.env.TWILIO_ACCOUNT_SID || '', vapiCredentialHash: requested.includes('voice') && process.env.VAPI_API_KEY ? hash(process.env.VAPI_API_KEY) : null });
 const bindingMatches = row => digest(row.providerBinding) === digest(binding(row.requestedChannels));
 const started = row => Object.values(row.steps || {}).some(step => step?.startedAt);
+const authorizedChannels = row => row?.requestedChannels || [];
+const desiredChannels = row => row?.desiredChannels || row?.requestedChannels || [];
+const channelSet = values => ['voice','sms'].filter(channel => values.includes(channel));
+function channelReady(kind, status) { return kind === 'voice' ? status.voice.available === true && !!status.voice.offer : status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && !!keyBytes(); }
+function acceptanceReceipt(row, submissionId) { return (row?.admissions || []).find(receipt => receipt.submissionId === submissionId.toLowerCase()); }
+function childPermission(kind, row, facts) {
+  if (row.providerBinding.accountSid !== (process.env.TWILIO_ACCOUNT_SID || '')) return 'provider_binding_changed';
+  if (kind === 'number') {
+    if (!facts.number.available || !facts.number.offer) return 'service_unavailable';
+    if (facts.number.offer.digest !== row.offer.number.digest) return 'terms_changed';
+    const reasons=row.requestedChannels.map(channel=>childPermission(channel,row,facts));
+    return reasons.some(reason=>!reason)?null:reasons.find(reason=>reason!=='service_unavailable')||'service_unavailable';
+  }
+  if (kind==='voice' && row.providerBinding.vapiCredentialHash !== (process.env.VAPI_API_KEY ? hash(process.env.VAPI_API_KEY) : null)) return 'provider_binding_changed';
+  if (!channelReady(kind,facts)) return 'service_unavailable';
+  if (kind==='voice') return facts.voice.offer.digest === row.offer.voice?.digest ? null : 'terms_changed';
+  return facts.messaging.offer.digest === row.offer.messaging?.digest && facts.messaging.program.digest === row.offer.program?.digest ? null : 'terms_changed';
+}
 
 function engine(options = {}) {
   const deps = { statuses: defaultStatuses, requestNumber: requestPhoneActivation, requestVoice: requestVoiceActivation, requestMessaging: requestMessagingActivation,
@@ -113,8 +134,14 @@ function engine(options = {}) {
     if (!admission || admission.id !== id || admission.tenantIdentity !== tenant(c) || entry.tenantIdentity !== tenant(c)) throw new Error('Service setup admission unavailable');
     return atomicUpdate(STORE, id, old => {
       if (old && old.tenantIdentity !== admission.tenantIdentity) throw new Error('Service setup admission identity conflict');
+      if (![1,2].includes(admission.version) || old && ![1,2].includes(old.version)) throw new Error('Unsupported service setup receipt');
       if (old && old.generation > admission.generation) throw new Error('Service setup admission generation conflict');
       if (old?.generation === admission.generation) {
+        if (old.version===2 && admission.version===2 && (admission.admissionSequence || 0) > (old.admissionSequence || 0)) {
+          if (!admission.extension || admission.previousSequence !== old.admissionSequence || admission.inputRevision !== old.inputRevision || admission.lifecycle !== old.lifecycle || digest(admission.desiredChannels)!==digest(old.desiredChannels) || old.requestedChannels.some(channel=>!admission.requestedChannels.includes(channel)) || old.admissions.some((receipt,index)=>digest(receipt)!==digest(admission.admissions[index])) || ['number',...old.requestedChannels.map(channel=>channel==='sms'?'messaging':'voice'),...(old.requestedChannels.includes('sms')?['program']:[])].some(kind=>digest(old.offer[kind])!==digest(admission.offer[kind]))) throw new ServiceOnboardingError('setup_conflict','This connection approval changed. Refresh before continuing.');
+          const value={...old,requestedChannels:admission.requestedChannels,offer:admission.offer,privateData:admission.privateData,legalInputHash:admission.legalInputHash,forwardingMode:admission.forwardingMode,providerBinding:admission.providerBinding,authority:admission.authority,requestFingerprint:admission.requestFingerprint,admissions:admission.admissions,admissionSequence:admission.admissionSequence,updatedAt:stamp(),...(entry.cancelRequestedAt?{cancelRequestedAt:old.cancelRequestedAt||entry.cancelRequestedAt,cancellationActor:entry.cancellationActor}:{}),state:old.cancelRequestedAt||entry.cancelRequestedAt?'cancellation_pending':old.state==='active'?'queued':old.state};
+          return {value,result:value};
+        }
         if (entry.cancelRequestedAt && !old.cancelRequestedAt) return { value: { ...old, cancelRequestedAt: entry.cancelRequestedAt, cancellationActor: entry.cancellationActor, state: 'cancellation_pending' }, result: { ...old, cancelRequestedAt: entry.cancelRequestedAt, cancellationActor: entry.cancellationActor, state: 'cancellation_pending' } };
         return { result: old };
       }
@@ -130,52 +157,77 @@ function engine(options = {}) {
     return atomicUpdate(STORE, id, current => { if (!current) throw new Error('Service setup receipt unavailable'); const next = update(current); if (!next) return { result: current }; const value = { ...next, updatedAt: stamp() }; return { value, result: value }; });
   }
   async function status(c) {
-    const current = await currentClient(c), row = await strictRead(STORE, idFor(current)), facts = await deps.statuses(current), offer = quote(current, facts), requested = channels(current);
+    const current = await currentClient(c), row = await strictRead(STORE, idFor(current)), facts = await deps.statuses(current), requested = channels(current);
+    if(row && ![1,2].includes(row.version))throw new ServiceOnboardingError('unsupported_setup','This retained setup needs support review.');
     const entry = queueValue(await strictRead(QUEUE, KEY)).intents[idFor(current)];
     const standalone = !row && !!(facts.number.operation || facts.voice.operation || facts.messaging.operation);
+    const accepted=authorizedChannels(row),unsigned=requested.filter(channel=>!accepted.includes(channel));
+    const scope=row?.version===1?requested:unsigned.length?unsigned.filter(channel=>channelReady(channel,facts)):row&&!started(row)&&!entry?.dispatchStartedAt?requested:row?[]:requested.filter(channel=>channelReady(channel,facts));
+    const offer=row?.version===1?legacyQuote(current,facts):quote(current,facts,scope,row?.version===2&&scope.every(channel=>!accepted.includes(channel))&&samePlan(row,current)?row:null);
     let state = row?.state, reason = row?.reasonCode;
     if (row && !row.cancelRequestedAt) {
-      if (!samePlan(row, current) || !bindingMatches(row)) { state = current.status === 'paused' ? 'paused' : 'needs_review'; reason = 'workspace_changed'; }
-      else if (!offer || offer.digest !== row.offer.digest) { state = offer ? 'needs_review' : 'waiting_platform'; reason = offer ? 'terms_changed' : 'service_unavailable'; }
+      if (!samePlan(row, current) || row.version===1&&!bindingMatches(row) || row.version===2&&row.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||'')) { state = current.status === 'paused' ? 'paused' : 'needs_review'; reason = 'workspace_changed'; }
+      else if (row.version===1 && (!offer || offer.digest !== row.offer.digest)) { state = offer ? 'needs_review' : 'waiting_platform'; reason = offer ? 'terms_changed' : 'service_unavailable'; }
+      else if(row.version===2 && row.requestedChannels.some(channel=>{const reason=childPermission(channel,row,facts);return reason&&reason!=='service_unavailable';})){state='needs_review';reason=row.requestedChannels.map(channel=>childPermission(channel,row,facts)).find(reason=>reason&&reason!=='service_unavailable');}
       else if (row.steps?.number?.acknowledgedAt && row.requestedChannels.every(channel => row.steps?.[channel]?.acknowledgedAt)) {
         const active = row.requestedChannels.every(channel => (channel === 'sms' ? facts.messaging : facts.voice).active === true);
         state = active ? 'active' : row.requestedChannels.some(channel => ['needs_action', 'needs_review', 'blocked', 'failed', 'awaiting_test', 'ready'].includes((channel === 'sms' ? facts.messaging : facts.voice).state)) ? 'needs_action' : 'connecting';
       }
     }
     const braked = (await strictRead('health', 'brake'))?.on === true;
-    const canReview = !braked && !!offer && !standalone && (!row || !row.cancelRequestedAt && !started(row) && !entry?.dispatchStartedAt && (!row.claim || Date.parse(row.claim.until) <= deps.now()));
-    const existingActions = standalone || !!row && started(row) && ['needs_review', 'needs_action'].includes(state);
-    return { available: canReview, legacySetup: existingActions, requestedChannels: requested, offer: standalone || braked ? null : offer, reasonCode: standalone ? 'existing_setup' : braked ? 'usage_brake' : !requested.length ? 'no_service_requested' : !offer ? 'service_unavailable' : null,
+    const adding=row?.version===2&&unsigned.length>0&&samePlan(row,current)&&!Object.values(row.steps||{}).some(step=>step.startedAt&&!step.acknowledgedAt);
+    const canReview = !braked && !!offer && !standalone && (!row || !row.cancelRequestedAt && (adding || !started(row) && !entry?.dispatchStartedAt) && (!row.claim || Date.parse(row.claim.until) <= deps.now()));
+    const existingActions = standalone || !!row && started(row) && ['needs_review', 'needs_action'].includes(state) && !adding;
+    const deferredChannels=requested.filter(channel=>!accepted.includes(channel)||row?.version===2&&childPermission(channel,row,facts)).map(id=>({id,reasonCode:accepted.includes(id)?childPermission(id,row,facts):channelReady(id,facts)?'permission_required':'service_unavailable',ownerAction:accepted.includes(id)&&childPermission(id,row,facts)!=='service_unavailable'?'review_existing_connection':channelReady(id,facts)&&!accepted.includes(id)?'review_service_offer':'wait_for_service'}));
+    return { available: canReview, legacySetup: existingActions, numberReady:facts.number.operation?.state==='number_acquired'&&!facts.number.operation.cancellationRequested&&!facts.number.operation.releaseConfirmed, requestedChannels: requested, acceptedChannels:[...accepted],authorizableChannels:canReview?[...scope]:[],deferredChannels, offer: standalone || braked || !canReview ? null : offer, reasonCode: standalone ? 'existing_setup' : braked ? 'usage_brake' : !requested.length ? 'no_service_requested' : !offer ? 'service_unavailable' : null,
       operation: row ? { ...operationView(row, state, reason), canReview, nextAction: existingActions ? 'review_existing_connections' : canReview && state === 'needs_review' ? 'review_current_offer' : null } : null };
   }
   async function request(c, body = {}) {
     requireOwner(body.actor);
-    const current = await currentClient(c, body.actor, body.expectedRevision), requested = channels(current); requestShape(body, requested);
-    const id = idFor(current), prior = await ensure(current);
-    if (prior) {
-      if (prior.tenantIdentity === tenant(current) && prior.requestFingerprint === fingerprint(body)) return operationView(prior);
-      const entry = queueValue(await strictRead(QUEUE, KEY)).intents[id];
-      if (prior.cancelRequestedAt || started(prior) || entry?.dispatchStartedAt || prior.claim && Date.parse(prior.claim.until) > deps.now()) throw new ServiceOnboardingError('setup_conflict', 'A setup request already exists. Keep its recorded progress and use its connection actions.');
-    }
-    const facts = await deps.statuses(current), offer = quote(current, facts);
-    if (!offer || (await strictRead('health', 'brake'))?.on === true) throw new ServiceOnboardingError('service_setup_unavailable', 'Your connection preferences are saved. The current service offer is not available yet. No paid setup was requested.');
-    if (facts.number.operation || facts.voice.operation || facts.messaging.operation) throw new ServiceOnboardingError('existing_setup', 'This workspace already has a connection request. Continue with its recorded setup.');
-    if (body.offerDigest !== offer.digest) throw new ServiceOnboardingError('offer_changed', 'Service terms changed. Review the current offer before continuing.');
-    requirements(current, body, requested);
-    const legal = requested.includes('sms') ? normalizeMessagingRegistration(body.legal) : null, createdAt = stamp();
-    const row = { version: 1, id, slug: current.slug, tenantIdentity: tenant(current), inputRevision: configurationRevision(current), lifecycle: lifecycle(current), requestedChannels: requested, providerBinding: binding(requested),
-      requestFingerprint: fingerprint(body), offer, forwardingMode: body.forwardingMode || null, privateData: legal ? seal(legal, id) : null, legalInputHash: legal ? hash(JSON.stringify({ legal, program: offer.program })) : null,
-      authority: { actor: { role: 'owner', email: normalizeAccountEmail(body.actor.email) }, acceptedAt: createdAt, acceptedCosts: true, authority: true, ...(legal ? { attestLegalAccuracy: true, attestConsent: true, testPhoneConsent: true } : {}) },
-      state: 'queued', createdAt, updatedAt: createdAt, generation: (prior?.generation || 0) + 1, steps: {}, claim: null, cancelRequestedAt: null, reasonCode: null,
-      history: [...(prior?.history || []), ...(prior ? [{ generation: prior.generation, inputRevision: prior.inputRevision, offerDigest: prior.offer.digest, acceptedAt: prior.authority.acceptedAt }] : [])].slice(-10) };
-    await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), old = queue.intents[id];
-      if (old?.admission?.tenantIdentity === row.tenantIdentity && old.admission.requestFingerprint === row.requestFingerprint) return { result: old };
-      if (old && (!prior || old.admission?.generation !== prior.generation || old.dispatchStartedAt || old.cancelRequestedAt)) throw new ServiceOnboardingError('setup_receipt_unavailable', 'An existing setup receipt needs recovery. No replacement request was created.', 503);
-      if (!old && (Object.values(queue.intents).filter(entry => !entry.cancelRequestedAt).length >= CAPACITY || Object.keys(queue.intents).length >= INSPECTION_CAPACITY)) throw new ServiceOnboardingError('setup_capacity_full', 'Connection setup is temporarily at capacity. No paid setup was requested.', 503);
-      return { value: { ...queue, intents: { ...queue.intents, [id]: { id, slug: row.slug, tenantIdentity: row.tenantIdentity, createdAt, admission: row } } } };
+    const current = await currentClient(c, body.actor, body.expectedRevision), selected = channels(current);
+    if (body.acceptedChannels !== undefined && (!Array.isArray(body.acceptedChannels) || !body.acceptedChannels.length || body.acceptedChannels.length > 2 || new Set(body.acceptedChannels).size !== body.acceptedChannels.length || body.acceptedChannels.some(channel => !selected.includes(channel)))) throw new ServiceOnboardingError('invalid_channels','Choose only the connections shown in the reviewed offer.',400);
+    const requested = body.acceptedChannels === undefined ? selected : channelSet(body.acceptedChannels);
+    requestShape(body, requested);
+    const id = idFor(current), prior = await ensure(current), requestFingerprint = fingerprint(body);
+    if (prior && ![1,2].includes(prior.version)) throw new ServiceOnboardingError('unsupported_setup','This retained setup needs support review.');
+    const receipt=acceptanceReceipt(prior,body.submissionId);
+    if(receipt){if(receipt.requestFingerprint!==requestFingerprint)throw new ServiceOnboardingError('submission_conflict','This approval was already used for different connection details.');return operationView(prior);}
+    if(prior?.requestFingerprint===requestFingerprint)return operationView(prior);
+    const entry=queueValue(await strictRead(QUEUE,KEY)).intents[id];
+    const adding=!!prior&&prior.version===2&&samePlan(prior,current)&&requested.every(channel=>!prior.requestedChannels.includes(channel));
+    if(prior&&(prior.cancelRequestedAt || prior.claim&&Date.parse(prior.claim.until)>deps.now() || adding&&Object.values(prior.steps||{}).some(step=>step.startedAt&&!step.acknowledgedAt) || !adding&&(started(prior)||entry?.dispatchStartedAt)))throw new ServiceOnboardingError('setup_conflict','A setup request already exists. Keep its recorded progress and use its connection actions.');
+    if(prior?.version===2&&(prior.admissions||[]).length>=20)throw new ServiceOnboardingError('approval_history_full','Connection approval history needs support review before another approval can be added.');
+    const facts=await deps.statuses(current),offer=quote(current,facts,requested,adding?prior:null);
+    if(!offer||(await strictRead('health','brake'))?.on===true)throw new ServiceOnboardingError('service_setup_unavailable','Your connection preferences are saved. The current service offer is not available yet. No paid setup was requested.');
+    if(!prior&&(facts.number.operation||facts.voice.operation||facts.messaging.operation))throw new ServiceOnboardingError('existing_setup','This workspace already has a connection request. Continue with its recorded setup.');
+    if(body.offerDigest!==offer.digest)throw new ServiceOnboardingError('offer_changed','Service terms changed. Review the current offer before continuing.');
+    if(adding&&prior.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||''))throw new ServiceOnboardingError('setup_conflict','Your recorded number belongs to the earlier service setup. Review it before adding a connection.');
+    requirements(current,body,requested);
+    const legal=requested.includes('sms')?normalizeMessagingRegistration(body.legal):null,createdAt=stamp();
+    const authority={actor:{role:'owner',email:normalizeAccountEmail(body.actor.email)},acceptedAt:createdAt,acceptedCosts:true,authority:true,...(legal?{attestLegalAccuracy:true,attestConsent:true,testPhoneConsent:true}:{})};
+    const admission={submissionId:body.submissionId.toLowerCase(),requestFingerprint,acceptedChannels:requested,offerDigest:offer.digest,acceptedAt:createdAt,actor:authority.actor};
+    const combined=adding?channelSet([...prior.requestedChannels,...requested]):requested;
+    const mergedOffer=adding?{...prior.offer,...(requested.includes('voice')?{voice:offer.voice}:{}),...(requested.includes('sms')?{messaging:offer.messaging,program:offer.program}:{})}:offer;
+    const row={...(adding?prior:{}),version:2,id,slug:current.slug,tenantIdentity:tenant(current),inputRevision:configurationRevision(current),lifecycle:lifecycle(current),desiredChannels:selected,requestedChannels:combined,
+      providerBinding:adding?{...prior.providerBinding,...(requested.includes('voice')?{vapiCredentialHash:binding(requested).vapiCredentialHash}:{})}:binding(requested),
+      requestFingerprint,offer:mergedOffer,forwardingMode:requested.includes('voice')?body.forwardingMode:adding?prior.forwardingMode:null,
+      privateData:legal?seal(legal,id):adding?prior.privateData:null,legalInputHash:legal?hash(JSON.stringify({legal,program:offer.program})):adding?prior.legalInputHash:null,
+      authority:adding?{...prior.authority,...(legal?{attestLegalAccuracy:true,attestConsent:true,testPhoneConsent:true}:{})}:authority,
+      state:'queued',createdAt:adding?prior.createdAt:createdAt,updatedAt:createdAt,generation:adding?prior.generation:(prior?.generation||0)+1,
+      admissionSequence:adding?prior.admissionSequence+1:1,previousSequence:adding?prior.admissionSequence:null,extension:adding,
+      admissions:[...(prior?.admissions||[]),admission],steps:adding?prior.steps:{},claim:null,cancelRequestedAt:null,reasonCode:null,
+      history:[...(prior?.history||[]),...(!adding&&prior?[{generation:prior.generation,inputRevision:prior.inputRevision,offerDigest:prior.offer.digest,acceptedAt:prior.authority.acceptedAt}]:[])].slice(-10)};
+    await atomicUpdate(QUEUE,KEY,async value=>{
+      const queue=queueValue(value),old=queue.intents[id];
+      if(old?.admission?.tenantIdentity===row.tenantIdentity&&old.admission.requestFingerprint===requestFingerprint)return {result:old};
+      const live=await strictRead(STORE,id);await currentClient(current,body.actor,body.expectedRevision);
+      if(adding){
+        if(!live||live.version!==2||live.generation!==prior.generation||live.admissionSequence!==prior.admissionSequence||live.cancelRequestedAt||old?.cancelRequestedAt||live.claim&&Date.parse(live.claim.until)>deps.now()||Object.values(live.steps||{}).some(step=>step.startedAt&&!step.acknowledgedAt))throw new ServiceOnboardingError('setup_conflict','Connection setup progressed while you reviewed it. Refresh the current offer.');
+      }else if(old&&(!prior||old.admission?.generation!==prior.generation||old.dispatchStartedAt||old.cancelRequestedAt))throw new ServiceOnboardingError('setup_receipt_unavailable','An existing setup receipt needs recovery. No replacement request was created.',503);
+      if(!old&&(Object.values(queue.intents).filter(item=>!item.cancelRequestedAt).length>=CAPACITY||Object.keys(queue.intents).length>=INSPECTION_CAPACITY))throw new ServiceOnboardingError('setup_capacity_full','Connection setup is temporarily at capacity. No paid setup was requested.',503);
+      return {value:{...queue,intents:{...queue.intents,[id]:{...(adding?old||{}:{}),id,slug:row.slug,tenantIdentity:row.tenantIdentity,createdAt:row.createdAt,admission:row,...(adding&&started(prior)?{dispatchStartedAt:old?.dispatchStartedAt||prior.updatedAt}:{})}}}};
     });
-    const saved = await ensure(current);
-    return operationView(saved);
+    return operationView(await ensure(current));
   }
   async function cancel(c, body = {}) {
     requireOwner(body.actor);
@@ -215,35 +267,45 @@ function engine(options = {}) {
     const token = randomBytes(16).toString('hex');
     row = await change(row.id, old => old.claim && Date.parse(old.claim.until) > deps.now() ? null : { ...old, claim: { token, until: new Date(deps.now() + 30000).toISOString() } });
     if (row.claim?.token !== token) return { ok: true, state: row.state, voiceRequested: false, messagingRequested: false, operation: operationView(row) };
+    const claimed={version:row.version,generation:row.generation,sequence:row.version===2?row.admissionSequence:null,token};
+    const ownsClaim=plan=>plan?.version===claimed.version&&plan.generation===claimed.generation&&plan.claim?.token===claimed.token&&(claimed.version!==2||plan.admissionSequence===claimed.sequence)&&Number.isFinite(Date.parse(plan.claim.until))&&Date.parse(plan.claim.until)>deps.now();
+    let workerStale=false;
+    const stale=()=>new ServiceOnboardingError('setup_worker_stale','A newer setup check owns this request. Its saved work will continue safely.');
     const hints = { voiceRequested: false, messagingRequested: false };
-    const save = patch => change(row.id, old => old.generation === row.generation && old.claim?.token === token ? { ...old, ...patch, ...(old.cancelRequestedAt && patch.state !== 'cancelled' ? { state: 'cancellation_pending' } : {}) } : null);
+    const save = patch => change(row.id, old => {if(!ownsClaim(old)){workerStale=true;return null;}return { ...old, ...patch, ...(old.cancelRequestedAt && patch.state !== 'cancelled' ? { state: 'cancellation_pending' } : {}) };});
     const finish = async (state, reasonCode = null) => {
       row = await save({ state, reasonCode, claim: null, nextCheckAt: ['cancelled', 'active'].includes(state) ? null : new Date(deps.now() + 600000).toISOString() });
-      if (['active', 'cancelled'].includes(row.state)) await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), entry = queue.intents[row.id]; if (!entry || entry.admission?.generation !== row.generation || row.state === 'active' && entry.cancelRequestedAt) return {}; const intents = { ...queue.intents }; delete intents[row.id]; return { value: { ...queue, intents } }; });
+      if(workerStale)return {ok:true,state:row.state,voiceRequested:false,messagingRequested:false,staleWorker:true,operation:operationView(row)};
+      if (['active', 'cancelled'].includes(row.state)) await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), entry = queue.intents[row.id]; if (!entry || entry.admission?.generation !== row.generation || row.version===2&&entry.admission.admissionSequence!==row.admissionSequence || row.state === 'active' && entry.cancelRequestedAt) return {}; const intents = { ...queue.intents }; delete intents[row.id]; return { value: { ...queue, intents } }; });
       // A known customer review is a waiting outcome, not a failed platform
       // worker. Retain its reason on the operation; uncertainty remains a failure.
       return { ok: row.state !== 'uncertain', state: row.state, ...hints, operation: operationView(row) };
     };
     async function latest() {
       const [client, plan, brake, value] = await Promise.all([strictRead('clients', row.slug), strictRead(STORE, row.id), strictRead('health', 'brake'), strictRead(QUEUE, KEY)]);
-      if (!client || !isSupportedSelfServiceClient(client) || tenant(client) !== row.tenantIdentity || !plan || plan.tenantIdentity !== row.tenantIdentity || plan.generation !== row.generation || plan.claim?.token !== token) throw new ServiceOnboardingError('workspace_changed', 'This saved setup no longer matches the workspace.');
+      if (!client || !isSupportedSelfServiceClient(client) || tenant(client) !== row.tenantIdentity || !plan || plan.tenantIdentity !== row.tenantIdentity) throw new ServiceOnboardingError('workspace_changed', 'This saved setup no longer matches the workspace.');
+      if(!ownsClaim(plan)){workerStale=true;throw stale();}
       const entry = queueValue(value).intents[row.id];
-      current = client; row = entry?.cancelRequestedAt && !plan.cancelRequestedAt ? await change(row.id, old => old.generation === plan.generation && old.claim?.token === token ? { ...old, cancelRequestedAt: entry.cancelRequestedAt, cancellationActor: entry.cancellationActor, state: 'cancellation_pending' } : null) : plan;
+      current = client; row = entry?.cancelRequestedAt && !plan.cancelRequestedAt ? await change(row.id, old => {if(!ownsClaim(old)){workerStale=true;return null;}return { ...old, cancelRequestedAt: entry.cancelRequestedAt, cancellationActor: entry.cancellationActor, state: 'cancellation_pending' };}) : plan;
+      if(workerStale)throw stale();
       return { brake: brake?.on === true };
     }
     async function saveStep(kind, patch) {
-      row = await change(row.id, old => ({ ...old, steps: { ...old.steps, [kind]: { ...old.steps[kind], ...patch } }, ...(old.cancelRequestedAt ? { state: 'cancellation_pending' } : {}) }));
+      row = await change(row.id, old => {if(!ownsClaim(old)){workerStale=true;return null;}return { ...old, steps: { ...old.steps, [kind]: { ...old.steps[kind], ...patch } }, ...(old.cancelRequestedAt ? { state: 'cancellation_pending' } : {}) };});
+      if(workerStale)throw stale();
     }
     async function clearPrepared(kind) {
       // This path is used only while the lower-engine method has NOT been invoked.
       // Unknown/lost acknowledgments after invocation retain the durable marker.
       await atomicUpdate(QUEUE, KEY, async value => { const queue = queueValue(value), entry = queue.intents[row.id], plan = await strictRead(STORE, row.id);
-        if (!entry || entry.admission?.generation !== row.generation || plan?.claim?.token !== token || plan.generation !== row.generation) return {};
+        if (!entry || entry.admission?.generation !== claimed.generation || row.version===2&&entry.admission.admissionSequence!==claimed.sequence || !ownsClaim(plan)){workerStale=true;return {};}
         const dispatches = { ...entry.dispatches }; delete dispatches[kind];
         const next = { ...entry, dispatches }; if (!Object.keys(dispatches).length) delete next.dispatchStartedAt;
         return { value: { ...queue, intents: { ...queue.intents, [row.id]: next } } };
       });
-      row = await change(row.id, old => { if (old.generation !== row.generation || old.claim?.token !== token || old.steps[kind]?.acknowledgedAt) return null; const steps = { ...old.steps }; delete steps[kind]; return { ...old, steps }; });
+      if(workerStale)throw stale();
+      row = await change(row.id, old => { if (!ownsClaim(old)){workerStale=true;return null;}if(old.steps[kind]?.acknowledgedAt)return null;const steps = { ...old.steps }; delete steps[kind]; return { ...old, steps }; });
+      if(workerStale)throw stale();
     }
     try {
       await latest();
@@ -269,35 +331,37 @@ function engine(options = {}) {
       const checked = await latest();
       if (checked.brake) return finish('waiting_platform', 'usage_brake');
       if (current.status === 'paused') return finish('paused', 'workspace_paused');
-      if (!samePlan(row, current) || !reviewed(current) || !bindingMatches(row)) return finish('needs_review', 'workspace_changed');
-      let facts = await deps.statuses(current), currentOffer = quote(current, facts);
-      if (!currentOffer) return finish('waiting_platform', 'service_unavailable');
-      if (currentOffer.digest !== row.offer.digest) return finish('needs_review', 'terms_changed');
+      if (!samePlan(row, current) || !reviewed(current) || (row.version===1?!bindingMatches(row):row.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||''))) return finish('needs_review', 'workspace_changed');
+      let facts = await deps.statuses(current), currentOffer = row.version===1?legacyQuote(current,facts):null;
+      if(row.version===1){if (!currentOffer) return finish('waiting_platform', 'service_unavailable');if (currentOffer.digest !== row.offer.digest) return finish('needs_review', 'terms_changed');}
       const ids = childIds(current);
       for (const kind of ['number', ...row.requestedChannels]) {
         if (deps.now() >= deadlineAt) return finish('connecting', 'worker_deadline');
         const checked = await latest();
         if (row.cancelRequestedAt) return finish('cancellation_pending');
-        if (checked.brake || !samePlan(row, current) || !reviewed(current) || !bindingMatches(row)) return finish(checked.brake ? 'waiting_platform' : 'needs_review', checked.brake ? 'usage_brake' : 'workspace_changed');
-        facts = await deps.statuses(current); currentOffer = quote(current, facts);
-        if (!currentOffer || currentOffer.digest !== row.offer.digest) return finish(currentOffer ? 'needs_review' : 'waiting_platform', currentOffer ? 'terms_changed' : 'service_unavailable');
+        if (checked.brake || !samePlan(row, current) || !reviewed(current) || (row.version===1?!bindingMatches(row):row.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||''))) return finish(checked.brake ? 'waiting_platform' : 'needs_review', checked.brake ? 'usage_brake' : 'workspace_changed');
+        facts = await deps.statuses(current); currentOffer = row.version===1?legacyQuote(current,facts):null;
+        if (row.version===1&&(!currentOffer || currentOffer.digest !== row.offer.digest)) return finish(currentOffer ? 'needs_review' : 'waiting_platform', currentOffer ? 'terms_changed' : 'service_unavailable');
         if (kind !== 'number' && (facts.number.operation?.id !== ids.number || facts.number.operation?.state !== 'number_acquired' || facts.number.operation?.cancellationRequested || facts.number.operation?.releaseConfirmed)) return finish('awaiting_number');
         let child = await deps.readChild(kind, ids[kind]);
         if (child && !row.steps[kind]?.startedAt) return finish('needs_review', 'standalone_child_conflict');
         if (child && !childMatches(kind, child, row)) return finish('needs_review', 'child_identity_conflict');
         if (!child) {
+          const permission=row.version===2?childPermission(kind,row,facts):null;
+          if(permission){if(kind==='number')return finish(permission==='service_unavailable'?'waiting_platform':'needs_review',permission);continue;}
           let invoked = false;
           try {
-          await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), entry = queue.intents[row.id]; if (!entry || entry.tenantIdentity !== row.tenantIdentity || entry.admission?.generation !== row.generation || entry.cancelRequestedAt) throw new ServiceOnboardingError('setup_changed', 'This setup request changed before handoff.'); return { value: { ...queue, intents: { ...queue.intents, [row.id]: { ...entry, dispatchStartedAt: entry.dispatchStartedAt || stamp(), dispatches: { ...entry.dispatches, [kind]: { id: ids[kind], startedAt: stamp() } } } } } }; });
+          await atomicUpdate(QUEUE, KEY, async value => { const queue = queueValue(value), entry = queue.intents[row.id],plan=await strictRead(STORE,row.id);if(!ownsClaim(plan)||row.version===2&&entry?.admission?.admissionSequence!==claimed.sequence){workerStale=true;throw stale();} if (!entry || entry.tenantIdentity !== row.tenantIdentity || entry.admission?.generation !== claimed.generation || entry.cancelRequestedAt) throw new ServiceOnboardingError('setup_changed', 'This setup request changed before handoff.'); return { value: { ...queue, intents: { ...queue.intents, [row.id]: { ...entry, dispatchStartedAt: entry.dispatchStartedAt || stamp(), dispatches: { ...entry.dispatches, [kind]: { id: ids[kind], startedAt: stamp() } } } } } }; });
           await saveStep(kind, { id: ids[kind], startedAt: row.steps[kind]?.startedAt || stamp() });
           const finalCheck = await latest();
           if (row.cancelRequestedAt) { await clearPrepared(kind); return finish('cancellation_pending'); }
-          if (finalCheck.brake || !samePlan(row, current) || !reviewed(current) || !bindingMatches(row)) { await clearPrepared(kind); return finish(finalCheck.brake ? 'waiting_platform' : 'needs_review', finalCheck.brake ? 'usage_brake' : 'workspace_changed'); }
-          const lastOffer = quote(current, await deps.statuses(current));
-          if (!lastOffer || lastOffer.digest !== row.offer.digest) { await clearPrepared(kind); return finish(lastOffer ? 'needs_review' : 'waiting_platform', lastOffer ? 'terms_changed' : 'service_unavailable'); }
+          if (finalCheck.brake || !samePlan(row, current) || !reviewed(current) || (row.version===1?!bindingMatches(row):row.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||''))) { await clearPrepared(kind); return finish(finalCheck.brake ? 'waiting_platform' : 'needs_review', finalCheck.brake ? 'usage_brake' : 'workspace_changed'); }
+          const lastFacts=await deps.statuses(current),lastOffer=row.version===1?legacyQuote(current,lastFacts):null;
+          const finalPermission=row.version===2?childPermission(kind,row,lastFacts):!lastOffer?'service_unavailable':lastOffer.digest!==row.offer.digest?'terms_changed':null;
+          if(finalPermission){await clearPrepared(kind);if(kind==='number'||row.version===1)return finish(finalPermission==='service_unavailable'?'waiting_platform':'needs_review',finalPermission);continue;}
           const finalOwner = await latest();
           if (row.cancelRequestedAt) { await clearPrepared(kind); return finish('cancellation_pending'); }
-          if (finalOwner.brake || !samePlan(row, current) || !reviewed(current) || !bindingMatches(row)) { await clearPrepared(kind); return finish(finalOwner.brake ? 'waiting_platform' : 'needs_review', finalOwner.brake ? 'usage_brake' : 'workspace_changed'); }
+          if (finalOwner.brake || !samePlan(row, current) || !reviewed(current) || (row.version===1?!bindingMatches(row):row.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||''))) { await clearPrepared(kind); return finish(finalOwner.brake ? 'waiting_platform' : 'needs_review', finalOwner.brake ? 'usage_brake' : 'workspace_changed'); }
           const body = { actor: row.authority.actor, expectedRevision: row.inputRevision };
           invoked = true;
           if (kind === 'number') await deps.requestNumber(current, { ...body, submissionId: hash(row.id + ':number'), offerVersion: row.offer.number.version, offerDigest: row.offer.number.digest, acceptedCosts: true, authority: true });
@@ -316,7 +380,8 @@ function engine(options = {}) {
       facts = await deps.statuses(current);
       const active = row.requestedChannels.every(channel => (channel === 'sms' ? facts.messaging : facts.voice).active === true);
       const action = row.requestedChannels.some(channel => ['needs_action', 'needs_review', 'blocked', 'failed', 'awaiting_test', 'ready'].includes((channel === 'sms' ? facts.messaging : facts.voice).state));
-      return finish(active ? 'active' : action ? 'needs_action' : 'connecting');
+      const blocked=row.version===2?row.requestedChannels.map(channel=>childPermission(channel,row,facts)).filter(Boolean):[];
+      return finish(active?'active':blocked.some(reason=>reason!=='service_unavailable')?'needs_review':action?'needs_action':blocked.length?'waiting_platform':'connecting',blocked[0]||null);
     } catch (error) { return finish(row.cancelRequestedAt ? 'cancellation_pending' : error instanceof ServiceOnboardingError ? 'needs_review' : 'uncertain', error instanceof ServiceOnboardingError ? error.code : 'service_request_unconfirmed'); }
   }
   async function recover({ limit = 1, deadlineAt = deps.now() + 12000, excludeIds = [] } = {}) {

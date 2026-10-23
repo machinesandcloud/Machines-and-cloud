@@ -1,0 +1,72 @@
+{
+  "scope": "Tenant replacement isolation core; synthetic local acceptance only",
+  "base": "6dabff563408e5a17a5136f088d4fa2084f4af3c",
+  "files": {
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/managed-consent.mjs": "29c986b3916f89502d72dd570958a402ee6a2d25b7e68959afcfd705d99fdab1",
+    "netlify/functions/chat.mjs": "611e1db67a6e2c93c03a8a2ec22e1152e135f8391a12d122bf78dbe8c6c4b2fd",
+    "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+    "netlify/functions/lib/owner-visits.mjs": "07236a7997b6f58a223afa98c70ff528f4ec1530151aa20c422a41b787d25a49",
+    "netlify/functions/lib/self-service-ai.mjs": "9a1a7fb085f76125a665bd6bd06b1e58a62525193f761008975094ddeacc9114",
+    "netlify/functions/lib/website-installation.mjs": "2fdad92711601cbbb8d5b448ad17c4b0ba980b3d315ab648c6a3ccd67bbe31fd",
+    "netlify/functions/lib/calendar-delivery.mjs": "7459a4d9c8bb049e1b974aefed8d1ca94cd3d23648e70be53aec79aef7b706f1",
+    "netlify/functions/lib/managed-delivery.mjs": "95804ed7d580f066bf4d7483f86e837c5760558eb8d626638a6c42a3d4cd756c",
+    "scripts/tenant-isolation-check.mjs": "43071a370bd12a87d200d397ee2e57ee3e043e2c021660d5b354e113380dcb54",
+    "scripts/owner-test-check.mjs": "63b5ff9b8befb882518149b74a9b2442f7a87ec21743097e608f04ef10b828d2",
+    "scripts/owner-visits-check.mjs": "74d591be908406b540e092c9d84053f6ce863ebada38674055f65acab2d198c9",
+    "scripts/managed-delivery-qa-check.mjs": "a92c78fcd6646ee89b957064e73b3f5aace21ada9f426d606a6d29ea91e7fdf4",
+    "scripts/self-service-delivery-check.mjs": "d678cac716bce46692eb97977acc5d58a0a979e4937e878f1ddee60b9aac462a"
+  },
+  "checks": {
+    "core": {
+      "ok": true,
+      "checks": 18
+    },
+    "private-rehearsal": {
+      "ok": true,
+      "checks": 44,
+      "outboundRequests": 0
+    },
+    "owner-visits": {
+      "passed": 27,
+      "failed": 0,
+      "physicalExternalRequests": 0
+    },
+    "capacity": {
+      "result": "CAPACITY OK: memory (concurrency, aliases, history, capacity, moves, lifecycle)\nCAPACITY OK: blobs (concurrency, aliases, history, capacity, moves, lifecycle, failures and independent instances)"
+    },
+    "ai-budget": {
+      "ok": true,
+      "checks": 43
+    },
+    "website-installation": {
+      "ok": true,
+      "passed": 17
+    },
+    "calendar-delivery": {
+      "passed": 27,
+      "failed": 0
+    },
+    "managed-delivery": {
+      "passed": 18,
+      "failed": 0,
+      "physicalExternalRequests": 0
+    },
+    "managed-sms": {
+      "ok": true,
+      "passed": 17
+    },
+    "self-service-delivery": {
+      "ok": true,
+      "checks": 36
+    }
+  },
+  "physicalNetworkRequests": 0,
+  "limitations": [
+    "Old records without consistent explicit identity remain retained but excluded. No automatic adoption.",
+    "Bounded migration checks at most2000 raw primary records. Additional history stays incomplete; new indexed requests remain visible, while full exports/reports and capacity reconstruction refuse false completeness.",
+    "An unbound unfinished capacity mutation without a primary record requires review.",
+    "Pre-upgrade unbound AI rows remain under the global budget and conservatively reduce same-slug private/web availability until daily reset; current used counts exclude them."
+  ]
+}

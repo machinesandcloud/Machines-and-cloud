@@ -38,6 +38,6 @@ export default async (req) => {
   }
   c.billing = b;
   await saveClient(c);
-  await logEvent(c.slug, "billing", { type: ev.type, status: b.status });
+  await logEvent(c, "billing", { type: ev.type, status: b.status });
   return new Response("ok");
 };

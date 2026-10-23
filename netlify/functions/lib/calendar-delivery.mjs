@@ -1,6 +1,7 @@
 // Durable, source-reconciled Google Calendar delivery for verified customer workspaces.
 import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
+import { belongsToWorkspace } from "./workspace-identity.mjs";
 import { strictRead } from "./accounts.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { canonicalWindow, isoDateValid, addDays, houstonToday } from "./availability.mjs";
@@ -46,16 +47,17 @@ export async function calendarDeliveryView(client) {
 export async function queueCalendarBooking(client, booking) {
   await supportedClient(client);
   if (!validId(booking?.id) || booking.slug !== client.slug) throw new CalendarError("invalid_booking", "This saved visit belongs to another workspace.", 400);
-  if (!await calendarExecutionAvailable(client, { bookingId: booking.id })) return null;
+  if (booking.websiteSetupCheck || booking.simulation) return null;
+  if (!await calendarExecutionAvailable(client, { bookingId: booking.id, localOnly: true })) return null;
   // Seal reviewed retained-resource authority before our own enqueue changes the
   // inspected snapshot. This grants no transport and spends no request allowance.
-  await admitCalendarExecution(client, {bookingId:booking.id});
+  await admitCalendarExecution(client, {bookingId:booking.id,localOnly:true});
   const key = calendarDeliveryKey(client, booking.id);
   const result = await atomicUpdate("calendar_deliveries", key, async job => {
     // Re-read the source inside every CAS attempt; a delayed enqueue cannot regress a newer visit.
     const current = await supportedClient(client), saved = await strictRead("bookings", keyFor(client.slug, booking.id));
     if (!saved) throw new CalendarError("booking_not_saved", "Save the visit before syncing Calendar.");
-    if (saved.delivery?.tenantIdentity !== calendarTenantIdentity(current)) return { result: null };
+    if (saved.delivery?.tenantIdentity !== calendarTenantIdentity(current) || !belongsToWorkspace(current, saved) || saved.websiteSetupCheck || saved.simulation) return { result: null };
     const connection = await getCalendarConnection(current.slug), revision = sourceRevision(saved);
     if (!job && (!connection || !ACTIVE.has(saved.status) || saved.date < houstonToday())) return { result: null };
     if (job?.sourceRevision === revision && job.lifecycleVersion === (current.operationLifecycleVersion || 0) && (!connection || job.connectionId === connection.connectionId)) return { result: job };
@@ -87,7 +89,7 @@ async function latestJob(job) {
   if (!saved || saved.version !== job.version || saved.claim?.token !== job.claim?.token || saved.sourceRevision !== job.sourceRevision) throw new CalendarError("superseded", "A newer saved visit will be synced instead.");
   const [client, booking, connection] = await Promise.all([strictRead("clients", job.slug), strictRead("bookings", keyFor(job.slug, job.bookingId)), getCalendarConnection(job.slug)]);
   if (!client || !isSupportedSelfServiceClient(client) || calendarTenantIdentity(client) !== job.tenantIdentity || !["testing", "live"].includes(client.status) || (client.operationLifecycleVersion || 0) !== job.lifecycleVersion) throw new CalendarError("workspace_changed", "Workspace status changed. Refresh calendar setup before resuming.");
-  if (!booking || booking.delivery?.tenantIdentity !== job.tenantIdentity || sourceRevision(booking) !== job.sourceRevision) throw new CalendarError("superseded", "A newer saved visit will be synced instead.");
+  if (!booking || booking.websiteSetupCheck || booking.simulation || booking.delivery?.tenantIdentity !== job.tenantIdentity || !belongsToWorkspace(client, booking) || sourceRevision(booking) !== job.sourceRevision) throw new CalendarError("superseded", "A newer saved visit will be synced instead.");
   if (!connection) throw new CalendarError("reconnect_required", "Connect Calendar to resume saved work.");
   if (connection.targetId !== job.targetId) throw new CalendarError("calendar_target_changed", "A different Google calendar is connected. Existing event references are retained for review.");
   await assertCalendarExecution(client, { targetId: connection.targetId, bookingId: job.bookingId });
@@ -184,25 +186,27 @@ async function processJob(key, deadline) {
   });
   return { ok: !failure, state: failure?.code || "confirmed" };
 }
-async function discover(limit) {
+async function discover(limit, deadline = Infinity) {
   const keys = await list("bookings", ""), cursor = await strictRead("calendar_scan", "bookings:v1");
   const ordered = [...keys.filter(key => key > (cursor?.after || "")), ...keys.filter(key => key <= (cursor?.after || ""))].slice(0, limit);
-  let discovered = 0;
+  let discovered = 0, last;
   for (const key of ordered) {
+    if (Date.now() >= deadline) break;
+    last = key;
     const booking = await strictRead("bookings", key);
     if (!booking || !validSlug(booking.slug) || !validId(booking.id)) continue;
     const client = await strictRead("clients", booking.slug);
     if (!isSupportedSelfServiceClient(client)) continue;
     if (await queueCalendarBooking(client, booking)) discovered++;
   }
-  if (ordered.length) await atomicUpdate("calendar_scan", "bookings:v1", () => ({ value: { after: ordered.at(-1), updatedAt: stamp() } }));
+  if (last) await atomicUpdate("calendar_scan", "bookings:v1", () => ({ value: { after: last, updatedAt: stamp() } }));
   return discovered;
 }
 export async function runCalendarDelivery({ limit = 2, discoveryLimit = 50, budgetMs = 12000 } = {}) {
   if (!calendarDeliveryEnabled()) return { ok: true, enabled: false, discovered: 0, processed: 0, failed: 0 };
   const count = Math.max(1, Math.min(50, Math.floor(limit))), scan = Math.max(1, Math.min(200, Math.floor(discoveryLimit))), deadline = Date.now() + Math.max(1000, Math.min(120000, budgetMs));
-  const discovered = await discover(scan), keys = await list("calendar_deliveries", calendarExecutionPolicy().tenant.slug + '/'), cursor = await strictRead("calendar_scan", "jobs:v1");
-  const ordered = [...keys.filter(key => key > (cursor?.after || "")), ...keys.filter(key => key <= (cursor?.after || ""))];
+  const policy = calendarExecutionPolicy(), discovered = await discover(scan, deadline), keys = await list("calendar_deliveries", policy.mode === 'self_service' ? '' : policy.tenant.slug + '/'), cursor = await strictRead("calendar_scan", "jobs:v1");
+  const rotated = [...keys.filter(key => key > (cursor?.after || "")), ...keys.filter(key => key <= (cursor?.after || ""))], ordered = policy.mode === 'self_service' ? rotated.slice(0, scan) : rotated;
   let processed = 0, failed = 0, last;
   for (const key of ordered) {
     if (processed >= count || Date.now() >= deadline) break;
@@ -211,10 +215,10 @@ export async function runCalendarDelivery({ limit = 2, discoveryLimit = 50, budg
     if (result) { processed++; if (!result.ok) failed++; }
   }
   if (last) await atomicUpdate("calendar_scan", "jobs:v1", () => ({ value: { after: last, updatedAt: stamp() } }));
-  const all = (await Promise.all(keys.map(key => strictRead("calendar_deliveries", key)))).filter(Boolean);
+  const all = (await Promise.all((policy.mode === 'self_service' ? ordered : keys).map(key => strictRead("calendar_deliveries", key)))).filter(Boolean);
   const openFailures = all.filter(job => ["needs_attention", "retry"].includes(job.state)).length;
   const waiting = all.filter(job => job.state === "waiting_connection").length;
-  return { ok: failed === 0 && openFailures === 0, enabled: true, discovered, processed, failed, openFailures, waiting };
+  return { ok: failed === 0 && openFailures === 0, enabled: true, discovered, processed, failed, openFailures, waiting, ...(policy.mode === 'self_service' ? { scope: 'inspected_jobs', inspected: all.length, historyIncomplete: keys.length > ordered.length } : {}) };
 }
 
 export async function runCalendarDeliveryWave({ budgetMs = 120000 } = {}) {
@@ -238,10 +242,24 @@ export async function runCalendarDeliveryWave({ budgetMs = 120000 } = {}) {
   await atomicUpdate("calendar_scan", "wave:v1", current => current?.token === token ? { value: { ...current, state: "complete", until: 0, completedAt: stamp() } } : {});
   return record;
 }
-export async function dispatchCalendarDeliveryWave() {
+export async function dispatchCalendarDeliveryWave(requestedClient = null) {
   if (!calendarDeliveryEnabled()) return { ok: true, enabled: false, dispatched: false };
-  const client = await strictRead('clients', calendarExecutionPolicy().tenant.slug);
-  const response = await guardedCalendarFetch(client, 'workerDispatch', `${accessSite()}/api/calendar-delivery-background`, { method: "POST", headers: { "Content-Type": "application/json", "x-service-worker-key": process.env.SERVICE_WORKER_KEY }, body: "{}", signal: AbortSignal.timeout(5000) }, { authorize: () => calendarDeliveryEnabled() });
+  const policy = calendarExecutionPolicy();
+  let client, targetId;
+  if (policy.mode === 'self_service') {
+    // Scheduled waves rotate through connected tenants; a customer-triggered
+    // dispatch uses that customer's current grant. Neither needs a manual map.
+    const cursor = await strictRead('calendar_scan', 'dispatch:self_service'), keys = requestedClient ? [requestedClient.slug] : await list('calendar_connections', '');
+    const ordered = requestedClient ? keys : [...keys.filter(key => key > (cursor?.after || '')), ...keys.filter(key => key <= (cursor?.after || ''))].slice(0, 25);
+    for (const slug of ordered) {
+      if (!requestedClient) await atomicUpdate('calendar_scan', 'dispatch:self_service', () => ({ value: { after: slug, updatedAt: stamp() } }));
+      const candidate = await strictRead('clients', slug), connection = candidate && await getCalendarConnection(slug);
+      if (!connection || requestedClient && calendarTenantIdentity(candidate) !== calendarTenantIdentity(requestedClient)) continue;
+      if (await calendarExecutionAvailable(candidate, { targetId: connection.targetId, actions: ['workerDispatch'] })) { client = candidate; targetId = connection.targetId; break; }
+    }
+    if (!client) return { ok: true, enabled: true, dispatched: false, reasonCode: 'no_eligible_calendar_dispatch' };
+  } else client = await strictRead('clients', policy.tenant.slug);
+  const response = await guardedCalendarFetch(client, 'workerDispatch', `${accessSite()}/api/calendar-delivery-background`, { method: "POST", headers: { "Content-Type": "application/json", "x-service-worker-key": process.env.SERVICE_WORKER_KEY }, body: "{}", signal: AbortSignal.timeout(5000) }, { ...(targetId ? { targetId } : {}), authorize: () => calendarDeliveryEnabled() });
   if (![200, 202].includes(response.status)) throw new CalendarError("calendar_dispatch_unavailable", "Calendar work is saved and waiting for background recovery.", 503);
   return { ok: true, enabled: true, dispatched: true };
 }

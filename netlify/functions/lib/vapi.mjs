@@ -119,19 +119,19 @@ export async function updateVoicePrompt(client) {
 // Pause: point the number's voice webhook back at us so the fallback plays instead of the assistant.
 export async function detachVoice(client, site) {
   if (!client.voice?.assistantId) return;
-  if (!twilioEnabled() || !client.phone?.twilioNumberSid) { await logEvent(client.slug, "voice_detach_skipped", {}); return; }
+  if (!twilioEnabled() || !client.phone?.twilioNumberSid) { await logEvent(client, "voice_detach_skipped", {}); return; }
   try {
     const n = await getNumber(client.phone.twilioNumberSid);
     if (n.voice_url && !n.voice_url.includes("/api/voice")) client.voice.vapiVoiceUrl = n.voice_url;
     await setNumberWebhooks(client.phone.twilioNumberSid, { voiceUrl: `${site}/api/voice`, smsUrl: `${site}/api/sms`, voiceFallbackUrl: voiceFallbackFor(client) });
     client.voice.detached = true;
-    await logEvent(client.slug, "voice_detached", {});
-  } catch (err) { await logEvent(client.slug, "voice_detach_failed", { error: String(err.message).slice(0, 200) }); }
+    await logEvent(client, "voice_detached", {});
+  } catch (err) { await logEvent(client, "voice_detach_failed", { error: String(err.message).slice(0, 200) }); }
 }
 
 export async function attachVoice(client, site) {
   if (!client.voice?.detached) return;
-  if (!twilioEnabled() || !client.phone?.twilioNumberSid) { await logEvent(client.slug, "voice_attach_skipped", {}); return; }
+  if (!twilioEnabled() || !client.phone?.twilioNumberSid) { await logEvent(client, "voice_attach_skipped", {}); return; }
   try {
     if (client.voice.vapiVoiceUrl) await setNumberWebhooks(client.phone.twilioNumberSid, { voiceUrl: client.voice.vapiVoiceUrl, smsUrl: `${site}/api/sms` });
     else if (vapiEnabled() && client.phone.twilioNumber) {
@@ -140,8 +140,8 @@ export async function attachVoice(client, site) {
     }
     try { await setVoiceFallback(client.phone.twilioNumberSid, `${site}/api/voice`); } catch { /* fallback stays as it was */ }
     client.voice.detached = false;
-    await logEvent(client.slug, "voice_attached", {});
-  } catch (err) { await logEvent(client.slug, "voice_attach_failed", { error: String(err.message).slice(0, 200) }); }
+    await logEvent(client, "voice_attached", {});
+  } catch (err) { await logEvent(client, "voice_attach_failed", { error: String(err.message).slice(0, 200) }); }
 }
 
 export async function releaseVoice(client) {

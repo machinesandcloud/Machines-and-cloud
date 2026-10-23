@@ -2,7 +2,26 @@
 
 How a shop goes from the pilot form to a live front desk, what runs where, and what Steve has to switch on once.
 
-## Current core-delivery work
+## Four-connection customer setup (local candidate)
+
+The active connection-journey candidate reuses each shop's saved business answers. Selecting a connection records a preference; it does not authorize purchases, messaging or Google access. The customer stays in one workspace and is not asked to create Twilio, Vapi or Google Cloud developer accounts or supply API keys. Every chosen connection shows its current next step, the platform's work, the owner's one-time action and the evidence needed to call it ready.
+
+| Connection | Customer supplies or authorizes | Background delivery | Ready evidence |
+|---|---|---|---|
+| Website chat | Website origin, reviewed answers, a private rehearsal, installation access or snippet installation | Prepare the saved front desk, serve the widget, retain the installation check and customer requests | Exact permitted website check, active chat and matching saved request; copying code is not installation |
+| Phone answering | Existing business line/provider and routing choice or new-number choice; current usage/cost authority | Reserve one dedicated number, create/configure the assistant and webhooks, retain resource receipts and retry/reconcile safely | Current routing and a successful actual call; an existing-line owner/carrier must enable forwarding on that business line |
+| Text messaging | Registered-business details and representative, customer consent process, current carrier/usage costs and setup-text agreement | Submit the shop's sender/brand/campaign, track review, configure inbound/status routes and delivery | Carrier approval and two-way setup verification; forwarding an existing voice line does not move its text messages |
+| Google Calendar | Google OAuth permission for the intended account | Encrypt its refresh credential, discover saved visits, create/update/delete only the shop's deterministic owned event, reconcile retries | Owner grant and per-visit confirmed delivery; outside Google busy time does not yet alter offered availability |
+
+Phone/text approvals name the exact available channel subset. A waiting SMS connection cannot block an already-authorized phone connection. Later availability alone cannot authorize a deferred service: its current costs and permissions require a separate explicit review. A later approval reuses the original shared number and retained setup receipts. Cancellation, changed owner identity, uncertain number acquisition and a changed common provider account still stop unsafe work. Worker progress survives browser closure; the visible page uses bounded refresh rather than an unlimited polling loop.
+
+**Production Calendar policy is separate from the retained internal proof.** The new `CALENDAR_SELF_SERVICE_ENABLED=true` mode requires `CALENDAR_SELF_SERVICE_APPROVED_VERSION` and strict `CALENDAR_SELF_SERVICE_POLICY_JSON`: `mode: "self_service"`, `version`, future `expiresAt`, `googleClientIdHash`, `limits` and `tenantLimits`. Both limit objects contain exactly `oauthStart`, `tokenExchange`, `tokenRefresh`, `calendarRead`, `eventCreate`, `eventUpdate`, `eventDelete`, `workerDispatch`, and `totalRequests`; values are bounded nonnegative integers and each tenant ceiling is at most the global ceiling. Normal `CALENDAR_CONNECTION_ENABLED`, `CALENDAR_DELIVERY_ENABLED`, encryption/client credentials and the worker key remain required. These are platform deployment settings, never customer form fields.
+
+This mode admits current opted-in workspace identities and their own owner-granted calendar and visits without hand-maintained slug/visit allowlists. Non-refundable per-tenant and global UTC-day CAS counters retain consumed capacity across policy version edits. Local desired work can remain queued during a pause or exhausted allowance, but local queue admission cannot authorize provider transport. OAuth state binds the original verified session, owner incarnation, grant epoch, Google client and policy; a changed client/policy cannot exchange an older code. Ordinary signout does not revoke the separately granted background connection. Disconnect, revoked Google permission, cancellation or ownership change prevents further delivery.
+
+Website setup samples and simulated records are excluded from new delivery and checked again before a retained job can send email/SMS or touch Calendar. This candidate changes no production activation setting; the new self-service mode defaults off and the earlier named proof remains a separate closed phase. This candidate has local protocol-fixture evidence only; hosting restoration, Google branding/scope verification, current provider credentials and actual customer delivery are still launch gates. No environment or billing change is performed by these code changes.
+
+## Earlier named internal Calendar proof
 
 [Sprint20](product/SPRINT20.md) advances actual service delivery from published `05e8c5c`. The new Calendar execution policy binds one workspace incarnation, Google OAuth client, actual primary-calendar target and explicit visit IDs to durable request allowances. Both Calendar flags remain required. The policy does not authorize phone, SMS, model requests, emails or provider fees. No live policy is configured by this local work.
 

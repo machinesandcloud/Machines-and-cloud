@@ -22,10 +22,10 @@ async function runTask(t) {
   const c = await getClient(t.slug);
   if (!c) return "no client";
   if (isSelfServiceClient(c)) {
-    await logEvent(c.slug, "task_skipped", { type: t.type, reason: "self_service_portal_only" });
+    await logEvent(t.slug, "task_skipped", { type: t.type, reason: "self_service_portal_only" });
     return "channel_not_active";
   }
-  if (!ACTIVE.includes(c.status)) { await logEvent(c.slug, "task_skipped", { type: t.type, reason: c.status }); return "skipped"; }
+  if (!ACTIVE.includes(c.status)) { await logEvent(c, "task_skipped", { type: t.type, reason: c.status }); return "skipped"; }
   if (t.type === "escalate") return runEscalation(c, t);
   if (t.type === "callback_check") return runCallbackCheck(c, t);
   if (t.type === "visit_check") return runVisitCheck(c, t);
@@ -47,12 +47,12 @@ async function runTask(t) {
   const r = await sendSMS({ to: rec.phone, client: c, type: t.type, body });
   if (r.ok || r.logged) {
     // The front desk should know what it sent when the customer replies to it.
-    const conv = await getConversation(c.slug, "sms", rec.phone);
+    const conv = await getConversation(c, "sms", rec.phone);
     conv.messages.push({ role: "assistant", content: body, at: new Date().toISOString(), system: t.type });
     await saveConversation(conv);
     if (t.type === "review_request") { rec.reviewAskedAt = new Date().toISOString(); await saveRecord("bookings", rec); }
   }
-  await logEvent(c.slug, "task_sent", { type: t.type, id: rec.id, ok: r.ok, logged: !!r.logged });
+  await logEvent(c, "task_sent", { type: t.type, id: rec.id, ok: r.ok, logged: !!r.logged });
   return r.ok ? "sent" : r.logged ? "logged" : "send failed";
 }
 
@@ -61,14 +61,14 @@ async function tellOwnerTenDlcFailed(c) {
   const text = `${c.business.name}: carriers did not accept the texting registration. Usually the legal business name or EIN does not match the IRS letter, or the address differs. Check them on your portal (Setup, Texting registration) and save to refile: ${portal}. Until it clears, texts keep going out from our registered number with your name.`;
   if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: text });
   await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting registration needs a fix`, text });
-  await logEvent(c.slug, "tendlc_owner_told", {});
+  await logEvent(c, "tendlc_owner_told", {});
 }
 // One-time lifecycle messages, each sent once (stamped on the client record).
 async function lifecycle(c) {
   let n = 0;
   const stamps = c.lifecycle || {};
   const portal = `${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`;
-  const mark = async (k, type) => { stamps[k] = new Date().toISOString(); c.lifecycle = stamps; await saveClient(c); await logEvent(c.slug, type, {}); n++; };
+  const mark = async (k, type) => { stamps[k] = new Date().toISOString(); c.lifecycle = stamps; await saveClient(c); await logEvent(c, type, {}); n++; };
   // (a) Day 8: the free week is over.
   if (c.status === "live" && c.liveAt && !stamps.trialOver && stamps.day7Sent && Date.now() - new Date(c.liveAt).getTime() >= 8 * D) {
     const text = `${c.business.name}: your free week is over. Nothing changes on the line. Your first statement arrives on the 1st, and Steve sends the invoice with it. Reply to this email with anything you want the front desk to do differently.`;
@@ -111,7 +111,7 @@ async function alertOnce(c, reason, hours, subject, text) {
   if (last && Date.now() - new Date(last.at).getTime() < hours * 3600 * 1000) return false;
   await put("health", k, { at: new Date().toISOString() });
   await notifySteve(subject, `${text}\n${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`);
-  await logEvent(c.slug, "health_alert", { reason });
+  await logEvent(c, "health_alert", { reason });
   return true;
 }
 async function healthAlerts(c) {
@@ -125,7 +125,7 @@ async function healthAlerts(c) {
   const cal = since(24 * 3600 * 1000).filter((e) => e.type === "calendar_failed");
   if (cal.length && (await alertOnce(c, "calendar", 24, `Calendar failing: ${c.business.name}`, `${cal.length} booking(s) did not reach the owner's Google Calendar in the last 24 hours (${cal[cal.length - 1].data?.error || "error"}). Usually the Google connection expired: ask the owner to press Connect Google Calendar on the portal again. Bookings still reach the owner by text.`))) n++;
   if (c.status === "live" && c.phone?.forwardingVerified && c.phone?.forwarding !== "none") {
-    const inbound = (await lastInbound(c.slug))?.at || events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
+    const inbound = (await lastInbound(c))?.at || events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
     if (inbound && businessDaysSince(inbound) >= 5 && (await alertOnce(c, "no_inbound", 5 * 24, `Line silent: ${c.business.name}`, `No call or text has reached the front desk for ${businessDaysSince(inbound)} business days (last at ${inbound}). Forwarding may have dropped: ask the owner to dial *#61# and check Live Voicemail, then call the business number from another phone.`))) n++;
   }
   return n;
@@ -178,7 +178,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
           c.phone.campaignStatus = st;
           if (st === "VERIFIED") {
             c.phone.tenDlc = "approved";
-            await logEvent(c.slug, "sender_switched", { to: "own" });
+            await logEvent(c, "sender_switched", { to: "own" });
             await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting is live from your number`, text: `Carriers approved your business for texting. Your front desk now texts customers from ${c.phone.twilioNumber}: missed calls, confirmations, reminders, and follow-ups.` });
             if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${c.business.name}: texting is approved. Your front desk now texts customers from your own number.` });
           } else if (st === "FAILED") { c.phone.tenDlc = "failed"; await notifySteve(`10DLC campaign failed: ${c.business.name}`, `Campaign ${c.phone.campaignSid} failed. Check the Twilio console.`); await tellOwnerTenDlcFailed(c); }
@@ -224,7 +224,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
         c.voice = { provider: "none", released: c.voice?.assistantId || "" };
         c.releasedAt = new Date().toISOString();
         await saveClient(c);
-        await logEvent(c.slug, skipped ? "number_release_skipped" : "number_released", out);
+        await logEvent(c, skipped ? "number_release_skipped" : "number_released", out);
         await notifySteve(`${skipped ? "Number release skipped (no keys)" : "Number released"}: ${c.business?.name}`, `${c.slug}: ${JSON.stringify(out)}\nCancelled ${c.cancelledAt}, window ended ${c.serviceEndsAt}.`);
         released++;
       } catch (err) { console.error("release", slug, err); }

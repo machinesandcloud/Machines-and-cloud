@@ -1,0 +1,695 @@
+{
+  "at": "2026-10-23T04:53:08.507Z",
+  "status": "Immutable before evidence only; no redesign acceptance",
+  "commit": "b0820e5",
+  "assetCheckout": "/tmp/mc-workspace-simplicity-baseline-b082",
+  "receipt": "scratchpad/workspace-simplicity-independent-baseline.json",
+  "strictVisibilityInventory": "scratchpad/workspace-simplicity-independent-baseline-strict-inventory.json",
+  "sourceBefore": {
+    "desk.js": "3a185c41878e8151c5effe607c984fc27d1dc8bd19aee89dc759bd175c953fde",
+    "desk.html": "b1717a24de6d825ab7492cfcd6893143631891637591da86ca568420277d59f3",
+    "desk.css": "5b77b01f94ba6255c0246a1aac47cf2bbb96afaacd1fc69806414d9526ec22d5",
+    "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "netlify/functions/client.mjs": "0bbbc255d1eeac03c4e6286ebd857280d9a2b4132822d2168fd5a851378dc48d",
+    "onboard.html": "1578d3c24ffba4f89149c86bdf49a2408706be47bf19fdb79295124b89d67392",
+    "onboard.js": "1e9b97d3a5ab8a5a693426a133e08bb4acaecf1ca7da7375bf9e84d33d726217",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "142c621749c0bc1bc5f1e23f04bb145c3983502ff6e1c7c9c31f2c750332b989",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8"
+  },
+  "sourceStable": true,
+  "findings": [
+    {
+      "id": "navigation-weight",
+      "evidence": "390-today",
+      "finding": "Eight equal-weight navigation destinations form a two-row fixed mobile bar; daily work and setup are peers.",
+      "criticalTask": "Reach Inbox and Schedule directly; expose setup and secondary pages without two fixed rows."
+    },
+    {
+      "id": "global-next-step",
+      "evidence": [
+        "390-today",
+        "390-setup",
+        "390-test",
+        "390-leads",
+        "390-account"
+      ],
+      "finding": "A full Review business rules card repeats above five different page tasks. Requests and Account inherit a competing setup instruction.",
+      "criticalTask": "Keep one clear next setup action on Home; work pages should lead with their actual task."
+    },
+    {
+      "id": "connection-narratives",
+      "evidence": "390-setup",
+      "finding": "Your connection progress, Your connections, Finish your selected connections and the website installation card stack separate setup narratives. The page is3947px high before expanding details.",
+      "criticalTask": "One connection plan with an obvious service-specific next action; advanced/status/preferences behind explicit disclosure."
+    },
+    {
+      "id": "request-visit-location",
+      "evidence": "390-leads",
+      "finding": "Requests contains both Bookings/Add visit and Callback requests & leads; Availability is another navigation destination with overlapping scheduling language.",
+      "criticalTask": "Use Inbox for requests/conversations and Schedule for saved visits and blocked time; preserve exact record links and old hashes."
+    },
+    {
+      "id": "rules-density",
+      "evidence": "390-know",
+      "finding": "The rules page is4357px high, with48 rendered visible controls including navigation. Business profile, recurring hours, prices, FAQ, contact/routing/alert options and website origins share one long form.",
+      "criticalTask": "Progressively expose task groups without dropping hidden saved fields, draft/error/focus behavior or source-of-truth rules."
+    }
+  ],
+  "views": [
+    {
+      "label": "390-today",
+      "title": "Your day, at a glance",
+      "height": 1372,
+      "width": 390,
+      "controls": 14,
+      "duplicateDestinations": [
+        {
+          "destination": "leads",
+          "items": [
+            {
+              "label": "Requests",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "View customer requests →",
+              "id": "",
+              "tab": "p-today"
+            }
+          ]
+        },
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Your day, at a glance",
+        "Make sure it sounds like your business",
+        "Today at a glance",
+        "Needs you",
+        "Last 24 hours"
+      ]
+    },
+    {
+      "label": "390-setup",
+      "title": "Connections",
+      "height": 3947,
+      "width": 390,
+      "controls": 34,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            },
+            {
+              "label": "Review business details",
+              "id": "",
+              "tab": "p-setup"
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Connections",
+        "Make sure it sounds like your business",
+        "Your connection progress",
+        "Your connections",
+        "Finish your selected connections",
+        "Website chat",
+        "Phone answering",
+        "Text messaging",
+        "Google Calendar",
+        "Put your front desk on your website",
+        "Where should customers find your front desk?",
+        "Website details"
+      ]
+    },
+    {
+      "label": "390-know",
+      "title": "Business rules",
+      "height": 4357,
+      "width": 390,
+      "controls": 48,
+      "duplicateDestinations": [],
+      "headings": [
+        "Fixture Availability Shop",
+        "Business rules",
+        "Check your business rules",
+        "Business profile",
+        "Hours & appointments",
+        "Published prices",
+        "Customer questions",
+        "Your contact details",
+        "Website chat"
+      ]
+    },
+    {
+      "label": "390-test",
+      "title": "Practice your front desk",
+      "height": 1733,
+      "width": 390,
+      "controls": 20,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Practice your front desk",
+        "Make sure it sounds like your business",
+        "You’re the customer",
+        "What you’d receive"
+      ]
+    },
+    {
+      "label": "390-leads",
+      "title": "Customer requests",
+      "height": 1083,
+      "width": 390,
+      "controls": 16,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        },
+        {
+          "destination": "test",
+          "items": [
+            {
+              "label": "Practice",
+              "id": "tabTest",
+              "tab": null
+            },
+            {
+              "label": "Try a private conversation →",
+              "id": "",
+              "tab": "p-leads"
+            }
+          ]
+        },
+        {
+          "destination": "setup",
+          "items": [
+            {
+              "label": "Connections",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Check connections →",
+              "id": "",
+              "tab": "p-leads"
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Customer requests",
+        "Make sure it sounds like your business",
+        "Bookings 0 Add visit",
+        "Callback requests & leads 0"
+      ]
+    },
+    {
+      "label": "390-account",
+      "title": "Account & data",
+      "height": 1588,
+      "width": 390,
+      "controls": 21,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Account & data",
+        "Make sure it sounds like your business",
+        "This month",
+        "Your data",
+        "Service"
+      ]
+    },
+    {
+      "label": "1440-today",
+      "title": "Your day, at a glance",
+      "height": 950,
+      "width": 1440,
+      "controls": 15,
+      "duplicateDestinations": [
+        {
+          "destination": "leads",
+          "items": [
+            {
+              "label": "Requests",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "View customer requests →",
+              "id": "",
+              "tab": "p-today"
+            }
+          ]
+        },
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Your day, at a glance",
+        "Make sure it sounds like your business",
+        "Today at a glance",
+        "Needs you",
+        "Last 24 hours"
+      ]
+    },
+    {
+      "label": "1440-setup",
+      "title": "Connections",
+      "height": 2746,
+      "width": 1440,
+      "controls": 35,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            },
+            {
+              "label": "Review business details",
+              "id": "",
+              "tab": "p-setup"
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Connections",
+        "Make sure it sounds like your business",
+        "Your connection progress",
+        "Your connections",
+        "Finish your selected connections",
+        "Website chat",
+        "Phone answering",
+        "Text messaging",
+        "Google Calendar",
+        "Put your front desk on your website",
+        "Where should customers find your front desk?",
+        "Website details"
+      ]
+    },
+    {
+      "label": "1440-know",
+      "title": "Business rules",
+      "height": 2745,
+      "width": 1440,
+      "controls": 49,
+      "duplicateDestinations": [],
+      "headings": [
+        "Fixture Availability Shop",
+        "Business rules",
+        "Check your business rules",
+        "Business profile",
+        "Hours & appointments",
+        "Published prices",
+        "Customer questions",
+        "Your contact details",
+        "Website chat"
+      ]
+    },
+    {
+      "label": "1440-test",
+      "title": "Practice your front desk",
+      "height": 1172,
+      "width": 1440,
+      "controls": 21,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Practice your front desk",
+        "Make sure it sounds like your business",
+        "You’re the customer",
+        "What you’d receive"
+      ]
+    },
+    {
+      "label": "1440-leads",
+      "title": "Customer requests",
+      "height": 950,
+      "width": 1440,
+      "controls": 17,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        },
+        {
+          "destination": "test",
+          "items": [
+            {
+              "label": "Practice",
+              "id": "tabTest",
+              "tab": null
+            },
+            {
+              "label": "Try a private conversation →",
+              "id": "",
+              "tab": "p-leads"
+            }
+          ]
+        },
+        {
+          "destination": "setup",
+          "items": [
+            {
+              "label": "Connections",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Check connections →",
+              "id": "",
+              "tab": "p-leads"
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Customer requests",
+        "Make sure it sounds like your business",
+        "Bookings 0 Add visit",
+        "Callback requests & leads 0"
+      ]
+    },
+    {
+      "label": "1440-account",
+      "title": "Account & data",
+      "height": 950,
+      "width": 1440,
+      "controls": 22,
+      "duplicateDestinations": [
+        {
+          "destination": "know",
+          "items": [
+            {
+              "label": "Business rules",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Review business rules",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Account & data",
+        "Make sure it sounds like your business",
+        "This month",
+        "Your data",
+        "Service"
+      ]
+    },
+    {
+      "label": "reviewed-390-today",
+      "title": "Your day, at a glance",
+      "height": 1372,
+      "width": 390,
+      "controls": 14,
+      "duplicateDestinations": [
+        {
+          "destination": "leads",
+          "items": [
+            {
+              "label": "Requests",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "View customer requests →",
+              "id": "",
+              "tab": "p-today"
+            }
+          ]
+        },
+        {
+          "destination": "setup",
+          "items": [
+            {
+              "label": "Connections",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "View connections",
+              "id": "nextSetupAction",
+              "tab": null
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Your day, at a glance",
+        "Finish connecting your front desk",
+        "Today at a glance",
+        "Needs you",
+        "Last 24 hours"
+      ]
+    },
+    {
+      "label": "reviewed-390-setup",
+      "title": "Connections",
+      "height": 3672,
+      "width": 390,
+      "controls": 33,
+      "duplicateDestinations": [
+        {
+          "destination": "setup",
+          "items": [
+            {
+              "label": "Connections",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "Continue website setup",
+              "id": "",
+              "tab": "p-setup"
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Connections",
+        "Your connection progress",
+        "Your connections",
+        "Finish your selected connections",
+        "Website chat",
+        "Phone answering",
+        "Text messaging",
+        "Google Calendar",
+        "Put your front desk on your website",
+        "Where should customers find your front desk?",
+        "Website details"
+      ]
+    },
+    {
+      "label": "reviewed-390-leads",
+      "title": "Customer requests",
+      "height": 1083,
+      "width": 390,
+      "controls": 16,
+      "duplicateDestinations": [
+        {
+          "destination": "test",
+          "items": [
+            {
+              "label": "Practice",
+              "id": "tabTest",
+              "tab": null
+            },
+            {
+              "label": "Try a private conversation →",
+              "id": "",
+              "tab": "p-leads"
+            }
+          ]
+        },
+        {
+          "destination": "setup",
+          "items": [
+            {
+              "label": "Connections",
+              "id": "",
+              "tab": null
+            },
+            {
+              "label": "View connections",
+              "id": "nextSetupAction",
+              "tab": null
+            },
+            {
+              "label": "Check connections →",
+              "id": "",
+              "tab": "p-leads"
+            }
+          ]
+        }
+      ],
+      "headings": [
+        "Fixture Availability Shop",
+        "Customer requests",
+        "Finish connecting your front desk",
+        "Bookings 0 Add visit",
+        "Callback requests & leads 0"
+      ]
+    }
+  ],
+  "representativeRenders": [
+    "scratchpad/workspace-simplicity-independent-baseline-390-today.png",
+    "scratchpad/workspace-simplicity-independent-baseline-390-setup.png",
+    "scratchpad/workspace-simplicity-independent-baseline-1440-today.png",
+    "scratchpad/workspace-simplicity-independent-baseline-1440-setup.png",
+    "scratchpad/workspace-simplicity-independent-baseline-390-know.png",
+    "scratchpad/workspace-simplicity-independent-baseline-390-test.png",
+    "scratchpad/workspace-simplicity-independent-baseline-390-leads.png"
+  ],
+  "reproductionHarnesses": [
+    "scratchpad/workspace-simplicity-baseline-harness-v1.mjs",
+    "scratchpad/workspace-simplicity-baseline-inventory-harness.mjs"
+  ],
+  "methodNotes": [
+    "Actual local owner API handlers and synthetic memory workspace/session; no live account/customer records.",
+    "Initial rectangle inventory could include descendants of closed native details; strict visibility inventory excludes those. Visual findings above use actual renders and the corrected inventory.",
+    "Repeated links are not automatically defects. Findings target competing setup narratives, task location and screen density.",
+    "No models, providers, emails, calls, texts, purchases or channel activation; all site requests were reads."
+  ],
+  "effects": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "physicalNetwork": 0,
+    "pageErrors": 0,
+    "forbidden": 0
+  }
+}

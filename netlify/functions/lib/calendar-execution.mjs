@@ -4,6 +4,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { atomicUpdate, list } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { isSupportedSelfServiceClient } from './setup.mjs';
+import { selfServiceCalendarPolicy, assertSelfServiceCalendar, selfServiceCalendarAvailable, reserveSelfServiceCalendar } from './calendar-self-service.mjs';
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
@@ -25,6 +26,7 @@ export class CalendarExecutionError extends Error {
   constructor(code = 'calendar_execution_unavailable', message = 'Calendar connection is waiting for its approved service setup.') { super(message); this.code = code; this.status = 503; }
 }
 export function calendarExecutionPolicy() {
+  if (process.env.CALENDAR_SELF_SERVICE_ENABLED === 'true') return selfServiceCalendarPolicy();
   try {
     const p = JSON.parse(process.env.CALENDAR_EXECUTION_POLICY_JSON || 'null');
     if (!p || Object.keys(p).sort().join(',') !== ['version','expiresAt','tenant','googleClientIdHash','targetIdHash','censusDigest','censusMode','bookingIds','limits'].sort().join(',') || !['clean_initial','reviewed_retained'].includes(p.censusMode) || !/^[a-z0-9_-]{1,80}$/.test(p.version || '') || process.env.CALENDAR_EXECUTION_APPROVED_VERSION !== p.version || !Number.isFinite(Date.parse(p.expiresAt)) || Date.parse(p.expiresAt) <= Date.now() || Object.keys(p.tenant || {}).sort().join(',') !== 'identity,slug' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(p.tenant.slug || '') || ![p.tenant.identity,p.googleClientIdHash,p.targetIdHash,p.censusDigest].every(hex) || !Array.isArray(p.bookingIds) || !p.bookingIds.length || p.bookingIds.length > 10 || new Set(p.bookingIds).size !== p.bookingIds.length || !p.bookingIds.every(id => /^[a-zA-Z0-9_-]{1,80}$/.test(id)) || Object.keys(p.limits || {}).sort().join(',') !== [...ACTIONS,'totalRequests'].sort().join(',') || !Object.values(p.limits).every(n => Number.isSafeInteger(n) && n >= 0 && n <= 10000) || p.googleClientIdHash !== hash(process.env.GOOGLE_CLIENT_ID || '') || p.censusMode === 'reviewed_retained' && ['oauthStart','tokenExchange','eventCreate'].some(action => p.limits[action] !== 0)) return null;
@@ -61,7 +63,10 @@ function boundPolicy(c, targetId, bookingId) {
 function validLedger(row, p) {
   if (!row || row.version !== 1 || row.policyDigest !== p.digest || !acceptsCensus(row.census,p) || !row.used || Object.keys(row.used).sort().join(',') !== [...ACTIONS,'totalRequests'].sort().join(',') || !Object.values(row.used).every(n => Number.isSafeInteger(n) && n >= 0) || Object.keys(row.used).some(action => row.used[action] > p.limits[action]) || row.used.totalRequests !== ACTIONS.filter(action => action !== 'oauthStart').reduce((sum,action) => sum + row.used[action],0)) throw new CalendarExecutionError('calendar_policy_changed', 'Calendar service terms changed. The retained attempt budget needs review.');
 }
-export async function assertCalendarExecution(c, { targetId, bookingId, receipt, authorize } = {}) {
+export async function assertCalendarExecution(c, options = {}) {
+  const { targetId, bookingId, receipt, authorize } = options;
+  const production = calendarExecutionPolicy();
+  if (production?.mode === 'self_service') return assertSelfServiceCalendar(c, production, options);
   const p = boundPolicy(c, targetId, bookingId), current = await strictRead('clients', c.slug);
   if (!current || !isSupportedSelfServiceClient(current) || calendarExecutionIdentity(current) !== p.tenant.identity || !['testing','live','paused'].includes(current.status) || (await strictRead('health','brake'))?.on === true || authorize && await authorize() !== true) throw new CalendarExecutionError('calendar_authority_changed');
   if (receipt && (receipt.policyDigest !== p.digest || receipt.version !== p.version)) throw new CalendarExecutionError('calendar_policy_changed');
@@ -77,12 +82,16 @@ export async function assertCalendarExecution(c, { targetId, bookingId, receipt,
 }
 export async function calendarExecutionAvailable(c, options = {}) {
   try {
+    const production = calendarExecutionPolicy();
+    if (production?.mode === 'self_service') return await selfServiceCalendarAvailable(c, production, options);
     const p = await assertCalendarExecution(c, options), row = await strictRead('calendar_execution_budgets', calendarExecutionBudgetKey(p.version));
     const remains = action => ACTIONS.includes(action) && (row?.used[action] || 0) < p.limits[action];
     return (row?.used.totalRequests || 0) < p.limits.totalRequests && (options.actions || []).every(remains) && (!options.anyActions || options.anyActions.some(remains));
   } catch { return false; }
 }
 export async function admitCalendarExecution(c, options = {}) {
+  const production = calendarExecutionPolicy();
+  if (production?.mode === 'self_service') return assertSelfServiceCalendar(c, production, options);
   const p = await assertCalendarExecution(c,options);
   const baseline = await strictRead('calendar_execution_budgets', calendarExecutionBudgetKey(p.version)) ? null : await calendarExecutionCensus(c,p);
   await atomicUpdate('calendar_execution_budgets', calendarExecutionBudgetKey(p.version), row => {
@@ -98,6 +107,8 @@ export async function admitCalendarExecution(c, options = {}) {
 }
 export async function reserveCalendarExecution(c, action, options = {}) {
   if (!ACTIONS.includes(action)) throw new CalendarExecutionError('calendar_action_invalid');
+  const production = calendarExecutionPolicy();
+  if (production?.mode === 'self_service') return reserveSelfServiceCalendar(c, production, action, options);
   const p = await admitCalendarExecution(c, options), attempt = randomBytes(16).toString('hex');
   await atomicUpdate('calendar_execution_budgets', calendarExecutionBudgetKey(p.version), row => {
     if (calendarExecutionPolicy()?.digest !== p.digest) throw new CalendarExecutionError('calendar_policy_changed');
@@ -111,6 +122,7 @@ export async function reserveCalendarExecution(c, action, options = {}) {
   return receipt;
 }
 export async function guardedCalendarFetch(c, action, url, init, options = {}) {
+  options = { ...options, localOnly: false }; // A local queue admission never authorizes transport.
   if (options.deadline !== undefined && (!Number.isFinite(options.deadline) || Date.now() >= options.deadline)) throw new CalendarExecutionError('calendar_deadline_reached');
   if (action === 'oauthStart' || !ACTIONS.includes(action)) throw new CalendarExecutionError('calendar_action_invalid');
   const target = new URL(url), method = init?.method || 'GET';

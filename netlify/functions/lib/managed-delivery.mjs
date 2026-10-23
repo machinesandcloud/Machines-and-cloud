@@ -1,6 +1,7 @@
 // Durable local intent precedes every send. Accepted, delivered and uncertain are distinct.
 import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
+import { belongsToWorkspace } from "./workspace-identity.mjs";
 import { strictRead } from "./accounts.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant, mayDeliverManagedSMS } from "./managed-consent.mjs";
@@ -50,9 +51,9 @@ async function indexPending(job) {
   });
 }
 export async function queueManagedRecord(c, record, kind = "bookings") {
-  if (!isSupportedSelfServiceClient(c) || !["bookings", "leads"].includes(kind) || record?.slug !== c.slug || record.status === "spam" || record.ownerVisitCreationAborted === true) return;
+  if (!isSupportedSelfServiceClient(c) || !["bookings", "leads"].includes(kind) || record?.slug !== c.slug || record.status === "spam" || record.ownerVisitCreationAborted === true || record.websiteSetupCheck || record.simulation) return;
   const current = await currentClient(c), saved = await strictRead(kind, `${c.slug}/${record.id}`);
-  if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c)) return;
+  if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c) || !belongsToWorkspace(c, saved) || saved.websiteSetupCheck || saved.simulation) return;
   const rev = revision(saved), source = { kind, id: saved.id, revision: rev }, eventId = `${kind}:${saved.id}:${rev}`;
   const body = `${current.business.name}: ${kind === "bookings" ? "Visit" : "Customer request"} ${saved.id}\n${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
   await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, source, preserveSnapshot: true });
@@ -71,7 +72,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
 async function inspectSource(job, c) {
   if (!job.source) return true;
   const record = await strictRead(job.source.kind, `${c.slug}/${job.source.id}`);
-  return !!record && record.delivery?.tenantIdentity === job.tenant && revision(record) === job.source.revision;
+  return !!record && !record.websiteSetupCheck && !record.simulation && record.delivery?.tenantIdentity === job.tenant && belongsToWorkspace(c, record) && revision(record) === job.source.revision;
 }
 const terminal = state => ["delivered", "failed", "superseded", "suppressed", "expired"].includes(state);
 async function change(id, updater) {

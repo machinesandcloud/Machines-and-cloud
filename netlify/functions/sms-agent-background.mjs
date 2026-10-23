@@ -12,7 +12,7 @@ export default async (req) => {
   const c = await getClient(body?.slug || "");
   const from = e164(body?.from || "");
   if (!c || !from) return new Response("ok");
-  const conv = await getConversation(c.slug, "sms", from);
+  const conv = await getConversation(c, "sms", from);
   const bookings = await upcomingBookings(c, from);
   const history = toApiMessages(conv.messages);
   const tools = bookings.length ? [BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY] : [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
@@ -34,17 +34,17 @@ export default async (req) => {
     const out = await runAgent({ system: buildSystemPrompt(c, "sms", { bookings }), tools, messages: history, execTool, maxTokens: 1200, dropToolPreamble: true });
     reply = out.reply;
     const first = reply.split(/(?<=[.!?])\s+/)[0] || "";
-    if (/^(have|need|got|book|call|now|phone filled|ok,? (i|let)|let me)/i.test(first) && first.split(/\s+/).length < 12 && reply.length > first.length + 10) { reply = reply.slice(first.length).trim(); await logEvent(c.slug, "reply_trimmed", { from, dropped: first }); }
+    if (/^(have|need|got|book|call|now|phone filled|ok,? (i|let)|let me)/i.test(first) && first.split(/\s+/).length < 12 && reply.length > first.length + 10) { reply = reply.slice(first.length).trim(); await logEvent(c, "reply_trimmed", { from, dropped: first }); }
     done = (out.events || []).map((e) => e.type === "booking" ? `[Done: visit booked, ref ${e.id}]` : e.type === "lead" ? `[Done: owner notified, ref ${e.id}]` : e.type === "confirmed" ? `[Done: visit confirmed, ref ${e.id}]` : e.type === "rescheduled" ? `[Done: visit moved to ${e.date} ${e.window}, ref ${e.id}]` : e.type === "cancel_request" ? `[Done: cancel request sent, ref ${e.id}]` : "").filter(Boolean).join(" ");
   } catch (err) {
     console.error("sms agent failed", err);
-    await logEvent(c.slug, "sms_agent_failed", { from, error: String(err?.message || err).slice(0, 200) });
+    await logEvent(c, "sms_agent_failed", { from, error: String(err?.message || err).slice(0, 200) });
     reply = `Sorry, I had trouble with that. Please call ${c.phone?.businessNumber || "us"} and a person will help.`;
   }
-  const fresh = await getConversation(c.slug, "sms", from);
+  const fresh = await getConversation(c, "sms", from);
   fresh.messages.push({ role: "assistant", content: done ? reply + "\n" + done : reply, at: new Date().toISOString() });
   await saveConversation(fresh);
   if (!(await optedOut(from))) await sendSMS({ to: from, client: c, type: "reply", body: reply.slice(0, 1200) });
-  await logEvent(c.slug, "sms_reply", { from });
+  await logEvent(c, "sms_reply", { from });
   return new Response("ok");
 };

@@ -2,7 +2,7 @@
 // update the fields owners cannot touch (number, voice destination, status, plan, billing), delete a
 // client and everything under it, or the verification hooks the PM uses: prompt, tasks, records,
 // run_scheduler, digest, nudge_task.
-import { getClient, saveClient, indexClient, list, get, del, put, listJSON, logEvent } from "./lib/store.mjs";
+import { getClient, saveClient, indexClient, list, get, del, put, listJSON, logEvent, assertCurrentWorkspace, listWorkspaceRecords } from "./lib/store.mjs";
 import { json } from "./lib/agent.mjs";
 import { e164, notifyOwner, sendEmail, notifySteve } from "./lib/send.mjs";
 import { buildSystemPrompt, STATUSES } from "./lib/config.mjs";
@@ -13,6 +13,8 @@ import { run as runScheduler } from "./scheduler.mjs";
 import { releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { auditNeedsAttention } from "./lib/audit-policy.mjs";
 import { isSelfServiceClient } from "./lib/setup.mjs";
+
+import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
 
 export const config = { path: "/api/admin" };
 
@@ -29,7 +31,10 @@ export default async (req) => {
       const c = await getClient(sl); if (!c) continue;
       const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, selfService: isSelfServiceClient(c), owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${encodeURIComponent(c.slug)}`, policy: `${process.env.URL}/policy?c=${encodeURIComponent(c.slug)}` };
       if (full) {
-        const [events, alerts, leads, convs, usage] = await Promise.all([listJSON("events", c.slug + "/", 400), listJSON("alerts", c.slug + "/", 100), listJSON("leads", c.slug + "/", 200), listJSON("conversations", c.slug + "/", 100), getUsage(c.slug)]);
+        const prefix=isSelfServiceClient(c)?`${c.slug}/${workspaceTenant(c)}/`:c.slug+"/";
+        let [events, alertPage, leadPage, convs, usage] = await Promise.all([listJSON("events", prefix, 400), listWorkspaceRecords(c,"alerts",100), listWorkspaceRecords(c,"leads",200), listJSON("conversations", prefix, 100), getUsage(c)]);
+        let alerts=alertPage.records,leads=leadPage.records;row.recordListing={alerts:alertPage.listing,leads:leadPage.listing};
+        events=events.filter(row=>belongsToWorkspace(c,row));alerts=alerts.filter(row=>belongsToWorkspace(c,row));leads=leads.filter(row=>belongsToWorkspace(c,row));convs=convs.filter(row=>belongsToWorkspace(c,row));
         const h = lineHealth(c, events);
         row.health = h; row.usage = usageView(c, usage);
         row.waitingAlerts = alerts.filter((a) => a.status === "waiting").length;
@@ -51,7 +56,7 @@ export default async (req) => {
         let pushed = 0;
         for (const e of [...events].reverse()) { if (pushed >= 50) break; if (Date.now() - new Date(e.at).getTime() < 86400000) { stream.push({ slug: c.slug, name: c.business?.name, at: e.at, type: e.type }); pushed++; } }
       }
-      out.push(row);
+      await assertCurrentWorkspace(c);out.push(row);
     }
     stream.sort((a, b) => b.at.localeCompare(a.at));
     const brake = full ? (await get("health", "brake")) || { on: false } : undefined;
@@ -79,12 +84,13 @@ export default async (req) => {
   if (b.action === "tasks") {
     const keys = await list("tasks", "");
     const tasks = [];
-    for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug) tasks.push({ key: k, type: t.type, dueAt: t.dueAt, data: t.data, id: t.id }); }
+    for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug&&belongsToWorkspace(c,t)) tasks.push({ key: k, type: t.type, dueAt: t.dueAt, data: t.data, id: t.id }); }
+    await assertCurrentWorkspace(c);
     return json({ tasks });
   }
   if (b.action === "put_conversation") {
     const { getConversation, saveConversation } = await import("./lib/store.mjs");
-    const conv = await getConversation(c.slug, String(b.channel || "sms"), String(b.contact || "test"));
+    const conv = await getConversation(c, String(b.channel || "sms"), String(b.contact || "test"));
     conv.messages = (b.messages || []).map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: String(m.content || "").slice(0, 1500), at: m.at || new Date().toISOString() }));
     conv.autoFlag = null; await saveConversation(conv);
     return json({ ok: true, messages: conv.messages.length });
@@ -92,7 +98,7 @@ export default async (req) => {
   if (b.action === "autoflag") { const { autoFlagDay } = await import("./lib/desk.mjs"); const r = await autoFlagDay(c, !!b.debug); return json({ ok: true, ...(b.debug ? r : { flagged: r }) }); }
   if (b.action === "classifier_eval") { const { classifierEval } = await import("./lib/desk.mjs"); return json({ ok: true, results: await classifierEval(c, Array.isArray(b.models) && b.models.length ? b.models : undefined, Number(b.from) || 0, Number(b.to) || 50, Number(b.set) || 1) }); }
   if (b.action === "day7") { const { day7Draft } = await import("./lib/desk.mjs"); return json({ ok: true, draft: await day7Draft(c) }); }
-  if (b.action === "log_event") { const ev = await logEvent(c.slug, String(b.type || "note"), b.data || {}); return json({ ok: true, event: ev }); }
+  if (b.action === "log_event") { const ev = await logEvent(c, String(b.type || "note"), b.data || {}); return json({ ok: true, event: ev }); }
   if (b.action === "schedule_task") {
     const { scheduleTask } = await import("./lib/store.mjs");
     const t = await scheduleTask(c.slug, new Date(Date.now() - 60000), String(b.type || ""), b.data || {});
@@ -101,13 +107,13 @@ export default async (req) => {
   if (b.action === "cancel_task") {
     const keys = await list("tasks", ""); let n = 0;
     for (const k of keys) { const t = await get("tasks", k); if (t?.slug === c.slug && t.id === String(b.id || "")) { await del("tasks", k); n++; } }
-    if (n) await logEvent(c.slug, "task_cancelled", { id: String(b.id), by: "admin" });
+    if (n) await logEvent(c, "task_cancelled", { id: String(b.id), by: "admin" });
     return json({ ok: true, cancelled: n });
   }
   if (b.action === "reactivate") {
     if (c.status !== "cancelled") return json({ error: "not_cancelled" }, 400);
     c.status = "paused"; c.cancelledAt = null; c.serviceEndsAt = null; c.cancelReason = "";
-    await saveClient(c); await indexClient(c); await logEvent(c.slug, "reactivated", { by: "admin" });
+    await saveClient(c); await indexClient(c); await logEvent(c, "reactivated", { by: "admin" });
     return json({ ok: true, status: c.status, note: "Paused; the owner presses Resume on the portal (or admin resume) to go live again." });
   }
   if (b.action === "nudge_task") {
@@ -119,22 +125,31 @@ export default async (req) => {
   }
   if (b.action === "records") {
     const kind = ["bookings", "leads", "alerts", "conversations", "events", "usage", "customers"].includes(b.kind) ? b.kind : "events";
+    if (b.kind === "optouts" && isSelfServiceClient(c)) return json({ error: "managed_action_required", message: "Review this customer’s texting consent in the operator portal." }, 409);
     if (b.kind === "optouts") { const keys = await list("optouts", ""); const out = []; for (const k of keys) out.push({ key: k, phone: k, ...(await get("optouts", k)) }); return json({ records: out.filter((o) => !o.slug || o.slug === c.slug) }); }
-    return json({ records: await listJSON(kind, c.slug + "/", 500) });
+    let records, listing;
+    if (["bookings", "leads", "alerts", "customers"].includes(kind)) {
+      const page = await listWorkspaceRecords(c, kind, 500); records = page.records; listing = page.listing;
+    } else {
+      const prefix = isSelfServiceClient(c) ? `${c.slug}/${workspaceTenant(c)}/` : c.slug + "/";
+      records = (await listJSON(kind, prefix, 500)).filter(row => belongsToWorkspace(c,row));
+    }
+    await assertCurrentWorkspace(c);
+    return json({ records, ...(listing ? { listing } : {}) });
   }
   if (b.action === "monthly") {
     const mth = await monthlyReport(c, b.month);
-    if (b.send) { await sendEmail({ to: c.owner.email, subject: mth.subject, text: mth.text }); await notifySteve(`Statement: ${c.business.name} (${mth.month})`, `${mth.text}\n\n${mth.invoice}`); await logEvent(c.slug, "monthly", { month: mth.month, stats: mth.stats }); }
+    if (b.send) { await sendEmail({ to: c.owner.email, subject: mth.subject, text: mth.text }); await notifySteve(`Statement: ${c.business.name} (${mth.month})`, `${mth.text}\n\n${mth.invoice}`); await logEvent(c, "monthly", { month: mth.month, stats: mth.stats }); }
     return json({ ok: true, ...mth });
   }
   if (b.action === "weekly") {
     const w = await weeklyReport(c);
-    if (b.send) { await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text }); await logEvent(c.slug, "weekly", { empty: !!w.empty, stats: w.stats || null }); }
+    if (b.send) { await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text }); await logEvent(c, "weekly", { empty: !!w.empty, stats: w.stats || null }); }
     return json({ ok: true, ...w });
   }
   if (b.action === "digest") {
     const d = await dailyDigest(c);
-    if (b.send) { await notifyOwner(c, d.text, { type: "digest" }); await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email }); await logEvent(c.slug, "digest", { text: d.text }); }
+    if (b.send) { await notifyOwner(c, d.text, { type: "digest" }); await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email }); await logEvent(c, "digest", { text: d.text }); }
     return json({ ok: true, ...d });
   }
   if (b.action === "delete") {
@@ -162,8 +177,8 @@ export default async (req) => {
   if (b.action === "pause" || b.action === "resume") {
     const { detachVoice, attachVoice } = await import("./lib/vapi.mjs");
     const site = process.env.URL || new URL(req.url).origin;
-    if (b.action === "pause") { if (!["testing", "live"].includes(c.status)) return json({ error: "not_active" }, 400); c.pausedFrom = c.status; c.status = "paused"; c.pausedAt = new Date().toISOString(); await saveClient(c); await logEvent(c.slug, "paused", { by: "admin" }); try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
-    else { if (c.status !== "paused") return json({ error: "not_paused" }, 400); c.status = "live"; c.pausedAt = null; c.liveAt = c.liveAt || new Date().toISOString(); await saveClient(c); await logEvent(c.slug, "resumed", { by: "admin" }); try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
+    if (b.action === "pause") { if (!["testing", "live"].includes(c.status)) return json({ error: "not_active" }, 400); c.pausedFrom = c.status; c.status = "paused"; c.pausedAt = new Date().toISOString(); await saveClient(c); await logEvent(c, "paused", { by: "admin" }); try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
+    else { if (c.status !== "paused") return json({ error: "not_paused" }, 400); c.status = "live"; c.pausedAt = null; c.liveAt = c.liveAt || new Date().toISOString(); await saveClient(c); await logEvent(c, "resumed", { by: "admin" }); try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
     return json({ ok: true, status: c.status });
   }
   if (b.action === "clear_optout") { const n = e164(b.phone || ""); if (!n) return json({ error: "missing_phone" }, 400); await del("optouts", n); return json({ ok: true, cleared: n }); }
@@ -184,6 +199,6 @@ export default async (req) => {
   if (b.nextMonthNote !== undefined) c.nextMonthNote = String(b.nextMonthNote).slice(0, 300);
   if (b.liveAt !== undefined) c.liveAt = b.liveAt ? new Date(b.liveAt).toISOString() : null;
   await saveClient(c); await indexClient(c);
-  await logEvent(c.slug, "admin_update", { fields: Object.keys(b) });
+  await logEvent(c, "admin_update", { fields: Object.keys(b) });
   return json({ ok: true, client: { slug: c.slug, status: c.status, plan: c.plan, phone: c.phone, voice: c.voice, billing: c.billing } });
 };

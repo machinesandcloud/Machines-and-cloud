@@ -1,10 +1,11 @@
 // Owner visit changes are local transactions. Provider reconcilers receive saved source
 // records separately; neither a visit save nor a queue attempt is a delivery receipt.
 import { createHash } from 'node:crypto';
-import { list, atomicUpdate, reserveBookingWindow, finishStableBookingWindow, finishBookingWindow } from './store.mjs';
+import { list, atomicUpdate, reserveBookingWindow, finishStableBookingWindow, finishBookingWindow, capacityKey, indexWorkspaceRecord, addToIndex } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { configurationRevision, isSupportedSelfServiceClient } from './setup.mjs';
 import { e164 } from './send.mjs';
+import { belongsToWorkspace } from './workspace-identity.mjs';
 import { deliveryTenant } from './managed-consent.mjs';
 import { requestedDate, listedWindow, isElapsedWindow, canonicalWindow, AvailabilityInputError } from './availability.mjs';
 import { queueCalendarBooking } from './calendar-delivery.mjs';
@@ -34,18 +35,18 @@ function shape(body) {
   const allowed = ['action', 'visitId', 'expectedRevision', 'expectedVisitRevision', 'submissionId', ...(['create_visit','reschedule_visit'].includes(body.action) ? ['date', 'window'] : []), ...(body.action === 'create_visit' ? ['customer_name','phone','address','issue'] : [])];
   if (!['create_visit', 'reschedule_visit', 'cancel_visit'].includes(body.action) || JSON.stringify(body).length > 1800 || Object.keys(body).some(key => !allowed.includes(key)) || !/^[a-zA-Z0-9_-]{1,80}$/.test(body.visitId || '') || !/^[a-f0-9]{64}$/.test(body.expectedRevision || '') || body.action !== 'create_visit' && !/^[a-f0-9]{64}$/.test(body.expectedVisitRevision || '') || !/^[a-f0-9]{32,64}$/i.test(body.submissionId || '')) throw new OwnerVisitError('invalid_request', 'Refresh the visit and try again.', 400);
 }
-function owns(booking, client) { return booking?.slug === client.slug && booking.delivery?.tenantIdentity === deliveryTenant(client); }
+function owns(booking, client) { return booking?.slug === client.slug && booking.delivery?.tenantIdentity === deliveryTenant(client) && belongsToWorkspace(client, booking); }
 async function releaseLock(key, operationId) {
   await atomicUpdate(LOCKS, key, row => row?.operationId === operationId ? { value: { ...row, operationId: null, completedAt: stamp() } } : {});
 }
 async function operationChange(key, change) { return atomicUpdate(OPERATIONS, key, row => { if (['complete','rejected'].includes(row?.state)) return { result:row }; const value = change(row); return { value, result: value }; }); }
 async function finishAbort(client, operation, booking, key, lockKey) {
   if (!owns(booking, client) || booking.ownerVisitAbortFence !== operation.id || booking.ownerVisitMutation?.id === operation.id) throw new Error('Visit abort identity is uncertain');
-  const capacity = await strictRead('index', `capacity:${client.slug}`), token = capacity?.mutations?.[booking.id];
+  const capacity = await strictRead('index', capacityKey(client)), token = capacity?.mutations?.[booking.id];
   if (token === operation.id) {
     const claim = capacity.stableClaims?.[booking.id], creating = operation.input.action === 'create_visit';
     if (!claim || claim.token !== operation.id || claim.previous.length !== (creating ? 0 : 1)) throw new Error('Visit abort capacity is uncertain');
-    await finishBookingWindow(client.slug, booking.id, { ...claim, slot: claim.previous[0] || '', release: creating });
+    await finishBookingWindow(client, booking.id, { ...claim, slot: claim.previous[0] || '', release: creating });
   } else {
     const expected = operation.input.action === 'create_visit' ? [] : [`${operation.source.date}|${canonicalWindow(operation.source.window)}`];
     if (token || JSON.stringify(capacity?.reservations?.[booking.id] || []) !== JSON.stringify(expected)) throw new Error('Visit abort completion is uncertain');
@@ -132,6 +133,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
       const cancel = body.action === 'cancel_visit';
       const claim = await reserveBookingWindow(current, body.visitId, cancel ? booking.date : body.date, cancel ? booking.window : body.window, creating ? undefined : { date: operation.source.date, window: operation.source.window }, { requireExisting: cancel, mutationId: operationId });
       if (claim.full) throw new OwnerVisitError(claim.reason || 'window_full', claim.reason === 'blocked' ? 'That arrival window is blocked. Your original visit is unchanged.' : 'That arrival window is unavailable. Your original visit is unchanged.', 409, 'window');
+      await indexWorkspaceRecord('bookings', { id: body.visitId, slug: current.slug, delivery: { tenantIdentity: tenant } });
       booking = await atomicUpdate('bookings', `${client.slug}/${body.visitId}`, async saved => {
         current = await authority(client, session, body.expectedRevision, { checkRevision:false });
         if (!creating && !owns(saved, current) || creating && saved && !owns(saved, current)) throw new OwnerVisitError('visit_not_found', 'This visit is no longer available.', 404);
@@ -140,7 +142,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
         const latestOperation = await strictRead(OPERATIONS,key);
         if (latestOperation?.state === 'rejected') throw new OwnerVisitError(latestOperation.error.code,latestOperation.error.message,latestOperation.error.status,latestOperation.error.field);
         if (latestOperation?.state === 'complete') throw new Error('A concurrent retry already completed this visit');
-        const capacity = await strictRead('index', `capacity:${client.slug}`);
+        const capacity = await strictRead('index', capacityKey(client));
         if (capacity?.mutations?.[body.visitId] !== operationId) throw new Error('Visit capacity ownership could not be confirmed');
         if (creating ? !!saved : ownerVisitRevision(saved) !== body.expectedVisitRevision || !active(saved.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
         const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
@@ -151,12 +153,12 @@ export async function changeOwnerVisit(client, session, originalBody) {
     }
     // A thrown write may already have committed. Only this exact marker can recover it.
     if (!owns(booking, current) || booking.ownerVisitMutation?.id !== operationId) throw new Error('Visit outcome is uncertain');
-    const capacity = await strictRead('index', `capacity:${client.slug}`), token = capacity?.mutations?.[booking.id];
+    const capacity = await strictRead('index', capacityKey(client)), token = capacity?.mutations?.[booking.id];
     if (token === operationId) {
       const claim = capacity.stableClaims?.[booking.id];
       if (!claim || claim.token !== operationId) throw new Error('Visit capacity recovery is unavailable');
-      if (body.action === 'cancel_visit') await finishBookingWindow(client.slug, booking.id, { ...claim, release: true });
-      else await finishStableBookingWindow(client.slug, booking.id, operationId);
+      if (body.action === 'cancel_visit') await finishBookingWindow(client, booking.id, { ...claim, release: true });
+      else await finishStableBookingWindow(client, booking.id, operationId);
     } else {
       const slots = capacity?.reservations?.[booking.id] || [], expected = body.action === 'cancel_visit' ? [] : [`${booking.date}|${canonicalWindow(booking.window)}`];
       if (token || JSON.stringify(slots) !== JSON.stringify(expected)) throw new Error('Visit capacity outcome is uncertain');
@@ -166,10 +168,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
     if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw new OwnerVisitError(operation.error.code,operation.error.message,operation.error.status,operation.error.field); }
     // Queue writes are local-only and replay safely from the authoritative booking.
     try {
-      if (booking.phone) await atomicUpdate('index', `bookings:${current.slug}:${booking.phone}`, ids => {
-        const previous = Array.isArray(ids) ? ids : [];
-        return previous.includes(booking.id) ? {} : { value: [...previous, booking.id].slice(-100) };
-      });
+      if (booking.phone) await addToIndex('bookings', current, booking.phone, booking.id);
       const calendar = await queueCalendarBooking(current, booking);
       await queueManagedRecord(current, booking, 'bookings');
       operation = await operationChange(key, row => ({ ...row, state: 'complete', calendar: calendar || null, notifications: 'prepared', completedAt: stamp() }));
@@ -188,7 +187,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
     // Only reject/release before any capacity claim or booking commit. Ambiguous
     // persistence retains the immutable operation and claim for the same retry.
     if (error instanceof OwnerVisitError) {
-      const saved = await strictRead('bookings', `${client.slug}/${body.visitId}`), capacity = await strictRead('index', `capacity:${client.slug}`);
+      const saved = await strictRead('bookings', `${client.slug}/${body.visitId}`), capacity = await strictRead('index', capacityKey(client));
       if (saved?.ownerVisitMutation?.id !== operationId && capacity?.mutations?.[body.visitId] === operationId && (creating ? !saved : ownerVisitRevision(saved) === body.expectedVisitRevision)) {
         // Fence any delayed conditional booking write before restoring the source slot.
         // An unacknowledged write can arrive late; simply releasing capacity is unsafe.
@@ -200,7 +199,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
         });
         throw await finishAbort(current, operation, fenced, key, lockKey);
       }
-      const after = await strictRead('index', `capacity:${client.slug}`);
+      const after = await strictRead('index', capacityKey(client));
       if (saved?.ownerVisitMutation?.id !== operationId && after?.mutations?.[body.visitId] !== operationId) {
         await operationChange(key, row => ({ ...row, state: 'rejected', error: { code: error.code, message: error.message, status: error.status, field: error.field } }));
         await releaseLock(lockKey, operationId); throw error;

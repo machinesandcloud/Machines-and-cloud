@@ -1,0 +1,201 @@
+{
+  "at": "2026-10-23T04:36:50.241Z",
+  "checkout": "/tmp/mc-connection-journey-645",
+  "base": "645daeb1914f393b3c79b6b31a848a9b90685546",
+  "status": "Scoped local acceptance complete on v4 with an explicit exact-source bridge; hosted/provider activation remains separate.",
+  "summary": {
+    "passed": 67,
+    "failed": 0,
+    "groups": 67
+  },
+  "suites": [
+    {
+      "name": "Calendar, managed sample authority and forwarding",
+      "receipt": "scratchpad/connection-calendar-independent-accepted.json",
+      "receiptSha256": "b4adbce952e5ef86f9a3609a5df398413fd27c9ed448e60a6e4cb36c5b52890c",
+      "passed": 12,
+      "failed": 0,
+      "sourceStable": true,
+      "sourceMatchesCurrent": true
+    },
+    {
+      "name": "Actual owner API and scoped orchestration authority",
+      "receipt": "scratchpad/service-onboarding-qa-connections-scoped-first.json",
+      "receiptSha256": "187e033273e15f29c4a58a84f4bc843cd630f2d6c63eb40eeb15992c29471178",
+      "passed": 36,
+      "failed": 0,
+      "sourceStable": true,
+      "sourceMatchesCurrent": true
+    },
+    {
+      "name": "Actual owner handler/browser Connections journey",
+      "receipt": "scratchpad/connection-journey-independent-ui-final.json",
+      "receiptSha256": "175ea6521df3bdb9cd6ff99b83919af6e8fa093debd42d14e50bad5173767284",
+      "passed": 12,
+      "failed": 0,
+      "sourceStable": true,
+      "sourceMatchesCurrent": false,
+      "sourceBridge": "sourceBridge",
+      "bridgeOnly": [
+        "netlify/functions/lib/connection-journey.mjs"
+      ]
+    },
+    {
+      "name": "Targeted actual owner DTO/browser review for the final helper repair",
+      "receipt": "scratchpad/connection-journey-voice-review-independent-first.json",
+      "receiptSha256": "4a974b4ded66bfd6b67a4ba0c651f0138e26225f91a02ead91bccece03014f6f",
+      "passed": 7,
+      "failed": 0,
+      "sourceStable": true,
+      "sourceMatchesCurrent": true
+    }
+  ],
+  "sourceAssertions": {
+    "allExpectedSourcesMatch": true,
+    "allScopedReceiptsMatchCurrent": false,
+    "allScopedReceiptsMatchOrHaveTargetedBridge": true,
+    "manifests": [
+      "scratchpad/connection-root-source-freeze-v2.json",
+      "scratchpad/connection-onboarding-claim-final-freeze.json",
+      "scratchpad/connection-journey-owned-freeze-v4.json"
+    ],
+    "frozenFiles": {
+      "netlify/functions/lib/calendar-self-service.mjs": "483100f9badad837b160bb6488f69881aaf0fad7b669872cd24b01a4348d21fd",
+      "netlify/functions/lib/calendar-execution.mjs": "b69f5b2b127de92700ad78e5c3513c359c7dd5f78a8ac9fb833be6651d47174a",
+      "netlify/functions/lib/calendar-connection.mjs": "370cf8129ba0e90b60ab33819beeaceb3d61372c3649414aeb5e19b838f0cd58",
+      "netlify/functions/lib/calendar-delivery.mjs": "d130bfe4b1b2999d940430e2ea8bca99e995a3630c2517d7eeae8f55b43365e7",
+      "netlify/functions/lib/managed-delivery.mjs": "85aa018132ca71aadcb14cff0f1e672e96e6a12598a9205058dcbc5c5116ae00",
+      "netlify/functions/lib/desk.mjs": "cd1f12215ab41f81a88a6d30484499bfccf5561122e3f0be1fe81640bfe00b6c",
+      "netlify/functions/lib/forwarding.mjs": "b196c7c06b0a6501ad2e4f739ab9c920dd03709722b0ab7326bb92b76eb70f9e",
+      "desk.js": "3a185c41878e8151c5effe607c984fc27d1dc8bd19aee89dc759bd175c953fde",
+      "scripts/calendar-self-service-check.mjs": "63cfb906c72e19af93961795e649b1c2a2ca13f84516df6f63692cb99e1579b1",
+      "onboard.html": "1578d3c24ffba4f89149c86bdf49a2408706be47bf19fdb79295124b89d67392",
+      "onboard.js": "1e9b97d3a5ab8a5a693426a133e08bb4acaecf1ca7da7375bf9e84d33d726217",
+      "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+      "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+      "desk-connections.js": "142c621749c0bc1bc5f1e23f04bb145c3983502ff6e1c7c9c31f2c750332b989",
+      "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+      "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+      "scripts/connection-journey-check.mjs": "2a9442f5c7ce8cafb0f569c536892a3df1e7ad988b4928e54706cd4bf6c418f6",
+      "scripts/connection-journey-ui-check.mjs": "4b019b557d542fecc586918e343bfe689921ce030af7a20af50fbd579b5c0b60",
+      "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+      "netlify/functions/client.mjs": "0bbbc255d1eeac03c4e6286ebd857280d9a2b4132822d2168fd5a851378dc48d",
+      "scripts/service-onboarding-check.mjs": "8a0e871df4b1dffe959f33c7afc09791838a077adc230b9755ab24d98bf8a077",
+      "scripts/connection-admissions-check.mjs": "6817cfce25e749ee61a67394e54e4b171001d5858c9d1cad1c3ad9a5d40afcb6",
+      "scripts/connection-admissions-cas-check.mjs": "4ac673fa0aec3e1a86a4096f838d679e92f67d349b2f723e1ced74165fd3e086"
+    },
+    "independentPermanentQAScript": {
+      "path": "scripts/service-onboarding-qa-check.mjs",
+      "sha256": "90516fef8595722607e6ce40b340a82f00c905cf4ce852d3c37e2a04c9013a5a"
+    }
+  },
+  "coverage": [
+    "Four saved preferences do not activate or charge; actionable requested/retained-only status and one visible channel disclosure at a time.",
+    "Actual owner API and HTML submit the exact available service scope; deferred texting stays unsigned and contains no registration data until its separate approval; same-number reuse and replay are verified.",
+    "Calendar connects multiple ordinary workspaces and accepts new owned booking IDs; exact create/update/delete paths, owner OAuth/session/source/target bindings, conditional global/tenant daily limits and post-reservation gate/policy/day races are exercised.",
+    "Setup/practice samples cannot enqueue or retain Calendar/managed notification delivery authority; business-line and direct-number instructions reject unsafe destinations.",
+    "320/390/1440 real layouts, keyboard disclosures and approval, actual create-to-Connections handoff, exact website target focus, six automatic status-read cap with manual-read nonreset, modal/navigation/controlled-visibility pauses, unsaved draft retention and actual401/403 cleanup.",
+    "Final retained-phone reapproval and truthful web service/quota copy are accepted by seven fresh actual-handler/browser groups."
+  ],
+  "effects": {
+    "physicalNetwork": 0,
+    "liveProviderRequests": 0,
+    "liveModelRequests": 0,
+    "emails": 0,
+    "calls": 0,
+    "texts": 0,
+    "accountChanges": 0,
+    "productionEnvironmentChanges": 0,
+    "deployments": 0,
+    "syntheticGoogleProtocolRequests": 29,
+    "syntheticCalendarWorkerRequests": 2
+  },
+  "fixtureBoundaries": [
+    "Calendar tests use installed Blobs SDK with an in-process conditional-storage double and synthetic Google protocol; this is not live Google delivery proof.",
+    "Browser tests use actual owner handlers/memory storage and actual assets. Hidden-document pause uses a controlled visibilityState event; native modal/navigation interactions are genuine browser actions.",
+    "Synthetic model-available configuration is used only to expose an already reviewed approval path; all model transport remains denied."
+  ],
+  "retainedEvidence": {
+    "originalBaselines": [
+      "scratchpad/connection-journey-independent-baseline-confirmed.json",
+      "scratchpad/connection-forwarding-independent-baseline.json",
+      "scratchpad/connection-setup-sample-delivery-baseline.json"
+    ],
+    "earlierIndependentRuns": [
+      "scratchpad/connection-calendar-independent-first.json",
+      "scratchpad/connection-calendar-independent-confirmed.json",
+      "scratchpad/connection-calendar-independent-final.json",
+      "scratchpad/connection-journey-independent-ui-first.json",
+      "scratchpad/connection-journey-independent-ui-second.json",
+      "scratchpad/connection-journey-independent-ui-confirmed.json"
+    ],
+    "historicalQAContractFailure": "scratchpad/connection-onboarding-qa-regression-first.json",
+    "correctionClassification": [
+      "Historical all-selected expectations were updated for approved per-channel scope while common number/foreign identity/lifecycle/cancellation negatives remain; changed-body submission reuse explicitly rejects.",
+      "Calendar first-run failures used the wrong API response envelope/status and a memory-only fixture against SDK mode. A later single failure guessed the forwarding diagnostic flag name; observable no-instruction behavior already held.",
+      "UI first-run approval cases intentionally fake AI unavailable; fixture corrected to synthetic service availability with denied model transport. Second run used a global hidden legacy EIN selector and unopened management disclosure; selectors corrected without app edits."
+    ],
+    "finalHelperRootReturn": "scratchpad/connection-journey-voice-review-source-return.json",
+    "helperFixtureFirstFailure": "scratchpad/connection-journey-model-offline-web-baseline.json",
+    "helperFixtureFailureClassification": "Synthetic customer seed tried to mutate absent channels.web before any product API/DOM assertion; fixed fixture initializes the retained activation flag. Not a product-failure proof."
+  },
+  "rootPOVisualReview": {
+    "authority": "Root reports acceptance of five compact actual-layout images; v3 changes only status-strip selection scope.",
+    "images": [
+      "scratchpad/connection-journey-compact-confirmed-workspace-390.png",
+      "scratchpad/connection-journey-compact-confirmed-workspace-expanded-390.png",
+      "scratchpad/connection-journey-compact-confirmed-workspace-1440.png",
+      "scratchpad/connection-journey-compact-confirmed-workspace-expanded-1440.png",
+      "scratchpad/connection-journey-compact-confirmed-onboard-selected.png"
+    ],
+    "finalBridge": "v4 changes helper text/actions/status only; renderer/layout remains the v3 visual source. Targeted native action/form behavior is separately accepted."
+  },
+  "independentlyViewedFinalImages": [
+    "scratchpad/connection-journey-independent-ui-final-web-only.png",
+    "scratchpad/connection-journey-independent-ui-final-expanded-320.png",
+    "scratchpad/connection-journey-independent-ui-final-overview-1440.png"
+  ],
+  "screenshots": [
+    "scratchpad/connection-journey-independent-ui-final-overview-320.png",
+    "scratchpad/connection-journey-independent-ui-final-expanded-320.png",
+    "scratchpad/connection-journey-independent-ui-final-overview-390.png",
+    "scratchpad/connection-journey-independent-ui-final-expanded-390.png",
+    "scratchpad/connection-journey-independent-ui-final-overview-1440.png",
+    "scratchpad/connection-journey-independent-ui-final-expanded-1440.png",
+    "scratchpad/connection-journey-independent-ui-final-web-only.png",
+    "scratchpad/connection-journey-independent-ui-final-approved-voice.png",
+    "scratchpad/connection-journey-independent-ui-final-real-website-target.png",
+    "scratchpad/connection-journey-independent-ui-final-actual-created-handoff.png",
+    "scratchpad/connection-journey-independent-ui-final-selected-onboarding.png"
+  ],
+  "remaining": "The37-command combined gate is being reported separately. This acceptance does not authorize or prove hosted activation, real provider delivery or unfinished G7 follow-through.",
+  "priorPacket": {
+    "path": "scratchpad/connection-journey-independent-acceptance.json",
+    "sha256": "90a2cc0d107305732d514ab0582f033b0d2a8144802d480e06e7969d9d777d8d",
+    "status": "Retained60-group acceptance on v3; superseded only for the final helper source behavior covered below."
+  },
+  "sourceBridge": {
+    "runtimeFilesChanged": [
+      "netlify/functions/lib/connection-journey.mjs"
+    ],
+    "previousSha256": "2c7fa519ca43b61a079cc87967e3926a84c895b2f053be064f47a2b5192c9fb3",
+    "currentSha256": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "priorBytes": "scratchpad/connection-journey-helper-v3-retained.mjs",
+    "priorBytesExactHashConfirmed": true,
+    "diff": "scratchpad/connection-journey-helper-v3-v4-final.diff",
+    "diffSha256": "3bfd98fac1713a9042d2270e7c8b3132143749a17fef6d6c4b04c8203ec48eb8",
+    "otherChangesAreTestOnly": [
+      "scripts/connection-journey-check.mjs",
+      "scripts/connection-journey-ui-check.mjs"
+    ],
+    "reason": "The final helper adds explicit existing-phone reapproval for retained reviewable states, honest failed/uncertain labels, preserves current live-test proof during AI downtime, and puts a known web model blocker ahead of a retained activation flag. No handler, authorization, storage, Calendar, coordinator or UI asset changed.",
+    "focusedCoverage": [
+      "needs_review/suspended/waiting_platform exact owner projection and genuine keyboard-opened permission forms",
+      "Actual existing-child voice reapproval updates its revision/generation, without a number request or new shared setup approval",
+      "failed/uncertain retained connections show attention/reconciliation instead of automatic-progress claims",
+      "Current live proof permits safe voice terms review while model-unavailable website chat remains waiting with an actionable installation path",
+      "An actual exhausted50-turn local allowance makes webAvailable false; saved activation is called switched on, not currently answering"
+    ],
+    "unrelatedCasesNotRepeated": "Prior Calendar12 and coordinator36 sources match byte-for-byte. Prior UI12 fixtures have no retained voice child in these review states; their model-offline onboarding fixture lacks a current live-test proof and still uses the same prerequisite. Existing browser assets are unchanged. Targeted7 actual-handler/DOM groups cover every new behavior, and the combined37-command gate is separate."
+  }
+}

@@ -1,7 +1,7 @@
-import { createHash } from "node:crypto";
 import { atomicUpdate } from "./store.mjs";
-import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
-export const deliveryTenant = c => createHash("sha256").update(JSON.stringify([c.slug, c.ownerKey, normalizeAccountEmail(c.owner?.email)])).digest("hex");
+import { strictRead } from "./accounts.mjs";
+import { workspaceTenant } from './workspace-identity.mjs';
+export const deliveryTenant = workspaceTenant;
 const key = (c, phone) => `${c.slug}/${deliveryTenant(c)}/${phone}`;
 const validPhone = phone => typeof phone === "string" && /^\+1[2-9]\d{9}$/.test(phone);
 const STOP = /^(STOP|STOPALL|UNSUBSCRIBE|CANCEL|END|QUIT|ALTO|PARAR)$/i;

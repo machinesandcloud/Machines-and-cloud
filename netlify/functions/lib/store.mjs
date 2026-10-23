@@ -4,6 +4,7 @@ import { getStore } from "@netlify/blobs";
 import { randomBytes } from "node:crypto";
 import { normalizeDate } from "./calendar.mjs";
 import { canonicalWindow, listedWindows, listedWindow, requestedDate, addDays, isoDateValid, isElapsedWindow, AvailabilityInputError } from "./availability.mjs";
+import { workspaceTenant, supportedWorkspace, belongsToWorkspace, WorkspaceIdentityError } from './workspace-identity.mjs';
 export { canonicalWindow } from "./availability.mjs";
 
 // Opened per call, never cached at module level: a warm function instance that outlives the Blobs
@@ -95,32 +96,104 @@ export async function indexClient(client) {
   if (client.phone?.twilioNumber) await put("index", "number:" + client.phone.twilioNumber, client.slug);
 }
 
-// ---- Conversations: one per client+channel+contact ----
-export const convKey = (slug, channel, contact) => `${slug}/${channel}/${contact}`;
-export async function getConversation(slug, channel, contact) {
-  return (await get("conversations", convKey(slug, channel, contact))) || { slug, channel, contact, messages: [], createdAt: now() };
+export async function assertCurrentWorkspace(client) {
+  if (!client || !Object.hasOwn(client, 'onboarding')) return client;
+  if (!supportedWorkspace(client)) throw new WorkspaceIdentityError();
+  const current = await atomicUpdate('clients', client.slug, row => ({ result: row }));
+  if (!supportedWorkspace(current) || workspaceTenant(current) !== workspaceTenant(client)) throw new WorkspaceIdentityError();
+  return current;
+}
+// ---- Conversations: supported workspaces never adopt the old slug-only namespace. ----
+export const convKey = (target, channel, contact) => typeof target === 'string' ? `${target}/${channel}/${contact}` : supportedWorkspace(target) ? `${target.slug}/${workspaceTenant(target)}/${channel}/${contact}` : `${target.slug}/${channel}/${contact}`;
+export async function getConversation(target, channel, contact) {
+  const client = typeof target === 'string' ? null : target, slug = client ? client.slug : target;
+  if (client) await assertCurrentWorkspace(client);
+  const scoped = supportedWorkspace(client), path = convKey(target, channel, contact);
+  const previous = scoped ? await atomicUpdate('conversations', path, row => ({ result: row })) : await get('conversations', path);
+  if (previous && scoped && (!belongsToWorkspace(client, previous) || previous.slug !== slug || previous.channel !== channel || previous.contact !== contact)) throw new WorkspaceIdentityError();
+  return previous || { slug, channel, contact, messages: [], createdAt: now(), ...(scoped ? { tenantIdentity: workspaceTenant(client) } : {}) };
 }
 export async function saveConversation(conv) {
+  if (conv.tenantIdentity !== undefined) {
+    const current = await atomicUpdate('clients', conv.slug, row => ({ result: row }));
+    if (!supportedWorkspace(current) || workspaceTenant(current) !== conv.tenantIdentity || !belongsToWorkspace(current, conv)) throw new WorkspaceIdentityError();
+  }
   conv.updatedAt = now();
   conv.messages = conv.messages.slice(-40);
-  return put("conversations", convKey(conv.slug, conv.channel, conv.contact), conv);
+  const path = conv.tenantIdentity === undefined ? convKey(conv.slug, conv.channel, conv.contact) : `${conv.slug}/${conv.tenantIdentity}/${conv.channel}/${conv.contact}`;
+  return put("conversations", path, conv);
 }
 
 // ---- Leads, bookings, tasks, events ----
+const RECORD_INDEX_LIMIT = 2000;
+const recordIndexKey = (slug, tenant, kind) => `${slug}/${tenant}/${kind}`;
+function explicitRecordTenant(record) {
+  const values = [record?.tenantIdentity, record?.delivery?.tenantIdentity].filter(value => value !== undefined);
+  return values.length && values.every(value => /^[a-f0-9]{64}$/.test(value) && value === values[0]) ? values[0] : null;
+}
+// Reserve the locator before the primary record write; an orphan is visible as incomplete,
+// while an accepted new record can never be hidden behind a different incarnation's old keys.
+export async function indexWorkspaceRecord(kind, record) {
+  const tenant = explicitRecordTenant(record);
+  if (!tenant || typeof record.slug !== 'string' || typeof record.id !== 'string' || !record.id || !['bookings', 'leads', 'alerts', 'customers'].includes(kind)) return;
+  await atomicUpdate('workspace_record_index', recordIndexKey(record.slug, tenant, kind), previous => {
+    if (previous?.ids?.includes(record.id)) return {};
+    const ids = [...(previous?.ids || []), record.id];
+    return { value: { version: 1, tenantIdentity: tenant, kind, legacyScanned: previous?.legacyScanned || false, scanLimit: previous?.scanLimit || 0, incomplete: previous?.incomplete ?? true, retentionIncomplete: !!previous?.retentionIncomplete || ids.length > RECORD_INDEX_LIMIT, ids: ids.slice(-RECORD_INDEX_LIMIT) } };
+  });
+}
+async function boundedRecordKeys(kind, prefix, limit) {
+  if (process.env.MC_MEMORY_STORE === '1') {
+    const keys = (await store(kind).list({ prefix: safe(prefix) })).blobs.map(row => unsafe(row.key)).sort();
+    return { keys: keys.slice(0, limit), incomplete: keys.length > limit };
+  }
+  // The installed SDK's default list collects all pages. Explicit pagination bounds metadata
+  // to at most two requests, and strong record reads to the requested limit.
+  const iterator = store(kind).list({ prefix: safe(prefix), paginate: true })[Symbol.asyncIterator]();
+  const first = await iterator.next();
+  if (first.done) return { keys: [], incomplete: false };
+  const firstKeys = first.value.blobs.map(row => unsafe(row.key)).sort();
+  const next = await iterator.next();
+  return { keys: firstKeys.slice(0, limit), incomplete: firstKeys.length > limit || !next.done };
+}
+export async function listWorkspaceRecords(client, kind, limit = 100) {
+  if (Object.hasOwn(client || {}, 'onboarding') && !supportedWorkspace(client)) throw new WorkspaceIdentityError();
+  if (!supportedWorkspace(client)) return { records: await listRecords(kind, client.slug, limit), listing: { source: 'legacy', limit, incomplete: false } };
+  if (!Number.isInteger(limit) || limit < 1 || limit > RECORD_INDEX_LIMIT || !['bookings', 'leads', 'alerts', 'customers'].includes(kind)) throw new Error('Invalid workspace record listing');
+  await assertCurrentWorkspace(client);
+  const indexKey = recordIndexKey(client.slug, workspaceTenant(client), kind);
+  let locator = await atomicUpdate('workspace_record_index', indexKey, row => ({ result: row }));
+  if (!locator?.legacyScanned || locator.incomplete && (locator.scanLimit || 0) < limit) {
+    const scan = await boundedRecordKeys(kind, client.slug + '/', limit);
+    const old = (await Promise.all(scan.keys.map(path => atomicUpdate(kind, path, row => ({ result: row }))))).filter(row => row && typeof row.id === 'string' && belongsToWorkspace(client, row));
+    locator = await atomicUpdate('workspace_record_index', indexKey, previous => {
+      const ids = [...new Set([...old.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt))).map(row => row.id), ...(previous?.ids || [])])];
+      const value = { version: 1, tenantIdentity: workspaceTenant(client), kind, legacyScanned: true, scanLimit: limit, incomplete: scan.incomplete, retentionIncomplete: !!previous?.retentionIncomplete || ids.length > RECORD_INDEX_LIMIT, ids: ids.slice(-RECORD_INDEX_LIMIT) };
+      return { value, result: value };
+    });
+  }
+  const ids = locator.ids.slice(-limit).reverse();
+  const records = (await Promise.all(ids.map(recId => atomicUpdate(kind, `${client.slug}/${recId}`, row => ({ result: row }))))).filter(row => row && typeof row.id === 'string' && belongsToWorkspace(client, row));
+  await assertCurrentWorkspace(client);
+  return { records, listing: { source: 'tenant_index', limit, incomplete: !!locator.incomplete || !!locator.retentionIncomplete || locator.ids.length > limit || records.length !== ids.length } };
+}
 export async function addRecord(kind, slug, data) {
   const rec = { id: id(5), slug, createdAt: now(), ...data };
+  await indexWorkspaceRecord(kind, rec);
   await put(kind, `${slug}/${rec.id}`, rec);
   return rec;
 }
 export async function createRecordOnce(kind, slug, data) {
+  await indexWorkspaceRecord(kind, { slug, ...data });
   return atomicUpdate(kind, `${slug}/${data.id}`, current => {
     if (current) return { result: current };
     const rec = { slug, createdAt: now(), ...data };
     return { value: rec, result: rec };
   });
 }
-export async function finishStableBookingWindow(slug, bookingId, mutationId) {
-  return atomicUpdate("index", capacityKey(slug), state => {
+export async function finishStableBookingWindow(target, bookingId, mutationId) {
+  return atomicUpdate("index", capacityKey(target), state => {
+    validateCapacity(target, state);
     const claim = state?.stableClaims?.[bookingId];
     if (!claim) return { result: false };
     if (claim.token !== mutationId || state.mutations?.[bookingId] !== mutationId) throw new Error("Booking recovery identity mismatch");
@@ -132,38 +205,73 @@ export async function finishStableBookingWindow(slug, bookingId, mutationId) {
 }
 export const getRecord = (kind, slug, recId) => get(kind, `${slug}/${recId}`);
 export async function saveRecord(kind, rec, { capacityClaim } = {}) {
-  if (kind !== "bookings") return put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
-  const owned = !!capacityClaim;
+  await indexWorkspaceRecord(kind, rec);
+  if (kind !== 'bookings') return put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
+  const current = await getClient(rec.slug);
+  const tenant = explicitRecordTenant(rec);
+  // A stale tagged booking must never reserve or release the replacement's capacity.
+  if (tenant && (!supportedWorkspace(current) || !belongsToWorkspace(current, rec))) throw new WorkspaceIdentityError();
+  if (supportedWorkspace(current) && !tenant) throw new WorkspaceIdentityError();
+  const target = current || { slug: rec.slug }, owned = !!capacityClaim;
+  await assertCurrentWorkspace(target);
   const claim = capacityClaim || (ACTIVE_BOOKINGS.has(rec.status)
-    ? await reserveBookingWindow((await getClient(rec.slug)) || { slug: rec.slug }, rec.id, rec.date, rec.window, undefined, { requireExisting: true })
-    : await lockBookingWindow(rec.slug, rec.id));
-  if (claim.full) throw new Error("Booking window is full; reload it and retry");
-  // An internal reschedule keeps ownership until both record and reservation are committed.
-  await atomicUpdate("index", capacityKey(rec.slug), (state) => {
-    if (state?.mutations?.[rec.id] !== claim.token) throw new Error("Booking mutation ownership lost");
+    ? await reserveBookingWindow(target, rec.id, rec.date, rec.window, undefined, { requireExisting: true })
+    : await lockBookingWindow(target, rec.id));
+  if (claim.full) throw new Error('Booking window is full; reload it and retry');
+  if (claim.tenantIdentity && claim.tenantIdentity !== tenant) throw new WorkspaceIdentityError();
+  await atomicUpdate('index', capacityKey(target), state => {
+    if (state?.mutations?.[rec.id] !== claim.token) throw new Error('Booking mutation ownership lost');
     return {};
   });
-  // Any write exception keeps the token and claims. SDK retries can commit an earlier attempt
-  // even when the final response is a 4xx, so the exception is never proof that rollback is safe.
+  await assertCurrentWorkspace(target);
   const saved = await put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
-  if (!owned) await finishBookingWindow(rec.slug, rec.id, claim);
+  if (!owned) await finishBookingWindow(target, rec.id, claim);
   return saved;
 }
 export const listRecords = (kind, slug, limit) => listJSON(kind, slug + "/", limit);
 
 const ACTIVE_BOOKINGS = new Set(["booked", "confirmed", "on_the_way"]);
 const bookingSlot = (date, window) => date && window ? `${normalizeDate(date)}|${canonicalWindow(window)}` : "";
-const capacityKey = (slug) => `capacity:${slug}`;
+export const capacityKey = target => typeof target === 'string' ? `capacity:${target}` : supportedWorkspace(target) ? `capacity:${target.slug}:${workspaceTenant(target)}` : `capacity:${target.slug}`;
+function validateCapacity(target, state) {
+  if (state && supportedWorkspace(target) && state.tenantIdentity !== workspaceTenant(target)) throw new WorkspaceIdentityError();
+  return state;
+}
 const capacityLimit = (c) => Math.max(1, Number(c.rules?.windowCapacity) || 1);
-async function initialCapacity(slug) {
-  const reservations = {};
-  // This is a one-time migration. Read every key, with strong reads that propagate errors; booking
-  // ids sort randomly, so a truncated history can exclude a current reservation.
-  for (const key of await list("bookings", slug + "/")) {
-    const b = await store("bookings").get(safe(key), { type: "json", consistency: "strong" });
-    if (b && ACTIVE_BOOKINGS.has(b.status)) { const slot = bookingSlot(b.date, b.window); if (slot) reservations[b.id] = [slot]; }
+async function initialCapacity(target) {
+  const client = typeof target === 'string' ? null : target, slug = client ? client.slug : target;
+  const reservations = {}, mutations = {}, stableClaims = {};
+  let bookings;
+  if (supportedWorkspace(client)) {
+    const found = await listWorkspaceRecords(client, 'bookings', RECORD_INDEX_LIMIT);
+    if (found.listing.incomplete) throw new Error('Booking history needs review before availability can be confirmed');
+    bookings = found.records;
+    const old = await atomicUpdate('index', `capacity:${slug}`, row => ({ result: row }));
+    const byId = new Map(bookings.map(booking => [booking.id, booking]));
+    if (Object.keys(old?.mutations || {}).length > RECORD_INDEX_LIMIT) throw new Error('Unconfirmed booking capacity needs review before availability can be confirmed');
+    for (const [bookingId, token] of Object.entries(old?.mutations || {})) {
+      const booking = byId.get(bookingId) || await atomicUpdate('bookings', `${slug}/${bookingId}`, row => ({ result: row }));
+      if (!booking) throw new Error('Unconfirmed booking capacity needs review before availability can be confirmed');
+      if (!belongsToWorkspace(client, booking)) continue;
+      mutations[bookingId] = token;
+      if (old.stableClaims?.[bookingId]) stableClaims[bookingId] = old.stableClaims[bookingId];
+    }
+    for (const booking of bookings) {
+      const held = old?.reservations?.[booking.id];
+      if (Array.isArray(held) && held.every(slot => typeof slot === 'string')) reservations[booking.id] = [...held];
+    }
+  } else {
+    // Keep the legacy migration unchanged. Supported workspaces have a bounded, explicit
+    // tenant record index and never adopt the old slug capacity or its unbound blocks.
+    bookings = await Promise.all((await list('bookings', slug + '/')).map(key => store('bookings').get(safe(key), { type: 'json', consistency: 'strong' })));
   }
-  return { version: 1, reservations, mutations: {}, blocks: [] };
+  for (const booking of bookings) {
+    if (booking && ACTIVE_BOOKINGS.has(booking.status)) {
+      const slot = bookingSlot(booking.date, booking.window);
+      if (slot && !reservations[booking.id]) reservations[booking.id] = [slot];
+    }
+  }
+  return { version: 1, reservations, mutations, ...(Object.keys(stableClaims).length ? { stableClaims } : {}), blocks: [], ...(supportedWorkspace(client) ? { tenantIdentity: workspaceTenant(client) } : {}) };
 }
 const blockedWindow = (state, date, window) => (state.blocks || []).some((b) => b.date === date && (!b.windowKey || b.windowKey === canonicalWindow(window)));
 const reservedCount = (state, slot) => Object.values(state.reservations).filter((slots) => slots.includes(slot)).length;
@@ -180,26 +288,29 @@ function openingsFromState(c, state, date, days) {
   }) };
 }
 export async function getAvailability(c, date, days) {
+  await assertCurrentWorkspace(c);
   const from = requestedDate(date);
   if (!Number.isInteger(days) || days < 1 || days > 14) throw new AvailabilityInputError("invalid_days", "Check from 1 to 14 consecutive dates.");
   if (!isoDateValid(addDays(from, days - 1))) throw new AvailabilityInputError("invalid_days", "The entire checked range must use real YYYY-MM-DD dates.");
-  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
-    const state = current || await initialCapacity(c.slug);
+  return atomicUpdate("index", capacityKey(c), async (current) => {
+    const state = validateCapacity(c, current) || await initialCapacity(c);
     return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days) };
   });
 }
 export async function getAvailabilityBlocks(c) {
-  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
-    const state = current || await initialCapacity(c.slug);
+  await assertCurrentWorkspace(c);
+  return atomicUpdate("index", capacityKey(c), async (current) => {
+    const state = validateCapacity(c, current) || await initialCapacity(c);
     return { ...(!current ? { value: state } : {}), result: blockViews(state) };
   });
 }
 export async function setAvailabilityBlock(c, date, window = "", blocked = true) {
+  await assertCurrentWorkspace(c);
   const day = requestedDate(date, { isoOnly: true, allowPast: !blocked });
   if (typeof window !== "string") throw new AvailabilityInputError("invalid_window", "Choose a listed window or the whole date.");
   const wholeDay = window === "";
-  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
-    const state = current || await initialCapacity(c.slug);
+  return atomicUpdate("index", capacityKey(c), async (current) => {
+    const state = validateCapacity(c, current) || await initialCapacity(c);
     const blocks = state.blocks || [];
     const key = wholeDay ? "" : canonicalWindow(window);
     const existing = blocks.find((b) => b.date === day && b.windowKey === key);
@@ -218,15 +329,17 @@ export async function setAvailabilityBlock(c, date, window = "", blocked = true)
   });
 }
 export async function bookingWindowTaken(c, date, window) {
+  await assertCurrentWorkspace(c);
   const slot = bookingSlot(date, window), capacity = capacityLimit(c);
   if (!slot) return { full: false, count: 0, capacity };
-  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
-    const state = current || await initialCapacity(c.slug);
+  return atomicUpdate("index", capacityKey(c), async (current) => {
+    const state = validateCapacity(c, current) || await initialCapacity(c);
     const count = reservedCount(state, slot), blocked = blockedWindow(state, normalizeDate(date), window);
     return { ...(!current ? { value: state } : {}), result: { full: blocked || count >= capacity, count, capacity, ...(blocked ? { blocked: true } : {}) } };
   });
 }
 export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false, mutationId = null } = {}) {
+  await assertCurrentWorkspace(c);
   if (mutationId !== null && !/^[a-f0-9]{64}$/.test(mutationId)) throw new Error("Invalid booking mutation identity");
   let targetDate = date, targetWindow = window;
   if (!requireExisting) {
@@ -236,8 +349,8 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     if (!targetWindow) return { full: true, reason: "invalid_window", message: "Nothing was booked. That is not a listed arrival window. Check availability for a listed window." };
   }
   const slot = bookingSlot(targetDate, targetWindow), capacity = capacityLimit(c), token = mutationId || id(12);
-  return atomicUpdate("index", capacityKey(c.slug), async (current) => {
-    const state = current || await initialCapacity(c.slug);
+  return atomicUpdate("index", capacityKey(c), async (current) => {
+    const state = validateCapacity(c, current) || await initialCapacity(c);
     state.mutations ||= {};
     if (state.mutations[bookingId]) {
       const prior = state.stableClaims?.[bookingId];
@@ -259,13 +372,15 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     const next = slot && !previous.includes(slot) ? [...previous, slot] : previous;
     if (next.length) state.reservations[bookingId] = next;
     state.mutations[bookingId] = token;
-    const claim = { token, slot, previous, next, date: targetDate, window: targetWindow };
+    const claim = { token, slot, previous, next, date: targetDate, window: targetWindow, ...(supportedWorkspace(c) ? { tenantIdentity: workspaceTenant(c) } : {}) };
     if (mutationId) { state.stableClaims ||= {}; state.stableClaims[bookingId] = claim; }
     return { value: state, result: claim };
   });
 }
-export async function finishBookingWindow(slug, bookingId, claim) {
-  await atomicUpdate("index", capacityKey(slug), (state) => {
+export async function finishBookingWindow(target, bookingId, claim) {
+  if (claim.tenantIdentity && (!supportedWorkspace(target) || claim.tenantIdentity !== workspaceTenant(target))) throw new WorkspaceIdentityError();
+  await atomicUpdate("index", capacityKey(target), (state) => {
+    validateCapacity(target, state);
     if (state?.mutations?.[bookingId] !== claim.token || JSON.stringify(state.reservations[bookingId] || []) !== JSON.stringify(claim.next)) throw new Error("Booking reservation changed before completion");
     const slots = claim.release || !claim.slot ? [] : [claim.slot];
     if (slots.length) state.reservations[bookingId] = slots; else delete state.reservations[bookingId];
@@ -274,39 +389,54 @@ export async function finishBookingWindow(slug, bookingId, claim) {
     return { value: state };
   });
 }
-async function lockBookingWindow(slug, bookingId) {
+async function lockBookingWindow(target, bookingId) {
+  if (typeof target !== 'string') await assertCurrentWorkspace(target);
   const token = id(12);
-  return atomicUpdate("index", capacityKey(slug), async (current) => {
-    const state = current || await initialCapacity(slug);
+  return atomicUpdate("index", capacityKey(target), async (current) => {
+    const state = validateCapacity(target, current) || await initialCapacity(target);
     state.mutations ||= {};
     if (state.mutations[bookingId]) throw new Error("Booking is being updated; reload it and retry");
     const previous = state.reservations[bookingId] || [];
     state.mutations[bookingId] = token;
-    return { value: state, result: { token, release: true, previous, next: previous } };
+    return { value: state, result: { token, release: true, previous, next: previous, ...(supportedWorkspace(target) ? { tenantIdentity: workspaceTenant(target) } : {}) } };
   });
 }
 
 // Per-phone index: "bookings:<slug>:<phone>" and "leads:<slug>:<phone>" hold the record ids for that number,
 // so the hot paths (every inbound text, every call) read a handful of records instead of listing the history.
-export async function addToIndex(kind, slug, phone, recId) {
+export const phoneIndexKey = (kind, target, phone) => typeof target === 'string' ? `${kind}:${target}:${phone}` : supportedWorkspace(target) ? `${kind}:${target.slug}:${workspaceTenant(target)}:${phone}` : `${kind}:${target.slug}:${phone}`;
+export async function addToIndex(kind, target, phone, recId) {
   if (!phone) return;
-  const k = `${kind}:${slug}:${phone}`;
-  const ids = (await get("index", k)) || [];
-  if (!ids.includes(recId)) { ids.push(recId); await put("index", k, ids.slice(-100)); }
+  await atomicUpdate('index', phoneIndexKey(kind, target, phone), previous => {
+    const ids = Array.isArray(previous) ? previous : [];
+    return ids.includes(recId) ? {} : { value: [...ids, recId].slice(-100) };
+  });
 }
-export async function recordsFor(kind, slug, phone) {
+export async function recordsFor(kind, target, phone) {
   if (!phone) return [];
-  const ids = (await get("index", `${kind}:${slug}:${phone}`)) || [];
-  const recs = await Promise.all(ids.map((id) => getRecord(kind, slug, id)));
-  return recs.filter(Boolean);
+  const scoped = supportedWorkspace(target), slug = typeof target === 'string' ? target : target.slug;
+  if (scoped) await assertCurrentWorkspace(target);
+  const key = phoneIndexKey(kind, target, phone);
+  const ids = (scoped ? await atomicUpdate('index', key, row => ({ result: row })) : await get('index', key)) || [];
+  let records = (await Promise.all(ids.map(recId => scoped ? atomicUpdate(kind, `${slug}/${recId}`, row => ({ result: row })) : getRecord(kind, slug, recId)))).filter(row => row && (!scoped || belongsToWorkspace(target, row)));
+  // Recover proven current pre-index records without consulting a foreign phone index.
+  if (scoped && !ids.length) records = (await listWorkspaceRecords(target, kind, 100)).records.filter(row => row.phone === phone);
+  if (scoped) await assertCurrentWorkspace(target);
+  return records;
 }
-// The latest customer contact per shop, written by the webhooks, read by the health alerts.
-export async function noteInbound(slug, kind = "text") {
-  const cur = (await get("health", "lastInbound:" + slug)) || {};
-  const at = now(); cur.at = at; cur[kind === "call" ? "call" : "text"] = at;
-  await put("health", "lastInbound:" + slug, cur);
+const inboundKey = target => typeof target === 'string' ? 'lastInbound:' + target : supportedWorkspace(target) ? `lastInbound:${target.slug}:${workspaceTenant(target)}` : 'lastInbound:' + target.slug;
+export async function noteInbound(target, kind = 'text') {
+  const scoped = supportedWorkspace(target);
+  await atomicUpdate('health', inboundKey(target), previous => {
+    if (scoped && previous && !belongsToWorkspace(target, previous)) throw new WorkspaceIdentityError();
+    const at = now(), value = { ...(previous || {}), at, [kind === 'call' ? 'call' : 'text']: at, ...(scoped ? { slug: target.slug, tenantIdentity: workspaceTenant(target) } : {}) };
+    return { value };
+  });
 }
-export const lastInbound = async (slug) => (await get("health", "lastInbound:" + slug)) || null;
+export async function lastInbound(target) {
+  const row = await get('health', inboundKey(target));
+  return supportedWorkspace(target) && row && !belongsToWorkspace(target, row) ? null : row;
+}
 
 // Tasks are keyed by due time so the scheduler can list what is due.
 export async function scheduleTask(slug, dueAt, type, data) {
@@ -338,8 +468,11 @@ export async function cancelTasksForNumber(e164Number) {
   }
   return n;
 }
-export async function logEvent(slug, type, data = {}) {
-  const rec = { id: id(4), slug, type, data, at: now() };
-  await put("events", `${slug}/${rec.at}_${rec.id}`, rec);
+export async function logEvent(target, type, data = {}) {
+  const client = typeof target === 'string' ? null : target, slug = client ? client.slug : target;
+  if (client && Object.hasOwn(client, 'onboarding') && !supportedWorkspace(client)) throw new WorkspaceIdentityError();
+  const tenantIdentity = supportedWorkspace(client) ? workspaceTenant(client) : null;
+  const rec = { id: id(4), slug, type, data, at: now(), ...(tenantIdentity ? { tenantIdentity } : {}) };
+  await put("events", `${slug}/${tenantIdentity ? tenantIdentity + '/' : ''}${rec.at}_${rec.id}`, rec);
   return rec;
 }

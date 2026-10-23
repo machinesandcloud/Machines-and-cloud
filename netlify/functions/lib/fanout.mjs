@@ -29,21 +29,21 @@ export async function fanout(kind) {
         if (text) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "digest", body: d.text });
         if (!d.empty) await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
         if ((c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) || d.steveNote) await notifySteve(`Digest: ${c.business.name}`, d.email + (d.steveNote || ""));
-        await logEvent(c.slug, "digest", { text: d.text, empty: !!d.empty, texted: !!text, emailed: !d.empty });
+        await logEvent(c, "digest", { text: d.text, empty: !!d.empty, texted: !!text, emailed: !d.empty });
       } else if (kind === "autoflag") {
         await autoFlagDay(c);
       } else if (kind === "weekly") {
         const w = await weeklyReport(c);
         await sendEmail({ to: c.owner.email, subject: w.subject, text: w.text });
         if (c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 28 * D) await notifySteve(`Weekly: ${c.business.name}`, w.text);
-        await logEvent(c.slug, "weekly", { empty: !!w.empty, stats: w.stats || null });
+        await logEvent(c, "weekly", { empty: !!w.empty, stats: w.stats || null });
       } else if (kind === "monthly") {
         const monthEnd = hou(); monthEnd.setDate(1); monthEnd.setHours(0, 0, 0, 0);
         if (c.liveAt && hou(new Date(c.liveAt)).getTime() > monthEnd.getTime() - D) continue;
         const mth = await monthlyReport(c);
         await sendEmail({ to: c.owner.email, subject: mth.subject, text: mth.text });
         await notifySteve(`Statement: ${c.business.name} (${mth.month})`, `${mth.text}\n\n${mth.invoice}`);
-        await logEvent(c.slug, "monthly", { month: mth.month, stats: mth.stats });
+        await logEvent(c, "monthly", { month: mth.month, stats: mth.stats });
       }
       result.done++;
     } catch (err) { console.error("fanout", kind, c.slug, err); result.errors.push({ slug: c.slug, error: String(err?.message || err).slice(0, 200) }); }

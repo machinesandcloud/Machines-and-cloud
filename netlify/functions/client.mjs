@@ -2,7 +2,7 @@
 // records, health, and forwarding instructions. PUT with the key updates the editable config (loop-checked).
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
-import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock, atomicUpdate } from "./lib/store.mjs";
+import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock, atomicUpdate, assertCurrentWorkspace, listWorkspaceRecords } from "./lib/store.mjs";
 import { getAIAllowance } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
@@ -34,12 +34,15 @@ import { dispatchServiceOnboarding } from "./lib/service-onboarding-dispatch.mjs
 
 import { changeOwnerVisit, ownerVisitView, pendingOwnerVisitChange, pendingOwnerVisitCreations, OwnerVisitError } from "./lib/owner-visits.mjs";
 import { parseWorkspacePatch, applyWorkspacePatch, workspacePatchConflicts, workspaceEditRevision, WorkspaceEditError } from "./lib/workspace-edit.mjs";
+import { websiteInstallationView, startWebsiteCheck, WebsiteInstallationError } from "./lib/website-installation.mjs";
+
+import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
 
 export const config = { path: "/api/client" };
 
 const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", Vary: "Origin" } : {});
 const s = (v, n = 300) => (typeof v === "string" ? v.trim().slice(0, n) : "");
-const visibleOwnerBooking = (client, booking) => !booking.ownerVisitCreationAborted && (!isSelfServiceClient(client) || booking.delivery?.tenantIdentity === deliveryTenant(client));
+const visibleOwnerBooking = (client, booking) => !booking.ownerVisitCreationAborted && belongsToWorkspace(client, booking);
 const arr = (v, n = 40) => (Array.isArray(v) ? v : String(v || "").split(/[\n;]+/)).map((x) => s(x, 160)).filter(Boolean).slice(0, n);
 
 async function updateWorkspace(c, body, ownsCurrent) {
@@ -71,7 +74,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
 
 export default async (req) => {
   let out;
-  try { out = await handle(req); } catch { out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req); } catch(error) { if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -112,9 +115,12 @@ async function handle(req) {
     let availabilityBlocks;
     try { availabilityBlocks = await getAvailabilityBlocks(c); }
     catch { return json({ error: "availability_unavailable", message: "The visit schedule could not be read. Try again before changing availability." }, 503); }
-    const [bookings, leads, convs, events, alerts, usage] = await Promise.all([
-      listRecords("bookings", c.slug, 100), listRecords("leads", c.slug, 100), listJSON("conversations", c.slug + "/", 60), listJSON("events", c.slug + "/", 300), listRecords("alerts", c.slug, 100), getUsage(c.slug),
+    const historyPrefix=selfService?`${c.slug}/${workspaceTenant(c)}/`:c.slug+"/";
+    let [bookingPage, leadPage, convs, events, alertPage, usage] = await Promise.all([
+      listWorkspaceRecords(c,"bookings",100), listWorkspaceRecords(c,"leads",100), listJSON("conversations", historyPrefix, 60), listJSON("events", historyPrefix, 300), listWorkspaceRecords(c,"alerts",100), getUsage(c),
     ]);
+    let bookings=bookingPage.records,leads=leadPage.records,alerts=alertPage.records;
+    bookings=bookings.filter(row=>belongsToWorkspace(c,row));leads=leads.filter(row=>belongsToWorkspace(c,row));convs=convs.filter(row=>belongsToWorkspace(c,row));events=events.filter(row=>belongsToWorkspace(c,row));alerts=alerts.filter(row=>belongsToWorkspace(c,row));
     const ownerBookings = selfService ? await Promise.all(bookings.filter(booking => visibleOwnerBooking(c, booking)).map(async booking => ({ ...booking, ownerVisit: ownerVisitView(booking), pendingVisitChange: await pendingOwnerVisitChange(c, booking.id) }))) : bookings;
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     const connections=selfService?await serviceConnections(c):null;
@@ -122,18 +128,20 @@ async function handle(req) {
       const sms=await managedSMSConversations(c,{limit:60});
       for(const conversation of sms){const old=convs.find(row=>row.channel==="sms"&&row.contact===conversation.contact);if(old)Object.assign(old,conversation);else convs.push(conversation);}
     }
-    return json({
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, serviceOnboarding: await serviceOnboardingStatus(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+    const serviceOnboarding=selfService?await serviceOnboardingStatus(c):null;
+    const ownerResponse={
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding), connections, serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation: await websiteInstallationView(c, aiAllowance), pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
-      health: lineHealth(c, events, await lastInbound(c.slug)),
-      availabilityBlocks,
+      health: lineHealth(c, events, await lastInbound(c)),
+      availabilityBlocks,recordListing:{bookings:bookingPage.listing,leads:leadPage.listing,alerts:alertPage.listing},
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
       forwarding: forwardingInstructions(c),
       policy: policyUrls(c.slug, site), dataPolicy: DATA_POLICY, ackMinutesOptions: ACK_MINUTES,
       site,
-    });
+    };
+    await assertCurrentWorkspace(c);return json(ownerResponse);
   }
   if (!isOwner) return json({ error: "forbidden" }, 403);
 
@@ -178,7 +186,7 @@ async function handle(req) {
     const loop = loopCheck(c);
     if (loop) { Object.assign(c, JSON.parse(before)); return json({ error: "loop", ...loop }, 400); }
     await saveClient(c); await indexClient(c);
-    await logEvent(c.slug, "config_updated", {});
+    await logEvent(c, "config_updated", {});
     const priorVoice = JSON.stringify(c.voice);
     try { await updateVoicePrompt(c); if (JSON.stringify(c.voice) !== priorVoice) await saveClient(c); } catch (e) { console.error("voice prompt update", e); }
     try { const { syncVoiceFallback } = await import("./lib/twilio.mjs"); await syncVoiceFallback(c); } catch (e) { console.error("voice fallback sync", e); }
@@ -187,6 +195,12 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if (b?.action === 'start_website_check') {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: 'forbidden' }, 403);
+      if (JSON.stringify(b).length > 1200) return json({ error: 'invalid_request' }, 400);
+      try { return json(await startWebsiteCheck(c, session, b), 200, { 'Cache-Control': 'no-store' }); }
+      catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message, ...(error.field ? { field: error.field } : {}) }, error.status, { 'Cache-Control': 'no-store' }); throw error; }
+    }
     if (["create_visit", "reschedule_visit", "cancel_visit"].includes(b?.action)) {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
       try { return json(await changeOwnerVisit(c, session, b), 200, { "Cache-Control": "no-store" }); }
@@ -196,7 +210,7 @@ async function handle(req) {
       }
     }
     const serviceActions = {
-      request_service_onboarding: ["expectedRevision", "submissionId", "offerDigest", "acceptedCosts", "authority", "forwardingMode", "legal", "attestLegalAccuracy", "attestConsent", "testPhoneConsent"],
+      request_service_onboarding: ["expectedRevision", "submissionId", "offerDigest", "acceptedChannels", "acceptedCosts", "authority", "forwardingMode", "legal", "attestLegalAccuracy", "attestConsent", "testPhoneConsent"],
       cancel_service_onboarding: ["expectedRevision", "operationId"],
       start_calendar_connection: ["expectedRevision"], complete_calendar_connection: ["state", "code", "error"], disconnect_calendar: [],
       request_voice_activation: ["expectedRevision", "acceptedAuthority", "policyVersion", "policyDigest", "forwardingMode"],
@@ -221,7 +235,7 @@ async function handle(req) {
           });
           if(!updated)return json({error:"not_ready",message:"Review and test your current saved rules before resuming."},409);
           try{await dispatchVoiceActivationWave();}catch{/* Scheduled recovery resumes accepted phone work. */}
-          try{await dispatchCalendarDeliveryWave();}catch{/* Scheduled recovery resumes saved calendar work. */}
+          try{await dispatchCalendarDeliveryWave(c);}catch{/* Scheduled recovery resumes saved calendar work. */}
           return json({ok:true,client:ownerView(updated),connections:await serviceConnections(updated)},202,{"Cache-Control":"no-store"});
         }
         if (b.action === "request_service_onboarding" || b.action === "cancel_service_onboarding") {
@@ -240,7 +254,7 @@ async function handle(req) {
         else result = await cancelMessagingActivation(c, b.operationId, body);
         if (["request_messaging_activation", "correct_messaging_activation", "cancel_messaging_activation"].includes(b.action)) try { await dispatchServiceWorker("service-activation-background",{slug:c.slug,tenant:deliveryTenant(c)}); } catch { /* Scheduled recovery still owns the saved intent. */ }
         if (["request_voice_activation", "cancel_voice_activation"].includes(b.action)) try { await dispatchVoiceActivationWave(); } catch { /* The next scheduled wave recovers the saved intent. */ }
-        if (b.action === "complete_calendar_connection") try { await dispatchCalendarDeliveryWave(); } catch { /* Saved future visits are discovered by scheduled recovery. */ }
+        if (b.action === "complete_calendar_connection") try { await dispatchCalendarDeliveryWave(c); } catch { /* Saved future visits are discovered by scheduled recovery. */ }
         return json({ ok: true, result, connections: await serviceConnections(c) }, 202, { "Cache-Control": "no-store" });
       } catch (error) {
         return json({ error: typeof error.code === "string" ? error.code : "service_setup_unavailable", message: error instanceof CalendarError || error instanceof ServiceOnboardingError || /ActivationError$/.test(error.constructor?.name || "") ? error.message : "Your service change could not be confirmed. Refresh its status before retrying." }, Number.isInteger(error.status) ? error.status : 503, { "Cache-Control": "no-store" });
@@ -262,7 +276,7 @@ async function handle(req) {
       try {
         const options = { actor: { role: "owner", email: session.email }, reason: b.reason, expectedRevision: b.expectedRevision };
         const operation = b.action === "rebuild_workspace" ? await queueWorkspaceRebuild(c, options) : await retryWorkspaceOperation(c, b.operationId, options);
-        return json({ ok: true, operation, operations: await listWorkspaceOperations(c.slug) }, 202, { "Cache-Control": "no-store" });
+        return json({ ok: true, operation, operations: await listWorkspaceOperations(c) }, 202, { "Cache-Control": "no-store" });
       } catch (error) {
         if (error instanceof WorkspaceOperationError) return json({ error: error.code, message: error.message }, error.status);
         throw error;
@@ -317,7 +331,7 @@ async function handle(req) {
       const wasPaused = c.status === "paused";
       c.status = wasPaused ? (c.pausedFrom === "live" ? "live" : "live") : "live";
       c.liveAt = c.liveAt || new Date().toISOString(); c.pausedAt = null;
-      await saveClient(c); await logEvent(c.slug, wasPaused ? "resumed" : "live", {});
+      await saveClient(c); await logEvent(c, wasPaused ? "resumed" : "live", {});
       if (wasPaused) { try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error("attach voice", e); } }
       else {
         const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket, and each one names the single reply it needs (ok, called, otw, or done). A 6 pm summary comes on any day it handled something, and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
@@ -342,7 +356,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
     if (b.action === "pause") {
       if (!["testing", "live"].includes(c.status)) return json({ error: "not_active" }, 400);
       c.pausedFrom = c.status; c.status = "paused"; c.pausedAt = new Date().toISOString();
-      await saveClient(c); await logEvent(c.slug, "paused", {});
+      await saveClient(c); await logEvent(c, "paused", {});
       try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error("detach voice", e); }
       const off = fw.off?.length ? `To stop forwarding entirely, dial ${fw.off.join(" or ")} from your cell.` : "To stop forwarding entirely, turn it off in your carrier app.";
       const text = `${name}: your front desk is paused. Calls to ${c.phone.twilioNumber || "the front desk number"} ring your cell; texts get one reply pointing to your main line. ${off} Resume from your portal any time.`;
@@ -352,7 +366,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
     }
     if (b.action === "cancel") {
       c.status = "cancelled"; c.cancelledAt = new Date().toISOString(); c.serviceEndsAt = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(); c.cancelReason = s(b.reason, 300);
-      await saveClient(c); await logEvent(c.slug, "cancelled", { reason: c.cancelReason });
+      await saveClient(c); await logEvent(c, "cancelled", { reason: c.cancelReason });
       await cancelTasks(c.slug, () => true);
       try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error("detach voice", e); }
       const last = c.cancelledAt.slice(0, 10), ends = c.serviceEndsAt.slice(0, 10);
@@ -368,14 +382,14 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
     }
     if (b.action === "flag" || b.action === "unflag") {
       const channel = s(b.channel, 10), contact = s(b.contact, 60);
-      const conv = await getConversation(c.slug, channel, contact);
+      const conv = await getConversation(c, channel, contact);
       if (!conv.messages.length) return json({ error: "no_conversation" }, 404);
       if (b.action === "flag") {
         conv.flag = { at: new Date().toISOString(), note: s(b.note, 300), by: "owner" };
-        await saveConversation(conv); await logEvent(c.slug, "flagged", { channel, contact });
+        await saveConversation(conv); await logEvent(c, "flagged", { channel, contact });
         const tail = conv.messages.slice(-6).map((m) => `${m.role === "user" ? "Customer" : "Desk"}: ${m.content}`).join("\n");
         if (!isSelfServiceClient(c)) await notifySteve(`Flagged by ${name}: ${channel} ${contact}`, `${conv.flag.note || "(no note)"}\n\n${tail}\n\n${site}/desk?c=${c.slug}&k=${c.ownerKey}#convs`);
-      } else { conv.flag = null; await saveConversation(conv); await logEvent(c.slug, "unflagged", { channel, contact }); }
+      } else { conv.flag = null; await saveConversation(conv); await logEvent(c, "unflagged", { channel, contact }); }
       return json({ ok: true, flag: conv.flag });
     }
     if (b.action === "digest") { const d = await dailyDigest(c); return json({ ok: true, text: d.text, email: d.email }); }
@@ -413,35 +427,40 @@ function todayStrip(c, bookings, leads, events) {
   return {
     calls: events.filter((e) => ["missed_call", "call_ended"].includes(e.type) && day(e.at) === today).length,
     texts: events.filter((e) => e.type === "sms_inbound" && day(e.at) === today).length,
-    bookings: bookings.filter((b) => day(b.createdAt) === today).length,
-    needsYou: leads.filter((l) => l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome)).length,
+    bookings: bookings.filter((b) => !b.websiteSetupCheck && day(b.createdAt) === today).length,
+    needsYou: leads.filter((l) => !l.websiteSetupCheck && l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome)).length,
   };
 }
 
 // ---- CSV export (RFC 4180, UTF-8 BOM, attachment) ----
 const csvCell = (v) => { const t = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v); return /[",\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
 const csv = (header, rows) => "\uFEFF" + [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
+async function recordsForExport(c,kind,limit){
+  const page=await listWorkspaceRecords(c,kind,limit);
+  if(isSelfServiceClient(c)&&page.listing.incomplete)throw Object.assign(new Error('A complete history export is not available yet. Some saved records need reconciliation; contact support before exporting.'),{code:'history_incomplete'});
+  return page.records;
+}
 async function exportCSV(c, what) {
   const today = new Date().toISOString().slice(0, 10);
   let header, rows;
   if (what === "bookings") {
-    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "date", "window", "urgency", "status", "outcome", "customerType", "channel", "notes", "unsure", "consent.at", "consent.channel"];
-    rows = (await listRecords("bookings", c.slug, 2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel]);
+    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "date", "window", "urgency", "status", "outcome", "customerType", "channel", "notes", "unsure", "consent.at", "consent.channel", "setup_check"];
+    rows = (await recordsForExport(c,"bookings",2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel, b.websiteSetupCheck ? 'Website setup check' : '']);
   } else if (what === "leads") {
-    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure"];
-    rows = (await listRecords("leads", c.slug, 2000)).map((l) => [l.id, l.createdAt, l.customer_name, l.phone, l.address, l.issue, l.reason, l.outcome, l.urgency, l.wanted, l.status, l.channel, l.unsure]);
+    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure", "setup_check"];
+    rows = (await recordsForExport(c,"leads",2000)).filter(row=>belongsToWorkspace(c,row)).map((l) => [l.id, l.createdAt, l.customer_name, l.phone, l.address, l.issue, l.reason, l.outcome, l.urgency, l.wanted, l.status, l.channel, l.unsure, l.websiteSetupCheck ? 'Website setup check' : '']);
   } else if (what === "conversations") {
     header = ["channel", "contact", "at", "role", "content", "flag_note", "processing"];
     rows = [];
-    const conversations=await listJSON("conversations", c.slug + "/", 2000),sms=isSelfServiceClient(c)?await managedSMSConversations(c,{limit:100}):[];
+    const conversations=(await listJSON("conversations", isSelfServiceClient(c)?`${c.slug}/${workspaceTenant(c)}/`:c.slug+"/", 2000)).filter(row=>belongsToWorkspace(c,row)),sms=isSelfServiceClient(c)?await managedSMSConversations(c,{limit:100}):[];
     for(const v of conversations.filter(v=>!sms.some(managed=>v.channel==="sms"&&managed.contact===v.contact)).concat(sms))for(const m of v.messages || [])rows.push([v.channel,v.contact,m.at,m.role,m.content,v.flag?.note || "",m.processing || ""]);
   } else if (what === "customers") {
     // Jobber's supported import headers; Housecall Pro's wizard maps the same names.
     header = ["First name", "Last name", "Mobile Phone", "Email", "Street", "City", "State", "Zip Code", "Note", "Lead Source", "Tags"];
     const byPhone = new Map();
-    const all = [...(await listRecords("bookings", c.slug, 2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => ({ ...b, kind: "booking" })), ...(await listRecords("leads", c.slug, 2000)).filter((l) => l.status !== "spam").map((l) => ({ ...l, kind: "lead" }))].sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+    const all = [...(await recordsForExport(c,"bookings",2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => ({ ...b, kind: "booking" })), ...(await recordsForExport(c,"leads",2000)).filter((l) => belongsToWorkspace(c,l)&&l.status !== "spam").map((l) => ({ ...l, kind: "lead" }))].sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
     for (const r of all) {
-      if (!r.phone) continue;
+      if (!r.phone || r.websiteSetupCheck) continue;
       const cur = byPhone.get(r.phone) || { name: "", address: "", issues: [], refs: [] };
       if (r.customer_name) cur.name = r.customer_name;
       if (r.address && (r.kind === "booking" || !cur.address)) cur.address = r.address;
@@ -455,5 +474,6 @@ async function exportCSV(c, what) {
       return [first, last, phone, "", a.street, a.city, a.state, a.zip, `${x.issues.slice(-1)[0] || ""}${x.refs.length ? " (refs " + x.refs.join(", ") + ")" : ""}`, "Other", "front desk"];
     });
   } else return json({ error: "unknown_export" }, 400);
+  await assertCurrentWorkspace(c);
   return new Response(csv(header, rows), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${c.slug}-${what}-${today}.csv"`, "Cache-Control": "no-store" } });
 }

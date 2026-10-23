@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-23T01:50:06.293Z",
+  "receipt": "scratchpad/tenant-isolation-required-final.json",
+  "receiptHash": "9e240158b9aac4f98384963d5350fad10d033bc97ef00d84633d3c2ec1c9d8af",
+  "logCount": 33,
+  "allLogsIntact": true,
+  "freshProcessPerCommand": "Runner spawns process.execPath separately for each of all33 steps; no shared handler process or shell chain.",
+  "exitGuardLedger": {
+    "rows": 31,
+    "missingCommands": [
+      "node scripts/service-onboarding-check.mjs",
+      "node scripts/service-onboarding-qa-check.mjs"
+    ],
+    "reason": "Both service-onboarding harnesses explicitly delete all MC_* environment variables, including the diagnostic ledger path. This removes their optional exit-log destination, while the preloaded socket/TLS/DNS guards and their own network-denial fixtures remain active. Their full logs are retained."
+  },
+  "exactCommandEquality": true,
+  "sourceStable": true,
+  "historicalArtifactsRestored": true,
+  "appEdits": false,
+  "externalActions": false
+}

@@ -31,7 +31,7 @@ globalThis.fetch = async (value) => {
   throw new Error("Unexpected provider request intercepted");
 };
 const { newClient } = await import("../netlify/functions/lib/config.mjs");
-const { saveClient, put, get, list, listRecords } = await import("../netlify/functions/lib/store.mjs");
+const { saveClient, put, get, list, listRecords, capacityKey } = await import("../netlify/functions/lib/store.mjs");
 const { bookVisit, rescheduleVisit, flagLead, openAlert, runEscalation, runCallbackCheck, callbackPromise } = await import("../netlify/functions/lib/desk.mjs");
 const c = newClient({ slug: "qa-web-record-only", ownerKey: "private-key", owner: { name: "QA Owner", email: "qa@example.invalid", phone: "+17135550140", backupPhone: "+17135550141" }, business: { name: "QA Air", trade: "HVAC", serviceArea: ["Katy"], hours: "Mon-Fri 8am-5pm" } });
 c.status = "live"; c.onboarding = { version: 1, verifiedEmail: c.owner.email };
@@ -50,7 +50,7 @@ check(() => assert.equal(b.calendarEventId, undefined));
 check(() => assert.equal(outbound.length, 0));
 const tasksAfterBooking = await list("tasks", "");
 check(() => assert.equal(tasksAfterBooking.length, 0));
-const capacity = await get("index", `capacity:${c.slug}`);
+const capacity = await get("index", capacityKey(c));
 check(() => assert.equal(capacity.reservations[b.id].length, 1));
 check(() => assert.deepEqual(capacity.mutations, {}));
 b.calendarEventId = "existing-remote-event"; // Even stale remote IDs must not enable Calendar writes.

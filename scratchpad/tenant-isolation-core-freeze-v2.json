@@ -1,0 +1,74 @@
+{
+  "scope": "Tenant replacement isolation core; synthetic local acceptance only",
+  "base": "6dabff563408e5a17a5136f088d4fa2084f4af3c",
+  "files": {
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/managed-consent.mjs": "29c986b3916f89502d72dd570958a402ee6a2d25b7e68959afcfd705d99fdab1",
+    "netlify/functions/chat.mjs": "611e1db67a6e2c93c03a8a2ec22e1152e135f8391a12d122bf78dbe8c6c4b2fd",
+    "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+    "netlify/functions/lib/owner-visits.mjs": "ada7081684795a186f49bd19cb52417f6371c9c0ec658b315a27faefd7d71b7e",
+    "netlify/functions/lib/self-service-ai.mjs": "9a1a7fb085f76125a665bd6bd06b1e58a62525193f761008975094ddeacc9114",
+    "netlify/functions/lib/website-installation.mjs": "f61d568fc6ed0bc0f33329f235c427098ea802da810617cb4fee447b3204bdde",
+    "netlify/functions/lib/calendar-delivery.mjs": "9ba4f14b9b5c6a4fb1eb861e7844a042393e8968f23c795648dca5eb773f8712",
+    "netlify/functions/lib/managed-delivery.mjs": "13bf12e126befd0cd34d1a798400f965fc0a48a66599f5078d37b872e983b210",
+    "scripts/tenant-isolation-check.mjs": "0b9de55725b0dcf258533d4ece4fc0e1fde7736b691ff9f2613dd8264053c5db",
+    "scripts/owner-test-check.mjs": "63b5ff9b8befb882518149b74a9b2442f7a87ec21743097e608f04ef10b828d2",
+    "scripts/owner-visits-check.mjs": "74d591be908406b540e092c9d84053f6ce863ebada38674055f65acab2d198c9",
+    "scripts/managed-delivery-qa-check.mjs": "a92c78fcd6646ee89b957064e73b3f5aace21ada9f426d606a6d29ea91e7fdf4",
+    "scripts/self-service-delivery-check.mjs": "d678cac716bce46692eb97977acc5d58a0a979e4937e878f1ddee60b9aac462a"
+  },
+  "checks": {
+    "core": {
+      "ok": true,
+      "checks": 19
+    },
+    "private-rehearsal": {
+      "ok": true,
+      "checks": 44,
+      "outboundRequests": 0
+    },
+    "owner-visits": {
+      "passed": 27,
+      "failed": 0,
+      "physicalExternalRequests": 0
+    },
+    "capacity": {
+      "result": "CAPACITY OK: memory (concurrency, aliases, history, capacity, moves, lifecycle)\nCAPACITY OK: blobs (concurrency, aliases, history, capacity, moves, lifecycle, failures and independent instances)"
+    },
+    "ai-budget": {
+      "ok": true,
+      "checks": 43
+    },
+    "website-installation": {
+      "ok": true,
+      "passed": 17
+    },
+    "calendar-delivery": {
+      "passed": 27,
+      "failed": 0
+    },
+    "managed-delivery": {
+      "passed": 18,
+      "failed": 0,
+      "physicalExternalRequests": 0
+    },
+    "managed-sms": {
+      "ok": true,
+      "passed": 17
+    },
+    "self-service-delivery": {
+      "ok": true,
+      "checks": 36
+    }
+  },
+  "physicalNetworkRequests": 0,
+  "limitations": [
+    "Old records without consistent explicit identity remain retained but excluded. No automatic adoption.",
+    "Bounded migration checks at most2000 raw primary records. Additional history stays incomplete; new indexed requests remain visible, while full exports/reports and capacity reconstruction refuse false completeness.",
+    "An unbound unfinished capacity mutation without a primary record requires review.",
+    "Pre-upgrade unbound AI rows remain under the global budget and conservatively reduce same-slug private/web availability until daily reset; current used counts exclude them."
+  ],
+  "supersedes": "scratchpad/tenant-isolation-core-freeze.json",
+  "refinement": "Original delivery-marker prerequisites retained alongside all-marker agreement; top-only records are not newly authorized for delivery, owner visits or installation evidence."
+}

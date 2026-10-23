@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-23T01:52:27.581Z",
+  "scope": "Next-slice availability expiry baseline; no application changes",
+  "before": {
+    "desk.js": "9c99c2378884397decb74ed930ed804aa21cfe8e0690f3c827020b82ca2a5ed0",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/client",
+      "action": null,
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/client",
+      "action": "availability_block",
+      "status": 401
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "findings": [
+    {
+      "confirmed": true,
+      "name": "Expired session on availability action retains private portal and bearer",
+      "observed": {
+        "state": "ready",
+        "portalHidden": false,
+        "privateDomRetained": true,
+        "tokenRetained": true,
+        "message": "Could not save availability. Refresh and try again."
+      },
+      "expected": "Canonical session-expired cleanup removes bearer and private DOM; no availability mutation"
+    }
+  ],
+  "after": {
+    "desk.js": "9c99c2378884397decb74ed930ed804aa21cfe8e0690f3c827020b82ca2a5ed0",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca"
+  },
+  "sourceStable": true,
+  "physicalNetwork": 0,
+  "modelRequests": 0
+}

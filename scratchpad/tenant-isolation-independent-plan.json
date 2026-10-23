@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-23T01:29:23.981Z",
+  "status": "Prepared; runtime evolving, no final acceptance run",
+  "base": "6dabff563408e5a17a5136f088d4fa2084f4af3c",
+  "baseline": {
+    "path": "scratchpad/tenant-isolation-original-four-leaks.json",
+    "sha": "11f15ab03d61857123b55230a706de5a2d737452551ac684ece3ab68934cee50"
+  },
+  "harnesses": [
+    {
+      "path": "scratchpad/tenant-isolation-independent-api.mjs",
+      "sha": "082215d84070cd48e47fd2d42ccdce7e1a428f4cf2d759541a222f6e3ea1607e"
+    },
+    {
+      "path": "scratchpad/tenant-isolation-independent-browser.mjs",
+      "sha": "1f03fc680aaeec7a38fedca3d62995bf24a3c0f0768a4a5d2e65953804a4cc33"
+    },
+    {
+      "path": "scratchpad/tenant-isolation-independent-fixture.mjs",
+      "sha": "b7573b964aa5388a5e1412edcfece54b46dad35c21d74490ba1fa99b8957cf78"
+    }
+  ],
+  "apiCases": [
+    "Four original leaks are closed: new owner sees no prior lead/transcript/event and model receives no prior transcript",
+    "Current tenant real lead/conversation/event producers remain visible to owner and operator",
+    "Untagged, foreign and conflicting provenance never auto-adopt; exact top/delivery/both markers remain visible",
+    "Owner and admin projections plus all four CSV exports exclude prior/unknown records while preserving current rows",
+    "Conversation prompts are scoped by captured tenant, channel and visitor contact, with current context preserved",
+    "Private rehearsal does not adopt prior owner history, preserves current preview context and never creates real records",
+    "OwnerKey-only and email-only replacements isolate context; changed email denies previous owner authority",
+    "Managed SMS authoritative history retains current provenance and excludes old incarnation and raw impostors",
+    "Legacy owner/admin/export and same-contact conversation behavior remain available without retroactive tags",
+    "Captured origin events retain the old identity after replacement and never attribute through current slug lookup",
+    "Replacement before a model tool returns fails closed and cannot create a new-tenant lead or conversation",
+    "Replacement after actual old lead persistence does not reattribute origin event/history or leak it into new owner",
+    "Owner GET that races incarnation replacement fails closed rather than returning a stale private snapshot",
+    "Customer classification and new booking do not treat prior completed booking as current or close prior leads",
+    "Unknown onboarding versions fail closed and never receive legacy untagged records or model calls",
+    "Private rehearsal completing after email-only replacement cannot certify or persist history for the new incarnation",
+    "Arrival-window capacity and availability do not inherit a prior incarnation reservation",
+    "Daily/monthly reports do not count or disclose prior/untagged requests and conversation activity"
+  ],
+  "browserCases": [
+    "320/390/1440px actual owner portal shows only current requests/transcripts and keeps keyboard navigation usable",
+    "Private practice pending state visibly disables Send, suppresses repeated Enter and preserves newer typing",
+    "Operator customer detail uses actual tenant-filtered records with no prior private transcript or lead",
+    "A prior-owner portal clears private content/token after real foreign-owner refresh instead of reviving it"
+  ],
+  "boundary": "Local actual handlers and actual browser DOM, SDK/Blobs protocol fixtures; physical/model/provider requests denied; no application edits"
+}

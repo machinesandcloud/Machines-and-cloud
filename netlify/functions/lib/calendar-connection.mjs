@@ -54,7 +54,7 @@ export async function startCalendarConnection(client, session) {
   const epoch = await atomicUpdate("calendar_connections", client.slug, row => { const base = row?.tenantIdentity === calendarTenantIdentity(client) ? row : { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), status: "not_connected" }; const next = { ...base, grantEpoch: (base.grantEpoch || 0) + 1, updatedAt: createdAt }; return { value: next, result: next.grantEpoch }; });
   await atomicUpdate("calendar_oauth", hash(state), row => {
     if (row) throw new Error("Calendar state collision");
-    return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, email: session.email, sessionHash: session.sessionHash, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
+    return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, executionPolicyDigest:calendarExecutionPolicy().digest, email: session.email, sessionHash: session.sessionHash, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
   });
   const params = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID, redirect_uri: `${accessSite()}/api/google/callback`, response_type: "code", scope: "https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly", access_type: "offline", prompt: "consent", state, code_challenge: createHash("sha256").update(verifier).digest("base64url"), code_challenge_method: "S256" });
   return { ok: true, authorizationUrl: `https://accounts.google.com/o/oauth2/v2/auth?${params}`, expiresAt };
@@ -83,13 +83,13 @@ export async function completeCalendarConnection(client, session, input) {
   if (!input || Object.keys(input).some(key => !["state", "code", "error"].includes(key)) || !hex(input.state) || (input.error !== undefined && input.error !== "access_denied") || (!input.error && (typeof input.code !== "string" || !input.code || input.code.length > 4096))) throw new CalendarError("invalid_callback", "This calendar authorization is invalid.", 400);
   const key = hash(input.state), current = await strictRead("calendar_connections", client.slug);
   const claim = await atomicUpdate("calendar_oauth", key, row => {
-    if (!row || row.state !== "pending" || Date.parse(row.expiresAt) <= Date.now() || row.slug !== client.slug || row.sessionHash !== session.sessionHash || row.email !== session.email || row.tenantIdentity !== calendarTenantIdentity(client) || current?.tenantIdentity !== row.tenantIdentity || row.epoch !== current?.grantEpoch || row.lifecycleVersion !== (client.operationLifecycleVersion || 0)) return { result: null };
+    if (!row || row.state !== "pending" || Date.parse(row.expiresAt) <= Date.now() || row.slug !== client.slug || row.sessionHash !== session.sessionHash || row.email !== session.email || row.tenantIdentity !== calendarTenantIdentity(client) || row.googleClientIdHash !== calendarExecutionPolicy()?.googleClientIdHash || row.executionPolicyDigest !== calendarExecutionPolicy()?.digest || current?.tenantIdentity !== row.tenantIdentity || row.epoch !== current?.grantEpoch || row.lifecycleVersion !== (client.operationLifecycleVersion || 0)) return { result: null };
     return { value: { ...row, state: input.error ? "denied" : "consumed", consumedAt: at() }, result: row };
   });
   if (!claim) throw new CalendarError("invalid_state", "This calendar link expired, was already used, or belongs to another sign-in. Connect again.", 410);
   if (input.error) return { ok: true, denied: true, calendar: await calendarConnectionView(client) };
   const verifier = unseal(claim.verifier, `state:${key}`);
-  const authority = async () => { await owner(client, session); const saved = await strictRead('calendar_connections', client.slug); return saved?.grantEpoch === claim.epoch && saved?.tenantIdentity === claim.tenantIdentity; };
+  const authority = async () => { await owner(client, session); const saved = await strictRead('calendar_connections', client.slug), policy = calendarExecutionPolicy(); return saved?.grantEpoch === claim.epoch && saved?.tenantIdentity === claim.tenantIdentity && claim.googleClientIdHash === policy?.googleClientIdHash && claim.executionPolicyDigest === policy?.digest; };
   const token = await googleJson(client, 'tokenExchange', "https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ code: input.code, client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: `${accessSite()}/api/google/callback`, grant_type: "authorization_code", code_verifier: verifier }).toString() }, undefined, { authorize: authority });
   if (!token.response.ok || typeof token.data.refresh_token !== "string" || !token.data.refresh_token || typeof token.data.access_token !== "string") throw new CalendarError("authorization_failed", "Google did not grant ongoing Calendar access. Connect again and allow Calendar access.");
   const granted = new Set(String(token.data.scope || "").split(" "));
@@ -97,7 +97,7 @@ export async function completeCalendarConnection(client, session, input) {
   const calendar = await googleJson(client, 'calendarRead', "https://www.googleapis.com/calendar/v3/calendars/primary", { headers: { Authorization: `Bearer ${token.data.access_token}` } }, undefined, { authorize: authority });
   if (!calendar.response.ok || typeof calendar.data.id !== "string" || !calendar.data.id || calendar.data.id.length > 1024) throw new CalendarError("calendar_unavailable", "Your primary calendar could not be confirmed. Connect again.", 503);
   await owner(client, session);
-  await execution(() => assertCalendarExecution(client, { targetId: calendar.data.id, authorize: authority }));
+  await execution(() => assertCalendarExecution(client, { targetId: calendar.data.id, authorize: authority, connecting: true }));
   const connectionId = randomBytes(16).toString("hex"), connectedAt = at();
   await atomicUpdate("calendar_connections", client.slug, row => {
     if (!row || row.tenantIdentity !== claim.tenantIdentity || row.grantEpoch !== claim.epoch) throw new CalendarError("connection_changed", "Calendar setup changed. Connect again.");

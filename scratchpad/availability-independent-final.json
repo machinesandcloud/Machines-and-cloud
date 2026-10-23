@@ -1,0 +1,500 @@
+{
+  "at": "2026-10-23T01:57:37.344Z",
+  "scope": "Independent actual owner/access handlers and actual browser DOM with explicit transport/body/JSON failures. All browser requests intercepted; installed storage SDK protocol double only. No model/provider/physical request.",
+  "sourceBefore": {
+    "desk.js": "6de9602ca248b0a4c7cd098874a103e28e1ad98d8da8bd5f39d8ab64b5e7425e",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/sales-desk.mjs": "e2bee9d6b73bfea7d67544774491b2f258797fc28e766dde46103d4129521653"
+  },
+  "harnessHash": "33a552a44accfeb15e296392f00369543cfde462fdeae1a5e6f972d7a037be62",
+  "checks": [
+    {
+      "name": "320px real 401 availability action clears private state before reading a malformed body",
+      "pass": true
+    },
+    {
+      "name": "320px real 403 availability action clears private state before reading a malformed body",
+      "pass": true
+    },
+    {
+      "name": "390px real 401 availability action clears private state before reading a malformed body",
+      "pass": true
+    },
+    {
+      "name": "390px real 403 availability action clears private state before reading a malformed body",
+      "pass": true
+    },
+    {
+      "name": "1440px real 401 availability action clears private state before reading a malformed body",
+      "pass": true
+    },
+    {
+      "name": "1440px real 403 availability action clears private state before reading a malformed body",
+      "pass": true
+    },
+    {
+      "name": "320px keyboard success preserves newer date/window and identifies the submitted snapshot",
+      "pass": true
+    },
+    {
+      "name": "390px keyboard success preserves newer date/window and identifies the submitted snapshot",
+      "pass": true
+    },
+    {
+      "name": "1440px keyboard success preserves newer date/window and identifies the submitted snapshot",
+      "pass": true
+    },
+    {
+      "name": "Non-auth 400 failure retains selected draft and last confirmed blocks for deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth 409 failure retains selected draft and last confirmed blocks for deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth 503 failure retains selected draft and last confirmed blocks for deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth network failure retains selected draft and last confirmed blocks for deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Non-auth incomplete failure retains selected draft and last confirmed blocks for deliberate retry",
+      "pass": true
+    },
+    {
+      "name": "Late transport200 after actual signout cannot restore private content or write obsolete status",
+      "pass": true
+    },
+    {
+      "name": "Late transport503 after actual signout cannot restore private content or write obsolete status",
+      "pass": true
+    },
+    {
+      "name": "Late body200 after actual signout cannot restore private content or write obsolete status",
+      "pass": true
+    },
+    {
+      "name": "Late bodyError after actual signout cannot restore private content or write obsolete status",
+      "pass": false,
+      "error": "locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('body[data-workspace-state=\"ready\"]') to be visible\u001b[22m\n",
+      "stack": "locator.waitFor: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('body[data-workspace-state=\"ready\"]') to be visible\u001b[22m\n\n    at open (/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent.mjs:38:198)\n    at async file:///private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent.mjs:57:57\n    at async check (/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent.mjs:44:110)\n    at async file:///private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent.mjs:56:76",
+      "visible": {
+        "state": "recovery",
+        "message": "",
+        "busy": null,
+        "hasToken": true
+      }
+    },
+    {
+      "name": "Failed signout resets busy state; an obsolete body cannot unlock or overwrite a newer availability request",
+      "pass": true
+    },
+    {
+      "name": "Twenty-second timeout has no automatic replay and keeps draft/last-known view until deliberate retry",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 401,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "status": 403,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 401,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "status": 403,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 401,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "status": 403,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_unblock",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 400,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 409,
+      "fault": "Explicit pre-handler nonauth conflict/storage response; no write"
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 503,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "fault": "Explicit pre-handler transport rejection; no write"
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 503,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 503,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 503,
+      "fault": "Explicit pre-write signout503; actual session remains active"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    },
+    {
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "actualHandler": true
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "screenshots": [
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-auth-320-401.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-auth-320-403.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-auth-390-401.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-auth-390-403.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-auth-1440-401.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-auth-1440-403.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-keyboard-320.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-keyboard-390.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-keyboard-1440.png",
+    "/private/tmp/mc-availability-recovery-e461/scratchpad/availability-independent-final-failure-17.png"
+  ],
+  "sourceAfter": {
+    "desk.js": "6de9602ca248b0a4c7cd098874a103e28e1ad98d8da8bd5f39d8ab64b5e7425e",
+    "desk.html": "8d29fc9541fee1888fb5fc65ff6bebfe5751e14816939e86251e6b3bc657d036",
+    "desk.css": "07f66ed537dc1350e13566a7e0675c7c416eb3074adb495a3b722245fe466e19",
+    "desk-connections.js": "96bd072f2b88049293b48848c0b6a0fc6530208030cdef74d3ceb0832658a968",
+    "netlify/functions/client.mjs": "5a95d657b847437c70548046afa6006b048504b6b2edada243c02509b88cd8ca",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/sales-desk.mjs": "e2bee9d6b73bfea7d67544774491b2f258797fc28e766dde46103d4129521653"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 19,
+    "failed": 1,
+    "total": 20,
+    "physicalNetwork": 0,
+    "actualModelRequests": 0,
+    "mockSDKRequests": 0,
+    "pageErrors": 0,
+    "forbiddenRequests": 0
+  }
+}
