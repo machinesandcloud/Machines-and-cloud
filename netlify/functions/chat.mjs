@@ -8,7 +8,7 @@ import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from ".
 import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
 import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
 import { runOwnerTest } from "./lib/owner-test.mjs";
-import { reserveAIRequest } from "./lib/self-service-ai.mjs";
+import { reserveAIRequest, selfServiceAIModelFetch, reserveAIProofMutation } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
@@ -121,14 +121,16 @@ export default async (req, context) => {
     let websiteContext = null;
     try { websiteContext = await claimWebsiteTurn(c, body.websiteCheck, contact, origin); }
     catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message }, error.status, cors(origin)); return json({ error: 'website_check_unavailable' }, 503, cors(origin)); }
+    let aiProof;
     if (isSelfServiceClient(c)) {
       let budget;
       try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web"); }
       catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable", message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
       if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit", message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin)); }
+      aiProof = budget.proof;
     }
     if (channel === "test") {
-      const runTest = (onText) => runOwnerTest({ client: c, contact, messages: incoming, onText });
+      const runTest = (onText) => runOwnerTest({ client: c, contact, messages: incoming, onText, aiProof });
       if (wantStream) return ndjsonResponse(runTest, cors(origin));
       try { return json(await runTest(), 200, cors(origin)); }
       catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
@@ -148,8 +150,10 @@ export default async (req, context) => {
     const execTool = async (name, input) => {
       await fence();
       await validateWebsiteTurn(websiteContext);
-      const recordOptions = kind => ({ channel, contact, ...websiteRecordContext(websiteContext), ...(websiteContext ? { managedActionId: websiteActionId(websiteContext, kind) } : {}), ...(isSelfServiceClient(c) ? { onSavedRecord: (recordKind, record) => noteWebsiteRecord(c, recordKind, record, { context: websiteContext, origin, contact }) } : {}) });
       if (name === "get_availability") return availabilityToolResult(c, input);
+      const kind = name === 'book_visit' ? 'bookings' : 'leads';
+      const proofActionId = isSelfServiceClient(c) && ['book_visit','notify_owner'].includes(name) ? await reserveAIProofMutation(c, aiProof, name, input, { contact, ...(websiteContext ? { setupActionId:websiteActionId(websiteContext,kind) } : {}) }) : null;
+      const recordOptions = kind => ({ channel, contact, ...websiteRecordContext(websiteContext), ...(websiteContext ? { managedActionId: websiteActionId(websiteContext, kind) } : proofActionId ? { managedActionId:proofActionId } : {}), ...(isSelfServiceClient(c) ? { onSavedRecord: (recordKind, record) => noteWebsiteRecord(c, recordKind, record, { context: websiteContext, origin, contact }) } : {}) });
       if (name === "book_visit") { const b = await bookVisit(c, input, recordOptions('bookings')); if (b.full) return { content: b.message }; const appointmentTexts = await appointmentTextInvitation(c, b); return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly. ${appointmentTexts ? 'An optional appointment-text invitation will appear beside your final reply. Do not claim texting consent or delivery.' : ''}` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id, ...(appointmentTexts ? { appointmentTexts } : {}) } }; }
       if (name === "notify_owner") { const l = await flagLead(c, input, recordOptions('leads')); return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
       return { content: "Unknown tool.", is_error: true };
@@ -168,7 +172,8 @@ export default async (req, context) => {
     const run = async (onText) => {
       try {
         await fence();
-        return await finish(await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true }));
+        const modelFetch = isSelfServiceClient(c) ? await selfServiceAIModelFetch(c, aiProof) : undefined;
+        return await finish(await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true, modelFetch }));
       } catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} throw error; }
     };
     if (wantStream) return ndjsonResponse(run, cors(origin));

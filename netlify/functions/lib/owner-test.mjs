@@ -7,6 +7,7 @@ import { addDays, isElapsedWindow, listedWindow, listedWindows, requestedDate } 
 import { configurationRevision } from "./setup.mjs";
 
 import { workspaceTenant, supportedWorkspace, belongsToWorkspace, WorkspaceIdentityError } from './workspace-identity.mjs';
+import { selfServiceAIModelFetch } from './self-service-ai.mjs';
 
 const PREFIX = "Test preview: ";
 const clean = (value, limit = 300) => typeof value === "string" ? value.trim().slice(0, limit) : "";
@@ -66,7 +67,7 @@ export function ownerTestTool(client, name, input) {
   }
 }
 
-export async function runOwnerTest({ client, contact, messages, onText }) {
+export async function runOwnerTest({ client, contact, messages, onText, aiProof }) {
   await assertCurrentWorkspace(client);
   const revision = configurationRevision(client);
   const key = testKey(client, contact);
@@ -86,13 +87,14 @@ export async function runOwnerTest({ client, contact, messages, onText }) {
   let toolFailed = false;
   const testMode = process.env.MC_FAKE_MODEL === "1" ? "fake" : "live";
   await assertCurrentWorkspace(client);
+  const modelFetch = await selfServiceAIModelFetch(client, aiProof);
   const out = await runAgent({ system, tools, messages: toApiMessages(currentMessages), onText: forward,
     execTool: async (name, input) => {
       await assertCurrentWorkspace(client);
       const result = ownerTestTool(client, name, input);
       if (result.is_error) toolFailed = true;
       return result;
-    }, maxTokens: 1500, dropToolPreamble: true });
+    }, maxTokens: 1500, dropToolPreamble: true, modelFetch });
   await assertCurrentWorkspace(client);
   const reply = PREFIX + out.reply;
   const completedAt = new Date().toISOString();

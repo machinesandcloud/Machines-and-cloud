@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual, randomBytes, createHash } from "node:crypt
 import { atomicUpdate, list } from "./store.mjs";
 import { strictRead } from "./accounts.mjs";
 import { recordManagedInbound, managedSMSConsent, managedAppointmentConsentQuestion, deliveryTenant } from "./managed-consent.mjs";
-import { managedDeliveryEnabled, queueManagedMessage, recordManagedSMSReceipt, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
+import { managedDeliveryEnabled, managedDeliveryProofScope, queueManagedMessage, recordManagedSMSReceipt, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
 import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, pendingMessagingProbe, recordMessagingProbe } from "./messaging-activation.mjs";
 import { getAcquiredPhoneResource } from "./phone-activation.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
@@ -80,6 +80,7 @@ async function appendHistoryOnce(key,job,reply) {
 }
 export async function processManagedSMS(id) {
   if (!managedDeliveryEnabled() || typeof id!=="string" || id.length>220) return {ok:false,reasonCode:"sms_unavailable"};
+  if (await managedDeliveryProofScope()) return {ok:true,skipped:true,reasonCode:'delivery_proof_scope'};
   let job = await strictRead("managed_sms_inbound",id); if (!job || ["completed","suppressed","failed"].includes(job.state)) return {ok:true,skipped:true};
   const c = await strictRead("clients",job.slug);
   if (!c || deliveryTenant(c)!==job.tenant) return {ok:false,reasonCode:"workspace_changed"};
@@ -164,6 +165,7 @@ export async function processManagedSMS(id) {
 }
 export async function dispatchPendingManagedSMS({limit=2}={}) {
   if (!managedDeliveryEnabled()) return {ok:true,dispatched:0};
+  if (await managedDeliveryProofScope()) return {ok:true,dispatched:0,reasonCode:'delivery_proof_scope'};
   const keys=await list("managed_sms_inbound",""), cursor=await strictRead("managed_sms_scan","dispatch"), page=[...keys.filter(key=>key>(cursor?.key||"")),...keys.filter(key=>key<=(cursor?.key||""))].slice(0,Math.min(25,limit));
   let dispatched=0;
   for (const id of page) { const row=await strictRead("managed_sms_inbound",id); if (row && (row.state==="queued" || row.state==="running" && Date.parse(row.claim?.until)<=Date.now())) if (await dispatchServiceWorker("managed-sms-background",{id})) dispatched++; }

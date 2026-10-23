@@ -2,18 +2,60 @@
 import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
 import { belongsToWorkspace } from "./workspace-identity.mjs";
-import { strictRead } from "./accounts.mjs";
+import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant, mayDeliverManagedSMS } from "./managed-consent.mjs";
 import { arrivalInstant } from "./service-time.mjs";
 import { reserveManagedSMS, assertManagedSMSReservation, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
-import { reserveManagedEmail, assertManagedEmailReservation, assertManagedEmailDispatchPolicy, ManagedEmailBudgetError } from './managed-email-budget.mjs';
+import { reserveManagedEmail, assertManagedEmailReservation, assertManagedEmailDispatchPolicy, managedEmailBudgetPolicy, ManagedEmailBudgetError } from './managed-email-budget.mjs';
+import { selfServiceAIProofPolicy } from './self-service-ai.mjs';
 const hash = s => createHash("sha256").update(s).digest("hex");
 const stamp = () => new Date().toISOString();
 const STORE = "managed_deliveries";
 const INDEX = "managed_delivery_pending";
 const canonical = value => value && typeof value === "object" ? Array.isArray(value) ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key => [key,canonical(value[key])])) : value;
 export const managedDeliveryEnabled = () => process.env.SERVICE_DELIVERY_ENABLED === "true" && (process.env.SERVICE_WORKER_KEY || "").length>=32;
+// A deployed internal AI proof also narrows this worker, before discovery or
+// receipt recovery. Netlify freezes these settings per deployment; cleanup must
+// deploy SERVICE_DELIVERY_ENABLED=false before removing the proof selectors.
+// No permanent platform-wide latch is needed for an otherwise ordinary release.
+const proofSelected = () => ['MC_SELF_SERVICE_AI_PROOF_SLUG','MC_SELF_SERVICE_AI_PROOF_APPROVED_VERSION','MC_SELF_SERVICE_AI_PROOF_POLICY_JSON'].some(key => !!process.env[key]);
+export async function managedDeliveryProofScope() {
+  if (!proofSelected()) return null;
+  const closed = { selected:true, ready:false }, ai = selfServiceAIProofPolicy(), email = managedEmailBudgetPolicy();
+  if (!ai || !email || email.mode !== 'cohort' || email.tenants.length !== 1 || email.accountLimit > 2 || email.tenantLimit > 2 || JSON.stringify(canonical(email.tenants[0])) !== JSON.stringify(canonical(ai.tenant))) return closed;
+  const c = await strictRead('clients',ai.tenant.slug), owner = normalizeAccountEmail(c?.owner?.email), binding = await strictRead('self_service_ai_proofs',ai.tenant.slug);
+  if (!isSupportedSelfServiceClient(c) || !['testing','live'].includes(c.status) || deliveryTenant(c) !== ai.tenant.identity || !owner || normalizeAccountEmail(c.onboarding.verifiedEmail) !== owner || hash(owner) !== ai.tenant.emailHash || (await strictRead('health','brake'))?.on === true || binding && (binding.version !== 1 || binding.phaseId !== ai.phaseId || JSON.stringify(canonical(binding.tenant)) !== JSON.stringify(canonical(ai.tenant)))) return closed;
+  if (selfServiceAIProofPolicy()?.digest !== ai.digest || managedEmailBudgetPolicy()?.digest !== email.digest) return closed;
+  return {selected:true,ready:true,slug:c.slug,tenant:ai.tenant.identity,email:owner,phaseId:ai.phaseId,aiDigest:ai.digest,emailDigest:email.digest};
+}
+const proofClientAllowed = (scope,c) => !scope || scope.ready && c?.slug === scope.slug && deliveryTenant(c) === scope.tenant;
+const proofJobAllowed = (scope,job) => !scope || scope.ready && job?.slug === scope.slug && job.tenant === scope.tenant && job.channel === 'email' && ['owner_booking','owner_lead'].includes(job.purpose) && job.to === scope.email && new RegExp('^'+scope.slug+'/[a-f0-9]{64}$').test(job.id || '');
+function assertProofPolicy(scope) {
+  if (scope && (!scope.ready || !managedDeliveryEnabled() || selfServiceAIProofPolicy()?.digest !== scope.aiDigest || managedEmailBudgetPolicy()?.digest !== scope.emailDigest)) throw new Error('Internal delivery proof policy changed');
+}
+async function reserveProofReceiptRead(job) {
+  const scope = await managedDeliveryProofScope(); if (!scope) return null;
+  if (!proofJobAllowed(scope,job)) throw new Error('Internal delivery receipt is outside its approved scope');
+  const c = await strictRead('clients',scope.slug); await assertManagedEmailReservation(c,job,job.emailBudget);
+  const key = 'proof_receipt:'+hash(job.id), identity = hash(JSON.stringify(canonical({id:job.id,tenant:job.tenant,providerId:job.providerId,emailBudget:job.emailBudget.identity})));
+  const result = await atomicUpdate('managed_delivery_waves',key,async row => {
+    const current = await managedDeliveryProofScope();
+    if (!current || current.aiDigest !== scope.aiDigest || current.emailDigest !== scope.emailDigest || !proofJobAllowed(current,job)) throw new Error('Internal receipt authority changed');
+    await assertManagedEmailReservation(c,job,job.emailBudget);
+    if (row && (row.version !== 1 || row.phaseId !== scope.phaseId || row.identity !== identity || !Number.isSafeInteger(row.used) || row.used < 1 || row.used > 4 || !Number.isFinite(Date.parse(row.lastReservedAt)))) throw new Error('Internal receipt allowance changed');
+    // A wave makes several immediate recovery rounds. Wait for a later scheduled
+    // pass instead of spending all four physical reads on one provider state.
+    if (row && (row.used >= 4 || Date.now()-Date.parse(row.lastReservedAt) < 60000)) return {result:{reserved:false}};
+    return {value:{version:1,phaseId:scope.phaseId,identity,used:(row?.used || 0)+1,lastReservedAt:stamp()},result:{reserved:true,scope}};
+  });
+  if (result.reserved) {
+    const current = await managedDeliveryProofScope();
+    if (!current || current.aiDigest !== scope.aiDigest || current.emailDigest !== scope.emailDigest || !proofJobAllowed(current,job)) throw new Error('Internal receipt authority changed');
+    await assertManagedEmailReservation(c,job,job.emailBudget); assertProofPolicy(scope);
+  }
+  return result;
+}
 const revision = record => hash(JSON.stringify([record.status, record.customer_name, record.phone, record.address, record.issue, record.date, record.window, record.wanted, record.urgency]));
 async function currentClient(c) {
   const current = await strictRead("clients", c.slug);
@@ -21,6 +63,8 @@ async function currentClient(c) {
   return current;
 }
 export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null }) {
+  const scope = await managedDeliveryProofScope();
+  if (!proofClientAllowed(scope,c) || scope && (channel !== 'email' || to !== scope.email)) return null;
   await currentClient(c);
   if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
   if (channel === "email" && !["owner_booking", "owner_lead"].includes(purpose)) throw new Error("Unsupported email purpose");
@@ -53,6 +97,7 @@ async function indexPending(job) {
   });
 }
 export async function queueManagedRecord(c, record, kind = "bookings") {
+  const scope = await managedDeliveryProofScope(); if (!proofClientAllowed(scope,c)) return;
   if (!isSupportedSelfServiceClient(c) || !["bookings", "leads"].includes(kind) || record?.slug !== c.slug || record.status === "spam" || record.ownerVisitCreationAborted === true || record.websiteSetupCheck || record.simulation) return;
   const current = await currentClient(c), saved = await strictRead(kind, `${c.slug}/${record.id}`);
   if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c) || !belongsToWorkspace(c, saved) || saved.websiteSetupCheck || saved.simulation) return;
@@ -60,6 +105,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   const requestedVisit = kind === 'bookings' && saved.status === 'booked' && ['web','sms','call','voice'].includes(saved.channel);
   const body = `${current.business.name}: ${kind === "bookings" ? requestedVisit ? "Visit request" : "Visit" : "Customer request"} ${saved.id}\n${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
   await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, source, preserveSnapshot: true });
+  if (scope) return; // This internal phase proves owner email only, not customer SMS.
   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
   const cancelled = saved.status === "cancelled";
   await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
@@ -116,8 +162,11 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
     async send(job, c) {
       if (job.channel === "email") {
         if (!process.env.RESEND_API_KEY || !process.env.FROM_EMAIL) throw new Error("Email not configured");
+        const scope = await managedDeliveryProofScope();
+        if (!proofJobAllowed(scope,job)) throw new ManagedEmailBudgetError('email_proof_closed');
         await assertManagedEmailReservation(c, job, job.emailBudget);
         assertManagedEmailDispatchPolicy(job.emailBudget);
+        assertProofPolicy(scope);
         const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.purpose === "owner_booking" ? "Your front desk: visit update" : "Your front desk: customer request", text: job.body }) });
         if (!response.ok || typeof data.id !== "string") throw new Error("Email result unconfirmed");
         return { id: data.id, status: "accepted" };
@@ -134,8 +183,9 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
     },
-    async status(job) {
+    async status(job, proofReceipt = null) {
       if (!job.providerId) return null;
+      assertProofPolicy(proofReceipt?.scope);
       const email = job.channel === "email", sid = process.env.TWILIO_ACCOUNT_SID, secret = process.env.TWILIO_AUTH_TOKEN;
       const { response, data } = await request(email ? `https://api.resend.com/emails/${encodeURIComponent(job.providerId)}` : `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages/${job.providerId}.json`, { headers: { Authorization: email ? `Bearer ${process.env.RESEND_API_KEY}` : "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64") } });
       if (!response.ok) return null;
@@ -152,14 +202,20 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
 function engine({ provider = null, gate = managedDeliveryEnabled, sender = senderFor, deadlineAt=Date.now()+10000 } = {}) {
   provider ||= providerAdapter(deadlineAt);
   async function run(id) {
+    const scope = await managedDeliveryProofScope();
+    if (scope && (!scope.ready || typeof id !== 'string' || !id.startsWith(scope.slug+'/'))) return null;
     let job = await strictRead(STORE, id);
+    if (!proofJobAllowed(scope,job)) return job;
     if (!job || terminal(job.state)) return job;
     if (!gate()) return job;
     const c = await strictRead("clients", job.slug);
     if (!c || !isSupportedSelfServiceClient(c) || deliveryTenant(c) !== job.tenant) return change(id, row => ({ ...row, state: row.attemptStartedAt?"uncertain":"suppressed", reasonCode: "workspace_changed" }));
     if (["cancelled", "archived"].includes(c.status) && !job.attemptStartedAt) return change(id, row => ({ ...row, state: "suppressed", reasonCode: "workspace_closed" }));
     if (job.providerId) {
-      const receipt = await provider.status(job);
+      const proofReceipt = await reserveProofReceiptRead(job);
+      if (proofReceipt && !proofReceipt.reserved) return job;
+      assertProofPolicy(proofReceipt?.scope);
+      const receipt = await provider.status(job,proofReceipt);
       if (!receipt || receipt.id !== job.providerId) return change(id,row=>terminal(row.state)?null:{...row,receiptCheckFailedAt:row.receiptCheckFailedAt || stamp(),reasonCode:"receipt_status_unavailable"});
       // A crash can leave the provider receipt saved before the question's
       // consent-ledger projection. Rebuild it from this same verified receipt;
@@ -213,6 +269,11 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     try {
       if(job.channel==='sms')await assertManagedSMSReservation(latest,job,job.smsBudget);
       if(job.channel==='email')await assertManagedEmailReservation(latest,job,job.emailBudget);
+      if(scope) {
+        const currentScope=await managedDeliveryProofScope();
+        if(!currentScope || currentScope.aiDigest!==scope.aiDigest || currentScope.emailDigest!==scope.emailDigest || !proofJobAllowed(currentScope,job))throw new ManagedEmailBudgetError('email_proof_closed');
+        assertProofPolicy(currentScope);
+      }
       if(job.purpose==='activation_probe'&&!await probeFor(latest,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
       const receipt = await provider.send(job, latest);
       if (!receipt?.id) throw new Error("Missing receipt");
@@ -234,6 +295,7 @@ export function createManagedDeliveryEngine(options) {
 }
 export async function recordManagedSMSReceipt(id, fields) {
   if (!managedDeliveryEnabled()) return false;
+  if (await managedDeliveryProofScope()) return false;
   const job = await strictRead(STORE, id);
   if (!job || job.channel !== "sms" || !job.attemptStartedAt || !job.from || !job.serviceSid || fields.AccountSid !== process.env.TWILIO_ACCOUNT_SID || !/^SM[a-f0-9]{32}$/i.test(fields.MessageSid || "") || fields.To !== job.to) return false;
   const c = await strictRead("clients", job.slug);
@@ -254,15 +316,18 @@ export async function managedDeliveryView(c) {
   const counts = {}; for (const row of rows) counts[row.state] = (counts[row.state] || 0) + 1;
   return { enabled: managedDeliveryEnabled(), total: rows.length, counts, jobs: rows.sort((a,b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0,30).map(row => ({ id: row.id, channel: row.channel, purpose: row.purpose, state: row.state, reasonCode: row.reasonCode || null, detail:row.detail || null, updatedAt: row.updatedAt, deliveredAt: row.deliveredAt || null })) };
 }
-async function fairPage(kind, cursorKey, limit) {
-  const keys = await list(kind, ""), cursor = await strictRead("managed_delivery_cursors", cursorKey);
+async function fairPage(kind, cursorKey, limit, prefix = '') {
+  const keys = await list(kind, prefix), cursor = await strictRead("managed_delivery_cursors", cursorKey);
   const after = keys.filter(key => key > (cursor?.key || "")), before = keys.filter(key => key <= (cursor?.key || "")), page = [...after,...before].slice(0,limit);
   if (page.length) await atomicUpdate("managed_delivery_cursors",cursorKey,()=>({value:{key:page.at(-1),at:stamp()}}));
   return page;
 }
 export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budgetMs = 12000 } = {}) {
   const deadline = Date.now() + Math.min(15000, Math.max(1000,budgetMs)), errors = [];
-  if (managedDeliveryEnabled()) for (const slug of await fairPage("clients","probes",Math.min(25,discoveryLimit))) {
+  const scope = await managedDeliveryProofScope();
+  if (scope && !scope.ready) return {ok:false,processed:0,inspected:0,partialRepair:false,pending:0,openFailures:0,errors:['delivery_proof_closed'],enabled:managedDeliveryEnabled()};
+  const prefix = scope ? scope.slug+'/' : '', cursorKey = key => scope ? 'proof:'+scope.phaseId+':'+key : key;
+  if (!scope && managedDeliveryEnabled()) for (const slug of await fairPage("clients","probes",Math.min(25,discoveryLimit))) {
     if (Date.now() >= deadline) break;
     try {
       const c=await strictRead("clients",slug); if (!c || !isSupportedSelfServiceClient(c)) continue;
@@ -271,17 +336,18 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
     } catch { errors.push("probe_recovery_failed"); }
   }
   // Backfill from authoritative records also repairs a crash between record save and enqueue.
-  for (const kind of ["bookings", "leads"]) for (const key of await fairPage(kind, `source_${kind}`, Math.min(50,discoveryLimit))) {
+  for (const kind of ["bookings", "leads"]) for (const key of await fairPage(kind, cursorKey(`source_${kind}`), Math.min(50,discoveryLimit), prefix)) {
     if (Date.now() >= deadline) break;
     try { const record = await strictRead(kind,key), c = record && await strictRead("clients",record.slug); if (c && isSupportedSelfServiceClient(c)) await queueManagedRecord(c,record,kind); } catch { errors.push("source_recovery_failed"); }
   }
   let processed = 0;
   // Rebuild missing index entries after a crash between durable intent and queue projection.
   let partialRepair=false;
-  for (const key of await fairPage(STORE,"index_repair",50)) { if(Date.now()>=deadline){partialRepair=true;break;} await indexPending(await strictRead(STORE,key)); }
-  const pending=await strictRead(INDEX,"active"), keys=Object.keys(pending?.entries || {}).sort();
+  for (const key of await fairPage(STORE,cursorKey("index_repair"),50,prefix)) { if(Date.now()>=deadline){partialRepair=true;break;} const row=await strictRead(STORE,key); if(proofJobAllowed(scope,row))await indexPending(row); }
+  const pending=await strictRead(INDEX,"active"), keys=Object.keys(pending?.entries || {}).filter(key=>!scope || key.startsWith(prefix) && proofJobAllowed(scope,pending.entries[key]?.snapshot)).sort();
   const dueKeys=keys.filter(key=>!Number.isFinite(Date.parse(pending.entries[key].dueAt)) || Date.parse(pending.entries[key].dueAt)<=Date.now());
-  const candidates=[...dueKeys.filter(key=>key>(pending?.cursor || "")),...dueKeys.filter(key=>key<=(pending?.cursor || ""))];
+  const pendingCursor = scope ? (await strictRead('managed_delivery_cursors',cursorKey('pending')))?.key || '' : pending?.cursor || '';
+  const candidates=[...dueKeys.filter(key=>key>pendingCursor),...dueKeys.filter(key=>key<=pendingCursor)];
   let inspected=0, last=null;
   for (const key of candidates.slice(0,100)) {
     if (Date.now() >= deadline) break;
@@ -289,7 +355,8 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
     inspected++; last=key;
     try {
       let before=await strictRead(STORE,key);
-      if(!before && pending.entries[key]?.snapshot)before=await atomicUpdate(STORE,key,row=>row?{result:row}:{value:pending.entries[key].snapshot,result:pending.entries[key].snapshot});
+      if(!before && pending.entries[key]?.snapshot && proofJobAllowed(scope,pending.entries[key].snapshot))before=await atomicUpdate(STORE,key,row=>row?{result:row}:{value:pending.entries[key].snapshot,result:pending.entries[key].snapshot});
+      if(!proofJobAllowed(scope,before))continue;
       if (!before || terminal(before.state)) { if (before) await indexPending(before); continue; }
       if (!before.providerId && Date.parse(before.dueAt)>Date.now()) continue;
       const result = await engine({deadlineAt:deadline}).run(key);
@@ -297,9 +364,9 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
       if (result?.state === "uncertain") errors.push("delivery_needs_review");
     } catch { errors.push("delivery_unavailable"); }
   }
-  if(last) await atomicUpdate(INDEX,"active",value=>({value:{...value,cursor:last}}));
-  const index=await strictRead(INDEX,"active"),openFailures=Object.keys(index?.failures || {}).length;
-  return { ok: errors.length === 0 && openFailures === 0 && !partialRepair, processed, inspected, partialRepair, pending:Object.keys(index?.entries || {}).length, openFailures, errors: [...new Set(errors)], enabled: managedDeliveryEnabled() };
+  if(last) { if(scope)await atomicUpdate('managed_delivery_cursors',cursorKey('pending'),()=>({value:{key:last,at:stamp()}}));else await atomicUpdate(INDEX,"active",value=>({value:{...value,cursor:last}})); }
+  const index=await strictRead(INDEX,"active"),openFailures=Object.keys(index?.failures || {}).filter(key=>!scope || key.startsWith(prefix)).length;
+  return { ok: errors.length === 0 && openFailures === 0 && !partialRepair, processed, inspected, partialRepair, pending:Object.keys(index?.entries || {}).filter(key=>!scope || key.startsWith(prefix)).length, openFailures, errors: [...new Set(errors)], enabled: managedDeliveryEnabled() };
 }
 export async function dispatchManagedDeliveryWave() {
   if (!managedDeliveryEnabled() || (process.env.SERVICE_WORKER_KEY || "").length<32) return {ok:true,dispatched:false};
