@@ -1,0 +1,44 @@
+{
+  "ok": true,
+  "groups": [
+    {
+      "name": "Lost queue extension response is recovered from the same approval with existing child receipts",
+      "ok": true
+    },
+    {
+      "name": "Lost primary extension acknowledgment never duplicates approval or the common number",
+      "ok": true
+    },
+    {
+      "name": "Cancellation between queue authority and primary extension remains durable and starts no new SMS child",
+      "ok": true
+    },
+    {
+      "name": "A delayed old queue retirement cannot remove an independently committed later channel admission",
+      "ok": true
+    },
+    {
+      "name": "A delayed old active status cannot overwrite the next admission after its old claim expires",
+      "ok": true
+    },
+    {
+      "name": "A cancellation winning a held primary extension CAS is preserved by its retry",
+      "ok": true
+    },
+    {
+      "name": "Held old child response cannot acknowledge into a replacement lease and later channel admission",
+      "ok": true
+    }
+  ],
+  "passed": 7,
+  "total": 7,
+  "sourceStable": true,
+  "sourceHashes": {
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "scripts/connection-admissions-cas-check.mjs": "4ac673fa0aec3e1a86a4096f838d679e92f67d349b2f723e1ced74165fd3e086"
+  },
+  "conditionalStorageRequests": 2022,
+  "physicalNetworkRequests": 0,
+  "mode": "actual conditional Blobs SDK with synthetic transport; fixture engine constructed only under isolated test guard; no provider transport",
+  "providerDeliveryAcceptance": false
+}

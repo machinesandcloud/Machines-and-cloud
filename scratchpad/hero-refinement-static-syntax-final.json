@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-23T06:23:08.445014+00:00",
+  "scope": "Requested hero JavaScript syntax and static site scan, plus changed-source whitespace; no application/test/provider execution",
+  "checks": [
+    {
+      "name": "hero-script-syntax",
+      "command": [
+        "node",
+        "--check",
+        "hero-photos.js"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "log": "scratchpad/hero-refinement-hero-script-syntax.txt",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "static-sitecheck",
+      "command": [
+        "python3",
+        "-I",
+        "scripts/sitecheck.py",
+        "."
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "log": "scratchpad/hero-refinement-static-sitecheck.txt",
+      "logSha256": "27333ffc662d61801a9cfb05b29b4611311621ced7b272b5322eae8f3db15ec8"
+    },
+    {
+      "name": "changed-source-whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "desk.html",
+        "desk.css",
+        "index.html",
+        "hero-photos.js",
+        "site-refresh.css"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "log": "scratchpad/hero-refinement-changed-source-whitespace.txt",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "heroFreezeStable": true,
+  "sourceFreezeSha256": "350cb46c143a5a567efb0070851630fc88088e7a257a30df434a60f465e7ee68",
+  "summary": {
+    "passed": 3,
+    "failed": 0
+  },
+  "externalActions": 0
+}

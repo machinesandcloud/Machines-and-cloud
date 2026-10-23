@@ -3,20 +3,19 @@
   const root = document.querySelector('[data-hero-photos]');
   if (!root) return;
   const stage = root.querySelector('[data-hero-stage]');
-  const controls = root.querySelector('[data-hero-controls]');
   const toggle = root.querySelector('[data-hero-toggle]');
-  const buttons = [...root.querySelectorAll('[data-hero-photo]')];
-  if (!stage || !controls || !toggle || buttons.length < 2) return;
-  const photos = buttons.map(button => ({ ...button.dataset, button, image: null, ready: null, failed: false }));
+  const entries = [...root.querySelectorAll('[data-hero-photo]')];
+  if (!stage || !toggle || entries.length < 2) return;
+  const photos = entries.map(entry => ({ ...entry.dataset, image: null, ready: null, failed: false }));
   photos[0].image = stage.querySelector('img');
   if (!photos[0].image) return;
   const job = root.querySelector('.site-job-note p > span');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const DWELL = 7000, FADE = 1200;
+  const DWELL = 3000, FADE = 400;
   let current = 0, timer, intent = 0, autoIntent = 0, fading = false, pending = null, finishFade = null;
-  let userPaused = false, hovering = false, focused = false, inView = false, away = false;
+  let userPaused = false, focused = false, inView = false, away = false;
 
-  const canPlay = () => !userPaused && !motion.matches && !hovering && !focused && inView && !away && !document.hidden;
+  const canPlay = () => !userPaused && !motion.matches && !focused && inView && !away && !document.hidden;
   function schedule() {
     clearTimeout(timer);
     autoIntent++;
@@ -28,6 +27,7 @@
     const onlyOne = photos.filter(photo => !photo.failed).length < 2;
     const paused = userPaused || motion.matches || onlyOne;
     const label = motion.matches ? 'Automatic photos off for reduced motion' : onlyOne ? 'Only one photo is available' : paused ? 'Play photo rotation' : 'Pause photo rotation';
+    toggle.hidden = motion.matches || onlyOne;
     toggle.dataset.paused = String(paused);
     toggle.disabled = motion.matches || onlyOne;
     toggle.setAttribute('aria-label', label);
@@ -53,8 +53,6 @@
         image.onload = image.onerror = null;
         if (!success) {
           photo.failed = true;
-          photo.button.disabled = true;
-          photo.button.setAttribute('aria-label', photo.button.title + ' photo unavailable');
           updateToggle();
         }
         resolve(success ? image : null);
@@ -88,6 +86,8 @@
     if (!incoming || (!manual && !canPlay())) { schedule(); return; }
     fading = true;
     const outgoing = photos[current].image;
+    const instant = motion.matches || photos[current].failed;
+    incoming.style.transition = instant ? 'none' : '';
     incoming.classList.remove('is-visible');
     incoming.alt = '';
     incoming.setAttribute('aria-hidden', 'true');
@@ -109,7 +109,6 @@
       incoming.removeAttribute('aria-hidden');
       current = index;
       if (job) job.textContent = photos[index].job;
-      buttons.forEach((button, i) => button.setAttribute('aria-pressed', String(i === current)));
       fading = false;
       finishFade = null;
       const next = pending;
@@ -120,8 +119,8 @@
     const transitioned = event => { if (event.target === incoming && event.propertyName === 'opacity') finish(); };
     finishFade = finish;
     incoming.addEventListener('transitionend', transitioned);
-    const fallback = setTimeout(finish, motion.matches ? 0 : FADE + 80);
-    if (motion.matches) finish();
+    const fallback = setTimeout(finish, instant ? 0 : FADE + 80);
+    if (instant) finish();
   }
   async function advance() {
     if (!canPlay()) return;
@@ -136,19 +135,21 @@
   }
   toggle.addEventListener('click', () => {
     userPaused = !userPaused;
-    // A deliberate Play also resumes from the current hover/focus hold.
-    // A later pointer or focus entry pauses again; explicit Pause always wins.
-    if (!userPaused) { hovering = false; focused = false; }
+    // Explicit Play resumes even while the keyboard focus remains on this control.
+    // Explicit Pause persists through later focus, visibility and viewport changes.
+    if (!userPaused) focused = false;
     updateToggle();
     schedule();
   });
-  buttons.forEach((button, index) => button.addEventListener('click', () => show(index, true)));
-  root.addEventListener('pointerenter', event => { hovering = event.pointerType !== 'touch'; schedule(); });
-  root.addEventListener('pointerleave', () => { hovering = false; schedule(); });
   root.addEventListener('focusin', () => { focused = true; schedule(); });
   root.addEventListener('focusout', () => queueMicrotask(() => { focused = root.contains(document.activeElement); schedule(); }));
   document.addEventListener('visibilitychange', schedule);
-  motion.addEventListener('change', () => { updateToggle(); if (motion.matches && finishFade) finishFade(); schedule(); });
+  motion.addEventListener('change', () => {
+    updateToggle();
+    if (motion.matches && finishFade) finishFade();
+    if (!motion.matches) preload();
+    schedule();
+  });
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(entries => { inView = entries[0].isIntersecting; schedule(); }, { threshold: 0.05 }).observe(root);
   } else {
@@ -159,7 +160,18 @@
   }
   window.addEventListener('pagehide', () => { away = true; intent++; schedule(); });
   window.addEventListener('pageshow', () => { away = false; schedule(); });
-  controls.hidden = false;
+  function preload() {
+    // Decode the small local alternates while the first photograph is already visible.
+    // Rotation never has to fade into an image that is still loading.
+    if (!motion.matches) photos.forEach((photo, index) => { if (index !== current) ready(index); });
+  }
+  async function recoverFirst() {
+    // A failed first image needs a usable still even with reduced motion or offscreen.
+    for (let index = 1; index < photos.length; index++) {
+      if (await ready(index)) { await show(index, true); return; }
+    }
+    updateToggle();
+  }
   updateToggle();
-  ready(0).then(image => { if (image) schedule(); else advance(); });
+  ready(0).then(image => { if (image) { preload(); schedule(); } else recoverFirst(); });
 })();
