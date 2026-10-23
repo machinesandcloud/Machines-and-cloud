@@ -1,0 +1,715 @@
+{
+  "at": "2026-10-23T00:13:03.895Z",
+  "mode": "Actual homepage markup/CSS/photos and hero script fulfilled from disk; unrelated widget/demo/intake scripts omitted in the browser fixture; no API or physical network requests",
+  "sourcesBefore": {
+    "index.html": "e135e43726411b63c9f21a68754fe61866f80de141708405122dfe9cb3a6ae74",
+    "site-refresh.css": "6aa56cc5c9de489ee753181f8c18175175eeb02b55b2eec9ffbe5f2c599d614f",
+    "hero-photos.js": "b19c67492aac8b221b96a51adc5b33c8b5917806ae012a8da09964e4639c5ddd"
+  },
+  "cases": [
+    {
+      "name": "First real HVAC image renders without JavaScript",
+      "passed": true,
+      "detail": {
+        "pressed": 0,
+        "images": [
+          {
+            "src": "/assets/photos/hero-hvac.jpg",
+            "complete": true,
+            "width": 1800,
+            "opacity": 1,
+            "visible": true,
+            "ariaHidden": null,
+            "transition": "1.2s"
+          }
+        ],
+        "toggleLabel": "Pause photo rotation",
+        "toggleDisabled": false,
+        "geometry": {
+          "x": 20,
+          "y": 518.625,
+          "width": 350,
+          "height": 320
+        },
+        "viewport": 390,
+        "overflow": false,
+        "controls": [
+          {
+            "label": "Pause photo rotation",
+            "width": 0,
+            "height": 0,
+            "jobOverlap": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+          },
+          {
+            "label": "Show air conditioning photo",
+            "width": 0,
+            "height": 0,
+            "jobOverlap": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+          },
+          {
+            "label": "Show plumbing photo",
+            "width": 0,
+            "height": 0,
+            "jobOverlap": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+          },
+          {
+            "label": "Show electrical photo",
+            "width": 0,
+            "height": 0,
+            "jobOverlap": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+          }
+        ],
+        "goodFrame": 1,
+        "activeId": null
+      }
+    },
+    {
+      "name": "No-JS rotation controls are hidden",
+      "passed": true
+    },
+    {
+      "name": "Automatic rotation changes a loaded photo after its dwell",
+      "passed": true,
+      "detail": {
+        "before": 0,
+        "after": 1,
+        "images": [
+          {
+            "src": "/assets/photos/plumber.jpg",
+            "complete": true,
+            "width": 1400,
+            "opacity": 1,
+            "visible": true,
+            "ariaHidden": null,
+            "transition": "1.2s"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Autoplay preserves photo frame geometry",
+      "passed": true,
+      "detail": {
+        "before": {
+          "x": 769.265625,
+          "y": 156,
+          "width": 530.71875,
+          "height": 415
+        },
+        "after": {
+          "x": 769.265625,
+          "y": 156,
+          "width": 530.71875,
+          "height": 415
+        }
+      }
+    },
+    {
+      "name": "Explicit pause persists beyond three dwell periods",
+      "passed": true
+    },
+    {
+      "name": "Manual photo choice preserves explicit pause",
+      "passed": true
+    },
+    {
+      "name": "Keyboard Enter selects photo and retains selector focus",
+      "passed": true
+    },
+    {
+      "name": "Keyboard Space selects the first photo",
+      "passed": true
+    },
+    {
+      "name": "Keyboard Play resumes while toggle remains focused",
+      "passed": true,
+      "detail": {
+        "before": 0,
+        "after": 1
+      }
+    },
+    {
+      "name": "Explicit pause survives leaving and returning to the hero",
+      "passed": true
+    },
+    {
+      "name": "Rapid manual choices settle on the last selected loaded photo",
+      "passed": true,
+      "detail": {
+        "pressed": 2,
+        "images": [
+          {
+            "src": "/assets/photos/electrician.jpg",
+            "complete": true,
+            "width": 1400,
+            "opacity": 1,
+            "visible": true,
+            "ariaHidden": null,
+            "transition": "1.2s"
+          }
+        ],
+        "toggleLabel": "Pause photo rotation",
+        "toggleDisabled": false,
+        "geometry": {
+          "x": 769.265625,
+          "y": 156,
+          "width": 530.71875,
+          "height": 415
+        },
+        "viewport": 1440,
+        "overflow": false,
+        "controls": [
+          {
+            "label": "Pause photo rotation",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 787.265625,
+            "right": 831.265625,
+            "top": 427,
+            "bottom": 471
+          },
+          {
+            "label": "Show air conditioning photo",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 831.265625,
+            "right": 875.265625,
+            "top": 427,
+            "bottom": 471
+          },
+          {
+            "label": "Show plumbing photo",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 875.265625,
+            "right": 919.265625,
+            "top": 427,
+            "bottom": 471
+          },
+          {
+            "label": "Show electrical photo",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 919.265625,
+            "right": 963.265625,
+            "top": 427,
+            "bottom": 471
+          }
+        ],
+        "goodFrame": 1,
+        "activeId": "2"
+      }
+    },
+    {
+      "name": "Delayed alternate keeps the loaded first frame before decoding",
+      "passed": true,
+      "detail": {
+        "pendingImages": 1,
+        "state": {
+          "pressed": 0,
+          "images": [
+            {
+              "src": "/assets/photos/hero-hvac.jpg",
+              "complete": true,
+              "width": 1800,
+              "opacity": 1,
+              "visible": true,
+              "ariaHidden": null,
+              "transition": "1.2s"
+            }
+          ],
+          "toggleLabel": "Pause photo rotation",
+          "toggleDisabled": false,
+          "geometry": {
+            "x": 769.265625,
+            "y": 156,
+            "width": 530.71875,
+            "height": 415
+          },
+          "viewport": 1440,
+          "overflow": false,
+          "controls": [
+            {
+              "label": "Pause photo rotation",
+              "width": 44,
+              "height": 44,
+              "jobOverlap": 0,
+              "left": 787.265625,
+              "right": 831.265625,
+              "top": 427,
+              "bottom": 471
+            },
+            {
+              "label": "Show air conditioning photo",
+              "width": 44,
+              "height": 44,
+              "jobOverlap": 0,
+              "left": 831.265625,
+              "right": 875.265625,
+              "top": 427,
+              "bottom": 471
+            },
+            {
+              "label": "Show plumbing photo",
+              "width": 44,
+              "height": 44,
+              "jobOverlap": 0,
+              "left": 875.265625,
+              "right": 919.265625,
+              "top": 427,
+              "bottom": 471
+            },
+            {
+              "label": "Show electrical photo",
+              "width": 44,
+              "height": 44,
+              "jobOverlap": 0,
+              "left": 919.265625,
+              "right": 963.265625,
+              "top": 427,
+              "bottom": 471
+            }
+          ],
+          "goodFrame": 1,
+          "activeId": "1"
+        }
+      }
+    },
+    {
+      "name": "Ready images overlap during crossfade",
+      "passed": true,
+      "detail": [
+        {
+          "src": "/assets/photos/hero-hvac.jpg",
+          "complete": true,
+          "width": 1800,
+          "opacity": 1,
+          "visible": true,
+          "ariaHidden": null,
+          "transition": "1.2s"
+        },
+        {
+          "src": "/assets/photos/plumber.jpg",
+          "complete": true,
+          "width": 1400,
+          "opacity": 0.00939731,
+          "visible": true,
+          "ariaHidden": "true",
+          "transition": "1.2s"
+        }
+      ]
+    },
+    {
+      "name": "Decoded alternate completes its transition",
+      "passed": true
+    },
+    {
+      "name": "Reduced motion disables autoplay and rotation toggle",
+      "passed": true
+    },
+    {
+      "name": "Reduced-motion manual choice has no fade",
+      "passed": true,
+      "detail": [
+        {
+          "src": "/assets/photos/plumber.jpg",
+          "complete": true,
+          "width": 1400,
+          "opacity": 1,
+          "visible": true,
+          "ariaHidden": null,
+          "transition": "0s"
+        }
+      ]
+    },
+    {
+      "name": "Offscreen hero does not cycle",
+      "passed": true
+    },
+    {
+      "name": "Hidden document does not cycle",
+      "passed": true
+    },
+    {
+      "name": "Broken alternate retains a good visible frame",
+      "passed": true,
+      "detail": {
+        "pressed": 0,
+        "images": [
+          {
+            "src": "/assets/photos/hero-hvac.jpg",
+            "complete": true,
+            "width": 1800,
+            "opacity": 1,
+            "visible": true,
+            "ariaHidden": null,
+            "transition": "1.2s"
+          }
+        ],
+        "toggleLabel": "Pause photo rotation",
+        "toggleDisabled": false,
+        "geometry": {
+          "x": 769.265625,
+          "y": 156,
+          "width": 530.71875,
+          "height": 415
+        },
+        "viewport": 1440,
+        "overflow": false,
+        "controls": [
+          {
+            "label": "Pause photo rotation",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 787.265625,
+            "right": 831.265625,
+            "top": 427,
+            "bottom": 471
+          },
+          {
+            "label": "Show air conditioning photo",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 831.265625,
+            "right": 875.265625,
+            "top": 427,
+            "bottom": 471
+          },
+          {
+            "label": "Plumbing photo unavailable",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 875.265625,
+            "right": 919.265625,
+            "top": 427,
+            "bottom": 471
+          },
+          {
+            "label": "Show electrical photo",
+            "width": 44,
+            "height": 44,
+            "jobOverlap": 0,
+            "left": 919.265625,
+            "right": 963.265625,
+            "top": 427,
+            "bottom": 471
+          }
+        ],
+        "goodFrame": 1,
+        "activeId": null
+      }
+    },
+    {
+      "name": "A healthy photo remains selectable after alternate failure",
+      "passed": true
+    },
+    {
+      "name": "320px controls fit, remain touch-sized and avoid job card",
+      "passed": true,
+      "detail": [
+        {
+          "label": "Automatic photos off for reduced motion",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 32,
+          "right": 76,
+          "top": 745.1875,
+          "bottom": 789.1875
+        },
+        {
+          "label": "Show air conditioning photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 76,
+          "right": 120,
+          "top": 745.1875,
+          "bottom": 789.1875
+        },
+        {
+          "label": "Show plumbing photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 120,
+          "right": 164,
+          "top": 745.1875,
+          "bottom": 789.1875
+        },
+        {
+          "label": "Show electrical photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 164,
+          "right": 208,
+          "top": 745.1875,
+          "bottom": 789.1875
+        }
+      ]
+    },
+    {
+      "name": "320px manual selection preserves stage bounds",
+      "passed": true,
+      "detail": {
+        "before": {
+          "x": 16,
+          "y": 593.1875,
+          "width": 288,
+          "height": 280
+        },
+        "after": {
+          "x": 16,
+          "y": 593.1875,
+          "width": 288,
+          "height": 280
+        }
+      }
+    },
+    {
+      "name": "390px controls fit, remain touch-sized and avoid job card",
+      "passed": true,
+      "detail": [
+        {
+          "label": "Automatic photos off for reduced motion",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 36,
+          "right": 80,
+          "top": 710.625,
+          "bottom": 754.625
+        },
+        {
+          "label": "Show air conditioning photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 80,
+          "right": 124,
+          "top": 710.625,
+          "bottom": 754.625
+        },
+        {
+          "label": "Show plumbing photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 124,
+          "right": 168,
+          "top": 710.625,
+          "bottom": 754.625
+        },
+        {
+          "label": "Show electrical photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 168,
+          "right": 212,
+          "top": 710.625,
+          "bottom": 754.625
+        }
+      ]
+    },
+    {
+      "name": "390px manual selection preserves stage bounds",
+      "passed": true,
+      "detail": {
+        "before": {
+          "x": 20,
+          "y": 518.625,
+          "width": 350,
+          "height": 320
+        },
+        "after": {
+          "x": 20,
+          "y": 518.625,
+          "width": 350,
+          "height": 320
+        }
+      }
+    },
+    {
+      "name": "768px controls fit, remain touch-sized and avoid job card",
+      "passed": true,
+      "detail": [
+        {
+          "label": "Automatic photos off for reduced motion",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 417,
+          "right": 461,
+          "top": 371.515625,
+          "bottom": 415.515625
+        },
+        {
+          "label": "Show air conditioning photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 461,
+          "right": 505,
+          "top": 371.515625,
+          "bottom": 415.515625
+        },
+        {
+          "label": "Show plumbing photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 505,
+          "right": 549,
+          "top": 371.515625,
+          "bottom": 415.515625
+        },
+        {
+          "label": "Show electrical photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 549,
+          "right": 593,
+          "top": 371.515625,
+          "bottom": 415.515625
+        }
+      ]
+    },
+    {
+      "name": "768px manual selection preserves stage bounds",
+      "passed": true,
+      "detail": {
+        "before": {
+          "x": 399,
+          "y": 155.515625,
+          "width": 345,
+          "height": 360
+        },
+        "after": {
+          "x": 399,
+          "y": 155.515625,
+          "width": 345,
+          "height": 360
+        }
+      }
+    },
+    {
+      "name": "1440px controls fit, remain touch-sized and avoid job card",
+      "passed": true,
+      "detail": [
+        {
+          "label": "Automatic photos off for reduced motion",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 787.265625,
+          "right": 831.265625,
+          "top": 427,
+          "bottom": 471
+        },
+        {
+          "label": "Show air conditioning photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 831.265625,
+          "right": 875.265625,
+          "top": 427,
+          "bottom": 471
+        },
+        {
+          "label": "Show plumbing photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 875.265625,
+          "right": 919.265625,
+          "top": 427,
+          "bottom": 471
+        },
+        {
+          "label": "Show electrical photo",
+          "width": 44,
+          "height": 44,
+          "jobOverlap": 0,
+          "left": 919.265625,
+          "right": 963.265625,
+          "top": 427,
+          "bottom": 471
+        }
+      ]
+    },
+    {
+      "name": "1440px manual selection preserves stage bounds",
+      "passed": true,
+      "detail": {
+        "before": {
+          "x": 769.265625,
+          "y": 156,
+          "width": 530.71875,
+          "height": 415
+        },
+        "after": {
+          "x": 769.265625,
+          "y": 156,
+          "width": 530.71875,
+          "height": 415
+        }
+      }
+    }
+  ],
+  "pageErrors": [],
+  "apiRequests": [],
+  "blockedOrigins": [
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.googleapis.com"
+  ],
+  "photosLoaded": [
+    "/assets/photos/hero-hvac.jpg",
+    "/assets/photos/plumber.jpg",
+    "/assets/photos/electrician.jpg"
+  ],
+  "sourcesAfter": {
+    "index.html": "e135e43726411b63c9f21a68754fe61866f80de141708405122dfe9cb3a6ae74",
+    "site-refresh.css": "6aa56cc5c9de489ee753181f8c18175175eeb02b55b2eec9ffbe5f2c599d614f",
+    "hero-photos.js": "b19c67492aac8b221b96a51adc5b33c8b5917806ae012a8da09964e4639c5ddd"
+  },
+  "sourceStable": true,
+  "physicalRequests": 0,
+  "passed": 28,
+  "failed": 0
+}
