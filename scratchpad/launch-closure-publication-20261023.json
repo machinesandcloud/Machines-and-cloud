@@ -1,0 +1,208 @@
+{
+  "at": "2026-10-23T20:19:35.646105+00:00",
+  "candidate": "47e3c64163d20166970b6d309fbf6045a9de33b2",
+  "base": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "approval": "Owner approved one15-credit build and up to16total read-only site/Netlify checks; no environment/provider/financial changes",
+  "phase": "closed",
+  "accountId": "69797d78f01c70674ffef858",
+  "beforeEnvironment": {
+    "gates": {
+      "PHONE_ACQUISITION_ENABLED": "false",
+      "VOICE_ACTIVATION_ENABLED": "absent",
+      "MESSAGING_ACTIVATION_ENABLED": "absent",
+      "SERVICE_DELIVERY_ENABLED": "absent",
+      "MC_PLATFORM_SMS_ENABLED": "absent",
+      "WORKSPACE_BILLING_ENABLED": "absent",
+      "WORKSPACE_BILLING_LIVE_ENABLED": "absent",
+      "WORKSPACE_BILLING_PORTAL_ENABLED": "absent",
+      "CALENDAR_CONNECTION_ENABLED": "true",
+      "CALENDAR_DELIVERY_ENABLED": "true",
+      "CALENDAR_SELF_SERVICE_ENABLED": "absent"
+    },
+    "configured": {
+      "STRIPE_SECRET_KEY": false,
+      "STRIPE_WEBHOOK_SECRET": false,
+      "WORKSPACE_BILLING_WEBHOOK_SECRET": false,
+      "STRIPE_PRICE_STARTER": false,
+      "STRIPE_PRICE_GROWTH": false,
+      "WORKSPACE_BILLING_OFFER_JSON": false
+    }
+  },
+  "pushAttempts": 2,
+  "deploymentMutations": 0,
+  "checks": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "expectedStatus": 200,
+      "sha256": "19cfbfb4f9e80c6b208b3c5dc5d03ffe6d5ada56a872b9c86c985f2511ff566d",
+      "capture": "scratchpad/launch-closure-publication-captured/01_api_health.body",
+      "ok": true,
+      "health": {
+        "ok": true,
+        "lastRunAt": "2026-10-23T20:20:18.975Z",
+        "minutesAgo": 9,
+        "failingBlocks": []
+      },
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/01_api_health.body"
+    },
+    {
+      "path": "/desk",
+      "status": 200,
+      "expectedStatus": 200,
+      "sha256": "0ff413562c4c91690cad80fb9e59f8d0b02bad2fdde37fe14168cf767a20eace",
+      "capture": "scratchpad/launch-closure-publication-captured/02_desk.body",
+      "ok": true,
+      "exactApprovedBuildBytes": false,
+      "newModules": true,
+      "rawByteComparisonOk": false,
+      "canonicalCompiledHtmlOk": true,
+      "disposition": "scratchpad/launch-closure-publication-html-disposition.json",
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/02_desk.body"
+    },
+    {
+      "path": "/privacy-policy",
+      "status": 200,
+      "expectedStatus": 200,
+      "sha256": "b7c91822fceb30c0a7f95a2ec2292d97ecf90fa66031e87b405c64b579de02fe",
+      "capture": "scratchpad/launch-closure-publication-captured/03_privacy-policy.body",
+      "ok": true,
+      "exactApprovedBuildBytes": false,
+      "calendarPrivacy": true,
+      "rawByteComparisonOk": false,
+      "canonicalCompiledHtmlOk": true,
+      "disposition": "scratchpad/launch-closure-publication-html-disposition.json",
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/03_privacy-policy.body"
+    },
+    {
+      "path": "/desk-billing.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "sha256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+      "capture": "scratchpad/launch-closure-publication-captured/04_desk-billing.js.body",
+      "ok": true,
+      "exactApprovedBuildBytes": true,
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/04_desk-billing.js.body"
+    },
+    {
+      "path": "/desk-connections.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "sha256": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+      "capture": "scratchpad/launch-closure-publication-captured/05_desk-connections.js.body",
+      "ok": true,
+      "exactApprovedBuildBytes": true,
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/05_desk-connections.js.body"
+    },
+    {
+      "path": "/desk-requests.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "sha256": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+      "capture": "scratchpad/launch-closure-publication-captured/06_desk-requests.js.body",
+      "ok": true,
+      "exactApprovedBuildBytes": true,
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/06_desk-requests.js.body"
+    },
+    {
+      "path": "/api/workspace-billing",
+      "status": 401,
+      "expectedStatus": 401,
+      "sha256": "943d2e5c381cccb7e8237ada2ccfb13d429e998a86ba8bafbc59ff54b574291c",
+      "capture": "scratchpad/launch-closure-publication-captured/07_api_workspace-billing.body",
+      "ok": true,
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/07_api_workspace-billing.body"
+    },
+    {
+      "path": "/api/workspace-billing-webhook",
+      "status": 405,
+      "expectedStatus": 405,
+      "sha256": "5b7e6bf2dc4a32a6aa4770cd5639c2c7af890fc86c273b5c8567fe5382086bf3",
+      "capture": "scratchpad/launch-closure-publication-captured/08_api_workspace-billing-webhook.body",
+      "ok": true,
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/08_api_workspace-billing-webhook.body"
+    },
+    {
+      "path": "/.env",
+      "status": 404,
+      "expectedStatus": 404,
+      "sha256": "9161a020b30b7911f1b57c3dff49d915e07b5b3dd01d54dd35d02904fdaa995c",
+      "capture": "scratchpad/launch-closure-publication-captured/09_.env.body",
+      "ok": true,
+      "originalTemporaryCapture": "/tmp/mc-launch-publish-fd50/09_.env.body"
+    }
+  ],
+  "pushStartedAt": "2026-10-23T20:27:46.864717+00:00",
+  "approvedOriginalCommit": "fd50d2d8118a666585affdc7bf054c7d3ce7020c",
+  "successfulPushes": 1,
+  "rejectedPushes": [
+    {
+      "commit": "fd50d2d8118a666585affdc7bf054c7d3ce7020c",
+      "reason": "GitHub GH013 account identifier in diagnostic receipt",
+      "remoteRefUnchanged": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+      "buildStarted": false,
+      "bypass": false
+    }
+  ],
+  "redaction": {
+    "path": "scratchpad/launch-twilio-help-contact-saved.json",
+    "occurrences": 2,
+    "applicationFilesUnchanged": true,
+    "originalHistoryPreservedLocally": true
+  },
+  "redactedPreparedAt": "2026-10-23T20:25:44.360146+00:00",
+  "pushedAt": "2026-10-23T20:27:51.985026+00:00",
+  "published": {
+    "id": "6adbc34931bb7268db6db4f7",
+    "state": "ready",
+    "commit_ref": "47e3c64163d20166970b6d309fbf6045a9de33b2",
+    "published_at": "2026-10-23T20:28:55.359Z"
+  },
+  "automaticBuild": {
+    "id": "6adbc34931bb7268db6db4f5",
+    "deployId": "6adbc34931bb7268db6db4f7",
+    "done": true
+  },
+  "afterEnvironment": {
+    "gates": {
+      "PHONE_ACQUISITION_ENABLED": "false",
+      "VOICE_ACTIVATION_ENABLED": "absent",
+      "MESSAGING_ACTIVATION_ENABLED": "absent",
+      "SERVICE_DELIVERY_ENABLED": "absent",
+      "MC_PLATFORM_SMS_ENABLED": "absent",
+      "WORKSPACE_BILLING_ENABLED": "absent",
+      "WORKSPACE_BILLING_LIVE_ENABLED": "absent",
+      "WORKSPACE_BILLING_PORTAL_ENABLED": "absent",
+      "CALENDAR_CONNECTION_ENABLED": "true",
+      "CALENDAR_DELIVERY_ENABLED": "true",
+      "CALENDAR_SELF_SERVICE_ENABLED": "absent"
+    },
+    "configured": {
+      "STRIPE_SECRET_KEY": false,
+      "STRIPE_WEBHOOK_SECRET": false,
+      "WORKSPACE_BILLING_WEBHOOK_SECRET": false,
+      "STRIPE_PRICE_STARTER": false,
+      "STRIPE_PRICE_GROWTH": false,
+      "WORKSPACE_BILLING_OFFER_JSON": false
+    }
+  },
+  "closedAt": "2026-10-23T20:29:33.828054+00:00",
+  "totalReadOnlyRequests": 16,
+  "ledgerSha256": "4b75740fe928d733fa904a24dd60ce2e90ca9f7c1476cb0d3543d698fd0be882",
+  "ok": true,
+  "limits": "Publication/source and anonymous access checks only; no authenticated customer/provider/payment workflow or full launch accepted.",
+  "originalRawByteState": "scratchpad/launch-closure-publication-raw-20261023.json",
+  "htmlDisposition": "scratchpad/launch-closure-publication-html-disposition.json",
+  "healthQualification": "Captured health200/ok reports lastRunAt2026-10-23T20:20:18.975Z, before release20:28:55.359Z. Accept endpoint snapshot only, not new post-release worker execution/service delivery.",
+  "closedAfterOfflineDispositionAt": "2026-10-23T20:31:20.706981+00:00",
+  "deploymentMutationQualification": "Original deploymentMutations=0 means no manual deployment API triggers. Exactly one successful Git push triggered exactly one automatic build; preceding push was rejected before any ref update/build.",
+  "manualDeploymentApiTriggers": 0,
+  "successfulGitRefUpdates": 1,
+  "observedAutomaticBuilds": 1,
+  "productionEnvironmentWrites": 0,
+  "emailsSent": 0,
+  "modelVoiceTextRequests": 0,
+  "purchases": 0,
+  "newPaymentTests": 0,
+  "retention": "All nine originally captured public bodies copied into scratchpad/launch-closure-publication-captured and hash-checked; original raw state retained byte-for-byte. This derived receipt uses repository paths and keeps original temporary capture provenance."
+}

@@ -1,0 +1,444 @@
+{
+  "at": "2026-10-23T20:32:09.561244+00:00",
+  "scope": "Independent offline review of existing controller/state/ledger/public response bytes only",
+  "decision": "ACCEPT exact published revision and bounded anonymous publication scope with precise HTML-transform disposition",
+  "ok": true,
+  "published": {
+    "id": "6adbc34931bb7268db6db4f7",
+    "state": "ready",
+    "commit_ref": "47e3c64163d20166970b6d309fbf6045a9de33b2",
+    "published_at": "2026-10-23T20:28:55.359Z"
+  },
+  "automaticBuild": {
+    "id": "6adbc34931bb7268db6db4f5",
+    "deployId": "6adbc34931bb7268db6db4f7",
+    "done": true
+  },
+  "buildEvidenceLimit": "One matching successful automatic build is recorded by reviewed controller assertions and sanitized state. Raw authenticated Netlify metadata responses are hashed in the ledger but not retained; public response bytes are retained and independently checked.",
+  "requests": {
+    "total": 16,
+    "metadata": 7,
+    "public": 9,
+    "unknown": 0,
+    "sequentialGetAttempts": true,
+    "remaining": 0,
+    "allRecordedBeforeDispatch": true,
+    "ledgerSha256": "4b75740fe928d733fa904a24dd60ce2e90ca9f7c1476cb0d3543d698fd0be882",
+    "matchesStateHash": true
+  },
+  "originalOutcome": {
+    "stateOk": false,
+    "passed": 7,
+    "checks": 9,
+    "failedPaths": [
+      "/desk",
+      "/privacy-policy"
+    ],
+    "stateSha256": "ab927f4588798a24725967527994763c24988daf59b601a13154f4a6dc762595",
+    "preservedUnmodified": true
+  },
+  "effectiveOutcome": {
+    "acceptedChecks": 9,
+    "checks": 9,
+    "semanticHtmlAcceptanceSeparateFromExactByteFailures": true
+  },
+  "capturedChecks": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "expectedStatus": 200,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    },
+    {
+      "path": "/desk",
+      "status": 200,
+      "expectedStatus": 200,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": false
+    },
+    {
+      "path": "/privacy-policy",
+      "status": 200,
+      "expectedStatus": 200,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": false
+    },
+    {
+      "path": "/desk-billing.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    },
+    {
+      "path": "/desk-connections.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    },
+    {
+      "path": "/desk-requests.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    },
+    {
+      "path": "/api/workspace-billing",
+      "status": 401,
+      "expectedStatus": 401,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    },
+    {
+      "path": "/api/workspace-billing-webhook",
+      "status": 405,
+      "expectedStatus": 405,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    },
+    {
+      "path": "/.env",
+      "status": 404,
+      "expectedStatus": 404,
+      "capturedHashMatchesState": true,
+      "ledgerMatchesCapture": true,
+      "originalCheckOk": true
+    }
+  ],
+  "javascript": [
+    {
+      "file": "desk-billing.js",
+      "sourceAndPublishedSha256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+      "exactDistBytes": true
+    },
+    {
+      "file": "desk-connections.js",
+      "sourceAndPublishedSha256": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+      "exactDistBytes": true
+    },
+    {
+      "file": "desk-requests.js",
+      "sourceAndPublishedSha256": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+      "exactDistBytes": true
+    }
+  ],
+  "html": [
+    {
+      "file": "desk.html",
+      "capture": "02_desk.body",
+      "sourceSha256": "a4d16e14f5e824c7dbd9efeeb715195d6eb2a4ef700de6cfe109b7a0eb91a267",
+      "captureSha256": "0ff413562c4c91690cad80fb9e59f8d0b02bad2fdde37fe14168cf767a20eace",
+      "exactBytes": false,
+      "tagCountsEqual": true,
+      "allOtherBytesEqual": true,
+      "changes": [
+        {
+          "selectedTagIndex": 1,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "index.html",
+          "publishedHref": "/"
+        },
+        {
+          "selectedTagIndex": 3,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "onboard.html?signin=1",
+          "publishedHref": "/onboard?signin=1"
+        },
+        {
+          "selectedTagIndex": 17,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "privacy-policy.html",
+          "publishedHref": "/privacy-policy"
+        }
+      ],
+      "unexplainedChanges": [],
+      "acceptedPreciseTransforms": true
+    },
+    {
+      "file": "privacy-policy.html",
+      "capture": "03_privacy-policy.body",
+      "sourceSha256": "fa318990cba44a568d751f8ccc8e632067bdc0806c371ee43978601e8331cfc3",
+      "captureSha256": "b7c91822fceb30c0a7f95a2ec2292d97ecf90fa66031e87b405c64b579de02fe",
+      "exactBytes": false,
+      "tagCountsEqual": true,
+      "allOtherBytesEqual": true,
+      "changes": [
+        {
+          "selectedTagIndex": 0,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "index.html",
+          "publishedHref": "/"
+        },
+        {
+          "selectedTagIndex": 1,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "index.html#plans",
+          "publishedHref": "/#plans"
+        },
+        {
+          "selectedTagIndex": 2,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "index.html#week",
+          "publishedHref": "/#week"
+        },
+        {
+          "selectedTagIndex": 3,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "about.html",
+          "publishedHref": "/about"
+        },
+        {
+          "selectedTagIndex": 4,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "index.html#pilot",
+          "publishedHref": "/#pilot"
+        },
+        {
+          "selectedTagIndex": 7,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "sms-terms.html",
+          "publishedHref": "/sms-terms"
+        },
+        {
+          "selectedTagIndex": 13,
+          "tag": "form",
+          "kind": "exact_named_netlify_form_build_transform",
+          "allowed": true,
+          "sourceOpeningTag": "<form name=\"agent-lead\" netlify netlify-honeypot=\"bot-field\" hidden>",
+          "publishedOpeningTag": "<form hidden method='post' name='agent-lead'>"
+        },
+        {
+          "selectedTagIndex": 14,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "index.html",
+          "publishedHref": "/"
+        },
+        {
+          "selectedTagIndex": 18,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "houston.html",
+          "publishedHref": "/houston"
+        },
+        {
+          "selectedTagIndex": 19,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "industries.html",
+          "publishedHref": "/industries"
+        },
+        {
+          "selectedTagIndex": 20,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "locations.html",
+          "publishedHref": "/locations"
+        },
+        {
+          "selectedTagIndex": 21,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "guides.html",
+          "publishedHref": "/guides"
+        },
+        {
+          "selectedTagIndex": 22,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "insights.html",
+          "publishedHref": "/insights"
+        },
+        {
+          "selectedTagIndex": 23,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "privacy-policy.html",
+          "publishedHref": "/privacy-policy"
+        },
+        {
+          "selectedTagIndex": 24,
+          "tag": "a",
+          "kind": "existing_public_page_pretty_url_and_attribute_serialization",
+          "allowed": true,
+          "sourceHref": "terms-of-service.html",
+          "publishedHref": "/terms-of-service"
+        }
+      ],
+      "unexplainedChanges": [],
+      "acceptedPreciseTransforms": true
+    }
+  ],
+  "boundary": {
+    "liveSampled": {
+      "/.env": 404,
+      "/api/workspace-billing": 401,
+      "/api/workspace-billing-webhook": 405
+    },
+    "billing401Message": {
+      "error": "verification_required",
+      "message": "Sign in by email to manage billing."
+    },
+    "privatePackaging": "All 231 public-package files and private exclusions were independently accepted in /tmp/mc-release-47e3c64-qa-preflight.json. Product/scripts/scratchpad/manage were not additionally sampled live; no budget remains.",
+    "newModuleMarkers": true,
+    "googlePrivacyAnchor": true
+  },
+  "health": {
+    "capture": {
+      "ok": true,
+      "lastRunAt": "2026-10-23T20:20:18.975Z",
+      "minutesAgo": 9,
+      "failingBlocks": []
+    },
+    "publicationAt": "2026-10-23T20:28:55.359Z",
+    "recordPredatesPublication": true,
+    "acceptedMeaning": "HTTP200 and a healthy captured snapshot only; no post-publication scheduler run or customer/provider delivery established."
+  },
+  "environment": {
+    "recordedProjectionsUnchanged": true,
+    "calendarConnectionAndDeliveryRetained": true,
+    "newActivationOrFinancialConfiguration": false,
+    "rawEnvironmentNotReadByQA": true
+  },
+  "sourceGuard": {
+    "files": 464,
+    "noRuntimeConfigSourceDrift": true,
+    "mismatches": [],
+    "frozenHead": "47e3c64163d20166970b6d309fbf6045a9de33b2"
+  },
+  "handoffReview": {
+    "script": "/tmp/mc-close-fd50-handoff.py",
+    "scriptSha256": "ca0e5c1e799647395005209661ef9fbb11e5fa7199752e7673d24cd752f24f31",
+    "executedByQA": false,
+    "initialRequirements": "Preserve raw state false; separate precise-transform acceptance; qualify pre-release scheduler timestamp; include staged-change guard and durable captures/references; reconcile stale active Google observations.",
+    "requirementsResolved": true,
+    "publicationClaimOnly": true,
+    "remainingBlockersInThisPublicationScope": []
+  },
+  "limits": [
+    "No authenticated customer journey, signup/email, installation, AI enquiry, owner receipt, voice/text, Google grant/event, paid-service outcome or full-service launch is accepted by these captures.",
+    "No additional external requests or effects are authorized by this offline review.",
+    "The failed original push remains recorded; no protection bypass or second build."
+  ],
+  "effectsByQA": {
+    "externalRequests": 0,
+    "browser": 0,
+    "tests": 0,
+    "builds": 0,
+    "pushes": 0,
+    "deploys": 0,
+    "environmentWrites": 0
+  },
+  "finalHandoffAudit": {
+    "at": "2026-10-23T20:35:19.223088+00:00",
+    "ok": true,
+    "changedOrNewFiles": 20,
+    "onlyThreeDocsEightReceiptsNineBodies": true,
+    "mirroredFilesMatch": true,
+    "mirrorMismatches": [],
+    "protectedOriginalMainUntracked": 13,
+    "protectedHashesUnchanged": true,
+    "protectedMismatches": [],
+    "mainTrackedChanges": [
+      "product/LAUNCH-CONTROL.json"
+    ],
+    "mainRuntimeUntouched": true,
+    "sourceGuardFiles": 464,
+    "sourceDrift": [],
+    "rawFailureAndLedgerExactlyPreserved": true,
+    "derivedReferencesResolve": true,
+    "captures": [
+      {
+        "path": "scratchpad/launch-closure-publication-captured/01_api_health.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/02_desk.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/03_privacy-policy.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/04_desk-billing.js.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/05_desk-connections.js.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/06_desk-requests.js.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/07_api_workspace-billing.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/08_api_workspace-billing-webhook.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      },
+      {
+        "path": "scratchpad/launch-closure-publication-captured/09_.env.body",
+        "existsInBoth": true,
+        "hashMatches": true
+      }
+    ],
+    "currentPublicationFieldsReconciled": true,
+    "currentLiveCredentialFieldsReconciled": true,
+    "googleBrandingVsDataApprovalAndPublicationReconciled": true,
+    "googleHistoricalObservationRetained": true,
+    "noExtraReleaseAuthorized": true
+  },
+  "reviewerCheckCorrection": {
+    "preservedFirstReceipt": "/tmp/mc-release-47e3c64-publication-qa-final.json",
+    "sha256": "f439bbdab95509e2c3fc1a5889970b7bc5ab2a7316797e9d0c36ae6559a73386",
+    "disposition": "First final-review helper required the literal word separately, missing the correct phrase separate public disclosure publication are accepted. Factual branding/Prepare/data-approval/publication fields pass; no product or document defect. Corrected offline comparison only; no external action."
+  }
+}
