@@ -1,0 +1,123 @@
+{
+  "at": "2026-10-23T10:25:55.551Z",
+  "mode": "actual managed resource POST boundaries; synthetic configured upper bounds, not provider rates; memory and installed Blobs SDK; zero physical network",
+  "sourceBefore": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "8ba3a0c7df90d2625c5b8c3577f92548cc0d6415215680b3bacbfbce3e119412",
+    "netlify/functions/lib/phone-activation.mjs": "ddbbd71c07ae076a659f5f60d7f0d695ac722a3cf452e9dca61d5d2fd5515a76",
+    "netlify/functions/lib/phone-twilio.mjs": "3e9d47c879088d191a20f22d4300d6b91d222fb0e8a8502f8dd9dc5e3f1902bd",
+    "netlify/functions/lib/messaging-activation.mjs": "c3ca3a24ac28932c8d1b0ca744e17304808ab06f01776125d473d9b69a92e389",
+    "netlify/functions/lib/messaging-provider.mjs": "b5f962c2e6bbd070b62da29c202e70d4dae3bec92af621742e26bd6bb63a20cd",
+    "scripts/managed-resource-admission-check.mjs": "607238748bc55b6fe7dfa8b081f64dee798227dffe4c83398d9b181f95844418",
+    "scripts/phone-activation-check.mjs": "56e2764fa79a8b00af6ed2b4a147fc7b719944acde4b129ae236cc26e54b4c9c",
+    "scripts/messaging-activation-check.mjs": "57eb942befaf0f2325c47e9e81464c0daba44bf3ebb356454a1013cca3cf62d4"
+  },
+  "rawSourceBefore": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "35e345bbd24c76277b3c24aea18a70fc7e46951e8901f5129ad690c0e59283f3",
+    "netlify/functions/lib/phone-activation.mjs": "983b70d7bdc083054c98db1b74899a307cfbdaeb1b070797ab3ed28b71ce3448",
+    "netlify/functions/lib/phone-twilio.mjs": "b6c1a5ab6679446da11b36d00bdbe2102f38fe543562fcbf716e4bd93d7dc860",
+    "netlify/functions/lib/messaging-activation.mjs": "375c059d0964609154547255ab5baab89a86a32cacf9d7722b29e1e1a9ad9f8a",
+    "netlify/functions/lib/messaging-provider.mjs": "9760781873b050a60eca6bbc18c8c2f984c441dcd0daaf6c23a63c414a899f6f",
+    "scripts/managed-resource-admission-check.mjs": "4616f6b405e6d1e2e274b3d353510c225e0e35e2763967954c5f566c811166aa",
+    "scripts/phone-activation-check.mjs": "3878e7211511196a84857b81b0915e1a76529798278740c5ee58eccb041cfe4b",
+    "scripts/messaging-activation-check.mjs": "46a124eb051c0b4f29d863ecb31a436c03da94c7c7940118dc6698adf6b41d6b"
+  },
+  "harnessHash": "0e3f9cd08ffd82bdb4f555b07ae9b0227d45e25e0da074cdfc69959abd9274f0",
+  "checks": [
+    {
+      "name": "number: tenant replacement inside final authorization must prevent actual paid POST",
+      "pass": false,
+      "error": "A changed tenant after the last awaited authorization must not dispatch a paid create\n\n1 !== 0\n",
+      "stack": "AssertionError [ERR_ASSERTION]: A changed tenant after the last awaited authorization must not dispatch a paid create\n\n1 !== 0\n\n    at file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:83:339\n    at async check (file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:77:344)\n    at async file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:80:38"
+    },
+    {
+      "name": "brand: tenant replacement inside final authorization must prevent actual paid POST",
+      "pass": false,
+      "error": "A changed tenant after the last awaited authorization must not dispatch a paid create\n\n1 !== 0\n",
+      "stack": "AssertionError [ERR_ASSERTION]: A changed tenant after the last awaited authorization must not dispatch a paid create\n\n1 !== 0\n\n    at file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:83:339\n    at async check (file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:77:344)\n    at async file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:80:38"
+    },
+    {
+      "name": "unbound retained old-account resource cannot be marked released from current-account404",
+      "pass": false,
+      "error": "Unknown original provider account must not infer confirmed cleanup from another account404",
+      "stack": "AssertionError [ERR_ASSERTION]: Unknown original provider account must not infer confirmed cleanup from another account404\n    at file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:85:851\n    at async check (file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:77:344)\n    at async file:///private/tmp/mc-managed-resource-admission-e5cb/scratchpad/resource-admission-independent-boundary-race.mjs:85:1"
+    }
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    }
+  ],
+  "conflicts": 0,
+  "physicalNetworkAttempts": 0,
+  "freeze": "scratchpad/resource-admission-engineer-disabled-rates-freeze.json",
+  "observations": [
+    {
+      "kind": "number",
+      "authorizationCallbacks": 2,
+      "state": "number_acquired",
+      "reasonCode": null,
+      "paidPOSTs": 1,
+      "retainedLedger": {
+        "numbers": 1,
+        "brands": 0,
+        "campaigns": 0,
+        "setupCents": 0,
+        "monthlyCents": 115
+      }
+    },
+    {
+      "kind": "brand",
+      "authorizationCallbacks": 2,
+      "state": "preparing",
+      "reasonCode": null,
+      "paidPOSTs": 1,
+      "retainedLedger": {
+        "numbers": 0,
+        "brands": 1,
+        "campaigns": 0,
+        "setupCents": 4400,
+        "monthlyCents": 0
+      }
+    },
+    {
+      "case": "unbound retained cleanup",
+      "state": "cancelled",
+      "releasedAtPresent": true,
+      "resourceIdRetained": true
+    }
+  ],
+  "rawSourceAfter": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "35e345bbd24c76277b3c24aea18a70fc7e46951e8901f5129ad690c0e59283f3",
+    "netlify/functions/lib/phone-activation.mjs": "983b70d7bdc083054c98db1b74899a307cfbdaeb1b070797ab3ed28b71ce3448",
+    "netlify/functions/lib/phone-twilio.mjs": "b6c1a5ab6679446da11b36d00bdbe2102f38fe543562fcbf716e4bd93d7dc860",
+    "netlify/functions/lib/messaging-activation.mjs": "375c059d0964609154547255ab5baab89a86a32cacf9d7722b29e1e1a9ad9f8a",
+    "netlify/functions/lib/messaging-provider.mjs": "9760781873b050a60eca6bbc18c8c2f984c441dcd0daaf6c23a63c414a899f6f",
+    "scripts/managed-resource-admission-check.mjs": "4616f6b405e6d1e2e274b3d353510c225e0e35e2763967954c5f566c811166aa",
+    "scripts/phone-activation-check.mjs": "3878e7211511196a84857b81b0915e1a76529798278740c5ee58eccb041cfe4b",
+    "scripts/messaging-activation-check.mjs": "46a124eb051c0b4f29d863ecb31a436c03da94c7c7940118dc6698adf6b41d6b"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "8ba3a0c7df90d2625c5b8c3577f92548cc0d6415215680b3bacbfbce3e119412",
+    "netlify/functions/lib/phone-activation.mjs": "ddbbd71c07ae076a659f5f60d7f0d695ac722a3cf452e9dca61d5d2fd5515a76",
+    "netlify/functions/lib/phone-twilio.mjs": "3e9d47c879088d191a20f22d4300d6b91d222fb0e8a8502f8dd9dc5e3f1902bd",
+    "netlify/functions/lib/messaging-activation.mjs": "c3ca3a24ac28932c8d1b0ca744e17304808ab06f01776125d473d9b69a92e389",
+    "netlify/functions/lib/messaging-provider.mjs": "b5f962c2e6bbd070b62da29c202e70d4dae3bec92af621742e26bd6bb63a20cd",
+    "scripts/managed-resource-admission-check.mjs": "607238748bc55b6fe7dfa8b081f64dee798227dffe4c83398d9b181f95844418",
+    "scripts/phone-activation-check.mjs": "56e2764fa79a8b00af6ed2b4a147fc7b719944acde4b129ae236cc26e54b4c9c",
+    "scripts/messaging-activation-check.mjs": "57eb942befaf0f2325c47e9e81464c0daba44bf3ebb356454a1013cca3cf62d4"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "physicalNetwork": 0,
+    "sourceStable": true
+  }
+}

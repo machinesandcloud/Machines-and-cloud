@@ -3,8 +3,10 @@ import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:
 import { atomicUpdate, list } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient } from "./setup.mjs";
-import { policyUrls } from "./config.mjs";
+import { buildMessagingProgram } from "./messaging-program.mjs";
+export { buildMessagingProgram } from "./messaging-program.mjs";
 import { createTwilioMessagingAdapter } from "./messaging-provider.mjs";
+import { ManagedResourceAdmissionError } from './managed-resource-admission.mjs';
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle } from "./phone-activation.mjs";
 
 export class MessagingActivationError extends Error { constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; } }
@@ -46,22 +48,7 @@ const details = {
   cancel_pending: "Texting cancellation is saved. We are confirming the registration and sender cleanup; records are retained.",
   cancelled: "Texting has been disconnected and recorded sender cleanup is confirmed. Business registration and consent records are retained.",
 };
-export function buildMessagingProgram(c) {
-  const name = String(c.business?.name || "Your service company").trim().slice(0, 100), urls = policyUrls(c.slug), help = c.phone?.businessNumber || c.owner?.email;
-  const program = { version: "customer_care_ongoing_appointments_v2",
-    description: `${name} sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.`,
-    messageFlow: `Customers first text ${name} at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: ${urls.terms}. Privacy: ${urls.privacy}. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.`,
-    messageSamples: [
-      `${name}: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.`,
-      `${name}: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.`,
-      `${name}: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts.`,
-    ], privacyPolicyUrl: urls.privacy, termsAndConditionsUrl: urls.terms,
-    optInMessage: `${name}: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.`,
-    optOutMessage: `${name}: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.`,
-    helpMessage: `${name}: help with service texts at ${help}. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.`,
-  };
-  return { ...program, digest: hash(JSON.stringify(program)) };
-}
+
 function encryptionKey() {
   const encoded = process.env.PLATFORM_DATA_ENCRYPTION_KEY || process.env.CALENDAR_TOKEN_ENCRYPTION_KEY || "";
   if (!/^[A-Za-z0-9+/]{43}=$/.test(encoded) || Buffer.from(encoded, "base64").length !== 32) throw new MessagingActivationError("private_storage_unavailable", "Secure registration storage is not configured.", 503);
@@ -103,7 +90,7 @@ async function authorize(c, body) {
 function view(row, current) {
   const rulesNeedReview = row.state === "ready" && !reviewed(current), ready = row.state === "ready" && !rulesNeedReview && !row.cancelRequestedAt && !closed(current) && row.programDigest === buildMessagingProgram(current).digest && approved(row.approvals) && row.deliveryProof && Date.now() - Date.parse(row.lastVerifiedAt || "") <= APPROVAL_TTL_MS;
   const {expired,phoneChanged,rulesChanged,renewable}=probeState(row,current);
-  return { id: row.id, label: "Text messages", state: row.state, active: !!ready, detail: rulesNeedReview ? "Your texting connection is verified. Review and test your current saved business rules before it answers customers." : renewable ? expired?"The setup text expired. Request a fresh setup text to verify this connection.":"Your mobile number or saved business details changed. Request a fresh setup text to verify this connection." : details[row.state] || details.blocked, createdAt: row.createdAt, updatedAt: row.updatedAt,
+  return { id: row.id, label: "Text messages", state: row.state, active: !!ready, detail: rulesNeedReview ? "Your texting connection is verified. Review and test your current saved business rules before it answers customers." : renewable ? expired?"The setup text expired. Request a fresh setup text to verify this connection.":"Your mobile number or saved business details changed. Request a fresh setup text to verify this connection." : row.state==='waiting_platform'&&row.reasonCode?.startsWith('resource_')?row.resourceWaitDetail||details.waiting_platform:details[row.state] || details.blocked, createdAt: row.createdAt, updatedAt: row.updatedAt,
     nextCheckAt: row.nextCheckAt || null, reasonCode: rulesNeedReview ? "desk_review_required" : expired ? 'setup_reply_expired' : phoneChanged?'setup_mobile_changed':rulesChanged?'setup_rules_changed':row.reasonCode || null, submissionRevision: row.submissionRevision, customerAction: rulesNeedReview ? "review_current_rules" : row.state === "needs_action" ? "correct_registration" : row.state === "awaiting_test" ? renewable?'renew_setup_text':"reply_to_setup_text" : null,
     probe:row.probe?{nonce:row.probe.nonce,to:row.probe.to,expiresAt:row.probe.expiresAt,expired,renewable}:null,
     issues: (row.issues || []).map(item => ({ code: String(item.code).slice(0, 40), field: String(item.field || "").slice(0, 80) })), cancellationRequested: !!row.cancelRequestedAt, cleanupConfirmed: !!row.cleanupConfirmedAt,
@@ -131,6 +118,7 @@ function engine({ provider, offer: suppliedOffer, gate = false, allowExpiredOffe
       if (old) { if (old.tenantIdentity !== tenant(current)) throw new MessagingActivationError("intent_conflict", "This setup belongs to a different workspace."); if (old.inputHash !== inputHash || old.offerDigest !== digest) throw new MessagingActivationError("correction_required", "Use the existing registration correction instead of creating another registration."); return { result: old }; }
       const row = { version: 1, id, slug: current.slug, tenantIdentity: tenant(current), correlationId: hash("messaging-correlation:" + id), inputRevision: body.expectedRevision, inputHash, programDigest: program.digest,
         privateData, offer: structuredClone(offer), offerDigest: digest, state: "queued", createdAt: at, updatedAt: at, submissionRevision: 1, steps: {}, resources: {}, cleanup: {},
+        ...(/^AC[a-f0-9]{32}$/i.test(process.env.TWILIO_ACCOUNT_SID||'')?{resourceAccountHash:hash(process.env.TWILIO_ACCOUNT_SID)}:{}),
         inboundUrl: `${new URL(process.env.URL || "https://machinesandcloud.com").origin}/api/managed-sms`, statusUrl: `${new URL(process.env.URL || "https://machinesandcloud.com").origin}/api/managed-sms/status`, notifyEmail: normalizeAccountEmail(process.env.TWILIO_NOTIFY_EMAIL || process.env.ADMIN_EMAILS?.split(",")[0] || current.owner.email),
         authority: { actorEmail: normalizeAccountEmail(body.actor.email), acceptedAt: at, offerDigest: digest, programDigest: program.digest, legalAccuracy: true, explicitConsumerConsent: true, customerAuthority: true, costsAccepted: true, testPhoneConsent: true, testPhone: current.owner.phone }, history: [{ at, type: "customer_authorized", actorEmail: normalizeAccountEmail(body.actor.email) }], reasonCode: null };
       return { value: row, result: row };
@@ -181,7 +169,7 @@ function engine({ provider, offer: suppliedOffer, gate = false, allowExpiredOffe
     row = await update(id, old => old.claim && Date.parse(old.claim.until) > Date.now() ? null : ({ ...old, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (row.claim?.token !== token) return view(row, current);
     const change = fn => update(id, old => old.claim?.token === token ? fn(old) : null);
-    const authorizeWrite = async (cleanup = false) => { const [latest, job, brake] = await Promise.all([strictRead("clients", row.slug), strictRead(STORE, id), strictRead("health", "brake")]), parent = latest ? await parentLifecycle(latest) : null; return enabled() && brake?.on !== true && Date.now() < deadlineAt && latest && isSupportedSelfServiceClient(latest) && tenant(latest) === row.tenantIdentity && job?.claim?.token === token && job.submissionRevision === row.submissionRevision && (cleanup ? !!job.cancelRequestedAt : !job.cancelRequestedAt && !parent?.cancelRequestedAt && parent?.cancellationRequested !== true && !closed(latest) && job.programDigest === buildMessagingProgram(latest).digest); };
+    const authorizeWrite = async (cleanup = false) => { const [context, job, brake] = await Promise.all([strictRead("clients", row.slug), strictRead(STORE, id), strictRead("health", "brake")]), parent = context ? await parentLifecycle(context) : null,latest=await strictRead('clients',row.slug); return enabled() && brake?.on !== true && Date.now() < deadlineAt && latest && isSupportedSelfServiceClient(latest) && tenant(latest) === row.tenantIdentity && job?.claim?.token === token && job.submissionRevision === row.submissionRevision && (cleanup ? !!job.cancelRequestedAt : !job.cancelRequestedAt && !parent?.cancelRequestedAt && parent?.cancellationRequested !== true && !closed(latest) && job.programDigest === buildMessagingProgram(latest).digest); };
     try {
       if (!row.number && !row.cancelRequestedAt) {
         const number = await resolveNumber(current);
@@ -242,6 +230,10 @@ function engine({ provider, offer: suppliedOffer, gate = false, allowExpiredOffe
     } catch (error) {
       row = await change(old => {
         const dispatched = Object.entries(old.steps).find(([, step]) => step.state === "dispatching"), steps = { ...old.steps };
+        if(error instanceof ManagedResourceAdmissionError&&dispatched&&steps[dispatched[0]].startedAt===row.steps[dispatched[0]]?.startedAt&&steps[dispatched[0]].submissionRevision===row.submissionRevision) {
+          steps[dispatched[0]]={state:'pending'};
+          return {...old,steps,state:old.cancelRequestedAt?'cancel_pending':'waiting_platform',reasonCode:error.code,resourceWaitDetail:error.message,claim:null,nextCheckAt:null};
+        }
         if (dispatched) steps[dispatched[0]] = { ...steps[dispatched[0]], state: error?.code === "dispatch_not_authorized" ? "pending" : "uncertain" };
         return { ...old, steps, state: old.cancelRequestedAt ? "cancel_pending" : dispatched && error?.code !== "dispatch_not_authorized" ? "uncertain" : "blocked", reasonCode: error?.code === "dispatch_not_authorized" ? "dispatch_not_authorized" : dispatched ? "provider_write_unconfirmed" : "provider_or_storage_check_failed", claim: null, nextCheckAt: new Date(Date.now() + 600000).toISOString() };
       }); return view(row, current);

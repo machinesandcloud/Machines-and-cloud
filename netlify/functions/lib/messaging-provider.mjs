@@ -1,5 +1,7 @@
 // Real Twilio ISV adapter. The activation engine, not an HTTP caller, owns this adapter.
 // A persisted dispatch intent precedes every write; a timeout is never permission to create again.
+import { createHash } from 'node:crypto';
+import { ManagedResourceAdmissionError, reserveManagedResource, assertManagedResourceReservation, assertManagedResourceDispatchPolicy, managedResourceAccountBinding, managedResourceAccountHash } from './managed-resource-admission.mjs';
 const POLICY_SECONDARY = "RNdfbf3fae0e1107f8aded0e7cead80bf5";
 const POLICY_A2P = "RNb0d4771c2c98518d916a3d4cd70a8f8b";
 const SID = (value, prefix) => new RegExp(`^${prefix}[a-f0-9]{32}$`, "i").test(value || "");
@@ -63,7 +65,7 @@ const toForm = fields => { const form = new URLSearchParams(); for (const [key, 
 const asObject = value => { if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid Twilio response"); return value; };
 export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = null } = {}) {
   const account = () => process.env.TWILIO_ACCOUNT_SID, primary = () => process.env.TWILIO_PRIMARY_PROFILE_SID;
-  async function request(host, path, method = "GET", fields) {
+  async function request(host, path, method = "GET", fields, binding = null, admission = null) {
     const beforeDispatch = message => { const error = new Error(message); if (method === "POST") error.code = "dispatch_not_authorized"; return error; };
     if (typeof executionAllowed !== "function" || executionAllowed() !== true) throw beforeDispatch("Messaging execution is disabled");
     const user = process.env.TWILIO_API_KEY || account(), password = process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN;
@@ -71,6 +73,8 @@ export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = nu
     const root = host === "messaging" ? "https://messaging.twilio.com/v1/" : host === "trusthub" ? "https://trusthub.twilio.com/v1/" : `https://api.twilio.com/2010-04-01/Accounts/${account()}/`;
     if (typeof path !== "string" || !/^[A-Za-z0-9_/.?=&%-]+$/.test(path) || path.includes("..")) throw new Error("Invalid provider path");
     const remaining = Math.min(5000, deadlineAt === null ? 5000 : deadlineAt - Date.now()); if (remaining <= 0) throw beforeDispatch("Messaging operation deadline reached");
+    if(binding&&binding!==managedResourceAccountHash())throw beforeDispatch('Messaging resource belongs to another provider account');
+    if(admission)assertManagedResourceDispatchPolicy(admission);
     const response = await fetch(root + path, { method, redirect: "error", signal: AbortSignal.timeout(remaining), headers: { Authorization: "Basic " + Buffer.from(`${user}:${password}`).toString("base64"), ...(fields ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) }, ...(fields ? { body: toForm(fields) } : {}) });
     if (response.status === 404 || response.status === 204) return { status: response.status, data: null };
     if (!response.ok) { const error = new Error("Twilio messaging request could not be confirmed"); error.code = response.status >= 400 && response.status < 500 && response.status !== 429 ? "provider_rejected" : "provider_unavailable"; throw error; }
@@ -80,9 +84,9 @@ export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = nu
     if (!data || data.account_sid !== account() || !SID(data.sid, step.prefix) || !step.matches(data)) throw new Error("Messaging resource identity mismatch");
     return data;
   }
-  const readDescriptor = async (step, sid) => {
+  const readDescriptor = async (step, sid, binding) => {
     const path = step.update ? step.path : step.path.endsWith(".json") ? step.path.slice(0, -5) + `/${sid}.json` : `${step.path}/${sid}`;
-    const found = await request(step.host, path); return found.status === 404 ? null : validate(found.data, step);
+    const found = await request(step.host, path,'GET',null,binding); return found.status === 404 ? null : validate(found.data, step);
   };
   function correctionMatches(data, step) {
     if (step.paid) return false; // A FAILED paid resubmission cannot be inferred from unchanged fields.
@@ -91,22 +95,37 @@ export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = nu
   }
   return {
     async preflight(row) {
-      const profile = (await request("trusthub", `CustomerProfiles/${primary()}`)).data;
+      const binding=await managedResourceAccountBinding('brand',row.id);
+      const profile = (await request("trusthub", `CustomerProfiles/${primary()}`,'GET',null,binding)).data;
       if (!profile || profile.sid !== primary() || profile.account_sid !== account() || profile.status !== "twilio-approved") throw new Error("The platform ISV profile is not approved");
-      const number = (await request("account", `IncomingPhoneNumbers/${row.number.sid}.json`)).data;
+      const number = (await request("account", `IncomingPhoneNumbers/${row.number.sid}.json`,'GET',null,binding)).data;
       if (!number || number.account_sid !== account() || number.sid !== row.number.sid || number.phone_number !== row.number.number || number.capabilities?.sms !== true) throw new Error("The customer's SMS number is unavailable");
       return true;
     },
     async execute({ row, name, authorize }) {
+      if(['correct_brand','correct_campaign'].includes(name))throw new ManagedResourceAdmissionError('resource_paid_correction_unapproved','Your registration records are retained. The platform must review any paid brand or campaign correction before it can be submitted.');
       const step = descriptor(row, name, primary());
+      const binding=await managedResourceAccountBinding('brand',row.id);
+      let input,admission;
+      if(step.paid) {
+        if(createHash('sha256').update(JSON.stringify({legal:row.legal,program:row.program})).digest('hex')!==row.inputHash)throw new ManagedResourceAdmissionError('resource_intent_changed');
+        input={kind:name,operationId:row.id,claimToken:row.claim?.token,correlationId:row.correlationId,offer:row.offer,inputHash:row.inputHash,programDigest:row.programDigest,submissionRevision:row.submissionRevision,registrationRefs:{profileSid:row.resources?.profile?.sid,trustProductSid:row.resources?.trust_product?.sid,serviceSid:row.resources?.service?.sid,brandSid:row.resources?.brand?.sid,numberSid:row.number?.sid},payload:{host:step.host,path:step.path,fields:step.fields}};
+        try { admission=await reserveManagedResource(input); }
+        catch(error) { throw error instanceof ManagedResourceAdmissionError?error:new ManagedResourceAdmissionError('resource_admission_unavailable'); }
+      }
       if (typeof authorize !== "function" || !await authorize()) { const error = new Error("Messaging dispatch is no longer authorized"); error.code = "dispatch_not_authorized"; throw error; }
-      const created = await request(step.host, step.path, "POST", step.fields), data = validate(created.data, step);
+      if(admission) {
+        try { await assertManagedResourceReservation(input,admission); }
+        catch(error) { throw error instanceof ManagedResourceAdmissionError?error:new ManagedResourceAdmissionError('resource_admission_unavailable'); }
+      }
+      const created = await request(step.host, step.path, "POST", step.fields,admission?.providerAccountHash||binding,admission), data = validate(created.data, step);
       return { ...receipt(data, created.requestId), ...(name.startsWith("evaluate_") ? { compliant: data.status === "compliant", issues: (data.results || []).flatMap(item => item.passed === false ? (item.invalid || []).map(field => ({ code: String(field.error_code || item.error_code || "invalid"), field: String(field.object_field || item.requirement_name || "business").slice(0, 80) })) : []).slice(0, 20) } : {}) };
     },
     async reconcile({ row, name }) {
+      const binding=await managedResourceAccountBinding('brand',row.id);
       const step = descriptor(row, name, primary()), known = row.resources?.[name]?.sid;
       if (step.update || known) {
-        const data = await readDescriptor(step, known);
+        const data = await readDescriptor(step, known,binding);
         if (!data) return { status: "unknown", reasonCode: "known_resource_missing" };
         if (step.update && !correctionMatches(data, step)) {
           if (step.paid && ["PENDING", "IN_REVIEW", "APPROVED", "IN_PROGRESS", "VERIFIED"].includes(data.status || data.campaign_status)) return { status: "found", resource: receipt(data) };
@@ -114,7 +133,7 @@ export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = nu
         }
         return { status: "found", resource: { ...receipt(data), ...(name.startsWith("evaluate_") ? { compliant: data.status === "compliant", issues: [] } : {}) } };
       }
-      const query = step.path.includes("?") ? "&PageSize=100" : "?PageSize=100", found = (await request(step.host, step.path + query)).data;
+      const query = step.path.includes("?") ? "&PageSize=100" : "?PageSize=100", found = (await request(step.host, step.path + query,'GET',null,binding)).data;
       const entries = found?.[step.collection]; if (!Array.isArray(entries)) throw new Error("The provider list response is incomplete");
       const matches = entries.filter(data => data.account_sid === account() && step.matches(data));
       // The API does not promise creation idempotency or unique FriendlyNames. A zero match, a
@@ -123,38 +142,43 @@ export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = nu
       const data = validate(matches[0], step); return { status: "found", resource: { ...receipt(data), ...(name.startsWith("evaluate_") ? { compliant: data.status === "compliant", issues: [] } : {}) } };
     },
     async approvals(row) {
-      const profile = validate((await request("trusthub", `CustomerProfiles/${row.resources.profile.sid}`)).data, descriptor(row, "profile", primary()));
-      const trust = validate((await request("trusthub", `TrustProducts/${row.resources.trust_product.sid}`)).data, descriptor(row, "trust_product", primary()));
-      const brand = validate((await request("messaging", `a2p/BrandRegistrations/${row.resources.brand.sid}`)).data, descriptor(row, "brand", primary()));
+      const binding=await managedResourceAccountBinding('brand',row.id);
+      const profile = validate((await request("trusthub", `CustomerProfiles/${row.resources.profile.sid}`,'GET',null,binding)).data, descriptor(row, "profile", primary()));
+      const trust = validate((await request("trusthub", `TrustProducts/${row.resources.trust_product.sid}`,'GET',null,binding)).data, descriptor(row, "trust_product", primary()));
+      const brand = validate((await request("messaging", `a2p/BrandRegistrations/${row.resources.brand.sid}`,'GET',null,binding)).data, descriptor(row, "brand", primary()));
       let campaign = null;
-      if (row.resources.campaign) campaign = validate((await request("messaging", `Services/${row.resources.service.sid}/Compliance/Usa2p/${row.resources.campaign.sid}`)).data, descriptor(row, "campaign", primary()));
+      if (row.resources.campaign) campaign = validate((await request("messaging", `Services/${row.resources.service.sid}/Compliance/Usa2p/${row.resources.campaign.sid}`,'GET',null,binding)).data, descriptor(row, "campaign", primary()));
       return { profile: profile.status, trust: trust.status, brand: brand.status, campaign: campaign?.campaign_status || null, issues: [...receipt(brand).errors, ...(campaign ? receipt(campaign).errors : [])] };
     },
     async usecase(row) {
-      const data = (await request("messaging", `Services/${row.resources.service.sid}/Compliance/Usa2p/Usecases?BrandRegistrationSid=${row.resources.brand.sid}`)).data;
+      const binding=await managedResourceAccountBinding('brand',row.id);
+      const data = (await request("messaging", `Services/${row.resources.service.sid}/Compliance/Usa2p/Usecases?BrandRegistrationSid=${row.resources.brand.sid}`,'GET',null,binding)).data;
       return Array.isArray(data.us_app_to_person_usecases) && data.us_app_to_person_usecases.some(item => item.code === "CUSTOMER_CARE" && item.post_approval_required === false);
     },
     async verify(row) {
-      const service = validate((await request("messaging", `Services/${row.resources.service.sid}`)).data, descriptor(row, "service", primary()));
-      const sender = validate((await request("messaging", `Services/${row.resources.service.sid}/PhoneNumbers/${row.number.sid}`)).data, descriptor(row, "sender", primary()));
-      const number = validate((await request("account", `IncomingPhoneNumbers/${row.number.sid}.json`)).data, descriptor(row, "number_webhook", primary()));
+      const binding=await managedResourceAccountBinding('brand',row.id);
+      const service = validate((await request("messaging", `Services/${row.resources.service.sid}`,'GET',null,binding)).data, descriptor(row, "service", primary()));
+      const sender = validate((await request("messaging", `Services/${row.resources.service.sid}/PhoneNumbers/${row.number.sid}`,'GET',null,binding)).data, descriptor(row, "sender", primary()));
+      const number = validate((await request("account", `IncomingPhoneNumbers/${row.number.sid}.json`,'GET',null,binding)).data, descriptor(row, "number_webhook", primary()));
       return service.inbound_request_url === row.inboundUrl && service.inbound_method === "POST" && service.status_callback === row.statusUrl && service.use_inbound_webhook_on_number === false && sender.sid === row.number.sid && number.sms_url === row.inboundUrl && number.sms_method === "POST";
     },
     async verifyProbe(row, { outboundMessageSid, inboundMessageSid }) {
       if (!SID(outboundMessageSid, "SM") || !SID(inboundMessageSid, "SM") || outboundMessageSid === inboundMessageSid || !row.probe) return false;
-      const outbound = (await request("account", `Messages/${outboundMessageSid}.json`)).data, inbound = (await request("account", `Messages/${inboundMessageSid}.json`)).data;
+      const binding=await managedResourceAccountBinding('brand',row.id);
+      const outbound = (await request("account", `Messages/${outboundMessageSid}.json`,'GET',null,binding)).data, inbound = (await request("account", `Messages/${inboundMessageSid}.json`,'GET',null,binding)).data;
       const within = data => Number.isFinite(Date.parse(data?.date_created)) && Date.parse(data.date_created) >= Date.parse(row.probe.createdAt) - 60000 && Date.parse(data.date_created) <= Date.parse(row.probe.expiresAt);
       return outbound?.account_sid === account() && inbound?.account_sid === account() && outbound.sid === outboundMessageSid && inbound.sid === inboundMessageSid && outbound.status === "delivered" && outbound.direction === "outbound-api" && outbound.messaging_service_sid === row.resources.service.sid && outbound.from === row.number.number && outbound.to === row.probe.to && outbound.body === row.probe.body && within(outbound) && inbound.direction === "inbound" && inbound.from === row.probe.to && inbound.to === row.number.number && String(inbound.body).trim() === row.probe.nonce && within(inbound);
     },
     async cleanup({ row, name, authorize }) {
+      const binding=await managedResourceAccountBinding('brand',row.id);
       const service = row.resources.service?.sid;
       const path = name === "campaign" ? `Services/${service}/Compliance/Usa2p/${row.resources.campaign.sid}` : name === "sender" ? `Services/${service}/PhoneNumbers/${row.number.sid}` : `Services/${service}`;
-      const before = await request("messaging", path);
+      const before = await request("messaging", path,'GET',null,binding);
       if (before.status === 404) return { confirmed: true };
       validate(before.data, descriptor(row, name, primary()));
       if (typeof authorize !== "function" || !await authorize()) throw new Error("Cancellation authority changed");
-      await request("messaging", path, "DELETE");
-      return { confirmed: (await request("messaging", path)).status === 404 };
+      await request("messaging", path, "DELETE",null,binding);
+      return { confirmed: (await request("messaging", path,'GET',null,binding)).status === 404 };
     },
   };
 }

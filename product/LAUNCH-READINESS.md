@@ -1,3 +1,7 @@
+**Current locally accepted automation:** `/tmp/mc-managed-resource-admission-e5cb`, branch `work/managed-resource-admission`, based on published `e5cb71c`. One durable managed-resource ledger now admits number, initial brand and initial campaign creation under shared tenant/account counts, configured setup fees and monthly commitments. Exact pilot cohorts and automatic admission of new eligible shops use the same retained allowance. Expiry blocks new purchases while preserving authorized recorded maintenance; old unbound resources require review. [Acceptance](MANAGED-RESOURCE-ADMISSION-ACCEPTANCE-2026-10-23.json). All39required commands,8independent groups and11syntax files pass on stable source, with zero physical test traffic. Paid corrections remain outside this first admission.
+
+**Published boundary:** production is `e5cb71c7f23592539d9c292eb50123afbebf0f30`, READY deploy `6adb2d95532eace0e206ee14`, completed build `6adb2d95532eace0e206ee12`, October23at04:50CDT. Three builds have now run October23. The approved one-build/eight-read publication phase is closed. This newer resource-admission batch is local only; no additional publication or activation was performed. Main has unrelated unpublished runtime and must not be pushed wholesale. Earlier snapshots below are historical.
+
 ## Current delivery-recovery candidate · October 23
 
 The owner directed the team to finish the actual service rather than repeat unavailable-feature copy. The isolated `work/service-delivery-ready` candidate starts from published36918ed and contains these tested repairs:

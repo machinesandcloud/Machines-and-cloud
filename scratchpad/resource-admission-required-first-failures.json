@@ -1,0 +1,51 @@
+{
+  "originalsRetained": true,
+  "attempts": [
+    {
+      "receipt": "/tmp/mc-managed-resource-admission-required-final.json",
+      "sha256": "73f03a208205efda0e95e8f880144a268753ce8e7751efce04bb912fbbf6bdcf",
+      "summary": {
+        "required": 39,
+        "executed": 30,
+        "passed": 29,
+        "deniedPhysicalAttempts": 0,
+        "sourceStable": true,
+        "historicalReceiptsRestored": true
+      },
+      "failedCommands": [
+        {
+          "command": "node scripts/managed-sms-qa-check.mjs",
+          "exitCode": 1,
+          "log": "/tmp/mc-managed-resource-admission-required-final-30.log",
+          "sha256": "f9077d2aba887e9987d4942e0c15a42e94516f7b9018a650cf9eeee33d0fd0dd"
+        }
+      ],
+      "disposition": "Missing established account bindings in synthetic retained SMS resources",
+      "correction": "Fixture inputs only; no assertion or provider-failure injection weakened; application hashes unchanged."
+    },
+    {
+      "receipt": "/tmp/mc-managed-resource-admission-required-accepted.json",
+      "sha256": "8c40e7ae86b7105344217c8df725e4b6265f2513e71b6a25e792f6115806a693",
+      "summary": {
+        "required": 39,
+        "executed": 35,
+        "passed": 34,
+        "deniedPhysicalAttempts": 0,
+        "sourceStable": true,
+        "historicalReceiptsRestored": true
+      },
+      "failedCommands": [
+        {
+          "command": "node scripts/service-onboarding-qa-check.mjs",
+          "exitCode": 1,
+          "log": "/tmp/mc-managed-resource-admission-required-accepted-35.log",
+          "sha256": "b41fbc8d66fedf16277893e5460dbf6980b2ef2a5adb280813aef4aa51bd48ef"
+        }
+      ],
+      "disposition": "Synthetic coordinator omitted new mandatory creation allowance",
+      "correction": "Fixture inputs only; no assertion or provider-failure injection weakened; application hashes unchanged."
+    }
+  ],
+  "fixtureReview": "Independent reviewer reversed each fixture-only delta to reconstruct HEAD byte-for-byte; accepted application hashes remain unchanged.",
+  "currentGate": "resource-admission-required-pass.json"
+}

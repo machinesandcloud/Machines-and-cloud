@@ -1,5 +1,6 @@
 // Number acquisition only. No routing, assistant, messaging registration or channel activation.
 // Every request is made only through the caller's explicit product-wide execution gate.
+import { ManagedResourceAdmissionError, reserveManagedResource, assertManagedResourceReservation, assertManagedResourceDispatchPolicy, managedResourceAccountBinding, managedResourceAccountHash } from './managed-resource-admission.mjs';
 const sidValid = value => /^PN[a-f0-9]{32}$/i.test(value || "");
 const label = correlationId => "mc-phone-" + correlationId.slice(0, 55);
 const cents = value => {
@@ -8,12 +9,14 @@ const cents = value => {
   return Number(match[1]) * 100 + Number((match[2] || "").padEnd(2, "0"));
 };
 export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null }) {
-  async function request(path, method = "GET", body, pricing = false, deadline = Date.now() + 5000) {
+  async function request(path, method = "GET", body, pricing = false, deadline = Date.now() + 5000, binding = null, admission = null) {
     if (executionAllowed() !== true) throw new Error("Phone acquisition gate is closed");
     const account = process.env.TWILIO_ACCOUNT_SID, user = process.env.TWILIO_API_KEY || account, password = process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN;
     if (!/^AC[a-f0-9]{32}$/i.test(account || "") || !user || !password) throw new Error("Phone provider credentials unavailable");
     const base = pricing ? "https://pricing.twilio.com/v1/" : `https://api.twilio.com/2010-04-01/Accounts/${account}/`;
     const remaining = Math.min(5000, deadline - Date.now(), deadlineAt === null ? Infinity : deadlineAt - Date.now()); if (remaining <= 0) throw new Error("Phone operation deadline reached");
+    if(binding && binding!==managedResourceAccountHash()) throw new Error('Phone resource belongs to another provider account');
+    if(admission)assertManagedResourceDispatchPolicy(admission);
     const response = await fetch(base + path, { method, headers: { Authorization: "Basic " + Buffer.from(`${user}:${password}`).toString("base64"), ...(body ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) },
       ...(body ? { body: new URLSearchParams(body).toString() } : {}), signal: AbortSignal.timeout(remaining), redirect: "error" });
     if (response.status === 204) return { status: 204, data: null, requestId: response.headers.get("twilio-request-id") };
@@ -26,7 +29,7 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
     return { id: row.sid, number: row.phone_number, correlationId, requestId, quotedMonthlyCents: price ?? null, currency: "USD" };
   };
   return {
-    async acquire({ correlationId, offer, authorizeDispatch }) {
+    async acquire({ intentId, correlationId, offer, attemptToken, authorizeDispatch }) {
       const deadline = Date.now() + 15000;
       // Twilio exposes account-specific country/type pricing; the number-create
       // response has no charged-amount receipt or conditional price parameter.
@@ -36,32 +39,40 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
       const query = new URLSearchParams({ AreaCode: offer.areaCode, VoiceEnabled: "true", SmsEnabled: "true", ExcludeAllAddressRequired: "true", PageSize: "1" });
       const available = (await request("AvailablePhoneNumbers/US/Local.json?" + query, "GET", null, false, deadline)).data?.available_phone_numbers?.[0];
       if (!/^\+1\d{10}$/.test(available?.phone_number || "") || available.capabilities?.voice !== true || available.capabilities?.sms !== true || available.address_requirements !== "none") throw new Error("No eligible phone number available");
+      const fields={ PhoneNumber: available.phone_number, FriendlyName: label(correlationId) }, input={kind:'number',operationId:intentId,correlationId,offer,claimToken:attemptToken,quotedMonthlyCents:monthly,payload:{path:'IncomingPhoneNumbers.json',fields}};
+      let admission;
+      try { admission=await reserveManagedResource(input); }
+      catch(error) { throw error instanceof ManagedResourceAdmissionError?error:new ManagedResourceAdmissionError('resource_admission_unavailable'); }
       if (typeof authorizeDispatch !== "function" || !await authorizeDispatch()) { const error = new Error("The phone request is no longer authorized"); error.code = "dispatch_not_authorized"; throw error; }
-      const created = await request("IncomingPhoneNumbers.json", "POST", { PhoneNumber: available.phone_number, FriendlyName: label(correlationId) }, false, deadline);
+      try { await assertManagedResourceReservation(input,admission); }
+      catch(error) { throw error instanceof ManagedResourceAdmissionError?error:new ManagedResourceAdmissionError('resource_admission_unavailable'); }
+      const created = await request("IncomingPhoneNumbers.json", "POST", fields, false, deadline, admission.providerAccountHash, admission);
       return receipt(created.data, correlationId, monthly, created.requestId);
     },
-    async lookup({ correlationId, resourceId }) {
+    async lookup({ intentId, correlationId, resourceId }) {
+      const binding=await managedResourceAccountBinding('number',intentId);
       if (resourceId) {
         if (!sidValid(resourceId)) throw new Error("Invalid phone resource receipt");
-        const found = await request(`IncomingPhoneNumbers/${resourceId}.json`);
+        const found = await request(`IncomingPhoneNumbers/${resourceId}.json`,'GET',null,false,Date.now()+5000,binding);
         if (found.status === 404) return { status: "absent", definitive: true };
         return { status: "found", resource: receipt(found.data, correlationId) };
       }
-      const found = (await request("IncomingPhoneNumbers.json?" + new URLSearchParams({ FriendlyName: label(correlationId), PageSize: "100" }))).data;
+      const found = (await request("IncomingPhoneNumbers.json?" + new URLSearchParams({ FriendlyName: label(correlationId), PageSize: "100" }),'GET',null,false,Date.now()+5000,binding)).data;
       const matches = (found?.incoming_phone_numbers || []).filter(row => row.friendly_name === label(correlationId));
       // FriendlyName is a correlation aid, not a uniqueness/idempotency promise.
       // Pagination or no match cannot establish the absence of a timed-out create.
       if (found?.next_page_uri || matches.length !== 1) return { status: "unknown", reasonCode: matches.length > 1 ? "multiple_correlated_resources" : "resource_not_confirmed" };
       return { status: "found", resource: receipt(matches[0], correlationId) };
     },
-    async release({ correlationId, resourceId }) {
+    async release({ intentId, correlationId, resourceId }) {
+      const binding=await managedResourceAccountBinding('number',intentId);
       const deadline = Date.now() + 15000;
       if (!sidValid(resourceId)) throw new Error("Invalid phone resource receipt");
-      const before = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline);
+      const before = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline,binding);
       if (before.status === 404) return { confirmed: true, resourceId };
       receipt(before.data, correlationId);
-      await request(`IncomingPhoneNumbers/${resourceId}.json`, "DELETE", null, false, deadline);
-      const after = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline);
+      await request(`IncomingPhoneNumbers/${resourceId}.json`, "DELETE", null, false, deadline,binding);
+      const after = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline,binding);
       return { confirmed: after.status === 404, resourceId };
     },
   };

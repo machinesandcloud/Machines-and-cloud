@@ -95,6 +95,10 @@ function policies() {
 }
 function configure(open = true) {
   const p = policies();
+  // Explicit synthetic admission for this intercepted setup cohort. The same
+  // durable ledger is retained across configure calls and policy edits.
+  process.env.MANAGED_RESOURCE_ADMISSION_APPROVED_VERSION = 'qa_resource_v1';
+  process.env.MANAGED_RESOURCE_ADMISSION_POLICY_JSON = JSON.stringify({ version: 'qa_resource_v1', expiresAt: new Date(now + 10 * 86400000).toISOString(), mode: 'self_service', providerAccountHash: sha(accountSid), currency: 'USD', rateBasis: 'configured_upper_bound', rateSource: 'https://fees.example.test/synthetic-qa-resource-bounds', bounds: { numberSetupCents: p.number.oneTimeCents, numberMonthlyCents: p.number.monthlyCents, brandSetupCents: p.sms.brandRegistrationCents, campaignSetupCents: p.sms.campaignRegistrationCents, campaignMonthlyCents: p.sms.campaignMonthlyCents }, accountLimits: { numbers: 100, brands: 100, campaigns: 100, setupCents: 1000000, monthlyCents: 1000000 }, tenantLimits: { numbers: 1, brands: 1, campaigns: 1, setupCents: 5900, monthlyCents: 1115 }, tenants: [] });
   Object.assign(process.env, { TWILIO_ACCOUNT_SID: accountSid, TWILIO_AUTH_TOKEN: 'qa-synthetic-twilio-token', TWILIO_PRIMARY_PROFILE_SID: primarySid, VAPI_API_KEY: 'qa-synthetic-vapi-key', VAPI_WEBHOOK_SECRET: 'q'.repeat(48), SERVICE_WORKER_KEY: 'w'.repeat(48), PLATFORM_DATA_ENCRYPTION_KEY: Buffer.alloc(32, 3).toString('base64'), PHONE_ACTIVATION_OFFER_JSON: JSON.stringify(p.number), PHONE_ACTIVATION_APPROVED_VERSION: p.number.version, VOICE_ACTIVATION_POLICY_JSON: JSON.stringify(p.voice), VOICE_ACTIVATION_APPROVED_VERSION: p.voice.version, MESSAGING_ACTIVATION_OFFER_JSON: JSON.stringify(p.sms), MESSAGING_ACTIVATION_APPROVED_VERSION: p.sms.version, VOICE_FALLBACK_TWIML_URL: 'https://handler.twilio.com/twiml/EH' + 'e'.repeat(32) });
   for (const name of ['PHONE_ACQUISITION_ENABLED', 'VOICE_ACTIVATION_ENABLED', 'MESSAGING_ACTIVATION_ENABLED', 'SERVICE_DELIVERY_ENABLED']) process.env[name] = open ? 'true' : 'false';
   return p;

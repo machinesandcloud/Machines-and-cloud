@@ -1,5 +1,23 @@
 # Product outcome status
 
+**October23 grouped release:** Steve instructed "push everything". Finished Account/Connections/sign-in, marketing/four-photo hero and resource-admission work is integrated for combined verification and one publication. Earlier holds on those candidates are superseded; actual provider/customer delivery remains open. [Release scope](GROUPED-RELEASE-2026-10-23.json).
+
+**Current status:** [LAUNCH-CONTROL.json](LAUNCH-CONTROL.json) is authoritative. Production remains recorded at `e5cb71c`; current Account candidate `06c33c4`, Connections parent `22c6708` and sign-in/HELP parent `5b5f983` are locally accepted and kept local. Account has36independent customer groups,38required checks and replacement-PO ordinary desktop/mobile acceptance. Marketing `876aa5d` remains held separately. Complete customer/service launch remains unaccepted. These are retained/local observations, not a new hosted check.
+
+[The October 23 retrospective](TEAM-RETROSPECTIVE-2026-10-23.json) establishes the enforced handoff changes. PO owns the complete customer result; PM drives closure. The current ledger supersedes every conflicting status below.
+
+## Historical status and acceptance snapshots
+
+The following entries preserve their original evidence and scope. They do not define current production, candidate priority or fresh authority.
+
+**October 23 content candidate:** Marketing reviewed all182publicHTMLpages and the key interface strings, with independent sales and UI/UX review. The isolated implementation is `/tmp/mc-copy-refresh-369`, branch `work/copy-refresh`, based on published `36918ed`. The homepage now promises a specific website-chat result, supported by the example and owner view. [Content review](COPY-CONTENT-REVIEW-2026-10-23.json) records scope, evidence and current disposition. It is not published.
+
+**Last verified publication:** exact `36918edc350f8cf2db3e2fe6d8b65668b0e8d89a`, READY deploy `6adaff710fdb34cb48342216`, October23at01:33CDT. That publication’s eight-read allowance and one-build approval are closed. This content phase makes no new hosted status or provider-delivery claim. Main remains a documentation/evidence mirror and must not be pushed wholesale. [Launch readiness](LAUNCH-READINESS.md) governs the standing customer-outcome work and remaining gates.
+
+**Pricing remains under review:** [Fresh market/cost decision](PRICING-DECISION-2026-10-23.json) records seven public providers, four qualified operator threads and independently recomputed cost scenarios. Neither99nor249is validated as an available paid offer; no rates, allowances or billing settings changed. The copy candidate is accepted at `fb838fa` and remains unpublished.
+
+## Earlier launch snapshots — superseded by the record above
+
 **Continuing launch work:** [LAUNCH-READINESS](LAUNCH-READINESS.md) records the standing instruction to keep finding and completing blockers. [Sprint19](SPRINT19.md) is locally accepted at 39 independent browser/handler groups and 17 API groups; it is not published yet. The next selected outcome is installation and the first external request, including a reproduced interrupted-widget-stream repair. The active production-based checkout is `/tmp/mc-launch-readiness-35e`; main remains unsuitable for a wholesale push.
 
 Updated **October 22, 2026 Houston**. **Product Owner is accountable for the final working product across every gate.** PM coordinates delivery; Architect owns contracts/security; Engineer implements; QA independently tests; OM owns operational readiness and recovery. Their [persistent missions](README.md) remain distinct from PO outcome acceptance.

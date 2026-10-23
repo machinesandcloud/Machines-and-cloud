@@ -5,6 +5,7 @@ import { atomicUpdate, list } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient } from "./setup.mjs";
 import { createTwilioNumberAdapter } from "./phone-twilio.mjs";
+import { ManagedResourceAdmissionError } from './managed-resource-admission.mjs';
 
 export class PhoneActivationError extends Error {
   constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; }
@@ -50,7 +51,7 @@ const detail = state => ({
   needs_review: "This request needs a platform review. Its recorded resource has been retained and phone answering is not active.",
 })[state] || "Phone setup is not available yet.";
 export function phoneActivationView(row) {
-  return { id: row.id, state: row.state, active: false, label: "Phone setup", detail: detail(row.state),
+  return { id: row.id, state: row.state, active: false, label: "Phone setup", detail: row.state==='waiting_platform'&&row.reasonCode?.startsWith('resource_')?row.resourceWaitDetail||detail(row.state):detail(row.state),
     createdAt: row.createdAt, updatedAt: row.updatedAt, nextCheckAt: row.nextCheckAt || null,
     cancellationRequested: !!row.cancelRequestedAt, number: row.resource?.number || null,
     resourceRecorded: !!row.resource?.id, releaseConfirmed: !!row.releasedAt, reasonCode: row.reasonCode || null };
@@ -60,7 +61,8 @@ export async function phoneActivationStatus(c) {
   const rows = await Promise.all((await list(STORE, c.slug + "/")).map(key => strictRead(STORE, key)));
   const latest = rows.filter(row => row?.tenantIdentity === tenant(c)).sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id))[0];
   const policy = productionPolicy();
-  return { available: policy.enabled, active: false, state: latest?.state || "unavailable", detail: latest ? detail(latest.state) : "Phone setup is not available yet. No number will be purchased from signup or connection preferences.", offer: policy.enabled ? { ...policy.offer, digest: offerDigest(policy.offer) } : null, operation: latest ? phoneActivationView(latest) : null };
+  const available=policy.enabled&&policy.offerCurrent;
+  return { available, active: false, state: latest?.state || "unavailable", detail: latest ? phoneActivationView(latest).detail : "Phone setup is not available yet. No number will be purchased from signup or connection preferences.", offer: available ? { ...policy.offer, digest: offerDigest(policy.offer) } : null, operation: latest ? phoneActivationView(latest) : null };
 }
 // Server-only resource access. Never include this object in a browser response.
 export async function getAcquiredPhoneResource(c) {
@@ -106,8 +108,8 @@ function localFixtureContext() {
   try { return process.env.NODE_ENV === "test" && process.env.MC_FAKE_MODEL === "1" && ["localhost", "127.0.0.1", "[::1]"].includes(new URL(process.env.URL).hostname); } catch { return false; }
 }
 function offerDigest(offer) { return hash(JSON.stringify(offer)); }
-function validateOffer(offer) {
-  if (!offer || typeof offer.version !== "string" || !/^[a-z0-9_-]{1,80}$/.test(offer.version) || offer.currency !== "USD" || offer.scope !== "number_acquisition_only" || offer.country !== "US" || !/^[2-9]\d{2}$/.test(offer.areaCode || "") || !Number.isFinite(Date.parse(offer.expiresAt)) || Date.parse(offer.expiresAt) <= Date.now() || ![offer.oneTimeCents, offer.monthlyCents, offer.maxAcquisitionCents].every(value => Number.isSafeInteger(value) && value >= 0 && value <= 100000) || typeof offer.authorityText !== "string" || offer.authorityText.length < 20 || offer.authorityText.length > 1000) throw new PhoneActivationError("invalid_offer", "A complete approved quote and authority statement are required.", 400);
+function validateOffer(offer,{allowExpired=false}={}) {
+  if (!offer || typeof offer.version !== "string" || !/^[a-z0-9_-]{1,80}$/.test(offer.version) || offer.currency !== "USD" || offer.scope !== "number_acquisition_only" || offer.country !== "US" || !/^[2-9]\d{2}$/.test(offer.areaCode || "") || !Number.isFinite(Date.parse(offer.expiresAt)) || !allowExpired&&Date.parse(offer.expiresAt) <= Date.now() || ![offer.oneTimeCents, offer.monthlyCents, offer.maxAcquisitionCents].every(value => Number.isSafeInteger(value) && value >= 0 && value <= 100000) || typeof offer.authorityText !== "string" || offer.authorityText.length < 20 || offer.authorityText.length > 1000) throw new PhoneActivationError("invalid_offer", "A complete approved quote and authority statement are required.", 400);
   return structuredClone(offer);
 }
 function queueValue(value) {
@@ -189,13 +191,13 @@ export function createPhoneActivationEngine({ provider, offer: suppliedOffer, ga
   if (!localFixtureContext()) throw new PhoneActivationError("fixture_only", "Provider execution is unavailable outside isolated local tests.", 503);
   return phoneEngine({ provider, offer: suppliedOffer, gate });
 }
-function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
+function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpiredOffer=false }) {
   if (!provider || !["acquire", "lookup", "release"].every(name => typeof provider[name] === "function")) throw new Error("The fixture requires explicit acquire, lookup and release adapters");
-  const offer = validateOffer(suppliedOffer), digest = offerDigest(offer), enabled = () => typeof gate === "function" ? gate() === true : gate === true;
-  const quote = () => ({ ...structuredClone(offer), digest, available: enabled(), fixtureOnly: true });
+  const offer = validateOffer(suppliedOffer,{allowExpired:allowExpiredOffer}), digest = offerDigest(offer), enabled = () => typeof gate === "function" ? gate() === true : gate === true;
+  const quote = () => ({ ...structuredClone(offer), digest, available: enabled()&&Date.parse(offer.expiresAt)>Date.now(), fixtureOnly: true });
   async function request(c, body = {}) {
     const current = await authorizeCustomer(c, body.actor, body.expectedRevision);
-    if (!enabled()) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
+    if (!enabled()||Date.parse(offer.expiresAt)<=Date.now()) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
     if (!["testing", "live"].includes(current.status)) throw new PhoneActivationError("workspace_inactive", "Phone setup requires an active workspace.");
     if (body.offerVersion !== offer.version || body.offerDigest !== digest || body.acceptedCosts !== true || body.authority !== true || typeof body.submissionId !== "string" || !/^[a-f0-9]{32,64}$/i.test(body.submissionId)) throw new PhoneActivationError("acceptance_required", "Review the quote and confirm your authority before continuing.", 400);
     // One first-acquisition intent per customer identity, independent of browser
@@ -208,6 +210,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
       correlationId: hash("phone-acquire-v1:" + id + ":" + tenant(current)), state: "queued", createdAt: iso(), updatedAt: iso(),
       offer: structuredClone(offer), offerDigest: digest, authority: { actor: { role: "owner", email: normalizeAccountEmail(body.actor.email) }, acceptedAt: iso(), costsAccepted: true, authorityAccepted: true },
       generation: prior?.generation || 0, purchaseAttempts: 0, reconciliationAttempts: 0, cleanupAttempts: 0, reasonCode: null,
+      ...(prior?.resourceAccountHash?{resourceAccountHash:prior.resourceAccountHash}:/^AC[a-f0-9]{32}$/i.test(process.env.TWILIO_ACCOUNT_SID||'')?{resourceAccountHash:hash(process.env.TWILIO_ACCOUNT_SID)}:{}),
       ...(body.serviceOnboarding ? { serviceOnboarding: structuredClone(body.serviceOnboarding) } : {}),
       ...(prior ? { renewalSequence: sequence(prior) + 1, renewalFrom: phoneRenewalReference(prior), history: [...(prior.history || []), { ...phoneRenewalReference(prior), acceptedAt: prior.authority.acceptedAt }].slice(-20) } : {}) };
     const queued = await enqueue(row); return phoneActivationView(await ensure(queued));
@@ -233,7 +236,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     });
     if (claimed.lookupClaim?.token !== token) return claimed;
     try {
-      const found = await provider.lookup({ correlationId: row.correlationId, resourceId: row.resource?.id || null });
+      const found = await provider.lookup({ intentId:row.id,correlationId: row.correlationId, resourceId: row.resource?.id || null });
       if (found?.status === "found") {
         if (["cleanup_uncertain", "releasing"].includes(claimed.state) && found.resource?.id === claimed.resource?.id) return change(row.id, current => current.lookupClaim?.token === token ? { ...current, state: "cleanup_pending", cleanupStartedAt: null, cleanupClaim: null, lookupClaim: null, nextCheckAt: null } : null);
         await recordResource(claimed, found.resource);
@@ -261,7 +264,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     });
     if (claimed.cleanupClaim !== token) return claimed;
     try {
-      const released = await provider.release({ correlationId: row.correlationId, resourceId: row.resource.id });
+      const released = await provider.release({ intentId:row.id,correlationId: row.correlationId, resourceId: row.resource.id });
       if (released?.confirmed !== true || released.resourceId !== row.resource.id) throw new Error("Release not confirmed");
       return change(row.id, current => current.cleanupClaim === token ? { ...current, state: "cancelled", releasedAt: iso(), releaseReceipt: { resourceId: row.resource.id, confirmedAt: iso() }, reasonCode: null } : null);
     } catch { return change(row.id, current => current.cleanupClaim === token ? { ...current, state: "cleanup_uncertain", reasonCode: "release_result_unconfirmed", nextCheckAt: null } : null); }
@@ -282,6 +285,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     if (!await parentAllows(row)) return phoneActivationView(await change(id, old => sameRequest(old,row) ? { ...old, state: 'cancelled', reasonCode: 'parent_setup_changed' } : null));
     if (!["testing", "live"].includes(current.status) || configurationRevision(current) !== row.inputRevision) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: ["cancelled", "archived"].includes(current.status) ? "cancelled" : "superseded", reasonCode: "configuration_changed" }) : null));
     if (!enabled()) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: "waiting_platform", reasonCode: "product_gate_closed" }) : null));
+    if(Date.parse(offer.expiresAt)<=Date.now())return phoneActivationView(await change(id,old=>sameRequest(old,row)?{...old,state:'waiting_platform',reasonCode:'offer_expired'}:null));
     if (row.offerDigest !== digest) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: "needs_review", reasonCode: "quote_changed" }) : null));
     const token = randomBytes(16).toString("hex");
     row = await change(id, old => !sameRequest(old,row) || old.purchaseStartedAt || terminal(old.state) || old.cancelRequestedAt ? null : ({ ...old, state: "running", generation: old.generation + 1, purchaseAttempts: old.purchaseAttempts + 1, purchaseStartedAt: iso(), claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
@@ -289,13 +293,17 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     // Recheck the product gate after the durable claim and before the adapter.
     if (!enabled()) return phoneActivationView(await change(id, old => old.claim?.token === token ? { ...old, state: "waiting_platform", purchaseStartedAt: null, claim: null, reasonCode: "product_gate_closed" } : null));
     const authorizeDispatch = async () => {
-      const [latestClient, latestIntent] = await Promise.all([strictRead("clients", row.slug), strictRead(STORE, id)]);
-      return enabled() && !!latestClient && isSupportedSelfServiceClient(latestClient) && tenant(latestClient) === row.tenantIdentity && ["testing", "live"].includes(latestClient.status) && configurationRevision(latestClient) === row.inputRevision && latestIntent?.claim?.token === token && !latestIntent.cancelRequestedAt && await parentAllows(latestIntent);
+      const latestIntent=await strictRead(STORE,id),parentAllowed=latestIntent&&await parentAllows(latestIntent),latestClient=await strictRead('clients',row.slug);
+      return enabled() && !!latestClient && isSupportedSelfServiceClient(latestClient) && tenant(latestClient) === row.tenantIdentity && ["testing", "live"].includes(latestClient.status) && configurationRevision(latestClient) === row.inputRevision && latestIntent?.claim?.token === token && !latestIntent.cancelRequestedAt && parentAllowed;
     };
-    const stoppedBeforeDispatch = () => change(id, old => old.claim?.token === token && !old.resource ? { ...old, state: old.cancelRequestedAt ? "cancelled" : "superseded", purchaseStartedAt: null, claim: null, reasonCode: "dispatch_not_authorized" } : null);
+    const stoppedBeforeDispatch = async () => {
+      const latest=await strictRead('clients',row.slug),configurationChanged=latest&&isSupportedSelfServiceClient(latest)&&tenant(latest)===row.tenantIdentity&&['testing','live'].includes(latest.status)&&configurationRevision(latest)!==row.inputRevision;
+      return change(id, old => old.claim?.token === token && !old.resource && old.purchaseStartedAt===row.purchaseStartedAt ? { ...old, state: old.cancelRequestedAt ? "cancelled" : "superseded", purchaseStartedAt: null,purchaseAttempts:Math.max(0,old.purchaseAttempts-1), claim: null, reasonCode: configurationChanged?'configuration_changed':"dispatch_not_authorized" } : null);
+    };
     if (!await authorizeDispatch()) return phoneActivationView(await stoppedBeforeDispatch());
-    try { return phoneActivationView(await recordResource(row, await provider.acquire({ intentId: row.id, correlationId: row.correlationId, offer: row.offer, authorizeDispatch }))); }
+    try { return phoneActivationView(await recordResource(row, await provider.acquire({ intentId: row.id, correlationId: row.correlationId, offer: row.offer, attemptToken:token,authorizeDispatch }))); }
     catch (error) {
+      if(error instanceof ManagedResourceAdmissionError)return phoneActivationView(await change(id,old=>old.claim?.token===token&&!old.resource&&old.purchaseStartedAt===row.purchaseStartedAt?{...old,state:old.cancelRequestedAt?'cancelled':'waiting_platform',purchaseStartedAt:null,purchaseAttempts:Math.max(0,old.purchaseAttempts-1),claim:null,reasonCode:error.code,resourceWaitDetail:error.message,nextCheckAt:null}:null));
       if (error?.code === "dispatch_not_authorized") return phoneActivationView(await stoppedBeforeDispatch());
       return phoneActivationView(await change(id, old => old.resource ? null : ({ ...old, state: "uncertain", reasonCode: "acquisition_result_unconfirmed", nextCheckAt: null, claim: null })));
     }
@@ -320,20 +328,20 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
 
 function productionPolicy() {
   try {
-    const offer = validateOffer(JSON.parse(process.env.PHONE_ACTIVATION_OFFER_JSON || "null"));
+    const offer = validateOffer(JSON.parse(process.env.PHONE_ACTIVATION_OFFER_JSON || "null"),{allowExpired:true});
     const enabled = process.env.PHONE_ACQUISITION_ENABLED === "true" && process.env.PHONE_ACTIVATION_APPROVED_VERSION === offer.version &&
       /^AC[a-f0-9]{32}$/i.test(process.env.TWILIO_ACCOUNT_SID || "") && !!((process.env.TWILIO_API_KEY && process.env.TWILIO_API_SECRET) || process.env.TWILIO_AUTH_TOKEN);
-    return { enabled, offer };
-  } catch { return { enabled: false, offer: null }; }
+    return { enabled, offer,offerCurrent:Date.parse(offer.expiresAt)>Date.now() };
+  } catch { return { enabled: false, offer: null,offerCurrent:false }; }
 }
 function productionEngine(deadlineAt = null) {
   const policy = productionPolicy();
   if (!policy.offer) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
   const gate = () => { const current = productionPolicy(); return current.enabled && offerDigest(current.offer) === offerDigest(policy.offer); };
-  return phoneEngine({ provider: createTwilioNumberAdapter({ executionAllowed: gate, deadlineAt }), offer: policy.offer, gate });
+  return phoneEngine({ provider: createTwilioNumberAdapter({ executionAllowed: gate, deadlineAt }), offer: policy.offer, gate,allowExpiredOffer:true });
 }
 export async function requestPhoneActivation(c, body) {
-  if (!productionPolicy().enabled) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
+  const p=productionPolicy();if (!p.enabled||!p.offerCurrent) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
   return productionEngine().request(c, body);
 }
 export async function cancelPhoneActivation(c, id, body) { return saveCancellation(c, id, body); }

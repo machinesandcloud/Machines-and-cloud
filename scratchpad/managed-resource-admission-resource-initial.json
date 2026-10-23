@@ -1,0 +1,333 @@
+{
+  "at": "2026-10-23T10:17:04.551Z",
+  "mode": "actual managed resource POST boundaries; synthetic configured upper bounds, not provider rates; memory and installed Blobs SDK; zero physical network",
+  "sourceBefore": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "ff88298ac8ac77395ba94ff7cf8be809b1c90e70256bbb9108f6fe3b4efd5b13",
+    "netlify/functions/lib/phone-activation.mjs": "b5afa3c0d26f0347ad23aa6e31484c9e5c1db6b7c4c7ac1c3fe0af40141c485c",
+    "netlify/functions/lib/phone-twilio.mjs": "3e9d47c879088d191a20f22d4300d6b91d222fb0e8a8502f8dd9dc5e3f1902bd",
+    "netlify/functions/lib/messaging-activation.mjs": "c3ca3a24ac28932c8d1b0ca744e17304808ab06f01776125d473d9b69a92e389",
+    "netlify/functions/lib/messaging-provider.mjs": "4d4f45d3d09edc0e3050f1526115b4d7fa421d5c6d17cb12c12d95b5119af70f",
+    "scripts/managed-resource-admission-check.mjs": "dd433522c14ea9cc20c410560cd15572bdb660b8a976416fb10735492058c8b2",
+    "scripts/phone-activation-check.mjs": "65b1e9ced525252325df09d7b09dced0dce1bac0a01cf1d67754e99dfef6c943",
+    "scripts/messaging-activation-check.mjs": "57eb942befaf0f2325c47e9e81464c0daba44bf3ebb356454a1013cca3cf62d4"
+  },
+  "checks": [
+    {
+      "name": "strict explicit USD upper-bound schema and exact account approval fail closed",
+      "pass": true
+    },
+    {
+      "name": "memory: absent/expired/cohort denial saves resumable number with zero consumed attempts",
+      "pass": true
+    },
+    {
+      "name": "memory: mixed actual number/brand/campaign POSTs share one concurrent account fee/monthly ceiling",
+      "pass": true
+    },
+    {
+      "name": "memory: tenant ceiling denies even when the shared account has capacity; campaign resumes once",
+      "pass": true
+    },
+    {
+      "name": "memory: owner fee/monthly consent and observed number quote bound all three kinds",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'queued'\n- 'waiting_platform'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'queued'\n- 'waiting_platform'\n\n    at file:///private/tmp/mc-managed-resource-admission-e5cb/scripts/managed-resource-admission-check.mjs:83:447\n    at async check (file:///private/tmp/mc-managed-resource-admission-e5cb/scripts/managed-resource-admission-check.mjs:76:344)\n    at async file:///private/tmp/mc-managed-resource-admission-e5cb/scripts/managed-resource-admission-check.mjs:83:3"
+    },
+    {
+      "name": "memory: duplicate immutable reservation charges once; payload or financial identity cannot reuse it",
+      "pass": true
+    },
+    {
+      "name": "memory: cohort/self_service version and day changes retain spent exposure for future shops",
+      "pass": true
+    },
+    {
+      "name": "memory: policy and current-owner change after reservation deny the final actual POST",
+      "pass": true
+    },
+    {
+      "name": "memory: same-account number hold survives an untouched fresh business-rule review",
+      "pass": true
+    },
+    {
+      "name": "memory: number unknown POST retains debit and never repurchases/refiles after policy changes",
+      "pass": true
+    },
+    {
+      "name": "memory: brand unknown POST retains debit and never repurchases/refiles after policy changes",
+      "pass": true
+    },
+    {
+      "name": "memory: campaign unknown POST retains debit and never repurchases/refiles after policy changes",
+      "pass": true
+    },
+    {
+      "name": "memory: account change cannot assert/re-reserve or delete an old-account resource",
+      "pass": true
+    },
+    {
+      "name": "memory: creation-policy expiry permits retained number and campaign cleanup without refund",
+      "pass": true
+    },
+    {
+      "name": "memory: both paid correction POSTs are explicitly denied with retained records",
+      "pass": true
+    },
+    {
+      "name": "sdk: absent/expired/cohort denial saves resumable number with zero consumed attempts",
+      "pass": true
+    },
+    {
+      "name": "sdk: mixed actual number/brand/campaign POSTs share one concurrent account fee/monthly ceiling",
+      "pass": true
+    },
+    {
+      "name": "sdk: tenant ceiling denies even when the shared account has capacity; campaign resumes once",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner fee/monthly consent and observed number quote bound all three kinds",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'queued'\n- 'waiting_platform'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'queued'\n- 'waiting_platform'\n\n    at file:///private/tmp/mc-managed-resource-admission-e5cb/scripts/managed-resource-admission-check.mjs:83:447\n    at async check (file:///private/tmp/mc-managed-resource-admission-e5cb/scripts/managed-resource-admission-check.mjs:76:344)\n    at async file:///private/tmp/mc-managed-resource-admission-e5cb/scripts/managed-resource-admission-check.mjs:83:3"
+    },
+    {
+      "name": "sdk: duplicate immutable reservation charges once; payload or financial identity cannot reuse it",
+      "pass": true
+    },
+    {
+      "name": "sdk: cohort/self_service version and day changes retain spent exposure for future shops",
+      "pass": true
+    },
+    {
+      "name": "sdk: policy and current-owner change after reservation deny the final actual POST",
+      "pass": true
+    },
+    {
+      "name": "sdk: same-account number hold survives an untouched fresh business-rule review",
+      "pass": true
+    },
+    {
+      "name": "sdk: number unknown POST retains debit and never repurchases/refiles after policy changes",
+      "pass": true
+    },
+    {
+      "name": "sdk: brand unknown POST retains debit and never repurchases/refiles after policy changes",
+      "pass": true
+    },
+    {
+      "name": "sdk: campaign unknown POST retains debit and never repurchases/refiles after policy changes",
+      "pass": true
+    },
+    {
+      "name": "sdk: account change cannot assert/re-reserve or delete an old-account resource",
+      "pass": true
+    },
+    {
+      "name": "sdk: creation-policy expiry permits retained number and campaign cleanup without refund",
+      "pass": true
+    },
+    {
+      "name": "sdk: both paid correction POSTs are explicitly denied with retained records",
+      "pass": true
+    },
+    {
+      "name": "all requests remained intercepted and source bytes stayed fixed",
+      "pass": true
+    }
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG96493a487e60fcf64cc9d98599bfe866/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MGc308cf50034764506e400219e9da1787/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG5e6383be5884235cfa09e9b3bede846f/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "DELETE",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN985b4eaad048f4345913f79735a663a4.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG36fa5d2da1e78b644821c808fbaebe11/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/Services/MG36fa5d2da1e78b644821c808fbaebe11/Compliance/Usa2p/QE06aead33846abd2ac04f71ff380d1ff3"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/Services/MG36fa5d2da1e78b644821c808fbaebe11"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG8efe012eb76b5573f7dcd413fafe94dd/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MGf13c0ead5d57d1e27e439542ed2942b2/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG34d3f97b642f5db17aafb4c44a7b1a76/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "DELETE",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef17e7150de0461a5af9e3a2db9bd657.json"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/Services/MG74821da385552c65bc5bbd9b76b78585/Compliance/Usa2p",
+      "kind": "campaign"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/Services/MG74821da385552c65bc5bbd9b76b78585/Compliance/Usa2p/QE92508e7f36bae6f38bc984f53303aa9b"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/Services/MG74821da385552c65bc5bbd9b76b78585"
+    }
+  ],
+  "conflicts": 6,
+  "physicalNetworkAttempts": 0,
+  "sourceAfter": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "ff88298ac8ac77395ba94ff7cf8be809b1c90e70256bbb9108f6fe3b4efd5b13",
+    "netlify/functions/lib/phone-activation.mjs": "b5afa3c0d26f0347ad23aa6e31484c9e5c1db6b7c4c7ac1c3fe0af40141c485c",
+    "netlify/functions/lib/phone-twilio.mjs": "3e9d47c879088d191a20f22d4300d6b91d222fb0e8a8502f8dd9dc5e3f1902bd",
+    "netlify/functions/lib/messaging-activation.mjs": "c3ca3a24ac28932c8d1b0ca744e17304808ab06f01776125d473d9b69a92e389",
+    "netlify/functions/lib/messaging-provider.mjs": "4d4f45d3d09edc0e3050f1526115b4d7fa421d5c6d17cb12c12d95b5119af70f",
+    "scripts/managed-resource-admission-check.mjs": "dd433522c14ea9cc20c410560cd15572bdb660b8a976416fb10735492058c8b2",
+    "scripts/phone-activation-check.mjs": "65b1e9ced525252325df09d7b09dced0dce1bac0a01cf1d67754e99dfef6c943",
+    "scripts/messaging-activation-check.mjs": "57eb942befaf0f2325c47e9e81464c0daba44bf3ebb356454a1013cca3cf62d4"
+  },
+  "summary": {
+    "passed": 28,
+    "failed": 2,
+    "total": 30
+  }
+}

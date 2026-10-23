@@ -1,5 +1,41 @@
 # Product team working files
 
+**Current release instruction, October23:** Steve authorized "push everything". Root is combining all finished accepted candidates into one verified release. Prior local holds below are historical for those candidates. Provider activation, purchases, billing and unfinished/private main runtime remain outside the release. [Grouped release](GROUPED-RELEASE-2026-10-23.json).
+
+## Current Account repair
+
+The Account page has been rebuilt around identity/contact details, actual connection state, record downloads and intentional lifecycle controls. Empty sections, unsupported monthly revenue copy and the privacy wall were removed. Non-web resume and failed sign-out/export recovery were also repaired. Candidate `06c33c4` in `/tmp/mc-account-purpose-22` passes36independent Account groups and38required checks; the replacement PO exercised ordinary desktop/mobile tasks. [Accepted scope and evidence](ACCOUNT-PURPOSE-ACCEPTANCE-2026-10-23.json) · [PO review](ACCOUNT-PURPOSE-PO-2026-10-23.json).
+
+**Kept local.** The Connections and sign-in/HELP parent holds remain intact; marketing and resource admission are separate. Actual production/provider acceptance and the complete launch remain open in [launch control](LAUNCH-CONTROL.json).
+
+## Product Owner and accepted Connections repair
+
+Steve replaced the previous PO assignment. The fresh **product_owner_v2** owns website chat, phone answering, two-way texting, Calendar scheduling and useful retained customer outcomes across the full supported offer. The former PO agent's acceptance is not reused.
+
+The new PO independently reproduced the website-only screen and missing phone-details path, challenged unsupported transfer/backup controls and a number offer shown to Calendar-only owners, and observed the repaired ordinary desktop/mobile journey. [PO acceptance and service dependency map](COMPLETE-CONNECTIONS-PO-2026-10-23.json). The accepted local candidate is `22c6708`, with38required checks and41independent customer groups passing. [Scope, proof and remaining launch dependencies](COMPLETE-CONNECTIONS-ACCEPTANCE-2026-10-23.json).
+
+**Keep local:** both this candidate and its sign-in/HELP parent remain unpublished. Marketing remains held separately. [LAUNCH-CONTROL.json](LAUNCH-CONTROL.json) records current source and ownership; none of these UI results establish live provider delivery.
+
+## October 23 retrospective and operating changes
+
+All eight role agents reviewed the repeated failures, challenged other roles and reviewed a shared working agreement. [The meeting record](TEAM-RETROSPECTIVE-2026-10-23.json) contains each role's self-critique, evidence, resolved questions and owned actions.
+
+The team allowed scoped feature acceptance and green checks to displace the complete customer outcome. Visible recovery and coherent interaction were too often checked after Steve found a defect. Conflicting release snapshots made handoffs unreliable. Root owns enforcing the corrections; Steve should not discover basic regressions or configure each customer's internal services.
+
+The following changes are adopted:
+
+- **One current status:** [LAUNCH-CONTROL.json](LAUNCH-CONTROL.json) identifies exact production, local candidates, owner-held work, gaps, drivers and next evidence. Release/status snapshots elsewhere are historical when superseded by it.
+- **One primary customer outcome:** PM keeps it open through actual service and recovery; PO accepts the observed result. Direct blockers can proceed together. Optional adjacent improvements wait unless Steve changes priority.
+- **Independent task acceptance:** Engineering, UI/UX and QA follow ordinary screens, handlers and retained records, including visible errors, slow/lost responses, reload and recovery. Local evidence retains its value and its limits. Passing unaffected checks are reused.
+- **Operational proof:** ordinary scheduled recovery must work without founder repairs. OM owns support/incident receipt, a backup and hosting continuity. A queue entry, manual worker dispatch, READY deployment or HTTP 200 does not establish automatic service.
+- **One promise across the product:** Marketing owns site/chat/demo/pricing/onboarding language; QA checks it against observed state; PO accepts usefulness. A failed promised flow reopens the acceptance and claim. Relevant limits belong at decisions, and settled cost/value evidence is required before paid service.
+
+The next provider milestone is the normal owned-Calendar visit lifecycle: consent, create, move and cancel the same event, plus ordinary scheduled recovery and cleanup. Signup, installation and the first customer request remain separately owned by PO, with UI/UX and Engineering driving and QA verifying. Calendar does not close those launch gates.
+
+The sign-in repair remains pending publication approval; the marketing redesign stays held locally. No application change, live proof, publication, activation or new authorization occurred in this retrospective. [AGENTS.md](../AGENTS.md) makes the handoff rules available to future work. The next checkpoint is before the next active slice and before release; no unattended agent schedule is implied.
+
+## Continuing role missions
+
 Eight persistent roles work from these files. A role owns its mission and unresolved dependencies through completion, not only its current document or turn. A running agent may cover more than one role, but the responsibilities and acceptance evidence remain distinct.
 
 | Role | Accountable work and durable artifacts | Handoff and completion |

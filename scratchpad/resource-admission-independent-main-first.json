@@ -1,0 +1,175 @@
+{
+  "at": "2026-10-23T10:38:05.075Z",
+  "mode": "actual managed resource POST boundaries; synthetic configured upper bounds, not provider rates; memory and installed Blobs SDK; zero physical network",
+  "sourceBefore": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "ecdf3d3b47069b62bce0ccd1390edd3004cd4489c556622556c18d33cf3a9bce",
+    "netlify/functions/lib/phone-activation.mjs": "ddbbd71c07ae076a659f5f60d7f0d695ac722a3cf452e9dca61d5d2fd5515a76",
+    "netlify/functions/lib/phone-twilio.mjs": "1d42afe1edb22c1fe4eca3b6103fdb857433d926dc7c452af83042432ea9e9e8",
+    "netlify/functions/lib/messaging-activation.mjs": "8c58fbd668c197b35451d82beb85169970660251663dcae940e821401fcf2c22",
+    "netlify/functions/lib/messaging-provider.mjs": "6be345c09ae0515d0870e7af806259fe20d049477bc697ea5e0ef6dbfb9d0699",
+    "scripts/managed-resource-admission-check.mjs": "a5637a8000d455977440fcf7e664e41077ded0b953e4eb321b85824f2cfd8eaf",
+    "scripts/phone-activation-check.mjs": "70665387d250c475e182a4292b20848f591fdbdd4bcdecaac1563a81dcb14f9b",
+    "scripts/messaging-activation-check.mjs": "4a3992e3156b8167958464ae7f0689d27a28115e7e21975a2b7b7a699ecd044a",
+    "netlify/functions/lib/messaging-program.mjs": "e37d24478c919ceef13b567a8e934280e7ed256b95114fee917d2605f3baf53f"
+  },
+  "rawSourceBefore": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "ba042f7c76f80cb8d9d80fb2540f28f7671a902b6b8fa6543f95fbb52cf69c4c",
+    "netlify/functions/lib/phone-activation.mjs": "983b70d7bdc083054c98db1b74899a307cfbdaeb1b070797ab3ed28b71ce3448",
+    "netlify/functions/lib/phone-twilio.mjs": "72f8716ab5c01d676812881f3bdf218c9a78b5fac79c39055a4493ef339f5fd2",
+    "netlify/functions/lib/messaging-activation.mjs": "9cd1c8844c0c7ef5d8eaad5c41dc3e4d4d2110b8e66923685cc351aea6e9c969",
+    "netlify/functions/lib/messaging-provider.mjs": "14959f3945ec9fe039a2ed58cb93f58691a5f9a424cc5b148b376a85af568abc",
+    "scripts/managed-resource-admission-check.mjs": "3ee63741233ba2ac4a690f320a61880f44f24ea1929812b9447e2b096653e2ae",
+    "scripts/phone-activation-check.mjs": "70624a5963f673119459a2364c2067857147eeadb6561a01bbd3eb804680e6c1",
+    "scripts/messaging-activation-check.mjs": "ea9f0c0233842229ec57e4feb3ca9b67cace8c2f8f48d3a6dff877ef8197982b",
+    "netlify/functions/lib/messaging-program.mjs": "05e65fafc90e3402234b87c530f6c1dd118effe3de62942b88ce112bc372d163"
+  },
+  "harnessHash": "3498601a0632211459c1334298182f9f204ebaa1dc8188c3d698e852f815d500",
+  "checks": [
+    {
+      "name": "Strict schema and voice-only zero-kind bounds deny before attempts, then actual queued number resumes once",
+      "pass": true
+    },
+    {
+      "name": "Unknown brand consumes shared fee cap across mode/version/day edits while an affordable number can continue",
+      "pass": true
+    },
+    {
+      "name": "Installed SDK concurrent actual number workers admit only two shared monthly commitments",
+      "pass": true
+    },
+    {
+      "name": "Saved fee-consent revocation after reservation prevents all three actual creation boundaries without refund",
+      "pass": true
+    },
+    {
+      "name": "Expired creation policy does not obstruct bound cleanup and confirmed cleanup never replenishes lifetime cap",
+      "pass": true
+    }
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/a2p/BrandRegistrations",
+      "kind": "brand"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers.json",
+      "kind": "number"
+    },
+    {
+      "method": "DELETE",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN832354edd8e798471a0cb1320ca49746.json"
+    }
+  ],
+  "conflicts": 23,
+  "physicalNetworkAttempts": 0,
+  "freeze": "scratchpad/resource-admission-engineer-boundary-repair-freeze.json",
+  "frozenDigestScheme": "raw-byte SHA256",
+  "observations": [
+    {
+      "case": "strict schema/resume",
+      "deniedPolicies": 6,
+      "numberPOSTs": 1,
+      "used": {
+        "numbers": 1,
+        "brands": 0,
+        "campaigns": 0,
+        "setupCents": 0,
+        "monthlyCents": 115
+      }
+    },
+    {
+      "case": "shared unknown exposure",
+      "used": {
+        "numbers": 1,
+        "brands": 1,
+        "campaigns": 0,
+        "setupCents": 4400,
+        "monthlyCents": 115
+      },
+      "paidPOSTs": [
+        "brand",
+        "number"
+      ]
+    },
+    {
+      "case": "SDK mixed workers",
+      "workers": 16,
+      "POSTs": 2,
+      "conditionalConflicts": 17,
+      "used": {
+        "numbers": 2,
+        "brands": 0,
+        "campaigns": 0,
+        "setupCents": 0,
+        "monthlyCents": 230
+      }
+    },
+    {
+      "case": "saved consent revoked",
+      "kindsDenied": [
+        "number",
+        "brand",
+        "campaign"
+      ],
+      "newPOSTs": 0,
+      "reservationsRetained": true
+    },
+    {
+      "case": "expired cleanup",
+      "DELETEs": 1,
+      "newPOSTs": 0,
+      "refunded": false
+    }
+  ],
+  "rawSourceAfter": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "ba042f7c76f80cb8d9d80fb2540f28f7671a902b6b8fa6543f95fbb52cf69c4c",
+    "netlify/functions/lib/phone-activation.mjs": "983b70d7bdc083054c98db1b74899a307cfbdaeb1b070797ab3ed28b71ce3448",
+    "netlify/functions/lib/phone-twilio.mjs": "72f8716ab5c01d676812881f3bdf218c9a78b5fac79c39055a4493ef339f5fd2",
+    "netlify/functions/lib/messaging-activation.mjs": "9cd1c8844c0c7ef5d8eaad5c41dc3e4d4d2110b8e66923685cc351aea6e9c969",
+    "netlify/functions/lib/messaging-provider.mjs": "14959f3945ec9fe039a2ed58cb93f58691a5f9a424cc5b148b376a85af568abc",
+    "scripts/managed-resource-admission-check.mjs": "3ee63741233ba2ac4a690f320a61880f44f24ea1929812b9447e2b096653e2ae",
+    "scripts/phone-activation-check.mjs": "70624a5963f673119459a2364c2067857147eeadb6561a01bbd3eb804680e6c1",
+    "scripts/messaging-activation-check.mjs": "ea9f0c0233842229ec57e4feb3ca9b67cace8c2f8f48d3a6dff877ef8197982b",
+    "netlify/functions/lib/messaging-program.mjs": "05e65fafc90e3402234b87c530f6c1dd118effe3de62942b88ce112bc372d163"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/managed-resource-admission.mjs": "ecdf3d3b47069b62bce0ccd1390edd3004cd4489c556622556c18d33cf3a9bce",
+    "netlify/functions/lib/phone-activation.mjs": "ddbbd71c07ae076a659f5f60d7f0d695ac722a3cf452e9dca61d5d2fd5515a76",
+    "netlify/functions/lib/phone-twilio.mjs": "1d42afe1edb22c1fe4eca3b6103fdb857433d926dc7c452af83042432ea9e9e8",
+    "netlify/functions/lib/messaging-activation.mjs": "8c58fbd668c197b35451d82beb85169970660251663dcae940e821401fcf2c22",
+    "netlify/functions/lib/messaging-provider.mjs": "6be345c09ae0515d0870e7af806259fe20d049477bc697ea5e0ef6dbfb9d0699",
+    "scripts/managed-resource-admission-check.mjs": "a5637a8000d455977440fcf7e664e41077ded0b953e4eb321b85824f2cfd8eaf",
+    "scripts/phone-activation-check.mjs": "70665387d250c475e182a4292b20848f591fdbdd4bcdecaac1563a81dcb14f9b",
+    "scripts/messaging-activation-check.mjs": "4a3992e3156b8167958464ae7f0689d27a28115e7e21975a2b7b7a699ecd044a",
+    "netlify/functions/lib/messaging-program.mjs": "e37d24478c919ceef13b567a8e934280e7ed256b95114fee917d2605f3baf53f"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "physicalNetwork": 0,
+    "sourceStable": true
+  }
+}
