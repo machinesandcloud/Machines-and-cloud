@@ -1,0 +1,94 @@
+{
+  "checkedAt": "2026-10-23T11:33:21.296206+00:00",
+  "baseCommit": "e5cb71c7f23592539d9c292eb50123afbebf0f30",
+  "scope": "Owner-approved temporary public Gmail contact for Machines & Cloud Customer Care SMS HELP and text-policy support only.",
+  "publicSupportEmail": "ngoumnaisteve@gmail.com",
+  "helpMessage": "Machines & Cloud: for account or setup help, email ngoumnaisteve@gmail.com. Sign in: https://machinesandcloud.com/desk. Setup: https://machinesandcloud.com/onboard. Reply STOP, ALTO or PARAR to stop texts.",
+  "helpCharacters": 205,
+  "changedCampaignFields": [
+    "messageFlow",
+    "messageSamples",
+    "helpMessage"
+  ],
+  "preserved": [
+    "STOP/START messages and all keyword sets",
+    "company-only conversational consent and sender",
+    "other four message samples",
+    "use case, number, service/brand identity and policy URLs",
+    "content flags, acquisition and reply gates",
+    "all unrelated runtime and marketing copy"
+  ],
+  "suites": [
+    {
+      "command": "node scripts/platform-sms-check.mjs",
+      "passed": 18,
+      "total": 18,
+      "sourceStable": true,
+      "physicalExternalRequests": 0,
+      "networkMode": "all provider HTTP intercepted; synthetic records and test-only memory/SDK doubles"
+    },
+    {
+      "command": "node scripts/sms-policy-check.mjs",
+      "passed": 20,
+      "total": 20,
+      "sourceStable": true,
+      "physicalExternalRequests": 0,
+      "networkMode": "all provider HTTP intercepted; synthetic records and test-only memory/SDK doubles"
+    },
+    {
+      "command": "node scripts/platform-sms-independent-check.mjs",
+      "passed": 14,
+      "total": 14,
+      "sourceStable": true,
+      "physicalExternalRequests": 0,
+      "networkMode": "all provider HTTP intercepted; synthetic records and test-only memory/SDK doubles"
+    }
+  ],
+  "additionalChecks": {
+    "threeChangedJavaScriptSyntaxChecks": true,
+    "sitecheck": {
+      "htmlPages": 182,
+      "brokenLocalReferences": 0,
+      "missingSitemapFiles": 0,
+      "missingExtensionlessRedirects": 0,
+      "canonicalMismatches": 0
+    },
+    "gitDiffCheck": true,
+    "runtimeOnlyDiffIsHelpText": true,
+    "allOtherCampaignFieldsIdenticalToBase": true
+  },
+  "sourceSha256": {
+    "netlify/functions/lib/platform-sms.mjs": "b6094d00b99ae48c74823c08acd52e5499d834bd626285b4f8510181ba1f0220",
+    "privacy-policy.html": "823c4fd7622cc311a333b0a2072bb3c757e320f7f2a895e54b04055e842b5d73",
+    "product/PLATFORM-SMS-CAMPAIGN.md": "56ac049095376536bfb622468fc578afadc357f79dc54cbf6fab410181e20247",
+    "product/PLATFORM-SMS.md": "d120347794363a640db5a68b32ffd133a79f167131000af22f2b944a389778cd",
+    "product/SETUP-FOR-BROWSER-AGENT.md": "8b538d7630991cd5559763c225a37c5e3c381b17f542b598bcae55549a74835e",
+    "scripts/platform-sms-check.mjs": "6e55f5ca9dba744dcd8764ec98cc06ff48f675cd09615c7eeccecb5c5b375818",
+    "scripts/sms-policy-check.mjs": "4831ca56c8772ff360290bcacbdf9c42cfe013b367409d57c160ae0d6884c449",
+    "sms-terms.html": "ca13833dc25a7a5713f649354a5da8b200ee748aa687419623e39536fe2e23ec"
+  },
+  "externalEffects": {
+    "providerOrSupportRequests": 0,
+    "emails": 0,
+    "texts": 0,
+    "calls": 0,
+    "deployment": false,
+    "productionSettingsChanged": false,
+    "carrierSubmission": false
+  },
+  "notEstablished": [
+    "publication of this contact revision",
+    "saved Messaging Service HELP matching this revision",
+    "amended locked campaign HELP snapshot",
+    "fresh Support response or current ticket state",
+    "carrier approval or actual SMS delivery"
+  ],
+  "providerHandoff": {
+    "existingCampaign": "retain the existing rejected campaign; no recreation",
+    "lockedHelpSnapshot": "unresolved",
+    "supportTicket": 30031927,
+    "supportStatus": "New at last captured observation only; not rechecked",
+    "ownerBoundary": "No attestation, fee acknowledgment, resubmission or activation included."
+  },
+  "acceptance": "PASS for the scoped local contact revision; integration and production verification remain separate."
+}

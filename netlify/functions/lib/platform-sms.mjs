@@ -42,7 +42,7 @@ function keyword(body, type) {
 function guidance(body, kind) {
   if (kind === 'stop') return 'Machines & Cloud: texts stopped. Reply START or EMPEZAR to remove the block.';
   if (kind === 'start') return 'Machines & Cloud: your texting block is removed. We only reply to messages you send; no recurring texts. Reply HELP for help or STOP to stop.';
-  if (kind === 'help') return 'Machines & Cloud: account help at https://machinesandcloud.com/desk. Setup guidance at https://machinesandcloud.com/onboard. Reply STOP, ALTO or PARAR to stop texts.';
+  if (kind === 'help') return 'Machines & Cloud: for account or setup help, email ngoumnaisteve@gmail.com. Sign in: https://machinesandcloud.com/desk. Setup: https://machinesandcloud.com/onboard. Reply STOP, ALTO or PARAR to stop texts.';
   if (/\b(price|prices|pricing|cost|plans?|precio|precios|cuesta)\b/i.test(body)) return 'Machines & Cloud: you asked about plan pricing. Current plan details are at https://machinesandcloud.com/#plans. Reply STOP to stop texts.';
   if (/\b(log\s?in|sign\s?in|password|account|cuenta|acceso|sesion|sesión)\b/i.test(body)) return 'Machines & Cloud: sign in securely at https://machinesandcloud.com/desk. Request a fresh email link there. Never text a password or sign-in code. Reply STOP to stop texts.';
   if (/\b(set\s?up|onboard\w*|register|start|signup|sign\s?up|empezar|configurar|registro)\b/i.test(body)) return 'Machines & Cloud: continue your workspace setup at https://machinesandcloud.com/onboard using your setup email. Reply STOP to stop texts.';

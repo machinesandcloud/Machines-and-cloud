@@ -6,7 +6,9 @@ This is a separate, local implementation for **Machines & Cloud's own product in
 
 ## Supported behavior
 
-The sender initiates each interaction. A deterministic response links to public pricing, setup, secure sign-in or product information. HELP/INFO/AYUDA supplies general help. There is no AI/model request, account lookup/disclosure, support-ticket creation, booking, promise of human follow-up, admin reply control, proactive reminder or marketing campaign. YES does not enroll the sender in recurring texts.
+The October 23 Gmail contact revision is local only. It does not establish publication, saved Twilio HELP settings, an amended locked campaign HELP snapshot or carrier approval. Support ticket `30031927` was last captured as **New**; no fresh reply was checked. STOP/START wording, keyword sets, consent scope and activation gates are unchanged.
+
+The sender initiates each interaction. A deterministic response links to public pricing, setup, secure sign-in or product information. HELP/INFO/AYUDA supplies account/setup links and the owner-approved temporary public support email, ngoumnaisteve@gmail.com. There is no AI/model request, account lookup/disclosure, support-ticket creation, booking, promise of human follow-up, admin reply control, proactive reminder or marketing campaign. YES does not enroll the sender in recurring texts.
 
 STOP, STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT, REVOKE, OPTOUT, ALTO and PARAR record suppression. START, UNSTOP and EMPEZAR only remove suppression; they do not create ongoing consent. HELP remains unanswered while suppressed. A first STOP can receive one necessary confirmation even with ordinary replies disabled, unless Twilio's signed `OptOutType` says the provider handled the keyword. Repeated STOP while already suppressed prepares no second confirmation. START and HELP receive no application acknowledgment while the ordinary gate is off. Provider keyword handling never produces a second application acknowledgment.
 
