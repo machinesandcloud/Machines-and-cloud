@@ -1,0 +1,118 @@
+{
+  "at": "2026-10-23T12:28:46.992316+00:00",
+  "decision": "Technical acceptance of the bounded local Connections repair. PO customer-outcome acceptance, publication and actual production/provider delivery are separate.",
+  "checkout": "/tmp/mc-complete-connections-5b",
+  "source": {
+    "scripts/complete-connections-ui-qa-check.mjs": "1e54a06907fc094a3a0be7a2e875223a3a0771273956388c1da1fed8663ac03c",
+    "desk.html": "d474d85bd88792ca5aeed19c2865c9a31fd0e356611f4fe91724ae7b664e83e3",
+    "desk.js": "16fb0e9e7831dc0b90080408e181ddcd9ad9f90be3c48e4c69169dfda00a329f",
+    "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+    "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+    "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "currentEvidence": {
+    "receipt": "scratchpad/complete-connections-qa-final-confirmed.json",
+    "summary": {
+      "passed": 41,
+      "failed": 0,
+      "total": 41,
+      "physicalNetwork": 0,
+      "pageErrors": 0,
+      "forbidden": 0
+    },
+    "sourceStable": true,
+    "scriptContractBridge": "scratchpad/complete-connections-qa-script-contract-bridge.json",
+    "screenshots": [
+      "scratchpad/complete-connections-qa-final-confirmed-all-four-320.png",
+      "scratchpad/complete-connections-qa-final-confirmed-all-four-390.png",
+      "scratchpad/complete-connections-qa-final-confirmed-all-four-1440.png",
+      "scratchpad/complete-connections-qa-final-confirmed-website-editor-320.png",
+      "scratchpad/complete-connections-qa-final-confirmed-website-editor-390.png",
+      "scratchpad/complete-connections-qa-final-confirmed-website-editor-1440.png",
+      "scratchpad/complete-connections-qa-final-confirmed-blank-website-retained-origin.png",
+      "scratchpad/complete-connections-qa-final-confirmed-canonical-phone-details.png",
+      "scratchpad/complete-connections-qa-final-confirmed-phone-text-review-320.png",
+      "scratchpad/complete-connections-qa-final-confirmed-phone-text-review-390.png",
+      "scratchpad/complete-connections-qa-final-confirmed-phone-text-review-1440.png",
+      "scratchpad/complete-connections-qa-final-confirmed-retained-google-permission.png",
+      "scratchpad/complete-connections-qa-final-confirmed-retained-number-with-web-only.png"
+    ]
+  },
+  "scope": "Actual desk HTML/CSS/JS with actual local client/access/onboard handlers against isolated memory storage. Browser HTTP is intercepted. Synthetic platform policies expose real read DTO offers. Explicit phone approval only records a local queued intent; no worker purchases or carrier registration runs. Calendar start uses actual local handler and stops on an inert intercepted Google document before real consent. Retained Calendar connected state is a synthetic stored fixture, not a real grant.",
+  "observed": [
+    "All four paths remain visible for web-only, mixed, all-selected and no-web saved preferences at 320/390/1440; selection is an explicit draft followed by Save and reload shows the exact retained set.",
+    "Cancel, 409/503/network/malformed responses, HTTP401 empty response, newer choices during slow responses and lost-after-effect responses preserve the appropriate draft/saved boundary without automatic duplicate writes.",
+    "One website editor exposes Save and Cancel; invalid/error/slow/lost writes retain useful values. Missing URL with two retained origins still reaches Add website. Cancel restores visible focus.",
+    "Actual canonical phone number/carrier/forwarding PUT saves and reloads. Unsupported legacy transfer/backup controls stay hidden/disabled. Existing-line forwarding is disabled when it equals the owner cell; native keyboard keeps the new-number choice. These are local settings and review checks, not operational call/handoff proof.",
+    "Actual available phone/text review shows costs, canonical identity, separate unchecked authority/legal/customer-consent/setup-text approvals and an explicit submit. Retained Google permission and retained queued number request remain visible when unselected; new number offers are hidden for web/Calendar-only selections.",
+    "The final canonical phone, retained-number and website-editor screenshots were personally inspected; phone input focus is visible after the route settles."
+  ],
+  "preservedFindings": [
+    {
+      "receipt": "scratchpad/complete-connections-qa-baseline.json",
+      "finding": "Exact initial web-only actual page showed one card, collapsed preferences and duplicate Save website controls."
+    },
+    {
+      "receipt": "scratchpad/complete-connections-qa-first.json",
+      "finding": "Empty-body HTTP401 preference response did not clear private content. Engineering corrected status handling before body parsing; final expiry group passes. This diagnostic source was evolving and is not final acceptance."
+    },
+    {
+      "receipt": "scratchpad/complete-connections-qa-two-origin-first.json",
+      "finding": "Real stable-source failure: blank URL plus two saved allowed origins changed Add website to Copy installation code. Engineering hides the origin picker until a website URL exists; final group passes."
+    },
+    {
+      "receipt": "scratchpad/complete-connections-qa-phone-loop-isolated.json",
+      "finding": "The apparent phone guard failure was an assertion semantics error: captured DOM option.disabled was true, but Playwright isDisabled retargeted through its enclosing label. Replacement checks actual option property and ordinary keyboard choice; final group passes."
+    },
+    {
+      "receipt": "scratchpad/complete-connections-qa-final-accepted.json",
+      "finding": "40/41 on final runtime; the added retained-number fixture correctly returned HTTP202 queued, while the QA setup expected200. Only the QA contract/screenshot wait changed afterward, as the bridge records. Final41/41 is separate."
+    }
+  ],
+  "staleSuiteTriage": {
+    "receipt": "scratchpad/complete-connections-qa-legacy-journey.json",
+    "result": {
+      "passed": 1,
+      "failed": 6,
+      "total": 7,
+      "physicalNetwork": 0,
+      "pageErrors": 0,
+      "forbidden": 0
+    },
+    "disposition": "The unchanged old suite is not green. Its six failures are obsolete expectations, preserved rather than relabeled passing.",
+    "replacements": [
+      {
+        "old": "Three viewport groups require the exact retired disclosure label Your one-time part.",
+        "current": "The actual disclosure uses Your part. Final 12 profile/viewport groups open all four disclosures by keyboard and check automation guidance, state and geometry."
+      },
+      {
+        "old": "Create-workspace expects exactly two cards for web+Calendar.",
+        "current": "Its actual create/handoff reached the workspace, which rendered four cards as newly required. Final preference/reload profiles independently check the exact selected set and four-card discovery."
+      },
+      {
+        "old": "Web-only expects exactly one card and absent phone/text/Calendar cards.",
+        "current": "This contradicts the customer repair. Final web-only viewport profiles require all four paths and visible explicit preferences."
+      },
+      {
+        "old": "Website route requires activeElement websiteInstallStep.",
+        "current": "The route now reveals the complete website card; the dedicated Add action focuses the URL editor. Final website keyboard, Add, edit, save and Cancel focus checks verify current controls; PO separately observes the complete ordinary job."
+      }
+    ]
+  },
+  "supportingEarlierPhase": {
+    "receipt": "scratchpad/service-onboarding-qa-connections-complete-repair.json",
+    "result": "13/13 browser component checks on their recorded earlier phase source; not counted as additional final-current assertions or provider proof."
+  },
+  "limits": [
+    "No publication, push, commit, email, message, call, live model request, real OAuth consent, Calendar event or paid provider operation occurred in this QA.",
+    "Memory storage and intercepted traffic do not establish production persistence, live service, carrier acceptance or customer delivery.",
+    "The root 38-command required gate is separate evidence. Only the new QA script changed afterward; the exact two-change bridge preserves that distinction. No claim that all files retained identical hashes is made."
+  ]
+}

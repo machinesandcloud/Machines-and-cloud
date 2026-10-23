@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-23T12:29:34.774068+00:00",
+  "role": "Newly appointed Product Owner",
+  "decision": "Accepted locally for the complete Connections selection, saved-details and next-step customer journey. Full production service delivery is not accepted.",
+  "independence": "This PO independently reproduced the reported screen defects and exercised actual local owner handlers and portal assets. Prior PO conclusions were not adopted as acceptance.",
+  "customerJob": "An owner starting with website chat can discover website chat, phone answering, two-way texting and Google Calendar; reuse saved business facts; choose services explicitly; complete the relevant available next action; and understand where customer requests, visits and delivery status are retained.",
+  "publicationHold": {
+    "ownerDecision": "Keep local",
+    "appliesTo": [
+      "5b5f983 automatic sign-in and Gmail HELP candidate",
+      "This descendant complete Connections candidate"
+    ],
+    "effect": "No publication request or publication action. Held marketing 876aa5d remains separate and held.",
+    "authorityLimits": "No provider account read/write, consent, attestation, activation, purchase, message, call, real email, Calendar event, campaign filing or external customer action was performed or authorized by this acceptance."
+  },
+  "source": {
+    "checkout": "/tmp/mc-complete-connections-5b",
+    "branch": "work/complete-connections-5b",
+    "baseAndHeadAtReview": "5b5f983e95afb1b3be0c8b7cd458c7fafe276acd",
+    "sourceState": "Reviewed working-tree runtime changes on accepted local 5b5f983, not unrelated main runtime. File hashes identify the reviewed source before its later coordination commit.",
+    "runtimeFileSha256": {
+      "desk.html": "d474d85bd88792ca5aeed19c2865c9a31fd0e356611f4fe91724ae7b664e83e3",
+      "desk.js": "16fb0e9e7831dc0b90080408e181ddcd9ad9f90be3c48e4c69169dfda00a329f",
+      "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+      "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+      "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+      "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+      "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+      "netlify/functions/lib/workspace-edit.mjs": "f4d820eca1a9eb9946dc16dca4b3e10f9803ef272e06ceba028ec56ada0e0f21",
+      "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+      "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+      "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+      "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8"
+    },
+    "poSourceStable": true,
+    "independentQASourceMatched": true
+  },
+  "evidence": {
+    "independentPOJourney": "scratchpad/po-connections-final-reviewed.json",
+    "independentPOJourneySha256": "691c49af6ce6b093e28209ab7b0b6e45924ee0c5eda4b4ce5a10d0dfb78e50db",
+    "independentQA": "scratchpad/complete-connections-qa-final-confirmed.json",
+    "independentQASha256": "5262bc2745eda3f09ecc58e68ff02fc26efa200b18741f3668dd59a73315621b",
+    "independentQAResult": "41 of 41 passed, stable source, zero physical requests, forbidden requests and page errors.",
+    "requiredGate": "Root reported 38 of 38 required checks passed on stable matching runtime before this acceptance.",
+    "baseline": "scratchpad/po-connections-baseline.json",
+    "screenshotsPersonallyInspected": [
+      "scratchpad/po-connections-baseline-390-overview.png",
+      "scratchpad/po-connections-baseline-390-website-editor.png",
+      "scratchpad/po-connections-final-reviewed-390-phone-details.png",
+      "scratchpad/po-connections-final-reviewed-390-calendar-and-outcomes.png",
+      "scratchpad/po-connections-final-reviewed-1440-website-editor.png",
+      "scratchpad/complete-connections-qa-final-confirmed-canonical-phone-details.png",
+      "scratchpad/complete-connections-qa-final-confirmed-retained-google-permission.png",
+      "scratchpad/complete-connections-qa-final-confirmed-retained-number-with-web-only.png"
+    ],
+    "earlierObserverLimits": "po-connections-final-first.json and final-second.json preserve observer sequencing failures that assumed the website editor was already open; final-reviewed uses the normal Add website action and current narrowed runtime. Earlier final-accepted/final-source receipts are superseded by final-reviewed for final source acceptance."
+  },
+  "observedSelections": {
+    "initialSaved": [
+      "web"
+    ],
+    "afterExplicitPhoneSaveAndReload": [
+      "voice",
+      "web"
+    ],
+    "afterIncrementalSmsAndCalendarSaves": [
+      "calendar",
+      "sms",
+      "voice",
+      "web"
+    ],
+    "allFourServiceCardsVisibleAtWidths": [
+      390,
+      1440
+    ],
+    "choiceControlsVisibleWithoutDisclosure": true,
+    "chooseActionAloneDidNotChangeSavedPreferences": true
+  },
+  "observedCustomerOutcome": [
+    "At mobile 390px and desktop 1440px, the initial web-only owner sees all four service cards and all four visible choices, with unselected status and useful Choose actions.",
+    "Choose phone changes only the local draft. Save choices and reload retain web plus voice without authorizing or activating service.",
+    "Review phone details opens the existing canonical contact section and focuses the missing business-line field. The owner saves a separate business line, carrier and all-call forwarding choice through the actual PUT handler, while reusing the saved separate owner contact cell.",
+    "Ordinary business-details Save then Connections, without reload, retains all four cards and current next actions; a later reload retains the phone facts and service choices.",
+    "The shared business review works through its actual handler. After review, unavailable AI practice is shown as Waiting for AI service for phone and texting; no number reservation or service success is inferred.",
+    "SMS and Calendar choices save incrementally. Calendar separately explains that Google approval will be requested when available. Selection does not perform OAuth or provider work.",
+    "Inbox and Schedule actions open the actual request and saved-visit screens. The text distinguishes saved records from delivered messages and synced visits.",
+    "The website editor has exactly one visible Save website and one Cancel. The ordinary Add website action opens it, and the actual website PUT saves and reuses the canonical URL.",
+    "Current mobile and desktop screens fit their viewport. Unsupported managed-call transfer and backup urgent-alert fields remain hidden; the visible fallback explanation correctly names the saved owner contact cell.",
+    "Supplementary independent QA establishes the available-offer and recovery states: current costs/legal/consent decisions, safe forwarding choice, Calendar start interception, retained permissions, no new number offer for web/Calendar-only selections, retained number cancellation, error/slow/lost-response recovery and keyboard focus."
+  ],
+  "serviceToConnectionMap": [
+    {
+      "capability": "Website chat and customer intake",
+      "connection": "Saved website, allowed origin and installed widget; shared saved business answers. Requests and conversations go to Inbox; visits go to Schedule.",
+      "limit": "Actual authorized external installation and first ordinary customer request remain unaccepted."
+    },
+    {
+      "capability": "Phone answering and fallback",
+      "connection": "Explicit phone choice and current usage/cost authority; dedicated number and managed voice setup; existing-line forwarding decision and carrier; separate saved owner contact cell for provider-failure fallback.",
+      "limit": "Current managed assistant handles availability, saved visits and notify_owner. This screen does not establish live warm transfer, verified fallback, dispatch or an actual completed shop call."
+    },
+    {
+      "capability": "Two-way texting and appointment reminders",
+      "connection": "Dedicated shop sender, business/legal registration, approved program, owner decisions and current recipient-specific ongoing appointment consent.",
+      "limit": "A saved website/voice visit or shop registration attestation is not recipient SMS permission. Actual two-way delivery, STOP/HELP, reminder receipt and ordinary recovery remain unaccepted; a universal cross-channel reminder claim is not accepted."
+    },
+    {
+      "capability": "Google Calendar visit delivery",
+      "connection": "Owner chooses the intended Google account and grants Calendar permission. Saved visit create/change/cancel delivery has its own status.",
+      "limit": "Permission saved, delivery service ready and actual same-event sync are different states. Other Google events do not block workspace availability. Actual consent/event lifecycle and ordinary recovery remain unaccepted."
+    },
+    {
+      "capability": "Owner identity and email alerts",
+      "connection": "Verified owner email is reused. Machines & Cloud uses its platform Resend configuration; customers do not supply a Resend API key.",
+      "limit": "A queued owner email is not verified receipt. Actual alert/support receipt and operational readiness remain open."
+    },
+    {
+      "capability": "Person-needed request and follow-through",
+      "connection": "Saved handoff/safety rules, Inbox request, owner-email delivery status and saved separate contact cell for the supported provider-failure fallback.",
+      "limit": "Saved or seen requests do not establish attempted, reached or completed owner follow-through. Live transfer, dispatch and customer response-time guarantees are not accepted."
+    }
+  ],
+  "unsupportedIntegrationClaims": "No pretend Connect action or operational claim was added for Jobber, Housecall Pro, lead-platform replies, payment processing or dispatch. Existing CSV downloads and saved review/payment URLs are not native integrations.",
+  "remainingLaunchDependencies": [
+    "G1/G2: actual authenticated production save/recovery, fresh owner signup/return, authorized external installation and first retained ordinary customer request.",
+    "G3/G4/G5: current tenant AI/Spanish review, real shop phone/fallback lifecycle, dedicated-shop registration and actual two-way SMS/STOP/HELP, recipient consent and scheduled recovery.",
+    "Reminder collection/action dependency: the current server-authored ongoing appointment consent path is demonstrated in source after an inbound SMS booking. A website or phone booking does not itself create that proof; an ordinary consent route for first website/phone customers remains unaccepted before promising reminders to every booked customer.",
+    "G6: ordinary owned Calendar consent, one event created/moved/cancelled, scheduler recovery and cleanup; broader Google readiness remains separate.",
+    "G7/G8/G9: useful owner follow-through, actual email/support/incident receipt and backup, hosting continuity and an accepted paid scope/cost model. Local UI acceptance closes none of these production/provider gates."
+  ],
+  "nextUnresolvedStep": {
+    "scope": "Keep this repair local under the owner hold. Continue the existing primary full-service customer outcome; no new queue or website-only product pivot.",
+    "driver": "PM tracks the next unresolved step; UI/UX and Engineering own customer flow; QA verifies; OM owns provider and operational readiness; this replacement PO owns observed customer outcome acceptance.",
+    "requiredEvidence": "Calendar remains the next provider milestone under its existing separately scoped authority. Signup, external installation, first ordinary customer request and phone/text/handoff delivery remain owned until their actual observed outcomes; this document grants no live action authority."
+  }
+}

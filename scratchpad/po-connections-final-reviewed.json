@@ -1,0 +1,717 @@
+{
+  "at": "2026-10-23T12:24:57.527Z",
+  "sourceBefore": {
+    "desk.html": "d474d85bd88792ca5aeed19c2865c9a31fd0e356611f4fe91724ae7b664e83e3",
+    "desk.js": "16fb0e9e7831dc0b90080408e181ddcd9ad9f90be3c48e4c69169dfda00a329f",
+    "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/workspace-edit.mjs": "f4d820eca1a9eb9946dc16dca4b3e10f9803ef272e06ceba028ec56ada0e0f21",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8"
+  },
+  "scope": "Independent PO observed actual local owner handlers and desktop/mobile browser assets. Synthetic in-memory owner only; no physical transport or provider acceptance.",
+  "observations": [
+    {
+      "width": 390,
+      "initialChoices": [
+        "web"
+      ],
+      "cards": [
+        {
+          "id": "web",
+          "text": "Website chat\nYour next step\n\nAnswer website visitors and keep their requests in your workspace.\n\nComplete the shared step above\nWhat happens next\n+"
+        },
+        {
+          "id": "voice",
+          "text": "Phone answering\nNot selected\n\nAnswer calls through your existing business line or a dedicated front desk number.\n\nChoose phone answering\nWhat happens next\n+"
+        },
+        {
+          "id": "sms",
+          "text": "Two-way texting\nNot selected\n\nExchange customer texts from your dedicated front desk number.\n\nChoose two-way texting\nWhat happens next\n+"
+        },
+        {
+          "id": "calendar",
+          "text": "Google Calendar\nNot selected\n\nSend saved visits and changes to the Google calendar you authorize.\n\nChoose Google Calendar\nWhat happens next\n+"
+        }
+      ],
+      "preferencesVisible": true,
+      "initialButtons": [
+        {
+          "id": "saveConnections",
+          "text": "Save choices"
+        },
+        {
+          "id": null,
+          "text": "Review business details"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Choose phone answering"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Choose two-way texting"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Choose Google Calendar"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Open Inbox"
+        },
+        {
+          "id": null,
+          "text": "Open Schedule"
+        },
+        {
+          "id": null,
+          "text": "Check saved status"
+        }
+      ],
+      "screenshots": [
+        "scratchpad/po-connections-final-reviewed-390-overview.png",
+        "scratchpad/po-connections-final-reviewed-390-phone-details.png",
+        "scratchpad/po-connections-final-reviewed-390-phone-saved-connections.png",
+        "scratchpad/po-connections-final-reviewed-390-phone-reviewed-waiting.png",
+        "scratchpad/po-connections-final-reviewed-390-calendar-and-outcomes.png",
+        "scratchpad/po-connections-final-reviewed-390-website-editor.png",
+        "scratchpad/po-connections-final-reviewed-390-website-saved.png"
+      ],
+      "customerJourney": [
+        {
+          "step": "Choose phone without saving",
+          "retainedChoices": [
+            "web"
+          ],
+          "visibleMessage": "Your choice is not saved yet. Save choices to see the setup steps; permissions and any costs come later."
+        },
+        {
+          "step": "Save phone choice and reload",
+          "retainedChoices": [
+            "voice",
+            "web"
+          ],
+          "phoneCard": "Phone answering\nYour next step\n\nAnswer calls through your existing business line or a dedicated front desk number.\n\nComplete the shared step above\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "step": "Direct phone details action",
+          "focusedField": "phoneBusinessNumber",
+          "heading": "Phone answering details\n\nTo keep an existing business line, save it here with a separate contact cell. You will choose forwarding or a new number when reviewing phone setup. Saving these details does not connect calls.\n\nIf the answering provider fails, the phone fallback uses your saved contact cell. Requests that need a person stay in Inbox; a saved request and its email alert have separate statuses.",
+          "fallbackExplanation": "If the answering provider fails, the phone fallback uses your saved contact cell. Requests that need a person stay in Inbox; a saved request and its email alert have separate statuses.",
+          "legacyTransferVisible": false,
+          "legacyBackupVisible": false
+        },
+        {
+          "step": "Save existing-line routing details and reuse separate contact cell",
+          "retainedPhone": {
+            "businessNumber": "+17135550197",
+            "twilioNumber": "",
+            "forwarding": "all",
+            "carrier": "att",
+            "transferTo": "",
+            "voiceForwardTo": "",
+            "textBack": true,
+            "tenDlc": "not_started"
+          },
+          "savedContactCell": "+17135550198",
+          "saveMessage": "All changes saved. Connections shows any review, practice or permission needed for each service."
+        },
+        {
+          "step": "Ordinary return to Connections after business save, without reload",
+          "cards": [
+            "web",
+            "voice",
+            "sms",
+            "calendar"
+          ],
+          "phoneCard": "Phone answering\nYour next step\n\nAnswer calls through your existing business line or a dedicated front desk number.\n\nComplete the shared step above\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "step": "Follow shared review once and inspect phone next step",
+          "reviewedCurrentSavedRules": true,
+          "phoneCard": "Phone answering\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "step": "Reload phone configuration",
+          "retainedPhone": {
+            "businessNumber": "+17135550197",
+            "twilioNumber": "",
+            "forwarding": "all",
+            "carrier": "att",
+            "transferTo": "",
+            "voiceForwardTo": "",
+            "textBack": true,
+            "tenDlc": "not_started"
+          },
+          "retainedChoices": [
+            "voice",
+            "web"
+          ]
+        },
+        {
+          "step": "Choose and save sms",
+          "retainedChoices": [
+            "sms",
+            "voice",
+            "web"
+          ],
+          "channelCard": "Two-way texting\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nWhat happens next\n+"
+        },
+        {
+          "step": "Choose and save calendar",
+          "retainedChoices": [
+            "calendar",
+            "sms",
+            "voice",
+            "web"
+          ],
+          "channelCard": "Google Calendar\nWaiting for service\n\nYour Google approval will be requested here when connection is available.\n\nWaiting for platform\nWhat happens next\n+"
+        },
+        {
+          "step": "Open Inbox from outcome destination",
+          "heading": "Customer requests"
+        },
+        {
+          "step": "Open Schedule from outcome destination",
+          "heading": "Schedule"
+        }
+      ],
+      "finalChannelCards": [
+        {
+          "id": "web",
+          "text": "Website chat\nYour next step\n\nContinue the guided installation without treating it as proof that customer chat is active.\n\nContinue website setup\nWhat happens next\n+"
+        },
+        {
+          "id": "voice",
+          "text": "Phone answering\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "id": "sms",
+          "text": "Two-way texting\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nWhat happens next\n+"
+        },
+        {
+          "id": "calendar",
+          "text": "Google Calendar\nWaiting for service\n\nYour Google approval will be requested here when connection is available.\n\nWaiting for platform\nWhat happens next\n+"
+        }
+      ],
+      "websiteBeforeEdit": {
+        "hash": "#setup",
+        "setupPane": "pane on guide-target",
+        "detailsHidden": false,
+        "detailsOpen": true,
+        "editorHidden": true,
+        "choices": [
+          "web",
+          "voice",
+          "sms",
+          "calendar"
+        ]
+      },
+      "websiteButtons": [
+        {
+          "id": "websiteInstallSave",
+          "text": "Save website"
+        },
+        {
+          "id": "websiteInstallEditCancel",
+          "text": "Cancel"
+        }
+      ],
+      "savedWebsite": "https://houston-service.example.test/",
+      "afterSaveWebsiteButtons": [
+        {
+          "id": "websiteInstallChange",
+          "text": "Change website"
+        },
+        {
+          "id": "websiteInstallPrimary",
+          "text": "Use this website"
+        }
+      ],
+      "afterSaveChoices": [
+        "calendar",
+        "sms",
+        "voice",
+        "web"
+      ],
+      "documentWidth": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "width": 1440,
+      "initialChoices": [
+        "web"
+      ],
+      "cards": [
+        {
+          "id": "web",
+          "text": "Website chat\nYour next step\n\nAnswer website visitors and keep their requests in your workspace.\n\nComplete the shared step above\nWhat happens next\n+"
+        },
+        {
+          "id": "voice",
+          "text": "Phone answering\nNot selected\n\nAnswer calls through your existing business line or a dedicated front desk number.\n\nChoose phone answering\nWhat happens next\n+"
+        },
+        {
+          "id": "sms",
+          "text": "Two-way texting\nNot selected\n\nExchange customer texts from your dedicated front desk number.\n\nChoose two-way texting\nWhat happens next\n+"
+        },
+        {
+          "id": "calendar",
+          "text": "Google Calendar\nNot selected\n\nSend saved visits and changes to the Google calendar you authorize.\n\nChoose Google Calendar\nWhat happens next\n+"
+        }
+      ],
+      "preferencesVisible": true,
+      "initialButtons": [
+        {
+          "id": "saveConnections",
+          "text": "Save choices"
+        },
+        {
+          "id": null,
+          "text": "Review business details"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Choose phone answering"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Choose two-way texting"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Choose Google Calendar"
+        },
+        {
+          "id": null,
+          "text": "What happens next\n+"
+        },
+        {
+          "id": null,
+          "text": "Open Inbox"
+        },
+        {
+          "id": null,
+          "text": "Open Schedule"
+        },
+        {
+          "id": null,
+          "text": "Check saved status"
+        }
+      ],
+      "screenshots": [
+        "scratchpad/po-connections-final-reviewed-1440-overview.png",
+        "scratchpad/po-connections-final-reviewed-1440-phone-details.png",
+        "scratchpad/po-connections-final-reviewed-1440-phone-saved-connections.png",
+        "scratchpad/po-connections-final-reviewed-1440-phone-reviewed-waiting.png",
+        "scratchpad/po-connections-final-reviewed-1440-calendar-and-outcomes.png",
+        "scratchpad/po-connections-final-reviewed-1440-website-editor.png",
+        "scratchpad/po-connections-final-reviewed-1440-website-saved.png"
+      ],
+      "customerJourney": [
+        {
+          "step": "Choose phone without saving",
+          "retainedChoices": [
+            "web"
+          ],
+          "visibleMessage": "Your choice is not saved yet. Save choices to see the setup steps; permissions and any costs come later."
+        },
+        {
+          "step": "Save phone choice and reload",
+          "retainedChoices": [
+            "voice",
+            "web"
+          ],
+          "phoneCard": "Phone answering\nYour next step\n\nAnswer calls through your existing business line or a dedicated front desk number.\n\nComplete the shared step above\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "step": "Direct phone details action",
+          "focusedField": "phoneBusinessNumber",
+          "heading": "Phone answering details\n\nTo keep an existing business line, save it here with a separate contact cell. You will choose forwarding or a new number when reviewing phone setup. Saving these details does not connect calls.\n\nIf the answering provider fails, the phone fallback uses your saved contact cell. Requests that need a person stay in Inbox; a saved request and its email alert have separate statuses.",
+          "fallbackExplanation": "If the answering provider fails, the phone fallback uses your saved contact cell. Requests that need a person stay in Inbox; a saved request and its email alert have separate statuses.",
+          "legacyTransferVisible": false,
+          "legacyBackupVisible": false
+        },
+        {
+          "step": "Save existing-line routing details and reuse separate contact cell",
+          "retainedPhone": {
+            "businessNumber": "+17135550197",
+            "twilioNumber": "",
+            "forwarding": "all",
+            "carrier": "att",
+            "transferTo": "",
+            "voiceForwardTo": "",
+            "textBack": true,
+            "tenDlc": "not_started"
+          },
+          "savedContactCell": "+17135550198",
+          "saveMessage": "All changes saved. Connections shows any review, practice or permission needed for each service."
+        },
+        {
+          "step": "Ordinary return to Connections after business save, without reload",
+          "cards": [
+            "web",
+            "voice",
+            "sms",
+            "calendar"
+          ],
+          "phoneCard": "Phone answering\nYour next step\n\nAnswer calls through your existing business line or a dedicated front desk number.\n\nComplete the shared step above\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "step": "Follow shared review once and inspect phone next step",
+          "reviewedCurrentSavedRules": true,
+          "phoneCard": "Phone answering\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "step": "Reload phone configuration",
+          "retainedPhone": {
+            "businessNumber": "+17135550197",
+            "twilioNumber": "",
+            "forwarding": "all",
+            "carrier": "att",
+            "transferTo": "",
+            "voiceForwardTo": "",
+            "textBack": true,
+            "tenDlc": "not_started"
+          },
+          "retainedChoices": [
+            "voice",
+            "web"
+          ]
+        },
+        {
+          "step": "Choose and save sms",
+          "retainedChoices": [
+            "sms",
+            "voice",
+            "web"
+          ],
+          "channelCard": "Two-way texting\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nWhat happens next\n+"
+        },
+        {
+          "step": "Choose and save calendar",
+          "retainedChoices": [
+            "calendar",
+            "sms",
+            "voice",
+            "web"
+          ],
+          "channelCard": "Google Calendar\nWaiting for service\n\nYour Google approval will be requested here when connection is available.\n\nWaiting for platform\nWhat happens next\n+"
+        },
+        {
+          "step": "Open Inbox from outcome destination",
+          "heading": "Customer requests"
+        },
+        {
+          "step": "Open Schedule from outcome destination",
+          "heading": "Schedule"
+        }
+      ],
+      "finalChannelCards": [
+        {
+          "id": "web",
+          "text": "Website chat\nYour next step\n\nContinue the guided installation without treating it as proof that customer chat is active.\n\nContinue website setup\nWhat happens next\n+"
+        },
+        {
+          "id": "voice",
+          "text": "Phone answering\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nReview phone details\nWhat happens next\n+"
+        },
+        {
+          "id": "sms",
+          "text": "Two-way texting\nWaiting for service\n\nYour rules are saved. Live practice will be available when the AI service is ready.\n\nWaiting for AI service\nWhat happens next\n+"
+        },
+        {
+          "id": "calendar",
+          "text": "Google Calendar\nWaiting for service\n\nYour Google approval will be requested here when connection is available.\n\nWaiting for platform\nWhat happens next\n+"
+        }
+      ],
+      "websiteBeforeEdit": {
+        "hash": "#setup",
+        "setupPane": "pane on guide-target",
+        "detailsHidden": false,
+        "detailsOpen": true,
+        "editorHidden": true,
+        "choices": [
+          "web",
+          "voice",
+          "sms",
+          "calendar"
+        ]
+      },
+      "websiteButtons": [
+        {
+          "id": "websiteInstallSave",
+          "text": "Save website"
+        },
+        {
+          "id": "websiteInstallEditCancel",
+          "text": "Cancel"
+        }
+      ],
+      "savedWebsite": "https://houston-service.example.test/",
+      "afterSaveWebsiteButtons": [
+        {
+          "id": "websiteInstallChange",
+          "text": "Change website"
+        },
+        {
+          "id": "websiteInstallPrimary",
+          "text": "Use this website"
+        }
+      ],
+      "afterSaveChoices": [
+        "calendar",
+        "sms",
+        "voice",
+        "web"
+      ],
+      "documentWidth": {
+        "viewport": 1440,
+        "document": 1440
+      }
+    }
+  ],
+  "requests": [
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "save_connection_preferences",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "review_rules",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "save_connection_preferences",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "save_connection_preferences",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "save_connection_preferences",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "review_rules",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "save_connection_preferences",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "POST",
+      "action": "save_connection_preferences",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "width": 1440,
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "desk.html": "d474d85bd88792ca5aeed19c2865c9a31fd0e356611f4fe91724ae7b664e83e3",
+    "desk.js": "16fb0e9e7831dc0b90080408e181ddcd9ad9f90be3c48e4c69169dfda00a329f",
+    "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/workspace-edit.mjs": "f4d820eca1a9eb9946dc16dca4b3e10f9803ef272e06ceba028ec56ada0e0f21",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8"
+  },
+  "sourceStable": true
+}
