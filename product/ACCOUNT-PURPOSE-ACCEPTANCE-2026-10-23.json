@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-23",
+  "status": "Independent local technical and replacement Product Owner acceptance of the Account-purpose repair; not published",
+  "checkout": "/tmp/mc-account-purpose-22",
+  "branch": "work/account-purpose-22",
+  "baseCommit": "22c6708e49538d93dc243da1e2328c8c50980a7d",
+  "recordedProduction": "e5cb71c7f23592539d9c292eb50123afbebf0f30",
+  "ownerDecision": "Keep local. Includes held Connections and sign-in/HELP parents. No publication, provider action or Twilio HELP save authorized.",
+  "customerOutcome": "An owner can identify the account, edit saved contact details in one place, understand the actual state of every connection, download retained records, and safely pause, resume or stop service with an observable saved result.",
+  "changes": [
+    "Replaced empty service controls and the orphan Service heading with an Account page organized around identity, connection state and useful actions.",
+    "Contact editing opens the canonical saved business-details form; sign-in email is shown as identity rather than an editable duplicate.",
+    "Setup, active, paused and stopped states show appropriate actions and all four connection statuses without inferring service delivery from raw workspace status.",
+    "Four authenticated CSV downloads have clear labels, persistent progress and failure feedback, MIME validation, timeouts, expiry handling and no late download after sign-out. Actual downloaded bytes match the local handler responses.",
+    "Safe Stop confirmation supports Keep, Escape and focus return; slow or lost results are reconciled before allowing another mutation. Retained records remain downloadable after stopping.",
+    "Removed the misleading This month section and unsupported lost-revenue promise. Self-service hides optional average-job-value controls while preserving stored values and legacy save behavior.",
+    "Pause/resume, failed sign-out and interrupted export recovery do not leave controls permanently busy or repeat the service change.",
+    "Backend resume no longer requires website AI activation proof when restoring a non-web workspace. Restoring previously active website chat still requires current review, live practice and model readiness. Current SMS sender guards remain enforced; no resource is purchased or new channel activated."
+  ],
+  "source": {
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "1bdde048db5f5893598b6b962c72a21915e754feba1357cd5302a44d4a40355b",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "scripts/managed-sms-qa-check.mjs": "56255c2f1b60101c8b83082fe7df4b44740a64534cd8edcd89d5e2033c970bda",
+    "scripts/account-page-ui-qa-check.mjs": "431c0ab9dcd04179665a845e8dc0f26dec83c1140059bb0d1c191c1760519c79"
+  },
+  "verification": {
+    "independentQA": {
+      "passed": 36,
+      "total": 36,
+      "sourceStable": true,
+      "physicalNetwork": 0,
+      "pageErrors": 0,
+      "receipt": "scratchpad/account-purpose-final-r6.json",
+      "disposition": "scratchpad/account-purpose-qa-disposition.json",
+      "viewports": [
+        320,
+        390,
+        1440
+      ]
+    },
+    "requiredGate": {
+      "passed": 38,
+      "total": 38,
+      "sourceStable": true,
+      "physicalAttempts": 0,
+      "historicalReceiptsRestored": true,
+      "receipt": "scratchpad/account-purpose-required-summary.json"
+    },
+    "targetedBackend": {
+      "passed": 18,
+      "total": 18,
+      "receipt": "scratchpad/account-purpose-resume-regression.json",
+      "limits": "Actual local handlers with synthetic memory data and intercepted sends; no external provider effect."
+    },
+    "productOwner": {
+      "acceptance": "product/ACCOUNT-PURPOSE-PO-2026-10-23.json",
+      "actualJourney": "scratchpad/po-account-final-second.json",
+      "scope": "Independent ordinary Account tasks on actual local handlers/screens at390/1440, with explicit narrow final sign-out source bridge to independent QA."
+    },
+    "rootReview": "Reviewed implementation, desktop/mobile layout, source matches, resume activation boundary, lost-response/sign-out recovery and required gate. No unresolved Account-purpose defect; no unrelated full-suite green claim."
+  },
+  "reviewableScreens": [
+    "scratchpad/account-purpose-final-r6-state-draft-1440-full.png",
+    "scratchpad/account-purpose-final-r6-state-draft-390-full.png",
+    "scratchpad/account-purpose-final-r6-account-390-service-focused.png",
+    "scratchpad/account-purpose-final-r6-stop-confirm-320.png"
+  ],
+  "remainingEvidence": [
+    "Actual hosted owner Account journey and remote/provider effects remain unaccepted.",
+    "Complete phone/text/Calendar delivery, customer onboarding through first installed request and operational support/hosting acceptance remain open in the current launch control.",
+    "Advanced workspace refresh is accepted only as saved queued state with internal dispatch intercepted; ordinary scheduled completion is not established here.",
+    "Marketing876aa5d and resource-admission6323d8f stay separate and local. Main remains a documentation mirror with unrelated unpublished runtime."
+  ],
+  "notPerformed": [
+    "Push, deployment or production checks",
+    "Real email, SMS, call or AI inference",
+    "Google consent or event changes",
+    "Purchase, billing, activation or carrier submission"
+  ]
+}

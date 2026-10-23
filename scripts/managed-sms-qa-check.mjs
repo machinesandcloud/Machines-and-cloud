@@ -133,11 +133,43 @@ await check("old single-visit consent cannot authorize future bookings; explicit
 await check("common rules edits pause SMS readiness and fresh review restores existing resources without a new registration", async () => {
   const f = await fixture("rules-refresh", { status: "testing" }), previous = await strictRead("messaging_activation", f.row.id), edited = { ...f.c, services: ["Updated plumbing repairs"] }; await store.put("clients", f.c.slug, edited); assert.equal(await sms.messagingSender(edited), null); assert.equal((await sms.messagingActivationStatus(edited)).operation.customerAction, "review_current_rules"); const revision = configurationRevision(edited); edited.setupProof = { reviewedRevision: revision, testedRevision: revision, testMode: "live" }; await store.put("clients", f.c.slug, edited); assert.ok(await sms.messagingSender(edited)); assert.deepEqual((await strictRead("messaging_activation", f.row.id)).resources, previous.resources); assert.equal(edited.channels.web.active, false);
 });
-await check("owner resume restores testing phone-only state, requires current review/test/revision and does not activate website or purchase resources", async () => {
+await check("owner resume restores non-web state without AI activation; restoring web still requires current proof and resources remain unchanged", async () => {
   const f = await fixture("resume", { status: "paused" }); f.c.pausedFrom = "testing"; f.c.pausedChannels = { web: { active: false }, voice: { active: false }, sms: { active: false } }; await store.put("clients", f.c.slug, f.c); const token = hash("resume-owner-session"); await store.put("access_sessions", hash(token), { scope: "onboarding", status: "active", email: f.c.owner.email, expiresAt: new Date(clock + 3600000).toISOString() });
   const call = body => clientHandler(new Request(site + "/api/client?c=" + f.c.slug, { method: "POST", headers: { "content-type": "application/json", origin: site, authorization: "Bearer " + token }, body: JSON.stringify(body) })), body = { action: "resume_services", expectedRevision: configurationRevision(f.c) }, beforeSends = report.providerSends;
-  process.env.MC_FAKE_MODEL = "0"; process.env.ANTHROPIC_API_KEY = "offline-dummy-never-used";
-  try { assert.equal((await call({ ...body, acceptedCosts: true })).status, 400); assert.equal((await call({ ...body, expectedRevision: "0".repeat(64) })).status, 409); await store.put("clients", f.c.slug, { ...f.c, setupProof: { ...f.c.setupProof, testedRevision: "stale" } }); assert.equal((await call(body)).status, 409); await store.put("clients", f.c.slug, f.c); assert.equal((await call(body)).status, 202); const resumed = await strictRead("clients", f.c.slug); assert.equal(resumed.status, "testing"); assert.equal(resumed.channels.web.active, false); assert.equal(resumed.operationLifecycleVersion, 1); assert.equal(report.providerSends, beforeSends); assert.deepEqual((await strictRead("messaging_activation", f.row.id)).resources, f.row.resources); await store.put("clients", f.c.slug, { ...f.c, status: "cancelled" }); assert.equal((await call(body)).status, 409); } finally { process.env.MC_FAKE_MODEL = "1"; delete process.env.ANTHROPIC_API_KEY; }
+  try {
+    assert.equal((await call({ ...body, acceptedCosts: true })).status, 400);
+    assert.equal((await call({ ...body, expectedRevision: "0".repeat(64) })).status, 409);
+    // Resuming workspace setup must not depend on website AI proof. The SMS
+    // sender keeps its own current-rule guards and cannot resume delivery here.
+    const stale = { ...f.c, setupProof: { ...f.c.setupProof, testedRevision: "stale" } };
+    await store.put("clients", f.c.slug, stale);
+    assert.equal((await call(body)).status, 202);
+    const resumed = await strictRead("clients", f.c.slug);
+    assert.equal(resumed.status, "testing");
+    assert.equal(resumed.channels.web.active, false);
+    assert.equal(resumed.operationLifecycleVersion, 1);
+    assert.deepEqual(resumed.onboarding.desiredChannels, f.c.onboarding.desiredChannels);
+    assert.equal(await sms.messagingSender(resumed), null);
+    assert.equal(report.providerSends, beforeSends);
+    assert.deepEqual((await strictRead("messaging_activation", f.row.id)).resources, f.row.resources);
+    // Restoring a previously active website still requires current review,
+    // live practice and model readiness; a resume cannot bypass activation.
+    const web = { ...f.c, pausedFrom: "live", pausedChannels: { ...f.c.pausedChannels, web: { active: true } } };
+    await store.put("clients", f.c.slug, { ...web, setupProof: { ...web.setupProof, testedRevision: "stale" } });
+    assert.equal((await call(body)).status, 409);
+    assert.equal((await strictRead("clients", f.c.slug)).status, "paused");
+    process.env.MC_FAKE_MODEL = "0";
+    process.env.ANTHROPIC_API_KEY = "offline-dummy-never-used";
+    await store.put("clients", f.c.slug, web);
+    assert.equal((await call(body)).status, 202);
+    const webResumed = await strictRead("clients", f.c.slug);
+    assert.equal(webResumed.status, "live");
+    assert.equal(webResumed.channels.web.active, true);
+    assert.equal(report.providerSends, beforeSends);
+    assert.deepEqual((await strictRead("messaging_activation", f.row.id)).resources, f.row.resources);
+    await store.put("clients", f.c.slug, { ...f.c, status: "cancelled" });
+    assert.equal((await call(body)).status, 409);
+  } finally { process.env.MC_FAKE_MODEL = "1"; delete process.env.ANTHROPIC_API_KEY; }
 });
 await check("owner SMS history includes queued/failed requests, deduplicates projections and never crosses tenant incarnations", async () => {
   const f = await fixture("history-view"), fields = inbound(f, "My faucet is dripping."); await httpHandler(signed(fields)); let rows = await managedSMSConversations(f.c); assert.equal(rows.length, 1); assert.equal(rows[0].messages[0].processing, "queued"); assert.equal(rows[0].messages[0].content, fields.Body); await processManagedSMS(inboundKey(f, fields)); rows = await managedSMSConversations(f.c); assert.equal(rows[0].messages.filter(message => message.role === "user").length, 1); assert.equal(rows[0].messages.filter(message => message.role === "assistant").length, 1); assert.ok(rows[0].messages.find(message => message.role === "assistant").processing);

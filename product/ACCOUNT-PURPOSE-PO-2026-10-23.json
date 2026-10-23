@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-23T12:52:39.893937+00:00",
+  "role": "Product Owner product_owner_v2",
+  "decision": "Accepted locally for the Account identity, service-state, lifecycle-control and customer-record download tasks. Production/provider outcome acceptance remains open.",
+  "customerJob": "Identify the workspace and sign-in identity, edit supported contact details in their canonical form, understand current service readiness, pause/resume or stop service intentionally, download saved customer records and find privacy information.",
+  "publicationHold": {
+    "decision": "Keep local",
+    "scope": "This account-purpose descendant of held 22c6708 and sign-in/HELP parent 5b5f983; held marketing candidate remains separate.",
+    "limits": "No deployment, publication request, provider account action, real email, message, call, Calendar operation, purchase, permission or billing change was performed or authorized by this acceptance."
+  },
+  "source": {
+    "checkout": "/tmp/mc-account-purpose-22",
+    "branch": "work/account-purpose-22",
+    "headAtReview": "22c6708e49538d93dc243da1e2328c8c50980a7d",
+    "baseCommit": "22c6708e49538d93dc243da1e2328c8c50980a7d",
+    "state": "Reviewed working-tree account repair on the accepted local Connections candidate. File hashes bind acceptance before the later coordination commit.",
+    "currentRuntimeFileSha256": {
+      "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+      "desk.js": "1bdde048db5f5893598b6b962c72a21915e754feba1357cd5302a44d4a40355b",
+      "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+      "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+      "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+      "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+      "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+      "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+      "netlify/functions/lib/workspace-edit.mjs": "f4d820eca1a9eb9946dc16dca4b3e10f9803ef272e06ceba028ec56ada0e0f21"
+    },
+    "independentQACurrentSourceMatched": true
+  },
+  "evidence": {
+    "baseline": "scratchpad/po-account-baseline.json",
+    "ordinaryPOJourney": "scratchpad/po-account-final-second.json",
+    "ordinaryPOJourneySha256": "2549ecc5694aacfde3afc4bc3247244d056a114e6c915e8da8b50634688792ab",
+    "independentFinalQA": "scratchpad/account-purpose-final-r6.json",
+    "independentFinalQASha256": "4ae04686aa6029efcb810d3f739ba9be3cba90ac1d6eb611bd6fcae8816cc7f1",
+    "independentFinalQAResult": "36 of 36 groups passed on stable current source; zero physical requests, forbidden requests or page errors.",
+    "requiredGate": "Root confirmed 38 of 38 required checks passed on stable matching source, with zero physical attempts and restored receipts. This does not establish publication or actual provider service.",
+    "screenshotsPersonallyInspected": [
+      "scratchpad/po-account-baseline-390-testing.png",
+      "scratchpad/po-account-baseline-1440-testing.png",
+      "scratchpad/po-account-final-second-390-testing-initial.png",
+      "scratchpad/po-account-final-second-1440-testing-initial.png",
+      "scratchpad/po-account-final-second-390-testing-stop-confirmation.png",
+      "scratchpad/po-account-final-second-390-testing-stopped-retained.png",
+      "scratchpad/account-purpose-final-r6-account-390-service-focused.png",
+      "scratchpad/account-purpose-final-r6-stop-confirm-320.png"
+    ],
+    "retainedObserverFailure": "po-account-final-first.json preserves an observer copy assumption after a valid live-lifecycle resume: it expected Setup in progress, while the correct Account label is Check connections. The final-second observer verifies action feedback and durable state rather than requiring the obsolete label."
+  },
+  "sourceBridge": {
+    "ordinaryJourneySourceStable": true,
+    "ordinaryJourneyCurrentSourceDifference": [
+      "desk.js"
+    ],
+    "ordinaryJourneyDeskJsSha256": "4a8e5378da58388270e1b12e8ebe4a8ce403d4f2be9174c54282aecfe8dec584",
+    "finalDeskJsSha256": "1bdde048db5f5893598b6b962c72a21915e754feba1357cd5302a44d4a40355b",
+    "changedScope": "A later narrow sign-out/export recovery repair defers sign-out while a service mutation or status read is pending; permits sign-out during an export; resets interrupted export controls and gives durable feedback after a failed sign-out; and discards a late file from the prior browser generation.",
+    "POReview": "PO inspected the affected actual sign-out and download handlers. All other ordinary-journey file hashes remain identical. Layout, identity, lifecycle routing and normal download behavior retain the existing observed evidence.",
+    "finalCurrentSourceEvidence": "scratchpad/account-purpose-final-r6.json",
+    "focusedPassingQA": [
+      "Slow download shows durable progress, prevents duplicate clicks, and sign-out discards late file",
+      "Pending service action defers sign-out then failed sign-out leaves Account usable",
+      "Failed sign-out during pending download restores usable downloads and discards the late file"
+    ],
+    "reasonToReuse": "The final current-source independent QA covers the changed recovery paths. Replaying the unaffected complete PO matrix would add no evidence about that narrow change."
+  },
+  "independentlyObservedTasks": [
+    {
+      "task": "Understand the page",
+      "observed": "Account has read-only business, owner, sign-in email and contact-cell facts, a meaningful four-service status summary, record downloads, a concise privacy area, closed Advanced options and one intentional Stop service section. Empty Service controls, orphan Service heading, misleading This month and the self-service average-job-value estimate are absent."
+    },
+    {
+      "task": "Continue unfinished setup",
+      "observed": "At 390px and 1440px, the testing owner selects Continue setup and reaches the actual Connections page with all four service cards. A saved choice is not shown as activation."
+    },
+    {
+      "task": "Edit canonical contact data",
+      "observed": "Edit contact details opens the existing business-details form. Changing the owner name, saving through the actual PUT handler and returning to Account without reload immediately shows the saved name. The sign-in email remains unchanged and has no account email-edit input."
+    },
+    {
+      "task": "Download saved records",
+      "observed": "At both widths, the ordinary authenticated bookings CSV download contains the retained synthetic visit/customer and excludes the private owner key. On-page feedback states that the browser download started. Four clear dataset buttons remain available, with recent-conversation limits and manual customer CSV handoff described."
+    },
+    {
+      "task": "Find privacy information",
+      "observed": "The visible Privacy policy action points to the existing company privacy-policy.html file. Customer texting terms are separately named; a policy wall and raw policy URL do not occupy the normal account view."
+    },
+    {
+      "task": "Keep service after reviewing stop",
+      "observed": "The native confirmation explains automated-service/task stopping, retained records, no automatic number release or Google revocation, and separate carrier forwarding. Initial focus is Keep service. Keeping service leaves saved status unchanged and restores focus to the opener."
+    },
+    {
+      "task": "Stop service intentionally",
+      "observed": "The ordinary confirmation submits an optional reason through the actual handler. Reload retains cancelled status, identity and record-download access. The Stop service section then disappears; no active-service or account-deletion claim is shown."
+    },
+    {
+      "task": "Pause and resume the existing workspace",
+      "observed": "From the synthetic live lifecycle with website chat off, Pause saves paused state. Resume restores live lifecycle with website chat still off and all four saved choices preserved. Account correctly says Check connections rather than claiming service delivery."
+    },
+    {
+      "task": "Resume a paused testing workspace",
+      "observed": "Resume restores testing without requiring a new website AI activation, leaves website chat off and preserves the selected services."
+    },
+    {
+      "task": "Explain a previously active website resume requirement",
+      "observed": "The paused-web fixture shows its current rules-review blocker and a usable View resume requirements action. It opens the actual Connections page; an unavailable/dead Resume button is not presented."
+    },
+    {
+      "task": "Return to an already stopped account",
+      "observed": "The stopped fixture remains identifiable and exportable, without a duplicate stop action or a fake resume. This was observed at both desktop and mobile widths."
+    }
+  ],
+  "viewportsAndStates": {
+    "widths": [
+      390,
+      1440
+    ],
+    "ordinarySyntheticStates": [
+      "testing",
+      "live with website chat off",
+      "paused from testing with website chat off",
+      "paused with previously active website requiring current review",
+      "cancelled"
+    ],
+    "ordinaryObservedStates": 10,
+    "horizontalOverflowObserved": false,
+    "physicalRequests": 0,
+    "pageErrors": 0
+  },
+  "technicalQASupplement": "Current-source independent QA also accepts new/building/draft and no-web Calendar cases, available/readiness fixture behavior without AI requests, all four actual CSV datasets and byte contents, tenant isolation, incomplete history and header-only results, HTML/JSON/error/expired-session handling, slow/lost/503 service recovery, native confirmation keyboard behavior, old average-value retention and Advanced refresh queuing.",
+  "contractCorrections": [
+    "A self-service workspace has no source-backed fixed 30-day export or automatic number-release guarantee. The old promise was removed; current retained-record and provider-permission effects are stated.",
+    "Legacy monthly usage buckets do not establish complete current managed phone/text usage. The account uses an actual setup/service summary rather than a misleading monthly usage or paid-overage display.",
+    "The normal self-service account hides legacy average-job-value reporting and counterfactual voicemail revenue claims. Stored older values remain retained; a local UI repair does not establish measured revenue.",
+    "Non-web resume restores the previous lifecycle and paused channel choice. Restoring a previously active website still needs current website readiness; no routine resume silently turns website chat on.",
+    "No payment system, subscription management, email-identity migration, native CRM connector, remote resource cleanup or actual provider delivery was added or represented as working."
+  ],
+  "remainingOutcomeLimits": [
+    "All exercised owners, service states and customer records were synthetic and memory-only. Actual current authenticated production Account behavior has not been accepted.",
+    "Local pause/resume/stop state transitions are accepted; actual phone/SMS/Calendar cessation, provider fallback, revocation, resource release, recurring-cost effects and ordinary provider recovery remain separate unaccepted outcomes.",
+    "Actual signup/email receipt, authorized external website installation, first ordinary customer request, recipient reminder consent, two-way delivery, Calendar event lifecycle and useful owner follow-through remain open launch work.",
+    "A Contact support link is available, but actual support/incident receipt, recipient/backup and hosting continuity remain G8 operational proof gaps.",
+    "The existing full-service primary outcome and provider milestone remain owned. This account repair creates no launch, publication or activation authority."
+  ],
+  "nextUnresolvedStep": {
+    "localRepair": "Root completes the separate required-gate and source/commit handoff while preserving Keep local.",
+    "delivery": "PM retains the complete customer job; Engineering/UI/UX resolve actual blockers, QA verifies and PO accepts observed use. Ordinary owned Calendar lifecycle remains the next separately scoped provider milestone, while signup/install/first request and phone/text/handoff outcomes remain open."
+  }
+}

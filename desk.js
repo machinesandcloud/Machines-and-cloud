@@ -13,6 +13,7 @@
   function recover(message) {
     closeTour(false, false);
     if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; if ($('phoneAuthority')) $('phoneAuthority').checked = false; if ($('phoneCosts')) $('phoneCosts').checked = false;
+    if ($('cancelBox').open) $('cancelBox').close();
     if ($('visitDialog').open) $('visitDialog').close(); visitPending = null; visitSelected = null;
     $('portalContent').hidden = true; $('portalRecovery').hidden = false; document.body.dataset.workspaceState = 'recovery'; $('deskRail').hidden = true; $('railBusiness').textContent = 'Your front desk';
     $('title').textContent = 'Your workspace'; $('status').textContent = 'Unable to open workspace';
@@ -163,7 +164,7 @@
     know: ['YOUR FRONT DESK', 'Business details', 'Your services, hours and the answers your front desk uses.'],
     test: ['YOUR FRONT DESK', 'Test answers', 'Try a private customer conversation before customers do.'],
     setup: ['YOUR FRONT DESK', 'Connections', 'Follow setup progress, connect your channels and prepare for customers.'],
-    account: ['YOUR WORKSPACE', 'Account & data', 'Manage your service preferences and download your customer records.']
+    account: ['YOUR WORKSPACE', 'Account', 'Manage your contact details, front desk status and saved records.']
   };
   function showTab(t) {
     if (!pageCopy[t] || !document.getElementById('p-' + t)) return;
@@ -173,7 +174,7 @@
     if($('inboxNav'))$('inboxNav').hidden=parent!=='leads'; if($('frontDeskNav'))$('frontDeskNav').hidden=parent!=='setup';
     document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); });
     document.body.dataset.activePage = t;
-    $('pageEyebrow').textContent = pageCopy[t][0]; $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; if(data)renderHomeNext(data);else syncNextActionVisibility();
+    $('pageEyebrow').textContent = pageCopy[t][0]; $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; if(data){renderHomeNext(data);if(t==='account')renderAccount(data);}else syncNextActionVisibility();
   }
   function syncNextActionVisibility() { var guide = $('workspaceGuide'); guide.hidden = guide.dataset.needed !== 'true' || document.body.dataset.activePage !== 'today'; }
   if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
@@ -429,7 +430,7 @@
         return '<div class="setup-step"><div><strong>' + esc(channel.label) + ' · ' + esc(states[state] || 'Not connected yet') + '</strong><p>' + esc(detail) + '</p>' + (channel.requested && next ? '<p><b>Next:</b> ' + esc(next) + '</p>' : '') + '</div></div>';
       }).join('');
     }
-    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Website chat paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
+    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Front desk paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
     $('status').className = 'st' + (operational ? ' live' : '');
     renderHomeNext(d);
     var revision = setup.revision, proof = client.setupProof || {};
@@ -450,8 +451,6 @@
     $('installStatus').textContent = operational ? 'Chat is active. After installing, open your website and confirm a customer can reach it.' : 'The code can be installed now; customer conversations stay unavailable until setup checks pass and website chat is activated.';
     $('handoffNote').textContent = 'Saved visits appear in Schedule. Callback requests and conversations are in Inbox. Check Front desk for connection setup and delivery status.';
     $('textCommands').hidden = true;
-    $('usage').textContent = 'Review each connection’s terms before starting paid service. Creating your workspace and choosing connections do not purchase a number or start a subscription.';
-    if (client.status === 'cancelled') $('liveBtns').textContent = 'Service cancelled. Saved records can be exported below.';
     var voiceChosen=journey&&journey.channels.some(function(channel){return channel.id==='voice'&&(channel.requested||channel.retained);});
     $('phoneProfileHeading').hidden=!voiceChosen;
     ['phone.businessNumber','phone.carrier','phone.forwarding'].forEach(function(name){var field=$('cfg').elements[name];if(field){field.disabled=!voiceChosen||cfgClosed;field.closest('.form-group').hidden=!voiceChosen;}});
@@ -583,9 +582,114 @@
   $('tourBack').addEventListener('click', function () { if (tourIndex > 0) { tourIndex--; renderTour(); } });
   $('tourAction').addEventListener('click', function () { var anchor = tourAnchor;if(tour[tourIndex].target==='websiteInstallStep')tourWebsiteOpen=null; closeTour(true, false); if (tourVisible(anchor)) { anchor.scrollIntoView({ block: 'nearest', behavior: 'instant' }); tourFocus(anchor.querySelector('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled)') || anchor); } });
 
-  function load() {
+  var accountBusy = false, accountUncertain = null, exportBusy = false;
+  function accountMessage(message, error) {
+    $('accountServiceMessage').textContent = message || ''; $('accountServiceMessage').dataset.error = error ? 'true' : 'false';
+    if ($('cancelBox').open) { $('cancelMessage').textContent = message || ''; $('cancelMessage').dataset.error = error ? 'true' : 'false'; }
+  }
+  function accountCanResume(d) {
+    return !d.client.pausedChannels?.web?.active || !!d.setup?.canActivateWeb && (!d.aiAllowance || d.aiAllowance.available);
+  }
+  function renderAccount(d) {
+    var c = d.client, selfService = c.onboarding?.version === 1, closed = ['cancelled','archived'].includes(c.status), paused = c.status === 'paused';
+    $('accountBusiness').textContent = c.business.name || 'Not saved'; $('accountOwner').textContent = c.owner.name || 'Not saved';
+    $('accountEmail').textContent = c.owner.email || 'Not available'; $('accountPhone').textContent = c.owner.phone || 'Not saved';
+    $('accountEditContact').hidden = closed; $('accountReporting').hidden = selfService || closed; $('workspaceMaintenance').hidden = !selfService || closed;
+    var webActive = !!d.webAvailable && !!d.setup?.channels?.web?.ready && !!d.setup?.channels?.web?.active;
+    var rows = d.setup?.connectionJourney?.channels || [], active = rows.filter(function (row) { return row.id === 'web' ? webActive : row.active; });
+    $('accountServiceStatus').textContent = closed ? 'Service stopped' : paused ? 'Paused' : active.length ? 'Services connected' : c.status==='live' ? (selfService?'Check connections':'Workspace active') : 'Setup in progress';
+    $('accountServiceSummary').textContent = closed ? 'Your front desk is stopped. Saved customer records are still available to download.' : paused ? 'Automated service is paused. Your records, setup choices and permissions are kept.' : active.length ? 'Check each connection below. A saved visit or message has its own delivery status.' : c.status==='live' ? 'Check Connections for each service’s readiness and next steps.' : 'Your workspace is saved. Continue setup to prepare the services you want to use.';
+    var labels = {not_selected:'Not selected',needs_action:'Setup needed',pending_activation:'Not connected',waiting_platform:'Waiting for service',waiting_carrier:'Carrier review',working:'Setup in progress',needs_attention:'Needs attention',checking:'Checking saved result',checking_status:'Checking saved status',cleanup_pending:'Checking cleanup',cleanup_uncertain:'Checking cleanup',cancel_pending:'Checking cleanup',cancelled:'Disconnected',closed:'Stopped',paused:'Paused',ready_for_website:'Website setup needed'};
+    $('accountConnectionSummary').innerHTML = rows.map(function (row) {
+      var relevant = row.requested || row.retained || row.active, label = labels[row.status] || 'Check Connections';
+      if (closed && relevant) label = 'Stopped';
+      else if (paused && relevant) label = 'Paused';
+      else if (row.id === 'web' && webActive) label = 'Customer chat enabled';
+      else if (row.id === 'calendar' && d.connections?.calendar?.connected) label = d.connections.calendarDelivery?.enabled ? 'Permission saved · sync enabled' : 'Permission saved · sync waiting';
+      else if (row.active) label = 'Connection verified';
+      return '<div><dt>' + esc(row.label) + '</dt><dd>' + esc(label) + '</dd></div>';
+    }).join('');
+    $('accountConnectionSummary').hidden = !rows.length;
+    var buttons = '';
+    if (!closed) {
+      if (paused && (!selfService || accountCanResume(d))) buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="resume">Resume workspace</button>';
+      else if (!selfService && !paused && ['testing','draft'].includes(c.status)) buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button>';
+      else buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="accountConnections">' + (paused ? 'View resume requirements' : active.length || c.status === 'live' ? 'Manage connections' : 'Continue setup') + '</button>';
+      if (!paused && ['live','testing'].includes(c.status) && (c.status === 'live' || active.length || rows.some(function(row){return row.retained;}))) buttons += '<button type="button" class="btn-pill btn-pill-dark btn-sm" id="pause">Pause workspace</button>';
+    } else buttons = '<a class="btn-pill btn-pill-dark btn-sm" href="mailto:ngoumnaisteve@gmail.com">Contact support</a>';
+    var off = d.forwarding?.off;
+    if ((paused || closed) && Array.isArray(off) && off.length) buttons += '<div class="desk-account-forwarding muted">To stop carrier forwarding: ' + off.map(function (code) { return '<a href="tel:' + encodeURIComponent(code) + '">Dial ' + esc(code) + '</a>'; }).join(' · ') + '</div>';
+    $('liveBtns').innerHTML = buttons;
+    var resumeRequirement = d.aiAllowance && !d.aiAllowance.available ? 'Today’s AI allowance is exhausted. It resets at midnight Houston time; your saved review and test are kept.' : d.setup?.channels?.web?.blockers?.[0]?.detail || 'Check the current website chat requirements under Front desk.';
+    $('accountServiceScope').textContent = closed ? 'Stopping service does not delete your account or revoke saved provider permissions.' : paused && selfService && !accountCanResume(d) ? 'Website chat was on before pausing. ' + resumeRequirement : paused ? 'Resuming restores your previous workspace state. Each connection still needs its own readiness and delivery checks.' : $('pause') ? 'Pausing stops automated service in this workspace. Carrier call forwarding may need a separate change.' : 'Your saved service choices do not activate a connection. Continue setup to review what each service needs.';
+    $('accountStopService').hidden = closed;
+    $('accountStopNote').textContent = selfService ? 'Stop automated service and scheduled tasks. Your account and saved records are kept.' : 'Stop this front desk. Check your existing call forwarding before disconnecting.';
+    $('cancelScope').textContent = selfService ? 'This stops automated service and scheduled tasks for this workspace. Saved records remain available to download. It does not release a phone number or revoke Google access. If you forward an existing line, turn off forwarding with your carrier.' : 'This stops your front desk. Saved records remain available to download. Turn off existing call forwarding with your carrier; check Connections for your number and remaining service details.';
+    $('liveBtns').querySelectorAll('button').forEach(function(button){button.disabled=accountBusy || !!accountUncertain;});
+    $('cancelBtn2').disabled = accountBusy || !!accountUncertain; $('cancelGo').disabled = accountBusy || !!accountUncertain; $('cancelNo').disabled = accountBusy; $('cancelNo').textContent=accountUncertain?'Close':'Keep service'; $('cancelCheckStatus').hidden=!accountUncertain; $('cancelCheckStatus').disabled=accountBusy;
+    $('accountCheckStatus').hidden = !accountUncertain; $('accountCheckStatus').disabled = accountBusy;
+    $('accountServiceControls').setAttribute('aria-busy', accountBusy ? 'true' : 'false'); $('cancelBox').setAttribute('aria-busy', accountBusy ? 'true' : 'false');
+    if ($('accountConnections')) $('accountConnections').addEventListener('click',function(){routeTo('setup');});
+    if ($('golive')) $('golive').addEventListener('click',function(){accountChange('go_live');});
+    if ($('pause')) $('pause').addEventListener('click',function(){accountChange('pause');});
+    if ($('resume')) $('resume').addEventListener('click',function(){accountChange(selfService ? 'resume_services' : 'resume');});
+  }
+  function accountResultMatches(d, name, prior) {
+    var state = d.client?.status || d.status;
+    return name === 'cancel' ? state === 'cancelled' : name === 'pause' ? state === 'paused' : ['resume','go_live'].includes(name) ? state === 'live' : state === (prior === 'live' ? 'live' : 'testing');
+  }
+  function accountConfirmed(name) {
+    accountUncertain = null;
+    if (name === 'cancel' && $('cancelBox').open) $('cancelBox').close();
+    accountMessage(name === 'cancel' ? 'Service stopped. You can still download your saved records.' : name === 'pause' ? 'Workspace paused. Check carrier forwarding if calls should return to your phone.' : name === 'go_live' ? 'Activation saved. Check Connections for each service’s current status.' : 'Workspace resumed. Check Connections for each service’s current status.');
+    $('accountServiceMessage').focus({preventScroll:true});
+  }
+  async function accountChange(name) {
+    if (accountBusy || accountUncertain || leaving || !data) return;
+    if ((name === 'resume_services' || name === 'resume') && (cfgDirty || cfgBusy || acctDirty || acctBusy || websiteDirty || websiteBusy)) { accountMessage('Save your edited business details before resuming.', true); return; }
+    var generation = portalGeneration, prior = data.client.pausedFrom;
+    accountBusy = true; accountMessage(name === 'cancel' ? 'Stopping service…' : name === 'pause' ? 'Pausing workspace…' : name === 'go_live' ? 'Activating front desk…' : 'Resuming workspace…'); renderAccount(data);
+    var body = name === 'resume_services' ? {expectedRevision:data.configurationRevision} : name === 'cancel' ? {reason:$('cancelReason').value} : {};
+    try {
+      var result = await action(name, body); if (generation !== portalGeneration || leaving) return;
+      if (!accountResultMatches(result, name, prior)) throw new Error('The service change could not be confirmed.');
+      accountConfirmed(name); await load();
+    } catch (error) {
+      if (generation !== portalGeneration || leaving) return;
+      if (error.status === 401 || error.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+      if (error.status && error.status < 500) { accountMessage(error.message + ' No success was confirmed.', true); if(error.status===409)await load(); }
+      else {
+        accountUncertain = {name:name, prior:prior};
+        accountMessage('The response was lost. Checking the saved service status before another change…', true);
+        try {
+          var latest = await apiRequest(); if (generation !== portalGeneration || leaving) return;
+          if (accountResultMatches(latest, name, prior)) { accountConfirmed(name); await load(latest); }
+          else { await load(latest); accountMessage('The change is not confirmed. Check service status before trying again.', true); }
+        } catch (readError) {
+          if (generation !== portalGeneration || leaving) return;
+          if (readError.status === 401 || readError.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+          accountMessage('The change could not be confirmed. Check service status when your connection returns; do not repeat it yet.', true);
+        }
+      }
+    } finally { if (generation === portalGeneration && !leaving) { accountBusy = false; if (data) renderAccount(data); } }
+  }
+  $('accountEditContact').addEventListener('click',function(){routeTo('know');$('contactDetails').open=true;var field=$('cfg').elements['owner.name'];field.scrollIntoView({block:'center'});field.focus({preventScroll:true});});
+  $('cancelBtn2').addEventListener('click',function(){if(accountBusy || accountUncertain)return;$('cancelMessage').textContent='';$('cancelBox').showModal();$('cancelNo').focus();});
+  function closeAccountCancellation(){if(accountBusy)return;$('cancelBox').close();$('cancelBtn2').focus({preventScroll:true});}
+  $('cancelNo').addEventListener('click',closeAccountCancellation);
+  $('cancelBox').addEventListener('cancel',function(event){event.preventDefault();closeAccountCancellation();});
+  $('cancelGo').addEventListener('click',function(){accountChange('cancel');});
+  $('cancelCheckStatus').addEventListener('click',function(){$('accountCheckStatus').click();});
+  $('accountCheckStatus').addEventListener('click',async function(){
+    if(accountBusy || !accountUncertain || leaving)return;var generation=portalGeneration,pending=accountUncertain;accountBusy=true;accountMessage('Checking saved service status…');renderAccount(data);
+    try{var latest=await apiRequest();if(generation!==portalGeneration || leaving)return;if(accountResultMatches(latest,pending.name,pending.prior))accountConfirmed(pending.name);else{accountUncertain=null;accountMessage('Status checked. The previous change was not saved; review the current status before trying again.',true);}await load(latest);}
+    catch(error){if(generation!==portalGeneration || leaving)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}accountMessage('Status could not be checked. Keep this change on hold and try checking again.',true);}
+    finally{if(generation===portalGeneration&&!leaving){accountBusy=false;if(data)renderAccount(data);}}
+  });
+
+  function load(snapshot) {
     var generation = portalGeneration, fence = cfgFence;
-    return apiRequest().then(function (d) {
+    return (snapshot && snapshot.client ? Promise.resolve(snapshot) : apiRequest()).then(function (d) {
       if (generation !== portalGeneration || fence !== cfgFence || leaving) return;
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
       $('portalRecovery').hidden = true; $('portalContent').hidden = false; document.body.dataset.workspaceState = 'ready'; $('deskRail').hidden = false;
@@ -600,7 +704,6 @@
       $('title').textContent = (c.business.name || 'Your front desk'); $('railBusiness').textContent = c.business.name || 'Your front desk';
       var selfService = c.onboarding && c.onboarding.version === 1;
       $('today').dataset.summaryScope=selfService?'workspace':'legacy';
-      if($('cancelBtn2'))$('cancelBtn2').parentElement.hidden=!!selfService;
       var historyListing = d.recordListing || {}, bookingsLimited = !!historyListing.bookings?.incomplete, leadsLimited = !!historyListing.leads?.incomplete, workLimited = historyIncomplete(historyListing);
       renderHistoryScope(d);
       var st = $('status'); st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status; st.className = 'st' + (c.status === 'live' ? ' live' : '');
@@ -617,23 +720,6 @@
         $('today').innerHTML='<div><b>'+needsFollowup.length+'</b> Needs follow-up'+(leadsLimited?' · shown':'')+'</div><div><b>'+visitsToday+'</b> Visits today'+(bookingsLimited?' · shown':'')+'</div><div><b>'+d.conversations.length+'</b> Recent conversations'+(historyListing.conversations?.incomplete?' · shown':'')+'</div>';
         if($('homeServiceContext')){var webSelected=(c.onboarding.desiredChannels||[]).includes('web');$('homeServiceContext').textContent=c.status==='cancelled'?'Your service is cancelled. Saved records remain available.':c.status==='paused'?'Your front desk is paused. Manage service in Account.':webSelected&&!d.webAvailable?'Website chat is not answering customers yet. Your saved requests stay available.':'';}
       }else{var t=d.today||{},h=d.health||{};$('today').innerHTML='<div><b>'+(t.calls||0)+'</b> calls</div><div><b>'+(t.texts||0)+'</b> texts in</div><div><b>'+(t.bookings||0)+'</b> booked today</div><div><b>'+(t.needsYou||0)+'</b> need you</div><div class="muted">Line: '+(h.errors24h?h.errors24h+' errors in 24 h':'OK')+'</div>';if($('homeServiceContext'))$('homeServiceContext').textContent='';}
-      $('liveBtns').innerHTML = (selfService ? (['cancelled','archived'].includes(c.status) ? '<span class="muted">Service cancelled. Your saved records remain available.</span>' : (c.status==='paused'?'<button class="btn-pill btn-pill-blue btn-sm" id="resume">Resume service</button> ':c.status==='live'?'<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause service</button> ':'')+'<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn">Cancel service</button>') : (c.status === 'cancelled' ? '<span class="muted">line rings through until ' + esc((c.serviceEndsAt || '').slice(0, 10)) + '</span>' : c.status === 'paused'
-        ? '<button class="btn-pill btn-pill-blue btn-sm" id="resume">Resume</button> <button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn">Cancel service</button>'
-        : (c.status === 'live' ? '<button class="btn-pill btn-pill-dark btn-sm" id="pause">Pause</button> ' : '<button class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button> ') + '<button class="btn-pill btn-pill-dark btn-sm" id="cancelBtn" style="opacity:.7' + (c.status === 'live' ? ';display:none' : '') + '">Cancel service</button>')) + offBtns;
-      if (!selfService && c.status === 'live') { var tl = document.createElement('a'); tl.id = 'testLink'; tl.href = '#test'; tl.className = 'muted'; tl.style.marginLeft = '10px'; tl.textContent = 'Test it'; tl.addEventListener('click', function (ev) { ev.preventDefault(); window.__tabPicked = true; $('tabTest').style.display = ''; showTab('test'); }); $('liveBtns').appendChild(tl); }
-      var go = $('golive'), pa = $('pause'), re = $('resume'), ca = $('cancelBtn') || $('cancelBtn2');
-      if ($('cancelBtn') && $('cancelBtn2')) $('cancelBtn2').addEventListener('click', function () { $('cancelBtn').click(); });
-      if (go) { if (selfService) { go.textContent = 'Activate website chat'; go.disabled = !d.setup || !d.setup.canActivateWeb; } go.addEventListener('click', function () { confirmAction('go_live', selfService ? 'Website chat is active. Check Connections for your other services.' : 'Activation saved. Check Setup for each channel.'); }); }
-      if (pa) pa.addEventListener('click', function () { confirmAction('pause', selfService ? 'Website chat is paused.' : 'Service paused. Check call forwarding under Setup.'); });
-      if (re) { if (selfService) re.disabled = !d.setup || !d.setup.canActivateWeb; re.addEventListener('click', function () { confirmAction('resume', selfService ? 'Website chat is active again.' : 'Resume saved. Check Setup for active channels.'); }); }
-      if (ca) ca.addEventListener('click', function () {
-        var box = document.getElementById('cancelBox'); if (box) { box.remove(); return; }
-        box = document.createElement('div'); box.id = 'cancelBox'; box.className = 'card2'; box.style.marginTop = '12px';
-        box.innerHTML = '<h3>Cancel the front desk</h3><p class="muted">This stops service today. Your saved records remain available to export for 30 days. ' + (selfService ? 'Website chat will stop accepting customer messages.' : 'Check call forwarding under Setup before disconnecting your front desk number.') + '</p><div class="form-group"><label class="form-label">Anything we should know? (optional)</label><input class="form-input" id="cancelReason"></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="cancelGo">Yes, cancel today</button> <button type="button" class="btn-pill btn-pill-blue btn-sm" id="cancelNo">Keep it</button>';
-        ($('accountServiceControls')||$('liveBtns')).appendChild(box);
-        document.getElementById('cancelNo').addEventListener('click', function () { box.remove(); });
-        document.getElementById('cancelGo').addEventListener('click', function () { apiRequest('POST', { action: 'cancel', reason: document.getElementById('cancelReason').value }).then(function () { box.remove(); toast('Service cancelled. Your records remain available to export.'); return load(); }).catch(function (error) { toast(error.message); }); });
-      });
       $('missing').textContent = (c.build && c.build.notes) ? c.build.notes : 'Nothing major.';
       // records
       $('bookings').innerHTML = d.bookings.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Visit</th><th>Status</th><th>Ref</th>' + (selfService ? '<th>Manage</th>' : '') + '</tr>' + d.bookings.map(function (b) { return '<tr data-record-kind="bookings" data-record-id="'+esc(b.id)+'"><td>' + esc(recordTimeLabel(b.createdAt)) + '</td><td>' + esc(b.customer_name) + (b.websiteSetupCheck?' <span class="tag">Setup check</span>':'') + ' <span class="muted">(' + (b.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(b.phone) + '</span>' + (b.unsure ? '<br><span class="muted">Unsure: ' + esc(b.unsure) + '</span>' : '') + '</td><td>' + esc(b.issue) + '<br><span class="muted">' + esc(b.address) + '</span></td><td>' + esc(visitDateLabel(b.date)) + ' ' + esc(b.window) + '</td><td>' + esc(b.status) + '</td><td>' + esc(b.id) + '</td>' + (selfService ? '<td><button type="button" class="btn-pill btn-pill-dark btn-sm visit-open" data-visit="' + esc(b.id) + '">' + (b.pendingVisitChange ? 'Resume change' : 'View visit') + '</button></td>' : '') + '</tr>'; }).join('') + '</table></div>' : emptyState(bookingsLimited ? 'No bookings in this view' : 'No bookings yet', bookingsLimited ? 'Some booking history still needs checking. Contact support if you need an earlier visit.' : 'Saved visits appear here with their arrival window and job details. Use Add visit to record one yourself.');
@@ -650,8 +736,8 @@
         cfgStatus(cfgClosed ? 'error' : cfgIncomplete(d.setup) ? 'incomplete' : 'saved', cfgClosed ? 'This workspace no longer accepts business edits.' : cfgSavedMessage(d.setup));
       }
       acctObserve(d, false);
-      var u = d.usage || {}; $('usage').textContent = u.month ? (u.minutes || 0) + ' of ' + (u.included && u.included.minutes) + ' call minutes, ' + (u.texts || 0) + ' of ' + (u.included && u.included.texts) + ' texts to customers (' + u.month + '). Past the plan it is $0.35 a minute and $0.03 a text; nothing changes on the line.' : '';
-      [['expBookings','bookings'],['expLeads','leads'],['expConvs','conversations'],['expCustomers','customers']].forEach(function (item) { $(item[0]).href = '#download-' + item[1]; $(item[0]).dataset.export = item[1]; });
+      var u = d.usage || {}; $('usage').textContent = u.month ? 'Recorded legacy usage for ' + u.month + ': ' + (u.minutes || 0) + ' call minutes and ' + (u.texts || 0) + ' outbound texts. This is not a complete report of managed service usage or a bill.' : '';
+      [['expBookings','bookings'],['expLeads','leads'],['expConvs','conversations'],['expCustomers','customers']].forEach(function (item) { $(item[0]).dataset.export = item[1]; });
       // setup
       $('snippet').textContent = '<script src="' + d.site + '/embed.js" data-client="' + c.slug + '" async><\/script>';
       $('calBtn').href = '/api/google/auth?c=' + c.slug + '&k=' + key; $('calText').textContent = c.calendar.connected ? 'Connected.' : (d.integrations.google ? 'Bookings go on your Google Calendar once connected.' : 'Coming online; bookings are texted to you meanwhile.'); if (!d.integrations.google) $('calBtn').addEventListener('click', function (e) { e.preventDefault(); toast('Calendar connection is being switched on. Bookings are texted to you meanwhile.'); });
@@ -663,7 +749,8 @@
       $('tenDlc').textContent = dlcText;
       var h = d.health || {}; var rel = function (iso) { if (!iso) return 'none yet'; var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; };
       $('health').innerHTML = '<div>Last inbound call: ' + rel(h.lastInboundCall) + '</div><div>Last inbound text: ' + rel(h.lastInboundText) + '</div><div>Last text delivered: ' + rel(h.lastOutboundText) + '</div><div style="color:' + (h.errors24h > 0 ? '#B91C1C' : 'inherit') + '">Errors in the last 24 h: ' + (h.errors24h || 0) + '</div><div>Texting from: ' + (h.sender === 'own' ? 'your number' : h.sender === 'bridge' ? 'Machines & Cloud\'s registered number until carriers approve yours' : 'not yet') + '</div>';
-      $('dataPolicy').textContent = d.dataPolicy || ''; $('policyLink').textContent = (d.policy && d.policy.privacy) || ''; $('policyLink').href = (d.policy && d.policy.privacy) || '#';
+      var terms = d.policy && d.policy.privacy, termsURL; try { termsURL = new URL(terms, location.origin); } catch (error) { /* No valid customer terms were supplied. */ }
+      $('accountTextingTerms').hidden = !terms || !termsURL || !/^https?:$/.test(termsURL.protocol); $('policyLink').href = termsURL && /^https?:$/.test(termsURL.protocol) ? termsURL.href : '#';
       var lg = (c.business && c.business.legal) || {}; var lf = $('legal');
       $('legalForm').style.display = (dlc === 'needs_business_details' || dlc === 'not_started' || dlc === 'failed') ? 'block' : 'none';
       lf.elements['legalName'].value = lg.legalName || ''; lf.elements['ein'].value = lg.ein || ''; lf.elements['businessType'].value = lg.businessType || 'llc'; lf.elements['street'].value = lg.street || ''; lf.elements['city'].value = lg.city || ''; lf.elements['state'].value = lg.state || 'TX'; lf.elements['zip'].value = lg.zip || '';
@@ -681,7 +768,7 @@
         [c.status === 'live' ? 'ok' : 'wait', 'Live on your website'],
       ].map(function (x) { return '<div class="check"><span class="dot ' + x[0] + '"></span><span>' + x[1] + '</span></div>'; }).join('');
       $('liveEvents').innerHTML = (d.events || []).length ? d.events.slice(0, 8).map(function (e) { return '<div>' + esc((e.at || '').slice(5, 16).replace('T', ' ')) + ' ' + esc(e.type) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') : 'No service activity yet. Practice conversations stay separate.';
-      renderSetup(d);
+      renderSetup(d); renderAccount(d);
     }).catch(function (error) {
       if (generation !== portalGeneration || leaving) return;
       if (error.status === 401 || error.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
@@ -813,7 +900,8 @@
   window.addEventListener('beforeunload',function(event){if(cfgDirty||cfgBusy||acctDirty||acctBusy||websiteDirty||websiteBusy){event.preventDefault();event.returnValue='';}});
 
   $('deskSignOut').addEventListener('click', async function () {
-    var button = $('deskSignOut'); button.disabled = true;
+    if(accountBusy){accountMessage('A service change is still being checked. You can sign out when that check finishes.');routeTo('account');$('accountServiceMessage').focus({preventScroll:true});return;}
+    var button = $('deskSignOut'), interruptedExport = exportBusy; button.disabled = true;
     leaving = true; portalGeneration++; closeTour(false, false); if (chatController) chatController.abort(); availabilityReset();
     try {
       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
@@ -824,24 +912,32 @@
       history.replaceState(null, '', location.pathname);
       recover('Signed out. Use an email sign-in link to open your workspace again.');
       $('portalContent').innerHTML = '';
-    } catch (error) { if (!ownerSession && !key) return; leaving = false; cfgBusy = false; acctBusy = false; websiteBusy=false; cfgFence++; cfgChanged(); acctStatus(); await load(); toast(error.message); } finally { button.disabled = false; }
+    } catch (error) { if (!ownerSession && !key) return; leaving = false; cfgBusy = false; acctBusy = false; websiteBusy=false;
+      if(interruptedExport){exportBusy=false;['expBookings','expLeads','expConvs','expCustomers'].forEach(function(id){$(id).disabled=false;});$('accountDownloads').setAttribute('aria-busy','false');$('exportMessage').dataset.error='true';$('exportMessage').textContent='Sign out could not be confirmed. Your earlier download was interrupted; try the download again.';}
+      cfgFence++; cfgChanged(); acctStatus(); await load(); toast(error.message); } finally { button.disabled = false; }
   });
   ['expBookings','expLeads','expConvs','expCustomers'].forEach(function (id) {
     $(id).addEventListener('click', async function (event) {
-      event.preventDefault(); var kind = event.currentTarget.dataset.export, generation = portalGeneration; if (!kind) return;
+      event.preventDefault(); var kind = event.currentTarget.dataset.export, generation = portalGeneration; if (!kind || exportBusy || leaving) return;
+      exportBusy = true; var controller = new AbortController(), timeout = setTimeout(function(){controller.abort();},20000);
+      var buttons = ['expBookings','expLeads','expConvs','expCustomers']; buttons.forEach(function(button){$(button).disabled=true;});
+      $('accountDownloads').setAttribute('aria-busy','true'); $('exportMessage').dataset.error='false'; $('exportMessage').textContent='Preparing your '+(kind==='leads'?'requests':kind)+' CSV…';
       try {
-        var response = await fetch(API + '&export=' + encodeURIComponent(kind), { headers: ownerHeaders() });
+        var response = await fetch(API + '&export=' + encodeURIComponent(kind), { headers: ownerHeaders(), signal:controller.signal });
         if (generation !== portalGeneration || leaving) return;
+        if (response.status === 401 || response.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
         if (!response.ok) {
           var problem = await response.json().catch(function () { return {}; });
           if (generation !== portalGeneration || leaving) return;
-          if (response.status === 401 || response.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
           throw new Error(problem.message || 'This download is unavailable. Try again or contact support.');
         }
+        if (!/^text\/csv(?:;|$)/i.test(response.headers.get('content-type') || '')) throw new Error('The server did not return a CSV file. No download was started. Try again or contact support.');
         var file = await response.blob(); if (generation !== portalGeneration || leaving) return;
         var address = URL.createObjectURL(file), link = document.createElement('a');
-        link.href = address; link.download = slug + '-' + kind + '.csv'; link.click(); setTimeout(function () { URL.revokeObjectURL(address); }, 1000);
-      } catch (error) { if (generation === portalGeneration && !leaving) toast(error.message); }
+        link.href = address; link.download = slug + '-' + kind + '.csv'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(function () { URL.revokeObjectURL(address); }, 1000);
+        $('exportMessage').textContent='Your '+(kind==='leads'?'requests':kind)+' CSV download has started. Check your browser’s downloads.';
+      } catch (error) { if (generation === portalGeneration && !leaving) { $('exportMessage').dataset.error='true'; $('exportMessage').textContent=(error.name==='AbortError'?'The download timed out. Try again when your connection returns.':error.message); } }
+      finally { clearTimeout(timeout); if(generation===portalGeneration&&!leaving){exportBusy=false;buttons.forEach(function(button){$(button).disabled=false;});$('accountDownloads').setAttribute('aria-busy','false');} }
     });
   });
 

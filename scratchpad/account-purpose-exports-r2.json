@@ -1,0 +1,175 @@
+{
+  "at": "2026-10-23T12:43:45.914Z",
+  "baseCommit": "22c6708e49538d93dc243da1e2328c8c50980a7d",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "scripts/account-page-ui-qa-check.mjs": "a029b39b154808519fe28d7bbd930600269cede7ef8617fbc2e66ca1387fd1ea",
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "a29fa96c87752e6c794b8a48828300018b8d9b8ab90d1bf73a2c5bf834494b20",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+    "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "cd1f12215ab41f81a88a6d30484499bfccf5561122e3f0be1fe81640bfe00b6c",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "All four real CSV downloads authenticate, carry headers and empty data remains a valid file",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "cb22eef0b2050eda4bb22d81736606eb2021b67e7c3a8c17ea78f43d263d2127",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-1-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&export=leads",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "00457b5572b3762fa35e9e193c908d9793da2618175f7b77e8723656c5eeecd4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-1-leads-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,reason,outcome,urgency,wanted,status,channel,unsure,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&export=conversations",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "be1e532dbff877aa1d26d915c112f358aa07dff2f18b89367113928183e2d6e9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-1-conversations-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿channel,contact,at,role,content,flag_note,processing\r\n"
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&export=customers",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "65544c2ddf465d93916482140ea2365ad165d0976a3816f5b9b813a3e5c93fd7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-1-customers-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿First name,Last name,Mobile Phone,Email,Street,City,State,Zip Code,Note,Lead Source,Tags\r\n"
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "downloads": [
+    {
+      "path": "scratchpad/account-purpose-exports-r2-account-ui-1-bookings.csv",
+      "filename": "account-ui-1-bookings.csv",
+      "bytes": 159
+    },
+    {
+      "path": "scratchpad/account-purpose-exports-r2-account-ui-1-leads.csv",
+      "filename": "account-ui-1-leads.csv",
+      "bytes": 115
+    },
+    {
+      "path": "scratchpad/account-purpose-exports-r2-account-ui-1-conversations.csv",
+      "filename": "account-ui-1-conversations.csv",
+      "bytes": 57
+    },
+    {
+      "path": "scratchpad/account-purpose-exports-r2-account-ui-1-customers.csv",
+      "filename": "account-ui-1-customers.csv",
+      "bytes": 93
+    }
+  ],
+  "screenshots": [
+    "scratchpad/account-purpose-exports-r2-empty-csv-downloaded.png"
+  ],
+  "sourceAfter": {
+    "scripts/account-page-ui-qa-check.mjs": "a029b39b154808519fe28d7bbd930600269cede7ef8617fbc2e66ca1387fd1ea",
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "a29fa96c87752e6c794b8a48828300018b8d9b8ab90d1bf73a2c5bf834494b20",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+    "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "cd1f12215ab41f81a88a6d30484499bfccf5561122e3f0be1fe81640bfe00b6c",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "physicalNetwork": 0,
+    "pageErrors": 0,
+    "forbidden": 0
+  }
+}

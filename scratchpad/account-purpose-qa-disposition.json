@@ -1,0 +1,103 @@
+{
+  "at": "2026-10-23T12:49:51.526Z",
+  "stage": "Independent local technical acceptance only",
+  "baseCommit": "22c6708e49538d93dc243da1e2328c8c50980a7d",
+  "finalEvidence": "scratchpad/account-purpose-final-r6.json",
+  "finalSummary": {
+    "passed": 36,
+    "failed": 0,
+    "total": 36,
+    "physicalNetwork": 0,
+    "pageErrors": 0,
+    "forbidden": 0
+  },
+  "sourceStable": true,
+  "finalSource": {
+    "scripts/account-page-ui-qa-check.mjs": "431c0ab9dcd04179665a845e8dc0f26dec83c1140059bb0d1c191c1760519c79",
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "1bdde048db5f5893598b6b962c72a21915e754feba1357cd5302a44d4a40355b",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+    "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "cd1f12215ab41f81a88a6d30484499bfccf5561122e3f0be1fe81640bfe00b6c",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "baseline": {
+    "evidence": "scratchpad/account-purpose-baseline-r2.json",
+    "summary": {
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "physicalNetwork": 0,
+      "pageErrors": 0,
+      "forbidden": 0
+    },
+    "sourceStable": true,
+    "observed": [
+      "CSS hid the actual Cancel service button, leaving Service controls empty.",
+      "This month held setup terms and an unsupported monthly average-job-value comparison promise.",
+      "Data copy dominated the page; links were compact CSV anchors and Service heading had no visible control.",
+      "Actual authenticated bookings CSV handler returned200."
+    ]
+  },
+  "returnedProductFailures": [
+    {
+      "evidence": "scratchpad/account-purpose-failed-signout-r1.json",
+      "finding": "Pending service action, failed sign-out and stale response left Account busy and Resume disabled.",
+      "replacement": "Pending service action now defers sign-out while the action result is being checked; failed sign-out after settling leaves normal controls usable. Final group passes without duplicate mutation."
+    },
+    {
+      "evidence": "scratchpad/account-purpose-failed-export-r2.json",
+      "finding": "Pending download, failed sign-out and stale response left all download buttons disabled.",
+      "replacement": "Failed sign-out resets export busy state and reports interruption; old file is discarded and a fresh authenticated download works."
+    }
+  ],
+  "harnessDispositions": [
+    {
+      "evidence": "scratchpad/account-purpose-baseline.json",
+      "classification": "Harness-only selector mismatch and concurrent harness edit; superseded by stable baseline-r2. Account is #tabAccount."
+    },
+    {
+      "evidence": "scratchpad/account-purpose-final-r1.json",
+      "classification": "Harness-only native dialog body transition and BOM loss through Response.text decoding. Native dialog focus remains internal or browser body boundary; exact ArrayBuffer handler bytes now reach browser and downloaded SHA must match."
+    },
+    {
+      "evidence": "scratchpad/account-purpose-final-r3.json",
+      "classification": "One overly narrow status assertion rejected truthful Check connections for an inconsistent raw-live fixture lacking ready services. Runtime correctly avoided active-service claim; assertion broadened."
+    },
+    {
+      "evidence": "scratchpad/account-purpose-final-r4.json",
+      "classification": "New eligible-web fixture attempted c.channels.web assignment before c.channels initialization. Seed corrected; targeted-r5 and complete-r6 pass."
+    }
+  ],
+  "verificationLimits": [
+    "Every browser/API request stayed inside the intercepted local asset and actual handler harness. No .env file or real credential was loaded.",
+    "Memory storage replaces hosted storage; all owners, records, provider states and statuses are synthetic.",
+    "The explicit web-active scenario uses an availability-only dummy key and injected current proof; no model inference or customer chat occurred.",
+    "Internal background dispatch is intercepted202. Advanced refresh acceptance proves retained queued operation and honest status, not scheduler completion.",
+    "No provider call/text/email/OAuth/purchase/deployment or production acceptance was performed. Existing publication holds remain intact.",
+    "This scoped36-group pass does not declare unrelated obsolete acquisition/admin suites green."
+  ],
+  "reviewableScreens": [
+    "scratchpad/account-purpose-final-r6-account-390-focus.png",
+    "scratchpad/account-purpose-final-r6-account-390-service-focused.png",
+    "scratchpad/account-purpose-final-r6-account-1440-focus.png",
+    "scratchpad/account-purpose-final-r6-state-draft-390-full.png",
+    "scratchpad/account-purpose-final-r6-state-draft-1440-full.png",
+    "scratchpad/account-purpose-final-r6-stop-confirm-320.png",
+    "scratchpad/account-purpose-final-r6-stopped-export-available.png"
+  ]
+}

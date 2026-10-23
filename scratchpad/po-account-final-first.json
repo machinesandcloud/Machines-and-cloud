@@ -1,0 +1,318 @@
+{
+  "at": "2026-10-23T12:45:55.119Z",
+  "scope": "Independent PO actual local owner read/download handlers and browser assets with synthetic memory-only owners. No external/provider transport.",
+  "sourceBefore": {
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "4a8e5378da58388270e1b12e8ebe4a8ce403d4f2be9174c54282aecfe8dec584",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-edit.mjs": "f4d820eca1a9eb9946dc16dca4b3e10f9803ef272e06ceba028ec56ada0e0f21"
+  },
+  "observations": [
+    {
+      "width": 390,
+      "status": "testing",
+      "fixtureState": "testing",
+      "pageTitle": "Account",
+      "accountText": "Account details\nBusiness\nHouston Service Shop\nOwner\nAlex Review\nSign-in email\npo-account-390-testing@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nSetup needed\nText messaging\nSetup needed\nGoogle Calendar\nWaiting for service\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service",
+      "visibleButtons": [
+        {
+          "id": "accountEditContact",
+          "label": "Edit contact details"
+        },
+        {
+          "id": "accountConnections",
+          "label": "Continue setup"
+        },
+        {
+          "id": "expBookings",
+          "label": "Download bookings CSV"
+        },
+        {
+          "id": "expLeads",
+          "label": "Download requests CSV"
+        },
+        {
+          "id": "expConvs",
+          "label": "Download recent conversations CSV"
+        },
+        {
+          "id": "expCustomers",
+          "label": "Download customers CSV"
+        },
+        {
+          "id": "cancelBtn2",
+          "label": "Stop service"
+        }
+      ],
+      "visibleLinks": [
+        {
+          "id": null,
+          "label": "Privacy policy",
+          "href": "privacy-policy.html"
+        },
+        {
+          "id": null,
+          "label": "Contact support",
+          "href": "mailto:ngoumnaisteve@gmail.com"
+        },
+        {
+          "id": "policyLink",
+          "label": "Customer texting terms",
+          "href": "https://po-account.fixture.invalid/policy?c=po-account-390-testing"
+        }
+      ],
+      "screenshots": [
+        "scratchpad/po-account-final-first-390-testing-initial.png",
+        "scratchpad/po-account-final-first-390-testing-downloads.png",
+        "scratchpad/po-account-final-first-390-testing-stop-confirmation.png",
+        "scratchpad/po-account-final-first-390-testing-stopped-retained.png"
+      ],
+      "tasks": [
+        {
+          "task": "Continue setup",
+          "heading": "Connections",
+          "fourServiceCards": 4
+        },
+        {
+          "task": "Edit canonical contact and return to Account",
+          "ownerName": "Alex Updated",
+          "savedEmail": "po-account-390-testing@example.test",
+          "emailInputsOnAccount": 0
+        },
+        {
+          "task": "Download actual saved bookings CSV",
+          "file": "scratchpad/po-account-final-first-390-bookings.csv",
+          "containsSavedCustomer": true,
+          "containsPrivateOwnerKey": false,
+          "feedback": "Your bookings CSV download has started. Check your browser’s downloads."
+        },
+        {
+          "task": "Find actual privacy page",
+          "label": "Privacy policy",
+          "href": "privacy-policy.html",
+          "localFileExists": true
+        },
+        {
+          "task": "Review intentional stop confirmation",
+          "scope": "This stops automated service and scheduled tasks for this workspace. Saved records remain available to download. It does not release a phone number or revoke Google access. If you forward an existing line, turn off forwarding with your carrier.",
+          "focusedControl": "cancelNo"
+        },
+        {
+          "task": "Keep service returns safely",
+          "savedStatus": "testing",
+          "focusedControl": "cancelBtn2"
+        },
+        {
+          "task": "Stop service, reload and retain records access",
+          "savedStatus": "cancelled",
+          "stopVisible": false,
+          "exportVisible": true,
+          "ownerEmail": "po-account-390-testing@example.test"
+        }
+      ],
+      "viewport": {
+        "width": 390,
+        "document": 390
+      }
+    },
+    {
+      "width": 390,
+      "status": "live",
+      "fixtureState": "live",
+      "pageTitle": "Account",
+      "accountText": "Account details\nBusiness\nHouston Service Shop\nOwner\nAlex Review\nSign-in email\npo-account-390-live@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nCheck connections\n\nCheck Connections for each service’s readiness and next steps.\n\nWebsite chat\nSetup needed\nPhone answering\nSetup needed\nText messaging\nSetup needed\nGoogle Calendar\nWaiting for service\nManage connections\nPause workspace\n\nPausing stops automated service in this workspace. Carrier call forwarding may need a separate change.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service",
+      "visibleButtons": [
+        {
+          "id": "accountEditContact",
+          "label": "Edit contact details"
+        },
+        {
+          "id": "accountConnections",
+          "label": "Manage connections"
+        },
+        {
+          "id": "pause",
+          "label": "Pause workspace"
+        },
+        {
+          "id": "expBookings",
+          "label": "Download bookings CSV"
+        },
+        {
+          "id": "expLeads",
+          "label": "Download requests CSV"
+        },
+        {
+          "id": "expConvs",
+          "label": "Download recent conversations CSV"
+        },
+        {
+          "id": "expCustomers",
+          "label": "Download customers CSV"
+        },
+        {
+          "id": "cancelBtn2",
+          "label": "Stop service"
+        }
+      ],
+      "visibleLinks": [
+        {
+          "id": null,
+          "label": "Privacy policy",
+          "href": "privacy-policy.html"
+        },
+        {
+          "id": null,
+          "label": "Contact support",
+          "href": "mailto:ngoumnaisteve@gmail.com"
+        },
+        {
+          "id": "policyLink",
+          "label": "Customer texting terms",
+          "href": "https://po-account.fixture.invalid/policy?c=po-account-390-live"
+        }
+      ],
+      "screenshots": [
+        "scratchpad/po-account-final-first-390-live-initial.png"
+      ],
+      "tasks": [
+        {
+          "task": "Pause current workspace",
+          "savedStatus": "paused",
+          "savedChoices": [
+            "web",
+            "voice",
+            "sms",
+            "calendar"
+          ]
+        }
+      ],
+      "viewport": {
+        "width": 390,
+        "document": 390
+      }
+    }
+  ],
+  "requests": [
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "PUT",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "GET",
+      "export": "bookings",
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "cancel",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "testing",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "live",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "live",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "pause",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "live",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "live",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "resume_services",
+      "export": null,
+      "status": 202
+    },
+    {
+      "width": 390,
+      "fixtureStatus": "live",
+      "path": "/api/client",
+      "method": "GET",
+      "export": null,
+      "status": 200
+    }
+  ],
+  "errors": [
+    "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#accountServiceStatus').filter({ hasText: 'Setup in progress' }) to be visible\u001b[22m\n\n    at /private/tmp/mc-account-purpose-22/scratchpad/po-account-observe.mjs:31:423"
+  ],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "4a8e5378da58388270e1b12e8ebe4a8ce403d4f2be9174c54282aecfe8dec584",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-edit.mjs": "f4d820eca1a9eb9946dc16dca4b3e10f9803ef272e06ceba028ec56ada0e0f21"
+  },
+  "sourceStable": true
+}

@@ -230,7 +230,8 @@ async function handle(req) {
         if(b.action==="resume_services"){
           const updated=await atomicUpdate("clients",c.slug,current=>{
             if(!ownsCurrent(current))throw new Error("Workspace changed");
-            if(current.status!=="paused" || b.expectedRevision!==configurationRevision(current) || !setupReadiness(current).canActivateWeb)return {result:null};
+            const restoringWeb = current.pausedChannels?.web?.active === true;
+            if(current.status!=="paused" || b.expectedRevision!==configurationRevision(current) || (restoringWeb && !setupReadiness(current).canActivateWeb))return {result:null};
             const value={...current,status:current.pausedFrom==="live"?"live":"testing",channels:{...current.channels,web:{active:current.pausedChannels?.web?.active===true}},operationLifecycleVersion:(current.operationLifecycleVersion || 0)+1,pausedAt:null,updatedAt:new Date().toISOString()};
             return {value,result:value};
           });

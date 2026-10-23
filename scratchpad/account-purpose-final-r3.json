@@ -1,0 +1,1781 @@
+{
+  "at": "2026-10-23T12:45:53.486Z",
+  "baseCommit": "22c6708e49538d93dc243da1e2328c8c50980a7d",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "scripts/account-page-ui-qa-check.mjs": "2a960c6a07b09c419725c7fe9d9bc99f0b65be0c022ece37f77df678fe811c89",
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "4a8e5378da58388270e1b12e8ebe4a8ce403d4f2be9174c54282aecfe8dec584",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+    "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "cd1f12215ab41f81a88a6d30484499bfccf5561122e3f0be1fe81640bfe00b6c",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "320px ordinary Account identifies owner and selected services without empty or invented reporting",
+      "pass": true
+    },
+    {
+      "name": "390px ordinary Account identifies owner and selected services without empty or invented reporting",
+      "pass": true
+    },
+    {
+      "name": "1440px ordinary Account identifies owner and selected services without empty or invented reporting",
+      "pass": true
+    },
+    {
+      "name": "390px draft Account offers truthful state and next action after reload",
+      "pass": true
+    },
+    {
+      "name": "1440px draft Account offers truthful state and next action after reload",
+      "pass": true
+    },
+    {
+      "name": "390px live Account offers truthful state and next action after reload",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /setup|draft|connected|active/i. Input:\n\n'Check connections'\n\n    at file:///private/tmp/mc-account-purpose-22/scripts/account-page-ui-qa-check.mjs:131:86\n    at async check (file:///private/tmp/mc-account-purpose-22/scripts/account-page-ui-qa-check.mjs:89:125)\n    at async file:///private/tmp/mc-account-purpose-22/scripts/account-page-ui-qa-check.mjs:129:121",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-6@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nCheck connections\n\nCheck Connections for each service’s readiness and next steps.\n\nWebsite chat\nNot selected\nPhone answering\nSetup needed\nText messaging\nSetup needed\nGoogle Calendar\nWaiting for service\nManage connections\nPause workspace\n\nPausing stops automated service in this workspace. Carrier call forwarding may need a separate change.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "390px paused Account offers truthful state and next action after reload",
+      "pass": true
+    },
+    {
+      "name": "390px cancelled Account offers truthful state and next action after reload",
+      "pass": true
+    },
+    {
+      "name": "Contact shortcut opens real saved contact fields with identity retained",
+      "pass": true
+    },
+    {
+      "name": "Contact edits show new canonical owner and cell immediately on returning to Account",
+      "pass": true
+    },
+    {
+      "name": "Hidden legacy job value stays retained through Account reads, export, pause, resume and Stop",
+      "pass": true
+    },
+    {
+      "name": "Phone SMS Calendar live workspace pauses through actual handler without losing choices or claiming delivery",
+      "pass": true
+    },
+    {
+      "name": "Calendar only paused setup resumes actual workspace with AI unavailable and web stays off",
+      "pass": true
+    },
+    {
+      "name": "Paused previously active web requires current readiness and directs to review instead of false resume",
+      "pass": true
+    },
+    {
+      "name": "320px Stop confirmation uses labelled reason and Keep/Escape without mutation",
+      "pass": true
+    },
+    {
+      "name": "390px Stop confirmation uses labelled reason and Keep/Escape without mutation",
+      "pass": true
+    },
+    {
+      "name": "1440px Stop confirmation uses labelled reason and Keep/Escape without mutation",
+      "pass": true
+    },
+    {
+      "name": "Confirmed Stop retains reason and cancellation across return, replay exports stay available",
+      "pass": true
+    },
+    {
+      "name": "Stop failure retains reason and durable error without state change",
+      "pass": true
+    },
+    {
+      "name": "Lost Stop response remains uncertain until status check and never blindly repeats cancellation",
+      "pass": true
+    },
+    {
+      "name": "Slow Stop response disables duplicate confirmation and reports success only after actual response",
+      "pass": true
+    },
+    {
+      "name": "Actual incomplete-history export refuses a partial CSV and recovers after retained listing reconciliation",
+      "pass": true
+    },
+    {
+      "name": "All four real CSV downloads authenticate, carry headers and empty data remains a valid file",
+      "pass": true
+    },
+    {
+      "name": "Populated exports preserve real local records, quoting and tenant isolation",
+      "pass": true
+    },
+    {
+      "name": "Download 503 response gives durable actionable error and retry recovers",
+      "pass": true
+    },
+    {
+      "name": "Download network response gives durable actionable error and retry recovers",
+      "pass": true
+    },
+    {
+      "name": "Download html response gives durable actionable error and retry recovers",
+      "pass": true
+    },
+    {
+      "name": "Download json response gives durable actionable error and retry recovers",
+      "pass": true
+    },
+    {
+      "name": "Download revoked session enters recovery and never saves private records",
+      "pass": true
+    },
+    {
+      "name": "Anonymous and foreign owner export attempts are rejected by actual handler",
+      "pass": true
+    },
+    {
+      "name": "Slow download shows durable progress, prevents duplicate clicks, and sign-out discards late file",
+      "pass": true
+    },
+    {
+      "name": "Advanced refresh uses retained operation and accurate queued status without touching services or records",
+      "pass": true
+    },
+    {
+      "name": "No physical transport and no browser exceptions",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e46d1b71ba6b0eea2a8faf45d40081e556c4cdb3de9a03872c432f3b6a620c81",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7596e0dab9c0506d1b975fb5435837fd2deeda4bf86b5d57196c2f10a082dac6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "186a6f4e472104eeb6756d62fc8640d20d73bb09c5593a3992025b2982f981dc",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5d22acc0e47eb2286e7cba2d806e7e00bee0fef3bf5d08f1a905d1238e19bbe4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5d22acc0e47eb2286e7cba2d806e7e00bee0fef3bf5d08f1a905d1238e19bbe4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5b182a041d5b65f238dbb16d3e3c862c85e8df5c3bb85893ef1d2a257748d43d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5b182a041d5b65f238dbb16d3e3c862c85e8df5c3bb85893ef1d2a257748d43d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "905872de935db412d5ada9bbe8838326038b5ef60a1c03c2a76c9125edf54028",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "00bf84e2a4dcb933775807f8b3b8aaa3756a282ee4326513d7b56b3001076082",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "00bf84e2a4dcb933775807f8b3b8aaa3756a282ee4326513d7b56b3001076082",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d2b4c697b49dca99f965f77b09ec67db2e5cceeb7efb508b18d461f8953c504d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d2b4c697b49dca99f965f77b09ec67db2e5cceeb7efb508b18d461f8953c504d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "18f95bfc669612fe8bb85bfe39f307548307f2f91d5d2cbe7a975fbcc18ad5ff",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "79cc0f0ab3d3c6779355d7e1b38d79d0394f47f6a168dd34fbb796ac512ce200",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "PUT",
+      "body": {
+        "expectedRevision": "f38adb119cbbd0ca36a1f892baa877052479dcacf8f73a416e78a640b4860558",
+        "expectedEditRevision": "83a94f5b5b9ee53b64065b1601173d4ab78d2594a1346708b89884346a0fbea5",
+        "owner": {
+          "name": "Morgan Updated",
+          "phone": "7135550195"
+        }
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d5d5b7c400113b02970f69ecba3e6aefb83b291c147f731e09e305fe05025493",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "61c6dc1477d185f38f5281924991613e5be2b7ff25b1d05b03dba5883869f367",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "61c6dc1477d185f38f5281924991613e5be2b7ff25b1d05b03dba5883869f367",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "71444542c7c793d9ba0bdd4dc91947774eaef357ddad05ef66988e7e9c8d7567",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-11-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "POST",
+      "action": "pause",
+      "body": {
+        "action": "pause"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "bb1dfb0a315ebdb2f00f0203360d7804aa4b7663270d3908d1573e58a3fe0c42",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "45cbb4f92dc35f9f291061dfc5ab86e70c1d96e6776e11d04a8c0a461fb044d6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "POST",
+      "action": "resume_services",
+      "body": {
+        "action": "resume_services",
+        "expectedRevision": "8a96eccaab787008c18cc5f963ef2cd8dcb859b88593f22aec135f2a793bfacc"
+      },
+      "authPresent": true,
+      "status": 202,
+      "responseByteSha": "54a77c8fc3997ab08c308f0748fe365392e2b1f0e6424c75c5be1e3c3b38bdb3",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5cf6abebe44b40544dcef1b9a75b98d443e314cc50792b0ee14257db4fb86db9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "POST",
+      "action": "cancel",
+      "body": {
+        "action": "cancel",
+        "reason": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f4fb088fed1d4f40a580ee43347f1b275873c4af53299adf7693d0849fbd9beb",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0c3fd2d269c6b712c63db2ab1be653cc50d11ed88bbbf094331ad2552dfce225",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "abdcf431ac00a77928a212db88f3364f1be00a84d02cc9dd956ce9a4316fd685",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12",
+      "method": "POST",
+      "action": "pause",
+      "body": {
+        "action": "pause"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "bd3f73e9db6e20742969162bf078f6fa62cf1302ad22828825892aa9a359e9ca",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d2d10492b0146aa94dcb5a37c29049ff73c75a1a4d8ff55f19a005489453b9fd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9b1c40e6155b1ad0b8b442a73d570ad9f36edd26240a2fa3cdb14081d54d9ebf",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13",
+      "method": "POST",
+      "action": "resume_services",
+      "body": {
+        "action": "resume_services",
+        "expectedRevision": "f38adb119cbbd0ca36a1f892baa877052479dcacf8f73a416e78a640b4860558"
+      },
+      "authPresent": true,
+      "status": 202,
+      "responseByteSha": "f477c3e1993bb58defbfd26ae05420dd9c0d4a10579a19a22a35646bd5883235",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f37cb9bd89a3e526b5acb56fe684b857cdfa843b09ad6ae7ea210f38f339f7c0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/client",
+      "query": "?c=account-ui-14",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b5f6e07d243bfc65c85bb00461c5e883057aabb4f994f6d4af9af3acfc2ffbac",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-15",
+      "path": "/api/client",
+      "query": "?c=account-ui-15",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d53816ac0e7dc6b639c6dd134d4956b01cf0a165801853d5930383592799212b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-16",
+      "path": "/api/client",
+      "query": "?c=account-ui-16",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ae31473adb614ddfbd271f2f032e1777800e5f79aefc4eebef92068c3c248c99",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-17",
+      "path": "/api/client",
+      "query": "?c=account-ui-17",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6155d3a9145b57eebf9225a755e846657cef83d2e0c8ee4cf0e2e3323598c500",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-18",
+      "path": "/api/client",
+      "query": "?c=account-ui-18",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "81626c8d993b99dede1b1ad6b16a0afec6dc2f7249ee2c09ddabf016e9c8dffe",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-18",
+      "path": "/api/client",
+      "query": "?c=account-ui-18",
+      "method": "POST",
+      "action": "cancel",
+      "body": {
+        "action": "cancel",
+        "reason": "Synthetic QA service stop"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a905e9756bccbc193cd46dc1526e975ca3520686530dd11027395ba84b0c4e2c",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-18",
+      "path": "/api/client",
+      "query": "?c=account-ui-18",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "34d119a058fefd8220340598f99859b84e6e1e442aa912ea4b37390ec2b27818",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-18",
+      "path": "/api/client",
+      "query": "?c=account-ui-18",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "cf026d799284d0ae32fbb0c6c5048a6c78131c5a9ceab42ce3ed0357b4805e61",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-18",
+      "path": "/api/client",
+      "query": "?c=account-ui-18&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1cfe68547b485a1785f686730a47bdcc8ced9f375213b6eedda4ab04bf52d5eb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-18-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n8b13afa29b,2026-10-23T12:46:02.704Z,\"Renée \"\"Fixture\"\", Jr\",+17135550197,\"1500 Main St, Katy, TX 77450\",\"AC, fan\nnot cooling\",2026-10-24,8 to 12,,confirmed,,,web,Synthetic QA only,,,,\r\n"
+    },
+    {
+      "slug": "account-ui-19",
+      "path": "/api/client",
+      "query": "?c=account-ui-19",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c929c41d71731feacea9dd15212423a6c3db47a8308757d6624a3b3c7b07f6a8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-19",
+      "path": "/api/client",
+      "query": "?c=account-ui-19",
+      "method": "POST",
+      "action": "cancel",
+      "body": {
+        "action": "cancel",
+        "reason": "Keep my reason after failure"
+      },
+      "authPresent": true,
+      "fixture": 503,
+      "status": 503
+    },
+    {
+      "slug": "account-ui-19",
+      "path": "/api/client",
+      "query": "?c=account-ui-19",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c929c41d71731feacea9dd15212423a6c3db47a8308757d6624a3b3c7b07f6a8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-19",
+      "path": "/api/client",
+      "query": "?c=account-ui-19",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c929c41d71731feacea9dd15212423a6c3db47a8308757d6624a3b3c7b07f6a8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-20",
+      "path": "/api/client",
+      "query": "?c=account-ui-20",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7ac5d0981a4ef77b8a779bfd1337766399a48289c476b4f66b8138b52b72c854",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-20",
+      "path": "/api/client",
+      "query": "?c=account-ui-20",
+      "method": "POST",
+      "action": "cancel",
+      "body": {
+        "action": "cancel",
+        "reason": "Synthetic lost response"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b50a9a90beeeed57db5519108c1786c8db82945e7e2233d876cded8550109a2a",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      },
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "account-ui-20",
+      "path": "/api/client",
+      "query": "?c=account-ui-20",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 503,
+      "fixture": "read-503"
+    },
+    {
+      "slug": "account-ui-20",
+      "path": "/api/client",
+      "query": "?c=account-ui-20",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b6afb553e495aae561033e053dcb86d7300d124361fade9adc3be48287cded7a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-21",
+      "path": "/api/client",
+      "query": "?c=account-ui-21",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "db71a79ff6e2de794b42eb0354bce1d9c05ee26e4ff16887d494f669cd2cf557",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-21",
+      "path": "/api/client",
+      "query": "?c=account-ui-21",
+      "method": "POST",
+      "action": "cancel",
+      "body": {
+        "action": "cancel",
+        "reason": "Synthetic slow response"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0b5c776646290f531b94fdee0f6b63c5bb17932e10ada0cc8149abc4fcc25fa7",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-21",
+      "path": "/api/client",
+      "query": "?c=account-ui-21",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "360bcbe518502d47f7cae5bdb0e994074fc59aae5c4f915540e5a257860559af",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-22",
+      "path": "/api/client",
+      "query": "?c=account-ui-22",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0a1a8308d291ffa28c12fc3f0e77a93fbb4e10fc261a02b8c1ed84871e526f15",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-22",
+      "path": "/api/client",
+      "query": "?c=account-ui-22",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3d920ddfaa67e382fff33bbe940a6d6cc1739c125d33dbc00b6074de6fdc1610",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-22",
+      "path": "/api/client",
+      "query": "?c=account-ui-22&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 503,
+      "responseByteSha": "ad419611c3fb24e76907425102a69cff9843f678080f96b04dd79dd7f5b294ec",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      },
+      "responseBody": "{\"error\":\"history_incomplete\",\"message\":\"A complete history export is not available yet. Some saved records need reconciliation; contact support before exporting.\"}"
+    },
+    {
+      "slug": "account-ui-22",
+      "path": "/api/client",
+      "query": "?c=account-ui-22",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "664433fc611ac3556db56367434e84a68616e9f314a639e85161e4d731ac6abc",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-22",
+      "path": "/api/client",
+      "query": "?c=account-ui-22&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d5cce07a53f8accbe981b558f64987cee4c236411bcae3b96e00ca0e560b79c7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-22-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\nefc1ce6b21,2026-10-23T12:46:04.733Z,\"Renée \"\"Fixture\"\", Jr\",+17135550197,\"1500 Main St, Katy, TX 77450\",\"AC, fan\nnot cooling\",2026-10-24,8 to 12,,confirmed,,,web,Synthetic QA only,,,,\r\n"
+    },
+    {
+      "slug": "account-ui-23",
+      "path": "/api/client",
+      "query": "?c=account-ui-23",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c0dffeca9b34e0bae0a1a100f88704f9694b0cb4f362a8b7de74d9b8927d45f8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-23",
+      "path": "/api/client",
+      "query": "?c=account-ui-23&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-23-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-23",
+      "path": "/api/client",
+      "query": "?c=account-ui-23&export=leads",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "00457b5572b3762fa35e9e193c908d9793da2618175f7b77e8723656c5eeecd4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-23-leads-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,reason,outcome,urgency,wanted,status,channel,unsure,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-23",
+      "path": "/api/client",
+      "query": "?c=account-ui-23&export=conversations",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "be1e532dbff877aa1d26d915c112f358aa07dff2f18b89367113928183e2d6e9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-23-conversations-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿channel,contact,at,role,content,flag_note,processing\r\n"
+    },
+    {
+      "slug": "account-ui-23",
+      "path": "/api/client",
+      "query": "?c=account-ui-23&export=customers",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "65544c2ddf465d93916482140ea2365ad165d0976a3816f5b9b813a3e5c93fd7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-23-customers-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿First name,Last name,Mobile Phone,Email,Street,City,State,Zip Code,Note,Lead Source,Tags\r\n"
+    },
+    {
+      "slug": "account-ui-24",
+      "path": "/api/client",
+      "query": "?c=account-ui-24",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0c3e38c121527d32e15f48bc2e01d573f1e988789c8543423a6e80d51ffb258b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-24",
+      "path": "/api/client",
+      "query": "?c=account-ui-24",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4fa9e4b2fab5182e63814880d3da4e46b1dceebdf697f76a82db909ee2428d6d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-24",
+      "path": "/api/client",
+      "query": "?c=account-ui-24&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f902316a8864eedb7e8671aa30c375e035ed47d58f5fcfe4a9ff834c46c6c0a1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-24-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n630d07d407,2026-10-23T12:46:05.825Z,\"Renée \"\"Fixture\"\", Jr\",+17135550197,\"1500 Main St, Katy, TX 77450\",\"AC, fan\nnot cooling\",2026-10-24,8 to 12,,confirmed,,,web,Synthetic QA only,,,,\r\n"
+    },
+    {
+      "slug": "account-ui-24",
+      "path": "/api/client",
+      "query": "?c=account-ui-24&export=leads",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "491f1f8c77c92874bae4ce7d47ff6714bd3e9f118d6ad38ab1684574d46f6ca1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-24-leads-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,reason,outcome,urgency,wanted,status,channel,unsure,setup_check\r\n3dfb1da37b,2026-10-23T12:46:05.825Z,Taylor Fixture,+17135550196,,Callback,,wants_call,,,open,sms,,\r\n"
+    },
+    {
+      "slug": "account-ui-24",
+      "path": "/api/client",
+      "query": "?c=account-ui-24&export=conversations",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3c03730a53e789fe960be18ea6d60b42ae657138b11c44ad74b73d556f19c0d6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-24-conversations-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿channel,contact,at,role,content,flag_note,processing\r\nweb,local-fixture,2026-10-23T12:46:05.825Z,user,\"Synthetic customer \"\"question\"\", with comma\nand line break\",,\r\n"
+    },
+    {
+      "slug": "account-ui-24",
+      "path": "/api/client",
+      "query": "?c=account-ui-24&export=customers",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "51cb740dde54bbb1dd2380b5ef933dce960ab154bb731cc53d6d95744fccac47",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-24-customers-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿First name,Last name,Mobile Phone,Email,Street,City,State,Zip Code,Note,Lead Source,Tags\r\nRenée,\"\"\"Fixture\"\", Jr\",+17135550197,,1500 Main St,Katy,TX,77450,\"AC, fan\nnot cooling (refs 630d07d407)\",Other,front desk\r\nTaylor,Fixture,+17135550196,,,Houston,TX,,Callback (refs 3dfb1da37b),Other,front desk\r\n"
+    },
+    {
+      "slug": "account-ui-25",
+      "path": "/api/client",
+      "query": "?c=account-ui-25",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "50f8997e021ea1ab53c6201990f8db2ac07fcd592866dde3744bdd4cbaf94c16",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-25",
+      "path": "/api/client",
+      "query": "?c=account-ui-25&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "fixture": 503,
+      "status": 503
+    },
+    {
+      "slug": "account-ui-25",
+      "path": "/api/client",
+      "query": "?c=account-ui-25&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-25-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-26",
+      "path": "/api/client",
+      "query": "?c=account-ui-26",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c756db0114f83fb8e2e1a0fe9f6131a3de238a74282777f3affc490b2b84e252",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-26",
+      "path": "/api/client",
+      "query": "?c=account-ui-26&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "fixture": "network",
+      "status": "aborted"
+    },
+    {
+      "slug": "account-ui-26",
+      "path": "/api/client",
+      "query": "?c=account-ui-26&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-26-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-27",
+      "path": "/api/client",
+      "query": "?c=account-ui-27",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6740374038dffe76bdd66efc311342983425e83e8d5f4c4b189635db68228005",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-27",
+      "path": "/api/client",
+      "query": "?c=account-ui-27&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "fixture": "html",
+      "status": 200
+    },
+    {
+      "slug": "account-ui-27",
+      "path": "/api/client",
+      "query": "?c=account-ui-27&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-27-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-28",
+      "path": "/api/client",
+      "query": "?c=account-ui-28",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f97a98a75500a07c676385f87d1a47c584564294c746e3d61d6dc33de3dd2d48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-28",
+      "path": "/api/client",
+      "query": "?c=account-ui-28&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "fixture": "json",
+      "status": 200
+    },
+    {
+      "slug": "account-ui-28",
+      "path": "/api/client",
+      "query": "?c=account-ui-28&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-28-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-29",
+      "path": "/api/client",
+      "query": "?c=account-ui-29",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8037beba3c68d0acf6017a7d066930f8af538f5b08ec6bb59c232ebee8a6d357",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-29",
+      "path": "/api/client",
+      "query": "?c=account-ui-29&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "responseByteSha": "9d8788f7e29d479f2b2bd7108bf0424a1abc80fcf4bcdd65dd5f84fdfb213733",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      },
+      "responseBody": "{\"error\":\"verification_required\"}"
+    },
+    {
+      "slug": "account-ui-30",
+      "path": "/api/client",
+      "query": "?c=account-ui-30",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0f2ca30d4a4bb36c4099257fbd6ba72c852f027941ea6ed8b433d0e71c7f870c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-31",
+      "path": "/api/client",
+      "query": "?c=account-ui-31",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "bf14ab787aa8e2c60139b54e535cb763d6041933e340271a2e76f55814d52bc7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-31",
+      "path": "/api/client",
+      "query": "?c=account-ui-31&export=bookings",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3fe87cd809ae03fcb7e2e027e278c612a4f5533d3ed44af27acd2023d7b9f8bb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-31-bookings-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,date,window,urgency,status,outcome,customerType,channel,notes,unsure,consent.at,consent.channel,setup_check\r\n"
+    },
+    {
+      "slug": "account-ui-31",
+      "path": "/api/access",
+      "query": "",
+      "method": "POST",
+      "action": "sign_out",
+      "body": {
+        "action": "sign_out"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "slug": "account-ui-32",
+      "path": "/api/client",
+      "query": "?c=account-ui-32",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "93ed291eb31370fcf34d1c8b5d123b4a081648cf9bb3fb6e74a8069872a23074",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-32",
+      "path": "/api/client",
+      "query": "?c=account-ui-32",
+      "method": "POST",
+      "action": "rebuild_workspace",
+      "body": {
+        "action": "rebuild_workspace",
+        "expectedRevision": "f38adb119cbbd0ca36a1f892baa877052479dcacf8f73a416e78a640b4860558",
+        "reason": "Owner requested a refresh from saved business answers."
+      },
+      "authPresent": true,
+      "status": 202,
+      "responseByteSha": "30f30451fd359e12e7fda72d71c69db6050a45c2fee0645664eec40abb8037b0",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://account-purpose.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-32",
+      "path": "/api/client",
+      "query": "?c=account-ui-32",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "38c010b8386c1b718be4d946351c981e681e62be871bf356050ad9f1dc8578ea",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-32",
+      "path": "/api/client",
+      "query": "?c=account-ui-32",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "38c010b8386c1b718be4d946351c981e681e62be871bf356050ad9f1dc8578ea",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/account-purpose-final-r3-account-320-focus.png",
+    "scratchpad/account-purpose-final-r3-account-320-full.png",
+    "scratchpad/account-purpose-final-r3-account-390-focus.png",
+    "scratchpad/account-purpose-final-r3-account-390-full.png",
+    "scratchpad/account-purpose-final-r3-account-1440-focus.png",
+    "scratchpad/account-purpose-final-r3-account-1440-full.png",
+    "scratchpad/account-purpose-final-r3-state-draft-390.png",
+    "scratchpad/account-purpose-final-r3-state-draft-390-full.png",
+    "scratchpad/account-purpose-final-r3-state-draft-1440.png",
+    "scratchpad/account-purpose-final-r3-state-draft-1440-full.png",
+    "scratchpad/account-purpose-final-r3-failure-6.png",
+    "scratchpad/account-purpose-final-r3-state-paused-390.png",
+    "scratchpad/account-purpose-final-r3-state-cancelled-390.png",
+    "scratchpad/account-purpose-final-r3-contact-shortcut.png",
+    "scratchpad/account-purpose-final-r3-calendar-only-resumed.png",
+    "scratchpad/account-purpose-final-r3-stop-confirm-320.png",
+    "scratchpad/account-purpose-final-r3-stop-confirm-390.png",
+    "scratchpad/account-purpose-final-r3-stop-confirm-1440.png",
+    "scratchpad/account-purpose-final-r3-stopped-export-available.png",
+    "scratchpad/account-purpose-final-r3-stop-error.png",
+    "scratchpad/account-purpose-final-r3-lost-stop-reconciled.png",
+    "scratchpad/account-purpose-final-r3-empty-csv-downloaded.png",
+    "scratchpad/account-purpose-final-r3-export-503-recovered.png",
+    "scratchpad/account-purpose-final-r3-export-network-recovered.png",
+    "scratchpad/account-purpose-final-r3-export-html-recovered.png",
+    "scratchpad/account-purpose-final-r3-export-json-recovered.png",
+    "scratchpad/account-purpose-final-r3-export-expired-recovery.png",
+    "scratchpad/account-purpose-final-r3-advanced-refresh.png"
+  ],
+  "downloads": [
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-11-bookings.csv",
+      "filename": "account-ui-11-bookings.csv",
+      "bytes": 159
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-18-bookings.csv",
+      "filename": "account-ui-18-bookings.csv",
+      "bytes": 345
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-22-bookings.csv",
+      "filename": "account-ui-22-bookings.csv",
+      "bytes": 345
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-23-bookings.csv",
+      "filename": "account-ui-23-bookings.csv",
+      "bytes": 159
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-23-leads.csv",
+      "filename": "account-ui-23-leads.csv",
+      "bytes": 115
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-23-conversations.csv",
+      "filename": "account-ui-23-conversations.csv",
+      "bytes": 57
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-23-customers.csv",
+      "filename": "account-ui-23-customers.csv",
+      "bytes": 93
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-24-bookings.csv",
+      "filename": "account-ui-24-bookings.csv",
+      "bytes": 345
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-24-leads.csv",
+      "filename": "account-ui-24-leads.csv",
+      "bytes": 215
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-24-conversations.csv",
+      "filename": "account-ui-24-conversations.csv",
+      "bytes": 169
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-24-customers.csv",
+      "filename": "account-ui-24-customers.csv",
+      "bytes": 304
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-25-bookings.csv",
+      "filename": "account-ui-25-bookings.csv",
+      "bytes": 159
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-26-bookings.csv",
+      "filename": "account-ui-26-bookings.csv",
+      "bytes": 159
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-27-bookings.csv",
+      "filename": "account-ui-27-bookings.csv",
+      "bytes": 159
+    },
+    {
+      "path": "scratchpad/account-purpose-final-r3-account-ui-28-bookings.csv",
+      "filename": "account-ui-28-bookings.csv",
+      "bytes": 159
+    }
+  ],
+  "keyboard": [
+    {
+      "width": 320,
+      "step": 0,
+      "id": "",
+      "tag": "BODY",
+      "contained": false,
+      "open": true
+    },
+    {
+      "width": 320,
+      "step": 1,
+      "id": "cancelReason",
+      "tag": "INPUT",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 320,
+      "step": 2,
+      "id": "cancelGo",
+      "tag": "BUTTON",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 320,
+      "step": 3,
+      "id": "cancelNo",
+      "tag": "BUTTON",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 320,
+      "step": 4,
+      "id": "cancelReason",
+      "tag": "INPUT",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 390,
+      "step": 0,
+      "id": "",
+      "tag": "BODY",
+      "contained": false,
+      "open": true
+    },
+    {
+      "width": 390,
+      "step": 1,
+      "id": "cancelReason",
+      "tag": "INPUT",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 390,
+      "step": 2,
+      "id": "cancelGo",
+      "tag": "BUTTON",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 390,
+      "step": 3,
+      "id": "cancelNo",
+      "tag": "BUTTON",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 390,
+      "step": 4,
+      "id": "cancelReason",
+      "tag": "INPUT",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 1440,
+      "step": 0,
+      "id": "",
+      "tag": "BODY",
+      "contained": false,
+      "open": true
+    },
+    {
+      "width": 1440,
+      "step": 1,
+      "id": "cancelReason",
+      "tag": "INPUT",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 1440,
+      "step": 2,
+      "id": "cancelGo",
+      "tag": "BUTTON",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 1440,
+      "step": 3,
+      "id": "cancelNo",
+      "tag": "BUTTON",
+      "contained": true,
+      "open": true
+    },
+    {
+      "width": 1440,
+      "step": 4,
+      "id": "cancelReason",
+      "tag": "INPUT",
+      "contained": true,
+      "open": true
+    }
+  ],
+  "sourceAfter": {
+    "scripts/account-page-ui-qa-check.mjs": "2a960c6a07b09c419725c7fe9d9bc99f0b65be0c022ece37f77df678fe811c89",
+    "desk.html": "be14625a3f70345cb7e2d864c702fb8dc2cd662774b362e83868b88f6c7a66fc",
+    "desk.js": "4a8e5378da58388270e1b12e8ebe4a8ce403d4f2be9174c54282aecfe8dec584",
+    "desk.css": "cefd6e0820aeaa104faaac035bfb5b6eef2b10aa701e128ccf620d6d6631d935",
+    "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+    "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "f499d670a66e356819f0f5753640409c7c088cda29eb3b8868a7946deac8ee3e",
+    "netlify/functions/lib/connection-journey.mjs": "24af359d8d6e5b56f71e0f6752c2372e2b38314d7453c0c8e5ffdedfed65eb72",
+    "netlify/functions/lib/service-connections.mjs": "30466ba4388a87558ea63a4794a7ca46fd3ab7c0e7b8478edcb81a2d1c3ba8b8",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "cd1f12215ab41f81a88a6d30484499bfccf5561122e3f0be1fe81640bfe00b6c",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 32,
+    "failed": 1,
+    "total": 33,
+    "physicalNetwork": 0,
+    "pageErrors": 0,
+    "forbidden": 0
+  }
+}

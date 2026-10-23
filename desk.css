@@ -100,7 +100,6 @@
 .desk-app #pageTitle { margin:0; font-size:clamp(24px,2.6vw,32px); font-weight:650; line-height:1.2; }
 .desk-app #pageDescription { margin:9px 0 0; max-width:640px; font-size:14px; color:var(--ui-muted); line-height:1.55; }
 .desk-app #liveBtns { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; padding-top:22px; max-width:360px; flex:none; }
-.desk-app #liveBtns #cancelBtn { display:none!important; }
 .desk-app .btn-pill { display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; border:1px solid transparent; font-size:13px; font-weight:600; padding:11px 16px; line-height:1.4; min-height:42px; box-shadow:none; text-decoration:none; cursor:pointer; }
 .desk-app .btn-sm { padding:9px 13px; font-size:12px; min-height:39px; }
 .desk-app .btn-pill-blue { background:var(--ui-blue); color:#fff; }
@@ -262,7 +261,6 @@
 /* Keep the next action compact at narrow widths, with its button on a new row. */
 .desk-app .desk-topbar { flex-direction:row; }
 .desk-app:not([data-active-page="setup"]) #golive { display:none; }
-.desk-app:not([data-active-page="setup"]) #liveBtns:has(#golive):not(:has(#pause)):not(:has(#resume)) { display:none; }
 @media(max-width:720px) { .desk-next-copy { flex:1 1 calc(100% - 44px); }.desk-app #nextSetupAction { margin-left:44px; }.desk-app .workspace-guide { align-items:flex-start; }.desk-next-icon { margin-top:4px; }.desk-app .desk-topbar { align-items:center; } }
 @media(max-width:360px) { .desk-next-copy { flex-basis:100%; }.desk-app #nextSetupAction { margin-left:0; }.desk-app .desk-topbar { align-items:flex-start; } }
 @media(max-width:720px) { .desk-app .tbl tr:first-child { display:block; position:absolute; width:1px; height:1px; margin:-1px; padding:0; border:0; clip:rect(0,0,0,0); clip-path:inset(50%); overflow:hidden; white-space:nowrap; } }
@@ -482,3 +480,38 @@ body.desk-app.guide-tour-open { overflow:hidden; }
  .desk-app .desk-save-bar #saveMsg { font-size:12px; }
 }
 .desk-app #homeServiceContext { margin:0; padding:14px 24px; border-top:1px solid var(--ui-line); background:#fafcff; font-size:12px; line-height:1.6; border-radius:0 0 14px 14px; }
+
+/* Account: identity, service status and record downloads. */
+.desk-app .desk-account-grid { align-items:start; }
+.desk-app #p-account .card2 { min-width:0; }
+.desk-app .desk-account-facts,.desk-app .desk-account-connections { margin:18px 0; }
+.desk-app .desk-account-facts>div { margin:0 0 17px; }
+.desk-app .desk-account-facts dt { color:var(--ui-muted); font-size:12px; margin-bottom:5px; }
+.desk-app .desk-account-facts dd { margin:0; color:var(--ui-ink); font-size:14px; line-height:1.5; overflow-wrap:anywhere; }
+.desk-app .desk-account-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.desk-app .desk-account-heading h3 { margin:0; }
+.desk-app .desk-account-status { padding:5px 9px; border-radius:6px; background:#edf3ff; color:#31578d; font-size:11px; font-weight:600; }
+.desk-app .desk-account-connections>div { display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid var(--ui-line); font-size:12px; line-height:1.5; }
+.desk-app .desk-account-connections dt { color:var(--ui-ink); }
+.desk-app .desk-account-connections dd { margin:0; text-align:right; color:var(--ui-muted); }
+.desk-app #accountServiceScope { font-size:12px; margin:12px 0 0; }
+.desk-app .desk-account-message { margin:12px 0 0; font-size:13px; line-height:1.65; color:#31578d; overflow-wrap:anywhere; }
+.desk-app .desk-account-message:empty { display:none; }
+.desk-app .desk-account-message[data-error="true"] { color:#a62828; }
+.desk-app #accountCheckStatus { margin-top:12px; }
+.desk-app .desk-export-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:32px; row-gap:24px; margin:22px 0; }
+.desk-app .desk-export-grid>div { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+.desk-app .desk-export-grid h4 { font-size:14px; margin:0 0 6px; }
+.desk-app .desk-export-grid p { font-size:12px; line-height:1.6; margin:0 0 12px; flex:1; }
+.desk-app #p-account .btn-pill { min-height:44px; white-space:normal; text-align:center; }
+.desk-app .desk-account-privacy { display:flex; align-items:baseline; flex-wrap:wrap; column-gap:14px; row-gap:6px; border-top:1px solid var(--ui-line); padding-top:16px; font-size:12px; }
+.desk-app .desk-account-privacy p { margin:0; font-size:12px; }
+.desk-app #p-account .desk-maintenance>summary { padding:0; }
+.desk-app #p-account .desk-maintenance>summary small { display:block; margin-top:5px; font-size:12px; line-height:1.6; font-weight:400; color:var(--ui-muted); }
+.desk-app #p-account .desk-maintenance[open]>summary { margin-bottom:22px; }
+.desk-app .desk-account-danger { border-color:#ead8d8; }
+.desk-app .desk-account-danger>h3 { color:#8f3434; }
+.desk-app dialog.desk-account-confirm { border-color:#ead8d8; }
+.desk-app .desk-account-confirm h4 { margin:0 0 10px; font-size:15px; }
+.desk-app .desk-account-actions { margin-top:16px; display:flex; flex-wrap:wrap; gap:10px; }
+@media(max-width:600px) { .desk-app .desk-export-grid { grid-template-columns:1fr; row-gap:22px; }.desk-app .desk-account-connections>div { gap:10px; }.desk-app .desk-account-status { max-width:100%; }.desk-app #p-account .workspace-guide-head { flex-wrap:wrap; } }
