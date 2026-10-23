@@ -4,6 +4,14 @@
 
 The [current launch control](LAUNCH-CONTROL.json) remains authoritative. This review is under the replacement `product_owner_v2` mandate: one saved business profile must support website chat, phone answering, dedicated two-way texting and Google visit synchronization. There is no accepted launch date and no website-only product pivot.
 
+## Controlled external-site proof prepared
+
+Steve selected `https://zaricoach.com/`. The isolated route, exact tenant binding, protected CI build, bounded AI/owner-email delivery and current-source guard are accepted locally. M&C runtime candidate is `e27354f2d9b33b80209f6fc69e9fd25b7ee67362`; Zari candidate is `626d8a61ddfd512d223502e5601614512c31e8a7`. Nothing has been installed or published by this preparation.
+
+The final required build passes **44/44**. Independent AI10, scoped-worker5, full guarded journey27 and final protocol27 cover different, overlapping local scopes. The Zari production webpack build passes before a reviewed static-CSS-only bridge, with final13 unit cases and four browser groups. See the [independent acceptance](../scratchpad/zaricoach-independent-acceptance.json), [PO preparation review](ZARICOACH-PREPARATION-PO-ACCEPTANCE-2026-10-23.json) and [exact proposed live scope](ZARICOACH-CONTROLLED-INSTALLATION-PLAN-2026-10-23.json).
+
+The proposal reserves up to three production builds (45 credits): M&C proof and cleanup, plus Zari installation. Cleanup restores the exact prior Zari deploy only if no intervening legitimate deployment exists. Netlify Function settings are frozen per deployment, so configuration deletion alone cannot establish runtime cleanup. The actual signup, installed real-model request, owner inbox receipt and cleanup remain unaccepted; the full launch decision stays **NO-GO**.
+
 ## Exact product reviewed
 
 - Published runtime: `47e3c64163d20166970b6d309fbf6045a9de33b2`; deploy `6adbc34931bb7268db6db4f7`, published October 23 at 20:28:55 UTC. The original accepted `fd50d2d` application is identical; only provider identifiers in a private receipt were redacted from the release history.

@@ -1,0 +1,65 @@
+{
+  "at": "2026-10-23T22:35:21.692Z",
+  "mode": "independent actual local handlers/SDK with explicit synthetic transport",
+  "sourceBefore": {
+    "netlify/functions/lib/self-service-ai.mjs": "b1c7f19511948362c55aa2358e1ab1d34481189781e0a5ce11c18b5271b1e222",
+    "netlify/functions/lib/agent.mjs": "29c581802af1a850d674f4657964f868ef07bcd0e04cc559861babd1576b3afc",
+    "netlify/functions/chat.mjs": "57e6e4d8fc1d3a66349709f165a88f185c8b43836aec004b6950c46c8fd68c53",
+    "netlify/functions/lib/owner-test.mjs": "17936d018c6c4e1126f52eaf7dc971bb2350785845bc1f869d04a46ceaec3c44"
+  },
+  "checks": [
+    {
+      "name": "Two racing logical modes share exactly ten sticky reservations and policy version cannot replenish",
+      "pass": true
+    },
+    {
+      "name": "Thirty concurrent actual transport attempts debit before fetch and unknown responses do not refund",
+      "pass": true
+    },
+    {
+      "name": "Cached wrapper rejects changed owner, withdrawn selector/policy and corrupt ledger without normal fallback",
+      "pass": true
+    },
+    {
+      "name": "Official endpoint, exact model, token/byte ceiling and provider fallback fields rejected before debit",
+      "pass": true
+    },
+    {
+      "name": "Installed SDK counts a retry in every tool round and emits no fallback extension",
+      "pass": true
+    },
+    {
+      "name": "Cap exhausted between SDK retry and dispatch blocks that retry; original unknown debit retained",
+      "pass": true
+    },
+    {
+      "name": "Actual ordinary chat repeated identical tools retain exactly one real request with final NDJSON and no setup label",
+      "pass": true
+    },
+    {
+      "name": "Actual chat multiple different tool payloads preserves first record and does not falsely complete second",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(!lines.some(x=>x.t==='done'))\n\n    at file:///private/tmp/mc-zaricoach-ai-independent.mjs:19:710\n    at async check (file:///private/tmp/mc-zaricoach-ai-independent.mjs:9:57)\n    at async file:///private/tmp/mc-zaricoach-ai-independent.mjs:19:1"
+    }
+  ],
+  "physical": 0,
+  "actualRetained": {
+    "oneRequest": true,
+    "setupLabel": false,
+    "modelAttempts": 2,
+    "finalCompletion": true
+  },
+  "fatal": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(!lines.some(x=>x.t==='done'))\n\n    at file:///private/tmp/mc-zaricoach-ai-independent.mjs:19:710\n    at async check (file:///private/tmp/mc-zaricoach-ai-independent.mjs:9:57)\n    at async file:///private/tmp/mc-zaricoach-ai-independent.mjs:19:1",
+  "sourceAfter": {
+    "netlify/functions/lib/self-service-ai.mjs": "b1c7f19511948362c55aa2358e1ab1d34481189781e0a5ce11c18b5271b1e222",
+    "netlify/functions/lib/agent.mjs": "29c581802af1a850d674f4657964f868ef07bcd0e04cc559861babd1576b3afc",
+    "netlify/functions/chat.mjs": "57e6e4d8fc1d3a66349709f165a88f185c8b43836aec004b6950c46c8fd68c53",
+    "netlify/functions/lib/owner-test.mjs": "17936d018c6c4e1126f52eaf7dc971bb2350785845bc1f869d04a46ceaec3c44"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 7,
+    "failed": 1
+  },
+  "ok": false
+}

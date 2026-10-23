@@ -1,0 +1,74 @@
+{
+  "scope": "Independent local cloned-repo shell boundary; npm stubbed, zero package/build/provider/database execution",
+  "commit": "dc940b306b810a3f88c9dcb1449ad802718834c6",
+  "cases": [
+    {
+      "case": "normal_unset",
+      "exit": 0,
+      "npmCalls": [
+        "run prisma:generate",
+        "run prisma:migrate",
+        "run prisma:seed",
+        "run typecheck",
+        "test",
+        "run build"
+      ],
+      "message": ""
+    },
+    {
+      "case": "exact_approved",
+      "exit": 0,
+      "npmCalls": [
+        "run prisma:generate",
+        "run typecheck",
+        "test",
+        "run build"
+      ],
+      "message": ""
+    },
+    {
+      "case": "mismatched_exact_value",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build commit does not match the reviewed source."
+    },
+    {
+      "case": "malformed_boolean",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build commit does not match the reviewed source."
+    },
+    {
+      "case": "uncommitted_schema_drift",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build working source differs from the reviewed commit."
+    },
+    {
+      "case": "untracked_migration",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build working source differs from the reviewed commit."
+    },
+    {
+      "case": "committed_schema_drift",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build changed a protected database input."
+    },
+    {
+      "case": "committed_seed_input_drift",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build changed a protected database input."
+    },
+    {
+      "case": "ignored_untracked_prisma_file",
+      "exit": 1,
+      "npmCalls": [],
+      "message": "Acceptance build working source differs from the reviewed commit."
+    }
+  ],
+  "temporaryClone": "/var/folders/36/58l91vkx4b10c_vqtnbdr_tr0000gn/T/zari-po-build-r7njvgzn/repo",
+  "acceptance": "Accept exact-commit skip-bootstrap guard at dc940b3 for its local shell boundary only; liveenv readback/CI/deploy/normal-site/rollback/provider proof remain separate."
+}

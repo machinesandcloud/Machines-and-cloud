@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-23T22:50:47.021Z",
+  "mode": "independent actual worker and default adapter with intercepted transport only",
+  "checks": [
+    {
+      "name": "Real worker skips foreign source, existing receipt and orphan snapshot without mutating global cursor",
+      "pass": true
+    },
+    {
+      "name": "Foreign snapshot disguised with selected prefix and SMS work remain untouched",
+      "pass": true
+    },
+    {
+      "name": "Unknown receipt debits survive indexed projection recovery, races, spacing and policy renewal",
+      "pass": false,
+      "error": "Error: Fixture only\n    at Module.createManagedDeliveryEngine (file:///private/tmp/mc-production-readiness-47e/netlify/functions/lib/managed-delivery.mjs:293:122)\n    at engine (file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:7:160)\n    at file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:13:225\n    at async check (file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:8:49)\n    at async file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:13:1"
+    }
+  ],
+  "physical": 0,
+  "sourceBefore": {
+    "netlify/functions/lib/managed-delivery.mjs": "b557bf0bd24107f01f9f5e87d2b98531bcf4afea2772b844a5f19e270804f60c",
+    "netlify/functions/lib/managed-sms.mjs": "bca4801bb3c9116d01547f8159b52e82b0b3e222f82472d422cf0ba0e4e8d00f"
+  },
+  "fatal": "Error: Fixture only\n    at Module.createManagedDeliveryEngine (file:///private/tmp/mc-production-readiness-47e/netlify/functions/lib/managed-delivery.mjs:293:122)\n    at engine (file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:7:160)\n    at file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:13:225\n    at async check (file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:8:49)\n    at async file:///private/tmp/mc-production-readiness-47e/scratchpad/zaricoach-worker-independent-check.mjs:13:1",
+  "sourceAfter": {
+    "netlify/functions/lib/managed-delivery.mjs": "b557bf0bd24107f01f9f5e87d2b98531bcf4afea2772b844a5f19e270804f60c",
+    "netlify/functions/lib/managed-sms.mjs": "bca4801bb3c9116d01547f8159b52e82b0b3e222f82472d422cf0ba0e4e8d00f"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 2,
+    "failed": 1
+  },
+  "ok": false
+}

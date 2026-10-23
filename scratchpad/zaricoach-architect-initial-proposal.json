@@ -1,0 +1,105 @@
+{
+  "at": "2026-10-23",
+  "role": "readiness_architect",
+  "mode": "Local source feasibility and proposed controlled effect scope only. No external request, deployment, provider or website change.",
+  "source": "f23415b535b10a437454550194d76a89ec0d1080",
+  "hostBindingFromRoot": {
+    "origin": "https://zaricoach.com",
+    "siteId": "ba5cca8f-26c7-43a6-81fc-689272664716",
+    "publishedSource": "421f1c28f239ce24f22dcee5b8953cee04ecf66a",
+    "publishedDeploy": "6a71d1070df5fa00089f99f8",
+    "qualification": "Root supplied these observed hosting bindings; Architect made no external verification request."
+  },
+  "feasibility": {
+    "decision": "Compatible with current installation checker when a dedicated served HTTPS route returns the real embed and an effective page-specific CSP allows it.",
+    "pathProposal": "/mc-front-desk-acceptance-20261023/",
+    "urlTemplate": "https://zaricoach.com/mc-front-desk-acceptance-20261023/?client=<new-public-slug>&phase=mc-install-20261023",
+    "canonicalOrigin": "Root must retain the actual canonical served HTTPS origin; if redirect changes it, bind exact canonical business.website and widget.allowedOrigins rather than assuming www equivalence.",
+    "queryCompatibility": "business.website accepts a complete HTTPS URL including query. startWebsiteCheck retains it when origins match, rejects preexisting fragment routers and adds only #mc-website-check=<id>.<challenge>. embed removes that fragment while preserving pathname+query.",
+    "publicSlug": "The generated client slug is public embed configuration, not an owner credential. Strict server validation and escaped attribute serialization are required; query may contain only one exact client and fixed phase. No owner/session/check challenge or mailbox goes in query.",
+    "script": "<script src=\"https://machinesandcloud.com/embed.js\" data-client=\"<strictly-validated-new-public-slug>\" async></script>",
+    "pageRequirements": [
+      "Raw standalone HTML Route Handler bypassing root layout/VisitorTracker/referral capture; no coaching application JS, forms, analytics, cookies or scheduling.",
+      "Explicit visible heading: Machines & Cloud internal front desk test. Explain this is a synthetic home-service exercise, not a Zari coaching service, sale or support channel.",
+      "No navigation/footer/global widget changes; route has no discoverable internal links and has robots noindex,nofollow,nosnippet. Hidden/noindex is not authentication or a send/cost control.",
+      "Single effective page CSP permits exact platform script and connect origin; embed injects inline CSS so its style policy must permit that CSS. No iframe is used. Preserve global CSP and tracking on normal coaching routes.",
+      "Invalid slug/duplicate query/foreign phase renders a plain404 with no embed. Return private/no-store cache controls to avoid another slug receiving cached HTML. No shared tenant-specific cached response."
+    ],
+    "cspCaution": "A permissive second CSP cannot weaken a restrictive first one: actual response must have the intended single effective policy. Inspect wire headers and real browser errors, not only next.config or rendered HTML.",
+    "sourceReferences": [
+      "netlify/functions/lib/website-installation.mjs:24",
+      "netlify/functions/lib/website-installation.mjs:118",
+      "embed.js:17",
+      "embed.js:101",
+      "embed.js:141"
+    ]
+  },
+  "authenticityAndIsolation": [
+    "Use actual served route bytes and published external embed, not Playwright content injection, route.fulfill with modified HTML or a loopback alias as installation proof. Guarded raw fetched bytes may be relayed unchanged; any URL/redirect fidelity limitation must remain explicit.",
+    "The installation challenge authenticates a deliberate setup check only. It does not verify domain ownership, the complete website installation surface or all visit delivery.",
+    "Installation/setup sample writes websiteSetupCheck-marked records and deliberately produces no owner email, SMS or Calendar work. It cannot prove the first ordinary customer request.",
+    "After the completed sample, open a fresh ordinary visitor browser context without mc_website_setup state or a setup fragment. Otherwise even a clean path can silently reuse setup mode from sessionStorage.",
+    "Ordinary visitor page reports page:location.pathname; query is not sent in the chat payload. Installer requires exact allowed origin; current ordinary chat authorization compares hostnames and accepts platform/no-Origin calls. This is not path-based server authorization. The proof guard must restrict exact origin/path and must not claim the domain origin restricts the widget to this one page.",
+    "Cumulative exact-tenant/mailbox managed-email policy contains sends, not public page reachability or all Resend status reads. Backend AI admission must contain the selected tenant even if the unlisted route is discovered."
+  ],
+  "rollback": {
+    "before": "Root records clean isolated external checkout, exact published commit, baseline missing route/expected404, root CSP/layout/tracker hashes and published file manifest. Do not edit its unrelated dirty tree.",
+    "install": "Add only dedicated raw route and exact path CSP configuration. Review source diff; test valid/invalid/duplicate query, HTML escaping, no tracker and mobile/embed errors locally before one authorized external publication.",
+    "during": "Record external exact deployed source/page response, generated slug and requested/retained record IDs without copying bearer/fragment secrets into evidence.",
+    "after": "Pause the internal M&C workspace first to stop new customer chat; reconcile retained outcomes and only then cancel/revoke test sessions. Remove only test route/path CSP additions and publish the exact reviewed rollback in the external site. Verify intended404 and unchanged ordinary coaching pages/CSP/tracker. Retain all platform test records and uncertain provider IDs for audit.",
+    "deploymentBudget": "External installation and removal generally need two external publishes; platform admission/repair needs its own one grouped release. Do not promise one total build or silently restore an old entire coaching deploy, which could overwrite intervening legitimate work."
+  },
+  "existingGuardAdaptation": {
+    "reuse": "Selectively copy/review existing tracked main scripts/hosted-onboarding-guard.mjs plus its tests. Do not import main runtime or reopen the old phase/checkpoint. Current Calendar controller remains separate.",
+    "requiredChanges": [
+      "Replace frozen old release/phase/alias with exact current baseline, final candidate, fresh phase, new verified alias, internal fixture and 0600 exclusive ledger. Disable old zero-session recovery exception for this new phase.",
+      "Extend existing allowlist to current onboarding/workspace modules/CSS/branding/hero assets and exact valid API actions. Register website installation observe/status/acknowledge, review/test/go_live and same-tenant owner follow-through. Every redirect/preflight/asset/mutation shares explicit limits.",
+      "Add one external visitor role restricted to the exact zaricoach route and unique client/phase query, public platform embed/client GET, OPTIONS and POST /api/website-installation or /api/chat with exact Origin zaricoach.com and generated slug. No authorization/cookies/admin keys on external or public routes.",
+      "Treat final-only NDJSON completion and stored record receipt independently. An aborted stream can have committed a record; do not resend before reading retained state. Preserve 401/403/429/503 and lost-response traces.",
+      "Separate setup-check visitor context from ordinary visitor context; ban imported storage/service workers and unexpected coaching tracking/API calls.",
+      "Rehearse the current byte-served route against actual local handlers with scripted model/provider transport and real Chromium before executing. No local fake runner pointed directly at production."
+    ],
+    "backendAIPrerequisite": {
+      "current": "self-service-ai.mjs reserves accepted logical turns (default shared50/day;private20 andweb50/tenant). It does not count physical Anthropic attempts or freeze a proof phase.",
+      "actualCodeBound": "Both private runOwnerTest and ordinary tenant chat pass maxTokens1500. Shared runAgent defaults3 iterations with SDKmaxRetries1, so a logical turn can make up to6 direct SDK attempts. Retry/failure attempts are not exposed by usage.requests, which increments only completed finalMessage results.",
+      "smallestExtension": "Reuse existing self-service AI CAS admission with optional exact-tenant expiring proof policy and cumulative logical/physical counters, retaining existing normal tenant budgets. Thread a trusted context-bound fetch reservation hook through existing runAgent/makeClient into Anthropic SDK custom fetch. Count every physical attempt immediately before transport, including retry and timeout; exact POST api.anthropic.com/v1/messages only, redirect:error, model/max_tokens validation. No callback from a browser or arbitrary proxy URL. Installed SDK supports custom fetch and invokes it on retry (client.d.ts110,client.mjs593/797).",
+      "isolation": "Only the named test tenant enters the proof policy; other tenants/sales/legacy behavior remains unchanged. Expiry, pause/identity change or exhausted proof ledger prevents new attempts; counts never reset via policy version or a browser restart. New global daily-cap lowering is not a substitute for exact-tenant proof containment.",
+      "mutationPrerequisite": "Ordinary AI can request multiple tools per response. For an exact-one-ordinary-record scope, fence book_visit/notify_owner through existing durable managed-actions identity/reservation before mutation, or explicitly authorize a measured larger retained-record allowance. Do not mark the ordinary record websiteSetupCheck to gain idempotency; that would suppress owner delivery and invalidate acceptance.",
+      "status": "Design only; no runtime AI/proof-policy implementation or actual inference performed by this task."
+    }
+  },
+  "proposedScopeAfterPrerequisites": {
+    "ownerEmail": "ngoumnaisteve+mc-launch-zari-20261023@gmail.com",
+    "operatorEmail": "ngoumnaisteve@gmail.com",
+    "syntheticCallbackDataOnly": "+17135550142",
+    "syntheticBusiness": "M&C Internal Home-Service Acceptance 2026-10-23",
+    "firstPartyPhysicalHTTPRequests": 200,
+    "firstPartyMutationsIncluded": 45,
+    "netlifyMetadataReads": 6,
+    "externalPageGETRequests": 12,
+    "verificationEmailAttempts": 4,
+    "ordinaryWorkspaces": 1,
+    "earlyInquiries": 1,
+    "privateAITurns": 2,
+    "setupSampleAITurns": 4,
+    "ordinaryVisitorAITurns": 4,
+    "allAITurns": 10,
+    "allDirectAnthropicHTTPAttempts": 30,
+    "outputTokensPerAttempt": 1500,
+    "ordinaryRetainedRequests": "1 only after server mutation fence; separately1 labeled setup sample may remain.",
+    "managedOwnerEmailSendAttempts": 2,
+    "externalSiteChanges": "One reviewed exact-route installation and one exact rollback; no global widget/tracker/layout/CSP changes.",
+    "platformSettings": "No implied activation: separately reviewed grouped source plus exact tenant/email/AI policy Functions settings after new slug is observed. Exact final count depends approved implementation.",
+    "otherProviderEffects": "0 phone/SMS/Calendar/payment/carrier/purchases. No Vapi, Stripe, Twilio or marketing API use.",
+    "requestAccounting": "Backend physical AI/send reservations and browser/site guard are distinct. Include automatic internal workers and permitted status/readback counts in final packet; send cap is not a status-read or spend cap.",
+    "approval": "Proposal only. Site URL supplied by user enables preparation, not unbounded site mutation, deployment, inference or email. Root resolves existing standing authority and presents concrete final effects for any required approval."
+  },
+  "practicalSequence": [
+    "Before new inference or page publication, complete source/admission/guard prerequisites and offline acceptance.",
+    "Use existing published platform for identity/signup-only stage to observe one real generated slug; no AI/provider activation.",
+    "Bind exact tenant/email/AI policy privately from retained server evidence, compile one platform release and exact standalone page target with public slug, then execute only approved grouped deployment scope.",
+    "Complete owner review/private test; serve the authentic installed setup sample and observe its explicit receipt.",
+    "Use fresh ordinary visitor; retain one genuine request and observe exact scheduled owner email/provider receipt and owner follow-through.",
+    "Stop and cleanup in the reviewed order; remove external route without overwriting unrelated site changes. Full phone/text/Calendar/paid launch remains separate."
+  ]
+}

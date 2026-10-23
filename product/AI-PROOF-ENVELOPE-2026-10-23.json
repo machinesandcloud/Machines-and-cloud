@@ -1,0 +1,81 @@
+{
+  "at": "2026-10-23",
+  "scope": "Internal exact-tenant AI proof envelope inside existing admission/agent/record paths; local implementation and protocol acceptance only.",
+  "stage": "Author14 and independent10 groups accepted on frozen runtime. No actual inference, provider effect, policy configuration, release or website mutation.",
+  "files": [
+    "netlify/functions/lib/self-service-ai.mjs",
+    "netlify/functions/lib/agent.mjs",
+    "netlify/functions/lib/owner-test.mjs",
+    "netlify/functions/chat.mjs",
+    "scripts/self-service-ai-proof-check.mjs",
+    ".env.example",
+    "OPERATIONS.md",
+    "netlify.toml"
+  ],
+  "policy": {
+    "selector": "MC_SELF_SERVICE_AI_PROOF_SLUG",
+    "approvedVersion": "MC_SELF_SERVICE_AI_PROOF_APPROVED_VERSION",
+    "json": "MC_SELF_SERVICE_AI_PROOF_POLICY_JSON",
+    "shape": {
+      "version": "reviewed-version",
+      "phaseId": "hosted-onboarding-zaricoach-20261023-v1",
+      "expiresAt": "fresh exact future timestamp from approved phase",
+      "tenant": {
+        "slug": "generated after ordinary verified signup",
+        "identity": "workspaceTenant(current client)",
+        "emailHash": "sha256(normalized verified alias)"
+      },
+      "model": "claude-opus-5-5",
+      "maxOutputTokens": 1500,
+      "maxRequestBytes": 120000,
+      "limits": {
+        "logical": 10,
+        "physical": 30,
+        "ordinaryMutations": 1,
+        "setupMutations": 1
+      }
+    },
+    "state": "No production value created or changed. Blank example keys only."
+  },
+  "invariants": [
+    "One per-slug self_service_ai_proofs document permanently binds phase, original workspace incarnation and verified owner. It is not a day/month budget; midnight or policy version/expiry edits do not replenish it.",
+    "After binding, absent selector/policy, malformed config, expired policy, changed owner/incarnation, unsupported marker or different phase cannot silently fall back to normal transport. New starts fail and allowance projects unavailable. A bound ledger is retained through cleanup.",
+    "Normal unselected tenant quotas and existing sales/practice/legacy model behavior are preserved. A strict proof-state read is required to distinguish an unbound workspace from uncertain/missing authority; storage failure is not treated as an empty binding.",
+    "Trusted logical receipt comes only from server admission. Browser-provided proof fields are not used. Existing daily tenant/shared logical limits also remain in force; failed proof admission may conservatively consume daily allowance without inference.",
+    "The installed SDK receives a context-bound custom fetch through existing makeClient/runAgent. Every direct SDK attempt, including retry, reserves immediately before transport. Lost/timeout responses retain debit; no completed-message usage total substitutes for physical reservations.",
+    "Only HTTPS POST api.anthropic.com/v1/messages (optional unique beta=true query), approved model, stream and bounded tokens/body are allowed. Redirects are forbidden. Proof mode omits/rejects server-side fallback options/beta; provider-internal processing cannot be counted or assigned another effective model by this proof.",
+    "Ordinary record tool calls reserve one name/input/contact-bound stable operation before actual bookVisit/flagLead. Same operation returns one record; changed kind/payload/contact cannot create a second record. Ordinary request remains unmarked so real owner delivery can be proved.",
+    "A validated website setup sample has its own finite persistent slot and uses its existing websiteActionId/websiteSetupCheck marker. It neither consumes ordinary slot nor becomes owner-delivery evidence. Private rehearsal remains simulated while every real model transport is counted.",
+    "Proof tool rejection is supplied back to the model. It can still produce a completed final answer; acceptance therefore checks retained record and tool error, not a false assumption that every rejected tool forces an HTTP failure.",
+    "No model requests, emails or service activation are authorized by this implementation. Separate managed-owner-email policy still bounds sends; no implicit phone, text, Calendar, Stripe, purchase, publication or external-site authority."
+  ],
+  "authorEvidence": {
+    "final": "scratchpad/ai-proof-author-final.json",
+    "passed": 14,
+    "physicalExternalRequests": 0,
+    "preserved": "scratchpad/ai-proof-author-first.log retains a syntax mistake in the initial author test lambda. It performed no runtime probe. Subsequent second/fallback-final/final receipts retained without rewriting."
+  },
+  "independentEvidence": {
+    "final": "scratchpad/zaricoach-ai-independent-final.json",
+    "passed": 10,
+    "physicalExternalRequests": 0,
+    "source": "Exact final runtime hashes in author receipt; QA retains their receipt/runner under project artifacts separately.",
+    "covers": "Racing logical10, physical30 including unknowns, cached authority/policy/ledger changes, endpoint/body/model/token/fallback negatives, real SDK6attempts, exhausted retry, actual handler duplicate/changed-tool one-record behavior, separate setup slot and unchanged normal fallback/default-token control."
+  },
+  "sourceHashes": {
+    "netlify/functions/lib/self-service-ai.mjs": "b1c7f19511948362c55aa2358e1ab1d34481189781e0a5ce11c18b5271b1e222",
+    "netlify/functions/lib/agent.mjs": "29c581802af1a850d674f4657964f868ef07bcd0e04cc559861babd1576b3afc",
+    "netlify/functions/chat.mjs": "57e6e4d8fc1d3a66349709f165a88f185c8b43836aec004b6950c46c8fd68c53",
+    "netlify/functions/lib/owner-test.mjs": "17936d018c6c4e1126f52eaf7dc971bb2350785845bc1f869d04a46ceaec3c44",
+    "scripts/self-service-ai-proof-check.mjs": "0773c02b0609c621cc6b3ab7b9bf5215a940982d7cecd11ad2956678cd2839e0"
+  },
+  "affectedRegression": {
+    "selfServiceAI": "scratchpad/ai-proof-regression-self-service-ai-check-first.log;43checks, actualExternal0",
+    "ownerTest": "scratchpad/ai-proof-regression-owner-test-check-first.log;44checks,outbound0,actualcustomerstoresunchanged",
+    "tenantIsolation": "scratchpad/ai-proof-regression-tenant-isolation-check-first.log;19checks,external0",
+    "agentDelivery": "scratchpad/ai-proof-regression-agent-delivery-check-first.log;offline actualSDK fixture contracts pass",
+    "smoke": "scratchpad/ai-proof-regression-smoke-first.log;passes in-memory gate checks; no service acceptance",
+    "qualification": "These existing passes preceded the narrow proof-only fallback omission; normal no-hook request options are unchanged by that omission. Final author/independent evidence exercises it directly. Root runs final exact required gate after all source/config/QA changes are frozen."
+  },
+  "next": "Bind only the fresh observed MC Acceptance Zari identity/verified alias and approved phase, after the current guard/real-route rehearsal and concrete effect authorization. Keep ordinary installed visitor separate from setup context; preserve exact request/provider IDs and use reviewed cleanup."
+}

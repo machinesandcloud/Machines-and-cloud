@@ -1,0 +1,94 @@
+{
+  "at": "2026-10-23T22:37:26.794729+00:00",
+  "sourceCommit": "dc940b306b810a3f88c9dcb1449ad802718834c6",
+  "localOnly": true,
+  "realNpmCommands": 0,
+  "databaseOperations": 0,
+  "cases": [
+    {
+      "name": "no flag preserves ordinary maintenance path",
+      "exitCode": 0,
+      "mockNpmCommands": [
+        "run prisma:generate",
+        "run prisma:migrate",
+        "run prisma:seed",
+        "run typecheck",
+        "test",
+        "run build"
+      ]
+    },
+    {
+      "name": "exact reviewed source skips all DB maintenance",
+      "exitCode": 0,
+      "mockNpmCommands": [
+        "run prisma:generate",
+        "run typecheck",
+        "test",
+        "run build"
+      ]
+    },
+    {
+      "name": "malformed flag fails before npm",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "missing build commit fails before npm",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "stale build commit fails before npm",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "working source drift: prisma/schema.prisma",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "working source drift: prisma/migrations/20990101000000_uncommitted/migration.sql",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "schema drift rejects even matching selected commit",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "seed drift rejects even matching selected commit",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "new migration rejects even matching selected commit",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "role seed input drift rejects even matching selected commit",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "company seed input drift rejects even matching selected commit",
+      "exitCode": 1,
+      "mockNpmCommands": []
+    },
+    {
+      "name": "unchanged CI gate: production/",
+      "exitCode": 0
+    },
+    {
+      "name": "unchanged CI gate: production/GitHub CI",
+      "exitCode": 1
+    },
+    {
+      "name": "unchanged CI gate: deploy-preview/",
+      "exitCode": 1
+    }
+  ],
+  "pass": true
+}
