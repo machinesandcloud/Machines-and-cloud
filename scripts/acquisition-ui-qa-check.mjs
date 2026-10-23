@@ -93,9 +93,9 @@ async function contextFor(options = {}) {
 async function verify(page, email) {
   await page.locator('#access-send').click(); await page.locator('#access-status').filter({ hasText: 'No email was sent' }).waitFor();
   const delivery = await store.get('access_outbox', accessHash(email)); if (!delivery) throw new Error('No synthetic mailbox link');
-  await page.goto(delivery.link); await page.locator('#access-verify').waitFor({ state: 'visible' });
-  check('Mailbox link is scrubbed and remains pending until explicit Continue', !new URL(page.url()).hash && (await store.get('access_tokens', accessHash(delivery.token))).status === 'pending');
-  await page.locator('#access-verify').click(); await page.locator('#ob').waitFor({ state: 'visible' });
+  const before = result.requests.filter(row => row.path === '/api/access' && row.action === 'exchange').length;
+  await page.goto(delivery.link); await page.locator('#ob').waitFor({ state: 'visible' });
+  check('Mailbox proof automatically exchanges once and resumes setup without a confirmation click', !new URL(page.url()).hash && !await page.locator('#access-verify').isVisible() && (await store.get('access_tokens', accessHash(delivery.token))).status === 'consumed' && result.requests.filter(row => row.path === '/api/access' && row.action === 'exchange').length === before + 1);
 }
 try {
  if (guidedOnly) {
@@ -104,7 +104,7 @@ try {
   await store.put('access_sessions', accessHash(bearer), { email, scope: 'onboarding', status: 'active', createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 3600000).toISOString() });
   const created = await handlers['/api/onboard'](new Request(base + '/api/onboard', { method: 'POST', headers: { origin: base, authorization: 'Bearer ' + bearer, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'QA Guided Owner', business: 'QA Guided Air', phone: '7135550142', trade: 'HVAC', services: 'AC repair', hours: 'Mon-Fri 8am-5pm', serviceArea: 'Katy', desiredChannels: ['web', 'voice', 'sms', 'calendar'] }) }));
   if (!created.ok) throw new Error('Could not prepare actual-handler stored fixture'); const workspace = await created.json();
-  await context.addInitScript(value => { sessionStorage.setItem('mc-onboarding-session-v1', value); }, bearer); await page.goto(workspace.portal); await page.locator('#title').waitFor(); await page.locator('#guideDialog').waitFor({ state: 'visible' }); await page.locator('#skipGuide').click();
+  await context.addInitScript(value => { sessionStorage.setItem('mc-onboarding-session-v1', value); }, bearer); await page.goto(workspace.portal); await page.locator('#title').waitFor(); await page.locator('#openGuide').click(); await page.locator('#guideDialog[data-tour-ready="true"]').waitFor({ state: 'visible' }); await page.locator('#skipGuide').click();
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
     await page.locator('#setupSteps .setup-step').filter({ hasText: 'Choose your customer connections' }).locator('[data-route=setup]').click();
@@ -184,20 +184,22 @@ try {
   await shotElement(page, '#ob', 'verified-first-step-390');
   check('Verification does not enroll the captured contact', !(await store.get('prospects', accountKey(email))).marketing.preference && (await store.list('clients')).length === 0);
   let prefResponse = page.waitForResponse(response => response.url().includes('/api/access') && response.request().method() === 'PUT' && response.request().postDataJSON().marketingConsent === true);
+  await page.locator('#plan-email-preferences > summary').click();
   pendingProjection = true; await page.locator('#setup-marketing').check(); const pendingResponse = await prefResponse, pendingBody = await pendingResponse.json();
   await page.locator('#draft-status').filter({ hasText: 'email preference could not be confirmed' }).waitFor();
   check('Optional consent projection failure keeps known saved draft and truthful pending preference without enrollment', pendingResponse.status() === 200 && pendingBody.marketingPending === true && pendingBody.draft.revision > 0 && result.projectionFault.rejectedProspectWrites === 1 && !(await store.get('prospects', accountKey(email))).marketing.preference);
   await page.locator('#phone').fill('12'); await page.locator('#next').click();
-  check('Early invalid callback number stays on its field with focused guidance', await page.locator('[data-step="1"]').isVisible() && await page.evaluate(() => document.activeElement.id === 'phone') && /cell|phone|number/i.test(await page.locator('#err').innerText()));
+  check('Early invalid callback number stays on its field with focused guidance', await page.locator('[data-step="1"]').isVisible() && await page.evaluate(() => document.activeElement.id === 'phone') && /highlighted/.test(await page.locator('#err').innerText()) && /cell|phone|number/i.test(await page.locator('#phone-error').innerText()));
   await page.locator('#phone').fill('7135550142'); prefResponse = page.waitForResponse(response => response.url().includes('/api/access') && response.request().method() === 'PUT' && response.request().postDataJSON().marketingConsent === true);
   await page.locator('#next').click(); await prefResponse; await page.locator('[data-step="2"]').waitFor({ state: 'visible' }); await page.locator('#back').click(); await page.locator('[data-step="1"]').waitFor({ state: 'visible' });
   check('Continue retries pending consent with the committed draft revision and keeps one signup journey', !(await page.locator('#draft-status').innerText()).includes('another tab') && (await store.get('prospects', accountKey(email))).marketing.preference === true);
   check('Optional verified browser opt-in is separately persisted without sending mail', (await store.get('prospects', accountKey(email))).marketing.preference === true && (await store.list('access_outbox')).length === 1);
   prefResponse = page.waitForResponse(response => response.url().includes('/api/access') && response.request().method() === 'PUT' && response.request().postDataJSON().marketingConsent === false);
+  if (!await page.locator('#plan-email-preferences').evaluate(node => node.open)) await page.locator('#plan-email-preferences > summary').click();
   await page.locator('#setup-marketing').uncheck(); await prefResponse;
   check('Withdrawing optional email choice persists before continuation', (await store.get('prospects', accountKey(email))).marketing.preference === false && (await store.get('onboarding_drafts', accountKey(email))).emailPreference.preference === false);
   for (const value of ['voice', 'sms', 'calendar']) await page.locator('[name=desiredChannels][value=' + value + ']').check();
-  await page.locator('#phone').fill('7135550142'); await page.locator('#next').click(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
+  await page.locator('#phone').fill('7135550142'); await page.locator('#businessNumber').fill('7135550120'); await page.locator('#next').click(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
   check('Single full setup does not ask to retype captured name or business', await page.locator('#name').inputValue() === 'QA Saved Owner' && await page.locator('#business').inputValue() === 'QA Saved Air');
   await page.locator('#trade').selectOption('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#hours').fill('Mon-Fri 8am-5pm'); await page.locator('#serviceArea').fill('Katy');
   await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor(); await page.reload(); await page.locator('[data-step="2"]').waitFor({ state: 'visible' });
@@ -209,6 +211,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 }); await page.locator('#next').click(); await page.locator('[data-step="3"]').waitFor({ state: 'visible' }); await page.locator('#fees').fill('Diagnostic: $89'); await page.locator('#windows').fill('8 to 12\n12 to 5'); await page.locator('#next').click(); await page.locator('[data-step="4"]').waitFor({ state: 'visible' });
   routeFinalFieldError = true; await page.locator('#next').click(); await page.locator('[data-step="1"]').waitFor({ state: 'visible' });
   check('Final named server-field error returns to original field and preserves setup answers', await page.evaluate(() => document.activeElement.id === 'phone') && await page.locator('#business').inputValue() === 'QA Saved Air' && await page.locator('#services').inputValue() === 'AC repair' && (await store.list('clients')).length === 0);
+  await page.locator('#phone').fill('7135550143');
   for (let n = 2; n <= 4; n++) { await page.locator('#next').click(); await page.locator('[data-step="' + n + '"]').waitFor({ state: 'visible' }); }
   await page.locator('#next').click(); await page.locator('#done.on').waitFor();
   const slug = (await store.list('clients'))[0], client = await store.getClient(slug);
@@ -217,6 +220,7 @@ try {
   await page.locator('[data-t=setup]').click();
   check('Workspace presents requested connections in one place', await page.locator('#connectionJourney').isVisible() && /Phone|Text|Calendar/.test(await page.locator('#connectionJourney').innerText()));
   check('Unified setup hides duplicate legacy provider/purchase and delivery-test controls', !await page.locator('#legacyConnectionDetails').isVisible() && !await page.locator('#legacyDeliveryTests').isVisible() && await page.locator('#connectionPreferences input:checked').count() === 4);
+  await page.locator('#connectionPreferencesDetails > summary').click();
   await page.locator('#connectionPreferences [value=web]').uncheck(); await page.locator('#connectionPreferences [value=sms]').uncheck();
   await page.locator('#saveConnections').click(); await page.locator('#connectionsMessage').filter({ hasText: 'Preferences saved' }).waitFor();
   check('Connection preferences save in the same workspace without activation', JSON.stringify((await store.getClient(slug)).onboarding.desiredChannels) === JSON.stringify(['voice', 'calendar']) && !(await store.getClient(slug)).channels.voice.active && /Not selected/.test(await page.locator('#connectionJourney').innerText()));
@@ -254,7 +258,7 @@ try {
   downloading = page.waitForEvent('download'); await page.locator('#exportProspects').click(); const allDownload = await downloading, allCSV = readFileSync(await allDownload.path(), 'utf8');
   check('Explicit all-inquiries export includes contact with non-eligible status', allDownload.suggestedFilename() === 'all-inquiries.csv' && allCSV.includes(email) && allCSV.includes('"false"') && /not eligible/.test(await page.locator('#prospectsStatus').innerText()));
   const nextEmail = 'qa-acquisition-other-owner@example.test'; await page.goto(base + '/#pilot'); await page.locator('#intake-name').fill('QA Other Owner'); await page.locator('#intake-email').fill(nextEmail); await page.locator('#intake-business').fill('QA Other Business'); await page.locator('#intake-submit').click(); await page.waitForURL('**/onboard.html');
-  await page.locator('#intake-notice').filter({ hasText: 'couldn’t be added' }).waitFor();
+  await page.locator('#intake-notice').filter({ hasText: 'couldn’t add' }).waitFor();
   check('Prior owner session cannot adopt a new email handoff or expose its old workspace', !await page.locator('#ob').isVisible() && !await page.locator('#done.on').isVisible() && (await page.locator('#access-identity').innerText()).includes(email) && !await store.get('onboarding_drafts', accountKey(nextEmail)));
   await page.locator('#access-sign-out').click(); await page.locator('#access-gate').waitFor({ state: 'visible' });
   check('Identity switch revokes old bearer while preserving the intended new email gate', (await store.get('access_sessions', accessHash(ownerBearer))).status === 'revoked' && await page.locator('#access-email').inputValue() === nextEmail && !await store.get('access_outbox', accessHash(nextEmail)));

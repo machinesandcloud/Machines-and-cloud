@@ -17,9 +17,10 @@ const shot = async (page, name) => { const path = imagePrefix + '-' + name + '.p
 globalThis.fetch = async input => { const url = new URL(String(input)); result.blockedServer.push({ origin: url.origin, pathname: url.pathname }); throw new Error('QA server network blocked'); };
 const store = await import('../netlify/functions/lib/store.mjs');
 const { accessHash } = await import('../netlify/functions/lib/access.mjs');
+const { setupReadiness } = await import('../netlify/functions/lib/setup.mjs');
 const handlers = Object.fromEntries(await Promise.all(['access', 'onboard', 'client', 'chat'].map(async name => ['/api/' + name, (await import('../netlify/functions/' + name + '.mjs')).default])));
-const sources = ['onboard.html', 'onboard.js', 'onboard.css', 'product-ui.css', 'netlify/functions/access.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/accounts.mjs', 'netlify/functions/lib/setup.mjs', 'netlify/functions/lib/store.mjs', 'netlify/functions/lib/config.mjs'];
-if (phase === 'full') sources.push('desk.html', 'desk.js', 'desk-connections.js', 'desk-connections.css', 'desk.css', 'netlify/functions/client.mjs', 'netlify/functions/chat.mjs', 'netlify/functions/lib/owner-test.mjs', 'netlify/functions/lib/agent.mjs');
+const sources = ['onboard.html', 'onboard.js', 'onboard.css', 'product-ui.css', 'desk.html', 'desk.js', 'desk-connections.js', 'desk-connections.css', 'desk.css', 'netlify/functions/access.mjs', 'netlify/functions/client.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/accounts.mjs', 'netlify/functions/lib/setup.mjs', 'netlify/functions/lib/store.mjs', 'netlify/functions/lib/config.mjs'];
+if (phase === 'full') sources.push('netlify/functions/chat.mjs', 'netlify/functions/lib/owner-test.mjs', 'netlify/functions/lib/agent.mjs');
 const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 result.sourceBefore = hashes();
 const check = (name, pass, detail) => result.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
@@ -65,14 +66,9 @@ try {
     check('Selected Starter hint survives in the trusted fixed mailbox destination', fixedLink.origin === base && fixedLink.pathname === '/onboard.html' && fixedLink.searchParams.get('plan') === 'starter' && fixedLink.hash.startsWith('#verify='));
   }
   const beforeExchangeCount = result.requests.filter(row => row.path === '/api/access' && row.method === 'POST').length;
-  await page.goto(delivery.link);
-  // Same-document navigation resolves before the browser dispatches hashchange.
-  // Observe the real verification view before checking its URL, before any exchange.
-  await page.locator('#access-verify').waitFor({ state: 'visible' });
-  check('Verification view removes fragment before proof exchange', !new URL(page.url()).hash);
-  check('Opening mailbox link does not consume proof automatically', (await store.get('access_tokens', accessHash(delivery.token))).status === 'pending' && result.requests.filter(row => row.path === '/api/access' && row.method === 'POST').length === beforeExchangeCount);
-  await page.locator('#access-verify').click(); await page.locator('#ob').waitFor({ state: 'visible' });
-  check('Explicit Continue exchanges proof and binds read-only email', await page.locator('#email').inputValue() === email && await page.locator('#email').getAttribute('readonly') !== null && (await store.get('access_tokens', accessHash(delivery.token))).status === 'consumed');
+  await page.goto(delivery.link); await page.locator('#ob').waitFor({ state: 'visible' });
+  check('Opening mailbox link automatically exchanges proof once without a confirmation click', (await store.get('access_tokens', accessHash(delivery.token))).status === 'consumed' && result.requests.filter(row => row.path === '/api/access' && row.method === 'POST').length === beforeExchangeCount + 1 && !await page.locator('#access-verify').isVisible());
+  check('Verified new customer resumes the questionnaire with scrubbed URL and read-only email', !new URL(page.url()).hash && await page.locator('#email').inputValue() === email && await page.locator('#email').getAttribute('readonly') !== null);
   const firstSession = await page.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1'));
   const firstSessionRecord = await store.get('access_sessions', accessHash(firstSession));
   check('Verified browser bearer has a persisted24-hour expiry', firstSessionRecord.status === 'active' && Date.parse(firstSessionRecord.expiresAt) - Date.parse(firstSessionRecord.createdAt) === 24 * 60 * 60 * 1000);
@@ -108,9 +104,9 @@ try {
   await page.locator('#access-sign-out').click(); await page.locator('#access-gate').waitFor({ state: 'visible' });
   check('Sign out revokes onboarding session and returns to email gate', (await store.get('access_sessions', accessHash(sessionBeforeSignout))).status === 'revoked' && !await page.locator('#ob').isVisible());
   await page.locator('#access-email').fill(email); await page.locator('#access-send').click(); await page.locator('#access-status').filter({ hasText: 'No email was sent' }).waitFor();
-  const recover = await store.get('access_outbox', accessHash(email)); await page.goto(recover.link); await page.locator('#access-verify').click(); await page.locator('#done.on').waitFor();
-  const returningPortal = new URL(await page.locator('#goPortal').getAttribute('href')), createdPortal = new URL(portal); createdPortal.hash = '';
-  check('Proven returning customer opens existing workspace without overwrite', returningPortal.href === createdPortal.href && await page.locator('#goPortal').innerText() === 'Open my workspace' && JSON.stringify(created) === JSON.stringify(await store.getClient(created.slug)));
+  const recover = await store.get('access_outbox', accessHash(email)); await page.goto(recover.link); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor();
+  const returningPortal = new URL(page.url()), createdPortal = new URL(portal); returningPortal.hash = ''; createdPortal.hash = '';
+  check('Proven returning customer automatically opens the existing workspace without overwrite or permanent key', returningPortal.href === createdPortal.href && !returningPortal.searchParams.has('k') && (await store.get('access_tokens', accessHash(recover.token))).status === 'consumed' && JSON.stringify(created) === JSON.stringify(await store.getClient(created.slug)));
   check('Onboarding session storage contains no questionnaire/legal draft', await page.evaluate(() => Object.keys(sessionStorage).length === 1 && Object.keys(localStorage).length === 0));
   if (phase === 'plan') {
     result.planMetadata = [];
@@ -126,9 +122,10 @@ try {
     check('Plan metadata cannot mutate an existing tenant', JSON.stringify(created) === JSON.stringify(await store.getClient(created.slug)) && (await store.list('clients', '')).length === 1);
   }
   if (phase === 'full') {
-    await page.locator('#goPortal').click(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor();
-    await page.locator('#guideDialog').waitFor({ state: 'visible' });
-    check('New owner automatically discovers an actual guided workspace', await page.locator('#workspaceGuide').isVisible() && await page.locator('#guideDialog').isVisible());
+    await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor();
+    check('Returning owner reaches actual setup guidance without a blocking tour', await page.locator('#workspaceGuide').isVisible() && !await page.locator('#guideDialog').isVisible());
+    await page.locator('#openGuide').click(); await page.locator('#guideDialog[data-tour-ready="true"]').waitFor({ state: 'visible' });
+    check('Owner can launch the current guided workspace from Quick tour', await page.locator('#guideDialog').isVisible() && await page.locator('#tourSpotlight').isVisible());
     const proofBeforeGuide = (await store.getClient(created.slug)).setupProof;
     result.guide = [];
     for (let n = 0; n < 6; n++) {
@@ -143,25 +140,31 @@ try {
     check('Dismissed tutorial preference survives reload without certifying setup', !await page.locator('#guideDialog').isVisible() && !(await store.getClient(created.slug)).setupProof?.reviewedRevision);
     for (const width of [390, 320, 1440]) {
       await page.setViewportSize({ width, height: 900 }); await page.locator('#openGuide').click();
-      const geometry = await page.locator('#guideDialog').evaluate(node => { const r = node.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, width: innerWidth, height: innerHeight, overflow: document.documentElement.scrollWidth > innerWidth + 1 }; });
-      check(`Guide fits and centers in viewport at ${width}px without horizontal overflow`, geometry.x >= 0 && geometry.y >= 0 && geometry.right <= geometry.width + 1 && geometry.bottom <= geometry.height + 1 && Math.abs(geometry.x - (geometry.width - (geometry.right - geometry.x)) / 2) < 2 && Math.abs(geometry.y - (geometry.height - (geometry.bottom - geometry.y)) / 2) < 2 && !geometry.overflow, geometry);
+      await page.locator('#guideDialog[data-tour-ready="true"]').waitFor();
+      const geometry = await page.locator('#guideDialog').evaluate(node => {
+        const rect = element => { const r = element.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom }; };
+        const target = document.getElementById(node.dataset.tourTarget);
+        return { coach: rect(document.getElementById('tourCoach')), spotlight: rect(document.getElementById('tourSpotlight')), target: target ? rect(target) : null, targetId: target?.id, width: innerWidth, height: innerHeight, overflow: document.documentElement.scrollWidth > innerWidth + 1, fallback: node.dataset.tourFallback };
+      });
+      const contained = r => r && r.x >= 0 && r.y >= 0 && r.right <= geometry.width + 1 && r.bottom <= geometry.height + 1;
+      check(`Guide coach and spotlight fit the viewport and highlight a real target at ${width}px`, contained(geometry.coach) && contained(geometry.spotlight) && geometry.target && geometry.target.right > geometry.spotlight.x && geometry.target.x < geometry.spotlight.right && geometry.target.bottom > geometry.spotlight.y && geometry.target.y < geometry.spotlight.bottom && geometry.fallback === 'false' && !geometry.overflow, geometry);
       await shot(page, `guide-${width}`); await page.keyboard.press('Escape');
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('#openGuide').click(); await page.locator('#tourNext').click(); await page.locator('#tourAction').click();
-    check('Tutorial action opens and focuses real rules editor', await page.locator('#p-know').isVisible() && !await page.locator('#guideDialog').isVisible() && await page.evaluate(() => document.activeElement.id === 'p-know'));
+    check('Tutorial action opens and focuses real rules editor', await page.locator('#p-know').isVisible() && !await page.locator('#guideDialog').isVisible() && await page.evaluate(() => !!document.activeElement.closest('#p-know') && document.activeElement !== document.body));
     const reviewResponse = page.waitForResponse(response => response.url().includes('/api/client?') && response.request().method() === 'POST' && response.request().postDataJSON()?.action === 'review_rules');
     await page.locator('#reviewRules').click(); check('Review is an actual saved API action', (await reviewResponse).status() === 200 && !!(await store.getClient(created.slug)).setupProof?.reviewedRevision);
-    await page.reload(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await page.locator('[data-t="know"]').click();
+    await page.reload(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await page.locator('[data-t="setup"]').click(); await page.locator('[data-workspace-route="know"]').click();
     check('Review proof survives reload and is visible for saved version', /Review saved/.test(await page.locator('#reviewMessage').innerText()));
     const popup = page.waitForEvent('popup'); await page.evaluate(address => { window.open(address, 'qa-stale-tab'); }, portal); const stalePage = await popup;
-    await stalePage.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await stalePage.locator('[data-t="know"]').click();
+    await stalePage.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await stalePage.locator('[data-t="setup"]').click(); await stalePage.locator('[data-workspace-route="know"]').click();
     await stalePage.locator('#cfg [name="business.serviceArea"]').fill('Pearland');
     const beforeConfig = await store.getClient(created.slug); failConfig = true;
     await page.locator('#cfg [name="business.serviceArea"]').fill('Katy\nCypress');
     check('Unsaved rule edits prevent false review completion', await page.locator('#reviewRules').isDisabled());
     await page.locator('#cfg button[type="submit"]').click(); await page.locator('#saveMsg').filter({ hasText: 'could not be saved' }).waitFor();
-    check('Failed rule save retains edits and persisted record', await page.locator('#cfg [name="business.serviceArea"]').inputValue() === 'Katy\nCypress' && JSON.stringify(beforeConfig) === JSON.stringify(await store.getClient(created.slug)) && /still on this page/.test(await page.locator('#saveMsg').innerText()));
+    check('Failed rule save retains edits and persisted record', await page.locator('#cfg [name="business.serviceArea"]').inputValue() === 'Katy\nCypress' && JSON.stringify(beforeConfig) === JSON.stringify(await store.getClient(created.slug)) && /edits are still here/.test(await page.locator('#saveMsg').innerText()));
     const configResponse = page.waitForResponse(response => response.url().includes('/api/client?') && response.request().method() === 'PUT');
     await page.locator('#cfg button[type="submit"]').click(); await configResponse; await page.locator('#saveMsg').filter({ hasText: 'Saved.' }).waitFor();
     check('Retry saves corrected rules and invalidates earlier review', (await store.getClient(created.slug)).business.serviceArea.includes('Cypress') && !/Review saved/.test(await page.locator('#reviewMessage').innerText()));
@@ -172,7 +175,7 @@ try {
     await stalePage.close();
     const reviewAgain = page.waitForResponse(response => response.url().includes('/api/client?') && response.request().method() === 'POST' && response.request().postDataJSON()?.action === 'review_rules');
     await page.locator('#reviewRules').click(); await reviewAgain;
-    await page.locator('[data-t="test"]').click();
+    await page.locator('[data-workspace-route="test"]').click();
     const safeKinds = ['bookings', 'leads', 'tasks', 'alerts', 'conversations', 'customers'];
     const snapshot = async () => Object.fromEntries(await Promise.all(safeKinds.map(async kind => [kind, await Promise.all((await store.list(kind, '')).map(async key => [key, await store.get(kind, key)]))])));
     const beforePrivateTest = await snapshot();
@@ -180,9 +183,15 @@ try {
     await page.locator('#testPreview').filter({ hasText: 'Alex' }).waitFor(); await page.locator('#chatForm button').waitFor({ state: 'visible' });
     check('Private practice shows actual collected contact/address and explicit no-action result', /12 Oak/.test(await page.locator('#testPreview').innerText()) && /No real visit/.test(await page.locator('#testPreview').innerText()));
     check('Browser private test creates no real visits/messages/customer records', JSON.stringify(beforePrivateTest) === JSON.stringify(await snapshot()));
-    check('Successful fake test stays blocked from real customer activation', (await store.getClient(created.slug)).setupProof?.testMode === 'fake' && (await store.getClient(created.slug)).status === 'testing' && await page.locator('#golive').isDisabled());
-    const channelStatus = await page.locator('#channelStates').innerText();
-    check('Phone and SMS copy remains explicitly inactive after test', /Phone: (?:not active|unavailable)/.test(channelStatus) && /(?:Text messages|Texts): (?:not active|unavailable)/.test(channelStatus), channelStatus);
+    const afterFake = await store.getClient(created.slug);
+    const fakeActivation = await page.evaluate(async slug => {
+      const response = await fetch('/api/client?c=' + encodeURIComponent(slug), { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + sessionStorage.getItem('mc-onboarding-session-v1') }, body: JSON.stringify({ action: 'go_live' }) });
+      return { status: response.status, body: await response.json() };
+    }, created.slug);
+    check('Actual activation handler rejects simulated proof without changing the workspace', fakeActivation.status === 409 && fakeActivation.body.error === 'not_ready' && fakeActivation.body.setup.canActivateWeb === false && JSON.stringify(afterFake) === JSON.stringify(await store.getClient(created.slug)));
+    check('Successful fake test stays blocked from real customer activation', afterFake.setupProof?.testMode === 'fake' && afterFake.status === 'testing' && !setupReadiness(afterFake).canActivateWeb && await page.locator('#golive').count() === 0 && !['activate_web','resume_web'].includes(await page.locator('#websiteInstallPrimary').getAttribute('data-action')));
+    await page.locator('[data-t="setup"]').click();
+    check('Web-only practice leaves unselected phone and text services inactive without a connected claim', !afterFake.channels.voice.active && !afterFake.channels.sms.active && await page.locator('#connection-guide-voice, #connection-guide-sms').count() === 0 && !await page.locator('#connectionPreferences [value="voice"]').isChecked() && !await page.locator('#connectionPreferences [value="sms"]').isChecked());
     await shot(page, 'test-390');
     await page.locator('[data-t="availability"]').click(); await page.locator('#availabilityDate').fill('2099-01-07'); await page.locator('#availabilityWindow').selectOption(''); await page.locator('#availabilitySubmit').click();
     await page.locator('#availabilityMessage').filter({ hasText: 'Time blocked.' }).waitFor(); await page.reload(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await page.locator('[data-t="availability"]').click();
@@ -193,7 +202,7 @@ try {
     check('Workspace API failure exposes retry rather than spinner/success', /temporarily unavailable/.test(await page.locator('#recoveryMessage').innerText()) && !await page.locator('#portalContent').isVisible());
     await page.locator('#retryLoad').click(); await page.locator('#portalContent').waitFor({ state: 'visible' });
     check('Retry recovers actual saved owner workspace', await page.locator('#title').innerText() === 'QA Browser Air' && !await page.locator('#portalRecovery').isVisible());
-    await page.locator('[data-t="account"]').click();
+    await page.locator('[data-workspace-route="account"]').click();
     const downloadPromise = page.waitForEvent('download'); await page.locator('#expBookings').click(); const download = await downloadPromise;
     const csv = readFileSync(await download.path(), 'utf8');
     check('Signed-in owner can download CSV without leaking preview as real work', download.suggestedFilename() === created.slug + '-bookings.csv' && csv.includes('customer_name') && csv.includes('issue') && !csv.includes('Alex Demo'));
@@ -221,8 +230,7 @@ try {
     await page.locator('#portalRecovery a').click(); await page.locator('#access-email').fill(email);
     const emailAgain = page.waitForResponse(response => response.url().includes('/api/access') && response.request().method() === 'POST' && response.request().postDataJSON()?.action === 'request_link');
     await page.locator('#access-send').click(); await emailAgain;
-    const portalReturn = await store.get('access_outbox', accessHash(email)); await page.goto(portalReturn.link); await page.locator('#access-verify').click(); await page.locator('#done.on').waitFor();
-    await page.locator('#goPortal').click(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor();
+    const portalReturn = await store.get('access_outbox', accessHash(email)); await page.goto(portalReturn.link); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor();
     check('New mailbox proof restores the same workspace after real portal logout', await page.locator('#title').innerText() === 'QA Browser Air' && (await store.list('clients', '')).length === 1 && !new URL(page.url()).searchParams.has('k'));
   }
   check('No new customer response discloses permanent owner key', result.leakedOwnerKey.length === 0, result.leakedOwnerKey);

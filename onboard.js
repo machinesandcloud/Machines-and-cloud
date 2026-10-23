@@ -89,6 +89,7 @@
     document.body.dataset.setupState = 'signin';
     document.getElementById('access-signed-in').hidden = true; draftStatus.hidden = true;
     document.getElementById('done').classList.remove('on');
+    gate.removeAttribute('aria-busy');
     if (message) gateStatus.textContent = message;
   }
   async function request(path, method, body) {
@@ -226,17 +227,19 @@
         clearIntake(); intakeNotice.hidden = false; intakeNotice.textContent = 'Your business details are ready below.';
       } catch (error) {
         if (generation !== accessGeneration) return;
-        gateOnly(error.message);
+        signInFailure(error); accessForm.hidden = false;
+        document.getElementById('access-title').textContent = 'Your saved details need attention';
+        document.getElementById('access-intro').textContent = 'Your sign-in worked, but we couldn’t add the saved setup details. Try again, or request a link for the email you used when you started.';
         document.getElementById('access-identity').textContent = 'Signed in as ' + state.email;
         document.getElementById('access-signed-in').hidden = false;
-        intakeNotice.hidden = false; intakeNotice.textContent = 'Your details are saved, but couldn’t be added to this account. Sign out and use the email you entered, or request a new sign-in link below.';
+        intakeNotice.hidden = false; intakeNotice.textContent = 'We couldn’t add the saved details to this account. If you started with another email, sign out and use that address. Your answers have not been replaced.';
         return;
       }
     }
     form.elements.email.value = state.email; form.elements.email.readOnly = true;
     document.getElementById('access-identity').textContent = 'Signed in as ' + state.email; document.getElementById('access-signed-in').hidden = false;
     gate.hidden = true;
-    if (state.existing) { workspace(state.existing.portal, 'Welcome back. Open your workspace to continue setup or manage your front desk.'); return; }
+    if (state.existing) { openExistingWorkspace(state.existing); return; }
     revision = state.draft.revision || 0; restore(state.draft.fields || {});
     marketingField.checked = !!(state.marketing && state.marketing.preference === true); marketingVersion = 0; marketingSavedVersion = 0;
     form.hidden = false; document.querySelector('.ob-steps').hidden = false; draftStatus.hidden = false;
@@ -256,13 +259,43 @@
     catch (error) { if (generation === accessGeneration) gateStatus.textContent = error.name === 'AbortError' ? 'That request timed out. You can request another link.' : error.message; }
     finally { button.disabled = false; }
   });
-  var verifyButton = document.getElementById('access-verify');
+  var verifyButton = document.getElementById('access-verify'), verificationAttempt = null;
+  function signInFailure(error) {
+    gateOnly(error.name === 'AbortError' ? 'Opening your account timed out. Please try again.' : error.message);
+    document.getElementById('access-title').textContent = session ? 'Let’s finish signing you in' : 'Sign in to your workspace';
+    document.getElementById('access-intro').textContent = session ? 'Your link was verified. Try opening your account again without requesting another email.' : 'Request a fresh sign-in link below. Your saved business details are kept.';
+    accessForm.hidden = !!session; verifyButton.hidden = !session;
+    verifyButton.disabled = false; verifyButton.textContent = 'Try opening my account again';
+  }
+  function openExistingWorkspace(existing) {
+    var destination;
+    try { destination = new URL(existing.portal, location.href); } catch (error) { throw new Error('We could not find your workspace address. Please contact support.'); }
+    if (destination.origin !== location.origin || destination.username || destination.password || !['/desk.html', '/desk'].includes(destination.pathname) || !existing.slug || destination.searchParams.get('c') !== existing.slug) throw new Error('We could not confirm your workspace address. Please contact support.');
+    var retained = false;
+    try { retained = !!session && sessionStorage.getItem(storageKey) === session; } catch (error) { /* Keep the verified session in memory for a read-only retry. */ }
+    if (!retained) throw new Error('Your browser is blocking sign-in storage. Allow site storage for this website, then try opening your account again.');
+    gateOnly('Opening your workspace…'); accessForm.hidden = true; verifyButton.hidden = true;
+    document.getElementById('access-title').textContent = 'Opening your workspace…';
+    document.getElementById('access-intro').textContent = 'You’re signed in. Taking you to your front desk.';
+    gate.setAttribute('aria-busy', 'true');
+    location.replace(destination.href);
+  }
+  async function verifyAccess(attempt) {
+    try {
+      var result = await request('/api/access', 'POST', { action: 'exchange', token: attempt.token });
+      if (attempt.generation !== accessGeneration) return;
+      setSession(result.session); verifiedToken = null; clearIntake(); intakeNotice.hidden = true;
+      await signedIn();
+    } catch (error) { if (attempt.generation === accessGeneration) signInFailure(error); }
+    finally { if (verificationAttempt === attempt) { verificationAttempt = null; gate.removeAttribute('aria-busy'); } }
+  }
+  // This control is only a recovery path after verification; normal email links need no extra click.
   verifyButton.addEventListener('click', async function () {
-    var generation = accessGeneration;
-    verifyButton.disabled = true; gateStatus.textContent = 'Checking your sign-in link…';
-    try { var result = await request('/api/access', 'POST', { action: 'exchange', token: verifiedToken }); if (generation !== accessGeneration) return; setSession(result.session); verifiedToken = null; clearIntake(); intakeNotice.hidden = true; verifyButton.hidden = true; accessForm.hidden = false; await signedIn(); }
-    catch (error) { if (generation === accessGeneration) { gateStatus.textContent = error.message; verifyButton.hidden = true; accessForm.hidden = false; } }
-    finally { if (generation === accessGeneration) verifyButton.disabled = false; }
+    if (!session || verifyButton.disabled) return;
+    var generation = accessGeneration; verifyButton.disabled = true; gateStatus.textContent = 'Opening your account…'; gate.setAttribute('aria-busy', 'true');
+    setSession(session);
+    try { await signedIn(); } catch (error) { if (generation === accessGeneration) signInFailure(error); }
+    finally { if (generation === accessGeneration) { verifyButton.disabled = false; gate.removeAttribute('aria-busy'); } }
   });
   document.getElementById('access-sign-out').addEventListener('click', async function () {
     var generation = accessGeneration;
@@ -382,11 +415,17 @@
     } finally { if (generation === accessGeneration) { back.disabled = backWasDisabled; next.disabled = false; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; } }
   });
   function showVerification(token) {
+    if (verificationAttempt && verificationAttempt.token === token) return;
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
     saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); updateTrade(false); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
     updatePhoneSetup();
-    setSession(null); gateOnly('Confirm to continue securely. This link works once and expires after 20 minutes.');
-    accessForm.hidden = true; verifyButton.hidden = false; document.getElementById('access-title').textContent = 'Continue to your workspace';
+    setSession(null); gateOnly('Checking your secure sign-in link…');
+    accessForm.hidden = true; verifyButton.hidden = true;
+    document.getElementById('access-title').textContent = 'Signing you in…';
+    document.getElementById('access-intro').textContent = 'We’re checking your link and opening your account.';
+    gate.setAttribute('aria-busy', 'true');
+    verificationAttempt = { token: token, generation: accessGeneration };
+    verifyAccess(verificationAttempt);
   }
   // An email opened in the same tab can change only the fragment, without reloading this script.
   window.addEventListener('hashchange', function () {
@@ -399,6 +438,7 @@
     showVerification(verifiedToken);
   } else {
     try { session = sessionStorage.getItem(storageKey); } catch (error) { session = null; }
-    if (session) signedIn().catch(function (error) { gateOnly(error.message); }); else gateOnly();
+    var startupGeneration = accessGeneration;
+    if (session) signedIn().catch(function (error) { if (startupGeneration === accessGeneration) signInFailure(error); }); else gateOnly();
   }
 })();

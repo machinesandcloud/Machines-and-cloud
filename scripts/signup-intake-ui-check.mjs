@@ -67,10 +67,11 @@ try {
     await page.locator('#access-send').click();
     await page.waitForFunction(() => document.querySelector('#access-status').textContent.includes('prepared'));
     check(`${width}: explicit sign-in request carries opaque handoff and same email`, s.requests.at(-1).body.action === 'request_link' && s.requests.at(-1).body.email === email && s.requests.at(-1).body.intake === handoff);
-    await page.goto(base + '/onboard.html#verify=fixture-token'); await page.locator('#access-verify').click(); await page.locator('#ob').waitFor({ state: 'visible' });
+    await page.goto(base + '/onboard.html#verify=fixture-token'); await page.locator('#ob').waitFor({ state: 'visible' });
+    check(`${width}: email-link proof exchanges automatically once without another button`, s.requests.filter(r => r.body?.action === 'exchange').length === 1 && !await page.locator('#access-verify').isVisible() && new URL(page.url()).hash === '');
     check(`${width}: verified answers carry forward and email is readonly`, await page.locator('#name').inputValue() === 'Avery Owner' && await page.locator('#business').inputValue() === 'Bayou Service' && await page.locator('#email').getAttribute('readonly') !== null && await page.locator('#primaryGoal').inputValue() === 'missed_calls');
     check(`${width}: pending initial marketing request does not subscribe or precheck`, !await page.locator('#setup-marketing').isChecked());
-    await page.locator('#phone').fill('7135550100'); await page.locator('[name="desiredChannels"][value="voice"]').check(); await page.locator('#next').click(); await page.waitForFunction(() => document.querySelector('fieldset[data-step="2"]').classList.contains('on'));
+    await page.locator('#phone').fill('7135550100'); await page.locator('[name="desiredChannels"][value="voice"]').check(); await page.locator('#businessNumber').fill('7135550120'); await page.locator('#next').click(); await page.waitForFunction(() => document.querySelector('fieldset[data-step="2"]').classList.contains('on'));
     const save = s.requests.filter(r => r.method === 'PUT').at(-1);
     check(`${width}: one setup saves desired connections without confirming untouched marketing`, save.body.fields.desiredChannels.includes('web') && save.body.fields.desiredChannels.includes('voice') && !Object.hasOwn(save.body, 'marketingConsent'));
     await page.screenshot({ path: `scratchpad/signup-onboard-${width}.png` });
@@ -109,6 +110,7 @@ try {
   }
   {
     const s = await fixture('verified-marketing', 390, { session: true }), p = s.page; await p.goto(base + '/onboard.html'); await p.locator('#ob').waitFor({ state: 'visible' });
+    await p.locator('#plan-email-preferences > summary').click();
     await p.locator('#setup-marketing').check(); await p.waitForTimeout(800); await p.waitForFunction(() => document.querySelector('#draft-status').textContent.startsWith('Saved.'));
     check('Verified explicit email opt-in is a separate top-level preference', s.requests.filter(r => r.method === 'PUT').at(-1).body.marketingConsent === true);
     await p.locator('#setup-marketing').uncheck(); await p.waitForTimeout(800); await p.waitForFunction(() => document.querySelector('#draft-status').textContent.startsWith('Saved.'));
@@ -116,7 +118,7 @@ try {
   }
   {
     const s = await fixture('wrong-account', 390, { session: true }), p = s.page; s.attachFails = true; await p.goto(base + '/onboard.html#intake=' + handoff); await p.locator('#access-signed-in').waitFor({ state: 'visible' });
-    check('Wrong-account handoff keeps private setup hidden with sign-out recovery', !await p.locator('#ob').isVisible() && await p.locator('#access-sign-out').isVisible() && /couldn’t be added/.test(await p.locator('#intake-notice').innerText()));
+    check('Wrong-account handoff keeps private setup hidden with sign-out recovery', !await p.locator('#ob').isVisible() && await p.locator('#access-sign-out').isVisible() && /couldn’t add.*account/.test(await p.locator('#intake-notice').innerText()) && /not been replaced/.test(await p.locator('#intake-notice').innerText()));
     check('Wrong-account fragment is removed even on attachment failure', new URL(p.url()).hash === ''); await s.context.close();
   }
   {

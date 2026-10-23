@@ -1,0 +1,1472 @@
+{
+  "date": "2026-10-23",
+  "status": "accepted locally; not published",
+  "baseProduction": "e5cb71c7f23592539d9c292eb50123afbebf0f30",
+  "behavior": [
+    "Received email link verifies automatically, without Continue securely.",
+    "Existing customer opens the authenticated same-tenant workspace directly, without a second Open workspace screen.",
+    "New customer resumes the saved onboarding step. No empty customer workspace is created automatically.",
+    "Expired or used links show a fresh-link form; no email is sent automatically.",
+    "Verified sessions survive temporary account-state failures and can retry the read without exchanging the consumed link again.",
+    "Blocked browser session storage shows a recovery action rather than redirecting to an unauthenticated workspace."
+  ],
+  "protections": [
+    "Backend one-use token,20-minute expiry, rate limits and owner/operator purpose checks unchanged.",
+    "Fragment removed before exchange; no raw proof or session added to workspace URL.",
+    "New sign-in resets previous browser identity before exchange. Generation guards prevent older account/verification/save results replacing the new account.",
+    "Only same-origin fixed desk routes with matching server-returned tenant slug are accepted.",
+    "Marketing consent remains separate. No provider activation or billing behavior changed."
+  ],
+  "independentQA": {
+    "assertions": 54,
+    "failures": 0,
+    "sourceHashes": {
+      "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+      "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+      "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+      "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+      "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+    },
+    "receiptLocalPath": "/tmp/mc-auto-signin-independent-qa/final-v2-report.json",
+    "receiptSha256": "d141b86d7dfbc5554710018804d70ce3ca2b781cbe560964eef9fa559b854f5c",
+    "scope": "Actual browser onboarding assets; API responses intercepted; workspace destination stub. This verifies routing, not full workspace functionality.",
+    "externalRequests": 0
+  },
+  "supportContact": {
+    "approvedPublicEmail": "ngoumnaisteve@gmail.com",
+    "localContactCommit": "3a297e1",
+    "scope": "Receiver HELP, matching sample3/flow and public texting policies; not carrier resubmission.",
+    "providerHelpSaved": false,
+    "campaignResubmitted": false
+  },
+  "marketingCopy": "876aa5d remains local at owner request and is excluded from this repair.",
+  "liveProof": {
+    "deployed": false,
+    "realEmailTest": false,
+    "realTexts": 0,
+    "realCalls": 0
+  },
+  "broaderVerification": {
+    "acceptedAssertions": 148,
+    "failed": 0,
+    "suites": [
+      {
+        "name": "automatic-signin-customer-entry-final.json",
+        "passed": 21,
+        "failed": 0,
+        "sourceHashes": {
+          "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+          "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+          "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+          "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+          "desk.html": "77d16fe99db35393191b4d61675246b047013e7a9660292212a40e29747adb01",
+          "desk.js": "c2bcd831f8b803bdff9c5bc89ed8d42b1ce815fbe462166c6aaafc14a51d3d3c",
+          "desk-connections.js": "e38465d5bb960ab4cda5bfb72767d240f30b84d643742e1a9b7441c3692d4eac",
+          "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+          "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+          "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+          "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+          "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+          "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+          "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+          "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+          "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+          "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7"
+        },
+        "sha256": "5a6f012bb6ab2fa2b2153ebc4e883168e557a52ba3b963642b81a5856fbc6ad9",
+        "checks": [
+          {
+            "name": "Fresh customer sees email gate before private questionnaire",
+            "pass": true
+          },
+          {
+            "name": "Fake mailbox is visibly distinguished from sent email",
+            "pass": true
+          },
+          {
+            "name": "Opening mailbox link automatically exchanges proof once without a confirmation click",
+            "pass": true
+          },
+          {
+            "name": "Verified new customer resumes the questionnaire with scrubbed URL and read-only email",
+            "pass": true
+          },
+          {
+            "name": "Verified browser bearer has a persisted24-hour expiry",
+            "pass": true
+          },
+          {
+            "name": "Empty required fields keep customer in current step with guidance",
+            "pass": true
+          },
+          {
+            "name": "Saved answers and wizard position survive reload",
+            "pass": true
+          },
+          {
+            "name": "Failed autosave visibly preserves unsaved answers without claiming saved",
+            "pass": true
+          },
+          {
+            "name": "Web-only signup omits legal/purchase step and leaves phone routing hidden and disabled",
+            "pass": true
+          },
+          {
+            "name": "Lost create response leaves one tenant and permits retry",
+            "pass": true
+          },
+          {
+            "name": "Retry recovers the same tenant without duplicate creation",
+            "pass": true
+          },
+          {
+            "name": "Completed setup has no routine founder or false delivery claim",
+            "pass": true
+          },
+          {
+            "name": "New workspace link carries no permanent owner credential",
+            "pass": true
+          },
+          {
+            "name": "Selected Starter plan survives verified signup without a billing action",
+            "pass": true
+          },
+          {
+            "name": "Sign out revokes onboarding session and returns to email gate",
+            "pass": true
+          },
+          {
+            "name": "Proven returning customer automatically opens the existing workspace without overwrite or permanent key",
+            "pass": true
+          },
+          {
+            "name": "Onboarding session storage contains no questionnaire/legal draft",
+            "pass": true
+          },
+          {
+            "name": "No new customer response discloses permanent owner key",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Entry and recovery have no uncaught browser errors",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Automatic setup attempted no model/provider/background fetch",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Source stayed stable throughout browser journey",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "name": "automatic-signin-customer-plan-final.json",
+        "passed": 26,
+        "failed": 0,
+        "sourceHashes": {
+          "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+          "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+          "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+          "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+          "desk.html": "77d16fe99db35393191b4d61675246b047013e7a9660292212a40e29747adb01",
+          "desk.js": "c2bcd831f8b803bdff9c5bc89ed8d42b1ce815fbe462166c6aaafc14a51d3d3c",
+          "desk-connections.js": "e38465d5bb960ab4cda5bfb72767d240f30b84d643742e1a9b7441c3692d4eac",
+          "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+          "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+          "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+          "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+          "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+          "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+          "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+          "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+          "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+          "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7"
+        },
+        "sha256": "1b7cb1a43802aff712f0a3e09cc1a6d2efa161414d414c2c47c7b0bde76e06eb",
+        "checks": [
+          {
+            "name": "Fresh customer sees email gate before private questionnaire",
+            "pass": true
+          },
+          {
+            "name": "Fake mailbox is visibly distinguished from sent email",
+            "pass": true
+          },
+          {
+            "name": "Selected Starter hint survives in the trusted fixed mailbox destination",
+            "pass": true
+          },
+          {
+            "name": "Opening mailbox link automatically exchanges proof once without a confirmation click",
+            "pass": true
+          },
+          {
+            "name": "Verified new customer resumes the questionnaire with scrubbed URL and read-only email",
+            "pass": true
+          },
+          {
+            "name": "Verified browser bearer has a persisted24-hour expiry",
+            "pass": true
+          },
+          {
+            "name": "Empty required fields keep customer in current step with guidance",
+            "pass": true
+          },
+          {
+            "name": "Saved answers and wizard position survive reload",
+            "pass": true
+          },
+          {
+            "name": "Failed autosave visibly preserves unsaved answers without claiming saved",
+            "pass": true
+          },
+          {
+            "name": "Web-only signup omits legal/purchase step and leaves phone routing hidden and disabled",
+            "pass": true
+          },
+          {
+            "name": "Lost create response leaves one tenant and permits retry",
+            "pass": true
+          },
+          {
+            "name": "Retry recovers the same tenant without duplicate creation",
+            "pass": true
+          },
+          {
+            "name": "Completed setup has no routine founder or false delivery claim",
+            "pass": true
+          },
+          {
+            "name": "New workspace link carries no permanent owner credential",
+            "pass": true
+          },
+          {
+            "name": "Selected Starter plan survives verified signup without a billing action",
+            "pass": true
+          },
+          {
+            "name": "Sign out revokes onboarding session and returns to email gate",
+            "pass": true
+          },
+          {
+            "name": "Proven returning customer automatically opens the existing workspace without overwrite or permanent key",
+            "pass": true
+          },
+          {
+            "name": "Onboarding session storage contains no questionnaire/legal draft",
+            "pass": true
+          },
+          {
+            "name": "Plan metadata case1 cannot change trusted destination",
+            "pass": true,
+            "detail": {
+              "input": "valid enum plus untrusted redirect fields",
+              "status": 202,
+              "fixedOrigin": true,
+              "path": "/onboard.html",
+              "plan": "starter",
+              "untrustedInLink": false
+            }
+          },
+          {
+            "name": "Plan metadata case2 cannot change trusted destination",
+            "pass": true,
+            "detail": {
+              "input": "URL as plan plus untrusted redirect fields",
+              "status": 202,
+              "fixedOrigin": true,
+              "path": "/onboard.html",
+              "plan": null,
+              "untrustedInLink": false
+            }
+          },
+          {
+            "name": "Plan metadata case3 cannot change trusted destination",
+            "pass": true,
+            "detail": {
+              "input": "unknown plan plus untrusted redirect fields",
+              "status": 202,
+              "fixedOrigin": true,
+              "path": "/onboard.html",
+              "plan": null,
+              "untrustedInLink": false
+            }
+          },
+          {
+            "name": "Plan metadata cannot mutate an existing tenant",
+            "pass": true
+          },
+          {
+            "name": "No new customer response discloses permanent owner key",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Entry and recovery have no uncaught browser errors",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Automatic setup attempted no model/provider/background fetch",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Source stayed stable throughout browser journey",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "name": "automatic-signin-customer-full-accepted.json",
+        "passed": 53,
+        "failed": 0,
+        "sourceHashes": {
+          "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+          "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+          "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+          "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+          "desk.html": "77d16fe99db35393191b4d61675246b047013e7a9660292212a40e29747adb01",
+          "desk.js": "c2bcd831f8b803bdff9c5bc89ed8d42b1ce815fbe462166c6aaafc14a51d3d3c",
+          "desk-connections.js": "e38465d5bb960ab4cda5bfb72767d240f30b84d643742e1a9b7441c3692d4eac",
+          "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+          "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+          "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+          "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+          "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+          "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+          "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+          "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+          "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+          "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+          "netlify/functions/chat.mjs": "611e1db67a6e2c93c03a8a2ec22e1152e135f8391a12d122bf78dbe8c6c4b2fd",
+          "netlify/functions/lib/owner-test.mjs": "9b15b2a0d9d6d849361a6beb8bbd1f7b98dc9be5b95530c443b998e1fc7e1419",
+          "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7"
+        },
+        "sha256": "2df75d337e5488838583c6eda7a6cf1bc18f5bad0d15ff114797680148b7f70f",
+        "checks": [
+          {
+            "name": "Fresh customer sees email gate before private questionnaire",
+            "pass": true
+          },
+          {
+            "name": "Fake mailbox is visibly distinguished from sent email",
+            "pass": true
+          },
+          {
+            "name": "Opening mailbox link automatically exchanges proof once without a confirmation click",
+            "pass": true
+          },
+          {
+            "name": "Verified new customer resumes the questionnaire with scrubbed URL and read-only email",
+            "pass": true
+          },
+          {
+            "name": "Verified browser bearer has a persisted24-hour expiry",
+            "pass": true
+          },
+          {
+            "name": "Empty required fields keep customer in current step with guidance",
+            "pass": true
+          },
+          {
+            "name": "Saved answers and wizard position survive reload",
+            "pass": true
+          },
+          {
+            "name": "Failed autosave visibly preserves unsaved answers without claiming saved",
+            "pass": true
+          },
+          {
+            "name": "Web-only signup omits legal/purchase step and leaves phone routing hidden and disabled",
+            "pass": true
+          },
+          {
+            "name": "Lost create response leaves one tenant and permits retry",
+            "pass": true
+          },
+          {
+            "name": "Retry recovers the same tenant without duplicate creation",
+            "pass": true
+          },
+          {
+            "name": "Completed setup has no routine founder or false delivery claim",
+            "pass": true
+          },
+          {
+            "name": "New workspace link carries no permanent owner credential",
+            "pass": true
+          },
+          {
+            "name": "Selected Starter plan survives verified signup without a billing action",
+            "pass": true
+          },
+          {
+            "name": "Sign out revokes onboarding session and returns to email gate",
+            "pass": true
+          },
+          {
+            "name": "Proven returning customer automatically opens the existing workspace without overwrite or permanent key",
+            "pass": true
+          },
+          {
+            "name": "Onboarding session storage contains no questionnaire/legal draft",
+            "pass": true
+          },
+          {
+            "name": "Returning owner reaches actual setup guidance without a blocking tour",
+            "pass": true
+          },
+          {
+            "name": "Owner can launch the current guided workspace from Quick tour",
+            "pass": true
+          },
+          {
+            "name": "Six useful tutorial steps cover real customer work",
+            "pass": true
+          },
+          {
+            "name": "Reading guide cannot fabricate review or test proof",
+            "pass": true
+          },
+          {
+            "name": "Guide can be skipped, reopened and closed by Escape with focus restored",
+            "pass": true
+          },
+          {
+            "name": "Dismissed tutorial preference survives reload without certifying setup",
+            "pass": true
+          },
+          {
+            "name": "Guide coach and spotlight fit the viewport and highlight a real target at 390px",
+            "pass": true,
+            "detail": {
+              "coach": {
+                "x": 12,
+                "y": 365.28125,
+                "right": 356,
+                "bottom": 681.875
+              },
+              "spotlight": {
+                "x": 9,
+                "y": 102.8125,
+                "right": 381,
+                "bottom": 349.28125
+              },
+              "target": {
+                "x": 16,
+                "y": 109.8125,
+                "right": 374,
+                "bottom": 342.28125
+              },
+              "targetId": "todayTourSummary",
+              "width": 390,
+              "height": 900,
+              "overflow": false,
+              "fallback": "false"
+            }
+          },
+          {
+            "name": "Guide coach and spotlight fit the viewport and highlight a real target at 320px",
+            "pass": true,
+            "detail": {
+              "coach": {
+                "x": 12,
+                "y": 358.609375,
+                "right": 308,
+                "bottom": 693.203125
+              },
+              "spotlight": {
+                "x": 9,
+                "y": 82.953125,
+                "right": 311,
+                "bottom": 342.609375
+              },
+              "target": {
+                "x": 16,
+                "y": 89.953125,
+                "right": 304,
+                "bottom": 335.609375
+              },
+              "targetId": "todayTourSummary",
+              "width": 320,
+              "height": 900,
+              "overflow": false,
+              "fallback": "false"
+            }
+          },
+          {
+            "name": "Guide coach and spotlight fit the viewport and highlight a real target at 1440px",
+            "pass": true,
+            "detail": {
+              "coach": {
+                "x": 253,
+                "y": 12,
+                "right": 597,
+                "bottom": 324.21875
+              },
+              "spotlight": {
+                "x": 253,
+                "y": 340.21875,
+                "right": 1411,
+                "bottom": 574.640625
+              },
+              "target": {
+                "x": 260,
+                "y": 347.21875,
+                "right": 1404,
+                "bottom": 567.640625
+              },
+              "targetId": "todayTourSummary",
+              "width": 1440,
+              "height": 900,
+              "overflow": false,
+              "fallback": "false"
+            }
+          },
+          {
+            "name": "Tutorial action opens and focuses real rules editor",
+            "pass": true
+          },
+          {
+            "name": "Review is an actual saved API action",
+            "pass": true
+          },
+          {
+            "name": "Review proof survives reload and is visible for saved version",
+            "pass": true
+          },
+          {
+            "name": "Unsaved rule edits prevent false review completion",
+            "pass": true
+          },
+          {
+            "name": "Failed rule save retains edits and persisted record",
+            "pass": true
+          },
+          {
+            "name": "Retry saves corrected rules and invalidates earlier review",
+            "pass": true
+          },
+          {
+            "name": "A sequential stale second tab cannot overwrite a completed newer save",
+            "pass": true
+          },
+          {
+            "name": "Private practice shows actual collected contact/address and explicit no-action result",
+            "pass": true
+          },
+          {
+            "name": "Browser private test creates no real visits/messages/customer records",
+            "pass": true
+          },
+          {
+            "name": "Actual activation handler rejects simulated proof without changing the workspace",
+            "pass": true
+          },
+          {
+            "name": "Successful fake test stays blocked from real customer activation",
+            "pass": true
+          },
+          {
+            "name": "Web-only practice leaves unselected phone and text services inactive without a connected claim",
+            "pass": true
+          },
+          {
+            "name": "Real availability action survives reload from new customer workspace",
+            "pass": true
+          },
+          {
+            "name": "Owner can remove actual availability block",
+            "pass": true
+          },
+          {
+            "name": "Workspace API failure exposes retry rather than spinner/success",
+            "pass": true
+          },
+          {
+            "name": "Retry recovers actual saved owner workspace",
+            "pass": true
+          },
+          {
+            "name": "Signed-in owner can download CSV without leaking preview as real work",
+            "pass": true
+          },
+          {
+            "name": "Visible portal sign out revokes authority and clears private DOM/address",
+            "pass": true
+          },
+          {
+            "name": "Revoked browser session cannot replay private GET/export/action/chat",
+            "pass": true,
+            "detail": [
+              {
+                "path": "/api/client",
+                "status": 401,
+                "body": {
+                  "error": "verification_required"
+                }
+              },
+              {
+                "path": "/api/client",
+                "status": 401,
+                "body": {
+                  "error": "verification_required"
+                }
+              },
+              {
+                "path": "/api/client",
+                "status": 401,
+                "body": {
+                  "error": "verification_required"
+                }
+              },
+              {
+                "path": "/api/chat",
+                "status": 401,
+                "body": {
+                  "error": "verification_required"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Reload after portal sign out reveals no saved customer workspace",
+            "pass": true
+          },
+          {
+            "name": "Wrong private link is recoverable without legacy JS crash",
+            "pass": true
+          },
+          {
+            "name": "Missing private link offers email recovery instead of dead end",
+            "pass": true
+          },
+          {
+            "name": "New mailbox proof restores the same workspace after real portal logout",
+            "pass": true
+          },
+          {
+            "name": "No new customer response discloses permanent owner key",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Entry and recovery have no uncaught browser errors",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Automatic setup attempted no model/provider/background fetch",
+            "pass": true,
+            "detail": []
+          },
+          {
+            "name": "Source stayed stable throughout browser journey",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "name": "automatic-signin-accepted-signup-intake-ui.json",
+        "passed": 48,
+        "failed": 0,
+        "sourceHashes": {
+          "index.html": "b3a0a0c9b6cb96089ad8ef766c22af0fa95c57fbfe8abfc70daaaa994bf1f143",
+          "site-refresh.css": "858ca50c8eaa8d68a6051b89809db61be97c47829c239bc33546333283a079d4",
+          "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+          "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+          "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087"
+        },
+        "sha256": "7e26a514196292e917a58382c8aa0ce7811a0a6ef6c690b6ee47f22ff4fef939",
+        "checks": [
+          {
+            "name": "320: four preliminary questions, optional goal and no default marketing selection",
+            "pass": true
+          },
+          {
+            "name": "320: invalid form does not save or email",
+            "pass": true
+          },
+          {
+            "name": "320: form fits horizontally",
+            "pass": true,
+            "detail": {
+              "left": 16,
+              "right": 304,
+              "viewport": 320,
+              "document": 320
+            }
+          },
+          {
+            "name": "320: saves once and handoff URL is scrubbed without personal information",
+            "pass": true
+          },
+          {
+            "name": "320: next page carries email but sends no automatic sign-in email",
+            "pass": true
+          },
+          {
+            "name": "320: explicit sign-in request carries opaque handoff and same email",
+            "pass": true
+          },
+          {
+            "name": "320: email-link proof exchanges automatically once without another button",
+            "pass": true
+          },
+          {
+            "name": "320: verified answers carry forward and email is readonly",
+            "pass": true
+          },
+          {
+            "name": "320: pending initial marketing request does not subscribe or precheck",
+            "pass": true
+          },
+          {
+            "name": "320: one setup saves desired connections without confirming untouched marketing",
+            "pass": true
+          },
+          {
+            "name": "390: four preliminary questions, optional goal and no default marketing selection",
+            "pass": true
+          },
+          {
+            "name": "390: invalid form does not save or email",
+            "pass": true
+          },
+          {
+            "name": "390: form fits horizontally",
+            "pass": true,
+            "detail": {
+              "left": 20,
+              "right": 370,
+              "viewport": 390,
+              "document": 390
+            }
+          },
+          {
+            "name": "390: saves once and handoff URL is scrubbed without personal information",
+            "pass": true
+          },
+          {
+            "name": "390: next page carries email but sends no automatic sign-in email",
+            "pass": true
+          },
+          {
+            "name": "390: explicit sign-in request carries opaque handoff and same email",
+            "pass": true
+          },
+          {
+            "name": "390: email-link proof exchanges automatically once without another button",
+            "pass": true
+          },
+          {
+            "name": "390: verified answers carry forward and email is readonly",
+            "pass": true
+          },
+          {
+            "name": "390: pending initial marketing request does not subscribe or precheck",
+            "pass": true
+          },
+          {
+            "name": "390: one setup saves desired connections without confirming untouched marketing",
+            "pass": true
+          },
+          {
+            "name": "1440: four preliminary questions, optional goal and no default marketing selection",
+            "pass": true
+          },
+          {
+            "name": "1440: invalid form does not save or email",
+            "pass": true
+          },
+          {
+            "name": "1440: form fits horizontally",
+            "pass": true,
+            "detail": {
+              "left": 810.84375,
+              "right": 1300,
+              "viewport": 1440,
+              "document": 1440
+            }
+          },
+          {
+            "name": "1440: saves once and handoff URL is scrubbed without personal information",
+            "pass": true
+          },
+          {
+            "name": "1440: next page carries email but sends no automatic sign-in email",
+            "pass": true
+          },
+          {
+            "name": "1440: explicit sign-in request carries opaque handoff and same email",
+            "pass": true
+          },
+          {
+            "name": "1440: email-link proof exchanges automatically once without another button",
+            "pass": true
+          },
+          {
+            "name": "1440: verified answers carry forward and email is readonly",
+            "pass": true
+          },
+          {
+            "name": "1440: pending initial marketing request does not subscribe or precheck",
+            "pass": true
+          },
+          {
+            "name": "1440: one setup saves desired connections without confirming untouched marketing",
+            "pass": true
+          },
+          {
+            "name": "starter: public plan intent survives capture without personal information in query",
+            "pass": true
+          },
+          {
+            "name": "starter: explicit secure-link request carries preserved current plan preference",
+            "pass": true
+          },
+          {
+            "name": "growth: public plan intent survives capture without personal information in query",
+            "pass": true
+          },
+          {
+            "name": "growth: explicit secure-link request carries preserved current plan preference",
+            "pass": true
+          },
+          {
+            "name": "Goal can be skipped without silently choosing one or carrying an invalid plan",
+            "pass": true
+          },
+          {
+            "name": "Failed save keeps all entered answers and opt-in choice",
+            "pass": true
+          },
+          {
+            "name": "An unchanged explicit retry reuses its idempotency key",
+            "pass": true
+          },
+          {
+            "name": "A changed consent answer creates a new capture key and carries false explicitly",
+            "pass": true
+          },
+          {
+            "name": "Double submission during a pending save sends one request",
+            "pass": true
+          },
+          {
+            "name": "Storage-blocked handoff retains opaque capability, removes fragment and explains same-email entry",
+            "pass": true
+          },
+          {
+            "name": "Storage-blocked sign-in request still carries handoff",
+            "pass": true
+          },
+          {
+            "name": "Verified explicit email opt-in is a separate top-level preference",
+            "pass": true
+          },
+          {
+            "name": "Verified explicit opt-out saves false",
+            "pass": true
+          },
+          {
+            "name": "Wrong-account handoff keeps private setup hidden with sign-out recovery",
+            "pass": true
+          },
+          {
+            "name": "Wrong-account fragment is removed even on attachment failure",
+            "pass": true
+          },
+          {
+            "name": "Malformed success response does not navigate or discard entered answers",
+            "pass": true
+          },
+          {
+            "name": "Source remained unchanged during browser verification",
+            "pass": true
+          },
+          {
+            "name": "No browser page errors",
+            "pass": true,
+            "detail": []
+          }
+        ]
+      }
+    ],
+    "realRequests": 0,
+    "scope": "Actual local handlers and actual workspace assets; synthetic memory records and intercepted browser/SDK traffic. Includes direct same-workspace return after fresh proof and portal logout."
+  },
+  "durableRegression": {
+    "script": "scripts/automatic-signin-ui-check.mjs",
+    "passed": 55,
+    "failed": 0,
+    "sourceHashes": {
+      "scripts/automatic-signin-ui-check.mjs": "85c5825c370d3676da977c218515650abec67aeea2a874726f121f2aac3210b9",
+      "onboard.js": "42843814c373d13b86961dc6d55d457e56fe465951ec4d10c502c5aa4729b087",
+      "onboard.html": "495bbbb10e865924239da4f9c768fff9c233fa559c7bde469fdd1e132b4a6cfb",
+      "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+      "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+      "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+    },
+    "checks": [
+      {
+        "name": "1440: exchanges automatically with no user action",
+        "pass": true
+      },
+      {
+        "name": "1440: loading does not show misleading email request or confirmation",
+        "pass": true
+      },
+      {
+        "name": "1440: proof scrubbed before first fetch",
+        "pass": true,
+        "detail": [
+          {
+            "url": "/api/access",
+            "hash": "",
+            "search": "",
+            "auth": null
+          }
+        ]
+      },
+      {
+        "name": "1440: new proof is never sent using old owner authorization",
+        "pass": true
+      },
+      {
+        "name": "1440: returning owner navigates directly to existing workspace",
+        "pass": true
+      },
+      {
+        "name": "1440: exactly one POST exchange then one authenticated state GET",
+        "pass": true,
+        "detail": [
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "returning-proof"
+            },
+            "auth": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/access",
+            "body": null,
+            "auth": "Bearer session-returning-proof"
+          }
+        ]
+      },
+      {
+        "name": "1440: fresh session survives destination navigation",
+        "pass": true
+      },
+      {
+        "name": "390: exchanges automatically with no user action",
+        "pass": true
+      },
+      {
+        "name": "390: loading does not show misleading email request or confirmation",
+        "pass": true
+      },
+      {
+        "name": "390: proof scrubbed before first fetch",
+        "pass": true,
+        "detail": [
+          {
+            "url": "/api/access",
+            "hash": "",
+            "search": "",
+            "auth": null
+          }
+        ]
+      },
+      {
+        "name": "390: new proof is never sent using old owner authorization",
+        "pass": true
+      },
+      {
+        "name": "390: returning owner navigates directly to existing workspace",
+        "pass": true
+      },
+      {
+        "name": "390: exactly one POST exchange then one authenticated state GET",
+        "pass": true,
+        "detail": [
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "returning-proof"
+            },
+            "auth": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/access",
+            "body": null,
+            "auth": "Bearer session-returning-proof"
+          }
+        ]
+      },
+      {
+        "name": "390: fresh session survives destination navigation",
+        "pass": true
+      },
+      {
+        "name": "new owner: valid proof opens saved onboarding step automatically",
+        "pass": true
+      },
+      {
+        "name": "new owner: preserves account identity and saved answers",
+        "pass": true
+      },
+      {
+        "name": "new owner: no email request or unrelated write",
+        "pass": true
+      },
+      {
+        "name": "same tab: hash-only link automatically authenticates and routes to new owner",
+        "pass": true
+      },
+      {
+        "name": "same tab: exchange drops old identity and new GET uses new session",
+        "pass": true,
+        "detail": [
+          {
+            "method": "GET",
+            "path": "/api/access",
+            "body": null,
+            "auth": "Bearer old-session"
+          },
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "same-tab-proof"
+            },
+            "auth": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/access",
+            "body": null,
+            "auth": "Bearer session-same-tab-proof"
+          }
+        ]
+      },
+      {
+        "name": "startup race: first old owner state read is genuinely pending",
+        "pass": true
+      },
+      {
+        "name": "startup race: newer proof opens correct saved wizard before old failure",
+        "pass": true
+      },
+      {
+        "name": "startup race: late old GET503 cannot hide new wizard",
+        "pass": true
+      },
+      {
+        "name": "startup race: late old GET503 cannot replace or clear new session",
+        "pass": true
+      },
+      {
+        "name": "intake503: presents service error without claiming wrong account",
+        "pass": true
+      },
+      {
+        "name": "intake503: keeps verified session and explicit retry without automatic email",
+        "pass": true
+      },
+      {
+        "name": "intake503: retries same handoff using saved session without consuming another proof",
+        "pass": true
+      },
+      {
+        "name": "intake503: recovered saved answers and saved step are usable",
+        "pass": true
+      },
+      {
+        "name": "duplicates: same pending proof is exchanged once",
+        "pass": true,
+        "detail": [
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "proof-a"
+            },
+            "auth": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "proof-b"
+            },
+            "auth": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/access",
+            "body": null,
+            "auth": "Bearer session-proof-b"
+          }
+        ]
+      },
+      {
+        "name": "races: older exchange response cannot sign in or read state",
+        "pass": true,
+        "detail": [
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "proof-a"
+            },
+            "auth": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/access",
+            "body": {
+              "action": "exchange",
+              "token": "proof-b"
+            },
+            "auth": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/access",
+            "body": null,
+            "auth": "Bearer session-proof-b"
+          }
+        ]
+      },
+      {
+        "name": "races: only newest proof session is saved and used",
+        "pass": true
+      },
+      {
+        "name": "400: displays failure and offers explicit replacement link request",
+        "pass": true
+      },
+      {
+        "name": "400: no automatic email and no retry loop",
+        "pass": true
+      },
+      {
+        "name": "400: no stale session or proof remains",
+        "pass": true
+      },
+      {
+        "name": "410: displays failure and offers explicit replacement link request",
+        "pass": true
+      },
+      {
+        "name": "410: no automatic email and no retry loop",
+        "pass": true
+      },
+      {
+        "name": "410: no stale session or proof remains",
+        "pass": true
+      },
+      {
+        "name": "storage blocked: no redirect loop or repeated exchange",
+        "pass": true
+      },
+      {
+        "name": "storage blocked: destination is not opened without transferable session",
+        "pass": true
+      },
+      {
+        "name": "storage blocked: explains recovery instead of blank or misleading email",
+        "pass": true
+      },
+      {
+        "name": "state503: keeps successfully exchanged session",
+        "pass": true
+      },
+      {
+        "name": "state503: does not request another email",
+        "pass": true
+      },
+      {
+        "name": "state503: offers an explicit workspace retry",
+        "pass": true
+      },
+      {
+        "name": "state503: retry uses saved session without reconsuming proof",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination refused: https://attacker.invalid/desk.html?c=bayou-service",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination gives actionable error: https://attacker.invalid/desk.html?c=bayou-service",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination refused: /admin.html",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination gives actionable error: /admin.html",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination refused: /desk.html?c=another-account",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination gives actionable error: /desk.html?c=another-account",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination refused: javascript:alert(1)",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination gives actionable error: javascript:alert(1)",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination refused: http://user:password@127.0.0.1:8963/desk.html?c=bayou-service",
+        "pass": true
+      },
+      {
+        "name": "unsafe destination gives actionable error: http://user:password@127.0.0.1:8963/desk.html?c=bayou-service",
+        "pass": true
+      },
+      {
+        "name": "tested source remains unchanged throughout independent browser run",
+        "pass": true
+      },
+      {
+        "name": "No browser page errors",
+        "pass": true
+      }
+    ],
+    "receiptLocalPath": "/tmp/mc-automatic-signin-durable-qa/report.json",
+    "sha256": "87e40cfe88de3aabc6b0ef49eea13ff904bbb1e730b9d0cdeea52ae74b6127fb",
+    "scope": "Local onboarding assets, intercepted API, stubbed workspace destination; complements actual workspace customer suite."
+  },
+  "knownTestLimit": "A broader acquisition QA run reaches obsolete connection-label and removed key-based admin-fixture assertions. Those failures are preserved locally; that unrelated full suite is not claimed passing. No admin authentication changed.",
+  "rootReview": "Reviewed actual code/fixture diffs plus mobile sign-in progress, expired-link recovery and actual workspace screenshots. Initial stale startup-response bug was reproduced, fixed with a generation guard and verified in the retained regression.",
+  "requiredGate": {
+    "required": 38,
+    "executed": 38,
+    "passed": 38,
+    "deniedPhysicalAttempts": 0,
+    "sourceStable": true,
+    "historicalReceiptsRestored": true,
+    "receiptSha256": "7a07af86015bda00e14414a6e25ee2dbdafcb99d4d8aceb1bd0a57304467ab5d",
+    "commands": [
+      {
+        "command": "node scripts/build-practice-voice.mjs",
+        "exitCode": 0,
+        "logSha256": "6592c595b7378c7ee4c887d6891ba41ed0f2028cd40d9cd830fb2592e6c3d06d"
+      },
+      {
+        "command": "node scripts/smoke.mjs",
+        "exitCode": 0,
+        "logSha256": "bbbe01c624b958f47de4e3ca17b30371552db675295885eea33bbcc8d9f838a2"
+      },
+      {
+        "command": "node scripts/scheduler-gate-check.mjs",
+        "exitCode": 0,
+        "logSha256": "d271b3c935a4649923a17475ba07dae93dc3bba0a645864a88f3cfc7e22176a3"
+      },
+      {
+        "command": "node scripts/account-setup-check.mjs",
+        "exitCode": 0,
+        "logSha256": "ab927c5f97245ed5cf5f6503d4d6559cfefa9b97f2efba85d679b8b9b42a4e91"
+      },
+      {
+        "command": "node scripts/intake-check.mjs",
+        "exitCode": 0,
+        "logSha256": "bad7220a522775783dea92b3bb9237feee7f065be536354a2772f6a79509945a"
+      },
+      {
+        "command": "node scripts/platform-operations-check.mjs",
+        "exitCode": 0,
+        "logSha256": "0aff8c4b8812723a83111525b2bcec8f38690ca08644c12deea538b983f55d84"
+      },
+      {
+        "command": "node scripts/phone-activation-check.mjs",
+        "exitCode": 0,
+        "logSha256": "74b60ba6be5438a79ec8be0809b6f66e13f13ec43c439fc62dfb6af897ec9ed3"
+      },
+      {
+        "command": "node scripts/operator-management-qa-check.mjs",
+        "exitCode": 0,
+        "logSha256": "ecd0bd3bb57e8e0565455b21b2b5d1eb2ba29eb017fa1512a3b3a18e3781faeb"
+      },
+      {
+        "command": "node scripts/workspace-edit-check.mjs",
+        "exitCode": 0,
+        "logSha256": "6874da16deae9704ec5f79607874ebbb472390a207ff9f16e15341cb2b046566"
+      },
+      {
+        "command": "node scripts/website-installation-check.mjs",
+        "exitCode": 0,
+        "logSha256": "11c06fadf171b62e58aa57b95e8acd93aba4f0fca3bef5c551fa12d2dce98f27"
+      },
+      {
+        "command": "node scripts/tenant-isolation-check.mjs",
+        "exitCode": 0,
+        "logSha256": "f5420d91ebdc66e03093ae734b29e0bd68584774327386356fd0edbb4e4b109b"
+      },
+      {
+        "command": "node scripts/owner-test-check.mjs",
+        "exitCode": 0,
+        "logSha256": "9d5a5f68864af0e85f4f1704c0d7c1c8b8fabd5a85b99a70ca31bb767fd69352"
+      },
+      {
+        "command": "node scripts/self-service-delivery-check.mjs",
+        "exitCode": 0,
+        "logSha256": "62ac57529c12137c6d834a2ec4d0cb0395d284063ff9f34eab23fe1b83072a81"
+      },
+      {
+        "command": "node scripts/self-service-scheduler-check.mjs",
+        "exitCode": 0,
+        "logSha256": "0c0150659b12dc8e37ebb864fab779091e6aa41ad95926237f60c4d42b005529"
+      },
+      {
+        "command": "node scripts/self-service-ai-check.mjs",
+        "exitCode": 0,
+        "logSha256": "7af91ffa1d13c1c6397a0639c91e539f3dcfe4cae9988f68beb22f178d64ce10"
+      },
+      {
+        "command": "node scripts/sales-desk-check.mjs",
+        "exitCode": 0,
+        "logSha256": "b1e06856f3c652d6f9044fa867e563e64c091f3dd8478f24610c110c54ffa55c"
+      },
+      {
+        "command": "node scripts/sales-budget-check.mjs",
+        "exitCode": 0,
+        "logSha256": "526e855f7dc991fc16ee56d8f46293d78e14849ad9db1914fbb4558ce9372783"
+      },
+      {
+        "command": "node scripts/sales-agent-check.mjs",
+        "exitCode": 0,
+        "logSha256": "4ded3491505295b2648fed8f5aab4b3e5a742ccf3188245fbf3ae362c97b7f10"
+      },
+      {
+        "command": "node scripts/calendar-execution-check.mjs",
+        "exitCode": 0,
+        "logSha256": "ac55c12c4b7cedda104406fc49d1bdc7edab9add4a477a3bfc00639dd2d17e1f"
+      },
+      {
+        "command": "node scripts/calendar-self-service-check.mjs",
+        "exitCode": 0,
+        "logSha256": "9c00f1c3f6c7224a37b0118ec77c91aec3618ae6cf7054a0aa63f6cd445c53f8"
+      },
+      {
+        "command": "node scripts/calendar-connection-check.mjs",
+        "exitCode": 0,
+        "logSha256": "3d0fec253b5d15b7bcf63ffe59f81484bb8d50c8041754f1d8ce07438db72787"
+      },
+      {
+        "command": "node scripts/calendar-delivery-check.mjs",
+        "exitCode": 0,
+        "logSha256": "1f1105a9f849b4980ddd94b582b4bba4487dc202ffc0be62ef3de9d863b54a61"
+      },
+      {
+        "command": "node scripts/agent-delivery-check.mjs",
+        "exitCode": 0,
+        "logSha256": "774f7b07c6c8dad1e867e5287061088ae14066f9a8e138b3779adcbc9008dbf5"
+      },
+      {
+        "command": "node scripts/owner-visits-check.mjs",
+        "exitCode": 0,
+        "logSha256": "0b9fc0ab0167f7e0b56c5a27f52044d3f4345b6a7e0897a3c2c573864e2a7758"
+      },
+      {
+        "command": "node scripts/voice-activation-check.mjs",
+        "exitCode": 0,
+        "logSha256": "5da88ae8ab7493506f8334ef7c0b057f32e8564ae368489cf72a65563e92a27e"
+      },
+      {
+        "command": "node scripts/messaging-activation-check.mjs",
+        "exitCode": 0,
+        "logSha256": "d91c7c22242d4fc87dbafba0f124c667ca9a18b4c52c8ba2fbb6a1ddf7d147eb"
+      },
+      {
+        "command": "node scripts/managed-sms-budget-check.mjs",
+        "exitCode": 0,
+        "logSha256": "a19bf62091228ed8dae31deca04760491e99ec41302762f971b3c2eec97eee1a"
+      },
+      {
+        "command": "node scripts/managed-delivery-qa-check.mjs",
+        "exitCode": 0,
+        "logSha256": "313b5754f37193b6dad27f770482e5f79ef31bdd2806b42e2da28fe9d9075a16"
+      },
+      {
+        "command": "node scripts/managed-sms-qa-check.mjs",
+        "exitCode": 0,
+        "logSha256": "49e733d5c031bbc2e947e2a06739b89c4fa7f5a3abf3f03d97d864f51e4f8eb0"
+      },
+      {
+        "command": "node scripts/service-reconciliation-check.mjs",
+        "exitCode": 0,
+        "logSha256": "528bfda0e924c132700b4f87c05a057aec63dcb4604364455eb00f6335417de2"
+      },
+      {
+        "command": "node scripts/platform-sms-check.mjs",
+        "exitCode": 0,
+        "logSha256": "2f0cc95550add10f3ad5601d35dcba5a5f0d6e10309019f18baf2ceaf95545a8"
+      },
+      {
+        "command": "node scripts/sms-policy-check.mjs",
+        "exitCode": 0,
+        "logSha256": "822b8f54cf2d09b45e52d4b9b91a7e08705ce0400e14fdaf3dadb4f9b6de362c"
+      },
+      {
+        "command": "node scripts/service-onboarding-check.mjs",
+        "exitCode": 0,
+        "logSha256": "e63ee53c8b4362b5ff4a465d6966b49d47b340c014e5cd1e5a7340e28c536b32"
+      },
+      {
+        "command": "node scripts/service-onboarding-qa-check.mjs",
+        "exitCode": 0,
+        "logSha256": "e6d69428c1070d98151ef26f8563212409e784537d737c3ad87ddd6a5a86f27d"
+      },
+      {
+        "command": "node scripts/connection-journey-check.mjs",
+        "exitCode": 0,
+        "logSha256": "9c1a0309c29fd36cc7025da799e1c8f05e9b58db50381c818997a75a6c034ca5"
+      },
+      {
+        "command": "node scripts/connection-admissions-check.mjs",
+        "exitCode": 0,
+        "logSha256": "aced7d968e21fb720ec6459c927ea1e29394948b6c8daf0ff40394ee42e14f40"
+      },
+      {
+        "command": "node scripts/connection-admissions-cas-check.mjs",
+        "exitCode": 0,
+        "logSha256": "55e1eda083a0806edb72abf5ae9553892b67d9b27e680153fbe6b362c60bdd50"
+      },
+      {
+        "command": "node scripts/build-site.mjs",
+        "exitCode": 0,
+        "logSha256": "183c12ca5ac24f21fdcc190039aa51c3dac969d23df72bddfa727783eec0dffe"
+      }
+    ]
+  },
+  "requiredSourcesMatchCurrent": true
+}
