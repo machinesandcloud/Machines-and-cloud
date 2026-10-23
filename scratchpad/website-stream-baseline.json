@@ -1,0 +1,624 @@
+{
+  "scope": "Offline actual-DOM baseline reproduction; all browser requests fulfilled from fixtures or blocked; no live API/model/provider/store effects.",
+  "source": {
+    "path": "embed.js",
+    "sha256": "70c9f04aada23032ec71bdc6d8e7f4e08495b7c6c2ddbb51e00187cdaab80a11",
+    "unchanged": true
+  },
+  "syntheticLedgerCaveat": "Scripted saved-request entries illustrate the independent server outcome. They are not real request/tool/storage evidence. Actual source saves tools before the terminal done packet, so missing done cannot establish whether a request saved.",
+  "checks": {
+    "scenarios": 10,
+    "unexpectedNetworkRequests": 0
+  },
+  "results": [
+    {
+      "name": "delta_then_clean_eof",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          }
+        ],
+        "persisted": {
+          "contact": "w3ktyqay1mvk8qqx8",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "I have the details and I am checking the requested"
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "w3ktyqay1mvk8qqx8",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": true,
+      "originalPageErrors": [],
+      "screenshot": "scratchpad/website-stream-delta_then_clean_eof-390.png",
+      "followupPayload": {
+        "client": "stream-fixture",
+        "contact": "w3ktyqay1mvk8qqx8",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "content": "I have the details and I am checking the requested"
+          },
+          {
+            "role": "user",
+            "content": "Did you finish?"
+          }
+        ],
+        "page": "/",
+        "stream": true
+      }
+    },
+    {
+      "name": "saved_request_then_delta_eof",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          }
+        ],
+        "persisted": {
+          "contact": "wf15bij6umvk8qrbk",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "I have the details and I am checking the requested"
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "wf15bij6umvk8qrbk",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "source": "scripted fixture outcome, not actual save evidence"
+            }
+          ],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": true,
+      "originalPageErrors": []
+    },
+    {
+      "name": "complete_done_with_saved_request",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "persisted": {
+          "contact": "wxv9xw56kmvk8qrl2",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "wxv9xw56kmvk8qrl2",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "source": "scripted fixture outcome, not actual save evidence"
+            }
+          ],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": false,
+      "originalPageErrors": [],
+      "screenshot": "scratchpad/website-stream-complete_done_with_saved_request-390.png"
+    },
+    {
+      "name": "empty_eof",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Chat is unavailable right now. Please use the shopâ€™s contact details on this website."
+          }
+        ],
+        "persisted": {
+          "contact": "w5vxr4ooimvk8qrvs",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "w5vxr4ooimvk8qrvs",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": false,
+      "originalPageErrors": []
+    },
+    {
+      "name": "delta_then_explicit_error",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          },
+          {
+            "role": "assistant",
+            "text": "Chat is unavailable right now. Please use the shopâ€™s contact details on this website."
+          }
+        ],
+        "persisted": {
+          "contact": "wektutmqomvk8qs3u",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "wektutmqomvk8qs3u",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": false,
+      "originalPageErrors": []
+    },
+    {
+      "name": "delta_then_transport_error",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          },
+          {
+            "role": "assistant",
+            "text": "Chat is unavailable right now. Please use the shopâ€™s contact details on this website."
+          }
+        ],
+        "persisted": {
+          "contact": "w15fk16tvmvk8qse7",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "w15fk16tvmvk8qse7",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": false,
+      "originalPageErrors": []
+    },
+    {
+      "name": "saved_request_then_transport_error",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          },
+          {
+            "role": "assistant",
+            "text": "Chat is unavailable right now. Please use the shopâ€™s contact details on this website."
+          }
+        ],
+        "persisted": {
+          "contact": "wkthapeftmvk8qsni",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "wkthapeftmvk8qsni",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "source": "scripted fixture outcome, not actual save evidence"
+            }
+          ],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": false,
+      "originalPageErrors": []
+    },
+    {
+      "name": "complete_done_without_trailing_newline",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          }
+        ],
+        "persisted": {
+          "contact": "w8uonbiw4mvk8qswv",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "I have the details and I am checking the requested"
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "w8uonbiw4mvk8qswv",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "source": "scripted fixture outcome, not actual save evidence"
+            }
+          ],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": true,
+      "originalPageErrors": []
+    },
+    {
+      "name": "delta_then_truncated_done",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "I have the details and I am checking the requested"
+          }
+        ],
+        "persisted": {
+          "contact": "w49y0qq3vmvk8qt6y",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "I have the details and I am checking the requested"
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "w49y0qq3vmvk8qt6y",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "source": "scripted fixture outcome, not actual save evidence"
+            }
+          ],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": true,
+      "originalPageErrors": []
+    },
+    {
+      "name": "done_before_connection_closes",
+      "observation": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "persisted": {
+          "contact": "wq5eaurevmvk8qtgn",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": false,
+        "requests": [
+          {
+            "client": "stream-fixture",
+            "contact": "wq5eaurevmvk8qtgn",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Please save my AC service request for tomorrow."
+              }
+            ],
+            "page": "/",
+            "stream": true
+          }
+        ],
+        "receipt": {
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "source": "scripted fixture outcome, not actual save evidence"
+            }
+          ],
+          "modelCalls": 0,
+          "providerCalls": 0,
+          "note": "Synthetic fixture ledger only; no actual handler/tool, storage, model or provider was invoked."
+        }
+      },
+      "expectedDefectReproduced": false,
+      "originalPageErrors": [],
+      "sendEnabledAfterFixtureClose": true
+    }
+  ]
+}

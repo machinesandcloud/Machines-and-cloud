@@ -70,3 +70,9 @@ The following official documentation was read for this review. It describes vend
 - **Reuse saved settings and show where the result arrives.** Housecall Pro documents using existing business/booking/service-area settings, while acknowledging carrier forwarding and specialist assistance. Its chat documentation makes the website widget a prerequisite and puts outcomes in the inbox. Our onboarding should reuse verified answers, expose the remaining permission/installation step and prove the resulting request in the portal. [Housecall Pro setup](https://help.housecallpro.com/en/articles/12996637-getting-started-with-csr-ai), [chat workflow](https://help.housecallpro.com/en/articles/12453258-csr-ai-chat-answering).
 
 These lessons support the selected implementation and acceptance work. They do not establish that our service is better than a competitor or that an unbuilt connector is available. The existing [PO review](PO-NEXT-WORK-2026-10-22.md), [UI/UX review](UIUX-NEXT-WORK-2026-10-22.md) and [backlog](BACKLOG.md) retain additional public stakeholder inputs and longer-term ideas.
+
+## Grouped reliability release candidate
+
+The workspace repair, customer-widget stream recovery, hero photo rotation and onboarding spacing fix passed all 31 required commands together. The Netlify command now includes the permanent workspace-edit checks. Independent widget acceptance passed 16 browser groups in addition to 25 engineering fixtures. [Release plan](../scratchpad/launch-reliability-release-plan.json). Publication and read-only hosted checks remain separate evidence.
+
+The next session-expiry check reproduced inconsistent browser cleanup on background and conflict-refresh authorization failures; the backend denies access. Its repair is separate from this accepted batch. Guided website installation is the next product slice; the approved UI contract describes observation, setup-check completion and the first ordinary request as separate facts.

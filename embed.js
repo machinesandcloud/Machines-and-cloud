@@ -73,26 +73,53 @@
     var text = input.value.trim(); if (!text || busy) return;
     busy = true; sendBtn.disabled = true; input.value = '';
     state.transcript.push({ role: 'user', content: text }); persist(); add('user', text);
-    var tp = typing(), bubble = null, full = '', done = false;
+    var tp = typing(), bubble = null, full = '', done = false, reader = null;
+    var interrupted = 'The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again.';
+    var abort = typeof AbortController === 'function' ? new AbortController() : null, timer;
+    // One bounded attempt. An interrupted reply can follow a saved request, so never resend it here.
+    var deadline = new Promise(function (resolve, reject) {
+      timer = setTimeout(function () {
+        if (abort) abort.abort();
+        reject(new Error('Chat response timed out'));
+      }, 90000);
+    });
+    function bounded(promise) { return Promise.race([promise, deadline]); }
     function delta(t) { if (!bubble) { tp.remove(); bubble = add('a', ''); } full += t; bubble.textContent = full; list.scrollTop = list.scrollHeight; }
-    function finish(reply) { if (done) return; done = true; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; state.transcript.push({ role: 'assistant', content: reply }); persist(); }
-    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); add('a', typeof message === 'string' ? message : 'Chat is unavailable right now. Please use the shop’s contact details on this website.'); }
-    fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, contact: state.contact, messages: state.transcript.slice(-20), page: location.pathname, stream: true }) })
+    function finish(reply) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; state.transcript.push({ role: 'assistant', content: reply }); persist(); }
+    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status'); }
+    function release() {
+      clearTimeout(timer);
+      // A terminal packet completes the turn; do not wait indefinitely for the connection to close.
+      if (reader) { try { var cancelled = reader.cancel(); if (cancelled && cancelled.catch) cancelled.catch(function () {}); } catch (e) { /* already closed */ } }
+      busy = false; sendBtn.disabled = !cfg.available; if (root.classList.contains('open')) input.focus();
+    }
+    var request = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client: slug, contact: state.contact, messages: state.transcript.slice(-20), page: location.pathname, stream: true }) };
+    if (abort) request.signal = abort.signal;
+    bounded(fetch(ENDPOINT, request))
       .then(function (res) {
         var type = res.headers.get('content-type') || '';
         if (!res.ok) { if (res.status === 429) { cfg.available = false; input.disabled = true; } fail(res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : undefined); return; }
         if (type.indexOf('ndjson') !== -1 && res.body && res.body.getReader) {
-          var reader = res.body.getReader(), dec = new TextDecoder(), buf = '';
-          return (function pump() { return reader.read().then(function (r) {
-            if (r.done) { if (!done) { if (full) finish(full); else fail(); } return; }
+          reader = res.body.getReader(); var dec = new TextDecoder(), buf = '';
+          function packet(line) {
+            if (done || !line.trim()) return;
+            var value; try { value = JSON.parse(line); } catch (e) { fail(interrupted); return; }
+            if (!value || typeof value !== 'object') { fail(interrupted); return; }
+            if (value.t === 'delta' && typeof value.text === 'string') delta(value.text);
+            else if (value.t === 'done') finish(value.reply);
+            else fail(interrupted);
+          }
+          return (function pump() { return bounded(reader.read()).then(function (r) {
+            if (r.done) { buf += dec.decode(); if (buf.trim()) packet(buf); if (!done) fail(interrupted); return; }
             buf += dec.decode(r.value, { stream: true }); var lines = buf.split('\n'); buf = lines.pop();
-            lines.forEach(function (l) { if (!l.trim()) return; try { var o = JSON.parse(l); if (o.t === 'delta') delta(o.text || ''); else if (o.t === 'done') finish(o.reply || full); else if (o.t === 'error') fail(); } catch (e) { /* ignore */ } });
+            lines.forEach(packet);
+            if (done) return;
             return pump();
           }); })();
         }
-        return res.json().then(function (d) { if (d && typeof d.reply === 'string') finish(d.reply); else fail(); });
+        return bounded(res.json()).then(function (d) { if (d && d.t === 'done') finish(d.reply); else fail(interrupted); });
       })
-      .catch(fail)
-      .then(function () { busy = false; sendBtn.disabled = !cfg.available; input.focus(); });
+      .catch(function () { fail(interrupted); })
+      .then(release, release);
   });
 })();

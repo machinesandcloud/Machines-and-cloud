@@ -1,0 +1,1518 @@
+{
+  "scope": "Offline actual-DOM proposed-repair acceptance, not production or provider delivery proof.",
+  "source": {
+    "path": "embed.js",
+    "sha256": "e96a5190e806a79e2572aa9ebbe7b42743921d4c66ed56006cc578f404c64ae7",
+    "baselineSha256": "70c9f04aada23032ec71bdc6d8e7f4e08495b7c6c2ddbb51e00187cdaab80a11"
+  },
+  "fixtureCaveat": "Saved-request receipts are independently scripted fixture outcomes, not actual tool/storage saves. No AI/provider call or real saved request occurred.",
+  "counts": {
+    "passed": 25,
+    "total": 25,
+    "unexpectedBrowserRequests": 0,
+    "actualExternalRequests": 0,
+    "actualModelCalls": 0,
+    "actualProviderCalls": 0,
+    "actualSavedRequests": 0
+  },
+  "results": [
+    {
+      "name": "delta_then_clean_eof",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wnomuan40mvk8xkf3",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wnomuan40mvk8xkf3",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": [],
+      "screenshot": "scratchpad/website-stream-fixed-delta_then_clean_eof-390.png",
+      "followup": {
+        "client": "stream-fixture",
+        "contact": "wnomuan40mvk8xkf3",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "user",
+            "content": "Did you finish?"
+          }
+        ],
+        "page": "/",
+        "stream": true
+      }
+    },
+    {
+      "name": "saved_request_then_delta_eof",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wd33jorgamvk8xktc",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wd33jorgamvk8xktc",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "complete_done_with_saved_request",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "stored": {
+          "contact": "wy0igdi0kmvk8xl2n",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wy0igdi0kmvk8xl2n",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": [],
+      "screenshot": "scratchpad/website-stream-fixed-complete_done_with_saved_request-390.png"
+    },
+    {
+      "name": "empty_eof",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "w7l1ovlpfmvk8xld7",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "w7l1ovlpfmvk8xld7",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "delta_then_explicit_error",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "w5jum3iz6mvk8xll3",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "w5jum3iz6mvk8xll3",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "delta_then_transport_error",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wc5qauvg6mvk8xlup",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wc5qauvg6mvk8xlup",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "saved_request_then_transport_error",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wmv44kp78mvk8xm49",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wmv44kp78mvk8xm49",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "complete_done_without_trailing_newline",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "stored": {
+          "contact": "wdnk404zmmvk8xmdq",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wdnk404zmmvk8xmdq",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "delta_then_truncated_done",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wl24e4ywymvk8xmn9",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wl24e4ywymvk8xmn9",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "done_before_connection_closes",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "stored": {
+          "contact": "wo9f5am7dmvk8xmw6",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wo9f5am7dmvk8xmw6",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "malformed_packet_followed_by_done",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "w2cezy38wmvk8xn5y",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "w2cezy38wmvk8xn5y",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "terminal_done_missing_reply",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "whl1tfsf1mvk8xnfp",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "whl1tfsf1mvk8xnfp",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "terminal_done_blank_reply",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wn1mpm7jumvk8xnpc",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wn1mpm7jumvk8xnpc",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "terminal_done_wrong_reply_type",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wc3oy167hmvk8xnyq",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wc3oy167hmvk8xnyq",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "terminal_error_cannot_be_replaced_by_later_done",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wh8zd7fivmvk8xo8b",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wh8zd7fivmvk8xo8b",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "packets_after_done_do_not_change_answer",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "stored": {
+          "contact": "wljx30zqymvk8xohm",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wljx30zqymvk8xohm",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "wrong_delta_type",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "w65t38cwfmvk8xopl",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "w65t38cwfmvk8xopl",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "unknown_packet_type",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wisu0ecipmvk8xoxh",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wisu0ecipmvk8xoxh",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "no_response_headers_times_out_once",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "w9hxgopn2mvk8xp5i",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "w9hxgopn2mvk8xp5i",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": true,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "body_without_packets_times_out_once",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wdsvbg6ojmvk8xpfy",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wdsvbg6ojmvk8xpfy",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": true,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": true
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "saved_request_then_body_hang_times_out_once",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "w9grpbmtxmvk8xpqd",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "w9grpbmtxmvk8xpqd",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": true,
+          "cancellations": 1,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": true
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "json_without_terminal_done_is_not_completion",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wzjjmndpvmvk8xq0x",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wzjjmndpvmvk8xq0x",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "json_explicit_done_is_completion",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+          }
+        ],
+        "stored": {
+          "contact": "wfzr28b6jmvk8xqa9",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            },
+            {
+              "role": "assistant",
+              "content": "Your request is saved in the shop portal. Ref fixture-request-1. The shop must confirm the arrival details."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wfzr28b6jmvk8xqa9",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [
+            {
+              "id": "fixture-request-1",
+              "evidence": "scripted fixture only"
+            }
+          ],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "daily_limit_keeps_composer_disabled",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "Chat has reached its daily limit. Please contact the shop directly using the details on this website."
+          }
+        ],
+        "stored": {
+          "contact": "wpn9e6q6tmvk8xqjt",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": false,
+        "sendEnabled": false,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wpn9e6q6tmvk8xqjt",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    },
+    {
+      "name": "denied_request_recovers_composer",
+      "pass": true,
+      "observed": {
+        "bubbles": [
+          {
+            "role": "assistant",
+            "text": "How can we help?"
+          },
+          {
+            "role": "user",
+            "text": "Please save my AC service request for tomorrow."
+          },
+          {
+            "role": "assistant",
+            "text": "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+          }
+        ],
+        "stored": {
+          "contact": "wrx082fxbmvk8xqrv",
+          "transcript": [
+            {
+              "role": "user",
+              "content": "Please save my AC service request for tomorrow."
+            }
+          ]
+        },
+        "composerEnabled": true,
+        "sendEnabled": true,
+        "fixture": {
+          "requests": [
+            {
+              "client": "stream-fixture",
+              "contact": "wrx082fxbmvk8xqrv",
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Please save my AC service request for tomorrow."
+                }
+              ],
+              "page": "/",
+              "stream": true
+            }
+          ],
+          "savedRequests": [],
+          "aborted": false,
+          "cancellations": 0,
+          "deadlineDelays": [
+            90000
+          ],
+          "clearedDeadlines": 1,
+          "heldOpen": false
+        }
+      },
+      "pageErrors": []
+    }
+  ]
+}
