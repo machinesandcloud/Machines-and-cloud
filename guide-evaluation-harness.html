@@ -3,76 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LLM Evaluation Harness Guide | Machines & Cloud</title>
-  <meta name="description" content="A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.">
+  <title>A practical guide to testing AI workflows | Machines &amp; Cloud</title>
+  <meta name="description" content="Build a repeatable test from real questions, expected results and past mistakes. See what changed before customers or colleagues depend on a new answer.">
   <link rel="canonical" href="https://www.machinesandcloud.com/guide-evaluation-harness.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Machines & Cloud">
-  <meta property="og:title" content="LLM Evaluation Harness Guide | Machines & Cloud">
-  <meta property="og:description" content="A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.">
+  <meta property="og:title" content="A practical guide to testing AI workflows | Machines &amp; Cloud">
+  <meta property="og:description" content="Build a repeatable test from real questions, expected results and past mistakes. See what changed before customers or colleagues depend on a new answer.">
   <meta property="og:url" content="https://www.machinesandcloud.com/guide-evaluation-harness.html">
   <meta property="og:image" content="https://www.machinesandcloud.com/assets/logo.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="LLM Evaluation Harness Guide | Machines & Cloud">
-  <meta name="twitter:description" content="A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.">
+  <meta name="twitter:title" content="A practical guide to testing AI workflows | Machines &amp; Cloud">
+  <meta name="twitter:description" content="Build a repeatable test from real questions, expected results and past mistakes. See what changed before customers or colleagues depend on a new answer.">
   <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
     {
-      "@context": "https://schema.org",
-      "@graph": [
+      "@type": "Article",
+      "@id": "https://www.machinesandcloud.com/guide-evaluation-harness.html#article",
+      "headline": "Test the work your AI is meant to do",
+      "description": "Build a repeatable test from real questions, expected results and past mistakes. See what changed before customers or colleagues depend on a new answer.",
+      "author": {
+        "@type": "Organization",
+        "name": "Machines & Cloud"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Machines & Cloud",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.machinesandcloud.com/assets/logo.png"
+        }
+      },
+      "datePublished": "2026-04-09",
+      "dateModified": "2026-04-09",
+      "mainEntityOfPage": "https://www.machinesandcloud.com/guide-evaluation-harness.html"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.machinesandcloud.com/guide-evaluation-harness.html#faq",
+      "mainEntity": [
         {
-          "@type": "Article",
-          "@id": "https://www.machinesandcloud.com/guide-evaluation-harness.html#article",
-          "headline": "LLM Evaluation Harness Guide",
-          "description": "A practical guide to evaluation harnesses for AI agents: golden sets, release gates, regression tests, human review sampling, and drift monitoring for production workflows.",
-          "author": {
-            "@type": "Organization",
-            "name": "Machines & Cloud"
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": "Machines & Cloud",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.machinesandcloud.com/assets/logo.png"
-            }
-          },
-          "datePublished": "2026-04-09",
-          "dateModified": "2026-04-09",
-          "mainEntityOfPage": "https://www.machinesandcloud.com/guide-evaluation-harness.html"
+          "@type": "Question",
+          "name": "What is an evaluation harness for an AI agent?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An evaluation harness is the release and monitoring system that tests an agent against representative cases, edge cases, and failure modes before and after changes go live."
+          }
         },
         {
-          "@type": "FAQPage",
-          "@id": "https://www.machinesandcloud.com/guide-evaluation-harness.html#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "What is an evaluation harness for an AI agent?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "An evaluation harness is the release and monitoring system that tests an agent against representative cases, edge cases, and failure modes before and after changes go live."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What should be included in a golden set?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "A golden set should include normal cases, edge cases, prohibited actions, ambiguous cases, and known regressions that matter to the workflow's business outcome."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How often should agent regressions be tested?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Regression tests should run on every material change to prompts, tools, models, routing logic, or policy rules, and teams should review production drift on a fixed operating cadence."
-              }
-            }
-          ]
+          "@type": "Question",
+          "name": "What should be included in a golden set?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A golden set should include normal cases, edge cases, prohibited actions, ambiguous cases, and known regressions that matter to the workflow's business outcome."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often should agent regressions be tested?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Regression tests should run on every material change to prompts, tools, models, routing logic, or policy rules, and teams should review production drift on a fixed operating cadence."
+          }
         }
       ]
     }
-  </script>
+  ]
+}
+</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -84,18 +84,18 @@
     <div class="grid-pattern"></div>
   </div>
 
-  <nav class="navbar" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo.png" alt="Machines & Cloud"></a><button class="navbar-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button><div class="navbar-menu" id="navMenu"><ul class="navbar-links"><li><a href="index.html#plans">Plans</a></li><li><a href="index.html#week">See it work</a></li><li><a href="about.html">About</a></li></ul><div class="navbar-cta"><a href="index.html#pilot" class="btn btn-primary">Start a free pilot <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div></div></div></div></nav>
+  <nav class="navbar" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo.png" alt="Machines & Cloud"></a><button class="navbar-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button><div class="navbar-menu" id="navMenu"><ul class="navbar-links"><li><a href="index.html#plans">Plans</a></li><li><a href="index.html#week">See it work</a></li><li><a href="about.html">About</a></li></ul><div class="navbar-cta"><a href="index.html#pilot" class="btn btn-primary">Get started free<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div></div></div></div></nav>
 
   <section class="page-hero">
     <div class="container">
       <div class="hero-grid">
         <div class="page-hero-content reveal">
           <span class="section-eyebrow">Guide</span>
-          <h1 class="page-hero-title">Evaluation harness guide for agentic AI</h1>
-          <p class="page-hero-description">If you cannot measure normal cases, edge cases, and prohibited actions before launch, you do not have a production AI workflow. You have an experiment.</p>
+          <h1 class="page-hero-title">Test the work your AI is meant to do</h1>
+          <p class="page-hero-description">Build a repeatable test from real questions, expected results and past mistakes. See what changed before customers or colleagues depend on a new answer.</p>
           <div class="hero-actions">
             <a href="templates-checklists.html" class="btn btn-primary btn-xl">Use the Evaluation Template</a>
-            <a href="index.html#demo-wrap" class="btn btn-secondary btn-xl">See Workflow Examples</a>
+            <a href="index.html#demo-wrap" class="btn btn-secondary btn-xl">See website chat</a>
           </div>
         </div>
         <div class="hero-demo reveal">
@@ -121,7 +121,7 @@
                     <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                     <path class="ring-progress" stroke-dasharray="91, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                   </svg>
-                  <span class="ring-value">91%</span>
+                  <span class="ring-value">Review</span>
                 </div>
                 <div class="metric-info"><span class="metric-name">Target golden-set pass rate</span></div>
               </div>
@@ -139,7 +139,7 @@
               </div>
             </div>
             <div class="dashboard-footer">
-              <div class="dashboard-stat"><span class="stat-number">100%</span><span class="stat-text">Release coverage target</span></div>
+              <div class="dashboard-stat"><span class="stat-number">Sources</span><span class="stat-text">Release coverage target</span></div>
               <div class="dashboard-stat"><span class="stat-number">Fast</span><span class="stat-text">Rollback decision</span></div>
             </div>
           </div>
@@ -153,11 +153,11 @@
       <div class="section-header reveal">
         <span class="section-eyebrow">Direct answer</span>
         <h2 class="section-title">What an evaluation harness actually does</h2>
-        <p class="section-description">An evaluation harness is the release discipline for an agent. It tests expected behavior, catches regressions after changes, measures unsafe outcomes, and gives operators a repeatable way to decide whether the workflow can stay autonomous.</p>
+        <p class="section-description">An evaluation harness runs a repeatable set of tasks and compares the results with the expected behavior. It helps the team see which answers improved, which actions failed and whether a change is ready.</p>
       </div>
       <div class="grid grid-3 reveal">
         <div class="card">
-          <h3 class="card-title">Golden set</h3>
+          <h3 class="card-title">Representative test set</h3>
           <p class="card-description">Representative cases with expected outcomes, including both high-frequency work and known edge conditions.</p>
         </div>
         <div class="card">
@@ -166,7 +166,7 @@
         </div>
         <div class="card">
           <h3 class="card-title">Operating loop</h3>
-          <p class="card-description">A fixed cadence for reviewing drift, failures, and rule changes after launch so the harness stays current.</p>
+          <p class="card-description">Review real mistakes and business-rule changes regularly, then add the cases your next release needs to pass.</p>
         </div>
       </div>
     </div>
@@ -318,10 +318,10 @@
   <section class="section cta-section">
     <div class="container">
       <div class="cta-content reveal">
-        <h2 class="cta-title">Need an evaluation stack before launch pressure hits?</h2>
-        <p class="cta-description">We build the release criteria, golden sets, and review cadence around the actual workflow so production readiness is measurable instead of implied.</p>
+        <h2 class="cta-title">What would your next release need to pass?</h2>
+        <p class="cta-description">Use these questions to agree what your test should cover, who reviews uncertain cases and which failures stop a wider rollout.</p>
         <div class="cta-actions">
-          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary btn-lg">Book a Discovery Call</a>
+          <a href="https://calendly.com/ngoumnaisteve/30" class="btn btn-primary btn-lg">Talk through your task</a>
           <a href="guide-ai-governance.html" class="btn btn-secondary btn-lg">See Governance Playbook</a>
         </div>
       </div>

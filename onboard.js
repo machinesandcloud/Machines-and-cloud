@@ -9,7 +9,7 @@
     retiredPlanHint = plan === 'pro';
     form.querySelectorAll('input[name=plan]').forEach(function (field) { field.checked = field.value === selected; });
     var note = document.getElementById('plan-preference-note');
-    if (note) { note.hidden = plan !== 'pro'; note.textContent = plan === 'pro' ? 'Pro is no longer offered for new setup. Choose a current preference; billing remains off.' : ''; }
+    if (note) { note.hidden = plan !== 'pro'; note.textContent = plan === 'pro' ? 'Choose Coverage or Follow-through below, or talk with us about Enterprise. Your selection saves a preference; you’ll review any paid service before it starts.' : ''; }
     var preferences = document.getElementById('plan-email-preferences'); if (preferences && plan === 'pro') preferences.open = true;
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
   }
@@ -122,17 +122,17 @@
     if (frame) { window.scrollTo({ top: 0, behavior: 'instant' }); steps[i].querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
   }
   var connectionDescriptions = {
-    web: {label:'Website chat',summary:'Add the front desk to your website',automation:'Prepare your front desk from your answers and keep incoming requests in your workspace.',owner:'Add one snippet to your website, then follow the guided check.',ready:'Your website check succeeds and customer chat is active.'},
-    voice: {label:'Phone answering',summary:'Use your existing number or a new front desk line',automation:'After approval, prepare your number, answering assistant and fallback routing.',owner:'Review the usage terms once. Forward your existing line if selected, then place a test call.',ready:'Your current business rules and a successful call confirm the route.'},
-    sms: {label:'Text messaging',summary:'Text from your dedicated front desk number',automation:'Prepare your shop’s sender registration and track the carrier review.',owner:'Confirm legal details and customer opt-in, approve the costs, then reply to the setup test.',ready:'Carriers approve the registration and the test reply confirms delivery.'},
-    calendar: {label:'Google Calendar',summary:'Authorize the calendar for saved visits',automation:'Connect saved visits to the Google calendar you authorize.',owner:'Choose your Google account and approve calendar access.',ready:'Google permission is saved and visit sync is confirmed.',note:'Other Google events do not block time in your workspace automatically.'}
+    web: {label:'Website chat',summary:'First answers and clear customer requests',automation:'Use your services, fees and business details to answer website questions and gather customer requests.',owner:'Review the answers, try a customer question and add the chat to your website.',ready:'Complete the review, practice conversation and website check, then activate chat in your workspace.'},
+    voice: {label:'Phone answering',summary:'Save your call-handling preferences',automation:'Your connection checklist covers an answering assistant, a front desk number and a backup call route.',owner:'Review the service and usage terms. Follow the forwarding instructions only when your workspace asks you to.',ready:'Your workspace shows the connection status and the test call needed before activation.'},
+    sms: {label:'Text messaging',summary:'Plan your customer texting setup',automation:'Your connection checklist covers business registration, customer consent and carrier review.',owner:'Confirm your legal business details and opt-in process, review the costs and complete the setup text test.',ready:'Your workspace tracks approval and the two-way text check before texting is activated.'},
+    calendar: {label:'Google Calendar',summary:'Save your calendar preference',automation:'Your connection checklist covers Google authorization and syncing saved visits.',owner:'Choose your Google account and review the requested calendar permissions.',ready:'Your workspace shows the connection status and the visit-sync check needed before use.',note:'Keep your workspace availability up to date, including jobs booked elsewhere.'}
   };
   function updateConnectionPreview(changed) {
     var plan=document.getElementById('selected-connection-plan'),selected=Array.from(form.querySelectorAll('input[name="desiredChannels"]:checked')).map(function(field){return field.value;}),open=plan.querySelector('details[open]')?.dataset.channel;
-    document.getElementById('connection-preview-count').textContent=selected.length+' connection'+(selected.length===1?'':'s')+' selected';
+    document.getElementById('connection-preview-count').textContent=selected.length+' option'+(selected.length===1?'':'s')+' selected';
     if(changed?.checked)open=changed.value;
     if(!selected.includes(open))open=selected[0];
-    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id];return '<details class="connection-preview-card" data-channel="'+id+'"'+(id===open?' open':'')+'><summary><strong>'+row.label+'</strong><span>'+row.summary+'</span></summary><dl><div><dt>We handle</dt><dd>'+row.automation+'</dd></div><div><dt>Your one-time part</dt><dd>'+row.owner+'</dd></div><div><dt>Ready when</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose a connection above to see its setup path.</p>';
+    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id];return '<details class="connection-preview-card" data-channel="'+id+'"'+(id===open?' open':'')+'><summary><strong>'+row.label+'</strong><span>'+row.summary+'</span></summary><dl><div><dt>Your connection</dt><dd>'+row.automation+'</dd></div><div><dt>Your part</dt><dd>'+row.owner+'</dd></div><div><dt>Before activation</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose what you’d like help with to see the next steps.</p>';
   }
   function updatePhoneSetup() {
     var section = document.getElementById('phone-routing-settings'), existing = document.getElementById('existing-phone-fields'), mode = form.elements.phoneSetupMode;
@@ -211,7 +211,7 @@
     form.hidden = true; document.querySelector('.ob-steps').hidden = true; draftStatus.hidden = true; gate.hidden = true;
     document.getElementById('done').classList.add('on');
     document.getElementById('done').querySelector('h2').textContent = 'Your workspace is ready';
-    document.getElementById('buildStatus').textContent = text || 'Your business details are saved. Review them, try a private customer conversation, then finish your selected connections.';
+    document.getElementById('buildStatus').textContent = text || 'Your business details are saved. Review your answers, try a private conversation and finish your selected connections.';
     document.getElementById('portalLink').textContent = 'Open your private workspace'; document.getElementById('portalLink').href = portal; document.getElementById('goPortal').href = portal;
     document.getElementById('goPortal').textContent = text ? 'Open my workspace' : 'Review my front desk';
     if (!text) { var connectionPortal=portal.split('#')[0]+'#setup';document.getElementById('goPortal').href=connectionPortal;document.getElementById('goPortal').textContent='Continue my connections';document.getElementById('buildStatus').textContent='Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.';document.getElementById('portalLink').href=portal.split('#')[0]+'#today';document.getElementById('portalLink').textContent='Open workspace overview'; }

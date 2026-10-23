@@ -5,19 +5,19 @@
   var meta = document.querySelector('meta[name="mc-api-base"]');
   var ENDPOINT = (meta && meta.content ? meta.content.replace(/\/$/, '') : '') + '/api/chat';
   var STORE_KEY = 'mc_sales_desk_v3';
-  var GREETING = "What gets in the way at your shop? Tell me a little about it. I can work through a tricky customer request, draft a response, or check how our front desk would fit.";
+  var GREETING = "What do your customers ask before booking? Share one question and we’ll try it for your business.";
   var OFFLINE = 'I can’t connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time.';
   var RETRY = 'That reply didn’t finish. You can retry without losing your question.';
   var CHIPS = [
-    ['Show me a customer reply', 'Show me how you would handle a customer asking for help at my shop.'],
-    ['Would this fit my shop?', 'Help me figure out whether your front desk would fit my shop.'],
-    ['Work out my call volume', 'Help me work out how much of my call volume would need covering.'],
-    ['Hablemos en español', 'Hablemos en español. ¿Cómo ayudaría a mi negocio?']
+    ['Show me a customer reply', 'Show me how your website chat would answer a customer’s service or pricing question for my business.'],
+    ['Would this fit my business?', 'Help me decide whether your website chat fits my business and the website inquiries I receive.'],
+    ['Try my customer’s question', 'Help me try a customer question. Ask for the business details you need before answering it.'],
+    ['Hablemos en español', 'Hablemos en español. ¿Cómo ayudaría el chat de mi sitio web a mi negocio?']
   ];
   // Navigation is chosen by an explicit visitor click, never by arbitrary model URLs.
   var ACTIONS = {
-    start_workspace: { href: '/#pilot', label: 'Get started' },
-    see_example: { href: '/#demo-wrap', label: 'Try an example' },
+    start_workspace: { href: '/#pilot', label: 'Get started free' },
+    see_example: { href: '/#demo-wrap', label: 'See it work' },
     contact: { href: 'https://calendly.com/ngoumnaisteve/30', label: 'Choose a time to talk' }
   };
   var MAX_TURNS = 60, TIMEOUT_MS = 85000;
@@ -54,7 +54,7 @@
     '<div class="mc-agent-messages" id="mcAgentMessages" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions"></div>' +
     '<div class="mc-agent-chips" id="mcAgentChips"></div>' +
     '<div class="mc-agent-status" id="mcAgentStatus" role="status"></div>' +
-    '<form class="mc-agent-form" id="mcAgentForm"><label for="mcAgentInput" class="sr-only">Your message</label><textarea id="mcAgentInput" rows="1" placeholder="Tell me about your shop…" maxlength="1500" required></textarea><button type="submit" class="btn btn-primary" id="mcAgentSend">Send</button><button type="button" class="mc-agent-stop" id="mcAgentStop" hidden>Stop</button></form>' +
+    '<form class="mc-agent-form" id="mcAgentForm"><label for="mcAgentInput" class="sr-only">Your message</label><textarea id="mcAgentInput" rows="1" placeholder="Tell me about your business…" maxlength="1500" required></textarea><button type="submit" class="btn btn-primary" id="mcAgentSend">Send</button><button type="button" class="mc-agent-stop" id="mcAgentStop" hidden>Stop</button></form>' +
     '<div class="mc-agent-bottom"><p class="mc-agent-foot">AI assistant. History saved for this tab. Messages go to our AI provider. <a href="/privacy">Privacy</a></p><div class="mc-agent-bottom-actions"><button type="button" class="mc-agent-save" id="mcAgentSave">Save chat</button><a href="https://calendly.com/ngoumnaisteve/30" target="_blank" rel="noopener noreferrer">Talk with us</a></div></div></section>';
   document.body.appendChild(root);
   var launcher = document.getElementById('mcAgentLauncher'), panel = document.getElementById('mcAgentPanel');
@@ -141,19 +141,19 @@
       var data = event.data, card = el('details', 'mc-agent-card'), summary = el('summary'), body = el('div', 'mc-agent-card-body');
       if (event.type === 'sales_estimate' && data.kind === 'call_volume') {
         var valid = function (n) { return typeof n === 'number' && Number.isFinite(n) && n >= 0 && n < 1000000000; };
-        summary.textContent = valid(data.routedMinutes) ? data.routedMinutes.toLocaleString() + ' routed minutes / month' : 'Call-volume planning estimate';
+        summary.textContent = valid(data.routedMinutes) ? data.routedMinutes.toLocaleString() + ' estimated call minutes / month' : 'Your call-volume estimate';
         var dl = el('dl');
-        [['Total call minutes', data.totalMinutes], ['Missed-call minutes', data.missedMinutes], ['Minutes routed to AI', data.routedMinutes]].forEach(function (row) {
-          var div = el('div'); div.append(el('dt', '', row[0]), el('dd', '', valid(row[1]) ? row[1].toLocaleString() : 'Not established')); dl.appendChild(div);
+        [['Total call minutes', data.totalMinutes], ['Missed-call minutes', data.missedMinutes], ['Potential minutes to route', data.routedMinutes]].forEach(function (row) {
+          var div = el('div'); div.append(el('dt', '', row[0]), el('dd', '', valid(row[1]) ? row[1].toLocaleString() : 'Not enough information')); dl.appendChild(div);
         });
         body.appendChild(dl);
-        if (Array.isArray(data.assumptions) && data.assumptions.length) body.appendChild(el('p', '', 'Assumptions: ' + data.assumptions.filter(function (s) { return typeof s === 'string'; }).slice(0, 5).join('; ').slice(0, 1000)));
-        body.appendChild(el('p', '', 'Planning only. Phone service needs separate activation. This starts no subscription and predicts no booked jobs.'));
+        if (Array.isArray(data.assumptions) && data.assumptions.length) body.appendChild(el('p', '', 'Based on: ' + data.assumptions.filter(function (s) { return typeof s === 'string'; }).slice(0, 5).join('; ').slice(0, 1000)));
+        body.appendChild(el('p', '', 'This estimates the call volume you described. It is not a price quote; service, included usage and terms are confirmed before any paid service begins.'));
       } else if (event.type === 'sales_fit' && data.kind === 'workflow_fit' && ['current_fit', 'not_current_fit', 'clarify'].indexOf(data.fit) >= 0) {
-        summary.textContent = data.fit === 'not_current_fit' ? 'Fit check: a requirement is unavailable' : data.fit === 'current_fit' ? 'Fit check: website workflow' : 'Fit check: clarify your must-haves';
+        summary.textContent = data.fit === 'not_current_fit' ? 'Let’s review the connection you need' : data.fit === 'current_fit' ? 'A useful starting point for your business' : 'Let’s find the right starting point';
         var gaps = Array.isArray(data.gaps) ? data.gaps : [];
         gaps.slice(0, 5).forEach(function (gap) { if (gap && typeof gap.detail === 'string') body.appendChild(el('p', '', gap.detail.slice(0, 600))); });
-        body.appendChild(el('p', '', 'Website chat requires your review, a private test and activation. A useful website feature does not replace an unavailable requirement.'));
+        body.appendChild(el('p', '', data.fit === 'not_current_fit' ? 'Let’s confirm a service that meets this requirement before you commit.' : 'Try a question your customers ask and see what your team gets back.'));
       } else return;
       card.append(summary, body); bubble.appendChild(card);
     });
@@ -316,7 +316,7 @@
     function fail(message) {
       if (!current()) return;
       request.terminal = true; typing.remove(); if (bubble) bubble.parentElement.remove(); userBubble.parentElement.remove();
-      failedText = text; showFailure(text, message); status.textContent = 'Question saved. No completed reply.'; persist();
+      failedText = text; showFailure(text, message); status.textContent = 'Your question is still here. Try again.'; persist();
     }
     request.timer = setTimeout(function () { request.controller.abort(); }, TIMEOUT_MS);
     // Save unanswered input separately; it never becomes a fabricated assistant or dangling user turn.

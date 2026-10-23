@@ -17,8 +17,8 @@
     "customer": "Customer",
     "agent": "Front desk",
     "greeting": "Hi! I’m the AI front desk for Bayou Air & Heat. Ask me about an AC problem, our area or a service visit.",
-    "problem": "You’re with a customer. Another one is calling.",
-    "promise": "See how the desk answers a question, collects the right details and leaves you a clear request.",
+    "problem": "A customer is on your website. You’re on a job.",
+    "promise": "See how the chat explains your fee and gathers the details you need to call back.",
     "ruleSummary": "Example shop · Katy · $89 diagnostic · Ray confirms visits",
     "rules": "Bayou Air & Heat serves Katy, Cypress, Memorial, the Energy Corridor, Sugar Land and Richmond. Not Pearland or The Woodlands. The $89 diagnostic goes toward an approved repair; repairs are quoted on site. Requested windows: 8 to 12 or 12 to 5. Exact times are not promised. Ray confirms requested visits.",
     "suggestion": "My AC runs but won’t cool. Do you come to Katy, and what’s the call-out fee?",
@@ -55,7 +55,7 @@
       ],
       [
         "agent",
-        "The $89 covers the diagnostic, not the whole repair. The technician quotes the repair on site; I can’t give you a repair total before that."
+        "The technician will give you a repair quote after inspecting the unit. The $89 diagnostic is credited toward the repair if you go ahead."
       ],
       [
         "customer",
@@ -63,7 +63,7 @@
       ],
       [
         "agent",
-        "We don’t promise exact arrival times. Our usual windows are 8 to 12 or 12 to 5; which would you like to request?"
+        "You can request 8 to 12 or 12 to 5. Ray will need to confirm the window; which works better?"
       ],
       [
         "customer",
@@ -71,7 +71,7 @@
       ],
       [
         "agent",
-        "Thanks, Alex. The preview has your AC problem, contact details and tomorrow’s 12-to-5 request. That window still needs Ray’s confirmation."
+        "Thanks, Alex. I’ve noted your AC problem, address and preferred window: tomorrow, 12 to 5. Ray still needs to confirm the visit."
       ],
       [
         "customer",
@@ -87,7 +87,7 @@
       ],
       [
         "agent",
-        "Added: ask you before changing the window. Ray’s preview now has the corrected number and your preferred time; no visit is confirmed."
+        "Of course. Your request includes the corrected number and a note to check with you before changing the window."
       ]
     ],
     "first": [
@@ -329,8 +329,8 @@
     "customer": "Customer",
     "agent": "Front desk",
     "greeting": "Hi! I’m the AI front desk for Katy Pipeworks. It’s after hours in this example. What can I help you with?",
-    "problem": "It’s 10 pm. You can’t stay by the phone.",
-    "promise": "Try an active leak or a callback-only request. You get the details for a person to review, with no promised arrival time.",
+    "problem": "Your business is closed. A visitor has an urgent question.",
+    "promise": "See how an urgent question becomes a request for human review. You can type or try the separate voice practice demo.",
     "ruleSummary": "Example shop · Fulshear · $150 after-hours fee · Human callback",
     "rules": "Katy Pipeworks serves Katy, Fulshear, Richmond, Sugar Land, Cinco Ranch and Brookshire. Active leaks, no water and sewage backup get an urgent after-hours request. Published emergency fee: $150. Dana confirms any other charges before a visit. Slab leaks and repiping need an on-site quote. No arrival time or callback deadline is confirmed.",
     "suggestion": "It’s 10 pm and water is actively leaking at my home in Fulshear. Can a plumber help?",
@@ -359,7 +359,7 @@
       ],
       [
         "agent",
-        "We handle active leaks as after-hours emergencies. The published emergency fee is $150, but no arrival time is confirmed. What’s your name and best callback number?"
+        "An active leak is an after-hours emergency for our shop. The emergency fee is $150. I can take your details for an urgent callback request; what’s your name and best number?"
       ],
       [
         "customer",
@@ -367,7 +367,7 @@
       ],
       [
         "agent",
-        "Understood: an urgent callback request, with no visit booked. Your name, number and Fulshear address are in the owner preview."
+        "Got it—you’re asking for an urgent callback, with no visit booked. I’ve noted your name, number and Fulshear address."
       ],
       [
         "customer",
@@ -375,7 +375,7 @@
       ],
       [
         "agent",
-        "The $150 is the published after-hours emergency fee, not a repair quote. I can’t confirm whether the $79 service-call fee is additional; that and the repair price need confirmation before a visit."
+        "The $150 is the after-hours fee. The shop needs to confirm whether the $79 service-call fee also applies and quote the repair before you agree to a visit."
       ],
       [
         "customer",
@@ -383,7 +383,7 @@
       ],
       [
         "agent",
-        "I can’t guarantee a callback time. I’ve added your request for a call within ten minutes to the preview; the timing is not confirmed."
+        "I’ve noted that you’d like a callback within ten minutes. The team needs to confirm when they can call."
       ],
       [
         "customer",
@@ -391,7 +391,7 @@
       ],
       [
         "agent",
-        "Updated to (713) 555-0154 and noted call only, no texts. This remains a callback request, not a visit."
+        "Your callback number is now (713) 555-0154. I’ve also noted: call only, no texts."
       ],
       [
         "customer",
@@ -399,7 +399,7 @@
       ],
       [
         "agent",
-        "The preview for Dana now says active leak under the kitchen sink, urgent callback only, and speak with you before any visit. Your corrected number is included; no callback or arrival time is confirmed."
+        "Your request says: active leak under the kitchen sink, urgent callback only, and speak with you before arranging a visit. The corrected number is included."
       ]
     ],
     "first": [
@@ -715,7 +715,7 @@
       ],
       [
         "agent",
-        "No prometemos una hora exacta ni tenemos disponibilidad confirmada aquí. Puede solicitar de 8 a 10; ¿le sirve esa ventana?"
+        "Puede solicitar la ventana de 8 a 10. Nia debe confirmar la disponibilidad; ¿le sirve ese horario?"
       ],
       [
         "customer",
@@ -723,7 +723,7 @@
       ],
       [
         "agent",
-        "Gracias, Ana. La vista previa incluye sus datos y el sábado de 8 a 10 como horario solicitado, todavía sin confirmar."
+        "Gracias, Ana. Ya tengo sus datos y la solicitud para el sábado, de 8 a 10. Nia debe confirmar la visita."
       ],
       [
         "customer",
@@ -739,7 +739,7 @@
       ],
       [
         "agent",
-        "Añadido: llamada solicitada antes de cualquier cambio de horario. La vista previa para Nia contiene los datos corregidos y su solicitud del sábado de 8 a 10; la visita y la llamada siguen sin confirmar."
+        "He anotado que desea una llamada antes de cualquier cambio. La solicitud incluye los datos corregidos y el sábado de 8 a 10 como horario preferido."
       ]
     ],
     "first": [
@@ -1100,7 +1100,7 @@
     el('badge').textContent = live ? 'Live AI' : 'Example';
     messages.lang = ex.lang;
     el('context').textContent = live ? 'AI practice only. Use made-up details. No real visit, callback, text or email is arranged.' : 'Watch the example, or ask your own question below. Practice only; no real appointment or message is created.';
-    el('owner-foot').textContent = live ? 'This summary updates from your conversation. In your shop, these details would go straight to you.' : 'A clear handoff, with the conversation there when you need it.';
+    el('owner-foot').textContent = live ? 'See the customer’s details alongside the conversation, ready for your next step.' : 'A clear handoff, with the conversation there when you need it.';
     renderChallenges();
     input.lang = ex.lang; input.placeholder = ex.lang === 'es' ? 'Cuéntenos qué necesita…' : 'Tell the front desk what you need…';
     if (live) liveStart(); else { watchStart(); input.value = ''; el('send').disabled = true; }

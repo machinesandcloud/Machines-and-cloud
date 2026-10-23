@@ -688,24 +688,24 @@
 
       const terminalCommands = {
         'process claim': [
-          { prompt: '→', text: 'Initializing claim processor...', class: 'typing' },
-          { prompt: '✓', text: 'Claim #CLM-9421 loaded', class: 'success' },
-          { prompt: '⚡', text: 'Extracting policy data...', class: '' },
-          { prompt: '✓', text: 'Coverage verified: $50,000 limit', class: 'success' },
-          { prompt: '✓', text: 'Claim approved for fast-track', class: 'success', badge: 'APPROVED' }
+          { prompt: '→', text: 'Opening an illustrative claim workflow...', class: 'typing' },
+          { prompt: '✓', text: 'Example record shown; no customer data loaded', class: 'success' },
+          { prompt: '⚡', text: 'Example: review the supplied policy information', class: '' },
+          { prompt: '✓', text: 'Coverage needs verification by an authorized reviewer', class: 'success' },
+          { prompt: '✓', text: 'Example ends at human review; no claim approved', class: 'success', badge: 'EXAMPLE' }
         ],
         'check status': [
-          { prompt: '→', text: 'Querying agent status...', class: 'typing' },
-          { prompt: '✓', text: 'Agent: ONLINE | Uptime: 99.7%', class: 'success' },
-          { prompt: '📊', text: 'Tasks today: 1,247 completed', class: '' },
-          { prompt: '✓', text: 'All systems operational', class: 'success', badge: 'HEALTHY' }
+          { prompt: '→', text: 'Showing an illustrative status display...', class: 'typing' },
+          { prompt: '✓', text: 'Example only; not a live service-status report', class: 'success' },
+          { prompt: '📊', text: 'No customer tasks have been executed by this demo', class: '' },
+          { prompt: '✓', text: 'Use the actual workspace for service status', class: 'success', badge: 'EXAMPLE' }
         ],
         'run audit': [
-          { prompt: '→', text: 'Starting compliance audit...', class: 'typing' },
-          { prompt: '🔍', text: 'Scanning decision logs...', class: '' },
-          { prompt: '✓', text: '14,392 decisions reviewed', class: 'success' },
-          { prompt: '✓', text: 'No compliance violations detected', class: 'success' },
-          { prompt: '📋', text: 'Audit report generated', class: '', badge: 'PASS' }
+          { prompt: '→', text: 'Opening an illustrative audit workflow...', class: 'typing' },
+          { prompt: '🔍', text: 'Example: identify records that need review', class: '' },
+          { prompt: '✓', text: 'No real decisions or customer logs were reviewed', class: 'success' },
+          { prompt: '✓', text: 'Compliance conclusions require qualified human review', class: 'success' },
+          { prompt: '📋', text: 'Illustration complete; no audit was performed', class: '', badge: 'EXAMPLE' }
         ]
       };
 

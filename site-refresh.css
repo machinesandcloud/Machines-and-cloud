@@ -52,6 +52,8 @@
 .site-photo-wrap .site-hero-photo { position: absolute; inset: 0; opacity: 0; transition: opacity 400ms ease-out; }
 .site-photo-wrap .site-hero-photo.is-visible { opacity: 1; }
 .site-photo-wrap .site-hero-photo[data-photo="home-repair"] { object-position: 40% center; }
+.site-photo-wrap .site-hero-photo[data-photo="electrical"] { object-position: 65% center; }
+.site-photo-wrap .site-hero-photo[data-photo="cleaning"] { object-position: 49% center; }
 .site-hero-photo-toggle { position: absolute; z-index: 2; top: 14px; right: 14px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #ffffff50; border-radius: 50%; background: #13243eab; color: #fff; cursor: pointer; opacity: 0; transition: opacity 150ms ease; }
 .site-hero-photo-toggle[hidden] { display: none; }
 .site-photo-wrap:hover .site-hero-photo-toggle,.site-hero-photo-toggle:focus-visible,.site-hero-photo-toggle[data-paused="true"] { opacity: 1; }
@@ -188,10 +190,33 @@
 #demo-wrap button:focus-visible, #example-input:focus-visible { outline: 3px solid #638ff5; outline-offset: 3px; }
 @keyframes site-message-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes site-typing { 50% { opacity: .35; } }
+.site-plan.site-web-offer { display: grid; grid-template-columns: 1.4fr 1fr; gap: 44px; align-items: center; max-width: 1180px; margin: 0 auto 26px; padding: 36px 40px; }
+.site-web-offer .site-plan-name { font-size: 30px; }
+.site-web-offer .site-plan-for { min-height: 0; margin-bottom: 0; }
+.site-web-offer ul { margin-bottom: 0; }
+.site-web-offer-action { padding: 24px 28px; border-radius: 12px; background: var(--site-soft); }
+.site-web-offer-action > p:first-child { margin: 0 0 20px; color: var(--site-ink); font-size: 18px; font-weight: 500; }
+.site-web-offer-action .site-hero-note { margin-top: 12px; text-align: center; }
+.site-future-plans { max-width: 1180px; margin: 0 auto; padding: 0 28px; border: 1px solid var(--site-line); border-radius: 13px; background: #fff; }
+.site-future-plans > summary { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 76px; padding: 16px 0; color: var(--site-ink); font-size: 16px; font-weight: 600; cursor: pointer; list-style: none; }
+.site-future-plans > summary::-webkit-details-marker { display: none; }
+.site-future-plans > summary > span:last-child { color: var(--site-blue); font-size: 13px; }
+.site-future-plans[open] > summary { border-bottom: 1px solid var(--site-line); }
+.site-future-plans-intro, .site-future-plans-note { max-width: 800px; margin: 24px 0 12px; color: var(--site-muted); font-size: 14px; }
+.site-future-plans-note { margin-bottom: 28px; font-size: 12px; }
+@media (max-width: 700px) {
+  .site-plan.site-web-offer { grid-template-columns: 1fr; gap: 24px; padding: 26px 22px; }
+  .site-web-offer-action { padding: 22px; }
+  .site-future-plans { padding-inline: 20px; }
+  .site-future-plans > summary { align-items: start; flex-direction: column; gap: 5px; padding-block: 20px; }
+  .site-future-plans .site-plan { padding: 22px 18px; }
+}
 .site-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; padding-top: 14px; max-width: 1180px; margin-inline: auto; }
 .site-plan { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 29px 28px 27px; border: 1px solid var(--site-line); border-radius: 13px; background: #fff; }
 .site-plan-featured { border-color: var(--site-blue); box-shadow: 0 4px 20px #2459df0a; }
 .site-plan-badge { position: absolute; inset: -13px 22px auto auto; padding: 5px 11px; border-radius: 5px; background: var(--site-blue); color: #fff; font-size: 10px; font-weight: 600; line-height: 1.5; }
+.site-plan-status { display:inline-block; margin:0 0 12px; padding:5px 8px; border-radius:4px; background:#edf3ff; color:#2454bc; font-size:10px; font-weight:600; }
+.site-allowance small { display:block; margin-top:5px; font-size:10px; color:var(--site-muted); }
 .site-plan-name { margin: 0 0 6px; color: var(--site-ink); font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -.04em; }
 .site-plan-for { min-height: 43px; margin: 0 0 22px; color: var(--site-muted); font-size: 13px; }
 .site-price { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; }
