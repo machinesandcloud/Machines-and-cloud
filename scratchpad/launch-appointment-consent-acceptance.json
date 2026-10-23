@@ -1,0 +1,35 @@
+{
+  "candidate": "159bb059b897a516eccd06adf76e9b2434e1cdd3",
+  "decision": "Named appointment-consent local implementation accepted; actual dedicated-shop provider delivery and full G5 launch remain open",
+  "independentNewEvidence": {
+    "script": "scripts/launch-appointment-consent-qa-check.mjs",
+    "receipt": "scratchpad/launch-appointment-consent-first.json",
+    "passed": 5,
+    "failed": 0,
+    "sourceStable": true,
+    "unexpectedExternalRequests": 0,
+    "scope": [
+      "provider-readback mismatches cannot turn a valid signature into appointment permission",
+      "owner identity rotation invalidates both invitation and old same-number YES",
+      "foreign tenant and ambiguous recipient records never become an SMS invitation",
+      "replaying the old entry, YES or delayed receipt after STOP then START cannot restore permission",
+      "late receipt with wrong recipient cannot project a YES; exact same receipt recovers once without another question"
+    ]
+  },
+  "reusedEvidence": "scratchpad/launch-appointment-consent-source-bridge.json independently verifies all declared25-handler/9-UI/18-delivery/20-policy receipt source hashes against159bb05. These are author-run results reused without claiming independent reruns.",
+  "reviewedActualUI": [
+    "scratchpad/appointment-consent-ui-final-r6-320.png",
+    "scratchpad/appointment-consent-ui-final-r6-1440.png"
+  ],
+  "actualHandlerBoundary": "/api/chat real booking creates optional invitation only; managed voice dispatcher shares ordinary booking + exact current dedicated number instruction; signed /api/managed-sms independently reads same provider account/message/service/from/to/body/time before tenant+recipient ledger. Deterministic APPOINTMENTS/CITAS asks and YES/SI/S\u00cd require a distinct later affirmative and exact server-authored ongoing wording. Consent alone still cannot bypass current sender/rules/account/budget gates.",
+  "unknownResultBoundary": "Late receipt readback is bound to original provider message/from/to/service/body. Delayed YES is projected from that same exact receipt only; mismatched readback stays unconsented, and no second consent question is sent to repair local projection.",
+  "stopReplayBoundary": "STOP suppresses and clears current ask/affirmation. START removes block without restoring recurring permission. Old entry, YES and handled receipt replay cannot widen it. Current old narrow purpose is not silently widened to ongoing future-visit permission.",
+  "qualifications": [
+    "Synthetic provider approvals and common review proof; no actual phone registration/send/receive/carrier readiness inferred.",
+    "Scripted model protocol only; Spanish copy was visually inspected, not qualified linguistic acceptance.",
+    "Independent new cases use the proven intercepted Blobs/Twilio fixture prefix with separately authored adversarial assertions.",
+    "No real credentials/environment files/provider/model/email/Google/purchases/deployment used.",
+    "A changed carrier program deliberately invalidates older program digests; actual selected shop carrier review/approval and two-way STOP/HELP remain required."
+  ],
+  "remainingLaunchProof": "Current exact-source dedicated-shop registration/approval and ordinary two-way provider lifecycle plus consent/reminder/STOP/HELP receipts, unknown-result and scheduled recovery; root/OM readiness and replacement PO actual outcome acceptance remain separate."
+}

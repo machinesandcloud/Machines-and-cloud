@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-23",
+  "baseCommit": "40fa70b",
+  "stage": "Implemented and engineering-checked locally; independent acceptance, owner policy adoption/publication, Google verification and actual OAuth/event acceptance remain separate.",
+  "customerJob": "A signed-in owner understands Calendar data access, use, storage, sharing and retained-data controls before deliberately continuing to Google, and can find public same-domain details.",
+  "scope": "Separate Calendar disclosure/privacy delta. Frozen billing sources and the Root uncommitted pure admin projections are unchanged. No provider request, Google permission, attestation, Console change, outreach, email, deployment or publication.",
+  "implementation": [
+    "The existing Connect/Reconnect control opens the existing review dialog with a separate versioned Calendar disclosure. Continue to Google alone invokes the existing owner-bound start handler; Back and Escape do not submit. No redundant queue or consent framework was added.",
+    "Disclosure states actual granted scope and limited primary-calendar/own-visit use, Google/Netlify processing, sealed refresh token versus other records, absence of automatic record deletion, separate AI conversation facts, disconnect consequences and approved temporary Gmail deletion-help contact.",
+    "Same-domain privacy-policy.html#google-calendar documents exact visit fields, application token protection, retained records, Google permission removal and support request boundaries. General privacy contact now uses the already approved temporary Gmail address.",
+    "Disconnect review now distinguishes removing our refresh token and stopping new sync from retaining Google permission/events/workspace visits/history, including requests already sent. No deletion control or provider revoke behavior was added."
+  ],
+  "dataFlowReview": [
+    {
+      "source": "netlify/functions/lib/calendar-connection.mjs: startCalendarConnection / completeCalendarConnection / disconnectCalendar",
+      "facts": "Only implemented scopes events.owned and calendars.readonly; primary calendar identifier retained; refresh token sealed using AES-256-GCM with tenant/connection AAD; disconnect sets refresh=null and retains connection identity/history. OAuth state has logical expiry but is not a general retained-record deletion mechanism."
+    },
+    {
+      "source": "netlify/functions/lib/calendar-delivery.mjs: source / bodyFor / queueCalendarBooking / requestGoogle / assertOwned",
+      "facts": "Sync jobs copy saved visit details and Google event references. They create/check/update/delete deterministic owned visit events and do not list unrelated events or call free/busy. No AI client import or model-dispatch path from Google responses."
+    },
+    {
+      "source": "netlify/functions/lib/desk.mjs: bookVisit / queueSavedDelivery, netlify/functions/lib/agent.mjs: runAgent",
+      "facts": "Supported self-service bookings use portal-only saved records and scheduled Calendar delivery rather than legacy inline Google event results. AI receives separately supplied conversations and tool facts; this connection stores Google credentials in separate server-side connection rows rather than model messages."
+    },
+    {
+      "source": "netlify/functions/lib/store.mjs: put / atomicUpdate",
+      "facts": "Connection and sync values are Netlify Blobs JSON. Refresh-token sealing must not be described as encryption of every stored record. No automatic connection/sync record TTL or full deletion fulfillment procedure was established by inspection."
+    }
+  ],
+  "policyCommitmentsForOwnerReview": [
+    "Use/transfer of Google API information according to Google API Services User Data Policy and Limited Use.",
+    "No sale, advertising use or general-purpose AI model training with Google API information; transfers only for the disclosed feature/security subject to Limited Use.",
+    "Human access limited to Google-permitted cases such as specific user agreement for support, security or legal obligations. Actual processor terms, staff-access controls and operational deletion fulfillment remain to be confirmed.",
+    "The public support text invites a reviewed, authority-verified request and explains limits. It does not claim automatic deletion, a demonstrated support receipt, verified deletion times, backup erasure, Google-event cleanup or a completed compliance audit."
+  ],
+  "evidence": {
+    "path": "scratchpad/calendar-disclosure-final.json",
+    "passed": 17,
+    "total": 17,
+    "sourceStable": true,
+    "providerRequests": 0,
+    "physicalRequests": 0,
+    "scope": "2 focused actual-handler/policy groups +15 ordinary actual-handler browser groups at1440/390/320px. Connect/Back/Escape/Continue/reconnect/public anchor and disconnect retention are observed. Google destination intercepted before any consent; no token exchange or provider request.",
+    "visualReview": "390px disclosure screenshot inspected: opening heading visible, readable access/storage/control paragraphs and deliberate Continue/Back controls; width tests show no horizontal overflow.",
+    "publicBuild": "scratchpad/calendar-disclosure-public-build.json:182HTML/231assets; internal directories absent.",
+    "syntax": "node --check changed JavaScript and script, plus git diff --check, pass.",
+    "preservedFirstReceipt": "scratchpad/calendar-disclosure-first.json retains8/14 initial harness failures from reading sessionStorage on the intercepted Google origin and attempting a management button inside a closed section. Final source explicitly returns to the workspace origin and uses View calendar delivery before Disconnect."
+  },
+  "officialSources": [
+    {
+      "url": "https://developers.google.com/terms/api-services-user-data-policy",
+      "applied": "Accurate identity/purpose, access/use/storage/sharing disclosures, contextual permission requests and Limited Use."
+    },
+    {
+      "url": "https://developers.google.com/workspace/workspace-api-user-data-developer-policy",
+      "applied": "Normal-use disclosure before affirmative consent, data management/help, Limited Use, human-access and prohibited data-use boundaries."
+    }
+  ],
+  "sourceHashes": {
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "privacy-policy.html": "fa318990cba44a568d751f8ccc8e632067bdc0806c371ee43978601e8331cfc3",
+    "scripts/calendar-disclosure-check.mjs": "287d93e37ef126811c2b0cf1671b62b3ac8e1d8c31a9f983d43d6ee9e76133fe",
+    "netlify/functions/lib/calendar-connection.mjs": "370cf8129ba0e90b60ab33819beeaceb3d61372c3649414aeb5e19b838f0cd58",
+    "netlify/functions/lib/calendar-delivery.mjs": "d1589ee7d66c5e57e90a3f3361102fecff3178bc88990389a8a587111e22adcf",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55"
+  },
+  "nextUnresolved": "Root/PO review exact legal commitments and verify operational/processor/deletion-help readiness, then publication and Google verification materials under their own authority. Actual customer Google permission and saved-event lifecycle remain unaccepted by this local disclosure check."
+}

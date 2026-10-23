@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-23",
+  "baseCommit": "0beab960c942e5c43ccc21a52a2392246639a4cd",
+  "stage": "Implemented and engineering-regressed locally; independent acceptance and actual new provider destination/signing-secret delivery remain separate.",
+  "problem": "The existing Stripe destination accepts valid shared-merchant events and falls through to legacy slug/client_reference_id matching. A foreign product event can collide with a local unmarked legacy client. Merchant signature alone is not M&C product/tenant authority.",
+  "repair": {
+    "path": "/api/workspace-billing-webhook",
+    "secret": "WORKSPACE_BILLING_WEBHOOK_SECRET",
+    "verification": "Shared raw-body, timestamp-tolerance, timing-safe and multiple-v1 verifier; dedicated secret must be present and distinct from STRIPE_WEBHOOK_SECRET. Missing/reused dedicated secret never falls back.",
+    "dispatch": "Only handleWorkspaceBillingEvent. Unrelated events acknowledge200 without a legacy lookup, local write, notification or financial dispatch. Bounded250000UTF-8-byte input, malformed JSON/envelope rejection, POST-only.",
+    "legacy": "Existing /api/stripe-webhook file is byte-identical to base. Existing verifyWebhook(payload,header) still reads only STRIPE_WEBHOOK_SECRET; the same verification body was extracted for explicit-secret reuse.",
+    "operator": "workspaceBillingConfiguration uses the dedicated verifier configuration. Legacy-only/reused secrets report webhookConfigured=false and missing verifier accurately; legacy billing remains separate."
+  },
+  "providerConfigurationPending": {
+    "authority": "No destination was configured or inspected by this slice. Root owns separately scoped provider setup. Do not replace existing Zari destinations/secrets.",
+    "destination": "https://machinesandcloud.com/api/workspace-billing-webhook",
+    "events": [
+      "checkout.session.completed",
+      "checkout.session.expired",
+      "checkout.session.async_payment_succeeded",
+      "checkout.session.async_payment_failed",
+      "customer.subscription.created",
+      "customer.subscription.updated",
+      "customer.subscription.deleted",
+      "invoice.paid",
+      "invoice.payment_failed"
+    ],
+    "notes": "Create a new explicitly M&C-scoped TEST destination first and store its unique signing secret in WORKSPACE_BILLING_WEBHOOK_SECRET under separately authorized configuration. Existing STRIPE_WEBHOOK_SECRET is retained for the existing legacy consumer. Actual selected TEST provider event delivery, production configuration and financial activation remain unaccepted."
+  },
+  "testChanges": "Existing owner billing, QA-authored billing/admin scripts and operator configuration fixtures now sign/use the dedicated endpoint and secret. Legacy endpoint signature/projection checks are retained separately. Their historical receipts remain unchanged; these reruns are engineering regression, not fresh independent acceptance.",
+  "evidence": [
+    {
+      "path": "scratchpad/workspace-billing-webhook-final.json",
+      "passed": 32,
+      "total": 32,
+      "scope": "Actual owner/new+legacy webhook handlers and intercepted Stripe protocol. Includes dedicated secret isolation, multi-v1 rotation, raw Unicode bytes, changed bytes/format, stale/future/duplicate timestamps, size/method/malformed envelopes, unrelated Zari slug collisions with unchanged relevant stores and zero notification/provider dispatch, original legacy signature/projection, and positive own canonical event dispatch/replay/lifecycle."
+    },
+    {
+      "path": "scratchpad/workspace-billing-webhook-qa-regression.json",
+      "passed": 11,
+      "total": 11,
+      "scope": "Engineering rerun of existing QA-authored backend/security/lifecycle cases on the new endpoint/secret."
+    },
+    {
+      "path": "scratchpad/workspace-billing-webhook-admin-regression.json",
+      "passed": 1,
+      "total": 1,
+      "scope": "Actual owner quote and authorized operator projection agree on dedicated signing configuration."
+    },
+    {
+      "path": "scratchpad/workspace-billing-webhook-configuration-final.json",
+      "passed": 22,
+      "total": 22,
+      "scope": "Actual authorized manage GET with synthetic configuration; includes missing dedicated verifier while legacy secret exists and explicit reused-secret rejection."
+    }
+  ],
+  "sourceHashes": {
+    "netlify/functions/workspace-billing-webhook.mjs": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "scripts/workspace-billing-check.mjs": "0659b578ed1b9afa0f8328c6372ac341e1ff54ac470f8117d689138f955ef5db",
+    "scripts/launch-billing-qa-check.mjs": "f8028d08cd2d61bbfbde0f7ef68df1330b05ac75638d3f83376abc40d193640a",
+    "scripts/launch-billing-admin-projection-qa-check.mjs": "3325772c49cf77bdf9f32dcdfca02ac37d8a32586e8ae865043244ebf99bbde2",
+    "scripts/launch-provider-state-qa-check.mjs": "19027f7744aa0c4fefd630ea7282abcbbee34f7079536b689b6f1c47d366494b"
+  },
+  "legacyEndpointByteIdentical": true,
+  "limits": [
+    "All physical networking is blocked. No actual provider request, signing-secret/key read, endpoint configuration, account change, email, call, text, model request, charge or deployment occurred.",
+    "Positive event receipt is a synthetic HMAC-signed local handler request with intercepted canonical Stripe reads. It does not establish real Stripe delivery or production webhook readiness.",
+    "No UI assets changed. Previously accepted billing browser workflow and Google disclosure evidence retain their exact earlier source scope. The new shared-merchant isolation seam requires independent focused acceptance before claiming the updated integration accepted."
+  ]
+}

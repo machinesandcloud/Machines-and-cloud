@@ -515,3 +515,32 @@ body.desk-app.guide-tour-open { overflow:hidden; }
 .desk-app .desk-account-confirm h4 { margin:0 0 10px; font-size:15px; }
 .desk-app .desk-account-actions { margin-top:16px; display:flex; flex-wrap:wrap; gap:10px; }
 @media(max-width:600px) { .desk-app .desk-export-grid { grid-template-columns:1fr; row-gap:22px; }.desk-app .desk-account-connections>div { gap:10px; }.desk-app .desk-account-status { max-width:100%; }.desk-app #p-account .workspace-guide-head { flex-wrap:wrap; } }
+
+/* Owner follow-up details use the existing Inbox and keep appointment state separate. */
+.desk-app dialog.request-dialog { width:min(760px,calc(100% - 28px)); }
+.request-dialog-heading { position:sticky; top:0; z-index:2; background:#fff; padding:8px 0; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.request-dialog-heading::before { content:""; position:absolute; inset:-30px 0 0; z-index:-1; background:#fff; }
+.request-dialog-heading h2 { margin:5px 0 14px!important; }
+.request-dialog .btn-pill { min-height:44px; white-space:normal; transition:background-color .15s; }.request-dialog .btn-pill:hover { transform:none; }
+.request-dialog h3 { font-size:15px; margin:0 0 12px; }
+.request-dialog .request-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 24px; margin:20px 0; }
+.request-facts dt,.request-progress dt { font-size:12px; color:var(--ui-muted); margin-bottom:4px; }
+.request-facts dd,.request-progress dd { margin:0; font-size:13px; line-height:1.65; overflow-wrap:anywhere; white-space:pre-wrap; }
+.request-facts .request-wide { grid-column:1/-1; }
+.request-progress,.request-review,.request-visits { border:1px solid var(--ui-line); border-radius:10px; padding:18px; margin:18px 0; }
+.request-progress .request-wide { grid-column:1/-1; }
+.request-more>summary,.request-visits>summary { font-size:13px; font-weight:600; cursor:pointer; }.request-visits[open]>summary { margin-bottom:12px; }
+.request-progress>dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:0; }
+.request-review { border-color:#d5aa65; background:#fffaf0; }
+.request-review p { margin:0 0 12px; }
+.request-dialog #requestMessage { font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.request-dialog #requestMessage[data-error="true"] { color:#a62828; }
+.request-dialog [aria-invalid="true"] { border-color:#b91c1c; }
+.request-dialog #requestForm { border-top:1px solid var(--ui-line); padding-top:20px; }
+.request-dialog .request-save-scope,.request-dialog #requestActionHelp { font-size:12px; line-height:1.65; }
+.request-history-title { margin-top:24px!important; }
+.request-history { padding:0; list-style:none; margin:0; }
+.request-history li { padding:14px 0; border-top:1px solid var(--ui-line); font-size:12px; line-height:1.7; overflow-wrap:anywhere; }
+.request-history p { margin:6px 0 0; white-space:pre-wrap; font-size:12px!important; }
+.request-visits button { margin:5px 0; text-align:left; }
+@media(max-width:450px) { .request-dialog .request-facts,.request-progress>dl { gap:14px; }.request-dialog-heading { gap:8px; }.desk-app dialog.request-dialog { padding:20px; } }

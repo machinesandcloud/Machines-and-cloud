@@ -16,17 +16,21 @@ function prerequisite(client,setup) {
   return null;
 }
 function sharedOffer(plan,id) {if(plan?.available!==true||!plan.offer)return false;const scope=Array.isArray(plan.offer.scopeChannels)?plan.offer.scopeChannels:plan.requestedChannels;return Array.isArray(scope)&&scope.includes(id);}
-function channelRow(id,client,services,plan,setup) {
+function channelRow(id,client,services,plan,setup,websiteInstallation) {
   const service=id==='voice'?services.voice||{}:id==='sms'?services.messaging||{}:id==='calendar'?services.calendar||{}:setup.channels?.web||{};
   const selected=(Array.isArray(client.onboarding?.desiredChannels)?client.onboarding.desiredChannels:['web']).includes(id),op=service.operation;
   const retained=!!op||id==='calendar'&&(service.connected===true||service.reconnectRequired===true)||id==='web'&&service.active===true;
   let row={id,...content[id],requested:selected,retained,active:service.active===true,status:'needs_action',detail:'',nextStep:'',responsibility:'customer',action:wait('Check saved status')};
   if(!selected&&!retained)return {...row,status:'not_selected',detail:'You have not selected this connection.',nextStep:'Choose the services you want in your connection preferences.',ownerTask:'Select this service when you want to prepare it.',responsibility:'customer',action:wait('Not selected')};
   if(client.status==='cancelled')return {...row,status:'closed',active:false,detail:'This workspace is cancelled. Saved setup records remain available.',nextStep:'Contact support before starting another connection.',responsibility:'platform',action:wait('Workspace cancelled')};
-  if(client.status==='paused'&&id!=='web')return {...row,status:'paused',active:false,detail:'Your service is paused. Saved permissions and setup records are retained.',nextStep:'Resume the front desk when you are ready, then check this connection again.',responsibility:'customer',action:wait('Service paused')};
+  if(client.status==='paused')return {...row,status:'paused',active:false,detail:'Your service is paused. Saved permissions and setup records are retained.',nextStep:'Resume the front desk when you are ready, then check this connection again.',responsibility:'customer',action:wait('Service paused')};
   const pre=prerequisite(client,setup);
   if(id==='web') {
     if(pre)return pre.responsibility==='platform'?{...row,...pre,detail:'Your website installation can be prepared while AI replies await service availability.',nextStep:'Continue the guided installation without treating it as proof that customer chat is active.',action:route('setup','Continue website setup'),responsibility:'customer'}:{...row,...pre,detail:'Your saved answers carry into website chat. Complete the shared review and private practice first.'};
+    const website=websiteInstallation;
+    if(service.active&&service.ready&&website?.customerChat?.state==='limit')return {...row,active:false,status:'limited',detail:website.customerChat.reason,nextStep:'Your website check is retained. Customer AI replies can resume when the allowance renews.',responsibility:'platform',action:wait('Waiting for AI allowance')};
+    const installed=service.active===true&&service.ready===true&&website?.originAllowed===true&&website.observation?.state==='found'&&website.setupRequest?.state==='complete'&&website.customerChat?.available===true;
+    if(installed){const received=website.firstExternalRequest?.state==='received',visit=received&&website.firstExternalRequest.record?.kind==='bookings';return {...row,active:true,status:'active',detail:received?'Website chat is active, its installation check is complete and an ordinary customer request is saved.':'Website chat is active and its installation check is complete. No ordinary customer request has been observed yet.',nextStep:visit?'Your first customer visit is saved. Open Schedule to review it.':received?'Your first customer request is saved. Open Inbox to follow up.':'Your website check is complete. New customer requests will appear in Inbox.',ownerTask:'Use Inbox for customer requests and Schedule for saved visits.',responsibility:'complete',action:route(visit?'availability':'leads',visit?'Open Schedule':'Open Inbox')};}
     const model=setup.channels?.web?.blockers?.some(item=>item.id==='model');
     return {...row,status:model?'waiting_platform':service.active?'ready_for_website':'needs_action',detail:model?'Your website setup can be prepared while customer AI replies await service availability.':service.active?'Customer chat is switched on in your workspace. Website installation and its check are shown separately below.':'Your front desk is prepared. Follow the guided website setup below.',nextStep:'Follow the next step in your website installation card.',action:route('setup','Continue website setup'),responsibility:'customer'};
   }
@@ -50,6 +54,6 @@ function channelRow(id,client,services,plan,setup) {
   if(op)return {...row,status:state==='waiting_platform'?'waiting_platform':'working',detail:op.detail||service.detail||'Your approved setup is continuing in the background.',nextStep:op.nextCheckAt?'The next provider check is scheduled. Return here to see its result.':'We continue the approved setup in the background and show the next result here.',responsibility:'platform',action:wait(state==='waiting_platform'?'Waiting for platform':'Setup in progress')};
   return {...row,status:'waiting_platform',detail:'Your choice is saved. This service has not been authorized or activated.',nextStep:'The available service review will appear here before any number, registration or usage is charged.',responsibility:'platform',action:wait('Waiting for service availability')};
 }
-export function buildConnectionJourney(client,services={},plan=null,setup={}) {
-  return {title:'Finish your selected connections',channels:['web','voice','sms','calendar'].map(id=>channelRow(id,client,services,plan,setup))};
+export function buildConnectionJourney(client,services={},plan=null,setup={},websiteInstallation=null) {
+  return {title:'Finish your selected connections',channels:['web','voice','sms','calendar'].map(id=>channelRow(id,client,services,plan,setup,websiteInstallation))};
 }

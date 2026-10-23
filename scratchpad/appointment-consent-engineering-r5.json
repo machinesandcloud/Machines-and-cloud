@@ -1,0 +1,181 @@
+{
+  "at": "2026-10-23T14:46:34.104Z",
+  "mode": "independent real handler/provider protocol/installed SDK fixtures; fake model only; synthetic common review proof; zero external network",
+  "before": {
+    "scripts/managed-sms-qa-check.mjs": "42cdf456f54b911eda264579e90272c546878c5f23bb5ee2bb193fe580846fd9",
+    "embed.js": "3083fa6e91bbf35877027c3f03f6c9cafe8fcde2ba5cdfcd75c7a927b8b6c546",
+    "netlify/functions/chat.mjs": "b3703e67477d026d226902aa84e7c2a8ac97df75740da8b97bbdf1aca7d9eb6b",
+    "netlify/functions/lib/appointment-texts.mjs": "fdbdc34866190dbac17107cd27c8a14a5705e7ea215e0d39d777b8b78303f62c",
+    "netlify/functions/lib/managed-actions.mjs": "6305fd04c5d2a1e3aceb3a0d0c0ea1d220dbe6ed974f2418821477f5523913dc",
+    "netlify/functions/lib/messaging-program.mjs": "e3f727749a9608c3d2f5b61d3e92a51b7b28bf8a0ebb9c436c06f94a94f0614f",
+    "netlify/functions/policy.mjs": "e7e80f6e5208900120087e30f725a6fe6eb8cee48ec664ab79071370bd80e852",
+    "netlify/functions/lib/managed-sms.mjs": "aeab5284eac23d9ada335fe32b8fcf53eaf1287193cffbefecee683f6091cb2a",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "de023aed10a0541b5235aa729b7b0201715e6bf0daf9075ae99e3d7809177ae8",
+    "netlify/functions/lib/managed-consent.mjs": "f0655527fd4deb409647e979af9232dcc771445032594b08645df1389c4c40ba",
+    "netlify/functions/lib/managed-history.mjs": "f8dbf15321ee419db29fb8ca876b8a669f79182b7890b93a8513ffb3a782a51f",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487"
+  },
+  "checks": [
+    {
+      "name": "invalid signatures/accounts/duplicate fields/provider identities are rejected before consent or queue",
+      "pass": true
+    },
+    {
+      "name": "old and future provider messages do not refresh reply authority",
+      "pass": true
+    },
+    {
+      "name": "current service and registration epoch prevent old or foreign service messages entering a reused number's tenant",
+      "pass": true
+    },
+    {
+      "name": "Spanish STOP persists while paused; distinct repeated STOP and blocked HELP stay silent; provider acknowledgments are not duplicated",
+      "pass": true
+    },
+    {
+      "name": "provider-verified normal inbound recovers after consent committed but queue projection failed",
+      "pass": true
+    },
+    {
+      "name": "background endpoint requires exact worker key and strict body",
+      "pass": true
+    },
+    {
+      "name": "parallel processors produce one reply and a STOP racing model reservation prevents delivery",
+      "pass": true
+    },
+    {
+      "name": "reply recovery after conversation-history projection failure restores both conversation turns",
+      "pass": true
+    },
+    {
+      "name": "callback cannot bind queued intent or wrong-account/direction/service/old receipt",
+      "pass": true
+    },
+    {
+      "name": "two-way setup proof waits for actual delivered GET and matching inbound nonce",
+      "pass": true
+    },
+    {
+      "name": "phone-only testing customer can book through SMS and deliver its reply and owner alert with website chat inactive",
+      "pass": true
+    },
+    {
+      "name": "old single-visit consent cannot authorize future bookings; explicit ongoing agreement covers a second visit until STOP",
+      "pass": true
+    },
+    {
+      "name": "actual website booking offers optional SMS without permission; signed opt-in unlocks the same confirmation and scheduled reminder exactly once",
+      "pass": true
+    },
+    {
+      "name": "voice booking offers the actual dedicated number without sending or inferring consent; replay retains the same visit",
+      "pass": true
+    },
+    {
+      "name": "CITAS and signed SÍ use the full Spanish question without AI and record purpose-specific permission",
+      "pass": true
+    },
+    {
+      "name": "an unrelated phone or tenant cannot grant a saved recipient permission or expose its visit",
+      "pass": true
+    },
+    {
+      "name": "expired questions and STOP/START need a fresh question and YES; old replay cannot restore consent",
+      "pass": true
+    },
+    {
+      "name": "scheduled receipt reconciliation repairs a lost consent-question projection and never sends it again",
+      "pass": true
+    },
+    {
+      "name": "a saved older carrier program cannot silently adopt the additional consent entry or invite recipients",
+      "pass": true
+    },
+    {
+      "name": "common rules edits pause SMS readiness and fresh review restores existing resources without a new registration",
+      "pass": true
+    },
+    {
+      "name": "owner resume restores non-web state without AI activation; restoring web still requires current proof and resources remain unchanged",
+      "pass": true
+    },
+    {
+      "name": "owner SMS history includes queued/failed requests, deduplicates projections and never crosses tenant incarnations",
+      "pass": true
+    },
+    {
+      "name": "owner history orders real RFC-2822 Twilio timestamps chronologically and returns canonical dates",
+      "pass": true
+    },
+    {
+      "name": "customer activation HTTP actions require owner scope, same origin, exact fields and current revision",
+      "pass": true
+    },
+    {
+      "name": "seven-day allowance wait can renew one owner-approved setup text without resending old queued or unknown probes",
+      "pass": false,
+      "error": "{\"jobs\":[{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550100\",\"body\":\"Fixture Service: requested setup check. Reply F0000124 to confirm.\",\"source\":null,\"dueAt\":\"2026-10-22T18:00:36.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"F0000124\",\"expiresAt\":\"2026-10-29T18:00:36.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/0a3f45bc7a5683f3349567d2878235bffaeae5e32cb63f3b53c55148419fe989\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"baf88d5079f7a61bdcfb0685f2ff437b403a28f8c906bb1669b361cc96474915\",\"identity\":\"715e6a4436886f8bfec3104b41455e5483c1a43d9ad909c93205e268c4d730b6\",\"state\":\"waiting_platform\",\"createdAt\":\"2026-10-22T18:00:36.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":0,\"reasonCode\":\"sms_not_ready\",\"detail\":\"Texting is waiting for an approved platform sending allowance. Your message remains saved.\"},{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550100\",\"body\":\"Fixture Service: requested setup check. Reply F0000124 to confirm.\",\"source\":null,\"dueAt\":\"2026-10-22T18:00:36.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"F0000124\",\"expiresAt\":\"2026-10-29T18:00:36.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/0d7cf0fa9236add3f80dca405b7529b0c4536d0e5d26b79d7ca2a24a788deffe\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"baf88d5079f7a61bdcfb0685f2ff437b403a28f8c906bb1669b361cc96474915\",\"identity\":\"715e6a4436886f8bfec3104b41455e5483c1a43d9ad909c93205e268c4d730b6\",\"state\":\"uncertain\",\"createdAt\":\"2026-10-22T18:00:36.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":1,\"attemptStartedAt\":\"2026-10-22T18:00:36.000Z\",\"from\":\"+17135550123\",\"serviceSid\":\"MG96eb3f8389266fba976ac22c1a32cdd4\",\"reasonCode\":\"provider_receipt_missing\"},{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550101\",\"body\":\"Fixture Service: your texting setup check. Reply 8CA97231 to verify this connection. This is one setup text you requested; no recurring signup is created.\",\"source\":null,\"dueAt\":\"2026-10-29T18:00:37.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"8CA97231\",\"expiresAt\":\"2026-11-05T18:00:37.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/41bfbd0cf6c4ebe2f41b82350bf6dca05788e1ebde966840b16dd270acb350a2\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"e14cd2c347570cdf7c79c82c8f8a8f5b76c071fa978153e67cbe04f06f2d38c1\",\"identity\":\"ebf86410ead9fc4f4e062d032cfa8c1bdef48f15195be9bdf022589a5a1f6bb6\",\"state\":\"waiting_platform\",\"createdAt\":\"2026-10-29T18:00:37.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":0,\"reasonCode\":\"sms_not_ready\",\"detail\":\"Texting is waiting for an approved platform sending allowance. Your message remains saved.\"},{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550102\",\"body\":\"Fixture Service: your texting setup check. Reply 6A20AD2E to verify this connection. This is one setup text you requested; no recurring signup is created.\",\"source\":null,\"dueAt\":\"2026-10-29T18:00:37.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"6A20AD2E\",\"expiresAt\":\"2026-11-05T18:00:37.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/9c229dec0c96579eaa87a109e80ab294246a74890d00d233d45d697e26b69f01\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"eaecf1702c06e56c276598551d16a9b46afefdd2c02c76733afa9e1ae52b674f\",\"identity\":\"5461efc36f2447e3be21b99965ea35acd0a48cbf9079bb476fd2c90b896c610b\",\"state\":\"waiting_platform\",\"createdAt\":\"2026-10-29T18:00:37.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":0,\"reasonCode\":\"sms_budget_policy_unavailable\",\"detail\":\"Texting is waiting for an approved platform sending allowance. Your message remains saved.\"}],\"brake\":null}\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"jobs\":[{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550100\",\"body\":\"Fixture Service: requested setup check. Reply F0000124 to confirm.\",\"source\":null,\"dueAt\":\"2026-10-22T18:00:36.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"F0000124\",\"expiresAt\":\"2026-10-29T18:00:36.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/0a3f45bc7a5683f3349567d2878235bffaeae5e32cb63f3b53c55148419fe989\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"baf88d5079f7a61bdcfb0685f2ff437b403a28f8c906bb1669b361cc96474915\",\"identity\":\"715e6a4436886f8bfec3104b41455e5483c1a43d9ad909c93205e268c4d730b6\",\"state\":\"waiting_platform\",\"createdAt\":\"2026-10-22T18:00:36.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":0,\"reasonCode\":\"sms_not_ready\",\"detail\":\"Texting is waiting for an approved platform sending allowance. Your message remains saved.\"},{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550100\",\"body\":\"Fixture Service: requested setup check. Reply F0000124 to confirm.\",\"source\":null,\"dueAt\":\"2026-10-22T18:00:36.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"F0000124\",\"expiresAt\":\"2026-10-29T18:00:36.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/0d7cf0fa9236add3f80dca405b7529b0c4536d0e5d26b79d7ca2a24a788deffe\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"baf88d5079f7a61bdcfb0685f2ff437b403a28f8c906bb1669b361cc96474915\",\"identity\":\"715e6a4436886f8bfec3104b41455e5483c1a43d9ad909c93205e268c4d730b6\",\"state\":\"uncertain\",\"createdAt\":\"2026-10-22T18:00:36.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":1,\"attemptStartedAt\":\"2026-10-22T18:00:36.000Z\",\"from\":\"+17135550123\",\"serviceSid\":\"MG96eb3f8389266fba976ac22c1a32cdd4\",\"reasonCode\":\"provider_receipt_missing\"},{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550101\",\"body\":\"Fixture Service: your texting setup check. Reply 8CA97231 to verify this connection. This is one setup text you requested; no recurring signup is created.\",\"source\":null,\"dueAt\":\"2026-10-29T18:00:37.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"8CA97231\",\"expiresAt\":\"2026-11-05T18:00:37.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/41bfbd0cf6c4ebe2f41b82350bf6dca05788e1ebde966840b16dd270acb350a2\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"e14cd2c347570cdf7c79c82c8f8a8f5b76c071fa978153e67cbe04f06f2d38c1\",\"identity\":\"ebf86410ead9fc4f4e062d032cfa8c1bdef48f15195be9bdf022589a5a1f6bb6\",\"state\":\"waiting_platform\",\"createdAt\":\"2026-10-29T18:00:37.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":0,\"reasonCode\":\"sms_not_ready\",\"detail\":\"Texting is waiting for an approved platform sending allowance. Your message remains saved.\"},{\"tenant\":\"c62b4a4d82c8ceb4486640c434bccbfc7761888fd68b9ed6d6b5de9568b152d3\",\"channel\":\"sms\",\"purpose\":\"activation_probe\",\"to\":\"+17135550102\",\"body\":\"Fixture Service: your texting setup check. Reply 6A20AD2E to verify this connection. This is one setup text you requested; no recurring signup is created.\",\"source\":null,\"dueAt\":\"2026-10-29T18:00:37.000Z\",\"consentAsk\":false,\"probe\":{\"operationId\":\"sms-qa-probe-renewal-http-123/44e3e6350819a20a03e10fb516e2da188182946bacaf5a55b794adc4a79492e5\",\"nonce\":\"6A20AD2E\",\"expiresAt\":\"2026-11-05T18:00:37.000Z\"},\"id\":\"sms-qa-probe-renewal-http-123/9c229dec0c96579eaa87a109e80ab294246a74890d00d233d45d697e26b69f01\",\"slug\":\"sms-qa-probe-renewal-http-123\",\"digest\":\"eaecf1702c06e56c276598551d16a9b46afefdd2c02c76733afa9e1ae52b674f\",\"identity\":\"5461efc36f2447e3be21b99965ea35acd0a48cbf9079bb476fd2c90b896c610b\",\"state\":\"waiting_platform\",\"createdAt\":\"2026-10-29T18:00:37.000Z\",\"updatedAt\":\"2026-10-29T18:00:37.000Z\",\"attempts\":0,\"reasonCode\":\"sms_budget_policy_unavailable\",\"detail\":\"Texting is waiting for an approved platform sending allowance. Your message remains saved.\"}],\"brake\":null}\n\n0 !== 1\n\n    at file:///private/tmp/mc-launch-consent-d217/scripts/managed-sms-qa-check.mjs:277:94\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async check (file:///private/tmp/mc-launch-consent-d217/scripts/managed-sms-qa-check.mjs:59:40)\n    at async file:///private/tmp/mc-launch-consent-d217/scripts/managed-sms-qa-check.mjs:254:1"
+    }
+  ],
+  "conflicts": 5,
+  "blocked": [],
+  "dispatches": 53,
+  "providerSends": 19,
+  "emailSends": 4,
+  "websiteBookingFixture": {
+    "slug": "sms-qa-web-opt-in-66",
+    "source": "actual /api/chat booking and public /api/client projection; synthetic storage and scripted SDK only",
+    "response": {
+      "t": "done",
+      "reply": "Your visit is saved in the shop portal. The shop confirms arrival details directly.",
+      "events": [
+        {
+          "type": "booking",
+          "id": "a4f5b333ef",
+          "appointmentTexts": {
+            "version": 1,
+            "bookingId": "a4f5b333ef",
+            "number": "+17135550066",
+            "business": "Fixture Service",
+            "language": "en",
+            "keyword": "APPOINTMENTS",
+            "restartRequired": false
+          }
+        }
+      ]
+    },
+    "publicConfig": {
+      "slug": "sms-qa-web-opt-in-66",
+      "status": "live",
+      "name": "Fixture Service",
+      "greeting": "Hi, this is the Fixture Service front desk. What can we help with today? / Hola, le atiende la recepción de Fixture Service. ¿En qué le podemos ayudar?",
+      "spanish": true,
+      "businessNumber": "",
+      "webAvailable": true
+    }
+  },
+  "after": {
+    "scripts/managed-sms-qa-check.mjs": "42cdf456f54b911eda264579e90272c546878c5f23bb5ee2bb193fe580846fd9",
+    "embed.js": "3083fa6e91bbf35877027c3f03f6c9cafe8fcde2ba5cdfcd75c7a927b8b6c546",
+    "netlify/functions/chat.mjs": "b3703e67477d026d226902aa84e7c2a8ac97df75740da8b97bbdf1aca7d9eb6b",
+    "netlify/functions/lib/appointment-texts.mjs": "fdbdc34866190dbac17107cd27c8a14a5705e7ea215e0d39d777b8b78303f62c",
+    "netlify/functions/lib/managed-actions.mjs": "6305fd04c5d2a1e3aceb3a0d0c0ea1d220dbe6ed974f2418821477f5523913dc",
+    "netlify/functions/lib/messaging-program.mjs": "e3f727749a9608c3d2f5b61d3e92a51b7b28bf8a0ebb9c436c06f94a94f0614f",
+    "netlify/functions/policy.mjs": "e7e80f6e5208900120087e30f725a6fe6eb8cee48ec664ab79071370bd80e852",
+    "netlify/functions/lib/managed-sms.mjs": "aeab5284eac23d9ada335fe32b8fcf53eaf1287193cffbefecee683f6091cb2a",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "de023aed10a0541b5235aa729b7b0201715e6bf0daf9075ae99e3d7809177ae8",
+    "netlify/functions/lib/managed-consent.mjs": "f0655527fd4deb409647e979af9232dcc771445032594b08645df1389c4c40ba",
+    "netlify/functions/lib/managed-history.mjs": "f8dbf15321ee419db29fb8ca876b8a669f79182b7890b93a8513ffb3a782a51f",
+    "netlify/functions/client.mjs": "e0db125022413363bae5fd289cecbbaedf35f23f8873e190f383cfb248844487"
+  },
+  "sourceStable": true,
+  "passed": 24,
+  "total": 25,
+  "ok": false
+}

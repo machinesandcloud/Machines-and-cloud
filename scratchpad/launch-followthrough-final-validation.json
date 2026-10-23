@@ -1,0 +1,63 @@
+{
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "desk-requests.js"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "desk.js"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "desk-connections.js"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-I",
+        "scripts/sitecheck.py",
+        "."
+      ],
+      "exitCode": 0,
+      "output": "noindex pages (excluded from sitemap/redirect/canonical checks): ['404.html', 'admin.html', 'desk.html', 'houston-downtown.html', 'houston-galleria.html', 'houston-midtown.html', 'onboard.html', 'thank-you.html']\nHTML pages: 182\nBroken local refs: 0\n\nSitemap URLs: 174\nSitemap entries w/o file: 0 []\nHTML pages not in sitemap: 0 []\n\n_redirects rules: 192\nHTML pages lacking extensionless redirect: 0 []\n\nCanonical mismatches: 0 []\n"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/build-site.mjs"
+      ],
+      "exitCode": 0,
+      "output": "{\"ok\":true,\"output\":\"dist\",\"html\":182,\"files\":229,\"internalDirectoriesAbsent\":true}\n"
+    }
+  ],
+  "physicalNetwork": 0,
+  "scope": "Local syntax/reference/public-asset assembly after scoped CSS paint repair",
+  "changedSinceRequiredGate": [
+    "desk.css: opaque request-dialog sticky header background only"
+  ]
+}

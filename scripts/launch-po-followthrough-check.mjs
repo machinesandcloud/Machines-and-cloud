@@ -1,0 +1,195 @@
+// Actual owner handlers and browser assets; memory storage, no server or external transport.
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { resolve, extname, delimiter } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { syncBuiltinESMExports } from 'node:module';
+import net from 'node:net'; import http from 'node:http'; import https from 'node:https';
+
+const option = name => process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : null;
+const output = option('--output'), playwrightPath = option('--playwright') || process.env.MC_PLAYWRIGHT_MODULE;
+if (output && (!/^scratchpad\/[a-z0-9-]+\.json$/.test(output) || existsSync(output))) throw new Error('Choose a new --output scratchpad/name.json');
+const root = resolve('.'), origin = 'https://followthrough.fixture.invalid';
+const phase=option('--phase')||'baseline';
+const files = ['desk-requests.js','netlify/functions/lib/request-followthrough.mjs','scripts/build-site.mjs','scripts/launch-po-followthrough-check.mjs','desk.html','desk.js','desk.css','onboard.html','onboard.js','onboard.css','product-ui.css','desk-connections.js','netlify/functions/lib/connection-journey.mjs','netlify/functions/lib/service-connections.mjs','desk-connections.css','styles.css','netlify/functions/client.mjs','netlify/functions/lib/store.mjs','netlify/functions/lib/access.mjs','netlify/functions/lib/desk.mjs','netlify/functions/lib/setup.mjs','netlify/functions/lib/config.mjs','netlify/functions/lib/workspace-identity.mjs','netlify/functions/lib/platform-operations.mjs'];
+const sha = value => createHash('sha256').update(value).digest('hex');
+const hashes = () => Object.fromEntries(files.map(file => [file, sha(readFileSync(file))]));
+const report = { at: new Date().toISOString(), reviewedCommit:'668118b', role:'Independent Product Owner/UI acceptance', harness:'Reused engineering transport/memory fixture only; independently selected owner jobs and assertions', qualifications:'Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.', mode: 'Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests', sourceBefore: hashes(), checks: [], requests: [], pageErrors: [], forbidden: [], physicalNetwork: 0 };
+for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_|PHONE_|VOICE_|MESSAGING_|CALENDAR_|SERVICE_|STEVE_|MC_SELF_SERVICE_AI_|NETLIFY_)/.test(key)) delete process.env[key];
+Object.assign(process.env, { MC_MEMORY_STORE: '1', MC_FAKE_MODEL: '1', NODE_ENV: 'test', URL: origin, PUBLIC_SITE_URL: origin });
+const deny = () => { report.physicalNetwork++; throw new Error('Connection journey check forbids physical transport'); };
+net.connect = net.createConnection = http.request = http.get = https.request = https.get = deny; syncBuiltinESMExports(); globalThis.fetch = async (input, init={}) => {const url=new URL(String(input));if(url.origin===origin&&url.pathname.startsWith('/.netlify/functions/')){report.backgroundRequests=(report.backgroundRequests||[]).concat({path:url.pathname,method:init.method||'GET'});return new Response(null,{status:202});}return deny();};
+let playwright;
+if (playwrightPath) playwright = await import(pathToFileURL(resolve(playwrightPath)).href);
+else {
+  try { playwright = await import('playwright'); }
+  catch { for (const bin of (process.env.PATH || '').split(delimiter)) { const path = resolve(bin, '../playwright/index.mjs'); if (existsSync(path)) { playwright = await import(pathToFileURL(path).href); break; } } }
+}
+if (!playwright) throw new Error('Use installed Playwright via --playwright /path/to/playwright/index.mjs or MC_PLAYWRIGHT_MODULE. This check never installs tooling.');
+const store = await import('../netlify/functions/lib/store.mjs');
+const { accessHash } = await import('../netlify/functions/lib/access.mjs');
+const { configurationRevision } = await import('../netlify/functions/lib/setup.mjs');
+const { newClient, parseHours } = await import('../netlify/functions/lib/config.mjs');
+const handlers = { '/api/client': (await import('../netlify/functions/client.mjs')).default, '/api/access': (await import('../netlify/functions/access.mjs')).default, '/api/onboard': (await import('../netlify/functions/onboard.mjs')).default };
+const date = days => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(Date.now() + days * 86400000));
+let serial = 0;
+const browser = await playwright.chromium.launch({ channel: 'chrome', headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run', '--host-resolver-rules=MAP * ~NOTFOUND'] });
+const contexts = [];
+async function fixture(width = 390, channels = ['web'], options = {}) {
+  const slug = 'account-ui-' + ++serial, token = sha(slug), c = newClient({ slug, ownerKey: 'PRIVATE-FIXTURE-' + serial, owner: { name: 'Alex Fixture', email: slug + '@example.test', phone: '+17135550198' }, business: { name: 'Fixture Availability Shop', trade: 'HVAC', serviceArea: ['Katy'], hours: 'Mon-Fri 8am-5pm' } });
+  Object.assign(c, { onboarding: { version: 1, verifiedEmail: c.owner.email, desiredChannels: channels }, services: ['AC repair'], windows: ['8 to 12', '12 to 5'], status: 'testing', build: { status: 'built', source: 'owner_answers' } }); c.rules.hours = parseHours('Mon-Fri 8am-5pm'); if(options.status)c.status=options.status;if(options.allowedOrigins)c.widget.allowedOrigins=options.allowedOrigins;if(options.website)c.business.website=options.website;if(options.businessNumber)c.phone.businessNumber=options.businessNumber;if(options.reviewed){const revision=configurationRevision(c);c.setupProof={reviewedRevision:revision,testedRevision:revision,testMode:'live'};}if(options.configure)await options.configure(c);
+  await store.put('clients', slug, c); await store.put('access_sessions', accessHash(token), { scope: 'onboarding', status: 'active', email: c.owner.email, expiresAt: new Date(Date.now() + 3600000).toISOString() });
+  const context = await browser.newContext({ viewport: { width, height: 950 }, serviceWorkers: 'block', reducedMotion: 'reduce' }); contexts.push(context); context.setDefaultTimeout(6000);
+  await context.addInitScript(({ origin, slug, token }) => {
+    if (location.origin !== origin) return;
+    sessionStorage.setItem('mc-onboarding-session-v1', token); localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen');
+    const original = window.fetch; window.qaGates = []; window.holdAvailability = null;
+    window.fetch = async function (input, options) {
+      let body; try { body = JSON.parse(options?.body); } catch {}
+      const hold = (window.qaHoldAction&&(body?.action===window.qaHoldAction || options?.method===window.qaHoldAction) || window.qaHoldExport&&String(input).includes('export='+window.qaHoldExport)) && window.qaHold;
+      // Deliberately ignore cancellation for held fixtures, proving the generation fence too.
+      const response = await original(input, hold ? { ...options, signal: undefined } : options);
+      if (!hold) return response;
+      if (hold === 'body') { const json = response.json.bind(response); response.json = async function () { const value = await json(); await new Promise(release => window.qaGates.push(release)); return value; }; return response; }
+      await new Promise(release => window.qaGates.push(release)); if (hold === 'error') throw new TypeError('Explicit lost transport response'); return response;
+    };
+  }, { origin, slug, token });
+  const state = { fault: null, failSignout: false, requests: [], exports:[], exportFault:null, actionFault:null };
+  await context.routeWebSocket('**/*', socket => socket.close());
+  await context.route('**/*', async route => {
+    const request = route.request(), url = new URL(request.url());
+    if (url.origin === 'https://accounts.google.com') {report.oauthNavigation=(report.oauthNavigation||[]).concat(url.href);return route.fulfill({contentType:'text/html',body:'<!doctype html><title>Intercepted Google permission boundary</title><p>Local QA stopped before real Google consent.</p>'});} if (url.origin !== origin) { if (['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname)) return route.fulfill({ status: 200, contentType: 'text/css', body: '' }); report.forbidden.push({ origin: url.origin, path: url.pathname }); return route.abort('blockedbyclient'); }
+    if (url.pathname.startsWith('/api/')) {
+      const method = request.method(), body = method === 'GET' ? null : request.postDataJSON(), action = body?.action;
+      if (!handlers[url.pathname] || ['request_link', 'exchange'].includes(action)) { report.forbidden.push({ path: url.pathname, action }); return route.fulfill({ status: 403, body: '{}' }); }
+      const item = { slug, path: url.pathname, query:url.search, method, action, body, authPresent:!!request.headers().authorization }; state.requests.push(item); report.requests.push(item);
+      if(method==='GET'&&url.pathname==='/api/client'&&!url.searchParams.has('export')&&state.getFault){const f=state.getFault;state.getFault=null;item.status=f;item.fixture='read-'+f;return route.fulfill({status:f,contentType:'application/json',body:'{"error":"account_unavailable","message":"Synthetic saved status read unavailable."}'});}
+      if(url.searchParams.has('export')){state.exports.push(item);if(state.exportFault){const f=state.exportFault;state.exportFault=null;item.fixture=f;if(f==='network'){item.status='aborted';return route.abort('failed');}const status=typeof f==='number'?f:200;item.status=status;return route.fulfill({status,contentType:f==='html'?'text/html':f==='json'?'application/json':'application/json',body:f==='html'?'<html><title>Sign in</title><h1>Sign in required</h1></html>':f==='json'?'{}':JSON.stringify({error:'export_unavailable',message:'Synthetic download unavailable. Try again.'})});}}
+      if(action&&state.actionFault){const f=state.actionFault;state.actionFault=null;item.fixture=f;if(f==='network'){item.status='aborted';return route.abort('failed');}item.status=f;return route.fulfill({status:f,contentType:'application/json',body:JSON.stringify({error:'account_unavailable',message:'Synthetic service change unavailable. Your choice has not been confirmed.'})});}
+      if ((action === 'save_connection_preferences' || method==='PUT') && state.fault) {
+        const fault = state.fault; state.fault = null; item.fixture = fault;
+        if (fault === 'network') { item.status = 'aborted'; return route.abort('failed'); }
+        if (fault === 'malformed') { item.status = 200; return route.fulfill({ status: 200, contentType: 'text/plain', body: 'not JSON' }); }
+        if (fault === 'auth-empty') { item.status = 401; return route.fulfill({ status: 401, contentType: 'text/plain', body: '' }); }
+        item.status = fault; return route.fulfill({ status: fault, contentType: 'application/json', body: JSON.stringify({ error: fault === 409 ? 'configuration_changed' : 'availability_unavailable', message: fault === 409 ? 'The saved schedule changed. Reload availability before trying again.' : 'The schedule could not be confirmed.' }) });
+      }
+      if (action === 'sign_out' && state.failSignout) { state.failSignout = false; item.status = 503; item.fixture = 'signout503'; return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"explicit_signout_failure"}' }); }
+      const response = await handlers[url.pathname](new Request(url, { method, headers: request.headers(), ...(body ? { body: JSON.stringify(body) } : {}) }), { ip: '192.0.2.71' }); item.status = response.status;
+      const responseBuffer=Buffer.from(await response.arrayBuffer()),responseBody=responseBuffer.toString('utf8');item.responseByteSha=sha(responseBuffer); item.responseHeaders=Object.fromEntries(response.headers); if(url.searchParams.has('export'))item.responseBody=responseBody; if(method==='GET'&&url.pathname==='/api/client') {try{state.dto=JSON.parse(responseBody);}catch{}} if(state.loseAfter&&(action===state.loseAfter||method===state.loseAfter)){state.loseAfter=null;item.lostAfterEffect=true;if(state.failReadAfterLose){state.getFault=state.failReadAfterLose;state.failReadAfterLose=null;}return route.abort('failed');} if(state.badAfter&&action==='request_followthrough'){state.badAfter=false;return route.fulfill({status:200,contentType:'application/json',body:'{}'});} return route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: responseBuffer });
+    }
+    const path = resolve(root, decodeURIComponent(url.pathname).replace(/^\//, ''));
+    if (!path.startsWith(root + '/') || !existsSync(path) || statSync(path).isDirectory()) return route.fulfill({ status: 404, body: '' });
+    return route.fulfill({ contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
+  });
+  const page = await context.newPage(); page.on('pageerror', error => report.pageErrors.push(error.message));
+  await page.goto(origin + '/desk.html?c=' + slug + '#account'); await page.waitForFunction(() => document.body.dataset.workspaceState === 'ready');
+  return { page, c, token, state, context };
+}
+async function check(name,run){if(option('--only')&&!name.includes(option('--only')))return;const start=contexts.length;try{await run();report.checks.push({name,pass:true});}catch(error){report.checks.push({name,pass:false,error:error.stack});const page=contexts.at(-1)?.pages().at(-1);if(page){report.checks.at(-1).pageState=await page.evaluate(()=>({route:document.body.dataset.activePage,text:document.body.innerText.slice(0,12000)})).catch(()=>null);await shot(page,'failure-'+report.checks.length).catch(()=>{});}console.log('FAIL '+name+': '+error.message);}finally{await Promise.all(contexts.slice(start).map(context=>context.close()));}}
+async function shot(page,name,fullPage=false){if(!output)return;const path=output.replace(/\.json$/,'-'+name+'.png');await page.screenshot({path,fullPage});report.screenshots=(report.screenshots||[]).concat(path);}
+
+async function geometry(page,selector='#p-account'){const v=await page.locator(selector).evaluate(el=>({viewport:innerWidth,document:document.documentElement.scrollWidth,width:el.clientWidth,scroll:el.scrollWidth}));assert.ok(v.document<=v.viewport+1&&v.scroll<=v.width+1,JSON.stringify(v));return v;}
+async function account(x){await x.page.locator('#tabAccount').click();await x.page.locator('body[data-active-page="account"]').waitFor();}
+async function refresh(x){await x.page.evaluate(()=>document.dispatchEvent(new CustomEvent('mc:desk-refresh')));await x.page.waitForTimeout(120);}
+async function stored(x){return store.get('clients',x.c.slug);}
+async function invoke(x,body,options={}){return handlers['/api/client'](new Request(origin+'/api/client?c='+x.c.slug+(options.export?'&export='+options.export:''),{method:body?'POST':'GET',headers:{origin,...(options.anonymous?{}:{authorization:'Bearer '+(options.token||x.token)}),'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ip:'192.0.2.71'});}
+async function seedRecords(x){const {workspaceTenant}=await import('../netlify/functions/lib/workspace-identity.mjs');const tenantIdentity=workspaceTenant(x.c);const booking=await store.addRecord('bookings',x.c.slug,{tenantIdentity,customer_name:'Renée "Fixture", Jr',phone:'+17135550197',address:'1500 Main St, Katy, TX 77450',issue:'AC, fan\nnot cooling',date:date(1),window:'8 to 12',status:'confirmed',channel:'web',notes:'Synthetic QA only'});const lead=await store.addRecord('leads',x.c.slug,{tenantIdentity,customer_name:'Taylor Fixture',phone:'+17135550196',issue:'Callback',status:'open',channel:'sms',outcome:'wants_call'});await store.addRecord('leads',x.c.slug,{tenantIdentity:'f'.repeat(64),customer_name:'FOREIGN TENANT MUST NOT EXPORT',phone:'+17135550199',status:'open'});await store.put('conversations',x.c.slug+'/'+tenantIdentity+'/web/local-fixture',{slug:x.c.slug,tenantIdentity,channel:'web',contact:'local-fixture',updatedAt:new Date().toISOString(),messages:[{at:new Date().toISOString(),role:'user',content:'Synthetic customer "question", with comma\nand line break'}]});return {booking,lead};}
+async function exportFile(x,id,kind){const awaiting=x.page.waitForEvent('download');await x.page.locator('#'+id).click();const download=await awaiting;const bytes=readFileSync(await download.path());const item=x.state.exports.at(-1);assert.equal(sha(bytes),item.responseByteSha,'Saved download must match actual handler response bytes');if(output){const path=output.replace(/\.json$/,'-'+x.c.slug+'-'+kind+'.csv');await download.saveAs(path);report.downloads=(report.downloads||[]).concat({path,filename:download.suggestedFilename(),bytes:bytes.length});}return bytes;}
+async function noProviderEffects(x){for(const kind of ['phone_activation_intents','voice_activation_intents','messaging_activation','calendar_oauth'])assert.equal((await store.list(kind,x.c.slug)).length,0,kind);assert.equal(report.physicalNetwork,0);}
+
+const {workspaceTenant}=await import('../netlify/functions/lib/workspace-identity.mjs');
+async function setup(width=390){const x=await fixture(width,['web']);const tenantIdentity=workspaceTenant(x.c);x.lead=await store.addRecord('leads',x.c.slug,{tenantIdentity,customer_name:'Alex Customer',phone:'+17135550142',address:'12 Oak St',issue:'AC not cooling <script>never execute</script>',wanted:'Call after 3',reason:'wants_call',outcome:'wants_call',status:'open',channel:'web',urgency:'today'});x.booking=await store.addRecord('bookings',x.c.slug,{tenantIdentity,customer_name:'Alex Customer',phone:x.lead.phone,address:'12 Oak St',issue:'Existing visit',date:date(1),window:'8 to 12',status:'confirmed',channel:'web'});await refresh(x);await x.page.locator('.tabs [data-t="leads"]').click();await x.page.locator('#leads [data-request-open="'+x.lead.id+'"]').first().waitFor();return x;}
+async function openRequest(x){await x.page.locator('#leads [data-request-open="'+x.lead.id+'"]').click();await x.page.locator('#requestContent').waitFor({state:'visible'});await x.page.waitForFunction(()=>!document.getElementById('requestSave').disabled);}
+async function save(x,type,inputs={}){await x.page.locator('#requestAction').selectOption(type);for(const [id,value]of Object.entries(inputs)){const field=x.page.locator('#'+id);if(await field.evaluate(n=>n.tagName==='SELECT'))await field.selectOption(value);else await field.fill(value);}const count=x.state.requests.filter(r=>r.action==='request_followthrough').length;await x.page.locator('#requestSave').click();await x.page.waitForFunction(()=>/Action saved/.test(document.getElementById('requestMessage').textContent));assert.equal(x.state.requests.filter(r=>r.action==='request_followthrough').length,count+1);await x.page.waitForFunction(()=>document.getElementById('requestSave').disabled===false);}
+async function journal(x){return store.get('request_followthrough',x.c.slug+'/'+workspaceTenant(x.c)+'/'+x.lead.id);}
+try {
+for(const width of [390,1440]) await check(width+' owner job: plan overdue callback, distinguish message from reach, complete and return',async()=>{
+ const x=await setup(width); await openRequest(x);
+ assert.match(await x.page.locator('#requestFacts').innerText(),/Call after 3/);
+ assert.equal(await x.page.locator('#requestAction').inputValue(),'plan');
+ const before=x.state.requests.filter(r=>r.action==='request_followthrough').length;
+ await x.page.locator('#requestSave').click();
+ assert.match(await x.page.locator('#requestMessage').innerText(),/Describe the next action/);
+ assert.equal(x.state.requests.filter(r=>r.action==='request_followthrough').length,before);
+ assert.equal(await x.page.locator('#requestNextAction').getAttribute('aria-invalid'),'true');
+ await save(x,'plan',{requestNextAction:'Call Alex about repair options after 3',requestDue:'2026-01-01T15:00',requestNote:'Customer prefers this afternoon'});
+ await save(x,'attempt',{requestChannel:'text',requestAttemptResult:'sent_message',requestNote:'Sent an update; no reply yet'});
+ assert.equal((await journal(x)).state.contact,'attempted');
+ assert.equal((await journal(x)).state.completedAt,null);
+ assert.match(await x.page.locator('#requestProgress').innerText(),/Attempted, not reached/);
+ assert.match(await x.page.locator('#requestProgress').innerText(),/overdue/);
+ await x.page.locator('#requestForm').scrollIntoViewIfNeeded(); await shot(x.page,'attempt-'+width);
+ await x.page.locator('#requestClose').click();
+ await x.page.locator('.tabs [data-t="today"]').click();
+ await x.page.locator('#needsYou [data-request-open="'+x.lead.id+'"]').waitFor();
+ await x.page.locator('#needsYou [data-request-open="'+x.lead.id+'"]').click();
+ await x.page.waitForFunction(()=>!document.getElementById('requestSave').disabled);
+ await save(x,'reached',{requestChannel:'text',requestNote:'Customer replied and agreed we should discuss repair options'});
+ assert.equal((await journal(x)).state.completedAt,null,'Reaching customer must not complete the work');
+ await save(x,'complete',{requestResolution:'resolved',requestNote:'Spoke on the phone and answered the remaining question'});
+ assert.equal((await store.get('bookings',x.c.slug+'/'+x.booking.id)).status,'confirmed');
+ await x.page.locator('#requestHistory').scrollIntoViewIfNeeded(); await shot(x.page,'completed-'+width);
+ await x.page.locator('#requestClose').click(); await refresh(x);
+ assert.equal(await x.page.locator('#needsYou [data-request-open="'+x.lead.id+'"]').count(),0);
+ await x.page.reload(); await x.page.waitForFunction(()=>document.body.dataset.workspaceState==='ready');
+ await x.page.locator('.tabs [data-t="leads"]').click(); await openRequest(x);
+ assert.match(await x.page.locator('#requestProgress').innerText(),/Completed/);
+ assert.equal(await x.page.locator('#requestHistory li').count(),4);
+ await save(x,'reopen',{requestNote:'Customer now wants a replacement quote'});
+ assert.equal((await journal(x)).state.completedAt,null);
+ await x.page.locator('#requestContent').evaluate(n=>n.closest('dialog').scrollTop=0); await shot(x.page,'returned-'+width);
+ await geometry(x.page,'#requestDialog'); await noProviderEffects(x);
+});
+await check('Ordinary keyboard dismissal preserves a draft and returns focus without saving',async()=>{
+ const x=await setup(390); await openRequest(x);
+ await x.page.locator('#requestNextAction').fill('Check options before callback');
+ await x.page.locator('#requestDue').fill('2026-11-01T10:30');
+ await x.page.locator('#requestNote').fill('Retain this draft while I check the visit');
+ await x.page.keyboard.press('Escape');
+ assert.equal(await x.page.locator('#requestDialog').isVisible(),false);
+ assert.equal(await x.page.locator('#leads [data-request-open]').first().evaluate(n=>n===document.activeElement),true);
+ await x.page.keyboard.press('Enter');
+ await x.page.locator('#requestContent').waitFor({state:'visible'});
+ assert.equal(await x.page.locator('#requestNextAction').inputValue(),'Check options before callback');
+ assert.equal(await x.page.locator('#requestNote').inputValue(),'Retain this draft while I check the visit');
+ assert.equal(x.state.requests.filter(r=>r.action==='request_followthrough').length,0);
+});
+await check('A corrected callback number cannot inherit reached evidence for the previous number',async()=>{
+ const x=await setup(); await openRequest(x);
+ await save(x,'reached',{requestChannel:'call',requestNote:'Spoke to original supplied number'});
+ const old=x.lead.phone;
+ await store.atomicUpdate('leads',x.c.slug+'/'+x.lead.id,l=>({value:{...l,phone:'+17135550155',wanted:'Call my corrected number please'}}));
+ await x.page.locator('#requestClose').click(); await refresh(x); await openRequest(x);
+ await x.page.locator('#requestSourceNotice').waitFor({state:'visible'});
+ assert.match(await x.page.locator('#requestProgress').innerText(),/Customer contact[\s\S]*Not recorded/);
+ const beforeReview=await (await invoke(x)).json();
+ const {requestFollowthroughMetrics}=await import('../netlify/functions/lib/request-followthrough.mjs');
+ assert.equal(requestFollowthroughMetrics(beforeReview.leads).reached,0);
+ await shot(x.page,'corrected-phone-before-review');
+ await save(x,'review',{requestNote:'Reviewed corrected callback number; contact is still needed'});
+ const dto=await (await invoke(x)).json();
+ const lead=dto.leads.find(l=>l.id===x.lead.id);
+ report.phoneCorrection={oldPhone:old,newPhone:lead.phone,contact:lead.followthrough.state.contact,metrics:dto.followthrough,history:(await journal(x)).history.map(e=>({type:e.type,phone:e.source.phone}))};
+ await shot(x.page,'corrected-phone-after-review');
+ assert.notEqual(lead.followthrough.state.contact,'reached','Current phone inherited contact made only with old phone');
+ assert.equal((await journal(x)).history.length,2,'Original reached record must remain in audit');
+ assert.equal(requestFollowthroughMetrics(dto.leads).reached,0);
+ assert.equal((await journal(x)).history[0].source.phone,old);
+ assert.equal((await journal(x)).history[0].state.contact,'reached');
+ await save(x,'attempt',{requestChannel:'call',requestAttemptResult:'no_answer',requestNote:'Tried corrected callback number; no answer'});
+ assert.equal((await journal(x)).state.contact,'attempted');
+ await save(x,'reached',{requestChannel:'call',requestNote:'Spoke with customer on corrected callback number'});
+ await store.atomicUpdate('leads',x.c.slug+'/'+x.lead.id,l=>({value:{...l,phone:'(713) 555-0155',issue:'Same caller corrected repair description'}}));
+ await x.page.locator('#requestClose').click(); await refresh(x); await openRequest(x);
+ assert.match(await x.page.locator('#requestProgress').innerText(),/Reached \(owner recorded\)/);
+ await save(x,'review',{requestNote:'Same phone with formatting and repair-description corrections'});
+ const current=await (await invoke(x)).json();
+ assert.equal(requestFollowthroughMetrics(current.leads).reached,1);
+ assert.equal(current.leads.find(l=>l.id===x.lead.id).followthrough.state.contact,'reached');
+ await shot(x.page,'corrected-phone-current-evidence');
+});
+await check('Review remains local with no accidental external effects',async()=>{
+ assert.equal(report.physicalNetwork,0); assert.deepEqual(report.pageErrors,[]); assert.deepEqual(report.forbidden,[]);
+});
+}finally{await browser.close();report.sourceAfter=hashes();report.sourceStable=JSON.stringify(report.sourceBefore)===JSON.stringify(report.sourceAfter);report.summary={passed:report.checks.filter(c=>c.pass).length,failed:report.checks.filter(c=>!c.pass).length,total:report.checks.length,physicalNetwork:report.physicalNetwork,pageErrors:report.pageErrors.length};if(output)writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({output,...report.summary,sourceStable:report.sourceStable,failures:report.checks.filter(c=>!c.pass).map(c=>({name:c.name,error:c.error}))}));if(report.summary.failed||!report.sourceStable)process.exitCode=1;}

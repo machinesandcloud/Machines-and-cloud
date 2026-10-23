@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-23",
+  "stage": "Fresh account/configuration observations and real Stripe TEST protocol proof; no production/provider customer-delivery acceptance",
+  "ownerMerchantChoice": "Use the existing Zari Marketing account",
+  "stripe": {
+    "accountId": "acct_1NK0c6JW47xiUUpY",
+    "testAccountRead": "Matches approved account; charges_enabled,payouts_enabled,details_submitted true in test response",
+    "testProviderProof": "scratchpad/launch-stripe-test-provider-proof.json",
+    "casesPassed": 7,
+    "testRequests": 24,
+    "temporaryResources": "Two products/two Prices archived; one unpaid Checkout expired; no completed Checkout, subscription or charge",
+    "scope": "Actual Stripe TEST API and actual local billing handlers; synthetic in-memory workspace/readiness/session; no production credentials, billing settings, customer records or live offer changed",
+    "commercialTerms": "Unapproved; test terms and synthetic safety fields are not customer allowances. Live billing remains disabled."
+  },
+  "google": {
+    "observation": "Native Chrome Google Auth Platform, machines-and-cloud project",
+    "publishingStatus": "In production",
+    "audience": "External",
+    "userCount": 0,
+    "unverifiedUserCap": 100,
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.events.owned",
+      "https://www.googleapis.com/auth/calendar.calendars.readonly"
+    ],
+    "scopeSelectionMatchesRuntime": true,
+    "brandingVerified": false,
+    "dataAccessVerified": false,
+    "brandingFields": {
+      "name": "Machines & Cloud front desk",
+      "home": "https://www.machinesandcloud.com",
+      "privacy": "https://www.machinesandcloud.com/privacy-policy.html",
+      "terms": "https://www.machinesandcloud.com/terms-of-service.html",
+      "authorizedDomain": "machinesandcloud.com",
+      "contact": "ngoumnaisteve@gmail.com"
+    },
+    "actions": "Viewed Audience/Data Access/Verification/Branding. Clicked existing Branding Save once without field edits; no save/verification transition confirmed. Prepare for verification is disabled. Subsequent Chrome JavaScript bridge timed out; stopped further DOM actions. No attestation, submission, OAuth grant, token or event operation.",
+    "next": "Resolve branding prerequisites, prepare actual consent/use demo, owner submits required verification. A controlled owned grant is separate from general customer launch."
+  },
+  "twilio": {
+    "account": "Active on200 REST read",
+    "companyCampaign": "FAILED, exact reported30909 MESSAGE_FLOW and30893 SAMPLE_MESSAGE_1 persist",
+    "currentFiledData": "scratchpad/launch-company-campaign-readonly.json",
+    "scope": "Company support filing is separate from dedicated customer registrations. Existing Support request30031927 was sent under earlier explicit approval; no current reply verified. No new message/resubmission/fee/number/routing/HELP mutation occurred in this phase."
+  },
+  "resendVapi": {
+    "initial": "urllib default user agent received403",
+    "resolved": "Same read endpoints with normal user agent returned200; do not report bad credentials",
+    "limits": "No email, call or voice/model delivery proof."
+  },
+  "production": "Still recorded d21783c; acquisition/voice/SMS delivery remain closed; Google connection/delivery flags true under prior expired bounded policy. No new release or production setting change.",
+  "voiceCostObservation": {
+    "evidence": "scratchpad/launch-historical-voice-cost.json",
+    "actualProviderRead": "Historical approved synthetic browser call58.737s/costUSD0.0866; no new call",
+    "limits": "Practice model/voice; excludes Twilio legs. Does not establish managed call unit cost or acceptable monthly customer pricing."
+  }
+}

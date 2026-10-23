@@ -1,0 +1,2024 @@
+{
+  "at": "2026-10-23T15:05:28.689Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "desk-requests.js": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+    "netlify/functions/lib/request-followthrough.mjs": "547ea48402dfbb0e25ad2c1f2c4a0dbcc6dc28ffed7af37b2749b8dc4d2686c6",
+    "scripts/build-site.mjs": "17957f139006efae1765d523dbf22bd045141c7fb8ac87f8391966d936a85b77",
+    "scripts/request-followthrough-ui-check.mjs": "a6a7396d2e395096ffcbe8b0ad045ac455c1f48ba0d772775c117acb6ae2576f",
+    "desk.html": "94a6387f47ffa48db7e64fc3c0defd33c37b0fb95cbd5226d9eb9a0b12a4a971",
+    "desk.js": "c1c5e17a5bda3d087e18aa4b9b64394c55430f0b56770585b49cadedb5c45b7b",
+    "desk.css": "609244924e7bca83e0e1a2d1bdc568490ed0b5a09629f5575ae5590808fe12d9",
+    "onboard.html": "b7ac51b4c48fec6d346f52502f2117eaf8d45c03bf6fc7961f721b7eed3dc39b",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "c7d722f7ab065878fa42ed7f4313e7defcc3e941489e7f2738c315976d32e3c5",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "fca21ae22ee2c101297941000c7826eff1793c6d1ad6a3d26c17168d649cbf38",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "320px ordinary Inbox job: plan, contact outcomes, completion, return and retained history",
+      "pass": true
+    },
+    {
+      "name": "390px ordinary Inbox job: plan, contact outcomes, completion, return and retained history",
+      "pass": true
+    },
+    {
+      "name": "1440px ordinary Inbox job: plan, contact outcomes, completion, return and retained history",
+      "pass": true
+    },
+    {
+      "name": "Unsaved request notes and next-action values survive ordinary Close and return",
+      "pass": true
+    },
+    {
+      "name": "Lost action response reconciles one retained receipt without a duplicate POST",
+      "pass": true
+    },
+    {
+      "name": "Malformed successful action response keeps uncertainty until the saved receipt is reconciled",
+      "pass": true
+    },
+    {
+      "name": "Failed action read and reload retain exact operation; explicit same-action retry saves once",
+      "pass": true
+    },
+    {
+      "name": "Concurrent source change preserves typed note and requires review without silently resetting earlier contact",
+      "pass": true
+    },
+    {
+      "name": "Closed workspace details and history remain readable with no editable action",
+      "pass": true
+    },
+    {
+      "name": "Late follow-up result after sign-out cannot restore private records or an action form",
+      "pass": true
+    },
+    {
+      "name": "Request CSV retains follow-up context and history while preserving the original lead columns",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "82af865e65918f7bfae03407a44df2b325cdebc00ed14dae8b9a4b4b5528ad42",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e123adf34224d7cdb69614ba506b4be687c5f4461d2d22c35c4225042ff41518",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&requestId=55f250e12c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d858c108a4277334ef28c1435dfa9d2121262b362bb69036467db2ed21693bcd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "9d654ac5f092d5c6fb0fa893c36605b28c359256b21a74961c222ec0a74bffa1",
+        "operationId": "8742a0e4b31bfaef2e0c74eb3deedd9a",
+        "type": "seen",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a40faf1c061e02fd38737842353f918a310bc17eb04918a332b6eaee11ad7902",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f7afea3ddb7339ac95b101bc4f3e32dc597d527f3a6c5364a89fe6d9935cc8f8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "9ce9e557ed3345cbb06b48efbd8b47f764a98302d23a212b321d099386dad7d9",
+        "operationId": "39109118481b680b5cba5c1da7163e8c",
+        "type": "assign",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "444a0dc7ec5417477203204cccbb682a73ba15850d8fe178712856940953465e",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8abaf9ab3ff9f5c45da14f98f919bf4444b0d04eacaea7b27acd46457852b21d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "e7c6256dab15876cd48ba7dfb66eab08e8191621d447e5ce73ad391dfeb3ee9e",
+        "operationId": "6d9eb6c8bda5cc40fd0fce294a25bf90",
+        "type": "plan",
+        "note": "Use the number supplied by the customer",
+        "nextAction": "Call about repair options",
+        "dueAt": "2026-01-01T15:00:00.000Z"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8fc4462ce4a6ea6db9aa557f5d0f6c28a096bec8c04b0e07657140348f66143e",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f00c2325b583e3b16a7a7e249b006a63ad2ebf658911eaae3feef2f43ff69a4f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "8f4276840e959172c9701fa54fb6559e13318fe16b020b6ff94681e56ec90732",
+        "operationId": "0e0ce46f3fd4b0205b7bb6f511bf0990",
+        "type": "attempt",
+        "note": "Left a voicemail, no answer",
+        "channel": "call",
+        "result": "left_message"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4e979a08b3054c9e2e9883976efe77ea3635140497c33a2c355376c0039623f4",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9fe754e385d48f4fca62ce361aee779d8eff16d21d2c0be4fe65723e80fc00e4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "acfa8124eb8cd0199c3c166858f66a4ae902799949dea98ea10e5f380b0cf258",
+        "operationId": "725fdf5dea9bf3348203c4fe701dc441",
+        "type": "reached",
+        "note": "Spoke with the customer",
+        "channel": "call"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d06038c20b1934dbc8709bb01418b5ea66ba5562f0ed88c657e675244563df00",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "42b6130ed2c4d094e16079d711d8420baa4d5ecd41cc5bba4b147d307ad1da96",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "090c7ae928b43d6e9338fdd2aaf28e6b0598436410d78c8bea4bc1c0f2709a6e",
+        "operationId": "eb0fe028a90e0c4c3ed7cfd61d3094e9",
+        "type": "complete",
+        "note": "Explained the options; customer has no further question",
+        "resolution": "resolved"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "14814f193ecfa79a87140b03a7853cdff25b41a13e5484b71537e986b14a9544",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b175fc87a576e0fb68f59db2ab677f30b322e4ca7d8bcd2dbd0df62adf957a72",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b175fc87a576e0fb68f59db2ab677f30b322e4ca7d8bcd2dbd0df62adf957a72",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&requestId=55f250e12c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2c0af23bec3df2e40a4a97ee8e54d712183de171de1f1ca4ce3ced00379a9355",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "55f250e12c",
+        "sourceRevision": "26ba3c7fc3e3031fccbf08000a740a14c8da533dfd342d38d8840f1869e4de05",
+        "expectedRevision": "69a5dc65a0841c3e28f9b1e574d70c44228a65ccfde6de426b835a8af5f99a2e",
+        "operationId": "305e44fff1497f3c6aa51b13e13d09fd",
+        "type": "reopen",
+        "note": "Customer requested a second discussion"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "bab64b6f16fa505d676c63b7858f37f476006848473c6d0654e441bcba2f6389",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "97e77ed43511ae0778d2330abe635c741a1b84037be32f0159c62f44e407c5a4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "08dc8da92a3f3e547a40acbe9dd94973286686d17963abbe78421fe79702b13b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "741e607d6c72629d84f03849ced21fb017cdb51c3f6767f9cfbc67b2027b1c34",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&requestId=6352203de5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d284da6e8eb3ee56dd93eb7e92c4a361db39ebab04e81d0a56375347b3452eb3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "e85e65e019317b38521e74a0438d29e4cd4093bdd2f139a835acfe07312d7d40",
+        "operationId": "7bebd0d300e0cabeae33be7e49eccf05",
+        "type": "seen",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "cb7d33244bb30ffd19fe1875a8549ab7d741dc686a4e55349acb26681eb6d723",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0940b7045e36e57ae38abb63382be207fc19431ec697727cd7b4398ed5b970a1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "e9d255b80dad26374d609d4a0da2aec2baca8b7f74f3a03430ee18f05d36fa39",
+        "operationId": "676dfebe293993cb55ee23a7eef320fe",
+        "type": "assign",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "33a9fc017187ba8255916781e5f0644d12dae0b1781f1ca7dd257182aa797fdc",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c67c6253c53c80c82b381f91c5598c8e63b4dc0749ef1673fb6bbfb76d5d75b9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "6242dddc1b9f3dcc94d38a176c931703d4a7c925b174a59a176029e660722a7d",
+        "operationId": "af547b136afcfd7ce3074f03d92051c0",
+        "type": "plan",
+        "note": "Use the number supplied by the customer",
+        "nextAction": "Call about repair options",
+        "dueAt": "2026-01-01T15:00:00.000Z"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "34ee2d9ec00474cd3d0a71755bc15e037cb6b41c434927d2240f0721680a65c4",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b330f05fd53a98c957ec2acb8de67cf01b0a687fc84015b457cd586cb716b185",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "0bae38f6c9265f7ee3ee0e7dc74ae0be86f42b111e744649e5d7e19de7519208",
+        "operationId": "89d95cb7056a30dfde295e30f4d6d94e",
+        "type": "attempt",
+        "note": "Left a voicemail, no answer",
+        "channel": "call",
+        "result": "left_message"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6d7fd1362ed70c0f811e28bada94387e41f55735968d123d8ea2bc66e41c08a6",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7c3b3aaeccd5f9df20d90c1aa259629f7c7d2ef02a6d6ae2f42696442beeacb4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "c984adeea434143cc403ff1bf9ca8a5ae4a5e509a38127082d53ab23d35c01e3",
+        "operationId": "2ba02fb2a57a1b0d6f6846f71951e1dc",
+        "type": "reached",
+        "note": "Spoke with the customer",
+        "channel": "call"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f93943b578937010ee4b9551fb39be1c8f84d54af99602aeeef0ca543d63df11",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5f72c9bfb8807267bcea2851617e55eb8a1580dc1bfb09b4030125d1a973b19e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "20eef36d16d70c432771b5a8e9ba2e90e5349963a84e0ecb2c89328877134465",
+        "operationId": "127eecf745d2996e2f88983e7f4a64f5",
+        "type": "complete",
+        "note": "Explained the options; customer has no further question",
+        "resolution": "resolved"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8495c610e92235c51f3982a66e71cf3e9e994ce277df2bfbc6bfe6f43a1b5043",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4b4fdcc07c31c8eefc64111cd894ed7004efa24b5fc1f280fb332fd192ee4061",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4b4fdcc07c31c8eefc64111cd894ed7004efa24b5fc1f280fb332fd192ee4061",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&requestId=6352203de5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e15d183a108de4f167fa1dff26bae8450166f8a7b799f9602713c20f806be5b1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "6352203de5",
+        "sourceRevision": "68a6952dfa8cc28316d1dbf7a46733a7640387d4bf00daf56708676c9ef88c33",
+        "expectedRevision": "73287add3c414ca65be40a24dbd83a48fab8358b0353d782cd7ae90c917b2bfa",
+        "operationId": "d9ed35e0a64ae73040d221e45f70f15d",
+        "type": "reopen",
+        "note": "Customer requested a second discussion"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "44c46dea7a54134bfb7cf3f7c4384c81405cd349f844642927319253f892a8c5",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "807a96fe5d5d5e18e85f11d285087d315e236276d0bcd77eb37740115a76ec60",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "603c064fe860db78f65d027688570a52764880123ad1c3dd3d29ee839d7eb209",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9f56f58fb08a2be9af0bbd7098b15de16d248dce68fcd37272d6a0ccf573b562",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&requestId=85b167e9dc",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "62893fd3f2c592280e052cd99314508b9b03cba1e94d077a0af9b2ec214bf95a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "3c8cab958a3d14f81deb54aab5fba55ef10e868d160590ac64b1e2ed877d6882",
+        "operationId": "d222f0ae2942ca668b9d8849ca2873c8",
+        "type": "seen",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "daaeeca40cb3dade459c2d916db22887b7c1a40f89e2e4da3c7fb86ad4409b95",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ca5966771a9a997bd8b17836039e052749230ef9bbb883ad3236aa3b9ce23473",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "f05b8220c8165c170a660fd763bde5adbdc7f055b7be7b84ccaeb200e0f14060",
+        "operationId": "afd99a60a6d5c478c39c3c168a53be55",
+        "type": "assign",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "05c928b2a4722ca0608c2774d8aee600d1234123ac6fc4258ba96fbb3abe28c7",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "18310bc3690da41e8e468fd1f32dc6dc6b0b6c922267f8e22df9fbca2fd9246c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "28aba44641254c3b25758831cc157b0bb8c9e36cdebc966c70f77d6fd278314c",
+        "operationId": "e2fc883b464f72e403179cd00d8aa508",
+        "type": "plan",
+        "note": "Use the number supplied by the customer",
+        "nextAction": "Call about repair options",
+        "dueAt": "2026-01-01T15:00:00.000Z"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ca8fe5019fb661722295e71717eda995b2232055deb37ea77618c3e1b196ae5d",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2f7ea876be84072ead99ec6e15893d5b8d48e105893a42a9c07543f1a8bce46c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "5b42be4ce299a30f7d6e1edea824b3c5b6780e78931e151749ec1fc1464e3776",
+        "operationId": "9b6153072de9f611d30d9482b82c66eb",
+        "type": "attempt",
+        "note": "Left a voicemail, no answer",
+        "channel": "call",
+        "result": "left_message"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "dac8a038cc81174cdc02c42c4fd0fa8ce52212513f2d9b4c05be222b38af2355",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4638a2fb7461879770a818bb87f0bf2d0bdf6ea6456c22be68c3cf9d1335f4e0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "583324de95cbac0601e9dcc718040d5c349d94cc053b89163cd62bb74a4cae70",
+        "operationId": "b20d7390d94e29663845f597e5c4127e",
+        "type": "reached",
+        "note": "Spoke with the customer",
+        "channel": "call"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0c1eb39b0f32117bed0e0403d7b24a27917e59ca9d0e2ceef4ed9d00cfd6070b",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d8e6d41e62d50ebf307fce15a0b2565342c6e7145fdc48436d579712752cf49e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "f9f33ec206f93276ac3d92cbc78c5e852e8d0f0ea365bb9a3490812a92ad3a7d",
+        "operationId": "d15ea95bb6ad587306109083e889a20e",
+        "type": "complete",
+        "note": "Explained the options; customer has no further question",
+        "resolution": "resolved"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f35c20725f287f71ae92cc97753d555fa463b8261fa8d1bb34f7de1e31971498",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c680f1543a25ceb344e10fbcf26dd54872e4427ad27c5219e57db7452be58e28",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c680f1543a25ceb344e10fbcf26dd54872e4427ad27c5219e57db7452be58e28",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&requestId=85b167e9dc",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1ecd76f059fa92f918b593b7d5a22526bffc41cc434dae1b2033cedb32174526",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "85b167e9dc",
+        "sourceRevision": "ad8d874cfcf7843fed4114c87d334e0d620c3135e9d6dd3f962de511654a562d",
+        "expectedRevision": "33f7e3e33ecf6ad02a6a25558c89517fcc23de71e3029723d89fd38d4afd94fc",
+        "operationId": "fdb0b4fcd06fbabaf7de49f4cac7aaf9",
+        "type": "reopen",
+        "note": "Customer requested a second discussion"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e76d8cf8a72bd84e7b6b5d9cf847e95b2936b7b8d8c619b80cd1656b4b738c5d",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "fc5a10aefb0798483b9ff3b1cb6ac10070912caae6638aeaed1bad51150c82e6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "560b66ed115afb84e36947064d678981463edec7316e5064a16f4025809c28d2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "909a992ed3b286b56ba3fc295840c715aec08425a8b889da76a41dd069efb03d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&requestId=d7201219fa",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9f80a49e7d845f3eac28d006712cc6f7113cea00816367980951f576b298cce5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&requestId=d7201219fa",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9f80a49e7d845f3eac28d006712cc6f7113cea00816367980951f576b298cce5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f9585a12096017529abd7c7885555e92997e2e06bc0b58b38e0c465ecef091ad",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e7c2f21cd51ec1b4283659f1c88c720beedf312d1f81aadd46d976cdebb07091",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&requestId=fb7d006aee",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "414c7eeefdcf3cd4e41a62d1634c2f50f56b902eff2712f4bb9d45a08bcb4b79",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "fb7d006aee",
+        "sourceRevision": "c1937a54ce066a80405828ae0cc7bbd5089a0d182d6ea7e2bbae187563fb47a5",
+        "expectedRevision": "51c8a63cf578826d40bc2a5f481bd65793b69acc876e414c9e03462f21282858",
+        "operationId": "7350c5a596d87dea8a792fd6f19bd1fe",
+        "type": "attempt",
+        "note": "One attempted callback",
+        "channel": "call",
+        "result": "no_answer"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "83e1daa9aacb5e5b906b7912162c0ea2ee0cde33b55ce4cbc2e984dd71f47709",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      },
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&requestId=fb7d006aee&operationId=7350c5a596d87dea8a792fd6f19bd1fe",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "83e1daa9aacb5e5b906b7912162c0ea2ee0cde33b55ce4cbc2e984dd71f47709",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0033be48ded37fe7b7a34ece1588162da6201c86cec60ae77522d045685723cd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3b559508d31a1f08789a3bda8d1edd3d2004a9e4ba615a1c8e646c87b15973b0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b1a9b312d1e20f5e7f90668d6ee24b0afcc845b5111a5ef3658420653912eb76",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&requestId=dd13ed5ca4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c85fbfcbaa626faee8d4f76e436d7b1d6f572330f09edfacfe667fd4832eeac9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "dd13ed5ca4",
+        "sourceRevision": "1b1515beacd4a86cb51238687c93e4eb59032d6da2e468191ab763a12814a1dd",
+        "expectedRevision": "2c24552aae73836d7e253a391be3519c15acd5e47ac56114f8b2ea892dd2ae69",
+        "operationId": "de920619a75d3e83df86e02f3f912937",
+        "type": "assign",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "51eb78c8e4b20879fcaea2fcc15349d9059cff9667f5fabbbd1f045aa177a0b3",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&requestId=dd13ed5ca4&operationId=de920619a75d3e83df86e02f3f912937",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "51eb78c8e4b20879fcaea2fcc15349d9059cff9667f5fabbbd1f045aa177a0b3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "dbeda992b993986e2d1166ee391571ec2986a6ffc7be83f1b0a2b6b64f3f66e3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "971ea4b76164c57cd5d1721f46624993604ea4aa10935a117139ba640b883f74",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9cd89dfa106e157f19a5df87d15f86314d179b68c6e312b6492624515c9706d6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&requestId=aa485e79d7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6d480beb1c9cabf496365d602f695c5d0976846bfa18d27bacb84ec28649831f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "aa485e79d7",
+        "sourceRevision": "d423dee9dcbacbdc0f41ff9ca880af07355a55cc9082de199bb4b8e3d81403ad",
+        "expectedRevision": "9c5bce4183b91ebaa42913bd1f73d863d2bd2d696b4c02a7b71490105c0b2c7f",
+        "operationId": "6f2be9cd474d09830a60ffc9c79d5e0e",
+        "type": "assign",
+        "note": "I will handle this request"
+      },
+      "authPresent": true,
+      "fixture": 503,
+      "status": 503
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9cd89dfa106e157f19a5df87d15f86314d179b68c6e312b6492624515c9706d6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&requestId=aa485e79d7&operationId=6f2be9cd474d09830a60ffc9c79d5e0e",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6d480beb1c9cabf496365d602f695c5d0976846bfa18d27bacb84ec28649831f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "aa485e79d7",
+        "sourceRevision": "d423dee9dcbacbdc0f41ff9ca880af07355a55cc9082de199bb4b8e3d81403ad",
+        "expectedRevision": "9c5bce4183b91ebaa42913bd1f73d863d2bd2d696b4c02a7b71490105c0b2c7f",
+        "operationId": "6f2be9cd474d09830a60ffc9c79d5e0e",
+        "type": "assign",
+        "note": "I will handle this request"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e604e2135a236114ce66d425aea81c2def4bb4f6384a34a123b55a103601963e",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a0e5fa0c8b52f26f4a9cdf15fd4a4fe5d9c47fd3ec2abbb257663c7909bbf3a9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ceafbbdc12cf2a4038f18a1f5e9f470b31aad9871061b06f7376c30df3a60f43",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "bf92605877adbd94c7ebdfb9d09f762da231c4b77403f3d24f7608805f20b678",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&requestId=8e19acfdb8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c4a87e11825d5e38548805e2454677a4e7ceea81211bf6d20f06818b32da48c2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "8e19acfdb8",
+        "sourceRevision": "7f79fd432fd4c684a177c280e308c405a4444172e3c3d167bfdafcd21796998b",
+        "expectedRevision": "26e4f43f8298cfcdbed5bf57645896658ef196d9dca3ef480a199480013f2a35",
+        "operationId": "b17d2f1fb25b434a0ce0c8a7c725c04d",
+        "type": "reached",
+        "note": "Spoke with customer",
+        "channel": "call"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5bf6c90de1e01c1866b251c0a1bcf58291305fc28aa60dddfe1c4329a6501b35",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "dcf1df3331960d3fc25ed32e2e0cb3b2c19f9997aa5d48e21d26e66138e3ac60",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "8e19acfdb8",
+        "sourceRevision": "7f79fd432fd4c684a177c280e308c405a4444172e3c3d167bfdafcd21796998b",
+        "expectedRevision": "07b4e83a6d434fa43eef00e3ac2dae4b0f52bda841eeb3cadbdd91a419b6eb32",
+        "operationId": "2453ec3c45934729e8f880afffa4da17",
+        "type": "complete",
+        "note": "Keep my current result note",
+        "resolution": "resolved"
+      },
+      "authPresent": true,
+      "status": 409,
+      "responseByteSha": "bc25ba46710244f749eaea373f0500daa5fc770978008bb425c53948f2a9361d",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&requestId=8e19acfdb8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "21d5beb6709e794dfd6526b6ac5931c48618936d78e46fbd20b1541933d05900",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "8e19acfdb8",
+        "sourceRevision": "170fab75507ed19565eb63048f2ebde3114dae3c37776bc9953dfb782e749808",
+        "expectedRevision": "07b4e83a6d434fa43eef00e3ac2dae4b0f52bda841eeb3cadbdd91a419b6eb32",
+        "operationId": "d259bdaf8ffb077212d406e7329b1cb0",
+        "type": "review",
+        "note": "Read the corrected request and will follow up"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f330a7424ebc8537db02d75238b2a57bfd5cd7822c45b8195de748fd4f161e54",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0e0b8419191ce7dcfa6e7c92b68939125bd78939744080a5996d8559bdd9d321",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1860322486696cdad994aa93a174c7a0d52e72f5697a01f34ffb62d9cf9b2191",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "438615818b560b44263d6757cbdc21a5019dc5c318f9d57a00c82188e6a68c7f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7a805904316118acf207eec3a645c3cfeb2ac8dd5388ba70bbcc9cbcbca6dd87",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9&requestId=543d4a1750",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d95ac62ed383b1c575563cd77a98d3a8738319203f63e17118004b1607f57349",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2d69666e9b6c8e80b07fd245688074ea65171bba3de69d120765ce4097de31c0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b5bc159286139d8df23de9a56b4e96f34993687589d9d01ec28ca3be0459786b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10&requestId=99bf8233f9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e7ac1c6fc2525a3adb674992578afc6721a928075814d17ccd6a0015791eb861",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "99bf8233f9",
+        "sourceRevision": "f4dd9cb5f884ec912e03cb438183d439cdb77f9d5a0651a1fb43c5a2b74f9a16",
+        "expectedRevision": "d99d317899186f2f75c2eab27e80d8177d5bb652709ab37e4e1a92211e220bad",
+        "operationId": "7dffac9cc63b807e822adc4351ea7f2e",
+        "type": "assign",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f2721f2c4d35656b46f3a5bb24465d4df373b7c12ea37f7dedf75af30475edcd",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/access",
+      "query": "",
+      "method": "POST",
+      "action": "sign_out",
+      "body": {
+        "action": "sign_out"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b281bf326b9776ef75338880ed34c67aaefa821d1f522099a5b341a04fc3b91d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "34490ae452f5116c3dda7b0c488489b4c9c8355fab84abc945e7def7f2402823",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11&requestId=05dbe1303c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a176b2120dc5570837fb2449db73f99ed15c723a2fe3f7a1f0fec1a835b9fc65",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "05dbe1303c",
+        "sourceRevision": "61091140ad7f4675b660a95e0f975e53fa7f2d8ca348fffe2ffc42b8f07a9588",
+        "expectedRevision": "ad379ff6d8f4e4959eb23761c18c95af57976300f3352e7d807f22e7e5c49333",
+        "operationId": "0b83e0c20ed8962b20171f7f3a506193",
+        "type": "attempt",
+        "note": "Sent a detailed reply",
+        "channel": "email",
+        "result": "sent_message"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2ca6d636b7d369dd66162c31fca7f44aaf50d40e4feac71cb09717da55c75223",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e735bac7816f981d748a9a24da74c42b6464a05c5d05101e900438cdb2386b3e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11&export=leads",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4c39d1d3d4ed375ec6f89d1bf67abf894ebae1b4498d83cdc4e25d55b84e2967",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-disposition": "attachment; filename=\"account-ui-11-leads-2026-10-23.csv\"",
+        "content-type": "text/csv; charset=utf-8"
+      },
+      "responseBody": "﻿id,createdAt,customer_name,phone,address,issue,reason,outcome,urgency,wanted,status,channel,unsure,setup_check,followthrough_owner,next_action,due_at,contact_outcome,completed_at,resolution,review_required,followthrough_history\r\n05dbe1303c,2026-10-23T15:05:43.160Z,Alex Customer,+17135550142,12 Oak St,AC not cooling <script>never execute</script>,wants_call,wants_call,today,Call after 3,open,web,,,,,,attempted,,,false,\"[{\"\"id\"\":\"\"0b83e0c20ed8962b20171f7f3a506193\"\",\"\"type\"\":\"\"attempt\"\",\"\"at\"\":\"\"2026-10-23T15:05:43.566Z\"\",\"\"actor\"\":\"\"account-ui-11@example.test\"\",\"\"digest\"\":\"\"2b98f14e6ebbf3a534479affc791619c0380916081b271f79fc78cf66aa9d8a4\"\",\"\"input\"\":{\"\"action\"\":\"\"request_followthrough\"\",\"\"requestId\"\":\"\"05dbe1303c\"\",\"\"sourceRevision\"\":\"\"61091140ad7f4675b660a95e0f975e53fa7f2d8ca348fffe2ffc42b8f07a9588\"\",\"\"expectedRevision\"\":\"\"ad379ff6d8f4e4959eb23761c18c95af57976300f3352e7d807f22e7e5c49333\"\",\"\"operationId\"\":\"\"0b83e0c20ed8962b20171f7f3a506193\"\",\"\"type\"\":\"\"attempt\"\",\"\"note\"\":\"\"Sent a detailed reply\"\",\"\"channel\"\":\"\"email\"\",\"\"result\"\":\"\"sent_message\"\"},\"\"source\"\":{\"\"id\"\":\"\"05dbe1303c\"\",\"\"customer_name\"\":\"\"Alex Customer\"\",\"\"phone\"\":\"\"+17135550142\"\",\"\"address\"\":\"\"12 Oak St\"\",\"\"issue\"\":\"\"AC not cooling <script>never execute</script>\"\",\"\"reason\"\":\"\"wants_call\"\",\"\"urgency\"\":\"\"today\"\",\"\"wanted\"\":\"\"Call after 3\"\",\"\"outcome\"\":\"\"wants_call\"\",\"\"status\"\":\"\"open\"\",\"\"channel\"\":\"\"web\"\",\"\"contact\"\":null,\"\"createdAt\"\":\"\"2026-10-23T15:05:43.160Z\"\"},\"\"state\"\":{\"\"seenAt\"\":null,\"\"owner\"\":null,\"\"nextAction\"\":null,\"\"dueAt\"\":null,\"\"contact\"\":\"\"attempted\"\",\"\"completedAt\"\":null,\"\"resolution\"\":null}}]\"\r\n"
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/launch-followthrough-ui-final-verified-details-320.png",
+    "scratchpad/launch-followthrough-ui-final-verified-completed-320.png",
+    "scratchpad/launch-followthrough-ui-final-verified-returned-history-320.png",
+    "scratchpad/launch-followthrough-ui-final-verified-details-390.png",
+    "scratchpad/launch-followthrough-ui-final-verified-completed-390.png",
+    "scratchpad/launch-followthrough-ui-final-verified-returned-history-390.png",
+    "scratchpad/launch-followthrough-ui-final-verified-details-1440.png",
+    "scratchpad/launch-followthrough-ui-final-verified-completed-1440.png",
+    "scratchpad/launch-followthrough-ui-final-verified-returned-history-1440.png",
+    "scratchpad/launch-followthrough-ui-final-verified-lost-response-reconciled.png",
+    "scratchpad/launch-followthrough-ui-final-verified-exact-retry-after-return.png"
+  ],
+  "downloads": [
+    {
+      "path": "scratchpad/launch-followthrough-ui-final-verified-account-ui-11-leads.csv",
+      "filename": "account-ui-11-leads.csv",
+      "bytes": 1600
+    }
+  ],
+  "sourceAfter": {
+    "desk-requests.js": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+    "netlify/functions/lib/request-followthrough.mjs": "547ea48402dfbb0e25ad2c1f2c4a0dbcc6dc28ffed7af37b2749b8dc4d2686c6",
+    "scripts/build-site.mjs": "17957f139006efae1765d523dbf22bd045141c7fb8ac87f8391966d936a85b77",
+    "scripts/request-followthrough-ui-check.mjs": "a6a7396d2e395096ffcbe8b0ad045ac455c1f48ba0d772775c117acb6ae2576f",
+    "desk.html": "94a6387f47ffa48db7e64fc3c0defd33c37b0fb95cbd5226d9eb9a0b12a4a971",
+    "desk.js": "c1c5e17a5bda3d087e18aa4b9b64394c55430f0b56770585b49cadedb5c45b7b",
+    "desk.css": "609244924e7bca83e0e1a2d1bdc568490ed0b5a09629f5575ae5590808fe12d9",
+    "onboard.html": "b7ac51b4c48fec6d346f52502f2117eaf8d45c03bf6fc7961f721b7eed3dc39b",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "c7d722f7ab065878fa42ed7f4313e7defcc3e941489e7f2738c315976d32e3c5",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "fca21ae22ee2c101297941000c7826eff1793c6d1ad6a3d26c17168d649cbf38",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

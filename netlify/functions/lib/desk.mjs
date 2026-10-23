@@ -23,6 +23,7 @@ async function queueSavedDelivery(c, record, kind) {
   try { await dispatchManagedDeliveryWave(); } catch { /* Scheduled recovery retries dispatch. */ }
 }
 
+import { requestFollowthroughSummaries, requestFollowthroughMetrics } from './request-followthrough.mjs';
 import { workspaceTenant, belongsToWorkspace } from "./workspace-identity.mjs";
 
 async function workspaceRows(c,kind,limit,complete=false){
@@ -770,14 +771,15 @@ export async function dailyDigest(c, events) {
   const auditFindings = (events || (await workspaceRows(c,"events",300))).filter((e) => e.type === "auto_flag" && auditNeedsAttention(e.data) && new Date(e.at).getTime() > auditSince && new Date(e.at).getTime() <= Date.now());
   const sameDay = (r) => houstonDay(r.createdAt || r.at) === today;
   const bookings = (await workspaceRows(c,"bookings",300,true)).filter(row => !row.websiteSetupCheck && sameDay(row));
-  const leads = (await workspaceRows(c,"leads",300,true)).filter(row => !row.websiteSetupCheck && sameDay(row));
+  const sourceLeads = (await workspaceRows(c,"leads",300,true)).filter(row => !row.websiteSetupCheck && sameDay(row));
+  const leads = await requestFollowthroughSummaries(c,sourceLeads);
   const convs = (await workspaceConversations(c,200)).filter((v) => !String(v.contact).startsWith('websitecheck_') && v.flag && houstonDay(v.flag.at) === today);
   const ev = events || (await workspaceRows(c,"events",300));
   const h = lineHealth(c, ev);
   const t = (iso) => (iso ? new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" }).format(new Date(iso)) : "none");
-  const needs = leads.filter((l) => l.outcome === "needs_action" && l.status === "open");
+  const needs = leads.filter((l) => l.followthrough ? l.followthrough.needsFollowup : l.outcome === "needs_action" && l.status === "open");
   const emergencies = leads.filter((l) => l.urgency === "emergency").length + bookings.filter((b) => b.urgency === "emergency").length;
-  const wants = leads.filter((l) => l.outcome === "wants_call").length;
+  const wants = leads.filter((l) => l.outcome === "wants_call" && (!l.followthrough || l.followthrough.needsFollowup)).length;
   const spam = leads.filter((l) => l.outcome === "spam").length;
   const name = c.business.name;
   const steveNote = auditFindings.length ? `\n\nNightly check flagged ${auditFindings.length}: ${auditFindings.map((e) => `${e.data.channel} ${e.data.contact} (${(e.data.reasons || []).join(", ")})`).join("; ")}` : "";
@@ -789,7 +791,7 @@ export async function dailyDigest(c, events) {
     spam ? `Spam: ${spam}` : "",
     ...convs.map((v) => `Flagged (${v.channel} ${v.contact}): ${v.flag.note || ""}`),
     "", `Line: last call ${t(h.lastInboundCall)}, last text ${t(h.lastInboundText)}, last text delivered ${t(h.lastOutboundText)}, errors in 24 h ${h.errors24h}.`].filter((x) => x !== "").join("\n");
-  return { text, email, steveNote };
+  return { text, email, steveNote, ...(isSelfServiceClient(c)?{requestFollowthrough:requestFollowthroughMetrics(leads)}:{}) };
 }
 
 // Nightly rubric pass over the day's customer conversations (Steve reads flags instead of everything).
@@ -884,6 +886,7 @@ export async function monthlyReport(c, month) {
   const voicemailJobs = mb.filter((b) => textBackContacts.has(b.phone) || !isBusinessHours(c, b.createdAt)).length;
   const reviewsSent = me.filter((e) => e.type === "task_sent" && e.data?.type === "review_request").length;
   const positive = me.filter((e) => e.type === "review_reply" && e.data?.sentiment === "positive").length;
+  const followthrough=isSelfServiceClient(c)?requestFollowthroughMetrics(await requestFollowthroughSummaries(c,ml)):null;
   const promised = ml.filter((l) => l.callbackDueAt);
   const kept = promised.filter((l) => (l.calledAt && l.calledAt <= l.callbackDueAt) || (l.ackedAt && l.ackedAt <= l.callbackDueAt)).length;
   const emergencies = ml.filter((l) => l.urgency === "emergency").length + mb.filter((b) => b.urgency === "emergency").length;
@@ -914,6 +917,7 @@ export async function monthlyReport(c, month) {
     `Review requests sent: ${reviewsSent}; customers who replied they were happy: ${positive}`,
     promised.length ? `Callback promises kept on time: ${kept} of ${promised.length}` : "Callback promises: none made",
     `Emergencies handled: ${emergencies}`,
+    followthrough?`Owner-recorded follow-up in these requests: ${followthrough.reached} reached; ${followthrough.completed} completed; ${followthrough.due} due; ${followthrough.reviewRequired} updated requests need review.`:"",
     Object.keys(bySrc).length ? `Leads from platforms: ${Object.entries(bySrc).map(([k, v]) => `${v} ${k === "angi" ? "Angi" : k === "thumbtack" ? "Thumbtack" : k}`).join(", ")}` : "",
     `Usage: ${usage.minutes || 0} of ${plan.minutes} call minutes, ${usage.texts || 0} of ${plan.texts} texts${overage ? ` (over the plan by $${overage.toFixed(2)})` : " (inside the plan)"}`,
     `What changed: ${changes} edits to what it knows, ${flags} conversations you flagged`,
@@ -921,7 +925,7 @@ export async function monthlyReport(c, month) {
     "", `Every conversation is on your portal. Reply to this email any time.`,
   ].filter((x) => x !== "");
   const invoice = `Invoice: $${plan.price} plus $${overage.toFixed(2)} overage`;
-  return { month: m, subject: `${name}: ${label} statement`, text: lines.join("\n"), invoice, stats: { answered, textedBack, booked: mb.length, voicemailJobs, reviewsSent, positive, kept, promised: promised.length, emergencies, overage } };
+  return { month: m, subject: `${name}: ${label} statement`, text: lines.join("\n"), invoice, stats: { ...(followthrough?{requestFollowthrough:followthrough}:{}), answered, textedBack, booked: mb.length, voicemailJobs, reviewsSent, positive, kept, promised: promised.length, emergencies, overage } };
 }
 
 // Monday email: what the front desk did for the shop in the last seven Houston days.
@@ -954,7 +958,8 @@ export async function weeklyReport(c) {
   // Jobs that would have gone to voicemail: booked after a missed-call text-back, or booked after hours.
   const textBackContacts = new Set(wc.filter((v) => v.channel === "sms" && (v.messages || []).some((m) => m.system === "missed-call text-back")).map((v) => v.contact));
   const voicemailJobs = wb.filter((b) => textBackContacts.has(b.phone) || !isBusinessHours(c, b.createdAt)).length;
-  const open = wl.filter((l) => l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome));
+  const followedLeads=await requestFollowthroughSummaries(c,wl);
+  const open = followedLeads.filter((l) => l.followthrough?l.followthrough.needsFollowup:l.status === "open" && ["needs_action", "wants_call"].includes(l.outcome));
   const unbooked = wl.filter((l) => l.status !== "spam" && l.status !== "booked");
   const reasons = {}; for (const l of unbooked) { const r = l.nobook_reason && l.nobook_reason !== "none" ? l.nobook_reason : "not recorded"; reasons[r] = (reasons[r] || 0) + 1; }
   const emergencies = wl.filter((l) => l.urgency === "emergency").length + wb.filter((b) => b.urgency === "emergency").length;
@@ -970,6 +975,7 @@ export async function weeklyReport(c) {
   const label = (k) => ({ wanted_price: "wanted a price first", wanted_sooner: "wanted someone sooner", out_of_area: "out of the area", fee_objection: "the fee was too much", question_only: "a question only", other: "other" }[k] || k);
   const empty = !wb.length && !wl.length && !actionable.length && !calls;
   if (empty) return { empty: true, subject: `${name}: nothing this week`, text: `${name}: nothing this week. No calls, texts, or chats reached the front desk in the last 7 days. Line: ${lineHealth(c, events).errors24h} errors in the last 24 hours.` };
+  const followthrough=isSelfServiceClient(c)?requestFollowthroughMetrics(followedLeads):null;
   const lines = [
     `${name}: your front desk, last 7 days`, "",
     `Calls: ${answered} answered by the front desk, ${textedBack} texted back after a missed call${afterHours ? ` (${afterHours} contacts after hours)` : ""}`,
@@ -977,6 +983,7 @@ export async function weeklyReport(c) {
     `Booked: ${wb.length}${wb.length ? " (" + Object.entries(byChannel).map(([k, v]) => `${v} by ${k === "sms" ? "text" : k === "call" ? "phone" : k}`).join(", ") + ")" : ""}`,
     `Booking rate: ${bookedCustomers} booked of ${bookable.length} bookable conversations (${rate} percent)${wb.length > bookedCustomers ? ` (${wb.length} visits in all)` : ""}`,
     `Jobs that would have gone to voicemail: ${voicemailJobs}`,
+    followthrough?`Owner-recorded follow-up in these requests: ${followthrough.reached} reached; ${followthrough.completed} completed; ${followthrough.due} due; ${followthrough.reviewRequired} updated requests need review.`:"",
     `Leads still needing you: ${open.length}${open.length ? " (" + open.map((l) => l.id).join(", ") + ")" : ""}`,
     unbooked.length ? `Did not book: ${unbooked.length}. Why: ${Object.entries(reasons).map(([k, v]) => `${v} ${label(k)}`).join(", ")}` : "Did not book: 0",
     `Emergencies: ${emergencies}`,
@@ -987,5 +994,5 @@ export async function weeklyReport(c) {
     quietDays ? `Quiet days: ${quietDays} (no calls, texts, or bookings)` : "",
     "", `Every conversation is on your portal. Flag anything that reads wrong and Steve sees it the same day.`,
   ].filter((x) => x !== "");
-  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { calls, answered, textedBack, spamCalls, quietDays, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, bookedCustomers, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
+  return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { ...(followthrough?{requestFollowthrough:followthrough}:{}), calls, answered, textedBack, spamCalls, quietDays, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, bookedCustomers, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
 }

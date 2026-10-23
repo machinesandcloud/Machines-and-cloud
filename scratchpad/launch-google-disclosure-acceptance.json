@@ -1,0 +1,179 @@
+{
+  "at": "2026-10-23T16:16:43.519993+00:00",
+  "decision": "Accepted independent local Google disclosure/privacy implementation on exact integrated source; no new runtime defect.",
+  "source": {
+    "integratedCommit": "0beab960c942e5c43ccc21a52a2392246639a4cd",
+    "authorCommit": "166b3944e919f1b181cd5a3a664aaba37065db80",
+    "runtimeDelta": [
+      {
+        "file": "desk-connections.js",
+        "sha256": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32"
+      },
+      {
+        "file": "privacy-policy.html",
+        "sha256": "fa318990cba44a568d751f8ccc8e632067bdc0806c371ee43978601e8331cfc3"
+      }
+    ],
+    "guardedFiles": 463,
+    "sourceBridge": "scratchpad/launch-google-disclosure-source-bridge.json",
+    "qualification": "462 exact integrated runtime/config/assets/tests files plus the independent script guarded before/after. Later QA capture-only waits do not mutate assets or handlers. Temporary runtime copies restored before QA-only commit."
+  },
+  "results": [
+    {
+      "receipt": "scratchpad/launch-google-disclosure-independent-final.json",
+      "sha256": "9d5987a89b364bf453f98a336005d4781372ec64862b3d5f9fede8003f016df0",
+      "passed": 17,
+      "total": 17,
+      "sourceStable": true,
+      "providerRequests": 0,
+      "physicalRequests": 0,
+      "browserErrors": [],
+      "routeErrors": [],
+      "browserIsolation": {
+        "mode": "Fresh headless process through Playwright launch; no CDP attachment, system UI or global process termination",
+        "temporaryRoot": "/tmp/mc-google-disclosure-browser-ClTeiV",
+        "ownedProfileDirectories": [
+          "playwright_chromiumdev_profile-PfuP9y"
+        ]
+      }
+    },
+    {
+      "receipt": "scratchpad/launch-google-disclosure-focused-visual-final.json",
+      "sha256": "b8042dc0206af7254a6381d416dc8c7437da4754da71b498122c9ad1f6e4a5d5",
+      "passed": 3,
+      "total": 3,
+      "sourceStable": true,
+      "providerRequests": 0,
+      "physicalRequests": 0,
+      "browserErrors": [],
+      "routeErrors": [],
+      "browserIsolation": {
+        "mode": "Fresh headless process through Playwright launch; no CDP attachment, system UI or global process termination",
+        "temporaryRoot": "/tmp/mc-google-disclosure-browser-rOI30n",
+        "ownedProfileDirectories": [
+          "playwright_chromiumdev_profile-dHzU7I"
+        ]
+      }
+    },
+    {
+      "receipt": "scratchpad/launch-google-disclosure-privacy-visual-final.json",
+      "sha256": "7e7e09afdce8d19cb677bf0df7dfc011d1e6e96b966c9773697e3bdb457c6fea",
+      "passed": 3,
+      "total": 3,
+      "sourceStable": true,
+      "providerRequests": 0,
+      "physicalRequests": 0,
+      "browserErrors": [],
+      "routeErrors": [],
+      "browserIsolation": {
+        "mode": "Fresh headless process through Playwright launch; no CDP attachment, system UI or global process termination",
+        "temporaryRoot": "/tmp/mc-google-disclosure-browser-3jowSx",
+        "ownedProfileDirectories": [
+          "playwright_chromiumdev_profile-ZKzoSm"
+        ]
+      }
+    }
+  ],
+  "counting": "17 independent actual-handler/browser cases. Additional focused3 keyboard and3 public-anchor runs overlap those cases and provide finished captures; they are not additive acceptance totals. Engineering17 reused only within its matching source scope.",
+  "scope": {
+    "ordinaryFlow": [
+      "Connect opens disclosure without mutations and focuses its visible heading",
+      "keyboard Back/Enter and Escape return focus to Connect without OAuth start",
+      "same-domain privacy link opens a separate isolated tab; normal full load anchors its heading below the fixed header",
+      "only deliberate Continue invokes actual owner-bound start202 and creates one pending session-bound OAuth state; intercepted Google destination grants nothing",
+      "Reconnect repeats the same disclosure, with Back/Escape preserving connection state",
+      "Disconnect Back/Escape retain exact token/connection row; confirmed202 removes refresh only, retaining target/connection identity, exact workspace visit and sync/event history"
+    ],
+    "security": [
+      "actual owner revoked after disclosure receives401 with no new OAuth state or Google navigation",
+      "saved source revision changing during disclosure receives visible409, no OAuth state/navigation, and allows Back"
+    ],
+    "transport": "All assets/owner handlers local; synthetic memory and dummy keys only. Google authorization URL intercepted before permission. No token exchange, model inference or physical/provider request.",
+    "viewports": [
+      {
+        "width": 320,
+        "height": 844
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 1440,
+        "height": 1000
+      }
+    ]
+  },
+  "visualReview": {
+    "inspected": [
+      {
+        "file": "scratchpad/launch-google-disclosure-focused-visual-final-320-disclosure-actions.png",
+        "sha256": "0a23f7c7ab5888488d315a5efbba3e5049558652cc0d6c1ac3b4fe53ec54c07b"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-focused-visual-final-390-disclosure-top.png",
+        "sha256": "4b1c961f2773e12239c8c6ba0d919e74d0e437512f75eee9d106e8e4818b1687"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-independent-final-320-disclosure-top.png",
+        "sha256": "04d12b21e0f9bd4f3064d9da2bb1b229933222dda6ec8517ef694f8dfd406c1b"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-independent-final-390-disconnect.png",
+        "sha256": "64dcad49712a0f327e5889f8f7c171e2a38af47157d89c1c41f74ec92380f07d"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-independent-final-1440-disclosure-top.png",
+        "sha256": "94476ff43864cfaa56db9a75c3a07371656ebb357b8fb55ae2efdc05b315874c"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-privacy-visual-final-320-privacy.png",
+        "sha256": "a0f9cfe2aa9fddaf593309dc0a67fa08b8c2b09a096583552c13e36a76109ab3"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-privacy-visual-final-320-privacy-controls.png",
+        "sha256": "d11799895ce9ba4de9323986102e2e715d428855d917aa8f96b24382557c1842"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-privacy-visual-final-1440-privacy.png",
+        "sha256": "ed7dc081873e176862a0018d2c8b682b49cfed506c5de45476179d4c9885108a"
+      },
+      {
+        "file": "scratchpad/launch-google-disclosure-privacy-visual-final-390-privacy-controls.png",
+        "sha256": "05a7d67836fbb38ce1de578d602055a713775e8b866828fb8f6cb3e7ebebee58"
+      }
+    ],
+    "observed": "Readable access/storage/control paragraphs, visible focused heading, scrollable content, keyboard-reachable visible Continue/Back, useful disconnect consequences and privacy anchor/help. No observed horizontal overflow or overlapping controls.",
+    "captureQualification": "Early captures occurred before popup load/normal smooth scrolling settled. Final focused captures wait for stable normal scroll coordinates and full public page load; no DOM/CSS alteration. Geometry and keyboard actions were independently checked."
+  },
+  "sourceDataFlowReview": [
+    {
+      "source": "netlify/functions/lib/calendar-connection.mjs",
+      "observed": "Only events.owned and calendars.readonly OAuth scopes; primary calendar identifier retained; refresh token AES-GCM sealed with tenant/connection AAD. Disconnect nulls refresh/increments epoch and preserves other row fields; no Google revoke/event delete."
+    },
+    {
+      "source": "netlify/functions/lib/calendar-delivery.mjs",
+      "observed": "Jobs copy separate saved visit facts and event references, generate deterministic managed event bodies, and read/update/delete only identified visit events with ownership checks. Disconnected getCalendarConnection returns null; queued work waits rather than obtaining a refresh token. No unrelated-event listing or free/busy import observed."
+    },
+    {
+      "source": "netlify/functions/lib/desk.mjs and lib/agent.mjs",
+      "observed": "Supported self-service visits use portal-only saved records and background Calendar delivery, without adding inline Google event results to the tool return. Model input is separately supplied system/messages/tool facts; this Calendar connection stores OAuth data in separate server-side rows, not model messages."
+    },
+    {
+      "source": "netlify/functions/lib/store.mjs",
+      "observed": "Netlify JSON connection/sync records with no general automatic deletion schedule. Sealed refresh token does not imply all records encrypted by that mechanism."
+    }
+  ],
+  "firstFailures": {
+    "receipt": "scratchpad/launch-google-disclosure-independent-first.json",
+    "observed": "10/17; seven harness-only failures (workspace sessionStorage read on intercepted Google origin at3 widths, same-URL navigation did not reload newly seeded connection at3 widths, stale portalGate selector once).",
+    "disposition": "Preserved unchanged; QA harness now returns to workspace before reading state, explicitly reloads new retained fixtures, and targets actual portalRecovery. Independent final17 passes."
+  },
+  "operationalCommitmentsStillOpen": [
+    "Owner adoption and operational enforcement of published Limited Use, prohibited data-use and human-access commitments. Source review alone is not an organizational compliance audit.",
+    "Processor terms/access controls, actual support receipt/authority verification and retained-record deletion fulfillment are not established by this local check.",
+    "Google app verification, actual owner permission/token exchange, real same-event lifecycle/scheduled recovery and any publication remain separate; no external action occurred."
+  ],
+  "browserIsolation": "Each new run explicitly selects a fresh /tmp/mc-google-disclosure-browser-* temporary root with its own playwright_chromiumdev_profile-* directory. Headless launch only; no existing Chrome attachment, user profile, AppleScript or global process kill. Only owned contexts/browser closed.",
+  "unrelatedChecks": "No repeated billing or broad required gate."
+}

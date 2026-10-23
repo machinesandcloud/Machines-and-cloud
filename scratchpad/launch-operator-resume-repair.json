@@ -1,0 +1,2794 @@
+{
+  "at": "2026-10-23T14:41:17.041Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "sourceBefore": {
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/lib/operator.mjs": "4dc781c4002d82171ba299b671b4ae1783f9006c105a4deef3ee271b328ee3ac",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "mode": "Actual management handler, synthetic operator/session/client, memory, zero physical network",
+  "checks": [
+    {
+      "name": "Operator resume calendar-only",
+      "pass": true,
+      "status": 200,
+      "body": {
+        "ok": true,
+        "customer": {
+          "slug": "launch-calendar-only",
+          "name": "Launch Recovery Shop",
+          "owner": {
+            "name": "QA Owner",
+            "email": "owner@example.test",
+            "phone": "+17135550101"
+          },
+          "plan": "growth",
+          "status": "testing",
+          "revision": "558183df20509ea21fbb6742b6fd1552a7448a1dac6e71f36559031bc51ed509",
+          "configurationRevision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+          "selfService": true,
+          "createdAt": "2026-10-23T14:41:17.166Z",
+          "setup": {
+            "version": 1,
+            "revision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "review",
+                "label": "Review what the desk knows",
+                "status": "your_action",
+                "detail": "Save your review of the current business rules.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review what the desk knows"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "review",
+                    "label": "Review what the desk knows",
+                    "detail": "Save your review of the current business rules.",
+                    "tab": "know"
+                  },
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "calendar": {
+                "active": false,
+                "ready": false,
+                "status": "waiting_platform",
+                "detail": "Your calendar preference is saved. Google connection is awaiting platform availability.",
+                "nextStep": "Your Google approval will be requested here when connection is available."
+              }
+            },
+            "connectionJourney": {
+              "title": "Finish your selected connections",
+              "channels": [
+                {
+                  "id": "web",
+                  "label": "Website chat",
+                  "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The website check succeeds and customer chat is active.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "voice",
+                  "label": "Phone answering",
+                  "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "sms",
+                  "label": "Text messaging",
+                  "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "calendar",
+                  "label": "Google Calendar",
+                  "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+                  "ownerTask": "Choose your Google account and approve calendar access here.",
+                  "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "waiting_platform",
+                  "detail": "Your calendar preference is saved. Google connection is awaiting platform availability.",
+                  "nextStep": "Your Google approval will be requested here when connection is available.",
+                  "responsibility": "platform",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Waiting for platform"
+                  }
+                }
+              ]
+            },
+            "next": {
+              "id": "review",
+              "tab": "know",
+              "label": "Review what the desk knows"
+            }
+          },
+          "operations": [],
+          "phoneActivation": {
+            "available": false,
+            "active": false,
+            "state": "unavailable",
+            "detail": "Phone setup is not available yet. No number will be purchased from signup or connection preferences.",
+            "offer": null,
+            "operation": null
+          },
+          "services": {
+            "voice": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "offer": null,
+              "operation": null
+            },
+            "messaging": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "offer": null,
+              "program": {
+                "version": "customer_care_ongoing_appointments_v2",
+                "description": "Launch Recovery Shop sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.",
+                "messageFlow": "Customers first text Launch Recovery Shop at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: https://launch-owner.fixture.invalid/policy?c=launch-calendar-only&page=terms. Privacy: https://launch-owner.fixture.invalid/policy?c=launch-calendar-only. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.",
+                "messageSamples": [
+                  "Launch Recovery Shop: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.",
+                  "Launch Recovery Shop: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.",
+                  "Launch Recovery Shop: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts."
+                ],
+                "privacyPolicyUrl": "https://launch-owner.fixture.invalid/policy?c=launch-calendar-only",
+                "termsAndConditionsUrl": "https://launch-owner.fixture.invalid/policy?c=launch-calendar-only&page=terms",
+                "optInMessage": "Launch Recovery Shop: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.",
+                "optOutMessage": "Launch Recovery Shop: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.",
+                "helpMessage": "Launch Recovery Shop: help with service texts at owner@example.test. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.",
+                "digest": "3123556b31860a502628a6cfd8e2372399484220afe5244df16dfa4d9b6fdf2b"
+              },
+              "operation": null
+            },
+            "calendar": {
+              "available": false,
+              "provider": "google",
+              "status": "not_connected",
+              "connected": false,
+              "connectedAt": null,
+              "disconnectedAt": null,
+              "label": null,
+              "reconnectRequired": false,
+              "detail": "Connect your Google calendar to sync saved visits."
+            },
+            "calendarDelivery": {
+              "enabled": false,
+              "counts": {},
+              "total": 0,
+              "jobs": [],
+              "scope": "Latest 30 calendar jobs; counts include all retained jobs. Calendar sync does not check external busy time or change your listed arrival windows."
+            },
+            "delivery": {
+              "enabled": false,
+              "total": 0,
+              "counts": {},
+              "jobs": []
+            }
+          },
+          "serviceChecks": [],
+          "connections": [
+            {
+              "id": "web",
+              "label": "Website chat",
+              "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The website check succeeds and customer chat is active.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "not_selected",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone answering",
+              "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messaging",
+              "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "calendar",
+              "label": "Google Calendar",
+              "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+              "ownerTask": "Choose your Google account and approve calendar access here.",
+              "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "not_connected",
+              "detail": "Connect your Google calendar to sync saved visits.",
+              "nextStep": "Your Google approval will be requested here when connection is available.",
+              "responsibility": "platform",
+              "action": {
+                "kind": "wait",
+                "label": "Waiting for platform"
+              }
+            }
+          ],
+          "issues": [],
+          "aiAllowance": {
+            "private": {
+              "limit": 20,
+              "used": 0,
+              "remaining": 20
+            },
+            "web": {
+              "limit": 50,
+              "used": 0,
+              "remaining": 50
+            },
+            "available": true,
+            "resetAt": "2026-10-24T05:00:00.000Z",
+            "timezone": "America/Chicago"
+          },
+          "metrics": {
+            "bookings": 0,
+            "leads": 0,
+            "conversations": 0,
+            "openIssues": 0,
+            "scope": "Latest 100 records per category; conversations include up to 60 recent texting contacts."
+          },
+          "activity": [
+            {
+              "at": "2026-10-23T14:41:17.170Z",
+              "type": "resume",
+              "detail": "Synthetic operator restores the saved workspace state.",
+              "actor": "launch-operator@example.test"
+            }
+          ],
+          "notes": [],
+          "rules": {
+            "business": {
+              "name": "Launch Recovery Shop",
+              "city": "Houston",
+              "serviceArea": [
+                "Katy"
+              ],
+              "notServed": []
+            },
+            "services": [
+              "AC repair"
+            ],
+            "fees": [],
+            "windows": [
+              "8 to 12"
+            ],
+            "faq": [],
+            "summary": ""
+          },
+          "records": {
+            "bookings": [],
+            "leads": [],
+            "conversations": []
+          },
+          "recordListing": {
+            "bookings": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            },
+            "leads": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            }
+          }
+        }
+      },
+      "storedStatus": "testing",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "calendar"
+      ],
+      "expected": {
+        "http": 200,
+        "status": "testing",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume phone-text-calendar",
+      "pass": true,
+      "status": 200,
+      "body": {
+        "ok": true,
+        "customer": {
+          "slug": "launch-phone-text-calendar",
+          "name": "Launch Recovery Shop",
+          "owner": {
+            "name": "QA Owner",
+            "email": "owner@example.test",
+            "phone": "+17135550101"
+          },
+          "plan": "growth",
+          "status": "testing",
+          "revision": "e6613ba9aef835fbdbc342b3299f1736efc301e340867b0e11ec305e4255f926",
+          "configurationRevision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+          "selfService": true,
+          "createdAt": "2026-10-23T14:41:17.186Z",
+          "setup": {
+            "version": 1,
+            "revision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "review",
+                "label": "Review what the desk knows",
+                "status": "your_action",
+                "detail": "Save your review of the current business rules.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review what the desk knows"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "needs_action",
+                "detail": "Your saved business answers carry into this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "needs_action",
+                "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "review",
+                    "label": "Review what the desk knows",
+                    "detail": "Save your review of the current business rules.",
+                    "tab": "know"
+                  },
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "needs_action",
+                "detail": "Your saved business answers carry into this connection.",
+                "nextStep": "Check and review the business details used across your front desk."
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "needs_action",
+                "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+                "nextStep": "Check and review the business details used across your front desk."
+              },
+              "calendar": {
+                "active": false,
+                "ready": false,
+                "status": "waiting_platform",
+                "detail": "Your calendar preference is saved. Google connection is awaiting platform availability.",
+                "nextStep": "Your Google approval will be requested here when connection is available."
+              }
+            },
+            "connectionJourney": {
+              "title": "Finish your selected connections",
+              "channels": [
+                {
+                  "id": "web",
+                  "label": "Website chat",
+                  "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The website check succeeds and customer chat is active.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "voice",
+                  "label": "Phone answering",
+                  "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+                  "ownerTask": "Review the usage terms once. If keeping an existing line, arrange forwarding, then place a test call.",
+                  "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "needs_action",
+                  "detail": "Your saved business answers carry into this connection.",
+                  "nextStep": "Check and review the business details used across your front desk.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "route",
+                    "target": "know",
+                    "label": "Review business details"
+                  }
+                },
+                {
+                  "id": "sms",
+                  "label": "Text messaging",
+                  "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+                  "ownerTask": "Confirm legal details and customer consent, approve the costs, then reply to the setup text. Forwarding your existing line changes calls only.",
+                  "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "needs_action",
+                  "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+                  "nextStep": "Check and review the business details used across your front desk.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "route",
+                    "target": "know",
+                    "label": "Review business details"
+                  }
+                },
+                {
+                  "id": "calendar",
+                  "label": "Google Calendar",
+                  "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+                  "ownerTask": "Choose your Google account and approve calendar access here.",
+                  "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "waiting_platform",
+                  "detail": "Your calendar preference is saved. Google connection is awaiting platform availability.",
+                  "nextStep": "Your Google approval will be requested here when connection is available.",
+                  "responsibility": "platform",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Waiting for platform"
+                  }
+                }
+              ]
+            },
+            "next": {
+              "id": "review",
+              "tab": "know",
+              "label": "Review what the desk knows"
+            }
+          },
+          "operations": [],
+          "phoneActivation": {
+            "available": false,
+            "active": false,
+            "state": "unavailable",
+            "detail": "Phone setup is not available yet. No number will be purchased from signup or connection preferences.",
+            "offer": null,
+            "operation": null
+          },
+          "services": {
+            "voice": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "offer": null,
+              "operation": null
+            },
+            "messaging": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "offer": null,
+              "program": {
+                "version": "customer_care_ongoing_appointments_v2",
+                "description": "Launch Recovery Shop sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.",
+                "messageFlow": "Customers first text Launch Recovery Shop at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: https://launch-owner.fixture.invalid/policy?c=launch-phone-text-calendar&page=terms. Privacy: https://launch-owner.fixture.invalid/policy?c=launch-phone-text-calendar. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.",
+                "messageSamples": [
+                  "Launch Recovery Shop: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.",
+                  "Launch Recovery Shop: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.",
+                  "Launch Recovery Shop: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts."
+                ],
+                "privacyPolicyUrl": "https://launch-owner.fixture.invalid/policy?c=launch-phone-text-calendar",
+                "termsAndConditionsUrl": "https://launch-owner.fixture.invalid/policy?c=launch-phone-text-calendar&page=terms",
+                "optInMessage": "Launch Recovery Shop: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.",
+                "optOutMessage": "Launch Recovery Shop: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.",
+                "helpMessage": "Launch Recovery Shop: help with service texts at owner@example.test. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.",
+                "digest": "7ffaf83b99730fd94bf64db3b44b6e66b2e54a82d7e3f9bb574f1d0ada58b268"
+              },
+              "operation": null
+            },
+            "calendar": {
+              "available": false,
+              "provider": "google",
+              "status": "not_connected",
+              "connected": false,
+              "connectedAt": null,
+              "disconnectedAt": null,
+              "label": null,
+              "reconnectRequired": false,
+              "detail": "Connect your Google calendar to sync saved visits."
+            },
+            "calendarDelivery": {
+              "enabled": false,
+              "counts": {},
+              "total": 0,
+              "jobs": [],
+              "scope": "Latest 30 calendar jobs; counts include all retained jobs. Calendar sync does not check external busy time or change your listed arrival windows."
+            },
+            "delivery": {
+              "enabled": false,
+              "total": 0,
+              "counts": {},
+              "jobs": []
+            }
+          },
+          "serviceChecks": [],
+          "connections": [
+            {
+              "id": "web",
+              "label": "Website chat",
+              "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The website check succeeds and customer chat is active.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "not_selected",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone answering",
+              "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+              "ownerTask": "Review the usage terms once. If keeping an existing line, arrange forwarding, then place a test call.",
+              "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Your saved business answers carry into this connection.",
+              "nextStep": "Check and review the business details used across your front desk.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "route",
+                "target": "know",
+                "label": "Review business details"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messaging",
+              "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+              "ownerTask": "Confirm legal details and customer consent, approve the costs, then reply to the setup text. Forwarding your existing line changes calls only.",
+              "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "nextStep": "Check and review the business details used across your front desk.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "route",
+                "target": "know",
+                "label": "Review business details"
+              }
+            },
+            {
+              "id": "calendar",
+              "label": "Google Calendar",
+              "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+              "ownerTask": "Choose your Google account and approve calendar access here.",
+              "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "not_connected",
+              "detail": "Connect your Google calendar to sync saved visits.",
+              "nextStep": "Your Google approval will be requested here when connection is available.",
+              "responsibility": "platform",
+              "action": {
+                "kind": "wait",
+                "label": "Waiting for platform"
+              }
+            }
+          ],
+          "issues": [],
+          "aiAllowance": {
+            "private": {
+              "limit": 20,
+              "used": 0,
+              "remaining": 20
+            },
+            "web": {
+              "limit": 50,
+              "used": 0,
+              "remaining": 50
+            },
+            "available": true,
+            "resetAt": "2026-10-24T05:00:00.000Z",
+            "timezone": "America/Chicago"
+          },
+          "metrics": {
+            "bookings": 0,
+            "leads": 0,
+            "conversations": 0,
+            "openIssues": 0,
+            "scope": "Latest 100 records per category; conversations include up to 60 recent texting contacts."
+          },
+          "activity": [
+            {
+              "at": "2026-10-23T14:41:17.187Z",
+              "type": "resume",
+              "detail": "Synthetic operator restores the saved workspace state.",
+              "actor": "launch-operator@example.test"
+            }
+          ],
+          "notes": [],
+          "rules": {
+            "business": {
+              "name": "Launch Recovery Shop",
+              "city": "Houston",
+              "serviceArea": [
+                "Katy"
+              ],
+              "notServed": []
+            },
+            "services": [
+              "AC repair"
+            ],
+            "fees": [],
+            "windows": [
+              "8 to 12"
+            ],
+            "faq": [],
+            "summary": ""
+          },
+          "records": {
+            "bookings": [],
+            "leads": [],
+            "conversations": []
+          },
+          "recordListing": {
+            "bookings": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            },
+            "leads": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            }
+          }
+        }
+      },
+      "storedStatus": "testing",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "voice",
+        "sms",
+        "calendar"
+      ],
+      "expected": {
+        "http": 200,
+        "status": "testing",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume active-web-unready",
+      "pass": false,
+      "status": 409,
+      "body": {
+        "error": "setup_incomplete",
+        "message": "Review, a successful current live test and available AI allowance are required before resuming website chat."
+      },
+      "storedStatus": "paused",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "web"
+      ],
+      "expected": {
+        "http": 409,
+        "status": "paused",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume active-web-ready",
+      "pass": true,
+      "status": 200,
+      "body": {
+        "ok": true,
+        "customer": {
+          "slug": "launch-active-web-ready",
+          "name": "Launch Recovery Shop",
+          "owner": {
+            "name": "QA Owner",
+            "email": "owner@example.test",
+            "phone": "+17135550101"
+          },
+          "plan": "growth",
+          "status": "live",
+          "revision": "9ec1244ad555283d74c87a4cd9a63153c8bdc93e9803ae0aa552f01cad89e54b",
+          "configurationRevision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+          "selfService": true,
+          "createdAt": "2026-10-23T14:41:17.189Z",
+          "setup": {
+            "version": 1,
+            "revision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+            "stage": "ready",
+            "canActivateWeb": true,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": true,
+                "active": true,
+                "blockers": []
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "calendar": {
+                "active": false,
+                "ready": false,
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              }
+            },
+            "connectionJourney": {
+              "title": "Finish your selected connections",
+              "channels": [
+                {
+                  "id": "web",
+                  "label": "Website chat",
+                  "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+                  "ownerTask": "Add the installation snippet to your website and follow the guided check.",
+                  "readyWhen": "The website check succeeds and customer chat is active.",
+                  "requested": true,
+                  "retained": true,
+                  "active": true,
+                  "status": "ready_for_website",
+                  "detail": "Customer chat is switched on in your workspace. Website installation and its check are shown separately below.",
+                  "nextStep": "Follow the next step in your website installation card.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "route",
+                    "target": "setup",
+                    "label": "Continue website setup"
+                  }
+                },
+                {
+                  "id": "voice",
+                  "label": "Phone answering",
+                  "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "sms",
+                  "label": "Text messaging",
+                  "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "calendar",
+                  "label": "Google Calendar",
+                  "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                }
+              ]
+            },
+            "next": {
+              "id": "activate",
+              "tab": "setup",
+              "label": "Activate website chat"
+            }
+          },
+          "operations": [],
+          "phoneActivation": {
+            "available": false,
+            "active": false,
+            "state": "unavailable",
+            "detail": "Phone setup is not available yet. No number will be purchased from signup or connection preferences.",
+            "offer": null,
+            "operation": null
+          },
+          "services": {
+            "voice": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "offer": null,
+              "operation": null
+            },
+            "messaging": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "offer": null,
+              "program": {
+                "version": "customer_care_ongoing_appointments_v2",
+                "description": "Launch Recovery Shop sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.",
+                "messageFlow": "Customers first text Launch Recovery Shop at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: https://launch-owner.fixture.invalid/policy?c=launch-active-web-ready&page=terms. Privacy: https://launch-owner.fixture.invalid/policy?c=launch-active-web-ready. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.",
+                "messageSamples": [
+                  "Launch Recovery Shop: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.",
+                  "Launch Recovery Shop: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.",
+                  "Launch Recovery Shop: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts."
+                ],
+                "privacyPolicyUrl": "https://launch-owner.fixture.invalid/policy?c=launch-active-web-ready",
+                "termsAndConditionsUrl": "https://launch-owner.fixture.invalid/policy?c=launch-active-web-ready&page=terms",
+                "optInMessage": "Launch Recovery Shop: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.",
+                "optOutMessage": "Launch Recovery Shop: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.",
+                "helpMessage": "Launch Recovery Shop: help with service texts at owner@example.test. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.",
+                "digest": "16edc997beef931299e6d5da7396cd02733c145782260128be75471b0e82dc39"
+              },
+              "operation": null
+            },
+            "calendar": {
+              "available": false,
+              "provider": "google",
+              "status": "not_connected",
+              "connected": false,
+              "connectedAt": null,
+              "disconnectedAt": null,
+              "label": null,
+              "reconnectRequired": false,
+              "detail": "Connect your Google calendar to sync saved visits."
+            },
+            "calendarDelivery": {
+              "enabled": false,
+              "counts": {},
+              "total": 0,
+              "jobs": [],
+              "scope": "Latest 30 calendar jobs; counts include all retained jobs. Calendar sync does not check external busy time or change your listed arrival windows."
+            },
+            "delivery": {
+              "enabled": false,
+              "total": 0,
+              "counts": {},
+              "jobs": []
+            }
+          },
+          "serviceChecks": [],
+          "connections": [
+            {
+              "id": "web",
+              "label": "Website chat",
+              "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+              "ownerTask": "Add the installation snippet to your website and follow the guided check.",
+              "readyWhen": "The website check succeeds and customer chat is active.",
+              "requested": true,
+              "retained": true,
+              "active": true,
+              "status": "ready_for_website",
+              "detail": "Customer chat is switched on in your workspace. Website installation and its check are shown separately below.",
+              "nextStep": "Follow the next step in your website installation card.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "route",
+                "target": "setup",
+                "label": "Continue website setup"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone answering",
+              "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messaging",
+              "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "calendar",
+              "label": "Google Calendar",
+              "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "not_connected",
+              "detail": "Connect your Google calendar to sync saved visits.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            }
+          ],
+          "issues": [],
+          "aiAllowance": {
+            "private": {
+              "limit": 20,
+              "used": 0,
+              "remaining": 20
+            },
+            "web": {
+              "limit": 50,
+              "used": 0,
+              "remaining": 50
+            },
+            "available": true,
+            "resetAt": "2026-10-24T05:00:00.000Z",
+            "timezone": "America/Chicago"
+          },
+          "metrics": {
+            "bookings": 0,
+            "leads": 0,
+            "conversations": 0,
+            "openIssues": 0,
+            "scope": "Latest 100 records per category; conversations include up to 60 recent texting contacts."
+          },
+          "activity": [
+            {
+              "at": "2026-10-23T14:41:17.190Z",
+              "type": "resume",
+              "detail": "Synthetic operator restores the saved workspace state.",
+              "actor": "launch-operator@example.test"
+            }
+          ],
+          "notes": [],
+          "rules": {
+            "business": {
+              "name": "Launch Recovery Shop",
+              "city": "Houston",
+              "serviceArea": [
+                "Katy"
+              ],
+              "notServed": []
+            },
+            "services": [
+              "AC repair"
+            ],
+            "fees": [],
+            "windows": [
+              "8 to 12"
+            ],
+            "faq": [],
+            "summary": ""
+          },
+          "records": {
+            "bookings": [],
+            "leads": [],
+            "conversations": []
+          },
+          "recordListing": {
+            "bookings": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            },
+            "leads": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            }
+          }
+        }
+      },
+      "storedStatus": "live",
+      "storedWebActive": true,
+      "desiredChannels": [
+        "web"
+      ],
+      "expected": {
+        "http": 200,
+        "status": "live",
+        "web": true
+      }
+    },
+    {
+      "name": "Operator resume missing-snapshot",
+      "pass": true,
+      "status": 200,
+      "body": {
+        "ok": true,
+        "customer": {
+          "slug": "launch-missing-snapshot",
+          "name": "Launch Recovery Shop",
+          "owner": {
+            "name": "QA Owner",
+            "email": "owner@example.test",
+            "phone": "+17135550101"
+          },
+          "plan": "growth",
+          "status": "live",
+          "revision": "5c06a88e823161b2e1cfabf257ccdbbb2b9b89d29a33c5bb6ecefae1077afdda",
+          "configurationRevision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+          "selfService": true,
+          "createdAt": "2026-10-23T14:41:17.191Z",
+          "setup": {
+            "version": 1,
+            "revision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "review",
+                "label": "Review what the desk knows",
+                "status": "your_action",
+                "detail": "Save your review of the current business rules.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review what the desk knows"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "review",
+                    "label": "Review what the desk knows",
+                    "detail": "Save your review of the current business rules.",
+                    "tab": "know"
+                  },
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "calendar": {
+                "active": false,
+                "ready": false,
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              }
+            },
+            "connectionJourney": {
+              "title": "Finish your selected connections",
+              "channels": [
+                {
+                  "id": "web",
+                  "label": "Website chat",
+                  "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+                  "ownerTask": "Add the installation snippet to your website and follow the guided check.",
+                  "readyWhen": "The website check succeeds and customer chat is active.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "needs_action",
+                  "detail": "Your saved answers carry into website chat. Complete the shared review and private practice first.",
+                  "nextStep": "Check and review the business details used across your front desk.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "route",
+                    "target": "know",
+                    "label": "Review business details"
+                  }
+                },
+                {
+                  "id": "voice",
+                  "label": "Phone answering",
+                  "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "sms",
+                  "label": "Text messaging",
+                  "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "calendar",
+                  "label": "Google Calendar",
+                  "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                }
+              ]
+            },
+            "next": {
+              "id": "review",
+              "tab": "know",
+              "label": "Review what the desk knows"
+            }
+          },
+          "operations": [],
+          "phoneActivation": {
+            "available": false,
+            "active": false,
+            "state": "unavailable",
+            "detail": "Phone setup is not available yet. No number will be purchased from signup or connection preferences.",
+            "offer": null,
+            "operation": null
+          },
+          "services": {
+            "voice": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "offer": null,
+              "operation": null
+            },
+            "messaging": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "offer": null,
+              "program": {
+                "version": "customer_care_ongoing_appointments_v2",
+                "description": "Launch Recovery Shop sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.",
+                "messageFlow": "Customers first text Launch Recovery Shop at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: https://launch-owner.fixture.invalid/policy?c=launch-missing-snapshot&page=terms. Privacy: https://launch-owner.fixture.invalid/policy?c=launch-missing-snapshot. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.",
+                "messageSamples": [
+                  "Launch Recovery Shop: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.",
+                  "Launch Recovery Shop: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.",
+                  "Launch Recovery Shop: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts."
+                ],
+                "privacyPolicyUrl": "https://launch-owner.fixture.invalid/policy?c=launch-missing-snapshot",
+                "termsAndConditionsUrl": "https://launch-owner.fixture.invalid/policy?c=launch-missing-snapshot&page=terms",
+                "optInMessage": "Launch Recovery Shop: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.",
+                "optOutMessage": "Launch Recovery Shop: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.",
+                "helpMessage": "Launch Recovery Shop: help with service texts at owner@example.test. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.",
+                "digest": "6f245be90bb10717edd179361cf9ebe561ef08359d939398ceedc89565a3603a"
+              },
+              "operation": null
+            },
+            "calendar": {
+              "available": false,
+              "provider": "google",
+              "status": "not_connected",
+              "connected": false,
+              "connectedAt": null,
+              "disconnectedAt": null,
+              "label": null,
+              "reconnectRequired": false,
+              "detail": "Connect your Google calendar to sync saved visits."
+            },
+            "calendarDelivery": {
+              "enabled": false,
+              "counts": {},
+              "total": 0,
+              "jobs": [],
+              "scope": "Latest 30 calendar jobs; counts include all retained jobs. Calendar sync does not check external busy time or change your listed arrival windows."
+            },
+            "delivery": {
+              "enabled": false,
+              "total": 0,
+              "counts": {},
+              "jobs": []
+            }
+          },
+          "serviceChecks": [],
+          "connections": [
+            {
+              "id": "web",
+              "label": "Website chat",
+              "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+              "ownerTask": "Add the installation snippet to your website and follow the guided check.",
+              "readyWhen": "The website check succeeds and customer chat is active.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "needs_action",
+              "detail": "Your saved answers carry into website chat. Complete the shared review and private practice first.",
+              "nextStep": "Check and review the business details used across your front desk.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "route",
+                "target": "know",
+                "label": "Review business details"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone answering",
+              "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messaging",
+              "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "calendar",
+              "label": "Google Calendar",
+              "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "not_connected",
+              "detail": "Connect your Google calendar to sync saved visits.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            }
+          ],
+          "issues": [
+            {
+              "id": "readiness",
+              "severity": "high",
+              "title": "Website chat is blocked",
+              "detail": "Current saved rules have not passed all activation checks."
+            }
+          ],
+          "aiAllowance": {
+            "private": {
+              "limit": 20,
+              "used": 0,
+              "remaining": 20
+            },
+            "web": {
+              "limit": 50,
+              "used": 0,
+              "remaining": 50
+            },
+            "available": true,
+            "resetAt": "2026-10-24T05:00:00.000Z",
+            "timezone": "America/Chicago"
+          },
+          "metrics": {
+            "bookings": 0,
+            "leads": 0,
+            "conversations": 0,
+            "openIssues": 1,
+            "scope": "Latest 100 records per category; conversations include up to 60 recent texting contacts."
+          },
+          "activity": [
+            {
+              "at": "2026-10-23T14:41:17.191Z",
+              "type": "resume",
+              "detail": "Synthetic operator restores the saved workspace state.",
+              "actor": "launch-operator@example.test"
+            }
+          ],
+          "notes": [],
+          "rules": {
+            "business": {
+              "name": "Launch Recovery Shop",
+              "city": "Houston",
+              "serviceArea": [
+                "Katy"
+              ],
+              "notServed": []
+            },
+            "services": [
+              "AC repair"
+            ],
+            "fees": [],
+            "windows": [
+              "8 to 12"
+            ],
+            "faq": [],
+            "summary": ""
+          },
+          "records": {
+            "bookings": [],
+            "leads": [],
+            "conversations": []
+          },
+          "recordListing": {
+            "bookings": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            },
+            "leads": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            }
+          }
+        }
+      },
+      "storedStatus": "live",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "web"
+      ],
+      "expected": {
+        "http": 200,
+        "status": "live",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume inactive-web",
+      "pass": true,
+      "status": 200,
+      "body": {
+        "ok": true,
+        "customer": {
+          "slug": "launch-inactive-web",
+          "name": "Launch Recovery Shop",
+          "owner": {
+            "name": "QA Owner",
+            "email": "owner@example.test",
+            "phone": "+17135550101"
+          },
+          "plan": "growth",
+          "status": "live",
+          "revision": "2ddcc5ff40cbfb3cc0a56da4b5ef6290afa51e0a8763d452c7f8ed0356f48b26",
+          "configurationRevision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+          "selfService": true,
+          "createdAt": "2026-10-23T14:41:17.192Z",
+          "setup": {
+            "version": 1,
+            "revision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "review",
+                "label": "Review what the desk knows",
+                "status": "your_action",
+                "detail": "Save your review of the current business rules.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review what the desk knows"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "review",
+                    "label": "Review what the desk knows",
+                    "detail": "Save your review of the current business rules.",
+                    "tab": "know"
+                  },
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "calendar": {
+                "active": false,
+                "ready": false,
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              }
+            },
+            "connectionJourney": {
+              "title": "Finish your selected connections",
+              "channels": [
+                {
+                  "id": "web",
+                  "label": "Website chat",
+                  "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+                  "ownerTask": "Add the installation snippet to your website and follow the guided check.",
+                  "readyWhen": "The website check succeeds and customer chat is active.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "needs_action",
+                  "detail": "Your saved answers carry into website chat. Complete the shared review and private practice first.",
+                  "nextStep": "Check and review the business details used across your front desk.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "route",
+                    "target": "know",
+                    "label": "Review business details"
+                  }
+                },
+                {
+                  "id": "voice",
+                  "label": "Phone answering",
+                  "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "sms",
+                  "label": "Text messaging",
+                  "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "calendar",
+                  "label": "Google Calendar",
+                  "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                }
+              ]
+            },
+            "next": {
+              "id": "review",
+              "tab": "know",
+              "label": "Review what the desk knows"
+            }
+          },
+          "operations": [],
+          "phoneActivation": {
+            "available": false,
+            "active": false,
+            "state": "unavailable",
+            "detail": "Phone setup is not available yet. No number will be purchased from signup or connection preferences.",
+            "offer": null,
+            "operation": null
+          },
+          "services": {
+            "voice": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "offer": null,
+              "operation": null
+            },
+            "messaging": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "offer": null,
+              "program": {
+                "version": "customer_care_ongoing_appointments_v2",
+                "description": "Launch Recovery Shop sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.",
+                "messageFlow": "Customers first text Launch Recovery Shop at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: https://launch-owner.fixture.invalid/policy?c=launch-inactive-web&page=terms. Privacy: https://launch-owner.fixture.invalid/policy?c=launch-inactive-web. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.",
+                "messageSamples": [
+                  "Launch Recovery Shop: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.",
+                  "Launch Recovery Shop: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.",
+                  "Launch Recovery Shop: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts."
+                ],
+                "privacyPolicyUrl": "https://launch-owner.fixture.invalid/policy?c=launch-inactive-web",
+                "termsAndConditionsUrl": "https://launch-owner.fixture.invalid/policy?c=launch-inactive-web&page=terms",
+                "optInMessage": "Launch Recovery Shop: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.",
+                "optOutMessage": "Launch Recovery Shop: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.",
+                "helpMessage": "Launch Recovery Shop: help with service texts at owner@example.test. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.",
+                "digest": "c9881d08d765499a2b98271a6fe8cae3b8b61ba43f89e0ea2c59d2640a075e64"
+              },
+              "operation": null
+            },
+            "calendar": {
+              "available": false,
+              "provider": "google",
+              "status": "not_connected",
+              "connected": false,
+              "connectedAt": null,
+              "disconnectedAt": null,
+              "label": null,
+              "reconnectRequired": false,
+              "detail": "Connect your Google calendar to sync saved visits."
+            },
+            "calendarDelivery": {
+              "enabled": false,
+              "counts": {},
+              "total": 0,
+              "jobs": [],
+              "scope": "Latest 30 calendar jobs; counts include all retained jobs. Calendar sync does not check external busy time or change your listed arrival windows."
+            },
+            "delivery": {
+              "enabled": false,
+              "total": 0,
+              "counts": {},
+              "jobs": []
+            }
+          },
+          "serviceChecks": [],
+          "connections": [
+            {
+              "id": "web",
+              "label": "Website chat",
+              "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+              "ownerTask": "Add the installation snippet to your website and follow the guided check.",
+              "readyWhen": "The website check succeeds and customer chat is active.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "needs_action",
+              "detail": "Your saved answers carry into website chat. Complete the shared review and private practice first.",
+              "nextStep": "Check and review the business details used across your front desk.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "route",
+                "target": "know",
+                "label": "Review business details"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone answering",
+              "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messaging",
+              "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "calendar",
+              "label": "Google Calendar",
+              "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "not_connected",
+              "detail": "Connect your Google calendar to sync saved visits.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            }
+          ],
+          "issues": [
+            {
+              "id": "readiness",
+              "severity": "high",
+              "title": "Website chat is blocked",
+              "detail": "Current saved rules have not passed all activation checks."
+            }
+          ],
+          "aiAllowance": {
+            "private": {
+              "limit": 20,
+              "used": 0,
+              "remaining": 20
+            },
+            "web": {
+              "limit": 50,
+              "used": 0,
+              "remaining": 50
+            },
+            "available": true,
+            "resetAt": "2026-10-24T05:00:00.000Z",
+            "timezone": "America/Chicago"
+          },
+          "metrics": {
+            "bookings": 0,
+            "leads": 0,
+            "conversations": 0,
+            "openIssues": 1,
+            "scope": "Latest 100 records per category; conversations include up to 60 recent texting contacts."
+          },
+          "activity": [
+            {
+              "at": "2026-10-23T14:41:17.192Z",
+              "type": "resume",
+              "detail": "Synthetic operator restores the saved workspace state.",
+              "actor": "launch-operator@example.test"
+            }
+          ],
+          "notes": [],
+          "rules": {
+            "business": {
+              "name": "Launch Recovery Shop",
+              "city": "Houston",
+              "serviceArea": [
+                "Katy"
+              ],
+              "notServed": []
+            },
+            "services": [
+              "AC repair"
+            ],
+            "fees": [],
+            "windows": [
+              "8 to 12"
+            ],
+            "faq": [],
+            "summary": ""
+          },
+          "records": {
+            "bookings": [],
+            "leads": [],
+            "conversations": []
+          },
+          "recordListing": {
+            "bookings": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            },
+            "leads": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            }
+          }
+        }
+      },
+      "storedStatus": "live",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "web"
+      ],
+      "expected": {
+        "http": 200,
+        "status": "live",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume unselected-old-web",
+      "pass": true,
+      "status": 200,
+      "body": {
+        "ok": true,
+        "customer": {
+          "slug": "launch-unselected-old-web",
+          "name": "Launch Recovery Shop",
+          "owner": {
+            "name": "QA Owner",
+            "email": "owner@example.test",
+            "phone": "+17135550101"
+          },
+          "plan": "growth",
+          "status": "live",
+          "revision": "40816754488b80f2053fa2188451b1eead80cf06e35af01bae6ad59571d92bc5",
+          "configurationRevision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+          "selfService": true,
+          "createdAt": "2026-10-23T14:41:17.193Z",
+          "setup": {
+            "version": 1,
+            "revision": "9955f09b28137ff7bb439234b392a45ffdd6ac4dfd28ed80d3ba4e102816d35e",
+            "stage": "review",
+            "canActivateWeb": false,
+            "steps": [
+              {
+                "id": "knowledge",
+                "label": "Desk draft",
+                "status": "done",
+                "detail": "Built from your saved answers.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review rules"
+                }
+              },
+              {
+                "id": "review",
+                "label": "Review what the desk knows",
+                "status": "your_action",
+                "detail": "Save your review of the current business rules.",
+                "action": {
+                  "tab": "know",
+                  "label": "Review what the desk knows"
+                }
+              },
+              {
+                "id": "test",
+                "label": "Try your desk",
+                "status": "your_action",
+                "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                "action": {
+                  "tab": "test",
+                  "label": "Try your desk"
+                }
+              },
+              {
+                "id": "model",
+                "label": "AI service is unavailable",
+                "status": "needs_attention",
+                "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                "action": {
+                  "tab": "setup",
+                  "label": "AI service is unavailable"
+                }
+              },
+              {
+                "id": "voice",
+                "label": "Phone",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              },
+              {
+                "id": "sms",
+                "label": "Text messages",
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "action": {
+                  "tab": "setup",
+                  "label": "View channel setup"
+                }
+              }
+            ],
+            "channels": {
+              "web": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "review",
+                    "label": "Review what the desk knows",
+                    "detail": "Save your review of the current business rules.",
+                    "tab": "know"
+                  },
+                  {
+                    "id": "test",
+                    "label": "Try your desk",
+                    "detail": "Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat.",
+                    "tab": "test"
+                  },
+                  {
+                    "id": "model",
+                    "label": "AI service is unavailable",
+                    "detail": "Your settings are saved. AI service must be available before customers use this desk.",
+                    "tab": "setup"
+                  }
+                ]
+              },
+              "voice": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "voice",
+                    "label": "Phone setup is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "sms": {
+                "ready": false,
+                "active": false,
+                "blockers": [
+                  {
+                    "id": "sms",
+                    "label": "Text messaging is not active",
+                    "detail": "Provider setup, customer acceptance and a verified delivery path are required. Website chat can operate separately.",
+                    "tab": "setup"
+                  }
+                ],
+                "status": "not_selected",
+                "detail": "You have not selected this connection.",
+                "nextStep": "Choose the services you want in your connection preferences."
+              },
+              "calendar": {
+                "active": false,
+                "ready": false,
+                "status": "waiting_platform",
+                "detail": "Your calendar preference is saved. Google connection is awaiting platform availability.",
+                "nextStep": "Your Google approval will be requested here when connection is available."
+              }
+            },
+            "connectionJourney": {
+              "title": "Finish your selected connections",
+              "channels": [
+                {
+                  "id": "web",
+                  "label": "Website chat",
+                  "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The website check succeeds and customer chat is active.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "voice",
+                  "label": "Phone answering",
+                  "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "sms",
+                  "label": "Text messaging",
+                  "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+                  "ownerTask": "Select this service when you want to prepare it.",
+                  "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+                  "requested": false,
+                  "retained": false,
+                  "active": false,
+                  "status": "not_selected",
+                  "detail": "You have not selected this connection.",
+                  "nextStep": "Choose the services you want in your connection preferences.",
+                  "responsibility": "customer",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Not selected"
+                  }
+                },
+                {
+                  "id": "calendar",
+                  "label": "Google Calendar",
+                  "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+                  "ownerTask": "Choose your Google account and approve calendar access here.",
+                  "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+                  "requested": true,
+                  "retained": false,
+                  "active": false,
+                  "status": "waiting_platform",
+                  "detail": "Your calendar preference is saved. Google connection is awaiting platform availability.",
+                  "nextStep": "Your Google approval will be requested here when connection is available.",
+                  "responsibility": "platform",
+                  "action": {
+                    "kind": "wait",
+                    "label": "Waiting for platform"
+                  }
+                }
+              ]
+            },
+            "next": {
+              "id": "review",
+              "tab": "know",
+              "label": "Review what the desk knows"
+            }
+          },
+          "operations": [],
+          "phoneActivation": {
+            "available": false,
+            "active": false,
+            "state": "unavailable",
+            "detail": "Phone setup is not available yet. No number will be purchased from signup or connection preferences.",
+            "offer": null,
+            "operation": null
+          },
+          "services": {
+            "voice": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "offer": null,
+              "operation": null
+            },
+            "messaging": {
+              "available": false,
+              "active": false,
+              "state": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "offer": null,
+              "program": {
+                "version": "customer_care_ongoing_appointments_v2",
+                "description": "Launch Recovery Shop sends one-to-one customer care replies to people who initiate a text conversation about requested home services. Separately agreed ongoing appointment texts cover saved-visit confirmations, reminders and cancellations, including future visits with this business. An inbound conversation alone does not authorize recurring appointment updates. This program does not send on-the-way alerts, promotions, purchased-list outreach, review requests or unrelated marketing.",
+                "messageFlow": "Customers first text Launch Recovery Shop at its published service number about a home-service request. The inbound SMS is retained as consent for direct replies in that conversation only. When a visit is saved during that exchange, the front desk names the business and asks by SMS whether the recipient wants ongoing appointment confirmations, reminders and cancellation texts from this business, including future visits. The question discloses variable frequency, message and data rates, HELP and STOP, and that booking is available without texts. A separate written YES after that question is required. The question, inbound reply, recipient number, provider message IDs, time and wording version ongoing_appointments_v2 are recorded. Older consent for one visit is not widened to future visits. Reply STOP, ALTO or PARAR to end texts; HELP or AYUDA for assistance. START or EMPEZAR removes a previous texting block but does not grant recurring appointment consent. Terms: https://launch-owner.fixture.invalid/policy?c=launch-unselected-old-web&page=terms. Privacy: https://launch-owner.fixture.invalid/policy?c=launch-unselected-old-web. No texting consent is inferred from signup, a phone call, website chat, a missed call or merely providing a number.",
+                "messageSamples": [
+                  "Launch Recovery Shop: your requested service visit is saved for tomorrow, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts or HELP for help.",
+                  "Launch Recovery Shop: a reminder about your service appointment tomorrow, 12 to 5. Reply if you need to change it. Message frequency varies. Reply STOP to end texts.",
+                  "Launch Recovery Shop: your service visit has been cancelled. Reply here with a question, HELP for assistance, or STOP to end texts."
+                ],
+                "privacyPolicyUrl": "https://launch-owner.fixture.invalid/policy?c=launch-unselected-old-web",
+                "termsAndConditionsUrl": "https://launch-owner.fixture.invalid/policy?c=launch-unselected-old-web&page=terms",
+                "optInMessage": "Launch Recovery Shop: your texting block is removed. Appointment updates need a separate YES after our appointment-text question. HELP for help, STOP/ALTO/PARAR to end. Message and data rates may apply.",
+                "optOutMessage": "Launch Recovery Shop: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.",
+                "helpMessage": "Launch Recovery Shop: help with service texts at owner@example.test. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.",
+                "digest": "64ce55749fcd6ae1cdd04dda14dc8f4346d5d10d1ee0eafce62f7d47887e73aa"
+              },
+              "operation": null
+            },
+            "calendar": {
+              "available": false,
+              "provider": "google",
+              "status": "not_connected",
+              "connected": false,
+              "connectedAt": null,
+              "disconnectedAt": null,
+              "label": null,
+              "reconnectRequired": false,
+              "detail": "Connect your Google calendar to sync saved visits."
+            },
+            "calendarDelivery": {
+              "enabled": false,
+              "counts": {},
+              "total": 0,
+              "jobs": [],
+              "scope": "Latest 30 calendar jobs; counts include all retained jobs. Calendar sync does not check external busy time or change your listed arrival windows."
+            },
+            "delivery": {
+              "enabled": false,
+              "total": 0,
+              "counts": {},
+              "jobs": []
+            }
+          },
+          "serviceChecks": [],
+          "connections": [
+            {
+              "id": "web",
+              "label": "Website chat",
+              "automation": "Prepare your front desk from your saved answers and keep customer requests in this workspace.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The website check succeeds and customer chat is active.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "not_selected",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "voice",
+              "label": "Phone answering",
+              "automation": "After your approval, reserve the dedicated number and configure the answering assistant and fallback routing.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "Current business rules, confirmed routing and a successful call verify the connection.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "You have not selected this connection.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "sms",
+              "label": "Text messaging",
+              "automation": "Register your dedicated front desk sender and track the carrier review for your shop.",
+              "ownerTask": "Select this service when you want to prepare it.",
+              "readyWhen": "The carrier registration and two-way setup delivery are verified.",
+              "requested": false,
+              "retained": false,
+              "active": false,
+              "status": "unavailable",
+              "detail": "Texting setup is not available yet. Preferences do not purchase or register service.",
+              "nextStep": "Choose the services you want in your connection preferences.",
+              "responsibility": "customer",
+              "action": {
+                "kind": "wait",
+                "label": "Not selected"
+              }
+            },
+            {
+              "id": "calendar",
+              "label": "Google Calendar",
+              "automation": "Send saved visits and later changes to the Google calendar you authorize.",
+              "ownerTask": "Choose your Google account and approve calendar access here.",
+              "readyWhen": "Google permission is saved and a visit’s delivery status confirms its sync.",
+              "requested": true,
+              "retained": false,
+              "active": false,
+              "status": "not_connected",
+              "detail": "Connect your Google calendar to sync saved visits.",
+              "nextStep": "Your Google approval will be requested here when connection is available.",
+              "responsibility": "platform",
+              "action": {
+                "kind": "wait",
+                "label": "Waiting for platform"
+              }
+            }
+          ],
+          "issues": [
+            {
+              "id": "readiness",
+              "severity": "high",
+              "title": "Website chat is blocked",
+              "detail": "Current saved rules have not passed all activation checks."
+            }
+          ],
+          "aiAllowance": {
+            "private": {
+              "limit": 20,
+              "used": 0,
+              "remaining": 20
+            },
+            "web": {
+              "limit": 50,
+              "used": 0,
+              "remaining": 50
+            },
+            "available": true,
+            "resetAt": "2026-10-24T05:00:00.000Z",
+            "timezone": "America/Chicago"
+          },
+          "metrics": {
+            "bookings": 0,
+            "leads": 0,
+            "conversations": 0,
+            "openIssues": 1,
+            "scope": "Latest 100 records per category; conversations include up to 60 recent texting contacts."
+          },
+          "activity": [
+            {
+              "at": "2026-10-23T14:41:17.193Z",
+              "type": "resume",
+              "detail": "Synthetic operator restores the saved workspace state.",
+              "actor": "launch-operator@example.test"
+            }
+          ],
+          "notes": [],
+          "rules": {
+            "business": {
+              "name": "Launch Recovery Shop",
+              "city": "Houston",
+              "serviceArea": [
+                "Katy"
+              ],
+              "notServed": []
+            },
+            "services": [
+              "AC repair"
+            ],
+            "fees": [],
+            "windows": [
+              "8 to 12"
+            ],
+            "faq": [],
+            "summary": ""
+          },
+          "records": {
+            "bookings": [],
+            "leads": [],
+            "conversations": []
+          },
+          "recordListing": {
+            "bookings": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            },
+            "leads": {
+              "source": "tenant_index",
+              "limit": 100,
+              "incomplete": false
+            }
+          }
+        }
+      },
+      "storedStatus": "live",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "calendar"
+      ],
+      "expected": {
+        "http": 200,
+        "status": "live",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume not-paused",
+      "pass": false,
+      "status": 409,
+      "body": {
+        "error": "setup_incomplete",
+        "message": "Only a paused workspace can be resumed."
+      },
+      "storedStatus": "testing",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "calendar"
+      ],
+      "expected": {
+        "http": 409,
+        "status": "testing",
+        "web": false
+      }
+    },
+    {
+      "name": "Operator resume stale-management-version",
+      "pass": false,
+      "status": 409,
+      "body": {
+        "error": "customer_changed",
+        "message": "Customer details changed. Refresh before trying again."
+      },
+      "storedStatus": "paused",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "calendar"
+      ],
+      "expected": {
+        "http": 409,
+        "status": "paused",
+        "web": false
+      }
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/lib/operator.mjs": "4dc781c4002d82171ba299b671b4ae1783f9006c105a4deef3ee271b328ee3ac",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "sourceStable": true,
+  "physicalNetwork": 0,
+  "summary": {
+    "passed": 6,
+    "failed": 3
+  }
+}

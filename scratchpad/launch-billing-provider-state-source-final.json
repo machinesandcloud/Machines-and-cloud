@@ -1,0 +1,976 @@
+{
+  "at": "2026-10-23T15:58:04.702Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "mode": "Actual authorized manage GET; synthetic memory and configuration only; no network or environment file",
+  "sourceBefore": {
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/lib/operator.mjs": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c",
+    "netlify/functions/lib/workspace-billing.mjs": "4551a2d7016944cdbcf01a014263cf76295a7fe8746cede8220eb921928d49e9",
+    "netlify/functions/lib/calendar-execution.mjs": "b69f5b2b127de92700ad78e5c3513c359c7dd5f78a8ac9fb833be6651d47174a",
+    "netlify/functions/lib/calendar-self-service.mjs": "483100f9badad837b160bb6488f69881aaf0fad7b669872cd24b01a4348d21fd",
+    "admin.js": "d9b698d5f2d4386d3c804087fb66f3a1bcc7b6a04b083471d5246731b81b2dba",
+    "scripts/launch-provider-state-qa-check.mjs": "604f0a5384daaa646a513f47d7c8fd9672b9031c63f15dd75e38141c400a1951"
+  },
+  "checks": [
+    {
+      "name": "closed flags retain disabled even with keys",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "website": "configured",
+        "phone": "disabled",
+        "voice": "disabled",
+        "sms": "disabled",
+        "calendar": "disabled",
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "enabled flags with missing keys need attention",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "website": "unavailable",
+        "phone": "needs_attention",
+        "voice": "needs_attention",
+        "sms": "needs_attention",
+        "calendar": "needs_attention",
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "needs_attention",
+          "detail": "The execution setting is on, but required provider credentials are missing. No customer readiness is implied."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "needs_attention",
+          "detail": "The execution setting is on, but required provider credentials are missing. No customer readiness is implied."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "needs_attention",
+          "detail": "The execution setting is on, but required provider credentials are missing. No customer readiness is implied."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "configured keys plus current selfservice policy",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "website": "configured",
+        "phone": "configured",
+        "voice": "configured",
+        "sms": "configured",
+        "calendar": "configured",
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "configured",
+          "detail": "Self-service Calendar policy is configured. Each customer grants access; event delivery and current limits are checked separately."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "SMS delivery flag closed",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "sms": "disabled"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "SMS profile missing",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "sms": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "needs_attention",
+          "detail": "The execution setting is on, but required provider credentials are missing. No customer readiness is implied."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "voice webhook missing",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "voice": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "needs_attention",
+          "detail": "The execution setting is on, but required provider credentials are missing. No customer readiness is implied."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "Calendar policy missing",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "calendar": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "Calendar policy expired",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "calendar": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "Calendar encryption missing",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "calendar": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "needs_attention",
+          "detail": "The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "controlled Calendar restricted cohort",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "calendar": "configured"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "configured",
+          "detail": "AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "configured",
+          "detail": "The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "configured",
+          "detail": "A controlled Calendar policy is configured. Only its selected workspace and operations are eligible; this is not general customer activation."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "legacy billing remains distinct from disabled selfservice checkout",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "disabled",
+        "legacyBilling": "configured"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        },
+        "legacyBilling": {
+          "label": "Legacy billing",
+          "status": "configured",
+          "detail": "Legacy Stripe key and Price configuration is present. This does not configure self-service checkout or its approved offer."
+        }
+      }
+    },
+    {
+      "name": "valid TEST workspace offer agrees with enabled purchases",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "configured"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "configured",
+          "mode": "TEST",
+          "newPurchasesEnabled": true,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "New self-service checkout is configured in TEST mode. The merchant, Price and selected customer services are verified before checkout. A webhook signing secret is configured. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "missing signing secret needs attention while checkout remains enabled",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "needs_attention",
+          "mode": "TEST",
+          "newPurchasesEnabled": true,
+          "portalConfigured": false,
+          "webhookConfigured": false,
+          "detail": "New self-service checkout is configured in TEST mode. The merchant, Price and selected customer services are verified before checkout. The webhook signing secret is missing; payment notifications cannot be verified. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "closing new purchases preserves configured TEST identity",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "TEST",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "invalid offer cannot appear configured",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "needs_attention",
+          "mode": "TEST",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "Self-service checkout was requested, but its approved offer, credentials or explicit live-mode approval is incomplete. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "unapproved offer version cannot appear configured",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "needs_attention",
+          "mode": "TEST",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "Self-service checkout was requested, but its approved offer, credentials or explicit live-mode approval is incomplete. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "live purchases require explicit separate live authority",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "needs_attention",
+          "mode": "live",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "Self-service checkout was requested, but its approved offer, credentials or explicit live-mode approval is incomplete. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "approved live configuration is labeled live without delivery claim",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "configured"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "configured",
+          "mode": "live",
+          "newPurchasesEnabled": true,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "New self-service checkout is configured in live mode. The merchant, Price and selected customer services are verified before checkout. A webhook signing secret is configured. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "unsupported key format remains unconfigured",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "needs_attention"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "needs_attention",
+          "mode": "unconfigured",
+          "newPurchasesEnabled": false,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "Self-service checkout was requested, but its approved offer, credentials or explicit live-mode approval is incomplete. The payment-details and invoice portal is not configured."
+        }
+      }
+    },
+    {
+      "name": "restricted portal configuration remains separate when purchases and offer are disabled",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "disabled",
+          "mode": "TEST",
+          "newPurchasesEnabled": false,
+          "portalConfigured": true,
+          "webhookConfigured": true,
+          "detail": "New self-service checkout is disabled. Existing billing records and renewal reconciliation remain separate. The restricted payment-details and invoice portal is configured; its provider features are checked when opened."
+        }
+      }
+    },
+    {
+      "name": "invalid portal identifier cannot appear configured",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "billing": "configured"
+      },
+      "observed": {
+        "website": {
+          "label": "Website chat",
+          "status": "unavailable",
+          "detail": "AI credentials or the live model are unavailable."
+        },
+        "phone": {
+          "label": "Phone number setup",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "voice": {
+          "label": "Phone answering",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "sms": {
+          "label": "Text messaging",
+          "status": "disabled",
+          "detail": "Platform execution is disabled. Saved customer setup is retained."
+        },
+        "calendar": {
+          "label": "Google Calendar",
+          "status": "disabled",
+          "detail": "Calendar connections are disabled by platform configuration."
+        },
+        "billing": {
+          "label": "Customer billing",
+          "status": "configured",
+          "mode": "TEST",
+          "newPurchasesEnabled": true,
+          "portalConfigured": false,
+          "webhookConfigured": true,
+          "detail": "New self-service checkout is configured in TEST mode. The merchant, Price and selected customer services are verified before checkout. A webhook signing secret is configured. The payment-details and invoice portal is not configured."
+        }
+      }
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/lib/operator.mjs": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c",
+    "netlify/functions/lib/workspace-billing.mjs": "4551a2d7016944cdbcf01a014263cf76295a7fe8746cede8220eb921928d49e9",
+    "netlify/functions/lib/calendar-execution.mjs": "b69f5b2b127de92700ad78e5c3513c359c7dd5f78a8ac9fb833be6651d47174a",
+    "netlify/functions/lib/calendar-self-service.mjs": "483100f9badad837b160bb6488f69881aaf0fad7b669872cd24b01a4348d21fd",
+    "admin.js": "d9b698d5f2d4386d3c804087fb66f3a1bcc7b6a04b083471d5246731b81b2dba",
+    "scripts/launch-provider-state-qa-check.mjs": "604f0a5384daaa646a513f47d7c8fd9672b9031c63f15dd75e38141c400a1951"
+  },
+  "sourceStable": true,
+  "physicalNetwork": 0,
+  "summary": {
+    "passed": 21,
+    "failed": 0
+  }
+}

@@ -13,9 +13,33 @@ import { queueServiceReconciliation, runServiceReconciliation, serviceReconcilia
 import { parseWorkspacePatch, WorkspaceEditError } from './workspace-edit.mjs';
 
 import { workspaceTenant, belongsToWorkspace } from './workspace-identity.mjs';
+import { calendarExecutionPolicy } from './calendar-execution.mjs';
+import { workspaceBillingConfiguration } from './workspace-billing.mjs';
 
 export class OperatorError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
+}
+export function operatorProviderStates() {
+  const env = process.env, model = !!env.ANTHROPIC_API_KEY && env.MC_FAKE_MODEL !== '1';
+  const channel = (label, flag, credentials) => !flag
+    ? { label, status: 'disabled', detail: 'Platform execution is disabled. Saved customer setup is retained.' }
+    : !credentials
+      ? { label, status: 'needs_attention', detail: 'The execution setting is on, but required provider credentials are missing. No customer readiness is implied.' }
+      : { label, status: 'configured', detail: 'The execution setting and provider credentials are configured. Current policies, customer authority, budgets and verified delivery still apply.' };
+  const calendar = calendarExecutionPolicy();
+  return {
+    website: { label: 'Website chat', status: model ? 'configured' : 'unavailable', detail: model ? 'AI credentials are configured. Each customer still needs reviewed rules, a current practice check and available allowance.' : 'AI credentials or the live model are unavailable.' },
+    phone: channel('Phone number setup', env.PHONE_ACQUISITION_ENABLED === 'true', env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN),
+    voice: channel('Phone answering', env.VOICE_ACTIVATION_ENABLED === 'true', env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.VAPI_API_KEY && env.VAPI_WEBHOOK_SECRET),
+    sms: channel('Text messaging', env.MESSAGING_ACTIVATION_ENABLED === 'true' && env.SERVICE_DELIVERY_ENABLED === 'true', env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_PRIMARY_PROFILE_SID),
+    calendar: env.CALENDAR_CONNECTION_ENABLED !== 'true'
+      ? { label: 'Google Calendar', status: 'disabled', detail: 'Calendar connections are disabled by platform configuration.' }
+      : !calendar || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.CALENDAR_TOKEN_ENCRYPTION_KEY
+        ? { label: 'Google Calendar', status: 'needs_attention', detail: 'The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required.' }
+        : { label: 'Google Calendar', status: 'configured', detail: env.CALENDAR_SELF_SERVICE_ENABLED === 'true' ? 'Self-service Calendar policy is configured. Each customer grants access; event delivery and current limits are checked separately.' : 'A controlled Calendar policy is configured. Only its selected workspace and operations are eligible; this is not general customer activation.' },
+    billing: workspaceBillingConfiguration(),
+    ...(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_GROWTH ? { legacyBilling: { label: 'Legacy billing', status: 'configured', detail: 'Legacy Stripe key and Price configuration is present. This does not configure self-service checkout or its approved offer.' } } : {}),
+  };
 }
 export function operatorEmails() {
   const raw = String(process.env.ADMIN_EMAILS || '').trim();
@@ -128,10 +152,11 @@ export async function supportAction(session, body) {
     if (body.action === 'pause') { value.pausedFrom = current.status; value.pausedChannels = structuredClone(current.channels || {}); value.status = 'paused'; value.pausedAt = at; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
     if (body.action === 'cancel_service') { value.status = 'cancelled'; value.cancelledAt = at; value.cancelReason = reason; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
     if (body.action === 'resume') {
-      const ready = setupReadiness(current), allowance = await getAIAllowance(current);
-      if (current.status !== 'paused' || !ready.canActivateWeb || !allowance.available) throw new OperatorError('setup_incomplete', 'Review, a successful current live test and available AI allowance are required before resuming website chat.', 409);
       const wantsWeb = !Array.isArray(current.onboarding?.desiredChannels) || current.onboarding.desiredChannels.includes('web'), previousStatus = ['testing','live'].includes(current.pausedFrom) ? current.pausedFrom : 'live';
-      value.status = previousStatus; value.channels = { ...value.channels, web: { ...value.channels?.web, active: wantsWeb && previousStatus === 'live' && (current.pausedChannels ? current.pausedChannels.web?.active === true : true) } };
+      const restoringWeb = wantsWeb && previousStatus === 'live' && current.pausedChannels?.web?.active === true;
+      if (current.status !== 'paused') throw new OperatorError('setup_incomplete', 'Only a paused workspace can be resumed.', 409);
+      if (restoringWeb && (!setupReadiness(current).canActivateWeb || !(await getAIAllowance(current)).available)) throw new OperatorError('setup_incomplete', 'Review, a successful current live test and available AI allowance are required before resuming website chat.', 409);
+      value.status = previousStatus; value.channels = { ...value.channels, web: { ...value.channels?.web, active: restoringWeb } };
       value.pausedAt = null; if (previousStatus === 'live') value.liveAt = value.liveAt || at; value.pausedFrom = null; value.pausedChannels = null;
     }
     if (patch) for (const [key, item] of Object.entries(patch)) value[key] = key === 'business' ? { ...value.business, ...item } : item;

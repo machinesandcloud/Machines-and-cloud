@@ -1,0 +1,137 @@
+{
+  "at": "2026-10-23T16:23:22.075194+00:00",
+  "decision": "Accepted bounded independent local dedicated billing webhook isolation on exact53b979c; no runtime finding.",
+  "source": {
+    "integratedCommit": "53b979caede1d87f74e6b9dd8fab001a00ff9968",
+    "authorCommit": "700a132a1eb39c5108996daa2e2b8f4902292fdb",
+    "guardedFiles": 464,
+    "sourceStable": true,
+    "sourceBridge": "scratchpad/launch-webhook-isolation-source-bridge.json"
+  },
+  "independentEvidence": {
+    "receipt": "scratchpad/launch-webhook-isolation-independent-final.json",
+    "sha256": "763ce6381413e3891eb32ddc01187d65f6ce1a3a5a182666e945b8a9ae868b27",
+    "passed": 8,
+    "total": 8,
+    "physicalExternalRequests": 0,
+    "notificationDispatchAttempts": 0
+  },
+  "scope": [
+    "20 actual HMAC-signed foreign shared-merchant deliveries: ten event types against both an existing unmarked legacy slug and a verified-owner workspace slug. All acknowledge200 with13 relevant stores identical and no Stripe or notification dispatch.",
+    "Missing dedicated secret, dedicated equal to legacy secret, and legacy-signed request cannot verify the dedicated endpoint. Distinct dedicated secret works without a legacy secret.",
+    "Raw UTF8 Buffer payload including accented text/emoji is signed and verified; multiple v1 signatures work in either order. Reformatting, altered bytes, Unicode normalization, duplicate/old/future timestamps and missing signatures fail.",
+    "Malformed JSON/envelope, unsupported HTTP method and250000 UTF8 byte bound enforced without retained-state or dispatch effects.",
+    "Actual owner review/Checkout handlers create one synthetic attempt; own signed completion reads intercepted canonical session/subscription. Exact replay makes no retained-state or provider changes; later snapshot disagreement follows canonical past_due state.",
+    "Reused event identity/different payload, wrong mode/merchant and foreign tenant/customer cannot mutate accepted state.",
+    "Actual authorized manage GET reflects distinct/missing/equal/no-legacy signing configuration; schema, TEST label and needs_attention status match current verifier, while new offer availability remains separately true.",
+    "Legacy route path and endpoint bytes remain identical; its own legacy signature still verifies, while dedicated signature does not."
+  ],
+  "qualification": {
+    "handlers": "Actual integrated dedicated/legacy webhook, owner billing and admin handlers; real HMAC parser and retained in-memory documents.",
+    "doubles": "Dummy keys and approved TEST offer, deterministic memory/clock and intercepted Stripe protocol. Canonical paid subscription is synthetic, not a payment.",
+    "network": "All physical calls denied; the own-event positive case uses recorded intercepted Stripe reads only. No external request, provider setting, signing-secret read, charge, notification, browser, deployment or activation.",
+    "sourceReuse": {
+      "acceptedBillingUIReceipt": "scratchpad/launch-billing-integrated-first.json",
+      "uiByteMatches": [
+        {
+          "file": "desk-billing.js",
+          "acceptedSHA256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+          "currentSHA256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+          "matches": true
+        },
+        {
+          "file": "desk-billing.css",
+          "acceptedSHA256": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+          "currentSHA256": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+          "matches": true
+        },
+        {
+          "file": "desk.html",
+          "acceptedSHA256": "a4d16e14f5e824c7dbd9efeeb715195d6eb2a4ef700de6cfe109b7a0eb91a267",
+          "currentSHA256": "a4d16e14f5e824c7dbd9efeeb715195d6eb2a4ef700de6cfe109b7a0eb91a267",
+          "matches": true
+        }
+      ],
+      "allExistingWorkspaceFinancialFunctionsUnchangedFrom0beab96": true,
+      "legacyEndpointByteIdenticalFrom0beab96": true,
+      "legacyEndpointSHA256": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+      "qualification": "New endpoint and dedicated verifier/operator configuration are independently tested. Accepted29 source-bound billing cases and Google17 retain their own scope; no broader UI rerun required."
+    }
+  },
+  "firstFailure": {
+    "receipt": "scratchpad/launch-webhook-isolation-independent-first.json",
+    "observed": "6/8; independent assertion expected row.status although retained canonical status lives in row.subscription.status; dependent boundary group then had no preceding fixture.",
+    "disposition": "Harness-only shape error corrected; no runtime edit; final8/8 passes. First receipt unchanged."
+  },
+  "engineeringEvidence": {
+    "receipt": "/tmp/mc-launch-closure-d217/scratchpad/workspace-billing-webhook-final.json",
+    "sha256": "cca4492c27e3469040970b28c7039162412d0ef36211002e5ecd4b4f89b90a00",
+    "passed": 32,
+    "total": 32,
+    "sourceStable": true,
+    "physicalExternalRequests": 0,
+    "sourceMatrix": [
+      {
+        "file": "netlify/functions/lib/workspace-billing.mjs",
+        "sha256": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/workspace-billing.mjs",
+        "sha256": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/workspace-billing-scheduler.mjs",
+        "sha256": "689c16479a2588792f7e512dfc3f1b7622801a2d240a04d6f77237d2a78a0646",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/stripe-webhook.mjs",
+        "sha256": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/workspace-billing-webhook.mjs",
+        "sha256": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/lib/billing.mjs",
+        "sha256": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/client.mjs",
+        "sha256": "f9948749a77dfae049c393809309f780c07cf75b4d63dd5d07078ce70e879617",
+        "matches": true
+      },
+      {
+        "file": "desk-billing.js",
+        "sha256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+        "matches": true
+      },
+      {
+        "file": "desk-billing.css",
+        "sha256": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+        "matches": true
+      },
+      {
+        "file": "desk.html",
+        "sha256": "a4d16e14f5e824c7dbd9efeeb715195d6eb2a4ef700de6cfe109b7a0eb91a267",
+        "matches": true
+      },
+      {
+        "file": "scripts/workspace-billing-check.mjs",
+        "sha256": "0659b578ed1b9afa0f8328c6372ac341e1ff54ac470f8117d689138f955ef5db",
+        "matches": true
+      }
+    ],
+    "qualification": "32 source-matched engineering groups retained as supporting evidence, not an independent rerun or additive pass total."
+  },
+  "openEvidence": [
+    "Actual provider destination creation/configuration and unique signing secret custody are not established.",
+    "Actual Stripe delivery, live mode/completed Checkout/subscription/renewal/portal and commercial launch remain unaccepted.",
+    "Previously accepted29 billing UI and17 Google disclosure keep their exact recorded source scope; no unrelated broad rerun was performed."
+  ]
+}

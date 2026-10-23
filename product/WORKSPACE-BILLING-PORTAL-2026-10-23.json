@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-23",
+  "baseCommit": "64923683e00c966aaa9843ab2d6f1faef00ba7ab",
+  "stage": "Implemented and engineering-checked locally; independent QA of this delta pending. No actual provider/card/invoice action or production acceptance.",
+  "customerJob": "An existing verified workspace owner can update a payment method and view invoices in its own scoped hosted Stripe portal; uncertainty after Checkout or cancellation is visible and recoverable.",
+  "authority": "Root requested G9 paid-lifecycle completion under user fix-all scope. This slice uses synthetic records and blocked physical networking only.",
+  "configuration": {
+    "environment": {
+      "WORKSPACE_BILLING_PORTAL_ENABLED": "true",
+      "WORKSPACE_BILLING_PORTAL_CONFIGURATION_ID": "exact explicitly created M&C bpc_ configuration; never shared default",
+      "WORKSPACE_BILLING_LIVE_ENABLED": "must also be true for live-key portal access; separate new-purchase WORKSPACE_BILLING_ENABLED can remain false"
+    },
+    "metadata": {
+      "mc_product": "machines_and_cloud",
+      "mc_purpose": "payment_details_and_invoices",
+      "mc_portal_version": "v1"
+    },
+    "configurationContract": {
+      "active": true,
+      "is_default": false,
+      "livemode": "exact original saved account test/live mode",
+      "application": null,
+      "login_page.enabled": false,
+      "features.payment_method_update.enabled": true,
+      "features.invoice_history.enabled": true,
+      "features.customer_update.enabled": false,
+      "features.subscription_update.enabled": false,
+      "features.subscription_cancel.enabled": false,
+      "otherFeatures": "reject any other feature not explicitly disabled"
+    },
+    "permissions": [
+      "Stripe account read",
+      "Billing Portal Configurations read",
+      "Billing Portal Sessions write",
+      "Existing Checkout Sessions and Subscriptions read for canonical original customer binding"
+    ],
+    "sessionCreation": "Explicit configuration, original confirmed customer and fixed own desk.html?c=slug#account return URL only. No caller redirect, on_behalf_of, default configuration, customer update, plan change or cancellation flow. Root owns any separate TEST configuration creation."
+  },
+  "implemented": [
+    "Current owner/session and tenant-incarnation checks before and after hosted session creation; original canonical Checkout/subscription/customer/mode/offer and inverse tenant bindings are verified. No email lookup or orphan customer reuse.",
+    "Explicit M&C configuration is fetched from the same verified account each time and checked for narrowly scoped features, version metadata and exact mode. New-purchase and offer approval gates may be closed while maintaining an existing confirmed financial account.",
+    "Purpose-specific short-lived request identity persists before creation. Unknown response retries the same idempotency key within five minutes; later retry needs a fresh explicit customer action. Hosted session secret URL is not stored in the journal. No background process creates portal sessions.",
+    "Account exposes Payment details & invoices only for an eligible existing financial customer and validates the hosted HTTPS billing.stripe.com destination. Customer controls the hosted card step.",
+    "QA-frozen649 lost-response defects repaired: committed Checkout loss exposes durable status recovery and preserves client request ID; cancellation response loss closes the inert dialog and focuses visible recovery text, without repeating the mutation.",
+    "Purchased service scope is exactly the owner requested supported nonempty subset covered by the offer and actually ready. Scope is shown in review and persisted in review, Checkout, Stripe metadata and confirmed subscription. Unrequested channels do not block a bundle purchase. Non-web operating testing lifecycle can qualify through actual channel readiness; web still requires active live readiness. Billing does not activate any channel."
+  ],
+  "evidence": {
+    "path": "scratchpad/workspace-billing-portal-final-r2.json",
+    "passed": 46,
+    "total": 46,
+    "scope": "28 actual-handler/protocol groups +18 actual-handler browser groups at1440/390/320pixels. All physical networking blocked. Includes malicious portal config, current canonical bindings, revocation, lost result/retry/expiry, subset readiness, Calendar-only no-web customer, ordinary portal handoff and both independently reported response-loss repairs.",
+    "sourceStable": true,
+    "physicalExternalRequests": 0,
+    "publicBuild": "scratchpad/workspace-billing-portal-public-build.json:182HTML/230assets; internal directories absent",
+    "visualReview": "390px lost-response screenshot reviewed; visible explanation and full-width recovery controls fit.",
+    "preservedFailures": "Earlier engineering UI receipts are retained in this isolated checkout. The repeated post-webhook display fixture initially used same-document URL navigation and was corrected to explicit page reload; source-matched final receipts use the actual ordinary Account action paths. Original independent64913/17 receipt remains unchanged in QA checkout."
+  },
+  "sources": [
+    {
+      "url": "https://docs.stripe.com/api/customer_portal/configurations/object",
+      "applied": "Validate active, explicit nondefault config, mode, scoped features and metadata."
+    },
+    {
+      "url": "https://docs.stripe.com/api/customer_portal/sessions/create",
+      "applied": "Create a short-lived customer-specific hosted portal session with explicit configuration and safe return URL."
+    }
+  ],
+  "sourceHashes": {
+    "netlify/functions/lib/workspace-billing.mjs": "2bf9109e5c4131faf7cc0a5e94d8f5d03442ab5a88e756a3b781f6168f8f5a38",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "desk-billing.js": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+    "desk.html": "626616ee00ff733a5740539f09a8fe5436b8108e59754503321583240169180c",
+    "scripts/workspace-billing-check.mjs": "b6129d69ecfd0728af7bf0640c3358367954771a5286c922b30c720de345e67d"
+  },
+  "limits": [
+    "No private keys were read, actual provider requests sent, account/global defaults/customer records changed, payment method updated, invoice accessed, charge made or deployment performed.",
+    "Current test commercial/tax/safety fixtures remain unapproved customer terms. Production billing remains disabled pending approved offer, provider/account configuration and observed protocol/hosted lifecycle acceptance.",
+    "Local mocked Stripe protocol and intercepted browser destinations do not establish actual card-update, invoice-history or production webhook delivery. Root owns actual TEST provider evidence and independent QA owns the integrated acceptance.",
+    "Portal invoice history is scoped to the original dedicated financial customer created by M&C Checkout; shared customer reuse across workspaces is rejected. Shared Stripe account global defaults and unrelated products/customers/subscriptions are untouched."
+  ]
+}

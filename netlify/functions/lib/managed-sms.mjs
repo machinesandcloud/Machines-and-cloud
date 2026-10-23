@@ -108,6 +108,18 @@ export async function processManagedSMS(id) {
     };
     const historyKey=`${c.slug}/${job.tenant}/${job.from}`, history=await strictRead("managed_sms_history",historyKey);
     const messages=(history?.messages || []).slice(-12).concat([{role:"user",content:job.body}]);
+    // These recipient-initiated controls are deterministic and do not spend AI
+    // allowance. A website/call invitation starts this exchange; only the later
+    // provider-verified YES after the delivered question grants ongoing consent.
+    if (!job.reply && /^(APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(job.body.trim())) {
+      const asking = /^(APPOINTMENTS|CITAS)$/i.test(job.body.trim()) && !consent.transactional;
+      const spanish = /^(CITAS|SI|SÍ)$/i.test(job.body.trim()) || consent.proof?.wording === managedAppointmentConsentQuestion(c, 'es');
+      const reply = asking ? managedAppointmentConsentQuestion(c, spanish ? 'es' : 'en') : consent.transactional
+        ? spanish ? `${c.business.name}: activó los mensajes de citas para este número, incluidas visitas futuras. HELP para ayuda; STOP/ALTO/PARAR para terminar. Pueden aplicarse tarifas de mensajes y datos.` : `${c.business.name}: appointment texts are enabled for this number, including future visits. HELP for help; STOP/ALTO/PARAR to end. Message and data rates may apply.`
+        : spanish ? `${c.business.name}: los mensajes de citas no están activados. Envíe CITAS para recibir la pregunta y responda SÍ para aceptar. Puede reservar sin mensajes. HELP para ayuda; STOP/ALTO/PARAR para terminar.` : `${c.business.name}: appointment texts are not enabled. Text APPOINTMENTS or CITAS for the question, then reply YES or SÍ to agree. Booking is available without texts. HELP for help; STOP/ALTO/PARAR to end.`;
+      if (!await freshAuthority()) return {ok:true,suppressed:true};
+      job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:asking?'consent_ask':'reply'}:null);
+    }
     if (job.reply) {
       if (!await freshAuthority()) return {ok:true,suppressed:true};
       await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:job.replyPurpose,to:job.from,body:job.reply,consentAsk:job.replyPurpose==="consent_ask"});

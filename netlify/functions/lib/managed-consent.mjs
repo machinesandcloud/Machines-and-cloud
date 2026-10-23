@@ -8,7 +8,8 @@ const STOP = /^(STOP|STOPALL|UNSUBSCRIBE|CANCEL|END|QUIT|ALTO|PARAR)$/i;
 const START = /^(START|UNSTOP|EMPEZAR)$/i;
 const HELP = /^(HELP|INFO|AYUDA)$/i;
 export const MANAGED_APPOINTMENT_CONSENT_VERSION = "ongoing_appointments_v2";
-export function managedAppointmentConsentQuestion(c) {
+export function managedAppointmentConsentQuestion(c, language = 'en') {
+  if (language === 'es') return `${c.business.name}: ¿quiere confirmaciones, recordatorios y cancelaciones de citas por mensaje, incluidas visitas futuras? Responda SÍ para aceptar. Frecuencia variable. Pueden aplicarse tarifas de mensajes y datos. HELP para ayuda; STOP/ALTO/PARAR para terminar. Puede reservar sin mensajes.`;
   return `${c.business.name}: want ongoing appointment confirmations, reminders and cancellation texts from us, including future visits? Reply YES to agree. Frequency varies. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end. Booking is available without texts.`;
 }
 const currentProof = row => row?.transactional === true && row.proof?.purpose === "ongoing_appointment_updates" && row.proof?.wordingVersion === MANAGED_APPOINTMENT_CONSENT_VERSION;
@@ -34,18 +35,18 @@ export async function recordManagedInbound(c, { phone, text, messageSid, provide
     if (keyword === "stop") { next.suppressed = true; next.transactional = false; next.pendingAsk = null; next.lastAffirmation=null; next.stoppedAt = now; next.directiveDate = Math.max(Number(row.directiveDate) || 0, Date.parse(providerDate) || Date.now()); }
     if (keyword === "start" && Number.isFinite(Date.parse(providerDate)) && Date.parse(providerDate) > (Number(row.directiveDate) || 0)) { next.suppressed = false; next.startedAt = now; next.directiveDate = Date.parse(providerDate); }
     if (!next.suppressed && /^(yes|si|sí)$/i.test(word) && next.pendingAsk && Date.parse(next.pendingAsk.expiresAt) > Date.now() && Date.parse(providerDate) > Date.parse(next.pendingAsk.askedAt)) {
-      next.transactional = true; next.proof = { messageSid, wording: next.pendingAsk.wording, wordingVersion: MANAGED_APPOINTMENT_CONSENT_VERSION, at: now, purpose: "ongoing_appointment_updates", askMessageSid: next.pendingAsk.messageSid }; next.pendingAsk = null;
+      next.transactional = true; next.proof = { messageSid, wording: next.pendingAsk.wording, wordingVersion: MANAGED_APPOINTMENT_CONSENT_VERSION, at: now, purpose: "ongoing_appointment_updates", askMessageSid: next.pendingAsk.messageSid, source: 'verified_inbound_sms', recipient: phone, providerDate, senderNumber: next.pendingAsk.senderNumber || null, messagingServiceSid: next.pendingAsk.messagingServiceSid || null }; next.pendingAsk = null;
     }
     if(keyword==="message" && !/^(yes|si|sí)$/i.test(word)){next.pendingAsk=null;next.lastNonAffirmationDate=providerDate;}
     return { value: next, result: { ...next, keyword, alreadySuppressed: row.suppressed === true } };
   });
 }
-export async function saveManagedConsentAsk(c, phone, { wording, messageSid, sentAt }) {
+export async function saveManagedConsentAsk(c, phone, { wording, messageSid, sentAt, senderNumber = null, messagingServiceSid = null }) {
   if (!validPhone(phone) || typeof wording !== "string" || !/^SM[a-f0-9]{32}$/i.test(messageSid || "")) throw new Error("Consent ask needs a provider receipt");
-  const question = managedAppointmentConsentQuestion(c);
+  const questions = [managedAppointmentConsentQuestion(c), managedAppointmentConsentQuestion(c, 'es')];
   // A provider receipt for older, narrower or model-invented wording cannot silently
   // widen permission. The actual server-authored question must end the sent message.
-  if (wording !== question && !wording.endsWith("\n" + question)) return false;
+  if (!questions.some(question => wording === question || wording.endsWith("\n" + question))) return false;
   return atomicUpdate("managed_sms_consent", key(c, phone), row => {
     if (!row || row.suppressed) return { result: false };
     if(currentProof(row) || currentAsk(row.pendingAsk) && row.pendingAsk.messageSid===messageSid)return {result:true};
@@ -53,9 +54,9 @@ export async function saveManagedConsentAsk(c, phone, { wording, messageSid, sen
     const at=Date.parse(sentAt);if(!Number.isFinite(at) || at>Date.now()+300000 || at<Date.now()-86400000)return {result:false};
     const handledAsks={...row.handledAsks,[messageSid]:new Date(at).toISOString()};
     if(Date.parse(row.lastNonAffirmationDate)>at || (Number(row.directiveDate)||0)>=at)return {value:{...row,handledAsks},result:false};
-    const ask={wording,messageSid,wordingVersion:MANAGED_APPOINTMENT_CONSENT_VERSION,askedAt:new Date(at).toISOString(),expiresAt:new Date(at+86400000).toISOString()};
+    const ask={wording,messageSid,wordingVersion:MANAGED_APPOINTMENT_CONSENT_VERSION,askedAt:new Date(at).toISOString(),expiresAt:new Date(at+86400000).toISOString(),senderNumber,messagingServiceSid};
     const affirmation=row.lastAffirmation;
-    if(affirmation && Date.parse(affirmation.providerDate)>at && Date.parse(affirmation.providerDate)<=at+10*60000 && Date.parse(affirmation.providerDate)>(Number(row.directiveDate)||0))return {value:{...row,handledAsks,transactional:true,pendingAsk:null,proof:{messageSid:affirmation.messageSid,wording,wordingVersion:MANAGED_APPOINTMENT_CONSENT_VERSION,at:affirmation.at,purpose:"ongoing_appointment_updates",askMessageSid:messageSid}},result:true};
+    if(affirmation && Date.parse(affirmation.providerDate)>at && Date.parse(affirmation.providerDate)<=at+10*60000 && Date.parse(affirmation.providerDate)>(Number(row.directiveDate)||0))return {value:{...row,handledAsks,transactional:true,pendingAsk:null,proof:{messageSid:affirmation.messageSid,wording,wordingVersion:MANAGED_APPOINTMENT_CONSENT_VERSION,at:affirmation.at,purpose:"ongoing_appointment_updates",askMessageSid:messageSid,source:'verified_inbound_sms',recipient:phone,providerDate:affirmation.providerDate,senderNumber,messagingServiceSid}},result:true};
     return { value: { ...row,transactional:currentProof(row),handledAsks,pendingAsk:ask }, result: true };
   });
 }

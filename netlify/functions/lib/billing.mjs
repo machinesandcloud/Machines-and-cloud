@@ -39,13 +39,21 @@ export async function checkoutUrl({ site, client, plan }) {
   return session.url;
 }
 
+// New workspace delivery has an independent destination/secret. Do not accept
+// the legacy destination secret when this isolated verifier is unconfigured.
+export function workspaceBillingWebhookSecret() {
+  const secret=process.env.WORKSPACE_BILLING_WEBHOOK_SECRET;
+  return typeof secret==='string'&&secret.length>0&&secret!==process.env.STRIPE_WEBHOOK_SECRET?secret:null;
+}
 export function verifyWebhook(payload, header) {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  return verifyWebhookWithSecret(payload, header, process.env.STRIPE_WEBHOOK_SECRET);
+}
+export function verifyWebhookWithSecret(payload, header, secret) {
   if (!secret) return false;
-  const parts = Object.fromEntries(String(header || "").split(",").map((p) => p.split("=")));
-  const t = parts.t, v1 = parts.v1;
-  if (!t || !v1) return false;
+  const parts = String(header || '').split(',').map(part=>part.trim().split('=')),times=parts.filter(([name])=>name==='t'),signatures=parts.filter(([name])=>name==='v1').map(([,value])=>value);
+  if(times.length!==1||!/^\d+$/.test(times[0][1]||'')||!signatures.length)return false;
+  const t=times[0][1];
   if (Math.abs(Date.now() / 1000 - Number(t)) > 300) return false;
   const expected = createHmac("sha256", secret).update(`${t}.${payload}`).digest("hex");
-  try { return timingSafeEqual(Buffer.from(expected), Buffer.from(v1)); } catch { return false; }
+  return signatures.some(value=>/^[a-f0-9]{64}$/.test(value||'')&&timingSafeEqual(Buffer.from(expected),Buffer.from(value)));
 }

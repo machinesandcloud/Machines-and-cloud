@@ -1,0 +1,209 @@
+{
+  "at": "2026-10-23T14:55:10.931Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "mode": "Actual authorized manage GET; synthetic memory and configuration only; no network or environment file",
+  "sourceBefore": {
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/lib/operator.mjs": "0e4585d75f9ae029e34d7120ceec25ac2c23143582bb2ad70290422aeed611d2",
+    "netlify/functions/lib/calendar-execution.mjs": "b69f5b2b127de92700ad78e5c3513c359c7dd5f78a8ac9fb833be6651d47174a",
+    "netlify/functions/lib/calendar-self-service.mjs": "483100f9badad837b160bb6488f69881aaf0fad7b669872cd24b01a4348d21fd",
+    "admin.js": "d9b698d5f2d4386d3c804087fb66f3a1bcc7b6a04b083471d5246731b81b2dba",
+    "scripts/launch-provider-state-qa-check.mjs": "696f795a480bc3ede9be88f6c443f458461fa44e0389b0107d4cea604413addd"
+  },
+  "checks": [
+    {
+      "name": "closed flags retain disabled even with keys",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "website": "configured",
+        "phone": "disabled",
+        "voice": "disabled",
+        "sms": "disabled",
+        "calendar": "disabled",
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "enabled flags with missing keys need attention",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "website": "unavailable",
+        "phone": "needs_attention",
+        "voice": "needs_attention",
+        "sms": "needs_attention",
+        "calendar": "needs_attention",
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": "Unavailable",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "configured keys plus current selfservice policy",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "website": "configured",
+        "phone": "configured",
+        "voice": "configured",
+        "sms": "configured",
+        "calendar": "configured",
+        "billing": "disabled"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "SMS delivery flag closed",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "sms": "disabled"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "SMS profile missing",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "sms": "needs_attention"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "voice webhook missing",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "voice": "needs_attention"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "Calendar policy missing",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "calendar": "needs_attention"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "Calendar policy expired",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "calendar": "needs_attention"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "Calendar encryption missing",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "calendar": "needs_attention"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "controlled Calendar restricted cohort",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "calendar": "configured"
+      },
+      "observed": {
+        "website": "Configured; customer readiness and allowance still apply",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    },
+    {
+      "name": "legacy billing config not paid activation",
+      "pass": false,
+      "status": 200,
+      "expected": {
+        "billing": "configured"
+      },
+      "observed": {
+        "website": "Unavailable",
+        "phone": "New-customer activation unavailable",
+        "sms": "New-customer activation unavailable",
+        "calendar": "New-customer connection unavailable",
+        "billing": "Disabled"
+      }
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/lib/operator.mjs": "0e4585d75f9ae029e34d7120ceec25ac2c23143582bb2ad70290422aeed611d2",
+    "netlify/functions/lib/calendar-execution.mjs": "b69f5b2b127de92700ad78e5c3513c359c7dd5f78a8ac9fb833be6651d47174a",
+    "netlify/functions/lib/calendar-self-service.mjs": "483100f9badad837b160bb6488f69881aaf0fad7b669872cd24b01a4348d21fd",
+    "admin.js": "d9b698d5f2d4386d3c804087fb66f3a1bcc7b6a04b083471d5246731b81b2dba",
+    "scripts/launch-provider-state-qa-check.mjs": "696f795a480bc3ede9be88f6c443f458461fa44e0389b0107d4cea604413addd"
+  },
+  "sourceStable": true,
+  "physicalNetwork": 0,
+  "summary": {
+    "passed": 0,
+    "failed": 11
+  }
+}

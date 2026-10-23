@@ -157,6 +157,13 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     if (job.providerId) {
       const receipt = await provider.status(job);
       if (!receipt || receipt.id !== job.providerId) return change(id,row=>terminal(row.state)?null:{...row,receiptCheckFailedAt:row.receiptCheckFailedAt || stamp(),reasonCode:"receipt_status_unavailable"});
+      // A crash can leave the provider receipt saved before the question's
+      // consent-ledger projection. Rebuild it from this same verified receipt;
+      // never send another question merely to repair that local projection.
+      if (job.consentAsk && job.channel === 'sms' && !['failed','undelivered','canceled'].includes(receipt.status)) {
+        const { saveManagedConsentAsk } = await import('./managed-consent.mjs');
+        await saveManagedConsentAsk(c, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt, senderNumber: job.from, messagingServiceSid: job.serviceSid });
+      }
       return change(id, row => terminal(row.state) || row.providerId !== receipt.id ? null : ({ ...row, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", lastCheckedAt: stamp(),receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),reasonCode:null, ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
     }
     if (job.attemptStartedAt) {
@@ -201,7 +208,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       const receipt = await provider.send(job, latest);
       if (!receipt?.id) throw new Error("Missing receipt");
       const saved = await change(id, row => row.providerId || terminal(row.state) || row.claim?.token !== token ? null : { ...row, state: "accepted", providerId: receipt.id, from: receipt.from || null, serviceSid: receipt.serviceSid || null, acceptedAt: stamp(), claim: null, reasonCode: null });
-      if (job.consentAsk && job.channel === "sms") { const { saveManagedConsentAsk } = await import("./managed-consent.mjs"); await saveManagedConsentAsk(latest, job.to, { wording: job.body, messageSid: receipt.id,sentAt:receipt.sentAt }); }
+      if (job.consentAsk && job.channel === "sms") { const { saveManagedConsentAsk } = await import("./managed-consent.mjs"); await saveManagedConsentAsk(latest, job.to, { wording: job.body, messageSid: receipt.id,sentAt:receipt.sentAt,senderNumber:saved.from,messagingServiceSid:saved.serviceSid }); }
       return saved;
     } catch(error) {
       // Budget assertions reject before transport. Keep their conservative
@@ -229,7 +236,7 @@ export async function recordManagedSMSReceipt(id, fields) {
   const receipt = await providerAdapter().status({ ...job, providerId: fields.MessageSid });
   if (!receipt || receipt.id !== fields.MessageSid) return false;
   await change(id, row => terminal(row.state) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
-  if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt});}
+  if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt,senderNumber:job.from,messagingServiceSid:job.serviceSid});}
   return true;
 }
 export async function managedDeliveryView(c) {

@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="desk-connections.css">
+  <link rel="stylesheet" href="desk-billing.css">
 
 <link rel="stylesheet" href="product-ui.css"><link rel="stylesheet" href="desk.css"></head>
 <body class="theme-light product-app desk-app" data-no-widget="" data-workspace-state="loading"><a class="ui-skip" href="#workspaceMain">Skip to workspace</a>
@@ -152,6 +153,12 @@
         <button type="button" class="btn-pill btn-pill-dark btn-sm" id="accountCheckStatus" hidden>Check service status</button>
       </section>
     </div>
+    <section class="card2" id="workspaceBilling" aria-labelledby="billingTitle" hidden>
+      <div class="billing-heading"><h3 id="billingTitle">Plan &amp; billing</h3><span id="billingStatus">Checking saved status</span></div><p class="muted" id="billingSummary"></p>
+      <form id="billingOfferForm" hidden><div class="form-group"><label class="form-label" for="billingPlan">Choose your plan</label><select class="form-input" id="billingPlan"></select></div><button type="submit" class="btn-pill btn-pill-blue btn-sm">Review monthly offer</button></form>
+      <section id="billingReview" hidden aria-labelledby="billingReviewTitle"><h4 id="billingReviewTitle" tabindex="-1"></h4><p class="muted" id="billingScope"></p><p class="muted" id="billingLimits"></p><p>Renews monthly until cancelled. End renewal at any time; your current paid period is kept. Stopping your front desk also ends renewal. No additional usage charges are added by this checkout.</p><p id="billingMode" hidden>Test checkout — no real payment.</p><details><summary>Read your service terms</summary><p id="billingTerms"></p><a id="billingTermsLink" target="_blank" rel="noopener noreferrer">Open terms</a></details><form id="billingCheckoutForm" novalidate><label for="billingAgree"><input id="billingAgree" type="checkbox"><span>I agree to this monthly price, renewal and service terms.</span></label><button type="submit" class="btn-pill btn-pill-blue btn-sm">Continue to secure checkout</button></form></section>
+      <div class="billing-actions"><a class="btn-pill btn-pill-blue btn-sm" id="billingContinue" hidden>Continue saved checkout</a><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingRefresh" hidden>Check payment status</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingPortal" hidden>Payment details &amp; invoices</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingEnd" hidden>End monthly renewal</button></div><p class="desk-account-message" id="billingMessage" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></p>
+    </section>
     <section class="card2 desk-account-exports" id="accountDownloads" aria-labelledby="accountDownloadsTitle">
       <h3 id="accountDownloadsTitle">Download your records</h3><p class="muted">Save a CSV copy to open in Excel or Sheets.</p>
       <div class="desk-export-grid">
@@ -177,6 +184,25 @@
   </section>
   </div>
 </main></div>
+<dialog class="walkthrough request-dialog" id="requestDialog" aria-labelledby="requestTitle">
+  <div class="request-dialog-heading"><div><p class="ui-eyebrow">CUSTOMER REQUEST</p><h2 id="requestTitle">Request details</h2></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestClose">Close</button></div>
+  <p id="requestMessage" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></p>
+  <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestCheck" hidden>Check saved action</button>
+  <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestRetry" hidden>Retry same action</button>
+  <div id="requestContent" hidden><dl class="request-facts" id="requestFacts"></dl><details class="request-more"><summary>Address and request source</summary><dl class="request-facts" id="requestOtherFacts"></dl></details>
+    <div class="request-review" id="requestSourceNotice" hidden><p>The customer request changed since the last recorded action. Earlier work stays in the history below. Review the new details before continuing.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestReview">Review updated request</button></div>
+    <section class="request-progress" aria-labelledby="requestProgressTitle"><h3 id="requestProgressTitle">Your follow-up</h3><dl id="requestProgress"></dl></section>
+    <details class="request-visits" id="requestVisitsSection" hidden><summary>Saved visits for this phone number</summary><div id="requestVisits"></div><p class="muted">Visit status stays separate from request follow-up.</p></details>
+    <form id="requestForm" novalidate><div class="form-group"><label class="form-label" for="requestAction">Record an action</label><select class="form-input" id="requestAction"></select><p class="muted" id="requestActionHelp"></p></div>
+      <div id="requestPlanFields" hidden><div class="form-group"><label class="form-label" for="requestNextAction">Next action</label><input class="form-input" id="requestNextAction" maxlength="200" placeholder="Call to discuss the repair"></div><div class="form-group"><label class="form-label" for="requestDue">Due date and time (your device time)</label><input class="form-input" id="requestDue" type="datetime-local"></div></div>
+      <div class="form-group" id="requestChannelField" hidden><label class="form-label" for="requestChannel">Contact method</label><select class="form-input" id="requestChannel"><option value="call">Call</option><option value="text">Text</option><option value="email">Email</option><option value="other">Other</option></select></div>
+      <div class="form-group" id="requestAttemptField" hidden><label class="form-label" for="requestAttemptResult">What happened?</label><select class="form-input" id="requestAttemptResult"><option value="no_answer">No answer</option><option value="left_message">Left a message</option><option value="sent_message">Sent a message, no reply yet</option><option value="other">Other</option></select></div>
+      <div class="form-group" id="requestResolutionField" hidden><label class="form-label" for="requestResolution">Resolution</label><select class="form-input" id="requestResolution"><option value="resolved">Answered or resolved</option><option value="not_proceeding">Customer is not proceeding</option><option value="no_followup_needed">No further follow-up needed</option></select></div>
+      <div class="form-group"><label class="form-label" for="requestNote">Note <span id="requestNoteRequirement">(optional)</span></label><textarea class="form-input" id="requestNote" maxlength="1000" rows="3"></textarea></div>
+      <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestSave">Save action</button><p class="muted request-save-scope">This records work you have done or plan to do. It does not send a message, place a call or change a visit.</p>
+    </form><h3 class="request-history-title">Action history</h3><ol id="requestHistory" class="request-history"></ol>
+  </div>
+</dialog>
 <dialog class="walkthrough" id="guideDialog" aria-labelledby="tourTitle" aria-describedby="tourBody">
   <div class="tour-mask" id="tourMaskTop" aria-hidden="true"></div><div class="tour-mask" id="tourMaskBottom" aria-hidden="true"></div><div class="tour-mask" id="tourMaskLeft" aria-hidden="true"></div><div class="tour-mask" id="tourMaskRight" aria-hidden="true"></div>
   <div id="tourSpotlight" aria-hidden="true" hidden></div>
@@ -210,7 +236,10 @@
   <div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="confirmPhoneCancel">Cancel number request</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="keepPhoneSetup">Keep request</button></div>
 </dialog>
 <script src="desk-connections.js" defer=""></script>
+<script src="desk-billing.js" defer=""></script>
 <script src="desk.js" defer=""></script>
+<script src="desk-requests.js" defer=""></script>
+<dialog class="walkthrough desk-account-confirm" id="billingCancel" aria-labelledby="billingCancelTitle"><h2 id="billingCancelTitle">End monthly renewal?</h2><p class="muted" id="billingCancelDetail"></p><div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingEndConfirm">End renewal</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="billingKeep">Keep subscription</button></div></dialog>
 
 
 

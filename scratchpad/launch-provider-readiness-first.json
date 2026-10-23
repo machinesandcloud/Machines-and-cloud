@@ -1,0 +1,116 @@
+{
+  "at": "2026-10-23T14:35:32.809695+00:00",
+  "scope": "Read-only account/API readiness, no model inference or other provider effect",
+  "site": {
+    "publishedCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+    "disabled": false
+  },
+  "configured": {
+    "TWILIO_ACCOUNT_SID": true,
+    "TWILIO_AUTH_TOKEN": true,
+    "TWILIO_API_KEY": false,
+    "TWILIO_API_SECRET": false,
+    "VAPI_API_KEY": true,
+    "VAPI_PUBLIC_KEY": true,
+    "VAPI_WEBHOOK_SECRET": true,
+    "RESEND_API_KEY": true,
+    "GOOGLE_CLIENT_ID": true,
+    "GOOGLE_CLIENT_SECRET": true,
+    "CALENDAR_TOKEN_ENCRYPTION_KEY": true,
+    "SERVICE_WORKER_KEY": true,
+    "ANTHROPIC_API_KEY": true,
+    "STRIPE_SECRET_KEY": false,
+    "STRIPE_WEBHOOK_SECRET": false,
+    "STRIPE_PRICE_STARTER": false,
+    "STRIPE_PRICE_GROWTH": false,
+    "ADMIN_EMAILS": true,
+    "FROM_EMAIL": true,
+    "STEVE_EMAIL": true
+  },
+  "flags": {
+    "PHONE_ACQUISITION_ENABLED": "false",
+    "VOICE_ACTIVATION_ENABLED": "absent",
+    "MESSAGING_ACTIVATION_ENABLED": "absent",
+    "SERVICE_DELIVERY_ENABLED": "absent",
+    "MC_PLATFORM_SMS_ENABLED": "absent",
+    "CALENDAR_CONNECTION_ENABLED": "true",
+    "CALENDAR_DELIVERY_ENABLED": "true",
+    "CALENDAR_SELF_SERVICE_ENABLED": "absent"
+  },
+  "providers": {
+    "twilio": {
+      "http": 200,
+      "accountStatus": "active",
+      "errorCode": null
+    },
+    "companyCampaign": {
+      "http": 200,
+      "rows": [
+        {
+          "status": "FAILED",
+          "useCase": "CUSTOMER_CARE",
+          "errorCodes": [
+            null,
+            null
+          ]
+        }
+      ]
+    },
+    "resend": {
+      "http": 403,
+      "businessDomain": []
+    },
+    "anthropic": {
+      "http": 200,
+      "modelCount": 13,
+      "configuredModelListed": {
+        "claude-opus-5-5": true,
+        "claude-sonnet-4": true,
+        "claude-haiku": true
+      },
+      "errorType": null
+    },
+    "vapi": {
+      "http": 403,
+      "readAccessWorking": false
+    }
+  },
+  "requests": [
+    {
+      "url": "https://api.netlify.com/api/v1/sites/f87916f1-bcc4-4171-a96f-2900cbf0b6dc",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://api.netlify.com/api/v1/accounts/69797d78f01c70674ffef858/env?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://api.twilio.com/2010-04-01/Accounts/[account].json",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://messaging.twilio.com/v1/Services/MG7643ab5d7b0bf42b24a2b476ce8e02eb/Compliance/Usa2p",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://api.resend.com/domains",
+      "method": "GET",
+      "status": 403
+    },
+    {
+      "url": "https://api.anthropic.com/v1/models?limit=100",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "https://api.vapi.ai/assistant?limit=1",
+      "method": "GET",
+      "status": 403
+    }
+  ],
+  "totalReadOnlyProviderAndMetadataCalls": 7
+}

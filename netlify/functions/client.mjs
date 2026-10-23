@@ -37,6 +37,9 @@ import { parseWorkspacePatch, applyWorkspacePatch, workspacePatchConflicts, work
 import { websiteInstallationView, startWebsiteCheck, WebsiteInstallationError } from "./lib/website-installation.mjs";
 
 import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
+import { queueWorkspaceStopBilling } from './lib/workspace-billing.mjs';
+
+import { readRequestFollowthrough, updateRequestFollowthrough, requestFollowthroughSummaries, RequestFollowthroughError } from './lib/request-followthrough.mjs';
 
 export const config = { path: "/api/client" };
 
@@ -74,7 +77,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
 
 export default async (req) => {
   let out;
-  try { out = await handle(req); } catch(error) { if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req); } catch(error) { if(error instanceof RequestFollowthroughError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -102,6 +105,10 @@ async function handle(req) {
   const ownsCurrent = current => !!current && current.slug === c.slug && current.ownerKey === c.ownerKey && (selfService ? isSelfServiceClient(current) && normalizeAccountEmail(current.owner?.email) === normalizeAccountEmail(session?.email) : current.ownerKey === key);
   const site = process.env.URL || url.origin;
 
+  if (req.method === 'GET' && url.searchParams.has('requestId')) {
+    if(!selfService || !isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    return json(await readRequestFollowthrough(c,session,url.searchParams.get('requestId'),url.searchParams.get('operationId')),200,{'Cache-Control':'no-store'});
+  }
   if (req.method === "GET") {
     if (!isOwner) {
       if (url.searchParams.get("export")) return json({ error: "forbidden" }, 403);
@@ -110,7 +117,7 @@ async function handle(req) {
       return json({ ...publicView(c), ...(selfService ? { webAvailable: web.ready && web.active && aiAllowance.available } : {}) }, 200, selfService ? { ...CORS(origin), "Cache-Control": "no-store", "Netlify-CDN-Cache-Control": "no-store", Vary: "Origin, Authorization" } : { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
     }
     const exp = url.searchParams.get("export");
-    if (exp) return exportCSV(c, exp);
+    if (exp) return exportCSV(c, exp, session);
     const aiAllowance = selfService ? await getAIAllowance(c) : null;
     let availabilityBlocks;
     try { availabilityBlocks = await getAvailabilityBlocks(c); }
@@ -121,6 +128,7 @@ async function handle(req) {
     ]);
     let bookings=bookingPage.records,leads=leadPage.records,alerts=alertPage.records;
     bookings=bookings.filter(row=>belongsToWorkspace(c,row));leads=leads.filter(row=>belongsToWorkspace(c,row));convs=convs.filter(row=>belongsToWorkspace(c,row));events=events.filter(row=>belongsToWorkspace(c,row));alerts=alerts.filter(row=>belongsToWorkspace(c,row));
+    if(selfService)leads=await requestFollowthroughSummaries(c,leads);
     const ownerBookings = selfService ? await Promise.all(bookings.filter(booking => visibleOwnerBooking(c, booking)).map(async booking => ({ ...booking, ownerVisit: ownerVisitView(booking), pendingVisitChange: await pendingOwnerVisitChange(c, booking.id) }))) : bookings;
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     const connections=selfService?await serviceConnections(c):null;
@@ -129,8 +137,9 @@ async function handle(req) {
       for(const conversation of sms){const old=convs.find(row=>row.channel==="sms"&&row.contact===conversation.contact);if(old)Object.assign(old,conversation);else convs.push(conversation);}
     }
     const serviceOnboarding=selfService?await serviceOnboardingStatus(c):null;
+    const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding), connections, serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation: await websiteInstallationView(c, aiAllowance), pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
@@ -195,6 +204,10 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if(b?.action==='request_followthrough'){
+      if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
+      return json(await updateRequestFollowthrough(c,session,b),200,{'Cache-Control':'no-store'});
+    }
     if (b?.action === 'start_website_check') {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: 'forbidden' }, 403);
       if (JSON.stringify(b).length > 1200) return json({ error: 'invalid_request' }, 400);
@@ -324,7 +337,7 @@ async function handle(req) {
         return { value: updated, result: { client: updated } };
       });
       if (result.error) return json({ error: result.error, setup: result.setup, ...(result.aiAllowance ? { aiAllowance: result.aiAllowance, message: "Website chat cannot activate while today’s AI allowance is exhausted." } : {}) }, result.status);
-      if (b.action === "cancel") await cancelTasks(c.slug, () => true);
+      if (b.action === "cancel") { await cancelTasks(c.slug, () => true); await queueWorkspaceStopBilling(result.client); }
       const aiAllowance = await getAIAllowance(result.client);
       return json({ ok: true, status: result.client.status, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), aiAllowance, webAvailable: result.client.status === "live" && setupReadiness(result.client).canActivateWeb && aiAllowance.available, activeChannels: result.client.status === "live" && aiAllowance.available ? ["web"] : [] });
     }
@@ -443,7 +456,7 @@ async function recordsForExport(c,kind,limit){
   if(isSelfServiceClient(c)&&page.listing.incomplete)throw Object.assign(new Error('A complete history export is not available yet. Some saved records need reconciliation; contact support before exporting.'),{code:'history_incomplete'});
   return page.records;
 }
-async function exportCSV(c, what) {
+async function exportCSV(c, what, session) {
   const today = new Date().toISOString().slice(0, 10);
   let header, rows;
   if (what === "bookings") {
@@ -451,7 +464,10 @@ async function exportCSV(c, what) {
     rows = (await recordsForExport(c,"bookings",2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel, b.websiteSetupCheck ? 'Website setup check' : '']);
   } else if (what === "leads") {
     header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure", "setup_check"];
-    rows = (await recordsForExport(c,"leads",2000)).filter(row=>belongsToWorkspace(c,row)).map((l) => [l.id, l.createdAt, l.customer_name, l.phone, l.address, l.issue, l.reason, l.outcome, l.urgency, l.wanted, l.status, l.channel, l.unsure, l.websiteSetupCheck ? 'Website setup check' : '']);
+    const leads=await requestFollowthroughSummaries(c,(await recordsForExport(c,'leads',2000)).filter(row=>belongsToWorkspace(c,row)));
+    if(isSupportedSelfServiceClient(c))header.push('followthrough_owner','next_action','due_at','contact_outcome','completed_at','resolution','review_required','followthrough_history');
+    rows=[];
+    for(const l of leads){const row=[l.id,l.createdAt,l.customer_name,l.phone,l.address,l.issue,l.reason,l.outcome,l.urgency,l.wanted,l.status,l.channel,l.unsure,l.websiteSetupCheck?'Website setup check':''];if(l.followthrough){const f=l.followthrough;const detail=await readRequestFollowthrough(c,session,l.id);row.push(f.state.owner?.email||'',f.state.nextAction||'',f.state.dueAt||'',f.state.contact,f.state.completedAt||'',f.state.resolution||'',f.reviewRequired,JSON.stringify(detail.request.history));}rows.push(row);}
   } else if (what === "conversations") {
     header = ["channel", "contact", "at", "role", "content", "flag_note", "processing"];
     rows = [];

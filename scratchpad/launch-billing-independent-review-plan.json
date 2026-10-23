@@ -1,0 +1,16 @@
+{
+  "state": "PREPARED_NOT_EXECUTED_PENDING_FROZEN_BILLING_SOURCE",
+  "mode": "Independent actual endpoint/webhook/scheduler tests with synthetic memory and intercepted Stripe only; no keys/network/Checkout purchases",
+  "reviewTargets": [
+    "Actual owner endpoint uses active same-owner onboarding bearer on every operation; foreign owner, operator scope, revoked/expired session, origin and permanent owner key fail before provider request.",
+    "Review binds configuration/lifecycle/owner incarnation, current approved offer/account, correct selected plan/services/caps and live/test mode; no Enterprise/unsupported price/tax/quantity/terms drift can create Checkout.",
+    "Parallel and lost-response Checkout preserve exact one request identity, identical provider idempotency key/parameters, and canonical same-session readback. After retention expiry, uncertainty requires reconciliation rather than a new paid session.",
+    "Stopping service with an already open Checkout expires only that exact owned session, including stop racing in-flight create; stale browser URL never creates a new subscription and completed-late payment triggers retained cancellation reconciliation.",
+    "Actual cancellation endpoint records owner confirmation and stable request; committed-but-lost Stripe response is read back before any repeated mutation; ordinary scheduler confirms same subscription and period end. Uncertainty remains visible.",
+    "Canceled subscription can begin a fresh deliberately reviewed Checkout without inheriting old customer/subscription/stop marker or suppressing cancellation of a newly completed session; active/past_due/incomplete subscription blocks duplicate subscription.",
+    "Signed current/duplicate/older webhook snapshots cannot establish paid state without authoritative exact account/livemode/tenant/session/price/customer/subscription binding. Wrong signatures/old timestamps/reused event data/foreign invoices fail closed.",
+    "Billable service state remains distinct from workspace/preparation/activation and provider readiness; new billing projection must not convert configured keys or Checkout return into paid/active service.",
+    "Focused Account billing review/return/error/cancel at desktop/mobile consumes actual handler capture; durable progress and recovery retained; no owner-key leak or arbitrary Checkout redirect."
+  ],
+  "reuseRule": "Use source-matched author cases for unchanged detailed paths. Independently add the highest-risk identity and cancellation/unknown-result cross-state cases, preserve first failures, hash all affected source pre/post, then report exact local scope."
+}

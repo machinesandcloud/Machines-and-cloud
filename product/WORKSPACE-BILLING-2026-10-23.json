@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-23",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "stage": "Implemented and engineering-checked locally; independent QA pending. Billing activation, commercial terms, merchant configuration and actual provider acceptance remain separate.",
+  "customerJob": "A verified owner reviews the exact monthly service offer, enters payment only through hosted Stripe Checkout, returns to confirmed payment status and can stop monthly renewal without founder configuration.",
+  "authority": "User asked to fix all launch blockers. Root assigned billing engineering; no live account configuration, provider calls, customer charges or publication authorized by this slice.",
+  "offerContract": {
+    "environment": [
+      "STRIPE_SECRET_KEY supports sk_test_,rk_test_,sk_live_,rk_live_; live keys additionally need WORKSPACE_BILLING_LIVE_ENABLED=true",
+      "STRIPE_WEBHOOK_SECRET",
+      "WORKSPACE_BILLING_ENABLED=true",
+      "WORKSPACE_BILLING_APPROVED_VERSION matches canonical offer.version",
+      "WORKSPACE_BILLING_OFFER_JSON"
+    ],
+    "schema": {
+      "version": "operator-approved stable version; no arbitrary daily renewal",
+      "stripeAccountId": "exact approved merchant account, validated by GET /v1/account",
+      "currency": "usd",
+      "terms": {
+        "version": "approved version",
+        "text": "full approved service terms,100-20000characters; shown and accepted, no default commercial language",
+        "url": "own HTTPS origin"
+      },
+      "plans": {
+        "starter": {
+          "amountCents": 9900,
+          "priceId": "explicit approved Price",
+          "services": "nonempty subset of web,voice,sms,calendar covering all selected customer connections",
+          "limits": [
+            "webRepliesPerDay",
+            "practiceRepliesPerDay",
+            "voiceCallsPerDay",
+            "voiceReservedMinutesPerDay",
+            "maxCallSeconds",
+            "smsExposureMessages",
+            "smsExposureSegments",
+            "smsExposureCostMicros"
+          ],
+          "limitsDescription": "approved clear explanation; no invented included allowances"
+        },
+        "growth": "same fields with amountCents24900"
+      }
+    },
+    "stripePriceRequirements": "Active matching test/live USD recurring month,interval_count1,licensed,per_unit,exact unit_amount9900/24900,tax_behavior inclusive. Checkout adds no trial, promotion, metering, shipping or tax amount.",
+    "activation": "Requires explicit approved offer and actual selected/offered service readiness. Existing provider safety limits must exactly match declared maxima. Approval/version is global, not a founder approval per customer.",
+    "permissions": [
+      "Stripe account read",
+      "Prices read",
+      "Checkout Sessions read/write (create and same-session expiry)",
+      "Subscriptions read/write only cancel_at_period_end=true; no unscoped subscription update",
+      "Webhook signing secret supplied separately"
+    ],
+    "excluded": "No Product/Price/Customer writes, global branding changes, Billing Portal configuration, payment-method reads, invoice mutations, usage-meter events, refunds or invented allowance/overage rates."
+  },
+  "implemented": [
+    "Authenticated same-origin owner-only GET saved status and POST review/checkout/status/cancel endpoints. Current session is reread immediately before Checkout dispatch.",
+    "Immutable tenant+actor+configuration+offer+terms+parameters persisted before one idempotent Checkout POST. Parallel/replayed requests reuse the same attempt; no ownerKey appears in returned URLs.",
+    "Unknown Checkout creation retries the same parameters/key only within23hours; later outcomes are searched/reconciled or held, never blindly recreated after Stripe retention.",
+    "Known pre-dispatch validation failures safely abandon unsent attempts and permit new explicit review; old attempts/subscriptions/cancellations remain in bounded immutable history.",
+    "Webhook signature uses exact raw bytes, fresh timestamp and any matching v1 signature for rotation. Duplicate event IDs retain their digest; event snapshots only trigger authoritative session/subscription reconciliation under a workspace lease.",
+    "Financial customer/subscription identities, mode, metadata, amount,currency and one exact Price/quantity are checked. Older event snapshots cannot regress current provider state, and tenant replacement cannot inherit billing.",
+    "Ending renewal persists a durable request. Ordinary scheduled recovery reconciles unknown results and can safely renew an aged cancellation key only after an authoritative read because its semantic mutation only sets cancel_at_period_end=true.",
+    "Stopping the front desk durably requests ending renewal and expires the same open unpaid Checkout. Unknown/lost expiry recovers through the ordinary scheduler; an already-paid race is retained and renewal ends without activating a stopped workspace.",
+    "Verified canceled/incomplete-expired subscriptions permit a fresh explicitly reviewed checkout using the existing bound Stripe customer.",
+    "Separate Account billing module shows offer, agreement, secure Checkout, returning status and keep/end-renewal dialog. Session loss or allowed sign-out prevents stale navigation; deferred Account sign-out preserves module responsiveness.",
+    "Legacy key GET cannot reach self-service billing; legacy webhook slug metadata cannot mutate self-service customers. Legacy billing behavior is otherwise retained."
+  ],
+  "evidence": [
+    {
+      "path": "scratchpad/workspace-billing-final-r2.json",
+      "passed": 29,
+      "total": 29,
+      "scope": "20 actual-handler/protocol groups and9 ordinary actual-handler browser groups at1440/390/320pixels. Synthetic memory, intercepted Stripe and assets only; no actual provider/model request or charge."
+    },
+    {
+      "path": "scratchpad/workspace-billing-sms-regression.json",
+      "passed": 18,
+      "total": 18,
+      "scope": "Existing managed SMS actual-handler regression after the stop-service hook; intercepted provider protocol only."
+    },
+    {
+      "path": "scratchpad/workspace-billing-public-build.json",
+      "scope": "182HTML/230public assets, exact copy hashes, new module allowlisted; internal directories absent."
+    }
+  ],
+  "otherAffectedChecks": {
+    "selfServiceDelivery": {
+      "passed": 36,
+      "log": "/tmp/mc-billing-delivery-regression.log"
+    },
+    "serviceReconciliation": {
+      "passed": 17,
+      "log": "/tmp/mc-billing-reconciliation-regression.log"
+    },
+    "syntax": "Changed JS and functions pass node --check; git diff --check passes"
+  },
+  "requiredGate": "workspace-billing-check.mjs added to the existing command in both netlify.toml and CLAUDE.md. Root will run the merged required40-command gate; this slice does not claim that broad gate already passed.",
+  "sources": [
+    {
+      "url": "https://docs.stripe.com/api/idempotent_requests",
+      "applied": "Persist same parameters/key; do not assume APIv1 retention beyond24hours."
+    },
+    {
+      "url": "https://docs.stripe.com/webhooks",
+      "applied": "Raw-body signature validation, timestamp tolerance, duplicates and event ordering."
+    },
+    {
+      "url": "https://docs.stripe.com/api/checkout/sessions/create",
+      "applied": "Hosted subscription Checkout and metadata, fixed Price/quantity, session identity and expiry."
+    },
+    {
+      "url": "https://docs.stripe.com/api/checkout/sessions/expire",
+      "applied": "Expire the same open Checkout when service stops."
+    }
+  ],
+  "sourceHashes": {
+    "netlify/functions/lib/workspace-billing.mjs": "a0b28e68e7d810d52b4a7b1d025bb9100383a3cca301abb524e51e33ddae9951",
+    "netlify/functions/workspace-billing.mjs": "5c850e64d8ecc0fabd298f8b2aad0ba22d7177655dbb24e7d37eec5a69ae6e77",
+    "netlify/functions/workspace-billing-scheduler.mjs": "689c16479a2588792f7e512dfc3f1b7622801a2d240a04d6f77237d2a78a0646",
+    "netlify/functions/client.mjs": "164fd7d0037db24972b917a6a4b6ef9beb5d9df98e0338b5d3f8af7c448f4c5a",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "netlify/functions/lib/billing.mjs": "cddaf382cb4fa746074b4212662f0b15983cc77d1af75bde1f73ae7ea40ec8d0",
+    "desk-billing.js": "fc62c19b95ffe1131b56b0bfa7cc5b9ad1839fd06ea938249a946dab7be92aac",
+    "desk-billing.css": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+    "desk.html": "8af11f2fd41b72ac113a2ece41bd944619af684260f44593e9b808139febe445",
+    "scripts/build-site.mjs": "3f1822330deb0e202038ea92ae081d1faa72634fe8420b017a2e3d4cc74f0ee1",
+    "scripts/workspace-billing-check.mjs": "b9d19c43fb82bf2f8ece1abc715f2448dddcef2f02a01b56e284123d615d0127",
+    "netlify.toml": "c11c6b474ad8d7a061066ff871409893edaa4f6867cc5f4b21e657ce09033807",
+    "CLAUDE.md": "eddd7452684bbfc9ffc2fe763bb098de12d0dec528091db262a61bb9f4233ff1"
+  },
+  "limits": [
+    "No provider requests, private-key reads, payment, purchase, Stripe account/product/price configuration, environment change or deployment occurred.",
+    "Synthetic offer and tax behavior exist only to test strict contracts. They are not approved customer commercial terms or approved included usage. Live paid activation remains disabled until reviewed scope/cost/caps/tax terms and the correct Stripe setup are approved and verified.",
+    "Stripe and workspace storage cannot form one atomic transaction. A payment already completing concurrently with Stop is retained as a paid exception, renewal is ended automatically and the stopped workspace is never activated. Refund decisions remain owner-controlled; no refund is promised.",
+    "The new billing state records financial truth and never certifies a service delivery or automatically activates a connection. Provider/customer launch acceptance remains separate.",
+    "Physical Stripe test-mode protocol acceptance, production webhooks and financial/support exception receipt are unaccepted by local checks."
+  ]
+}

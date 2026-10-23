@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-23T16:58:04.751356+00:00",
+  "decision": "Phase a correctly remains failed/closed. Independent actual local handler/UI reproduction classifies the immediate failure as proof fixture omission, not a product defect. One-line offline repair47e601c accepted; no new real retry occurred or is authorized by this artifact.",
+  "actualClosedPhase": {
+    "receipt": "scratchpad/stripe-test-lifecycle-phase-a-closed.json",
+    "requests": 7,
+    "readOnlyPreflight": 3,
+    "ownedFixtureReactivations": 2,
+    "ownedFixtureArchives": 2,
+    "checkouts": 0,
+    "subscriptions": 0,
+    "realMoneyCharges": 0,
+    "unknown": 0,
+    "sourceStable": true,
+    "runtimeSource": "961a96f2ae3a8c794e23dbc8d9c5ecd2d68d1edd",
+    "observed": "Local review stayed hidden; original phase did not preserve the UI message/body. Do not attribute the later offline message as if it was captured during the actual provider phase."
+  },
+  "independentReproduction": {
+    "receipt": "scratchpad/stripe-test-lifecycle-qa-local-review-repro.json",
+    "sourceFiles": 464,
+    "sourceStable": true,
+    "actualHandlersAndAssets": true,
+    "memoryAndStripeTransportInterception": true,
+    "width": 390,
+    "original": {
+      "post": 409,
+      "error": "service_not_ready",
+      "billingMessage": "Finish connecting and checking the services in this offer before starting paid service.",
+      "reviewVisible": false,
+      "readinessBlockers": [
+        "model"
+      ],
+      "interceptedStripeReviewReads": 0
+    },
+    "fixed": {
+      "post": 200,
+      "billingMessage": "Review the monthly renewal and service terms below.",
+      "reviewVisible": true,
+      "readinessBlockers": [],
+      "interceptedStripeReviewReads": 2
+    },
+    "classification": "Proof clears ANTHROPIC_* then omits synthetic availability marker while MC_FAKE_MODEL remains0. Real product readiness refuses checkout before any Stripe read, as designed. Adding only a dummy presence marker satisfies the explicitly artificial local proof fixture; it is not actual model/provider readiness or activation.",
+    "physicalNetwork": 0,
+    "privateFileAccessAttempts": 0,
+    "modelRequests": 0,
+    "regularBrowserAttached": false,
+    "screensInspected": true
+  },
+  "repair": {
+    "commit": "47e601c87ab654e3f69803da28f4157c40967de2",
+    "scriptSHA256": "bdc99a6f7560819e42a2033d08e42e94527ee1ec1074419772e0f5f57610c889",
+    "mechanicalOneLineDeltaVerified": true,
+    "change": "ANTHROPIC_API_KEY:'protocol-fixture-unused' in synthetic proof environment only",
+    "productRuntimeChanges": 0,
+    "allowlistOrChargingGateChanges": 0,
+    "unchangedManifestSHA256": "a88e861a0b145f83770aca8d21541e3a6d6a80fcbd3b3f9727becad71cbc03bd",
+    "retestReuse": "Existing captured one-variable before/after flow directly tests the same Boolean readiness condition; exact code delta reviewed. No additional full/actual rerun."
+  },
+  "guardReview": "scratchpad/stripe-test-lifecycle-qa-guard-review.json records originalebb guard acceptance7/7 under denied private-file/network/child processes. The only later executable change is the accepted dummy marker. Existing29 billing UI evidence remains source-matched; no broad repeat.",
+  "limits": [
+    "CDN b.stripecdn.com and background CAPTCHA remain intentionally fatal under approved proof allowlist; hosted completion remains uncertain.",
+    "No actual completed Checkout, subscription, public webhook delivery, live charge or full commercial/service launch accepted.",
+    "No fourth scope, closed phase reuse, source publication or further external action created by this QA artifact."
+  ],
+  "artifacts": [
+    {
+      "source": "/tmp/mc-stripe-lifecycle-qa-review-961/review-final.json",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-guard-review.json",
+      "sha256": "590659ae7ba6e884ce5f67b3cdb95567b353e04eeb9f334cd1cd69e808d412e7"
+    },
+    {
+      "source": "/tmp/mc-stripe-lifecycle-qa-review-961/offline-access-counters.json",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-offline-counters.json",
+      "sha256": "4e355db86b127c03102e699a01fc8fbdb4f05fdde8fc92ac422d14536815f0de"
+    },
+    {
+      "source": "/tmp/mc-stripe-lifecycle-qa-review-961/local-review-repro.json",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-local-review-repro.json",
+      "sha256": "d5655f72b136a1d66c31b85423f69979dd99e948c9ff3299f253855ad19a5154"
+    },
+    {
+      "source": "/tmp/mc-stripe-lifecycle-qa-review-961/local-review-original-390.png",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-original-390.png",
+      "sha256": "3dd75f7107cd79ee1961ae9c6ad84616e13fceeb7a9a6ca6cf59f7587c28e39f"
+    },
+    {
+      "source": "/tmp/mc-stripe-lifecycle-qa-review-961/local-review-fixed-390.png",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-fixed-390.png",
+      "sha256": "ae83bc3d8c48b63175a641825571af691a191425c019e2e4ce6b30c0a678a2b3"
+    },
+    {
+      "source": "/tmp/mc-stripe-lifecycle-qa-review-961/repro-local-review.mjs",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-repro.mjs",
+      "sha256": "4a1ab87d895a57a3d7b1e35f081f8f01720e69a96694c86446b0685f66bdc65a"
+    },
+    {
+      "source": "/tmp/mc-grouped-qa-20261023/stripe-test-lifecycle-qa-offline-final.log",
+      "artifact": "scratchpad/stripe-test-lifecycle-qa-offline-selfcheck.log",
+      "sha256": "0bd52e1dc5e3015beb6a732cdf1821a622f8075ca696b4e8e97da10e90fba38f"
+    },
+    {
+      "source": "/tmp/mc-stripe-test-lifecycle-proof-20261023-a.json",
+      "artifact": "scratchpad/stripe-test-lifecycle-phase-a-closed.json",
+      "sha256": "2728c55bc13c0177ad099421f7a1270ccf7b472843aa6e38f9910dd4b9de0467"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-23",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "stage": "Engineering implemented and locally checked; independent Root QA, publication and actual provider acceptance remain open",
+  "customerJob": "After a website or telephone booking, the recipient can choose appointment texts from the same mobile number without an owner or founder manually editing consent.",
+  "implemented": [
+    "A real website booking response includes an optional ready-shop-number SMS compose action. Opening the action sends nothing; full purpose, future visits, rates, HELP/STOP, optional nature and policy links are visible.",
+    "The real voice booking tool returns the dedicated number and recipient-initiated instruction; no text is sent or consent inferred by the booking/call itself.",
+    "APPOINTMENTS or CITAS from a provider-verified inbound recipient gets the exact server-authored English or Spanish question through the existing durable outbox, without model allowance.",
+    "Only a subsequent provider-verified YES or SI/S\u00cd after that question grants the existing tenant+recipient ongoing-appointment purpose. Proof retains wording/version, exact inbound/outbound provider IDs, dates, recipient, sender number and Messaging Service ID.",
+    "Existing confirmations and future due reminders use their original outbox/source IDs after consent. Delivered or uncertain messages are never blindly resent.",
+    "Ordinary provider receipt polling rebuilds a missing consent-question projection from its existing receipt, including a delayed already-arrived YES, without another outbound send.",
+    "Public shop policy and new registration program describe the same additional recipient-initiated path; old registered program digests fail closed."
+  ],
+  "evidence": [
+    {
+      "path": "scratchpad/appointment-consent-engineering-final-r6.json",
+      "passed": 25,
+      "total": 25,
+      "scope": "Actual signed SMS, chat booking, voice dispatcher, durable installed-SDK storage protocol doubles and existing outbox/scheduled-delivery runner. Synthetic account/records; scripted model SDK and intercepted providers."
+    },
+    {
+      "path": "scratchpad/appointment-consent-ui-final-r6.json",
+      "passed": 9,
+      "total": 9,
+      "scope": "Actual embed at1440/390/320px using source-matched responses from actual chat/client handlers. Ordinary send/reload, retained action, accessible readable CTA, disclosures and escaped malformed data. Browser routes fully intercepted."
+    },
+    {
+      "path": "scratchpad/appointment-consent-delivery-final-r6.json",
+      "passed": 18,
+      "total": 18,
+      "scope": "Existing independent negative-path regression rerun by engineering; identities, unknown sends, late receipts, ask replay, delayed proof and suppression."
+    },
+    {
+      "path": "scratchpad/appointment-consent-policy-final-r6.json",
+      "passed": 20,
+      "total": 20,
+      "scope": "Existing policy/company receiver regression; no company campaign was changed."
+    }
+  ],
+  "additionalChecks": {
+    "messagingActivation": {
+      "passed": 41,
+      "total": 41,
+      "log": "/tmp/mc-consent-messaging-activation.log"
+    },
+    "websiteInstallation": {
+      "passed": 17,
+      "total": 17,
+      "log": "/tmp/mc-consent-website-installation.log"
+    },
+    "syntaxAndWhitespace": "Changed runtime files pass node --check; git diff --check passes"
+  },
+  "returnedEvidence": [
+    {
+      "path": "scratchpad/appointment-consent-engineering-r4.json",
+      "disposition": "23/25: test incorrectly expected an operation envelope where continueMessagingActivation returns its view directly; expanded cumulative synthetic cohort exceeded the existing25-tenant limit. No product bypass was introduced."
+    },
+    {
+      "path": "scratchpad/appointment-consent-engineering-r5.json",
+      "disposition": "24/25: detailed retained receipt confirmed unsupported26th synthetic cohort member. Fixture now keeps its explicitly approved rolling25-member cohort; application limit remains25 and all existing cumulative reservations remain."
+    }
+  ],
+  "sourceHashes": {
+    "embed.js": "3083fa6e91bbf35877027c3f03f6c9cafe8fcde2ba5cdfcd75c7a927b8b6c546",
+    "netlify/functions/chat.mjs": "b3703e67477d026d226902aa84e7c2a8ac97df75740da8b97bbdf1aca7d9eb6b",
+    "netlify/functions/lib/appointment-texts.mjs": "fdbdc34866190dbac17107cd27c8a14a5705e7ea215e0d39d777b8b78303f62c",
+    "netlify/functions/lib/managed-actions.mjs": "6305fd04c5d2a1e3aceb3a0d0c0ea1d220dbe6ed974f2418821477f5523913dc",
+    "netlify/functions/lib/managed-consent.mjs": "f0655527fd4deb409647e979af9232dcc771445032594b08645df1389c4c40ba",
+    "netlify/functions/lib/managed-delivery.mjs": "de023aed10a0541b5235aa729b7b0201715e6bf0daf9075ae99e3d7809177ae8",
+    "netlify/functions/lib/managed-sms.mjs": "aeab5284eac23d9ada335fe32b8fcf53eaf1287193cffbefecee683f6091cb2a",
+    "netlify/functions/lib/messaging-program.mjs": "e3f727749a9608c3d2f5b61d3e92a51b7b28bf8a0ebb9c436c06f94a94f0614f",
+    "netlify/functions/policy.mjs": "e7e80f6e5208900120087e30f725a6fe6eb8cee48ec664ab79071370bd80e852",
+    "scripts/managed-sms-qa-check.mjs": "f0d7fb5739ec6997994889f6a4145f56578c650511527a6db92d0ab1103aacde",
+    "scripts/appointment-texts-ui-check.mjs": "1e9d776129961561b38b8ed6f99094523ec2a6ef23feca37395c229b9abdbd30"
+  },
+  "officialReferences": [
+    {
+      "url": "https://www.twilio.com/en-us/legal/messaging-policy",
+      "applied": "Recipient purpose-specific permission and retained consent evidence."
+    },
+    {
+      "url": "https://www.twilio.com/docs/messaging/tutorials/advanced-opt-out",
+      "applied": "Honor provider OptOutType and avoid duplicate keyword acknowledgments."
+    }
+  ],
+  "limits": [
+    "No actual external provider or model requests, SMS, call, email, OAuth mutation, purchase, environment update or deployment occurred.",
+    "Website/voice opt-in invitations require a current correctly registered and verified dedicated shop sender. Execution and admission/cost gates remain unchanged.",
+    "A phone number belonging to another person cannot grant permission for the saved booking recipient. Its own opt-in does not expose that booking.",
+    "A preexisting registered program with a different digest cannot silently adopt this entry. The existing product explicitly requires a supported reviewed migration once campaign resources exist; such migration/carrier approval remains a separately scoped dependency.",
+    "The company support campaign is separate and unchanged.",
+    "Voice instructions are covered at the actual tool boundary; intelligibility and natural delivery by the live voice model still require separately authorized real-call acceptance.",
+    "Invitations and consent are optional; no universal-reminder claim for customers who decline or never complete the verified SMS exchange."
+  ]
+}

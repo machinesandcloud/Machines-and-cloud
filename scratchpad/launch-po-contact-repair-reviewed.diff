@@ -1,0 +1,58 @@
+diff --git a/netlify/functions/lib/request-followthrough.mjs b/netlify/functions/lib/request-followthrough.mjs
+index 0685f07..b02c148 100644
+--- a/netlify/functions/lib/request-followthrough.mjs
++++ b/netlify/functions/lib/request-followthrough.mjs
+@@ -13,6 +13,19 @@ export class RequestFollowthroughError extends Error {
+ }
+ const fail = (code, message, status = 409, field = null) => { throw new RequestFollowthroughError(code, message, status, field); };
+ const initial = () => ({ seenAt: null, owner: null, nextAction: null, dueAt: null, contact: 'not_recorded', completedAt: null, resolution: null });
++function contactIdentity(lead) {
++  const digits = String(lead.phone || '').replace(/\D/g, '');
++  if (digits) return 'phone:' + (digits.length === 10 ? '1' + digits : digits);
++  return 'contact:' + String(lead.contact || lead.customer_name || '').trim().toLowerCase();
++}
++function currentState(lead, row) {
++  const state = structuredClone(row.state);
++  if (state.contact !== 'not_recorded') {
++    const evidence = row.history.findLast(entry => entry.type === (state.contact === 'reached' ? 'reached' : 'attempt'));
++    if (!evidence?.source || contactIdentity(evidence.source) !== contactIdentity(lead)) state.contact = 'not_recorded';
++  }
++  return state;
++}
+ // Meaningful customer facts, not updatedAt/ackedAt or delivery housekeeping.
+ export function requestSourceRevision(lead) {
+   return digest(['id','slug','tenantIdentity','customer_name','phone','address','issue','reason','urgency','wanted','outcome','status','channel','contact','websiteSetupCheck'].map(key => [key, lead[key] ?? null]).concat([['deliveryTenant', lead.delivery?.tenantIdentity ?? null]]));
+@@ -38,11 +51,12 @@ async function source(client, id) {
+ }
+ function view(client, lead, row, operationId = null) {
+   const sourceRevision = requestSourceRevision(lead), reviewRequired = !!row.sourceRevision && row.sourceRevision !== sourceRevision;
++  const state = currentState(lead, row);
+   const excluded = !!lead.websiteSetupCheck || !!lead.simulation || lead.status === 'spam' || lead.outcome === 'spam';
+-  const due = !row.state.completedAt && !!row.state.dueAt && Date.parse(row.state.dueAt) <= Date.now();
+-  const needsFollowup = !excluded && (reviewRequired || !row.state.completedAt && (due || !!row.state.nextAction || lead.status === 'open'));
++  const due = !state.completedAt && !!state.dueAt && Date.parse(state.dueAt) <= Date.now();
++  const needsFollowup = !excluded && (reviewRequired || !state.completedAt && (due || !!state.nextAction || lead.status === 'open'));
+   const receipt = operationId && row.history.find(entry => entry.id === operationId);
+-  return { sourceRevision, revision: digest(row), reviewRequired, state: structuredClone(row.state), due, needsFollowup,
++  return { sourceRevision, revision: digest(row), reviewRequired, state, due, needsFollowup,
+     canChange: !excluded && ['testing','live','paused'].includes(client.status) && row.history.length < LIMIT,
+     historyFull: row.history.length >= LIMIT, readOnlyReason: excluded ? 'Setup checks and filtered requests are read-only.' : !['testing','live','paused'].includes(client.status) ? 'This workspace is closed. Its request history remains available.' : row.history.length >= LIMIT ? 'This retained history is full. Contact support before recording more work.' : null, source: Object.fromEntries(['id','customer_name','phone','address','issue','reason','urgency','wanted','outcome','status','channel','contact','createdAt'].map(key => [key, lead[key] ?? null])),
+     history: structuredClone(row.history), receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
+@@ -94,7 +108,7 @@ export async function updateRequestFollowthrough(client, session, body) {
+     if (input.expectedRevision !== currentView.revision) fail('request_changed', 'Another follow-up action was saved. Review its history before saving yours.');
+     if (currentView.reviewRequired && input.type !== 'review') fail('request_review_required', 'The customer request changed. Review the new details before recording more work.');
+     if (!currentView.reviewRequired && input.type === 'review') fail('invalid_transition', 'This request already uses the current customer details.');
+-    const next = structuredClone(row.state);
++    const next = structuredClone(currentView.state);
+     if (next.completedAt && !['reopen','review'].includes(input.type)) fail('request_completed', 'Reopen this request before recording more work.');
+     if (input.type === 'reopen' && !next.completedAt) fail('invalid_transition', 'This request is already open.');
+     if (input.type === 'seen') next.seenAt = next.seenAt || at;
+@@ -104,7 +118,7 @@ export async function updateRequestFollowthrough(client, session, body) {
+     if (input.type === 'reached') next.contact = 'reached';
+     if (input.type === 'complete') { next.completedAt = at; next.resolution = input.resolution; next.nextAction = null; next.dueAt = null; }
+     if (input.type === 'reopen') { next.completedAt = null; next.resolution = null; }
+-    // Review keeps earlier owner-recorded work visible; it never silently resets it.
++    // Earlier contact stays in history; a corrected recipient cannot inherit it.
+     if (input.type === 'review') { next.completedAt = null; next.resolution = null; }
+     await authority(client, session, true);
+     if (requestSourceRevision(await source(client, input.requestId)) !== currentView.sourceRevision) fail('request_source_changed', 'The customer request changed. Check its latest details before saving.');

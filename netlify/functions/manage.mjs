@@ -1,6 +1,6 @@
 import { AccessError, accessOriginAllowed, requestAccessLink, exchangeAccessToken, getAccessSession, revokeAccessSession } from './lib/access.mjs';
 import { normalizeAccountEmail, strictRead } from './lib/accounts.mjs';
-import { OperatorError, operatorEmails, requireOperator, customerPage, customerView, supportAction } from './lib/operator.mjs';
+import { OperatorError, operatorEmails, requireOperator, customerPage, customerView, supportAction, operatorProviderStates } from './lib/operator.mjs';
 import { prospectAudience, prospectsCSV } from './lib/intake.mjs';
 import { platformSMSView } from './lib/platform-sms.mjs';
 
@@ -53,7 +53,7 @@ export default async (req, context) => {
     const page = await customerPage(url.searchParams.get('cursor') || '');
     const scheduler = await strictRead('health', 'scheduler:lastRun');
     const age = scheduler?.at ? Math.floor((Date.now() - Date.parse(scheduler.at)) / 60000) : null;
-    return reply({ ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy: age !== null && age < 25 && scheduler?.ok === true, minutesAgo: age, blocks: Object.entries(scheduler?.blocks || {}).map(([name, row]) => ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: row.reasonCode })) }, providerStates: { website: process.env.ANTHROPIC_API_KEY && process.env.MC_FAKE_MODEL !== '1' ? 'Configured; customer readiness and allowance still apply' : 'Unavailable', phone: 'New-customer activation unavailable', sms: 'New-customer activation unavailable', calendar: 'New-customer connection unavailable', billing: 'Disabled' } } });
+    return reply({ ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy: age !== null && age < 25 && scheduler?.ok === true, minutesAgo: age, blocks: Object.entries(scheduler?.blocks || {}).map(([name, row]) => ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: row.reasonCode })) }, providerStates: operatorProviderStates() } });
   } catch (error) {
     if (error instanceof OperatorError || error instanceof AccessError || Number.isInteger(error?.status) && error?.code) return reply({ error: error.code, message: error.message, ...(error.fieldErrors ? { fieldErrors: error.fieldErrors } : {}) }, error.status);
     return reply({ error: 'management_unavailable', message: 'We could not confirm this operation. Refresh to check the saved state before retrying.' }, 503);

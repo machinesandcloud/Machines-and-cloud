@@ -1,0 +1,271 @@
+{
+  "at": "2026-10-23T16:00:59.924600+00:00",
+  "decision": "Accepted for bounded independent local billing/admin implementation; actual customer/provider launch remains open.",
+  "source": {
+    "integratedCommit": "40fa70b6f453282b352c485ad860c439992a970e",
+    "laterPureConfigurationRepair": [
+      {
+        "file": "netlify/functions/lib/workspace-billing.mjs",
+        "sha256": "4551a2d7016944cdbcf01a014263cf76295a7fe8746cede8220eb921928d49e9"
+      },
+      {
+        "file": "netlify/functions/lib/operator.mjs",
+        "sha256": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c"
+      }
+    ],
+    "sourceBridge": "scratchpad/launch-billing-source-bridge.json",
+    "trackedRuntimeConfigAssetsTestsCopiedForQA": 459,
+    "guardedBillingSourceFiles": 460,
+    "guardedAdminSourceFiles": 461,
+    "qualification": "Exact stable local copied source. Runtime copies restored before QA-only commit. Billing29 accepted on40fa70b; later pure configuration export/import mechanically preserves all existing financial functions and is separately exercised."
+  },
+  "results": [
+    {
+      "receipt": "scratchpad/launch-billing-integrated-first.json",
+      "sha256": "e99b57ae1a3c8b0893e6b442834a383b0987fc62233b96e9723caa721ffbf6cc",
+      "passed": 29,
+      "total": 29,
+      "sourceStable": true,
+      "networkRequests": 0
+    },
+    {
+      "receipt": "scratchpad/launch-billing-integrated-focused-recovery.json",
+      "sha256": "53c965b904d628bca1dce61a143f5864f6e7eaa807bd834e70af06040d1bdee1",
+      "passed": 6,
+      "total": 6,
+      "sourceStable": true,
+      "networkRequests": 0
+    },
+    {
+      "receipt": "scratchpad/launch-billing-admin-projection-repair.json",
+      "sha256": "73987470d6525f8eca4ec1917261dd7fe797127fe03cb217f3b3c897ba69ee56",
+      "passed": 1,
+      "total": 1,
+      "sourceStable": true,
+      "networkRequests": 0
+    },
+    {
+      "receipt": "scratchpad/launch-billing-provider-state-source-final.json",
+      "sha256": "d5682eaa56a564e7893d89f2edcd3c2b4bf5c9c023fd964f44a5d3ffa136e692",
+      "passed": 21,
+      "total": 21,
+      "sourceStable": true,
+      "networkRequests": 0
+    },
+    {
+      "receipt": "scratchpad/launch-billing-operator-regression-final.json",
+      "sha256": "cf8929ad432f0feab326932c73d443edfffd914b398e3c7fa1404b3780654552",
+      "passed": 58,
+      "total": 58,
+      "sourceStable": true,
+      "networkRequests": 0
+    },
+    {
+      "receipt": "scratchpad/launch-billing-operator-recovery-final.json",
+      "sha256": "6b9c1a70d101a6b8fb812c2bf05daad2958cc332d13d0d19b773cc50422bd113",
+      "passed": 9,
+      "total": 9,
+      "sourceStable": true,
+      "networkRequests": 0
+    }
+  ],
+  "counting": "29 independent billing cases (11 backend/portal,18 ordinary browser groups at320/390/1440). The focused6 are recovery recaptures of included browser cases, not additive. Admin1, configuration21 and operator58/recovery9 have distinct scopes and overlap prior evidence; no inflated combined total.",
+  "fixtureQualification": {
+    "actual": "Owner billing, signed webhook, scheduler, client and admin handlers; retained memory store; ordinary installed desk assets and UI actions.",
+    "doubles": "Synthetic credentials, approved TEST offer, intercepted deterministic Stripe protocol, controlled clock and memory transport. A modeled completed subscription is not a real payment.",
+    "physicalNetwork": 0,
+    "environmentFilesRead": false,
+    "realProviderOrModelRequests": 0,
+    "activationOrPublication": false
+  },
+  "covered": [
+    "expired/revoked/wrong-scope owner access and no unauthorized provider call; offer/live-mode changes after review",
+    "Stop racing normal/lost Checkout responses expires the same session; genuinely stale create response cannot regress signed completion",
+    "25-hour uncertain cancellation canonical read and safe semantic retry; canceled subscription requires explicit new reviewed checkout",
+    "tenant/customer/account/mode/event identity boundaries; old invoices/cancellations cannot overwrite renewed subscription",
+    "financial maintenance while new purchase authority is off; immutable original customer and portal configuration/capability checks",
+    "portal response loss retains the same short-lived capability; unsafe configuration/response and foreign customer index rejected",
+    "ordinary plan review/agreement/hosted handoff/return/end-renewal/Keep; account mutation and deferred signout failure recovery",
+    "lost committed Checkout and renewal responses expose visible durable recovery without duplicate creation or mutation",
+    "same-process owner/admin agreement, pure configuration negatives and unaffected guarded operator recovery"
+  ],
+  "firstFindings": [
+    {
+      "receipt": "scratchpad/launch-billing-independent-errors-first.json",
+      "observed": "13/17; lost committed Checkout hid status recovery and cancellation dialog obscured outside error, each at390/1440.",
+      "disposition": "Two real product defects repaired in2953535; integrated29 and focused6 pass."
+    },
+    {
+      "receipt": "scratchpad/launch-billing-admin-projection-first.json",
+      "observed": "0/1; owner GET/review accepted offer while admin claimed billing disabled based on obsolete legacy environment.",
+      "disposition": "Real projection defect repaired by exact two-file pure export/import; admin1 and provider21 pass."
+    },
+    {
+      "receipt": "scratchpad/launch-billing-provider-state-stale-first.json",
+      "observed": "10/11; legacy-only Stripe key/Price expectation previously counted as configured self-service billing.",
+      "disposition": "Obsolete assertion preserved; replacement asserts separate legacyBilling plus ten new current self-service configuration cases."
+    },
+    {
+      "receipt": "scratchpad/launch-billing-independent-harness-first.json",
+      "observed": "Browser launch could not find default bundled Chromium.",
+      "disposition": "Harness-only; installed Chrome channel used for subsequent actual browser cases."
+    }
+  ],
+  "visualReview": {
+    "viewports": [
+      320,
+      390,
+      1440
+    ],
+    "inspected": [
+      {
+        "file": "scratchpad/launch-billing-integrated-first-320-review.png",
+        "sha256": "10f2439d1a88bc0107ba3fce1d7aab2d8f9c359d6a753d6d15e17bc4b25f02c2"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-first-1440-review.png",
+        "sha256": "b7497893fd186a486f0b4cad254f58e8d009c43a940719b66da06ce76eab714c"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-first-390-cancelled.png",
+        "sha256": "6df99761ffa496afb27b5f455ef6eca76ddbd36bd028691807dac40f7dc2099b"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-focused-recovery-320-checkout-uncertain.png",
+        "sha256": "1edb1016770419d4b4f274d5dcff299ea679d179817b7f73b0db09606f1fac14"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-focused-recovery-320-cancel-uncertain.png",
+        "sha256": "0a6771dfc8039cbc97ece05ebb9436430de3da9e795312bd2d286808d20fafa0"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-focused-recovery-390-checkout-uncertain.png",
+        "sha256": "4bdd388071157712fdc7d625263bf19d65b37aca832fe2f43a3d23ba19f61a66"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-focused-recovery-390-cancel-uncertain.png",
+        "sha256": "7ce365553fc911513c4fc9e88ca5856192271e583c9d7aa1062d2d5760020d42"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-focused-recovery-1440-checkout-uncertain.png",
+        "sha256": "a8ca5b741f4966e0349132ccbe40ca1525cd5f72b78925f2cebe4daae663273c"
+      },
+      {
+        "file": "scratchpad/launch-billing-integrated-focused-recovery-1440-cancel-uncertain.png",
+        "sha256": "ae1573b625f6a3ecb10d70b630615881ffe71cb061b459d12e2b1f2378f82874"
+      }
+    ],
+    "observed": "Readable offer, TEST disclosure and renewal terms; no horizontal overlap in tested flow; uncertainty explanations and Check payment status are visible and reachable. Lost cancellation closes confirmation and focuses the visible explanation. Kept initial loss screenshots separately.",
+    "note": "The original test name mentions an open confirmation; assertion explicitly accepts released dialog with visible error and recovery. Current accepted fix closes it."
+  },
+  "reusedEngineeringEvidence": {
+    "report": "/tmp/mc-launch-billing-portal-649/scratchpad/workspace-billing-portal-final-r2.json",
+    "sha256": "83f8abcd5f2671a922f2ddfd1f957506033aeb421e7fec0ab225254c94439f45",
+    "passed": 46,
+    "total": 46,
+    "sourceStable": true,
+    "physicalExternalRequests": 0,
+    "sourceComparison": [
+      {
+        "file": "netlify/functions/lib/workspace-billing.mjs",
+        "authorSHA256": "2bf9109e5c4131faf7cc0a5e94d8f5d03442ab5a88e756a3b781f6168f8f5a38",
+        "currentSHA256": "4551a2d7016944cdbcf01a014263cf76295a7fe8746cede8220eb921928d49e9",
+        "matches": false
+      },
+      {
+        "file": "netlify/functions/workspace-billing.mjs",
+        "authorSHA256": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+        "currentSHA256": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/workspace-billing-scheduler.mjs",
+        "authorSHA256": "689c16479a2588792f7e512dfc3f1b7622801a2d240a04d6f77237d2a78a0646",
+        "currentSHA256": "689c16479a2588792f7e512dfc3f1b7622801a2d240a04d6f77237d2a78a0646",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/stripe-webhook.mjs",
+        "authorSHA256": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+        "currentSHA256": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/lib/billing.mjs",
+        "authorSHA256": "cddaf382cb4fa746074b4212662f0b15983cc77d1af75bde1f73ae7ea40ec8d0",
+        "currentSHA256": "cddaf382cb4fa746074b4212662f0b15983cc77d1af75bde1f73ae7ea40ec8d0",
+        "matches": true
+      },
+      {
+        "file": "netlify/functions/client.mjs",
+        "authorSHA256": "164fd7d0037db24972b917a6a4b6ef9beb5d9df98e0338b5d3f8af7c448f4c5a",
+        "currentSHA256": "f9948749a77dfae049c393809309f780c07cf75b4d63dd5d07078ce70e879617",
+        "matches": false
+      },
+      {
+        "file": "desk-billing.js",
+        "authorSHA256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+        "currentSHA256": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+        "matches": true
+      },
+      {
+        "file": "desk-billing.css",
+        "authorSHA256": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+        "currentSHA256": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+        "matches": true
+      },
+      {
+        "file": "desk.html",
+        "authorSHA256": "626616ee00ff733a5740539f09a8fe5436b8108e59754503321583240169180c",
+        "currentSHA256": "a4d16e14f5e824c7dbd9efeeb715195d6eb2a4ef700de6cfe109b7a0eb91a267",
+        "matches": false
+      },
+      {
+        "file": "scripts/workspace-billing-check.mjs",
+        "authorSHA256": "b6129d69ecfd0728af7bf0640c3358367954771a5286c922b30c720de345e67d",
+        "currentSHA256": "b6129d69ecfd0728af7bf0640c3358367954771a5286c922b30c720de345e67d",
+        "matches": true
+      }
+    ],
+    "bridge": "Billing endpoint, scheduler, webhook, legacy billing, billing JS/CSS and author fixture are byte-identical. Billing helper differs only by the independently exercised pure configuration export. Integrated client/desk HTML retain G7/request and billing integration; independent 29 actual-handler/browser cases exercise those merged assets. Author 46 are reused as engineering evidence, not an independent rerun or additive pass total."
+  },
+  "historicalRealStripeProof": {
+    "receipt": "/tmp/mc-stripe-provider-proof.json",
+    "receiptSHA256": "fc7b9a70ebd52d825fd29b9e069bb6740b9666e831969f9387788871ae85beb0",
+    "sourceMatches": [
+      {
+        "file": "netlify/functions/lib/workspace-billing.mjs",
+        "proofSHA256": "a0b28e68e7d810d52b4a7b1d025bb9100383a3cca301abb524e51e33ddae9951",
+        "matchesAuthorFrozen": true
+      },
+      {
+        "file": "netlify/functions/workspace-billing.mjs",
+        "proofSHA256": "5c850e64d8ecc0fabd298f8b2aad0ba22d7177655dbb24e7d37eec5a69ae6e77",
+        "matchesAuthorFrozen": true
+      },
+      {
+        "file": "netlify/functions/client.mjs",
+        "proofSHA256": "164fd7d0037db24972b917a6a4b6ef9beb5d9df98e0338b5d3f8af7c448f4c5a",
+        "matchesAuthorFrozen": true
+      }
+    ],
+    "all7ChecksPass": true,
+    "actualRequestsInCapturedProtocol": 19,
+    "sameKeyAndSession": true,
+    "sourceStable": true,
+    "realCharges": 0,
+    "completedCheckouts": 0,
+    "unknownResults": 0,
+    "cleanup": {
+      "oneSessionExpired": true,
+      "fourFixtureObjectsArchived": true
+    },
+    "qualification": "Offline review of Root captured actual TEST Stripe account/Price/open-session protocol only. QA made no external request. No completed payment, actual subscription, renewal, charge/refund, webhook installation or commercial launch acceptance established."
+  },
+  "openEvidence": [
+    "No current completed real Checkout, actual subscription, renewal cancellation, hosted portal, charge/refund, installed webhook delivery or live commercial launch is accepted.",
+    "Historical Root TEST proof is narrower old-source account/Price/open-session/idempotency/expiry evidence only; it does not cover later selected-service metadata or portal additions.",
+    "Production remainsd21783c until separately accepted publication; complete real customer/signup/model/phone/text/Calendar/operational proof stays open per launch control."
+  ],
+  "scopeBoundaries": "No broad required41 rerun by independent QA; Root owns that integrated gate and its preserved runner-only dispositions."
+}

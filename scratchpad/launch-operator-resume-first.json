@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-23T14:36:04.029Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "sourceBefore": {
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/lib/operator.mjs": "0e4585d75f9ae029e34d7120ceec25ac2c23143582bb2ad70290422aeed611d2",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "mode": "Actual management handler, synthetic operator/session/client, memory, zero physical network",
+  "checks": [
+    {
+      "name": "Operator resume calendar",
+      "pass": false,
+      "status": 409,
+      "body": {
+        "error": "setup_incomplete",
+        "message": "Review, a successful current live test and available AI allowance are required before resuming website chat."
+      },
+      "storedStatus": "paused",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "calendar"
+      ],
+      "expected": "Non-web workspace restores without AI/website activation proof."
+    },
+    {
+      "name": "Operator resume voice/sms/calendar",
+      "pass": false,
+      "status": 409,
+      "body": {
+        "error": "setup_incomplete",
+        "message": "Review, a successful current live test and available AI allowance are required before resuming website chat."
+      },
+      "storedStatus": "paused",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "voice",
+        "sms",
+        "calendar"
+      ],
+      "expected": "Non-web workspace restores without AI/website activation proof."
+    },
+    {
+      "name": "Operator resume web",
+      "pass": true,
+      "status": 409,
+      "body": {
+        "error": "setup_incomplete",
+        "message": "Review, a successful current live test and available AI allowance are required before resuming website chat."
+      },
+      "storedStatus": "paused",
+      "storedWebActive": false,
+      "desiredChannels": [
+        "web"
+      ],
+      "expected": "Previously active web remains blocked by readiness."
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/lib/operator.mjs": "0e4585d75f9ae029e34d7120ceec25ac2c23143582bb2ad70290422aeed611d2",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "sourceStable": true,
+  "physicalNetwork": 0,
+  "summary": {
+    "passed": 1,
+    "failed": 2
+  }
+}
