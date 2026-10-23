@@ -82,6 +82,16 @@ async function suite(mode) {
     assert.equal((await engine.run(row.id)).state, "waiting_platform"); assert.equal(p.calls.acquire, 0); enabled = true; await engine.run(row.id); assert.equal(p.calls.acquire, 1);
     const stale = await client(mode, "stale"), old = await request(engine, stale); await store.put("clients", stale.slug, { ...stale, summary: "Owner changed rules" }); assert.equal((await engine.run(old.id)).state, "superseded"); assert.equal(p.calls.acquire, 1);
   });
+  await check(name("a confirmed untouched pre-purchase stop accepts a fresh review without changing number identity"), async () => {
+    const c = await client(mode, 'renew'), p = provider(), engine = phone.createPhoneActivationEngine({ provider: p.adapter, offer: offer(), gate: true }), first = await request(engine,c);
+    const before = await read('phone_activation_intents',first.id), updated = { ...c, summary: 'Owner reviewed corrected business instructions.' };
+    await store.put('clients',c.slug,updated); assert.equal((await engine.run(first.id)).state,'superseded');
+    const reviews = await Promise.all([request(engine,updated),request(engine,updated)]);
+    assert.ok(reviews.every(row => row.id === first.id));
+    const renewed = await read('phone_activation_intents',first.id);
+    assert.equal(renewed.correlationId,before.correlationId); assert.equal(renewed.renewalSequence,1); assert.equal(renewed.history.length,1);
+    await Promise.all([engine.run(first.id),engine.run(first.id)]); assert.equal(p.calls.acquire,1); assert.equal(p.resources.size,1);
+  });
   for (const releaseMode of ["before", "after"]) await check(name("cancellation retains resource after " + releaseMode + " release failure and confirms cleanup"), async () => {
     const c = await client(mode, "release"), p = provider(), engine = phone.createPhoneActivationEngine({ provider: p.adapter, offer: offer(), gate: true }), row = await request(engine, c); await engine.run(row.id); const reserved = await read("phone_activation_intents", row.id);
     await cancel(engine, c, row.id); p.release(releaseMode); assert.equal((await engine.run(row.id)).state, "cleanup_uncertain"); assert.equal((await read("phone_activation_intents", row.id)).resource.id, reserved.resource.id);

@@ -1,0 +1,88 @@
+{
+  "phase": "before",
+  "sourceBefore": {
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "harnessHash": "1ca3f9f686b68bc41908be3bd622e1f0ab16b7a1b0a0b3cb6e39f6938c306412",
+  "checks": [
+    {
+      "name": "Published369 deadlocks renewed business revision after a queued unpurchased child",
+      "pass": true
+    }
+  ],
+  "observations": [
+    {
+      "coordinatorId": "renewal-independent-1/8e42b27b1815490d5a5618f22b5a3c627a82c0a01f27b95f5ce499dfa992abff",
+      "childBefore": {
+        "state": "queued",
+        "purchaseStartedAt": null,
+        "purchaseAttempts": 0
+      },
+      "numberAfter": "superseded",
+      "continuedState": "needs_review",
+      "view": {
+        "available": false,
+        "legacySetup": true,
+        "offer": null,
+        "operation": {
+          "id": "renewal-independent-1/8e42b27b1815490d5a5618f22b5a3c627a82c0a01f27b95f5ce499dfa992abff",
+          "state": "needs_review",
+          "detail": "Your business setup or service terms changed. Review the current setup before further connection work.",
+          "reasonCode": "workspace_changed",
+          "requestedChannels": [
+            "voice"
+          ],
+          "desiredChannels": [
+            "voice"
+          ],
+          "acceptedChannels": [
+            "voice"
+          ],
+          "version": 2,
+          "createdAt": "2026-10-23T08:27:14.998Z",
+          "updatedAt": "2026-10-23T08:27:15.001Z",
+          "cancellationRequested": false,
+          "numberRequested": true,
+          "voiceRequested": false,
+          "messagingRequested": false,
+          "nextCheckAt": "2026-10-23T08:37:15.001Z",
+          "canReview": false,
+          "nextAction": "review_existing_connections"
+        }
+      },
+      "coordinatorError": "setup_conflict",
+      "numberError": "intent_conflict",
+      "startedMarker": "2026-10-23T08:27:14.999Z",
+      "queueDispatchMarker": "2026-10-23T08:27:14.999Z",
+      "counts": {
+        "acquire": 0,
+        "lookup": 0,
+        "release": 0,
+        "numberRequests": 1,
+        "voiceRequests": 0
+      }
+    }
+  ],
+  "physicalNetwork": 0,
+  "scope": "Actual coordinator and phone intent engines; isolated memory, synthetic business/authority/offer and explicit in-process number adapter. No env-file/account/provider/browser/network reads or effects.",
+  "sourceAfter": {
+    "netlify/functions/lib/service-onboarding.mjs": "e4bbc2c47c12b895ee8e9292f16ac9bb0989f101b496dae16d38898964f71f74",
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "physicalNetwork": 0,
+    "sourceStable": true
+  }
+}

@@ -23,7 +23,7 @@ import { phoneActivationStatus, requestPhoneActivation, cancelPhoneActivation, P
 import { startCalendarConnection, completeCalendarConnection, disconnectCalendar, calendarConnectionView, CalendarError } from "./lib/calendar-connection.mjs";
 import { voiceActivationStatus, requestVoiceActivation, cancelVoiceActivation } from "./lib/voice-activation.mjs";
 import { dispatchVoiceActivationWave } from "./lib/voice-activation.mjs";
-import { messagingActivationStatus, requestMessagingActivation, correctMessagingActivation, cancelMessagingActivation } from "./lib/messaging-activation.mjs";
+import { messagingActivationStatus, requestMessagingActivation, correctMessagingActivation, cancelMessagingActivation, renewMessagingProbe } from "./lib/messaging-activation.mjs";
 import { serviceConnections, serviceSetupView } from "./lib/service-connections.mjs";
 import { dispatchServiceWorker } from "./lib/managed-sms.mjs";
 import { deliveryTenant } from "./lib/managed-consent.mjs";
@@ -218,6 +218,7 @@ async function handle(req) {
       resume_services: ["expectedRevision"],
       request_messaging_activation: ["expectedRevision", "submissionId", "offerVersion", "offerDigest", "programDigest", "acceptedCosts", "authority", "attestLegalAccuracy", "attestConsent", "testPhoneConsent", "legal"],
       correct_messaging_activation: ["expectedRevision", "operationId", "expectedSubmissionRevision", "submissionId", "offerVersion", "offerDigest", "programDigest", "acceptedCosts", "authority", "attestLegalAccuracy", "attestConsent", "testPhoneConsent", "legal"],
+      renew_messaging_probe: ["expectedRevision", "operationId", "expectedProbeNonce", "testPhoneConsent"],
       cancel_messaging_activation: ["expectedRevision", "operationId"]
     };
     if (Object.hasOwn(serviceActions, b?.action || "")) {
@@ -251,8 +252,9 @@ async function handle(req) {
         else if (b.action === "cancel_voice_activation") result = await cancelVoiceActivation(c, body);
         else if (b.action === "request_messaging_activation") result = await requestMessagingActivation(c, body);
         else if (b.action === "correct_messaging_activation") result = await correctMessagingActivation(c, body);
+        else if (b.action === "renew_messaging_probe") result = await renewMessagingProbe(c, body);
         else result = await cancelMessagingActivation(c, b.operationId, body);
-        if (["request_messaging_activation", "correct_messaging_activation", "cancel_messaging_activation"].includes(b.action)) try { await dispatchServiceWorker("service-activation-background",{slug:c.slug,tenant:deliveryTenant(c)}); } catch { /* Scheduled recovery still owns the saved intent. */ }
+        if (["request_messaging_activation", "correct_messaging_activation", "cancel_messaging_activation", "renew_messaging_probe"].includes(b.action)) try { await dispatchServiceWorker("service-activation-background",{slug:c.slug,tenant:deliveryTenant(c)}); } catch { /* Scheduled recovery still owns the saved intent. */ }
         if (["request_voice_activation", "cancel_voice_activation"].includes(b.action)) try { await dispatchVoiceActivationWave(); } catch { /* The next scheduled wave recovers the saved intent. */ }
         if (b.action === "complete_calendar_connection") try { await dispatchCalendarDeliveryWave(c); } catch { /* Saved future visits are discovered by scheduled recovery. */ }
         return json({ ok: true, result, connections: await serviceConnections(c) }, 202, { "Cache-Control": "no-store" });

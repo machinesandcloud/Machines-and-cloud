@@ -6,6 +6,7 @@ import { strictRead } from "./accounts.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant, mayDeliverManagedSMS } from "./managed-consent.mjs";
 import { arrivalInstant } from "./service-time.mjs";
+import { reserveManagedSMS, assertManagedSMSReservation, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
 const hash = s => createHash("sha256").update(s).digest("hex");
 const stamp = () => new Date().toISOString();
 const STORE = "managed_deliveries";
@@ -123,6 +124,8 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
       const sid = process.env.TWILIO_ACCOUNT_SID, secret = process.env.TWILIO_AUTH_TOKEN;
       if (!sid || !secret) throw new Error("SMS not configured");
       const url = new URL("/api/managed-sms/status", process.env.URL); url.searchParams.set("job", job.id);
+      await assertManagedSMSReservation(c,job,job.smsBudget);
+      if(job.purpose==='activation_probe'&&!await probeFor(c,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
       const { response, data } = await request(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, { method: "POST", headers: { Authorization: "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ To: job.to, From: sender.number, MessagingServiceSid: sender.serviceSid, Body: job.body, StatusCallback: url.href }) });
       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
@@ -170,14 +173,18 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     }
     if (Date.parse(job.dueAt) > Date.now()) return job;
     if (job.channel === "email" && job.to !== c.owner.email) return change(id, row => ({ ...row, state: "superseded", reasonCode: "owner_changed" }));
+    let smsBudget=null;
     if (job.channel === "sms") {
-      if (!await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c))) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: "sms_not_ready" }));
+      const binding=await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c));
+      if (!binding) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: "sms_not_ready" }));
       if (job.purpose !== "activation_probe" && !await mayDeliverManagedSMS(c, job.to, job.purpose)) return change(id, row => ({ ...row, state: "waiting_consent", reasonCode: "consent_required" }));
       if (!["reply", "consent_ask"].includes(job.purpose) && inQuietHours()) return change(id, row => ({ ...row, state: "waiting_hours", reasonCode: "quiet_hours" }));
       if (job.source && !await inspectSource(job, c)) return job;
+      try { smsBudget=await reserveManagedSMS(c,{...job,from:binding.number,serviceSid:binding.serviceSid}); }
+      catch(error) { return change(id,row=>row.attemptStartedAt?null:{...row,state:"waiting_platform",reasonCode:error instanceof ManagedSMSBudgetError?error.code:"sms_budget_storage_unavailable",detail:error instanceof ManagedSMSBudgetError?error.message:"Texting is waiting for its platform sending allowance to be confirmed. Your message remains saved."}); }
     }
     const token = randomBytes(16).toString("hex");
-    job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
+    job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", detail:null, ...(smsBudget?{smsBudget}:{}), attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (job.claim?.token !== token) return job;
     // Reread lifecycle, source and consent after acquiring the exclusive send claim.
     const latest = await strictRead("clients", c.slug);
@@ -189,12 +196,19 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       if(job.claim?.token!==token)return job;
     }
     try {
+      if(job.channel==='sms')await assertManagedSMSReservation(latest,job,job.smsBudget);
+      if(job.purpose==='activation_probe'&&!await probeFor(latest,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
       const receipt = await provider.send(job, latest);
       if (!receipt?.id) throw new Error("Missing receipt");
       const saved = await change(id, row => row.providerId || terminal(row.state) || row.claim?.token !== token ? null : { ...row, state: "accepted", providerId: receipt.id, from: receipt.from || null, serviceSid: receipt.serviceSid || null, acceptedAt: stamp(), claim: null, reasonCode: null });
       if (job.consentAsk && job.channel === "sms") { const { saveManagedConsentAsk } = await import("./managed-consent.mjs"); await saveManagedConsentAsk(latest, job.to, { wording: job.body, messageSid: receipt.id,sentAt:receipt.sentAt }); }
       return saved;
-    } catch { return change(id, row => !row.providerId && !terminal(row.state) && row.claim?.token === token ? { ...row, state: "uncertain", claim: null, reasonCode: "provider_result_unconfirmed" } : null); }
+    } catch(error) {
+      // Budget assertions reject before transport. Keep their conservative
+      // reservation, but allow a later approved policy to resume the saved job.
+      if(error instanceof ManagedSMSBudgetError)return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
+      return change(id, row => !row.providerId && !terminal(row.state) && row.claim?.token === token ? { ...row, state: "uncertain", claim: null, reasonCode: "provider_result_unconfirmed" } : null);
+    }
   }
   return { run };
 }
@@ -222,7 +236,7 @@ export async function managedDeliveryView(c) {
   await currentClient(c);
   const rows = (await Promise.all((await list(STORE, `${c.slug}/`)).map(key => strictRead(STORE, key)))).filter(row => row?.tenant === deliveryTenant(c));
   const counts = {}; for (const row of rows) counts[row.state] = (counts[row.state] || 0) + 1;
-  return { enabled: managedDeliveryEnabled(), total: rows.length, counts, jobs: rows.sort((a,b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0,30).map(row => ({ id: row.id, channel: row.channel, purpose: row.purpose, state: row.state, reasonCode: row.reasonCode || null, updatedAt: row.updatedAt, deliveredAt: row.deliveredAt || null })) };
+  return { enabled: managedDeliveryEnabled(), total: rows.length, counts, jobs: rows.sort((a,b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0,30).map(row => ({ id: row.id, channel: row.channel, purpose: row.purpose, state: row.state, reasonCode: row.reasonCode || null, detail:row.detail || null, updatedAt: row.updatedAt, deliveredAt: row.deliveredAt || null })) };
 }
 async function fairPage(kind, cursorKey, limit) {
   const keys = await list(kind, ""), cursor = await strictRead("managed_delivery_cursors", cursorKey);

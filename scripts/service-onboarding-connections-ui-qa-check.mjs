@@ -31,7 +31,7 @@ async function fixture(data = dto(), width = 375) {
   await context.route('**/*', async route => {
     const req = route.request(), url = new URL(req.url());
     if (url.origin !== base) { report.blocked.push(url.origin); return route.abort(); }
-    if (url.pathname === '/fixture.html') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/desk-connections.css"><link rel="stylesheet" href="/product-ui.css"><link rel="stylesheet" href="/desk.css"><style>' + deskStyles + '</style></head><body class="theme-light product-app desk-app"><main style="max-width:1000px;margin:auto;padding:20px"><button id="deskSignOut">Sign out</button><h2 id="status">Workspace ready</h2><div id="channelStates"></div><section id="phoneSetupCard">Standalone number setup</section><div id="serviceConnections"></div><p id="serviceConnectionMessage" role="status"></p></main><script src="/desk-connections.js"></script></body></html>' });
+    if (url.pathname === '/fixture.html') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/desk-connections.css"><link rel="stylesheet" href="/product-ui.css"><link rel="stylesheet" href="/desk.css"><style>' + deskStyles + '</style></head><body class="theme-light product-app desk-app"><main style="max-width:1000px;margin:auto;padding:20px"><button id="deskSignOut">Sign out</button><h2 id="status">Workspace ready</h2><div id="channelStates"></div><section id="phoneSetupCard">Standalone number setup</section><div id="connectionJourney"></div><div id="serviceConnections"></div><p id="serviceConnectionMessage" role="status"></p></main><script src="/desk-connections.js"></script></body></html>' });
     if (url.pathname === '/api/client' && req.method() === 'POST') {
       const body = req.postDataJSON(); requests.push(body); report.requests.push({ action: body.action, legalPresent: !!body.legal });
       const result = structuredClone(data); result.serviceOnboarding.available = false; result.serviceOnboarding.operation = { id: 'fixture-operation', state: 'awaiting_number', numberRequested: true, voiceRequested: false, messagingRequested: false, cancellationRequested: false, detail: 'Your number request is saved. Selected connections continue automatically.' };
@@ -44,6 +44,35 @@ async function fixture(data = dto(), width = 375) {
 }
 async function shot(page, label) { const path = output.replace(/\.json$/, '') + '-' + label + '.png'; await page.screenshot({ path, fullPage: true }); report.screenshots.push(path); }
 try {
+  await check('Expired texting checks offer a fresh request with explicit unchecked mobile consent', async () => {
+    const data=dto();
+    data.connections.messaging.operation={id:'fixture-text-operation',state:'awaiting_test',detail:'The setup text expired. Request a fresh setup text to verify this connection.',customerAction:'renew_setup_text',probe:{nonce:'ABC12345',to:data.client.owner.phone,expiresAt:'2020-01-01T00:00:00Z',expired:true,renewable:true}};
+    const {page,requests}=await fixture(data,320);
+    assert.match(await page.locator('#textConnectionSteps').innerText(),/setup text expired/);
+    await page.locator('[data-connection="renew_text_probe"]').click();
+    const form=page.locator('#connectionForm');assert.equal(await form.locator('[name="testPhoneConsent"]').isChecked(),false);
+    await form.locator('[type="submit"]').click();assert.equal(requests.length,0);
+    await form.locator('[name="testPhoneConsent"]').check();await form.locator('[type="submit"]').click();
+    await page.waitForFunction(()=>!document.querySelector('dialog[open]'));
+    assert.deepEqual(requests,[{action:'renew_messaging_probe',expectedRevision:'e'.repeat(64),operationId:'fixture-text-operation',expectedProbeNonce:'ABC12345',testPhoneConsent:true}]);
+    data.connections.messaging.operation.probe.expired=false;
+    data.connections.messaging.operation.detail='Your mobile number changed. Request a fresh setup text.';
+    const changed=await fixture(data,320);await changed.page.locator('[data-connection="renew_text_probe"]').click();
+    assert.equal(await changed.page.locator('[name="testPhoneConsent"]').isChecked(),false);assert.doesNotMatch(await changed.page.locator('#connectionForm').innerText(),/earlier.*expired/);assert.equal(changed.requests.length,0);
+    data.connections.messaging.available=false;
+    const blocked=await fixture(data,320);assert.equal(await blocked.page.locator('[data-connection="renew_text_probe"]').count(),0);assert.equal(blocked.requests.length,0);
+  });
+  await check('Saved sending waits explain platform responsibility and Calendar automatic recovery without a fake retry', async () => {
+    const data = dto();
+    data.connections.delivery = { total:1, jobs:[{purpose:'reply',state:'waiting_platform',reasonCode:'sms_budget_exhausted',detail:'The platform is reviewing this sending allowance. <script>window.qaInjected=true</script>'}] };
+    data.connections.calendarDelivery = { total:1, jobs:[{bookingId:'fixture-visit',state:'queued',reasonCode:'calendar_budget_exhausted',detail:'Internal detail',nextAttemptAt:'2026-10-24T00:00:00.000Z'}] };
+    const {page,requests} = await fixture(data,320);
+    await page.getByText('Recent delivery status',{exact:true}).click();
+    assert.match(await page.locator('[data-delivery-status="message"]').innerText(),/Machines & Cloud manages this delivery check/);
+    assert.match(await page.locator('[data-delivery-status="calendar"]').innerText(),/continue automatically/);
+    assert.equal(await page.locator('[data-delivery-status="calendar"] time').getAttribute('datetime'),'2026-10-24T00:00:00.000Z');
+    assert.equal(await page.locator('[data-delivery-status] button').count(),0); assert.equal(await page.evaluate(()=>window.qaInjected),undefined); assert.equal(requests.length,0);
+  });
   await check('Unreviewed business routes to the saved answers without opening a financial approval', async () => {
     const data = dto(); data.client.setupProof = {}; const { page, requests } = await fixture(data); assert.equal(await page.locator('[data-connection="review_setup"]').count(), 0); assert.equal(await page.locator('[data-connection="review_business"]').count(), 1);
     await page.evaluate(() => document.addEventListener('mc:desk-route', event => { window.qaRoute = event.detail; })); await page.locator('[data-connection="review_business"]').click(); assert.equal(await page.evaluate(() => window.qaRoute?.tab), 'know'); assert.equal(await page.locator('#connectionForm').count(), 0); assert.equal(requests.length, 0);

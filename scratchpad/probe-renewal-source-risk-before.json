@@ -1,0 +1,52 @@
+{
+  "stage": "Candidate pre-freeze risk reproduction",
+  "sourceBefore": {
+    "netlify/functions/lib/messaging-activation.mjs": "183174d4722311aa3a02c95227fe53af3442d3eef96e7334a8bda599b6484133",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/lib/managed-delivery.mjs": "c71f4fe495a4925fffabf939ecf084a8db86993a2c425495f461c9f5ad82f7d5"
+  },
+  "harnessHash": "62392cbbf50f8666c5c88e6498197151fbc31fae1b9e2a6b2874097437ad7368",
+  "physicalNetwork": 0,
+  "providerCalls": 0,
+  "checks": [
+    {
+      "name": "Inner-CAS workspace edit after authorize commits stale mobile/revision",
+      "reproduced": true,
+      "evidence": {
+        "accepted": true,
+        "requestedRevision": "7666a78aba1c136555b912880b5416d2af7da201bb399525d9c85230fde88a9f",
+        "currentRevision": "a2f023ceef1d2d7a08e0c28d2d424d9d7ecba98ecf2a93509dc61a1f30ac1f1c",
+        "renewedTo": "+17135550199",
+        "currentMobile": "+17135550198",
+        "currentReviewStale": true,
+        "changedNonce": true
+      }
+    },
+    {
+      "name": "Unreadable retained lease is cleared while a valid live lease is denied",
+      "reproduced": true,
+      "evidence": {
+        "validLiveLeaseDenied": true,
+        "malformedClaimBefore": {
+          "token": "dddddddddddddddddddddddddddddddd",
+          "until": "unreadable-retained-deadline"
+        },
+        "malformedClaimCleared": true,
+        "renewalAccepted": true
+      }
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/messaging-activation.mjs": "183174d4722311aa3a02c95227fe53af3442d3eef96e7334a8bda599b6484133",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/lib/managed-delivery.mjs": "c71f4fe495a4925fffabf939ecf084a8db86993a2c425495f461c9f5ad82f7d5"
+  },
+  "sourceStable": true,
+  "summary": {
+    "reproduced": 2,
+    "notReproduced": 0,
+    "physicalNetwork": 0,
+    "providerCalls": 0,
+    "sourceStable": true
+  }
+}

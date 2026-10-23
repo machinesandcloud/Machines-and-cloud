@@ -101,4 +101,38 @@ await check('Revoked owner sessions cannot finish OAuth even though background g
   await f.store.put('access_sessions',item.session.sessionHash,{...item.session,status:'revoked'});
   await assert.rejects(f.connection.completeCalendarConnection(item.client,item.session,{state,code:'revoked-session-code'}),e=>e.status===403);assert.equal(f.requests.length,before);
 });
+await check('A daily update allowance waits until UTC reset without spending provider-failure retries',async()=>{
+  f.advance(86400000);
+  policy={...policy,limits:Object.fromEntries(actions.map(a=>[a,10000])),tenantLimits:Object.fromEntries(actions.map(a=>[a,a==='eventUpdate'?1:1000]))};publish();
+  const item=await shop('calendar-update-budget'),row=await booking(item.client,'ordinary-update-budget');
+  await all();
+  await f.store.put('bookings',`${item.client.slug}/${row.id}`,{...row,date:'2027-02-04'});await all();
+  await f.store.put('bookings',`${item.client.slug}/${row.id}`,{...row,date:'2027-02-05'});await all();
+  const key=f.delivery.calendarDeliveryKey(item.client,row.id),waiting=await f.store.get('calendar_deliveries',key),reset=new Date(Date.now());reset.setUTCHours(24,0,0,0);
+  assert.equal(waiting.state,'queued');assert.equal(waiting.reasonCode,'calendar_budget_exhausted');assert.equal(waiting.attempts,0);assert.equal(waiting.nextAttemptAt,reset.toISOString());
+  const before=f.requests.length;for(let n=0;n<6;n++){f.advance(60000);await all();}assert.equal(f.requests.length,before);
+  f.advance(reset.getTime()-Date.now());await all();
+  const saved=await f.store.get('calendar_deliveries',key);assert.equal(saved.state,'synced');assert.equal(saved.eventId,waiting.eventId);
+  const remote=f.events.get(`calendar-update-budget@google.fixture.test/${saved.eventId}`);assert.match(remote.start.dateTime,/2027-02-05/);
+});
+await check('A create denied before transport remains eligible next day without retaining a false unknown-create marker',async()=>{
+  f.advance(86400000);
+  policy={...policy,tenantLimits:Object.fromEntries(actions.map(a=>[a,a==='eventCreate'?1:1000]))};publish();
+  const item=await shop('calendar-create-budget');await booking(item.client,'first-create');await all();const row=await booking(item.client,'second-create');await all();
+  const key=f.delivery.calendarDeliveryKey(item.client,row.id),waiting=await f.store.get('calendar_deliveries',key);
+  assert.equal(waiting.state,'queued');assert.equal(waiting.reasonCode,'calendar_budget_exhausted');assert.equal(waiting.attempts,0);assert.equal(waiting.createAttempt,undefined);
+  const creates=()=>f.requests.filter(call=>call.method==='POST'&&call.body.includes(waiting.eventId)).length;assert.equal(creates(),0);
+  f.advance(Date.parse(waiting.nextAttemptAt)-Date.now());await all();await all();
+  const saved=await f.store.get('calendar_deliveries',key);assert.equal(saved.state,'synced');assert.equal(saved.eventId,waiting.eventId);assert.equal(creates(),1);
+});
+await check('Budget waits retain prior dispatched unknown-create evidence and its failure count',async()=>{
+  f.advance(86400000);
+  policy={...policy,tenantLimits:Object.fromEntries(actions.map(a=>[a,a==='calendarRead'?3:1000]))};publish();
+  const item=await shop('calendar-unknown-budget'),row=await booking(item.client,'unknown-create');f.setMode('lost_insert');await all();
+  const key=f.delivery.calendarDeliveryKey(item.client,row.id),unknown=await f.store.get('calendar_deliveries',key);assert.equal(unknown.state,'retry');assert.equal(unknown.attempts,1);assert.equal(unknown.createAttempt.state,'uncertain');
+  await f.execution.reserveCalendarExecution(item.client,'calendarRead',{targetId:'calendar-unknown-budget@google.fixture.test',bookingId:row.id});f.advance(120000);await all();
+  const waiting=await f.store.get('calendar_deliveries',key);assert.equal(waiting.state,'queued');assert.equal(waiting.attempts,1);assert.deepEqual(waiting.createAttempt,unknown.createAttempt);
+  const creates=()=>f.requests.filter(call=>call.method==='POST'&&call.body.includes(waiting.eventId)).length;assert.equal(creates(),1);
+  f.advance(Date.parse(waiting.nextAttemptAt)-Date.now());await all();assert.equal((await f.store.get('calendar_deliveries',key)).state,'synced');assert.equal(creates(),1);
+});
 await report('calendar-self-service-offline',checks);

@@ -43,6 +43,15 @@
     }
   }
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+  function deliveryStatus(job, calendar) {
+    var title = calendar ? 'Calendar visit ' + job.bookingId : labelState(job.purpose);
+    var detail = job.detail || '', next = calendar && job.nextAttemptAt && new Date(job.nextAttemptAt);
+    if (calendar && job.reasonCode === 'calendar_budget_exhausted') detail = 'Your visit is saved. Calendar sync will continue automatically when capacity renews.';
+    var note = detail ? '<p class="connection-note">' + esc(detail) + '</p>' : '';
+    if (!calendar && /^sms_budget_/.test(job.reasonCode || '')) note += '<p class="connection-note">Machines &amp; Cloud manages this delivery check. Your message stays saved.</p>';
+    if (next && Number.isFinite(next.getTime())) note += '<p class="connection-note">Resumes after <time datetime="' + esc(next.toISOString()) + '">' + esc(next.toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short' })) + '</time>.</p>';
+    return '<li data-delivery-status="' + (calendar ? 'calendar' : 'message') + '">' + esc(title) + ' · ' + esc(labelState(job.state)) + note + '</li>';
+  }
   function button(action, label) { return '<button type="button" class="btn-pill btn-pill-blue btn-sm" data-connection="' + action + '">' + esc(label) + '</button>'; }
   function money(cents) { return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(cents / 100); }
   function labelState(value) { return String(value || 'not active').replace(/_/g, ' '); }
@@ -121,8 +130,8 @@
       if(forwarding.needsBusinessNumber)html+=button('review_business','Review business details');
       html+='</div></div>';
     }
-    if ((!guideShown && !coordinated && requested.indexOf('sms') >= 0) || c.messaging.operation) html += '<div class="setup-step" id="textConnectionSteps"><div><h4>Text from your front desk number</h4><p>' + esc(c.messaging.detail) + '</p>' + (c.messaging.available && (!coordinated || c.messaging.operation?.customerAction === 'correct_registration') && (!c.messaging.operation || c.messaging.operation.customerAction === 'correct_registration') && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_sms', c.messaging.operation ? 'Review registration details' : 'Review texting setup') : '') + (c.messaging.operation && !c.messaging.operation.cancellationRequested && c.messaging.operation.state !== 'cancelled' ? button('cancel_sms', 'Disconnect texting') : '') + '</div></div>';
-    if (c.delivery.total || c.calendarDelivery.total) html += '<details><summary>Recent delivery status</summary><p>Saved requests stay in your workspace. Provider acceptance and confirmed delivery are tracked separately.</p><ul>' + c.delivery.jobs.map(function (j) { return '<li>' + esc(labelState(j.purpose)) + ' · ' + esc(labelState(j.state)) + '</li>'; }).concat(c.calendarDelivery.jobs.map(function (j) { return '<li>Calendar visit ' + esc(j.bookingId) + ' · ' + esc(labelState(j.state)) + '</li>'; })).join('') + '</ul></details>';
+    if ((!guideShown && !coordinated && requested.indexOf('sms') >= 0) || c.messaging.operation) html += '<div class="setup-step" id="textConnectionSteps"><div><h4>Text from your front desk number</h4><p>' + esc(c.messaging.operation ? c.messaging.operation.detail : c.messaging.detail) + '</p>' + (c.messaging.available && c.messaging.operation?.customerAction === 'renew_setup_text' ? button('renew_text_probe','Request a new setup text') : c.messaging.operation?.customerAction === 'reply_to_setup_text' && c.messaging.operation.probe ? '<p>When the setup text arrives at ' + esc(c.messaging.operation.probe.to) + ', reply ' + esc(c.messaging.operation.probe.nonce) + ' to confirm.</p>' : '') + (c.messaging.available && (!coordinated || c.messaging.operation?.customerAction === 'correct_registration') && (!c.messaging.operation || c.messaging.operation.customerAction === 'correct_registration') && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_sms', c.messaging.operation ? 'Review registration details' : 'Review texting setup') : '') + (c.messaging.operation && !c.messaging.operation.cancellationRequested && c.messaging.operation.state !== 'cancelled' ? button('cancel_sms', 'Disconnect texting') : '') + '</div></div>';
+    if (c.delivery.total || c.calendarDelivery.total) html += '<details><summary>Recent delivery status</summary><p>Saved requests stay in your workspace. Provider acceptance and confirmed delivery are tracked separately.</p><ul>' + c.delivery.jobs.map(function (j) { return deliveryStatus(j,false); }).concat(c.calendarDelivery.jobs.map(function (j) { return deliveryStatus(j,true); })).join('') + '</ul></details>';
     container.innerHTML = html;var controls=$('connectionServiceDetails');if(controls)controls.hidden=!html.trim();
     connectionRefreshInFlight=false;if(wasRefreshing&&message.textContent==='Checking saved connection status…')message.textContent='Saved connection status updated.';scheduleConnectionRefresh();
     var states = $('channelStates');
@@ -218,6 +227,13 @@
     if (action === 'finish_calendar' && calendarReturn) return request('complete_calendar_connection', calendarReturn);
     if (action === 'disconnect_calendar') return review('Disconnect Google Calendar?', '<p>New updates will stop. Existing events and saved visits remain. Reconnect the same calendar to resume pending work.</p>', 'Disconnect Calendar', function () { request('disconnect_calendar'); });
     if (action === 'cancel_voice' || action === 'cancel_sms') return review('Disconnect this service?', '<p>New delivery will stop. We confirm provider cleanup in the background and retain your customer records. Number release waits until attached services are disconnected.</p>', 'Disconnect service', function () { request(action === 'cancel_voice' ? 'cancel_voice_activation' : 'cancel_messaging_activation', action === 'cancel_voice' ? { expectedRevision:revision } : { expectedRevision:revision, operationId:c.messaging.operation.id }); });
+    if (action === 'renew_text_probe') {
+      var operation = c.messaging.operation;
+      if (!c.messaging.available || operation?.customerAction !== 'renew_setup_text' || !(operation.probe?.renewable || operation.probe?.expired)) return;
+      return review('Verify texting on your mobile', '<p>We will prepare a fresh text for your saved mobile number, ' + esc(data.client.owner.phone) + '. Reply with its code when it arrives to confirm the connection.</p>' + check('testPhoneConsent','Send one new setup verification text to my saved mobile number.'), 'Request setup text', function () {
+        request('renew_messaging_probe',{expectedRevision:revision,operationId:operation.id,expectedProbeNonce:operation.probe.nonce,testPhoneConsent:true});
+      });
+    }
     if (action === 'review_voice') {
       var offer = c.voice.offer;
       return review('Set up phone answering', '<p>' + esc(offer.usageDisclosure) + '</p><p>Up to ' + esc(offer.maxDurationSeconds) + ' seconds per call, ' + esc(offer.maxDailyCalls) + ' calls and ' + esc(offer.maxDailyMinutes) + ' minutes per day for your shop.</p><label class="form-label">How should customers reach you?<select class="form-input" name="forwardingMode"><option value="forward_business_line">Keep my existing number and forward calls</option><option value="use_new_number">Use my new front desk number directly</option></select></label><p>A completed test call confirms the connection.</p>' + check('authority',offer.authorityText), 'Set up phone answering', function (form) { request('request_voice_activation',{ expectedRevision:revision, acceptedAuthority:true, policyVersion:offer.version, policyDigest:offer.digest, forwardingMode:form.get('forwardingMode') }); });

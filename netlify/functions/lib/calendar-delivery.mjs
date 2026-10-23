@@ -10,6 +10,7 @@ import { CalendarError, calendarConnectionEnabled, calendarTenantIdentity, getCa
 import { calendarExecutionPolicy, calendarExecutionAvailable, assertCalendarExecution, admitCalendarExecution, guardedCalendarFetch, calendarClaimExpired } from './calendar-execution.mjs';
 const hash = value => createHash("sha256").update(value).digest("hex");
 const stamp = () => new Date().toISOString();
+const nextUtcDay = () => { const date = new Date(); date.setUTCHours(24, 0, 0, 0); return date.toISOString(); };
 const ACTIVE = new Set(["booked", "confirmed", "on_the_way"]);
 const validId = value => typeof value === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(value);
 const validSlug = value => typeof value === "string" && /^[a-z0-9-]{1,40}$/.test(value);
@@ -133,7 +134,17 @@ async function reconcile(job, deadline) {
     });
     let inserted;
     try { inserted = await requestGoogle(job, connection, token, "POST", null, { id: job.eventId, ...body }, null, deadline); }
-    catch (error) { await recordCreateState(job, createToken, "uncertain"); throw error; }
+    catch (error) {
+      if (error.code === "calendar_budget_exhausted") {
+        // Reservation rejects before fetch. Remove only this invocation's
+        // undispatched marker; a prior or actually dispatched create stays retained.
+        await atomicUpdate("calendar_deliveries", job.storageKey, row => {
+          if (row?.createAttempt?.token !== createToken || row.createAttempt.state !== "sending") return {};
+          const value = { ...row }; delete value.createAttempt; return { value };
+        });
+      } else await recordCreateState(job, createToken, "uncertain");
+      throw error;
+    }
     await recordCreateState(job, createToken, inserted.response.ok ? "acknowledged" : "uncertain");
     if (inserted.response.ok) {
       if (inserted.data.id !== job.eventId || inserted.data.extendedProperties?.private?.mcOwner !== ownerTag(job.tenantIdentity, job.bookingId)) throw new CalendarError("delivery_uncertain", "Google's event receipt could not be confirmed. The same reference will be checked.", 503);
@@ -176,15 +187,19 @@ async function processJob(key, deadline) {
   let result, failure;
   try { result = await reconcile(job, deadline); await latestJob(job); }
   catch (error) { failure = error instanceof CalendarError ? error : error.code?.startsWith('calendar_') ? new CalendarError(error.code, error.message, 503) : new CalendarError("storage_or_provider_unavailable", "Calendar work could not be confirmed. The same event reference is retained.", 503); }
+  const budgetWait = failure?.code === "calendar_budget_exhausted" && calendarExecutionPolicy()?.mode === "self_service";
   await atomicUpdate("calendar_deliveries", key, row => {
     if (!row || row.version !== job.version || row.claim?.token !== token) return {};
     const permanent = failure && ["event_ownership_conflict", "event_etag_missing", "remote_event_deleted", "calendar_target_changed", "invalid_booking"].includes(failure.code);
     const waiting = failure && ["reconnect_required", "workspace_changed"].includes(failure.code);
     const superseded = failure?.code === "superseded";
-    const state = !failure ? (result.cancelled ? "cancelled" : "synced") : permanent || row.attempts >= 5 ? "needs_attention" : waiting ? "waiting_connection" : "retry";
-    return { value: { ...row, state, claim: null, updatedAt: stamp(), completedAt: failure ? null : stamp(), reasonCode: failure?.code || null, detail: failure?.message || (result.cancelled ? "Calendar event cancellation is confirmed. Your workspace record is retained." : "Saved visit is confirmed in your Google calendar."), nextAttemptAt: failure && !permanent && !waiting ? new Date(Date.now() + (superseded ? 1000 : Math.min(3600000, 60000 * 2 ** (row.attempts - 1)))).toISOString() : null, ...(!failure && result ? { receipt: { version: row.version, sourceRevision: row.sourceRevision, eventId: row.eventId, confirmedAt: stamp(), action: result.cancelled ? "cancel" : "sync" } } : {}) } };
+    const state = !failure ? (result.cancelled ? "cancelled" : "synced") : budgetWait ? "queued" : permanent || row.attempts >= 5 ? "needs_attention" : waiting ? "waiting_connection" : "retry";
+    // Daily admission waits are not failed provider operations. Every physical
+    // request remains debited in the execution ledger; earlier failures and
+    // unknown create evidence keep their existing retry count and receipts.
+    return { value: { ...row, state, attempts: budgetWait ? Math.max(0, row.attempts - 1) : row.attempts, claim: null, updatedAt: stamp(), completedAt: failure ? null : stamp(), reasonCode: failure?.code || null, detail: failure?.message || (result.cancelled ? "Calendar event cancellation is confirmed. Your workspace record is retained." : "Saved visit is confirmed in your Google calendar."), nextAttemptAt: budgetWait ? nextUtcDay() : failure && !permanent && !waiting ? new Date(Date.now() + (superseded ? 1000 : Math.min(3600000, 60000 * 2 ** (row.attempts - 1)))).toISOString() : null, ...(!failure && result ? { receipt: { version: row.version, sourceRevision: row.sourceRevision, eventId: row.eventId, confirmedAt: stamp(), action: result.cancelled ? "cancel" : "sync" } } : {}) } };
   });
-  return { ok: !failure, state: failure?.code || "confirmed" };
+  return { ok: !failure || budgetWait, state: failure?.code || "confirmed" };
 }
 async function discover(limit, deadline = Infinity) {
   const keys = await list("bookings", ""), cursor = await strictRead("calendar_scan", "bookings:v1");

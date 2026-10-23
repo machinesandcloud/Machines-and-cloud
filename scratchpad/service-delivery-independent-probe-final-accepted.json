@@ -1,0 +1,92 @@
+{
+  "decision": "Accepted for the independently reviewed local synthetic service-delivery repair slices; no unresolved runtime blocker in those slices.",
+  "checkout": "/tmp/mc-service-delivery-369",
+  "base": "36918edc350f8cf2db3e2fe6d8b65668b0e8d89a",
+  "scope": "Coordinator renewal; Calendar budget recovery; managed REST SMS budget; owner-requested setup-probe renewal and current-authority proof fencing.",
+  "summary": {
+    "probe": "6 main +3 source-race/send +3 current proof/nonce group executions passed. This is12executions covering11distinct groups: the nonce group was intentionally rerun. Eight earlier distinct groups retain acceptance through the exact proof-only source bridge;3groups executed on latest proof bytes.",
+    "priorRenewal": "29distinct groups covered:9executed at that coordinator freeze,20retained by its documented helper bridge. Coordinator/phone core is still unchanged; new client route exactly reverses to the earlier accepted source.",
+    "priorCalendar": "4groups passed; all6recorded Calendar sources remain unchanged.",
+    "priorSMS": "15groups passed at the earlier SMS freeze; budget module remains byte-identical. Delivery now differs only by2probe-specific final authority guards, verified by exact reverse hash. Fresh/old/unknown probe integration was exercised by the new6main groups.",
+    "physicalNetwork": 0,
+    "currentApplicationTestConfigHashes": 28,
+    "liveAcceptance": false
+  },
+  "receipts": {
+    "probeMain6": "scratchpad/messaging-probe-renewal-independent-final.json",
+    "probeRaceAndSend3": "scratchpad/probe-renewal-source-risk-after-first.json",
+    "proofCurrent2": "scratchpad/messaging-probe-late-proof-independent-after-first.json",
+    "nonceProofCurrent1": "scratchpad/messaging-probe-renewal-independent-proof-final.json",
+    "priorRenewal29": "scratchpad/coordinator-renewal-independent-final-accepted.json",
+    "priorCalendar4": "scratchpad/calendar-budget-edge-independent-final.json",
+    "priorSMS15": "scratchpad/service-delivery-independent-final-accepted.json",
+    "rootUI13": "scratchpad/service-onboarding-qa-connections-probe-reviewed.json",
+    "rootFull38": "/tmp/mc-service-delivery-required.json"
+  },
+  "baselinesPreserved": {
+    "initialCoordinatorDeadlock": "scratchpad/coordinator-renewal-independent-before.json",
+    "renewalDependencyRaceAndMalformedLease": "scratchpad/probe-renewal-source-risk-before.json",
+    "lateOldMobileProofMarkedActive": "scratchpad/messaging-probe-late-proof-independent-first.json"
+  },
+  "exactIndependentSourceBridges": [
+    {
+      "path": "netlify/functions/client.mjs",
+      "prior": "0bbbc255d1eeac03c4e6286ebd857280d9a2b4132822d2168fd5a851378dc48d",
+      "current": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+      "reverseHashMatchesPrior": true,
+      "delta": "Only new import/action allowlist/handler/dispatch membership; older action paths unchanged."
+    },
+    {
+      "path": "netlify/functions/lib/managed-delivery.mjs",
+      "prior": "c71f4fe495a4925fffabf939ecf084a8db86993a2c425495f461c9f5ad82f7d5",
+      "current": "bf9bd0cc5c6e66af8d5067825bc2f2f26e03632a9e92a793b7de6dd53e8d4cd4",
+      "reverseHashMatchesPrior": true,
+      "delta": "Only2probe-specific current-authority guards after budget assertions, before transport. Existing typed waiting handling retains debit and clears only undispatched attempts."
+    },
+    {
+      "path": "netlify/functions/lib/messaging-activation.mjs",
+      "prior": "cec0c4cf6d45b4b7ab34c5de52d10549488fee36a305e372670a7621ba2fe877",
+      "current": "1f895bc3dc1919f97a74660842bf090ffeeb41c38e709c60784f929836233314",
+      "reverseHashMatchesPrior": true,
+      "delta": "Pure current-phone/review/authorizedRevision predicate; initial proof check; final proof check; final current-client read after awaited parent. All other candidate backend bytes exactly match."
+    }
+  ],
+  "sourceHashes": {
+    "desk-connections.css": "c35beee78d17bf14a28009635c3d0c49d9d320e3fc3c905300a1ab41cd315932",
+    "desk-connections.js": "e38465d5bb960ab4cda5bfb72767d240f30b84d643742e1a9b7441c3692d4eac",
+    "desk.css": "e51c0746dc76c132b6550f1cd73910249ebf4a533774469012c59fbaf45bbabe",
+    "desk.html": "77d16fe99db35393191b4d61675246b047013e7a9660292212a40e29747adb01",
+    "netlify.toml": "48ba9b886a96c9e26c73d519b0d26122f99f0c93fdcf49c6ed3cc8a86a087c8f",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/calendar-connection.mjs": "370cf8129ba0e90b60ab33819beeaceb3d61372c3649414aeb5e19b838f0cd58",
+    "netlify/functions/lib/calendar-delivery.mjs": "d1589ee7d66c5e57e90a3f3361102fecff3178bc88990389a8a587111e22adcf",
+    "netlify/functions/lib/calendar-execution.mjs": "b69f5b2b127de92700ad78e5c3513c359c7dd5f78a8ac9fb833be6651d47174a",
+    "netlify/functions/lib/calendar-self-service.mjs": "483100f9badad837b160bb6488f69881aaf0fad7b669872cd24b01a4348d21fd",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/managed-delivery.mjs": "bf9bd0cc5c6e66af8d5067825bc2f2f26e03632a9e92a793b7de6dd53e8d4cd4",
+    "netlify/functions/lib/managed-sms-budget.mjs": "2153ed61a34d27ad7cd036b038f830a4281286eb7f562792e97a5eec887abe86",
+    "netlify/functions/lib/messaging-activation.mjs": "1f895bc3dc1919f97a74660842bf090ffeeb41c38e709c60784f929836233314",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "netlify/functions/lib/phone-activation.mjs": "22fce5eb89c014f78d3089e6e708dfa00e3d3928eb4725080b7ed02d2fdaa9f4",
+    "netlify/functions/lib/service-onboarding.mjs": "ad0a89efad4e6110c4e5c02eaa677015fa0803f15cc2096a312fa7184837754e",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "scripts/calendar-self-service-check.mjs": "e34f91259445e3f0be86fbafc2498baa7ca987df6e36da6546ba89a462324965",
+    "scripts/calendar-test-fixtures.mjs": "9e4a4eaf9286cd91a789a5faa3d85f1511f0ea2c2004519a487c8930b5183f67",
+    "scripts/managed-sms-budget-check.mjs": "8cc315ec844eee16ecbb5a76f2fcb79287ad4e1b03e816bf5d4d2474d89e63a4",
+    "scripts/managed-sms-qa-check.mjs": "82333c37b3dc230c6f22013a1888bf0e5a9223505260ac1c4e80988773a09198",
+    "scripts/messaging-activation-check.mjs": "046de7377987e0a248eb1d4e5756d81b0e600961bc7925365f9ec8f4ff3d736b",
+    "scripts/service-onboarding-connections-ui-qa-check.mjs": "15b3be6d9043f464275068dad7a1890b2957aa02756ec65e6f00fe96c12aa5ed",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "verifiedProbeOutcome": "Fresh verified-owner consent and current reviewed revision renew only an expired or invalidated expected nonce, retaining registration/resources/legal/filing receipts. Concurrent renewals create1nonce. Old queued/unknown SMS are never resent and old unknown debit/attempt evidence remains; fresh discovery emits1newprobe POST. Dependency edits, malformed/live claims, unauthorized/stale/cancelled/gated requests deny. Current mobile/review/revision and exact nonce are checked before proof and after held provider verification; legitimate late old-mobile proof cannot mark active.",
+  "failureDispositions": "Both candidate dependency/lease defects and the later stale-proof defect remain in immutable baseline receipts and are closed by linked followups. The independent main harness first stopped before scenarios because freeze JSON used source rather than files; corrected only the scratchpad reader, then6/6passed. Earlier fixture-only failures are retained and classified in prior accepted receipt.",
+  "rootVerificationSeparate": "Root UI13passed with0page errors/physical calls and the6renderer/style hashes still match. Root reports final38/38gate and15syntax checks on latest proof bytes with stable runtime hashes and0physical attempts; this is root verification, not an independent rerun.",
+  "limitations": [
+    "Synthetic memory and fixed protocol/provider evidence only. No real env-file/account/browser account, provider/model/email transport, purchases, cloud state or publication. No app/permanent-test edits by independent QA.",
+    "Earlier groups are carried only through the explicit unchanged hashes and source bridges; counts do not imply every group ran on latest bytes. Root owns full gate, commits and release decisions. OPERATIONS/.env.example narrative edits are outside this runtime/test/config receipt.",
+    "SMS cap covers managed REST outbox/probes only, excluding keyword/provider replies, inbound/company/legacy traffic, registration, number rental and voice costs. Configured upper assumptions are not billing receipts. Local acceptance does not establish deployed behavior or live delivery."
+  ]
+}

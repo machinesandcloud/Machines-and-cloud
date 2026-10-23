@@ -80,7 +80,7 @@ async function fixture(mode, suffix = "normal") {
   await store.put("phone_activation_intents", number.intentId, { id: number.intentId, slug, tenantIdentity: identity, state: "number_acquired", resource: { id: number.id, number: number.number }, correlationId: hash("fixture-phone:" + slug), dependencies: {} });
   remote.set(phonePath, { sid: number.id, account_sid: account, phone_number: number.number, capabilities: { sms: true, voice: true }, sms_url: "", sms_method: "POST" });
   const controls = { enabled: true, claimed: 0, cleared: 0, cancelled: false, provider: createTwilioMessagingAdapter({ executionAllowed: () => controls.enabled }) };
-  const engine = sms.createMessagingActivationEngine({ provider: controls.provider, gate: () => controls.enabled, offer: offer(), resolveNumber: async () => number, claimParent: async () => { if (controls.cancelled) throw new Error("Parent cancelled"); controls.claimed++; if (controls.failParentReceipt) throw new Error("Lost dependency claim receipt after parent commit"); }, clearParent: async (_, value) => { assert.equal(value.cleanupConfirmed, true); controls.cleared++; }, parentLifecycle: async () => ({ cancellationRequested: controls.cancelled }) });
+  const engine = sms.createMessagingActivationEngine({ provider: controls.provider, gate: () => controls.enabled, offer: offer(), resolveNumber: async () => number, claimParent: async () => { if (controls.cancelled) throw new Error("Parent cancelled"); controls.claimed++; if (controls.failParentReceipt) throw new Error("Lost dependency claim receipt after parent commit"); }, clearParent: async (_, value) => { assert.equal(value.cleanupConfirmed, true); controls.cleared++; }, parentLifecycle: async () => { if(controls.onParentRead)await controls.onParentRead();return { cancellationRequested: controls.cancelled }; } });
   const body = extra => ({ expectedRevision: configurationRevision(c), submissionId: hash("submit" + ++serial), actor: { role: "owner", email: c.owner.email }, offerVersion: engine.quote().version, offerDigest: engine.quote().digest, programDigest: sms.buildMessagingProgram(c).digest, authority: true, acceptedCosts: true, attestLegalAccuracy: true, attestConsent: true, testPhoneConsent: true, legal: legal(), ...extra });
   return { c, number, controls, engine, body, phonePath };
 }
@@ -127,6 +127,51 @@ async function suite(mode) {
   });
   await check(mode + ": lost create response is correlated without a second create; partial lookup remains uncertain", async () => {
     const f = await fixture(mode, "lost"), row = await f.engine.request(f.c, f.body()), before = result.providerWrites.length; lose = { path: "/v1/Services", method: "POST" }; assert.equal((await f.engine.run(row.id)).state, "uncertain"); pagination = true; clock += 601000; assert.equal((await f.engine.run(row.id)).state, "uncertain"); pagination = false; clock += 601000; await f.engine.run(row.id); const saved = await strictRead("messaging_activation", row.id); assert.equal(saved.steps.service.state, "complete"); assert.equal(result.providerWrites.slice(before).filter(row => row.path === "/v1/Services").length, 1);
+  });
+  await check(mode + ': expired setup text requires fresh owner consent and renews once without registration writes',async()=>{
+    const f=await fixture(mode,'probe-renewal'),status=await advance(f),id=status.id;
+    let row=await strictRead('messaging_activation',id);const original=structuredClone(row);clock+=8*86400000;await f.engine.run(id);row=await strictRead('messaging_activation',id);
+    const body={actor:{role:'owner',email:f.c.owner.email},expectedRevision:configurationRevision(f.c),operationId:id,expectedProbeNonce:row.probe.nonce,testPhoneConsent:true};
+    await assert.rejects(()=>f.engine.renewProbe(f.c,{...body,testPhoneConsent:false}),e=>e.code==='probe_consent_required');
+    await assert.rejects(()=>f.engine.renewProbe(f.c,{...body,actor:{role:'owner',email:'foreign@example.test'}}),e=>e.code==='forbidden');
+    assert.equal((await f.engine.run(id)).customerAction,'renew_setup_text');
+    const writes=result.providerWrites.length,results=await Promise.allSettled([f.engine.renewProbe(f.c,body),f.engine.renewProbe(f.c,body)]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+    const saved=await strictRead('messaging_activation',id);assert.notEqual(saved.probe.nonce,original.probe.nonce);assert.equal(saved.probe.to,f.c.owner.phone);assert.equal(saved.probeHistory.length,1);assert.deepEqual(saved.probeHistory[0].body,original.probe.body);assert.deepEqual(saved.resources,original.resources);assert.equal(saved.submissionRevision,original.submissionRevision);assert.equal(result.providerWrites.length,writes);assert.equal(results.find(r=>r.status==='fulfilled').value.customerAction,'reply_to_setup_text');
+    await assert.rejects(()=>f.engine.renewProbe(f.c,body),e=>e.code==='probe_changed');
+  });
+  await check(mode + ': an old proof finishing after expiry and renewal cannot verify the fresh nonce',async()=>{
+    const f=await fixture(mode,'probe-proof-race'),status=await advance(f),id=status.id,row=await strictRead('messaging_activation',id),outbound='SM'+hash(id+'race-out').slice(0,32),inbound='SM'+hash(id+'race-in').slice(0,32),root=`https://api.twilio.com/2010-04-01/Accounts/${account}/Messages/`;
+    remote.set(root+outbound+'.json',{sid:outbound,account_sid:account,direction:'outbound-api',status:'delivered',messaging_service_sid:row.resources.service.sid,from:row.number.number,to:row.probe.to,body:row.probe.body,date_created:isoAt(clock)});
+    remote.set(root+inbound+'.json',{sid:inbound,account_sid:account,direction:'inbound',from:row.probe.to,to:row.number.number,body:row.probe.nonce,date_created:isoAt(clock)});
+    const originalVerify=f.controls.provider.verifyProbe.bind(f.controls.provider);let reached,release;const arrival=new Promise(r=>reached=r),hold=new Promise(r=>release=r);f.controls.provider.verifyProbe=async(...args)=>{const verified=await originalVerify(...args);assert.equal(verified,true);reached();await hold;return verified;};
+    const pending=f.engine.prove(f.c,{operationId:id,outboundMessageSid:outbound,inboundMessageSid:inbound});await arrival;clock+=8*86400000;await f.engine.run(id);
+    await f.engine.renewProbe(f.c,{actor:{role:'owner',email:f.c.owner.email},expectedRevision:configurationRevision(f.c),operationId:id,expectedProbeNonce:row.probe.nonce,testPhoneConsent:true});release();await assert.rejects(()=>pending,e=>e.code==='proof_unavailable');assert.equal(!!(await strictRead('messaging_activation',id)).deliveryProof,false);
+  });
+  for(const held of [false,true])await check(mode + ': renewed proof rejects changed current mobile review and revision '+(held?'after held provider verification':'before provider verification'),async()=>{
+    for(const kind of ['mobile','review','revision']){
+      const f=await fixture(mode,'late-proof-'+kind+(held?'-held':'')),status=await advance(f),id=status.id;clock+=8*86400000;await f.engine.run(id);let row=await strictRead('messaging_activation',id);
+      await f.engine.renewProbe(f.c,{actor:{role:'owner',email:f.c.owner.email},expectedRevision:configurationRevision(f.c),operationId:id,expectedProbeNonce:row.probe.nonce,testPhoneConsent:true});row=await strictRead('messaging_activation',id);
+      const outbound='SM'+hash(id+'late-out').slice(0,32),inbound='SM'+hash(id+'late-in').slice(0,32),root=`https://api.twilio.com/2010-04-01/Accounts/${account}/Messages/`,ids={operationId:id,outboundMessageSid:outbound,inboundMessageSid:inbound};
+      remote.set(root+outbound+'.json',{sid:outbound,account_sid:account,direction:'outbound-api',status:'delivered',messaging_service_sid:row.resources.service.sid,from:row.number.number,to:row.probe.to,body:row.probe.body,date_created:isoAt(clock)});
+      remote.set(root+inbound+'.json',{sid:inbound,account_sid:account,direction:'inbound',from:row.probe.to,to:row.number.number,body:row.probe.nonce,date_created:isoAt(clock)});
+      let release,pending;
+      if(held){const original=f.controls.provider.verifyProbe.bind(f.controls.provider);let reached;const arrival=new Promise(r=>reached=r),hold=new Promise(r=>release=r);f.controls.provider.verifyProbe=async(...args)=>{const valid=await original(...args);assert.equal(valid,true);reached();await hold;return valid;};pending=f.engine.prove(f.c,ids);await arrival;}
+      const changed=structuredClone(f.c);if(kind==='mobile')changed.owner.phone='+17135550188';if(kind==='revision')changed.summary='Current reviewed owner instructions';const revision=configurationRevision(changed);changed.setupProof={reviewedRevision:revision,testedRevision:kind==='review'?'stale':revision,testMode:'live'};await store.put('clients',f.c.slug,changed);
+      if(held)release();await assert.rejects(()=>held?pending:f.engine.prove(f.c,ids),e=>e.code==='proof_unavailable');const saved=await strictRead('messaging_activation',id);assert.equal(saved.state,'awaiting_test');assert.equal(!!saved.deliveryProof,false);assert.equal(saved.probe.nonce,row.probe.nonce);
+    }
+  });
+  await check(mode + ': renewal cannot replace ready cancelled uncertain stale-carrier or claimed registrations',async()=>{
+    const f=await fixture(mode,'probe-renewal-guards'),status=await advance(f),id=status.id;clock+=8*86400000;await f.engine.run(id);const original=await strictRead('messaging_activation',id),body={actor:{role:'owner',email:f.c.owner.email},expectedRevision:configurationRevision(f.c),operationId:id,expectedProbeNonce:original.probe.nonce,testPhoneConsent:true},writes=result.providerWrites.length;
+    for(const patch of [{state:'ready'},{state:'cancelled'},{state:'uncertain'},{cancelRequestedAt:isoAt(clock)},{claim:{token:'live',until:isoAt(clock+60000)}},{claim:{token:'f'.repeat(32),until:'unparseable'}},{approvals:{...original.approvals,campaign:'REJECTED'}},{lastVerifiedAt:isoAt(clock-2*86400000)},{steps:{...original.steps,service:{state:'uncertain'}}},{resources:{...original.resources,service:{...original.resources.service,accountSid:'AC'+'f'.repeat(32)}}}]){await store.put('messaging_activation',id,{...original,...patch});await assert.rejects(()=>f.engine.renewProbe(f.c,body),e=>['probe_changed','probe_verification_required'].includes(e.code));}
+    await store.put('messaging_activation',id,original);f.controls.enabled=false;await assert.rejects(()=>f.engine.renewProbe(f.c,body),e=>e.code==='messaging_setup_unavailable');f.controls.enabled=true;
+    await assert.rejects(()=>f.engine.renewProbe(f.c,{...body,expectedRevision:'0'.repeat(64)}),e=>e.code==='configuration_changed');assert.equal(result.providerWrites.length,writes);assert.deepEqual((await strictRead('messaging_activation',id)).probe,original.probe);
+  });
+  await check(mode + ': dependency reads cannot approve a stale mobile or rules review during renewal',async()=>{
+    for(const kind of ['mobile','review']){
+      const f=await fixture(mode,'probe-race-'+kind),status=await advance(f),id=status.id;clock+=8*86400000;await f.engine.run(id);const original=await strictRead('messaging_activation',id),body={actor:{role:'owner',email:f.c.owner.email},expectedRevision:configurationRevision(f.c),operationId:id,expectedProbeNonce:original.probe.nonce,testPhoneConsent:true};let reads=0;
+      f.controls.onParentRead=async()=>{if(++reads===2){const changed=structuredClone(f.c);if(kind==='mobile')changed.owner.phone='+17135550188';else changed.setupProof={...changed.setupProof,testedRevision:'stale'};await store.put('clients',f.c.slug,changed);}};
+      await assert.rejects(()=>f.engine.renewProbe(f.c,body),e=>['configuration_changed','desk_review_required'].includes(e.code));assert.deepEqual((await strictRead('messaging_activation',id)).probe,original.probe);
+    }
   });
   for (const loss of ["before", "after"]) await check(mode + ": lost paid brand request " + loss + " remote effect is never blindly refiled", async () => {
     const f = await fixture(mode, "paid-" + loss), row = await f.engine.request(f.c, f.body());

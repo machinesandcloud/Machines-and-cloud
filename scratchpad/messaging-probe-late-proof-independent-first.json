@@ -1,0 +1,61 @@
+{
+  "scope": "One narrow late-proof authority scenario on the same actual engine and valid synthetic registration fixture; explicit in-process provider proof represents a delivered old-mobile exchange, no provider/network calls",
+  "sourceBefore": {
+    "netlify/functions/lib/messaging-activation.mjs": "cec0c4cf6d45b4b7ab34c5de52d10549488fee36a305e372670a7621ba2fe877",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/lib/managed-delivery.mjs": "bf9bd0cc5c6e66af8d5067825bc2f2f26e03632a9e92a793b7de6dd53e8d4cd4",
+    "netlify/functions/lib/managed-sms-budget.mjs": "2153ed61a34d27ad7cd036b038f830a4281286eb7f562792e97a5eec887abe86",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "netlify/functions/lib/phone-activation.mjs": "22fce5eb89c014f78d3089e6e708dfa00e3d3928eb4725080b7ed02d2fdaa9f4",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "desk-connections.js": "e38465d5bb960ab4cda5bfb72767d240f30b84d643742e1a9b7441c3692d4eac",
+    "scripts/messaging-activation-check.mjs": "b164d1bd4b743428a36cb4fb2f63ac52832d11b5d208c47a11f39fe69e9f6a8c",
+    "scripts/managed-sms-qa-check.mjs": "82333c37b3dc230c6f22013a1888bf0e5a9223505260ac1c4e80988773a09198",
+    "scripts/service-onboarding-connections-ui-qa-check.mjs": "15b3be6d9043f464275068dad7a1890b2957aa02756ec65e6f00fe96c12aa5ed"
+  },
+  "harnessHash": "dfc78018c397b3c27e11dddf3bdf9021384244b82bf4188748f3a606fff5b5ee",
+  "checks": [
+    {
+      "name": "Late proof for renewed probe after saved mobile and review changed must not activate",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Late proof for a probe bound to a prior mobile/review must be rejected\n+ actual - expected\n\n+ undefined\n- 'proof_unavailable'\n\n    at file:///private/tmp/mc-service-delivery-369/scratchpad/messaging-probe-late-proof-independent.mjs:36:1067\n    at async check (file:///private/tmp/mc-service-delivery-369/scratchpad/messaging-probe-late-proof-independent.mjs:35:82)\n    at async file:///private/tmp/mc-service-delivery-369/scratchpad/messaging-probe-late-proof-independent.mjs:36:2",
+      "syntheticPOSTs": 0
+    }
+  ],
+  "observations": [
+    {
+      "pendingProbe": null,
+      "oldMobile": "+17135550122",
+      "currentMobile": "+17135550129",
+      "authorizedRevision": "e99913eb431581d6979dd1bff99f4b9d7746ea03ceef0d7595f0edbfe2f5a0e9",
+      "currentRevision": "18d85aff4634d1d7d0b8eff90bd79831237a877910918acb47d1eec0815d17a2",
+      "proofState": "ready",
+      "proofActive": true,
+      "retainedDeliveryProof": true
+    }
+  ],
+  "freeze": "scratchpad/probe-renewal-backend-freeze.json",
+  "sourceAfter": {
+    "netlify/functions/lib/messaging-activation.mjs": "cec0c4cf6d45b4b7ab34c5de52d10549488fee36a305e372670a7621ba2fe877",
+    "netlify/functions/client.mjs": "10aa28a2a0d5130730c94a7b5b3444dd4f6f3054ecdde81aa1169e0861b50b99",
+    "netlify/functions/lib/managed-delivery.mjs": "bf9bd0cc5c6e66af8d5067825bc2f2f26e03632a9e92a793b7de6dd53e8d4cd4",
+    "netlify/functions/lib/managed-sms-budget.mjs": "2153ed61a34d27ad7cd036b038f830a4281286eb7f562792e97a5eec887abe86",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "netlify/functions/lib/phone-activation.mjs": "22fce5eb89c014f78d3089e6e708dfa00e3d3928eb4725080b7ed02d2fdaa9f4",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "desk-connections.js": "e38465d5bb960ab4cda5bfb72767d240f30b84d643742e1a9b7441c3692d4eac",
+    "scripts/messaging-activation-check.mjs": "b164d1bd4b743428a36cb4fb2f63ac52832d11b5d208c47a11f39fe69e9f6a8c",
+    "scripts/managed-sms-qa-check.mjs": "82333c37b3dc230c6f22013a1888bf0e5a9223505260ac1c4e80988773a09198",
+    "scripts/service-onboarding-connections-ui-qa-check.mjs": "15b3be6d9043f464275068dad7a1890b2957aa02756ec65e6f00fe96c12aa5ed"
+  },
+  "sourceStable": true,
+  "physicalNetwork": 0,
+  "syntheticSMSPosts": 0,
+  "syntheticBackgroundDispatches": 0,
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "sourceStable": true,
+    "physicalNetwork": 0
+  }
+}

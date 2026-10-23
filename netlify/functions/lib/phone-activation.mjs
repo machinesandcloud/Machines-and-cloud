@@ -15,6 +15,26 @@ const iso = () => new Date().toISOString();
 const tenant = c => hash(JSON.stringify([c.slug, c.ownerKey, normalizeAccountEmail(c.owner?.email)]));
 const validSlug = value => typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}$/.test(value);
 const validId = value => typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,39}\/[a-f0-9]{64}$/.test(value);
+const sequence = row => row?.renewalSequence || 0;
+const sameRequest = (row, expected) => !!row && row.tenantIdentity === expected.tenantIdentity && sequence(row) === sequence(expected) && row.inputRevision === expected.inputRevision && row.offerDigest === expected.offerDigest && row.correlationId === expected.correlationId;
+// Only a worker-confirmed stop before the first purchase can be approved again.
+// Missing purchase results, cancellations and retained resources use reconciliation.
+export function canRenewUnpurchasedPhone(row) {
+  return row?.version === 1 && row.state === 'superseded' && row.reasonCode === 'configuration_changed' && row.purchaseAttempts === 0 && row.reconciliationAttempts === 0 && row.cleanupAttempts === 0 &&
+    !row.purchaseStartedAt && !row.resource && !row.cancelRequestedAt && !row.releasedAt && !row.releaseReceipt && !row.claim && !row.lookupClaim && !row.cleanupClaim && !row.cleanupStartedAt && !Object.keys(row.dependencies || {}).length && !row.conflictingResourceIds?.length;
+}
+export const phoneRenewalReference = row => ({ id: row.id, inputRevision: row.inputRevision, offerDigest: row.offerDigest, renewalSequence: sequence(row), updatedAt: row.updatedAt });
+const renewalMatches = (row, reference) => canRenewUnpurchasedPhone(row) && JSON.stringify(phoneRenewalReference(row)) === JSON.stringify(reference);
+async function parentAllows(row) {
+  if (!row.serviceOnboarding) return true;
+  const reference = row.serviceOnboarding;
+  if (!validId(reference.id) || !reference.id.startsWith(row.slug + '/') || !Number.isSafeInteger(reference.generation) || reference.generation < 1 || reference.admissionSequence !== null && !Number.isSafeInteger(reference.admissionSequence)) return false;
+  const [parent, queue] = await Promise.all([strictRead('service_onboarding_intents',reference.id),strictRead('service_onboarding_queue','active_v1')]);
+  // Adding another channel preserves this generation's already accepted number.
+  // A renewed business/number approval changes generation and cannot reuse it.
+  const sequenceRetained = reference.admissionSequence === null ? parent?.version === 1 : reference.admissionSequence > 0 && Number.isSafeInteger(parent?.admissionSequence) && parent.admissionSequence >= reference.admissionSequence;
+  return !!parent && sequenceRetained && parent.tenantIdentity === row.tenantIdentity && parent.generation === reference.generation && parent.inputRevision === row.inputRevision && parent.offer?.number?.digest === row.offerDigest && parent.authority?.actor?.email === row.authority.actor.email && parent.steps?.number?.startedAt && !parent.cancelRequestedAt && !queue?.intents?.[reference.id]?.cancelRequestedAt && parent.providerBinding?.accountSid === (process.env.TWILIO_ACCOUNT_SID || '');
+}
 const terminal = state => ["number_acquired", "cancelled", "superseded", "needs_review"].includes(state);
 const detail = state => ({
   queued: "Your number request is saved. Phone answering is not active.",
@@ -97,17 +117,34 @@ function queueValue(value) {
 }
 async function enqueue(row, cancellation) {
   const queueToken = randomBytes(16).toString("hex");
-  await atomicUpdate(QUEUE, KEY, value => {
+  return atomicUpdate(QUEUE, KEY, async value => {
+    if (!cancellation && !await parentAllows(row)) throw new PhoneActivationError('setup_changed','The approved connection setup changed before the number request.');
     const queue = queueValue(value), previous = queue.intents[row.id];
-    if (previous && !cancellation) return {};
+    if (previous && !cancellation && !row.renewalFrom) return { result: previous };
+    if (row.renewalFrom && !cancellation) {
+      if (previous && !previous.cancellation && sequence(previous) === sequence(row) && sameRequest(previous,row)) return { result: previous };
+      if (previous?.cancellation || previous && sequence(previous) >= sequence(row) || !renewalMatches(await strictRead(STORE,row.id),row.renewalFrom)) throw new PhoneActivationError('intent_conflict', 'This number request changed while you reviewed it.');
+      const current = await strictRead('clients',row.slug);
+      if (!current || tenant(current) !== row.tenantIdentity || !['testing','live'].includes(current.status) || configurationRevision(current) !== row.inputRevision) throw new PhoneActivationError('configuration_changed', 'Review your current setup before changing phone service.');
+    }
     if (!previous && Object.keys(queue.intents).length >= 1000) throw new PhoneActivationError("queue_full", "Phone setup is temporarily busy.", 503);
-    return { value: { ...queue, intents: { ...queue.intents, [row.id]: { ...row, queueToken, ...(cancellation ? { cancellation } : {}) } } } };
+    const intent = { ...row, queueToken, ...(cancellation ? { cancellation } : {}) };
+    return { value: { ...queue, intents: { ...queue.intents, [row.id]: intent } }, result: intent };
   });
 }
 async function ensure(intent) {
-  return atomicUpdate(STORE, intent.id, current => {
+  return atomicUpdate(STORE, intent.id, async current => {
     if (current && current.tenantIdentity !== intent.tenantIdentity) throw new Error("Phone intent identity conflict");
-    if (current) return { result: current };
+    if (current) {
+      if (sequence(intent) > sequence(current)) {
+        if (sequence(intent) !== sequence(current) + 1 || !renewalMatches(current, intent.renewalFrom)) throw new PhoneActivationError('intent_conflict', 'This number request changed while you reviewed it.');
+        if (!await parentAllows(intent)) throw new PhoneActivationError('setup_changed','The approved connection setup changed before the number request.');
+        const row = { ...intent }; delete row.cancellation;
+        return { value: row, result: row };
+      }
+      return { result: current };
+    }
+    if (!await parentAllows(intent)) throw new PhoneActivationError('setup_changed','The approved connection setup changed before the number request.');
     const row = { ...intent }; delete row.cancellation;
     return { value: row, result: row };
   });
@@ -164,12 +201,16 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     // One first-acquisition intent per customer identity, independent of browser
     // retry keys. A new tab or a changed submission ID cannot buy a second number.
     const id = `${current.slug}/${hash("first-phone-acquisition:" + tenant(current))}`, prior = await strictRead(STORE, id);
-    if (prior) { if (prior.tenantIdentity !== tenant(current) || prior.inputRevision !== body.expectedRevision || prior.offerDigest !== digest) throw new PhoneActivationError("intent_conflict", "This request was already used for another setup."); return phoneActivationView(prior); }
+    if (prior && !canRenewUnpurchasedPhone(prior)) { if (prior.tenantIdentity !== tenant(current) || prior.inputRevision !== body.expectedRevision || prior.offerDigest !== digest) throw new PhoneActivationError("intent_conflict", "This request was already used for another setup."); return phoneActivationView(prior); }
+    if (prior && prior.tenantIdentity !== tenant(current)) throw new PhoneActivationError('intent_conflict', 'This number request belongs to another workspace.');
+    if (prior?.serviceOnboarding && !body.serviceOnboarding) throw new PhoneActivationError('intent_conflict','Review your updated connections together before renewing this number request.');
     const row = { version: 1, id, slug: current.slug, tenantIdentity: tenant(current), inputRevision: body.expectedRevision,
       correlationId: hash("phone-acquire-v1:" + id + ":" + tenant(current)), state: "queued", createdAt: iso(), updatedAt: iso(),
       offer: structuredClone(offer), offerDigest: digest, authority: { actor: { role: "owner", email: normalizeAccountEmail(body.actor.email) }, acceptedAt: iso(), costsAccepted: true, authorityAccepted: true },
-      generation: 0, purchaseAttempts: 0, reconciliationAttempts: 0, cleanupAttempts: 0, reasonCode: null };
-    await enqueue(row); return phoneActivationView(await ensure(row));
+      generation: prior?.generation || 0, purchaseAttempts: 0, reconciliationAttempts: 0, cleanupAttempts: 0, reasonCode: null,
+      ...(body.serviceOnboarding ? { serviceOnboarding: structuredClone(body.serviceOnboarding) } : {}),
+      ...(prior ? { renewalSequence: sequence(prior) + 1, renewalFrom: phoneRenewalReference(prior), history: [...(prior.history || []), { ...phoneRenewalReference(prior), acceptedAt: prior.authority.acceptedAt }].slice(-20) } : {}) };
+    const queued = await enqueue(row); return phoneActivationView(await ensure(queued));
   }
   async function recordResource(row, resource) {
     if (!resource || typeof resource.id !== "string" || !/^[a-zA-Z0-9_-]{2,100}$/.test(resource.id) || !/^\+1\d{10}$/.test(resource.number || "") || resource.correlationId !== row.correlationId) throw new Error("Provider resource receipt did not match its intent");
@@ -230,7 +271,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
     let row = await strictRead(STORE, id); if (!row) throw new PhoneActivationError("not_found", "The phone request was not found.", 404);
     if (row.nextCheckAt && Date.parse(row.nextCheckAt) > Date.now()) return phoneActivationView(row);
     const current = await strictRead("clients", row.slug);
-    if (!current || !isSupportedSelfServiceClient(current) || tenant(current) !== row.tenantIdentity) return phoneActivationView(await change(id, old => ({ ...old, state: old.purchaseStartedAt ? "needs_review" : "cancelled", reasonCode: "workspace_unavailable" })));
+    if (!current || !isSupportedSelfServiceClient(current) || tenant(current) !== row.tenantIdentity) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: old.purchaseStartedAt ? "needs_review" : "cancelled", reasonCode: "workspace_unavailable" }) : null));
     if (row.cancelRequestedAt) return phoneActivationView(await (row.resource ? cleanup(row) : row.purchaseStartedAt ? lookup(row) : change(id, old => ({ ...old, state: "cancelled" }))));
     if (terminal(row.state)) return phoneActivationView(row);
     if (row.purchaseStartedAt) {
@@ -238,17 +279,18 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false }) {
       row = await change(id, old => ({ ...old, state: "uncertain", reasonCode: "acquisition_result_unconfirmed", claim: null }));
       return phoneActivationView(await lookup(row));
     }
-    if (!["testing", "live"].includes(current.status) || configurationRevision(current) !== row.inputRevision) return phoneActivationView(await change(id, old => ({ ...old, state: ["cancelled", "archived"].includes(current.status) ? "cancelled" : "superseded", reasonCode: "configuration_changed" })));
-    if (!enabled()) return phoneActivationView(await change(id, old => ({ ...old, state: "waiting_platform", reasonCode: "product_gate_closed" })));
-    if (row.offerDigest !== digest) return phoneActivationView(await change(id, old => ({ ...old, state: "needs_review", reasonCode: "quote_changed" })));
+    if (!await parentAllows(row)) return phoneActivationView(await change(id, old => sameRequest(old,row) ? { ...old, state: 'cancelled', reasonCode: 'parent_setup_changed' } : null));
+    if (!["testing", "live"].includes(current.status) || configurationRevision(current) !== row.inputRevision) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: ["cancelled", "archived"].includes(current.status) ? "cancelled" : "superseded", reasonCode: "configuration_changed" }) : null));
+    if (!enabled()) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: "waiting_platform", reasonCode: "product_gate_closed" }) : null));
+    if (row.offerDigest !== digest) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: "needs_review", reasonCode: "quote_changed" }) : null));
     const token = randomBytes(16).toString("hex");
-    row = await change(id, old => old.purchaseStartedAt || terminal(old.state) || old.cancelRequestedAt || old.inputRevision !== row.inputRevision || old.correlationId !== row.correlationId ? null : ({ ...old, state: "running", generation: old.generation + 1, purchaseAttempts: old.purchaseAttempts + 1, purchaseStartedAt: iso(), claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
+    row = await change(id, old => !sameRequest(old,row) || old.purchaseStartedAt || terminal(old.state) || old.cancelRequestedAt ? null : ({ ...old, state: "running", generation: old.generation + 1, purchaseAttempts: old.purchaseAttempts + 1, purchaseStartedAt: iso(), claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (row.claim?.token !== token) return phoneActivationView(row);
     // Recheck the product gate after the durable claim and before the adapter.
     if (!enabled()) return phoneActivationView(await change(id, old => old.claim?.token === token ? { ...old, state: "waiting_platform", purchaseStartedAt: null, claim: null, reasonCode: "product_gate_closed" } : null));
     const authorizeDispatch = async () => {
       const [latestClient, latestIntent] = await Promise.all([strictRead("clients", row.slug), strictRead(STORE, id)]);
-      return enabled() && !!latestClient && isSupportedSelfServiceClient(latestClient) && tenant(latestClient) === row.tenantIdentity && ["testing", "live"].includes(latestClient.status) && configurationRevision(latestClient) === row.inputRevision && latestIntent?.claim?.token === token && !latestIntent.cancelRequestedAt;
+      return enabled() && !!latestClient && isSupportedSelfServiceClient(latestClient) && tenant(latestClient) === row.tenantIdentity && ["testing", "live"].includes(latestClient.status) && configurationRevision(latestClient) === row.inputRevision && latestIntent?.claim?.token === token && !latestIntent.cancelRequestedAt && await parentAllows(latestIntent);
     };
     const stoppedBeforeDispatch = () => change(id, old => old.claim?.token === token && !old.resource ? { ...old, state: old.cancelRequestedAt ? "cancelled" : "superseded", purchaseStartedAt: null, claim: null, reasonCode: "dispatch_not_authorized" } : null);
     if (!await authorizeDispatch()) return phoneActivationView(await stoppedBeforeDispatch());

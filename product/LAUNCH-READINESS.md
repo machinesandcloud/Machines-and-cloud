@@ -1,3 +1,16 @@
+## Current delivery-recovery candidate · October 23
+
+The owner directed the team to finish the actual service rather than repeat unavailable-feature copy. The isolated `work/service-delivery-ready` candidate starts from published36918ed and contains these tested repairs:
+
+- A worker-confirmed stop before any number purchase can be approved again from the same customer journey. Repeated business corrections retain the same number identity; cancellation, concurrent workers and unknown purchase results cannot create a second purchase.
+- Self-service Calendar work waits for the next UTC daily allowance instead of exhausting its failure retries. Actual failures and unknown event-creation evidence remain retained.
+- Managed REST SMS sends and setup texts share durable tenant/account message, segment and configured upper-cost exposure limits. A self-service policy admits newly eligible shops without a founder-maintained list; an exact cohort remains available for a bounded proof. This is not the complete provider bill and does not replace sender/carrier/consent gates.
+- Expired or invalidated texting checks have a real owner action with fresh consent and a new nonce. Old queued/unknown texts are not resent. Sending and final proof require the current mobile and reviewed facts. Delivery details and Calendar retry eligibility are visible in Connections.
+
+[Acceptance and exact evidence](SERVICE-DELIVERY-ACCEPTANCE-2026-10-23.json) records38passing required commands and13passing component-browser groups, with independent recovery/admission/probe checks and retained original failures. No application source changed after the final gate. These establish local mechanics; they do not establish a deployed release or a working customer phone/text/Calendar connection.
+
+Production remains36918ed. Provider account action and current access/delivery proof remain pending; detailed private account observations are retained locally. Existing company filing questions remain separate from dedicated customer registrations. No production flags, credentials, billing, carrier filing or customer data were changed. Actual provider proof, owner Google consent, verified support delivery, installed customer first request, G7 follow-through and commercial acceptance remain open. Main's unrelated runtime and the later unfinished copy checkpoint are excluded.
+
 # Readiness for the first customers
 
 **Decision: not ready for the complete phone, text, website and scheduling offer.** Internal signup and return access work, and the core portal is deployed. Actual service delivery, installation on a customer's website and recovery from real provider failures still need acceptance. Local tests, deployed code, a saved preference and a queued operation are different evidence stages.

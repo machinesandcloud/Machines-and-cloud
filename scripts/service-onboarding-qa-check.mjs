@@ -486,6 +486,70 @@ await check('Before dispatch, changed rules can be reviewed again without duplic
   await assert.rejects(() => submit(f, { submissionId: oldBody.submissionId }), error => error.status === 409 && error.code === 'submission_conflict');
   const before = report.providerRequests.length; await submit(f); await advanceNumber(f); await continuePlan(f); const state = await children(f); assert.ok(state.voice?.id && state.messaging?.id); assert.equal(numberPurchases(before), 1);
 });
+async function supersededNumber(f) {
+  await submit(f); await continuePlan(f);
+  const child = (await children(f)).number;
+  f.c = { ...f.c, summary: 'Owner corrected the saved business instructions.' };
+  f.revision = configurationRevision(f.c);
+  f.c.setupProof = { reviewedRevision: f.revision, testedRevision: f.revision, testMode: 'live' };
+  await store.put('clients', f.c.slug, f.c);
+  await phone.recoverPhoneActivations({ limit: 1, deadlineAt: now + 14000 });
+  await continuePlan(f);
+  assert.equal((await children(f)).number.state, 'superseded');
+  return strictRead('phone_activation_intents', child.id);
+}
+await check('After a confirmed pre-purchase stop, renewed owner approval resumes the same number and selected services once', async () => {
+  const f = await fresh('renew-number'), before = report.providerRequests.length;
+  const original = await supersededNumber(f), status = await onboarding.serviceOnboardingStatus(f.c);
+  assert.equal(status.available, true); assert.equal(status.legacySetup, false);
+  const renewed = await submit(f); assert.equal((await strictRead('service_onboarding_intents', renewed.id)).generation, 2);
+  await advanceNumber(f); await continuePlan(f);
+  const rows = await children(f), number = await strictRead('phone_activation_intents', rows.number.id);
+  assert.equal(number.id, original.id); assert.equal(number.correlationId, original.correlationId); assert.equal(number.renewalSequence, 1);
+  assert.equal(numberPurchases(before), 1); assert.ok(rows.voice && rows.messaging);
+});
+await check('Restoring original answers still allows a fresh approval after a confirmed pre-purchase stop', async () => {
+  const f = await fresh('restore-number', ['voice']), originalSummary = f.c.summary;
+  const original = await supersededNumber(f);
+  f.c.summary = originalSummary; f.revision = configurationRevision(f.c);
+  f.c.setupProof = { reviewedRevision: f.revision, testedRevision: f.revision, testMode: 'live' };
+  await store.put('clients', f.c.slug, f.c);
+  assert.equal(f.revision, original.inputRevision);
+  const renewed = await submit(f, { submissionId: sha('fresh-restored-review:' + f.c.slug) });
+  assert.equal((await strictRead('service_onboarding_intents', renewed.id)).generation, 2);
+  await continuePlan(f); assert.equal((await children(f)).number.state, 'queued');
+});
+await check('Several business reviews before a renewal handoff retain the exact untouched number request', async () => {
+  const f = await fresh('repeat-number', ['voice']), before = report.providerRequests.length;
+  const original = await supersededNumber(f); await submit(f);
+  f.c.summary = 'Owner made a second reviewed correction before automatic setup continued.';
+  f.revision = configurationRevision(f.c); f.c.setupProof = { reviewedRevision: f.revision, testedRevision: f.revision, testMode: 'live' };
+  await store.put('clients',f.c.slug,f.c);
+  const renewed = await submit(f), parent = await strictRead('service_onboarding_intents',renewed.id);
+  assert.equal(parent.generation,3); assert.equal(parent.numberRenewal.id,original.id);
+  await advanceNumber(f); const child = await strictRead('phone_activation_intents',original.id);
+  assert.equal(child.renewalSequence,1); assert.equal(child.inputRevision,f.revision); assert.equal(numberPurchases(before),1);
+});
+await check('A cancellation during number-renewal handoff cannot authorize a late purchase', async () => {
+  const f = await fresh('cancel-renew', ['voice']), before = report.providerRequests.length;
+  const original = await supersededNumber(f); await submit(f);
+  let reached, release; const arrived = new Promise(r => { reached = r; }), held = new Promise(r => { release = r; });
+  const engine = onboarding.createServiceOnboardingEngine({ requestNumber: async (c, body) => { reached(); await held; return phone.requestPhoneActivation(c, body); } });
+  const pending = engine.continue(f.c, { deadlineAt: now + 14000 }); await arrived; await cancel(f); release(); await pending;
+  await phone.recoverPhoneActivations({ limit: 1, deadlineAt: now + 14000 });
+  assert.equal(numberPurchases(before), 0);
+  const retained = await strictRead('phone_activation_intents', original.id);
+  assert.equal(retained.resource, undefined); assert.equal(retained.inputRevision, original.inputRevision);
+});
+await check('Purchase uncertainty and cancellation traces cannot be erased by renewed approval', async () => {
+  for (const patch of [{ purchaseStartedAt: new Date(now).toISOString() }, { purchaseAttempts: 1 }, { reconciliationAttempts: 1 }, { resource: { id: 'PN' + 'f'.repeat(32), number: '+17135550196' } }, { cancelRequestedAt: new Date(now).toISOString() }, { claim: { token: 'expired', until: new Date(now - 1).toISOString() } }]) {
+    const f = await fresh('renew-denied', ['voice']), original = await supersededNumber(f);
+    await store.atomicUpdate('phone_activation_intents', original.id, row => ({ value: { ...row, ...patch } }));
+    const status = await onboarding.serviceOnboardingStatus(f.c); assert.equal(status.available, false); assert.equal(status.offer, null);
+    // Remove this finished fixture's queue before the next member of the table.
+    for (const kind of ['service_onboarding_intents','service_onboarding_queue','phone_activation_intents','phone_activation_queue']) for (const key of await store.list(kind)) await store.del(kind,key);
+  }
+});
 await check('A missing primary plan is restored from its encrypted pre-dispatch admission', async () => {
   const f = await fresh('admission'); await submit(f); const id = (await onboarding.serviceOnboardingStatus(f.c)).operation.id;
   const queue = await strictRead('service_onboarding_queue', 'active_v1'), encoded = JSON.stringify(queue);
