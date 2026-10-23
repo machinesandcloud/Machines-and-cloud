@@ -10,6 +10,7 @@ import { serviceConnections, serviceSetupView } from './service-connections.mjs'
 import { deliveryTenant } from './managed-consent.mjs';
 import { managedSMSConversations } from './managed-history.mjs';
 import { queueServiceReconciliation, runServiceReconciliation, serviceReconciliationView } from './service-reconciliation.mjs';
+import { parseWorkspacePatch, WorkspaceEditError } from './workspace-edit.mjs';
 
 export class OperatorError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
@@ -27,7 +28,7 @@ export async function requireOperator(req) {
   return session;
 }
 export function managementRevision(c) {
-  return createHash('sha256').update(JSON.stringify([configurationRevision(c), c.owner?.email, c.status, c.operationLifecycleVersion || 0, c.channels, c.onboarding?.desiredChannels, c.build, c.setupProof, c.management?.revision || 0])).digest('hex');
+  return createHash('sha256').update(JSON.stringify([c.slug, c.ownerKey, configurationRevision(c), c.owner?.email, c.status, c.operationLifecycleVersion || 0, c.channels, c.onboarding?.desiredChannels, c.build, c.setupProof, c.management?.revision || 0])).digest('hex');
 }
 const trim = (value, max) => typeof value === 'string' ? value.slice(0, max) : '';
 const closedStatus = status => ['cancelled', 'archived'].includes(status);
@@ -89,32 +90,12 @@ export async function customerPage(cursor = '') {
   return { customers, total: keys.length, nextCursor: keys.some(key => key > (page.at(-1) || cursor)) ? page.at(-1) : null, summary: { customers: customers.length, active: customers.filter(c => c.status === 'live').length, needsAttention: customers.filter(c => c.issues.length).length, setupPending: customers.filter(c => c.selfService && !closedStatus(c.status) && c.connections.some(x => x.requested && !['active','connected'].includes(x.status))).length, scope: 'Current page' } };
 }
 function validatedPatch(patch) {
-  const allowed = ['business', 'services', 'fees', 'windows', 'faq', 'summary'];
-  if (!patch || typeof patch !== 'object' || Array.isArray(patch) || !Object.keys(patch).length || Object.keys(patch).some(k => !allowed.includes(k))) throw new OperatorError('invalid_patch', 'Choose supported business rules to update.');
-  const value = {};
-  const strings = (items, max = 300) => {
-    if (!Array.isArray(items) || items.length > 40 || items.some(x => typeof x !== 'string' || !x.trim() || x.length > max)) throw new OperatorError('invalid_patch', 'Check the rule list and try again.');
-    return items.map(x => x.trim());
-  };
-  for (const [key, input] of Object.entries(patch)) {
-    if (key === 'business') {
-      if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).some(k => !['name', 'city', 'serviceArea', 'notServed'].includes(k))) throw new OperatorError('invalid_patch', 'Check the business details.');
-      value.business = {};
-      for (const [field, text] of Object.entries(input)) {
-        if (['serviceArea', 'notServed'].includes(field)) value.business[field] = strings(text, 120);
-        else { if (typeof text !== 'string' || text.length > 160 || !text.trim()) throw new OperatorError('invalid_patch', 'Enter a valid business name or city.'); value.business[field] = text.trim(); }
-      }
-    } else if (key === 'fees') {
-      if (!Array.isArray(input) || input.length > 30 || input.some(x => !x || typeof x !== 'object' || Object.keys(x).some(k => !['label','amount','note'].includes(k)) || typeof x.label !== 'string' || !x.label.trim() || x.label.length > 160 || typeof x.amount !== 'string' || x.amount.length > 160 || x.note !== undefined && (typeof x.note !== 'string' || x.note.length > 300))) throw new OperatorError('invalid_patch', 'Check each fee label, amount and note.');
-      value.fees = input.map(x => ({ label: x.label.trim(), amount: x.amount.trim(), note: (x.note || '').trim() }));
-    } else if (key === 'summary') {
-      if (typeof input !== 'string' || input.length > 4000) throw new OperatorError('invalid_patch', 'Keep the summary under 4,000 characters.'); value.summary = input;
-    } else if (key === 'faq') {
-      if (!Array.isArray(input) || input.length > 40 || input.some(x => !x || Object.keys(x).some(k => !['q','a'].includes(k)) || typeof x.q !== 'string' || typeof x.a !== 'string' || !x.q.trim() || !x.a.trim() || x.q.length > 500 || x.a.length > 2000)) throw new OperatorError('invalid_patch', 'Check each question and answer.');
-      value.faq = input.map(x => ({ q: x.q.trim(), a: x.a.trim() }));
-    } else value[key] = strings(input);
+  if (!patch || typeof patch !== 'object' || Array.isArray(patch) || !Object.keys(patch).length) throw new OperatorError('invalid_patch', 'Choose supported business rules to update.');
+  try { return parseWorkspacePatch(patch, { operator: true }); }
+  catch (error) {
+    if (!(error instanceof WorkspaceEditError)) throw error;
+    throw Object.assign(new OperatorError('invalid_patch', error.message, error.status), { fieldErrors: error.fieldErrors });
   }
-  return value;
 }
 export async function supportAction(session, body) {
   const allowed = { pause: [], resume: [], cancel_service: [], save_note: ['text'], update_rules: ['patch'], rebuild_workspace: [], retry_operation: ['operationId'], reconcile_services: [] };
@@ -136,7 +117,7 @@ export async function supportAction(session, body) {
   const patch = body.action === 'update_rules' ? validatedPatch(body.patch) : null;
   const at = new Date().toISOString(), eventId = randomUUID();
   const updated = await atomicUpdate('clients', c.slug, async current => {
-    if (!current || !isSelfServiceClient(current) || managementRevision(current) !== body.expectedRevision || closedStatus(current.status) && !['save_note','reconcile_services'].includes(body.action)) return { result: null };
+    if (!current || !isSelfServiceClient(current) || current.slug !== c.slug || current.ownerKey !== c.ownerKey || normalizeAccountEmail(current.owner?.email) !== normalizeAccountEmail(c.owner?.email) || managementRevision(current) !== body.expectedRevision || closedStatus(current.status) && !['save_note','reconcile_services'].includes(body.action)) return { result: null };
     const value = structuredClone(current);
     if (body.action === 'pause') { value.pausedFrom = current.status; value.pausedChannels = structuredClone(current.channels || {}); value.status = 'paused'; value.pausedAt = at; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
     if (body.action === 'cancel_service') { value.status = 'cancelled'; value.cancelledAt = at; value.cancelReason = reason; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }

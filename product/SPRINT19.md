@@ -1,36 +1,17 @@
 # Sprint 19: trustworthy business-detail editing
 
-**Latest priority:** [Sprint20](SPRINT20.md) is now the primary delivery track after Steve called out unavailable core services. The two editing defects below remain confirmed and open in parallel. This sprint is not accepted as repaired or deployed.
+**Accepted locally; not yet published.** Production remains `35e81c9`. The repair is isolated in `/tmp/mc-launch-readiness-35e`, branch `work/launch-readiness`, with the pending hero/spacing changes. [Launch readiness](LAUNCH-READINESS.md) now governs the continuing work.
 
-October 22, 2026, Houston. **Selected next implementation slice; not implemented or published by this assessment.** The [PO](PO-NEXT-WORK-2026-10-22.md) and [UI/UX](UIUX-NEXT-WORK-2026-10-22.md) reviews agree that reliable editing takes priority over another visual redesign. Production remains `05e8c5c34656f3257af8a8d3d7e8523dcbd542b3`; the existing Twilio Support request and disabled service gates are unchanged.
+Owners can change business facts without losing newer typing or receiving false success for invalid details. Independent actual-handler/browser QA passes [39 of 39 groups](../scratchpad/launch-workspace-final.json), with stable source and zero physical requests or browser errors. The original [two defect reproductions](../scratchpad/next-work-workspace-save-qa.json) remain unchanged. These are local repair checks, not production customer acceptance.
 
-## Customer outcome
+The editor preserves newer raw inputs while acknowledging only the submitted snapshot. Business and Account saves disable repeated submits, retain failed/uncertain drafts, show associated field errors, reveal and focus the relevant section, and recover from a failed sign-out. An explicit comparison of the latest saved version precedes keeping the owner's changed fields after a conflict. Optional fields can be cleared; incomplete valid rules save as a draft and cannot bypass activation checks. Blank routine-request guidance restores the standard next-available-window rule, explained beside that field. Legacy workspaces retain their existing full-group save behavior.
 
-An owner can correct business details, understand exactly which version was saved, and recover from invalid input, a slow save or a conflicting edit without losing work. An operator's supported correction must follow the same field-validity contract. Acknowledging a request, service activation and new provider connections are separate work.
+The server validates every supplied leaf before mutation and preserves omitted values. Malformed phones, lists, hours, links and numeric settings are rejected with dotted field errors. Readable hours are checked before deriving the actual schedule. A separate `editRevision` covers every editable fact and the workspace incarnation; it protects metadata changes without changing the revision used for review/live-test proofs. Both tokens are required for v1 PUT. Conditional writes recheck supported version, ownership, incarnation, both revisions and supplied leaves while preserving provider, lifecycle and management state.
 
-## Confirmed returns
+Operator corrections use the same supported-field limits while retaining their narrower allowlist, reason and atomic audit. Management revision and conditional writes also bind the workspace incarnation. Owner email, provider state, legal filings and service activation cannot be edited through this parser.
 
-[Independent offline QA](../scratchpad/next-work-workspace-save-qa.json) reproduced two defects using the actual published browser assets and memory-backed access/client handlers, with zero physical network requests and stable source hashes:
+Engineering's permanent actual-handler regression check passes 14 groups. Independent API checks pass 17 groups, and the existing operator check passes 56 groups. All [31 required release commands](../scratchpad/launch-required-final.json) pass with stable source. Their first run retained an old account fixture that omitted the new editing token. The fixture was updated to the actual first-party contract, preserving its stale-write and provider-state assertions. No runtime guard was weakened.
 
-- Submit a business-name change, then type another name while the PUT is held. When the first response completes, the newer typing is replaced by the submitted snapshot and the page says Saved.
-- Submit `not-a-phone` as the callback number. The handler returns200, retains the previous number and the page says Saved without a field error.
+Independent browser acceptance includes correction/save/reload, in-flight typing, field errors at 320/390/1440px, keyboard submission, transport failure before and after commit, explicit conflict recovery, account value edits, repeated submits, failed-sign-out recovery, legacy preservation and tenant boundaries. Actual persisted values are checked alongside visible feedback.
 
-These are reproducible defects in the published implementation, not observations of an actual customer's lost data. The initial QA attempt using `123` is retained separately in the receipt; the permissive phone normalizer accepted it rather than producing the expected old-value fallback. Phone validation needs an explicit supported-format contract. Passing reproduction assertions confirm defects, not a repair.
-
-## Delivery and acceptance
-
-| Owner | Deliverable | Acceptance |
-|---|---|---|
-| Architect | Define supplied-field validation, optional blanks, incomplete-draft behavior and revision-aware save semantics. Reuse the existing tenant/session boundaries. | A provided malformed callback is rejected rather than ignored or normalized to an unusable destination. Deliberately incomplete drafts have an explicit state and cannot bypass current review/test/activation guards. Partial updates do not erase unrelated facts. |
-| UI/UX + Engineer | Add associated field errors, focused recovery and clear saving/saved/unsaved/incomplete states to the current editor. | Invalid values and other edits stay visible. An error reveals its section and focuses the first invalid control. Success/error updates are announced. Optional blanks remain usable. |
-| Engineer | Preserve new typing across pending saves; handle repeated submits, failures and revision conflicts. | A response acknowledges only its submitted snapshot. Typing after dispatch remains unsaved and cannot be overwritten by refresh. A failed write or conflict retains inputs and offers a useful recovery action. |
-| QA | Recheck the two returned cases, then independently exercise actual-handler validation and delayed-response/conflict recovery. | Meaningful browser cases at320/390/1440px, keyboard navigation, failed-write retry and cross-tenant denial. Verify actual persisted values and visible messages, not only event handlers or CSS. Preserve original failures and source fingerprints. |
-| PO + PM | Accept the owner outcome and maintain the exact release scope. | PO observes correction→save→reload and pending-edit/error recovery. PM isolates the accepted patch from the published base, including only explicitly reviewed dependencies; main must not be pushed wholesale. |
-
-Admin correction behavior must be inspected before changing it; this source audit reproduced the owner path only. Do not expand this repair into a new settings architecture or a broad redesign. Ordinary local implementation and isolated checks can proceed without Twilio approval. A later publication must be a concrete verified batch under the existing release rule; this assessment authorizes no build or hosted test.
-
-## Parallel and subsequent work
-
-PM/QA can prepare a fresh current-production signup/return/operator acceptance plan while this repair is built. Prior email/site-read allowances remain closed; preparation is not execution. Architect/OM retain exact-tenant eligibility, account exposure and cleanup as prerequisites for paid automatic connections.
-
-The next customer-facing feature is explicit request ownership and commitments: call/visit/quote, due time, attempted/reached outcomes and history. UI/UX also prioritizes guided website installation with evidence of the first customer request. External calendar conflict protection, current-source AI/Spanish acceptance and minimal conversion measurement remain ranked in the PO review. None is delivered by this planning record.
+Next: [guided website installation and a first request](WEBSITE-FIRST-REQUEST.md), with the customer-widget interrupted-stream defect being repaired independently. Production verification, hosted operator acceptance and real Calendar/voice/text delivery remain separate launch gates. No provider or live-customer acceptance is claimed from this repair.

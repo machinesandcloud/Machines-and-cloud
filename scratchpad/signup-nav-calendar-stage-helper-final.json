@@ -1,0 +1,122 @@
+{
+  "mode": "Hermetic copies of local receipt helper and synthetic files only; no live ledger/receipt writes or external effects",
+  "helperSHA256": "9e519a07e6c66e46bba13bff05b85cbc3e3cb6b908572aa635afdebea6534654",
+  "physicalRequests": 0,
+  "cases": [
+    {
+      "name": "Valid create receipt",
+      "accepted": true,
+      "expectedAccept": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Valid update receipt",
+      "accepted": true,
+      "expectedAccept": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Valid delete receipt",
+      "accepted": true,
+      "expectedAccept": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Stale create source relabeled as update rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Expected stage/source receipt mismatch"
+    },
+    {
+      "name": "Wrong moved date source rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Expected stage/source receipt mismatch"
+    },
+    {
+      "name": "Wrong moved window source rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Expected stage/source receipt mismatch"
+    },
+    {
+      "name": "Uncancelled active source rejected as deletion",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Expected stage/source receipt mismatch"
+    },
+    {
+      "name": "Receipt before saved stage rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Receipt predates saved stage"
+    },
+    {
+      "name": "Non-incrementing version rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Nonmonotonic stage receipt"
+    },
+    {
+      "name": "Non-incrementing confirmation time rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Receipt predates saved stage"
+    },
+    {
+      "name": "Wrong visit rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Expected stage/source receipt mismatch"
+    },
+    {
+      "name": "Missing successful saved response rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Receipt predates saved stage"
+    },
+    {
+      "name": "Malformed saved timestamp rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Receipt predates saved stage"
+    },
+    {
+      "name": "Malformed prior confirmation timestamp rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Nonmonotonic stage receipt"
+    },
+    {
+      "name": "Wrong delete action rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Expected stage/source receipt mismatch"
+    },
+    {
+      "name": "Non-positive prior version rejected",
+      "accepted": false,
+      "expectedAccept": false,
+      "passed": true,
+      "error": "Error: Nonmonotonic stage receipt"
+    }
+  ],
+  "sourceStable": true,
+  "passed": 16,
+  "total": 16
+}

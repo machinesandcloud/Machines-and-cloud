@@ -1,8 +1,11 @@
 # Sprint20: automatic core service delivery
 
-**Latest steering and approval:** Steve reported the mobile menu setup button failing, then approved publication and the controlled Calendar proof. Its one build now includes the requested narrow `script.js` repair after independent16-case browser acceptance and another source-stable30-command pass. Provider/effect caps are unchanged. The root [navigation handoff](../scratchpad/signup-nav-release-preflight.json) records the exact proof and original approval; no second build is authorized. Live execution has not started apart from the allowed owned-Calendar settings inspection.
+**Current hosted result, October 22:** `35e81c9` is READY, including the core slice plus the requested setup-menu repair. Hosted CTA checks and internal workspace creation/return passed. Google blocked isolated Chrome; regular Chrome reached the unverified-app warning but authorization expired before consent. No Calendar/token API call or event change occurred. The test workspace is disconnected/cancelled, all temporary sessions revoked, and the one approved build/three email allowance are spent. [Final result](CORE-DELIVERY-LIVE-RESULT.md). The frozen-candidate paragraphs below retain the earlier local acceptance; they do not describe an unpublished current release.
 
-October22,2026. PO accountability: a shop completes setup once and receives dependable customer service without routine founder intervention. Steve's latest feedback makes this the primary track. Sprint19's reproduced settings-save defects remain open in parallel. No new visual redesign or list of unavailable features completes this outcome.
+
+October 22,2026. PO accountability: a shop completes setup once and receives dependable customer service without routine founder intervention. Steve's latest feedback makes this the primary track. Sprint19's reproduced settings-save defects remain open in parallel. No new visual redesign or list of unavailable features completes this outcome.
+
+**Earlier locally accepted core candidate:** `4300906c1bf84175cc7cb7b931f909b026e7d9f5`, verified application manifest `7c09c5bbeec61cf9881e3b4e612569c0bede470cd606989b296546a922635360`. It is included in the current published `35e81c9` release, with the subsequent menu repair and documentation commits.
 
 ## Current implementation boundary
 

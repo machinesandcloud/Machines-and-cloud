@@ -1,0 +1,80 @@
+{
+  "mode": "Pure extracted inspect function and synthetic fixtures; no live files or ledger opened",
+  "sourceSHA256": "083364a84ae6f146ff7022914c9f26339db90c592c35a18026f3f8ef58604b5a",
+  "sourceStable": true,
+  "physicalRequests": 0,
+  "passed": 10,
+  "total": 10,
+  "cases": [
+    {
+      "name": "Root planned post-save fresh budget permits create dispatch",
+      "accepted": true,
+      "expected": true,
+      "passed": true,
+      "code": null
+    },
+    {
+      "name": "Pre-save budget remains valid for local-only save when newer than last physical effect",
+      "accepted": true,
+      "expected": true,
+      "passed": true,
+      "code": null
+    },
+    {
+      "name": "Saved cancellation may clean up an uncertain create admission without prior delivery receipt",
+      "accepted": true,
+      "expected": true,
+      "passed": true,
+      "code": null
+    },
+    {
+      "name": "Malformed latest budget timestamp denied",
+      "accepted": false,
+      "expected": false,
+      "passed": true,
+      "code": "VALID_AUTHORITATIVE_BUDGET_REQUIRED"
+    },
+    {
+      "name": "Future budget timestamp denied",
+      "accepted": false,
+      "expected": false,
+      "passed": true,
+      "code": "VALID_AUTHORITATIVE_BUDGET_REQUIRED"
+    },
+    {
+      "name": "Older than five-minute budget denied",
+      "accepted": false,
+      "expected": false,
+      "passed": true,
+      "code": "RUNTIME_BUDGET_OBSERVATION_TOO_OLD"
+    },
+    {
+      "name": "Budget predating a later OAuth effect denied",
+      "accepted": false,
+      "expected": false,
+      "passed": true,
+      "code": "STALE_RUNTIME_BUDGET"
+    },
+    {
+      "name": "Budget predating external create worker denied before update",
+      "accepted": false,
+      "expected": false,
+      "passed": true,
+      "code": "STALE_RUNTIME_BUDGET"
+    },
+    {
+      "name": "New budget after external create permits update",
+      "accepted": true,
+      "expected": true,
+      "passed": true,
+      "code": null
+    },
+    {
+      "name": "Site128 denies dispatch to preserve thirty native reads and three workers",
+      "accepted": false,
+      "expected": false,
+      "passed": true,
+      "code": "MAIN_RESERVED_THREE_WORKER_SLOTS_EXCEEDED"
+    }
+  ]
+}

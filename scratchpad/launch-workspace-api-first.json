@@ -1,0 +1,480 @@
+{
+  "apiOnly": true,
+  "at": "2026-10-23T00:24:25.173Z",
+  "surface": "workspace",
+  "scope": "Independent browser review of actual product assets and actual isolated-memory handlers. Loading, failure and empty-list responses are explicit fixtures. No signup, email, AI, provider, purchase, calendar mutation or deploy.",
+  "sourceBefore": {
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/admin.mjs": "1f0b331c8cb8f2f0e25137e050adec1edb194a6e2d65e0bd0a52fca7d88666be",
+    "netlify/functions/angi.mjs": "313100088b22a93d2f7273314f0932d254c637fc0b1a5071fa17d9936e8acef7",
+    "netlify/functions/billing.mjs": "22dc5a1cf6fb365757ddce19ecb455d8ccd8c70fb46cd788fddeb86d74c07432",
+    "netlify/functions/calendar-delivery-background.mjs": "c9595612b882df7a7398418dee4c3864a7749459e56b405a9a1543d209288417",
+    "netlify/functions/calendar-delivery-scheduler.mjs": "719404137e351ec4e0215ccf3b5b3d2b8496bd1acc1255b46b85f0748c454460",
+    "netlify/functions/chat.mjs": "bee39cda4c9a9c6a17daa71f00c240f69251dff6a2f2e9b1eca21f49c177249b",
+    "netlify/functions/client.mjs": "6db6e9fe014af3d82ce3b9ebf2903d547091f858d729fc74228fdd8547f1c29c",
+    "netlify/functions/google.mjs": "d31458a0798eea59219ebf6a2d3bfd668bedc2b2abfa18d299600cc20cb4b32f",
+    "netlify/functions/health.mjs": "6dd03b5986b40a0552e9e83551e4d5b93d728be6c6e9685fcc6a6caad5405f5b",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/audit-policy.mjs": "a951f3b11e918f5054cda451e4f682a0aeef5687c96d80e84ca4de78745b6154",
+    "netlify/functions/lib/availability.mjs": "a599dfb2b0579289b122b47dbd55dcaca22bce640faf054233bbad22f68a3086",
+    "netlify/functions/lib/billing.mjs": "f27f3ed3541aee0355bea83e3f5278041363e83500c49e4c1e0738d65889cbaa",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar.mjs": "f0b3656c38ebde06758739d2e55d432c78e32c624cb796652a915ed6fe6754d5",
+    "netlify/functions/lib/config.mjs": "fa11f41239c4df4a8bb7cbb51dd2334b00dd76e8281f31ff85af1d012147c1a4",
+    "netlify/functions/lib/desk.mjs": "e8f4d03f4f55ad7826468eb453b6064ac3835ec99ef908386bd0bdbf36151443",
+    "netlify/functions/lib/fake-model.mjs": "dd230abc17cef0af0232917662c8ecd9cb28eab3d18a9e75919ebc7999869f1e",
+    "netlify/functions/lib/fanout.mjs": "7c6fbacfd4fa724974f506bd8331dfb3b91a7093dda2e27295bc112f01c8be46",
+    "netlify/functions/lib/forwarding.mjs": "d5bda5ce0c20a7a75b0dbade054347f0441d0bc6262605332b61f59676ea8ea2",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/lib/managed-actions.mjs": "cd45407ff8142ced50ebf33f1a1aa76c42cc45896c0e46a14bd144c213c72ff5",
+    "netlify/functions/lib/managed-consent.mjs": "ed0c3992174b2b97e286a2b97f456ee933720cc4d9ff5de919b6d8259d2a263b",
+    "netlify/functions/lib/managed-delivery.mjs": "beba0c6fc70597124b41fc7802fa834e17e8ff34b5f048d99581063335b37cd1",
+    "netlify/functions/lib/managed-history.mjs": "f8dbf15321ee419db29fb8ca876b8a669f79182b7890b93a8513ffb3a782a51f",
+    "netlify/functions/lib/managed-sms.mjs": "d6ce48097e42a521c434db5a4d01f8a146b81824b7f71cbf179fba4e6db3310d",
+    "netlify/functions/lib/messaging-activation.mjs": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "netlify/functions/lib/operator.mjs": "00b758f5b5f228ac7e02bd4d1c78ec036f9fa1dc30392f18848dd565ea093132",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/owner-visits.mjs": "ee232fce3aec54d785de35a08bd0c95fbbabbb2c327cb321a2fc902c74675440",
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/phone-twilio.mjs": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+    "netlify/functions/lib/platform-operations.mjs": "9029cb48d61eb10fa9f3e7687ddc8de99c5c0e0cd38e3d608e87f687652f37d5",
+    "netlify/functions/lib/platform-sms.mjs": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+    "netlify/functions/lib/practice-personas.mjs": "6ed8236d906f9277de03d86f67eabe4964328101231c4beea31be2d1e3416ca8",
+    "netlify/functions/lib/rubric-eval.mjs": "01aa5ef10df694c5a5e36ed60ee8b00a9d2118a7969b2175b67252e6f0ba74ed",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/sales-desk.mjs": "53c25922dde550d5aa0baf979a5fd00d064a3c762623e76ffa31fe23f6733b18",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55",
+    "netlify/functions/lib/send.mjs": "8809d608390f63f48034dc9fddb8e027b80783ce1a4542d382bd8c713b8be39c",
+    "netlify/functions/lib/service-connections.mjs": "7f7364eeee7db8574871cb06537545486a474f5d3f947e1dae3cf6b98392dc7e",
+    "netlify/functions/lib/service-health.mjs": "7e23e5f6200b186be17fe05641e35f6ada8654103e91da2ffb0ac28a547fa880",
+    "netlify/functions/lib/service-onboarding-dispatch.mjs": "b98cba92ea7330e9f8c7abba55f96078dacf1d6a4d2e659c71d510d1d29b4560",
+    "netlify/functions/lib/service-onboarding.mjs": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8",
+    "netlify/functions/lib/service-reconciliation.mjs": "dd56945cc88e09a14362c4581a62894a632e498170619861a2ddd403d3be8a27",
+    "netlify/functions/lib/service-time.mjs": "803d10292c38638e785cefad27e4fa88af8fb3e52b02365e9cfc257d47ce7e39",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/lib/twilio.mjs": "12a9406dc174cdd24f47cc33b7dd0a84257d241114e02ca45d63639d124b6adf",
+    "netlify/functions/lib/usage.mjs": "b6a41aefe17751eeed0629ea35d7e4bab3be7649a981a0080f08ebd57cff8dc6",
+    "netlify/functions/lib/vapi.mjs": "9f4cc9e444274995ce9cd7fd3b1ddf7a29a5f97f5913bb36465197c92b1adcb9",
+    "netlify/functions/lib/voice-activation.mjs": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+    "netlify/functions/lib/voice-provider.mjs": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+    "netlify/functions/lib/workspace-edit.mjs": "d9cdea8a3c197c447e6608394531eb235c7c937e0489bc69cf0a9558e256eb58",
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/managed-delivery-background.mjs": "8bd230c1960740ef26f84959cc9159a3ce53fefe7a375dc3a29de6f1be947fba",
+    "netlify/functions/managed-delivery-scheduler.mjs": "417aaabe4fe045985e720f8b80cf02649ceb162a5565c2c98087f0ab5f7ee9be",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-vapi.mjs": "117dc3de50aa8d1c94b1741eae96b09e81de0f2e62e0fffed59f99acbfdd513a",
+    "netlify/functions/managed-voice.mjs": "323c3377f9798176c315d025b2fd458b064da539058151657f3d0c316c4fceac",
+    "netlify/functions/messaging-activation-scheduler.mjs": "dee0a97fe51aa3d519a647aa7b4382c34c0e181d47963cade7bb54dc2bcd7a6f",
+    "netlify/functions/onboard-build-background.mjs": "8efd0bc27fcc31fb340be4823507e8e35c11edb1f4e3a0d81af8cff184bbe7c0",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/phone-activation-scheduler.mjs": "47c3390228f3ac280e07c1ad9fcc339a84f36b7ad707e45f302f1420234d378d",
+    "netlify/functions/platform-sms.mjs": "af7fc6eb2c98fd02e734d393bb9fc444f87d829c19c87606ab82fb3349cf487c",
+    "netlify/functions/policy.mjs": "7eda5bd3091491d79595284359d4b2c296927bb494faafeaeaa4c38d059255d2",
+    "netlify/functions/practice-voice.mjs": "cf61cf33449e4bcce87fb8d6af6a1e56f548bb623cba3e22f650373b791d9a2f",
+    "netlify/functions/provision-background.mjs": "c92bd7493eaef6f30a22e5bda973ddc07dd92770f38b85ca6c215449af1aebdc",
+    "netlify/functions/scheduler-fanout-background.mjs": "3c769b9fcbd31b5d121efda0bd929fab90dbae260f092a4060a62fb636bbd485",
+    "netlify/functions/scheduler.mjs": "c33d75ba5f5dd47b93e337255fbfa4722af6166d045575393f6a1f314d46fa57",
+    "netlify/functions/service-activation-background.mjs": "c4e2ebcccb76c515c3ee18aec18cc39045c5002566e2569bd0b6d0e5d0a1f4c7",
+    "netlify/functions/service-onboarding-background.mjs": "336c3744db3a86fe3af50feaf3de60ae5655b164361df84f3c91bed076c64cb5",
+    "netlify/functions/service-onboarding-scheduler.mjs": "ee0c4c66944121f69f5b57563b91be14589d2946c52795bc17375be7ab0cc95a",
+    "netlify/functions/service-reconciliation-scheduler.mjs": "ccd670151bf0304ac9efabccd7657d676f7d429281fa98e97311c3e79bda16dc",
+    "netlify/functions/sms-agent-background.mjs": "312db1417ab15e18b4a1820fb7d1eb0d4aa1e8ae62ec4a00deac87c8119db775",
+    "netlify/functions/sms.mjs": "60e792b72729a9e079520bba71d47482f768d3064b5076bb0e6094c11e509b8c",
+    "netlify/functions/stripe-webhook.mjs": "04f9540a3a0e9fd6656b6c20a3d64ac10418ee929484e5f9965f624c39f04134",
+    "netlify/functions/thumbtack.mjs": "28a3d4bbfc502bde28b656fe3b522d6bd99eeb3959fddba01b19ff989ab4c992",
+    "netlify/functions/twilio-alert.mjs": "9908fd71c9e16f4288f6491db19edb438511836091a4ea0053524bcb430a0c57",
+    "netlify/functions/vapi.mjs": "991e30bb34d3da72fa7dba2b39d69e321b879b90b61b7a806595a9de0717fb2f",
+    "netlify/functions/voice-activation-background.mjs": "25edd55f7189c5c0f01044dc72fb67c438b9054807b183ade499369609703165",
+    "netlify/functions/voice-activation-scheduler.mjs": "67095d0b7a91ca928a71ebcd08ff5bdecfac68a38818e237aed830ec610c3f1e",
+    "netlify/functions/voice.mjs": "e6b7bdcb9a823e2fc846f0644635bb8635f95b764e0a9f7385c26a010c9d9ce2",
+    "netlify/functions/workspace-operations-background.mjs": "9103d1f78f8e464449a001ef1f3b8587e49b761bce54278710c865111d729bbf"
+  },
+  "harnessHash": "48e8ccab8a0215bcd90307202c5c614b1cdef4c4623f047d3b1ebf6905e9ba96",
+  "checks": [
+    {
+      "name": "Malformed callback variants are rejected atomically by the actual handler",
+      "pass": true
+    },
+    {
+      "name": "Optional callback destinations accept explicit blank clears through the actual handler",
+      "pass": true
+    },
+    {
+      "name": "Malformed supplied collection and object fields do not partially mutate other values",
+      "pass": false,
+      "error": "{\"error\":\"invalid_fields\",\"message\":\"Enter text of 40 characters or fewer.\",\"fieldErrors\":{\"fees.0.amount\":\"Enter text of 40 characters or fewer.\"}}",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"invalid_fields\",\"message\":\"Enter text of 40 characters or fewer.\",\"fieldErrors\":{\"fees.0.amount\":\"Enter text of 40 characters or fewer.\"}}\n    at assertNoPartialMutation (file:///private/tmp/mc-launch-readiness-35e/scratchpad/launch-workspace-independent-harness.mjs:158:27)\n    at async file:///private/tmp/mc-launch-readiness-35e/scratchpad/launch-workspace-independent-harness.mjs:239:367\n    at async check (file:///private/tmp/mc-launch-readiness-35e/scratchpad/launch-workspace-independent-harness.mjs:104:226)\n    at async file:///private/tmp/mc-launch-readiness-35e/scratchpad/launch-workspace-independent-harness.mjs:238:3"
+    },
+    {
+      "name": "Unsupported supplied fields reject the entire patch before mutation",
+      "pass": true
+    },
+    {
+      "name": "Deliberately incomplete drafts are explicit and cannot activate customer chat",
+      "pass": true
+    },
+    {
+      "name": "Partial updates retain unrelated supplied business facts",
+      "pass": true
+    },
+    {
+      "name": "Supported operator corrections share supplied-field validity and remain atomic",
+      "pass": true
+    },
+    {
+      "name": "An owner session cannot invoke operator corrections",
+      "pass": true
+    },
+    {
+      "name": "Authenticated foreign-tenant read/write and anonymous mutation are denied without changes",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "owner.phone": "Enter a valid US phone number, including the area code, or leave it blank."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "direct": true
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 400,
+      "direct": true,
+      "error": "invalid_request",
+      "fieldErrors": {
+        "owner": "Check the format of these details."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "services": "Use a list with no more than 60 entries."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "business.serviceArea": "Use a list with no more than 40 entries."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 422,
+      "direct": true,
+      "error": "invalid_fields",
+      "fieldErrors": {
+        "fees.0.amount": "Enter text of 40 characters or fewer."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 400,
+      "direct": true,
+      "error": "invalid_request",
+      "fieldErrors": {
+        "owner.email": "This field cannot be changed here."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 400,
+      "direct": true,
+      "error": "invalid_request",
+      "fieldErrors": {
+        "status": "This field cannot be changed here."
+      }
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "direct": true
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200,
+      "direct": true
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "direct": true
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "direct": true,
+      "action": "update_rules",
+      "status": 422,
+      "error": "invalid_patch"
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "direct": true,
+      "action": "update_rules",
+      "status": 422,
+      "error": "invalid_patch"
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "direct": true,
+      "action": "update_rules",
+      "status": 400,
+      "error": "invalid_patch"
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "direct": true,
+      "action": "update_rules",
+      "status": 200
+    },
+    {
+      "path": "/api/manage",
+      "method": "POST",
+      "direct": true,
+      "action": "update_rules",
+      "status": 401,
+      "error": "sign_in_required"
+    },
+    {
+      "path": "/api/client",
+      "method": "GET",
+      "status": 403,
+      "direct": true,
+      "error": "forbidden"
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 403,
+      "direct": true,
+      "error": "forbidden"
+    },
+    {
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 401,
+      "direct": true,
+      "error": "verification_required"
+    }
+  ],
+  "screenshots": [],
+  "pageErrors": [],
+  "forbiddenRequests": [],
+  "fontRequestsBlocked": [],
+  "physicalNetwork": 0,
+  "originalFailure": {
+    "path": "/private/tmp/mc-launch-readiness-35e/scratchpad/next-work-workspace-save-qa.json",
+    "sha": "f539ea17828c26277f01d41e97d52848e9b34adf1c935c3abf85e381b4b3a791",
+    "summary": {
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "sourceAfter": {
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/admin.mjs": "1f0b331c8cb8f2f0e25137e050adec1edb194a6e2d65e0bd0a52fca7d88666be",
+    "netlify/functions/angi.mjs": "313100088b22a93d2f7273314f0932d254c637fc0b1a5071fa17d9936e8acef7",
+    "netlify/functions/billing.mjs": "22dc5a1cf6fb365757ddce19ecb455d8ccd8c70fb46cd788fddeb86d74c07432",
+    "netlify/functions/calendar-delivery-background.mjs": "c9595612b882df7a7398418dee4c3864a7749459e56b405a9a1543d209288417",
+    "netlify/functions/calendar-delivery-scheduler.mjs": "719404137e351ec4e0215ccf3b5b3d2b8496bd1acc1255b46b85f0748c454460",
+    "netlify/functions/chat.mjs": "bee39cda4c9a9c6a17daa71f00c240f69251dff6a2f2e9b1eca21f49c177249b",
+    "netlify/functions/client.mjs": "6db6e9fe014af3d82ce3b9ebf2903d547091f858d729fc74228fdd8547f1c29c",
+    "netlify/functions/google.mjs": "d31458a0798eea59219ebf6a2d3bfd668bedc2b2abfa18d299600cc20cb4b32f",
+    "netlify/functions/health.mjs": "6dd03b5986b40a0552e9e83551e4d5b93d728be6c6e9685fcc6a6caad5405f5b",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/agent.mjs": "73f20c83692fcd5cb35a93cf570047cd2964cc8d07a2d1e0a63d84d27a1719d7",
+    "netlify/functions/lib/audit-policy.mjs": "a951f3b11e918f5054cda451e4f682a0aeef5687c96d80e84ca4de78745b6154",
+    "netlify/functions/lib/availability.mjs": "a599dfb2b0579289b122b47dbd55dcaca22bce640faf054233bbad22f68a3086",
+    "netlify/functions/lib/billing.mjs": "f27f3ed3541aee0355bea83e3f5278041363e83500c49e4c1e0738d65889cbaa",
+    "netlify/functions/lib/calendar-connection.mjs": "0a896c17cd9fb87c225758caef4ea43be194f58ba48644c23b177ce80593b83a",
+    "netlify/functions/lib/calendar-delivery.mjs": "1ba076e409ef1e6fe36f530a65f004860c28bceda74d8692dac6977d64775805",
+    "netlify/functions/lib/calendar-execution.mjs": "f761e9ba7dd02b9693dda5aa52d5903322886a9880ad30e7e7c7508fb5612290",
+    "netlify/functions/lib/calendar.mjs": "f0b3656c38ebde06758739d2e55d432c78e32c624cb796652a915ed6fe6754d5",
+    "netlify/functions/lib/config.mjs": "fa11f41239c4df4a8bb7cbb51dd2334b00dd76e8281f31ff85af1d012147c1a4",
+    "netlify/functions/lib/desk.mjs": "e8f4d03f4f55ad7826468eb453b6064ac3835ec99ef908386bd0bdbf36151443",
+    "netlify/functions/lib/fake-model.mjs": "dd230abc17cef0af0232917662c8ecd9cb28eab3d18a9e75919ebc7999869f1e",
+    "netlify/functions/lib/fanout.mjs": "7c6fbacfd4fa724974f506bd8331dfb3b91a7093dda2e27295bc112f01c8be46",
+    "netlify/functions/lib/forwarding.mjs": "d5bda5ce0c20a7a75b0dbade054347f0441d0bc6262605332b61f59676ea8ea2",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/lib/managed-actions.mjs": "cd45407ff8142ced50ebf33f1a1aa76c42cc45896c0e46a14bd144c213c72ff5",
+    "netlify/functions/lib/managed-consent.mjs": "ed0c3992174b2b97e286a2b97f456ee933720cc4d9ff5de919b6d8259d2a263b",
+    "netlify/functions/lib/managed-delivery.mjs": "beba0c6fc70597124b41fc7802fa834e17e8ff34b5f048d99581063335b37cd1",
+    "netlify/functions/lib/managed-history.mjs": "f8dbf15321ee419db29fb8ca876b8a669f79182b7890b93a8513ffb3a782a51f",
+    "netlify/functions/lib/managed-sms.mjs": "d6ce48097e42a521c434db5a4d01f8a146b81824b7f71cbf179fba4e6db3310d",
+    "netlify/functions/lib/messaging-activation.mjs": "b46b118a82f89bca4dc486cf9f42cbda612218f92faf138813727ea1e90899db",
+    "netlify/functions/lib/messaging-provider.mjs": "62df8e92f58f3f49c7b31cb5535cc351e96b115fc3b319be5af6d80db1e722f0",
+    "netlify/functions/lib/operator.mjs": "00b758f5b5f228ac7e02bd4d1c78ec036f9fa1dc30392f18848dd565ea093132",
+    "netlify/functions/lib/owner-test.mjs": "9459e3d080dfcbe78714dc61fb655b6a1b4d02ad76a53c2710a724ca5905f63b",
+    "netlify/functions/lib/owner-visits.mjs": "ee232fce3aec54d785de35a08bd0c95fbbabbb2c327cb321a2fc902c74675440",
+    "netlify/functions/lib/phone-activation.mjs": "351424a7a1f6980d65dcd02315c59f08e0abdd80e4d7f99ceed36189b2428dfd",
+    "netlify/functions/lib/phone-twilio.mjs": "e77511033607e9fe05cb16d6f9c8f43a132afa0673cd9e4d3f797f83cd45fd60",
+    "netlify/functions/lib/platform-operations.mjs": "9029cb48d61eb10fa9f3e7687ddc8de99c5c0e0cd38e3d608e87f687652f37d5",
+    "netlify/functions/lib/platform-sms.mjs": "5dd192babf9ae94cd0fc34954c161724a8b27eae13aed60309b1d733227adc3c",
+    "netlify/functions/lib/practice-personas.mjs": "6ed8236d906f9277de03d86f67eabe4964328101231c4beea31be2d1e3416ca8",
+    "netlify/functions/lib/rubric-eval.mjs": "01aa5ef10df694c5a5e36ed60ee8b00a9d2118a7969b2175b67252e6f0ba74ed",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/sales-desk.mjs": "53c25922dde550d5aa0baf979a5fd00d064a3c762623e76ffa31fe23f6733b18",
+    "netlify/functions/lib/self-service-ai.mjs": "99943dd0d3300010021f6456b86e117ce78eef9c9bb8a2860a8ce75f5b84dc55",
+    "netlify/functions/lib/send.mjs": "8809d608390f63f48034dc9fddb8e027b80783ce1a4542d382bd8c713b8be39c",
+    "netlify/functions/lib/service-connections.mjs": "7f7364eeee7db8574871cb06537545486a474f5d3f947e1dae3cf6b98392dc7e",
+    "netlify/functions/lib/service-health.mjs": "7e23e5f6200b186be17fe05641e35f6ada8654103e91da2ffb0ac28a547fa880",
+    "netlify/functions/lib/service-onboarding-dispatch.mjs": "b98cba92ea7330e9f8c7abba55f96078dacf1d6a4d2e659c71d510d1d29b4560",
+    "netlify/functions/lib/service-onboarding.mjs": "d4478ed9774bb87156ea6aafb772c093fa766070b5eb4d5fdd0563a60151edc8",
+    "netlify/functions/lib/service-reconciliation.mjs": "dd56945cc88e09a14362c4581a62894a632e498170619861a2ddd403d3be8a27",
+    "netlify/functions/lib/service-time.mjs": "803d10292c38638e785cefad27e4fa88af8fb3e52b02365e9cfc257d47ce7e39",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "9d5bf565c3a1fad59d24e13eb1141d47377744da7eb5e2a291bb755e24ded3a9",
+    "netlify/functions/lib/twilio.mjs": "12a9406dc174cdd24f47cc33b7dd0a84257d241114e02ca45d63639d124b6adf",
+    "netlify/functions/lib/usage.mjs": "b6a41aefe17751eeed0629ea35d7e4bab3be7649a981a0080f08ebd57cff8dc6",
+    "netlify/functions/lib/vapi.mjs": "9f4cc9e444274995ce9cd7fd3b1ddf7a29a5f97f5913bb36465197c92b1adcb9",
+    "netlify/functions/lib/voice-activation.mjs": "b6ae5820e34383acb0d87ce87bb397fa2f52ea0d5116e1f0ed2f510137364a46",
+    "netlify/functions/lib/voice-provider.mjs": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+    "netlify/functions/lib/workspace-edit.mjs": "d9cdea8a3c197c447e6608394531eb235c7c937e0489bc69cf0a9558e256eb58",
+    "netlify/functions/manage.mjs": "ea0c2e1c77c47276bd92d72e527635d6b224fbf43106722743c187d5b03220a2",
+    "netlify/functions/managed-delivery-background.mjs": "8bd230c1960740ef26f84959cc9159a3ce53fefe7a375dc3a29de6f1be947fba",
+    "netlify/functions/managed-delivery-scheduler.mjs": "417aaabe4fe045985e720f8b80cf02649ceb162a5565c2c98087f0ab5f7ee9be",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-vapi.mjs": "117dc3de50aa8d1c94b1741eae96b09e81de0f2e62e0fffed59f99acbfdd513a",
+    "netlify/functions/managed-voice.mjs": "323c3377f9798176c315d025b2fd458b064da539058151657f3d0c316c4fceac",
+    "netlify/functions/messaging-activation-scheduler.mjs": "dee0a97fe51aa3d519a647aa7b4382c34c0e181d47963cade7bb54dc2bcd7a6f",
+    "netlify/functions/onboard-build-background.mjs": "8efd0bc27fcc31fb340be4823507e8e35c11edb1f4e3a0d81af8cff184bbe7c0",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/phone-activation-scheduler.mjs": "47c3390228f3ac280e07c1ad9fcc339a84f36b7ad707e45f302f1420234d378d",
+    "netlify/functions/platform-sms.mjs": "af7fc6eb2c98fd02e734d393bb9fc444f87d829c19c87606ab82fb3349cf487c",
+    "netlify/functions/policy.mjs": "7eda5bd3091491d79595284359d4b2c296927bb494faafeaeaa4c38d059255d2",
+    "netlify/functions/practice-voice.mjs": "cf61cf33449e4bcce87fb8d6af6a1e56f548bb623cba3e22f650373b791d9a2f",
+    "netlify/functions/provision-background.mjs": "c92bd7493eaef6f30a22e5bda973ddc07dd92770f38b85ca6c215449af1aebdc",
+    "netlify/functions/scheduler-fanout-background.mjs": "3c769b9fcbd31b5d121efda0bd929fab90dbae260f092a4060a62fb636bbd485",
+    "netlify/functions/scheduler.mjs": "c33d75ba5f5dd47b93e337255fbfa4722af6166d045575393f6a1f314d46fa57",
+    "netlify/functions/service-activation-background.mjs": "c4e2ebcccb76c515c3ee18aec18cc39045c5002566e2569bd0b6d0e5d0a1f4c7",
+    "netlify/functions/service-onboarding-background.mjs": "336c3744db3a86fe3af50feaf3de60ae5655b164361df84f3c91bed076c64cb5",
+    "netlify/functions/service-onboarding-scheduler.mjs": "ee0c4c66944121f69f5b57563b91be14589d2946c52795bc17375be7ab0cc95a",
+    "netlify/functions/service-reconciliation-scheduler.mjs": "ccd670151bf0304ac9efabccd7657d676f7d429281fa98e97311c3e79bda16dc",
+    "netlify/functions/sms-agent-background.mjs": "312db1417ab15e18b4a1820fb7d1eb0d4aa1e8ae62ec4a00deac87c8119db775",
+    "netlify/functions/sms.mjs": "60e792b72729a9e079520bba71d47482f768d3064b5076bb0e6094c11e509b8c",
+    "netlify/functions/stripe-webhook.mjs": "04f9540a3a0e9fd6656b6c20a3d64ac10418ee929484e5f9965f624c39f04134",
+    "netlify/functions/thumbtack.mjs": "28a3d4bbfc502bde28b656fe3b522d6bd99eeb3959fddba01b19ff989ab4c992",
+    "netlify/functions/twilio-alert.mjs": "9908fd71c9e16f4288f6491db19edb438511836091a4ea0053524bcb430a0c57",
+    "netlify/functions/vapi.mjs": "991e30bb34d3da72fa7dba2b39d69e321b879b90b61b7a806595a9de0717fb2f",
+    "netlify/functions/voice-activation-background.mjs": "25edd55f7189c5c0f01044dc72fb67c438b9054807b183ade499369609703165",
+    "netlify/functions/voice-activation-scheduler.mjs": "67095d0b7a91ca928a71ebcd08ff5bdecfac68a38818e237aed830ec610c3f1e",
+    "netlify/functions/voice.mjs": "e6b7bdcb9a823e2fc846f0644635bb8635f95b764e0a9f7385c26a010c9d9ce2",
+    "netlify/functions/workspace-operations-background.mjs": "9103d1f78f8e464449a001ef1f3b8587e49b761bce54278710c865111d729bbf"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 8,
+    "failed": 1
+  },
+  "originalFailureUnchanged": true
+}

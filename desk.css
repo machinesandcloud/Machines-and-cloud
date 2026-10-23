@@ -281,3 +281,27 @@
 #visitDialog .visit-field-error { color:#aa2438; }
 #visitDialog .form-input[aria-invalid="true"],
 #visitDialog .form-input[aria-invalid="true"]:focus { border-color:#aa2438; box-shadow:0 0 0 1px #aa2438; }
+
+/* Saved business details: keep the existing editor and make recovery explicit. */
+.desk-app #cfg .cfg-field-error { margin:6px 0 0; color:#aa2438; font-size:12px; line-height:1.5; }
+.desk-app #cfg .form-input[aria-invalid="true"],
+.desk-app #cfg .form-input[aria-invalid="true"]:focus,
+.desk-app #cfg .hours-row input[aria-invalid="true"] { border-color:#aa2438; box-shadow:0 0 0 1px #aa2438; }
+.desk-app #cfg[data-save-state="dirty"] #saveMsg,
+.desk-app #cfg[data-save-state="incomplete"] #saveMsg { color:#71501f; }
+.desk-app #cfg[data-save-state="error"] #saveMsg,
+.desk-app #cfg[data-save-state="conflict"] #saveMsg { color:#aa2438; }
+.desk-app #cfg .cfg-conflict { border-color:#e6c5a4; background:#fffcf7; }
+.desk-app #cfg .cfg-conflict-field { padding:10px 0; border-top:1px solid #eadfce; font-size:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.desk-app #cfg button:disabled { cursor:wait; opacity:.65; }
+
+/* The account value follows the same save and recovery states. */
+.desk-app .acct-save-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.desk-app #acct .cfg-field-error { margin:6px 0 0; color:#aa2438; font-size:12px; }
+.desk-app #acct .form-input[aria-invalid="true"],
+.desk-app #acct .form-input[aria-invalid="true"]:focus { border-color:#aa2438; box-shadow:0 0 0 1px #aa2438; }
+.desk-app #acct[data-save-state="dirty"] #acctMsg { color:#71501f; }
+.desk-app #acct[data-save-state="error"] #acctMsg,
+.desk-app #acct[data-save-state="conflict"] #acctMsg { color:#aa2438; }
+.desk-app #acct .cfg-conflict { margin-top:12px; padding:14px; border:1px solid #e6c5a4; border-radius:12px; background:#fffcf7; }
+.desk-app #acct button:disabled { cursor:wait; opacity:.65; }

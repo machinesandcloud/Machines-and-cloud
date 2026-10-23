@@ -33,6 +33,7 @@ import { serviceOnboardingStatus, requestServiceOnboarding, cancelServiceOnboard
 import { dispatchServiceOnboarding } from "./lib/service-onboarding-dispatch.mjs";
 
 import { changeOwnerVisit, ownerVisitView, pendingOwnerVisitChange, pendingOwnerVisitCreations, OwnerVisitError } from "./lib/owner-visits.mjs";
+import { parseWorkspacePatch, applyWorkspacePatch, workspacePatchConflicts, workspaceEditRevision, WorkspaceEditError } from "./lib/workspace-edit.mjs";
 
 export const config = { path: "/api/client" };
 
@@ -40,6 +41,33 @@ const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Acc
 const s = (v, n = 300) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 const visibleOwnerBooking = (client, booking) => !booking.ownerVisitCreationAborted && (!isSelfServiceClient(client) || booking.delivery?.tenantIdentity === deliveryTenant(client));
 const arr = (v, n = 40) => (Array.isArray(v) ? v : String(v || "").split(/[\n;]+/)).map((x) => s(x, 160)).filter(Boolean).slice(0, n);
+
+async function updateWorkspace(c, body, ownsCurrent) {
+  const { expectedRevision, expectedEditRevision, ...supplied } = body;
+  if (expectedRevision !== configurationRevision(c) || expectedEditRevision !== workspaceEditRevision(c)) return json({ error: "configuration_changed", message: "Saved details changed or this page uses an older version. Check the latest saved details before saving your edits." }, 409);
+  let patch;
+  try { patch = parseWorkspacePatch(supplied); }
+  catch (error) {
+    if (error instanceof WorkspaceEditError) return json({ error: error.code, message: error.message, fieldErrors: error.fieldErrors }, error.status);
+    throw error;
+  }
+  const at = new Date().toISOString();
+  const result = await atomicUpdate("clients", c.slug, current => {
+    if (!ownsCurrent(current) || !isSupportedSelfServiceClient(current)) return { result: null };
+    if (["cancelled", "archived"].includes(current.status)) return { result: { closed: true } };
+    if (configurationRevision(current) !== expectedRevision || workspaceEditRevision(current) !== expectedEditRevision || workspacePatchConflicts(c, current, patch)) return { result: { conflict: true } };
+    const value = applyWorkspacePatch(current, patch), loop = loopCheck(value);
+    if (loop) return { result: { loop } };
+    if (JSON.stringify(value) === JSON.stringify(current)) return { result: { client: current } };
+    value.updatedAt = at;
+    return { value, result: { client: value } };
+  });
+  if (!result) return json({ error: "forbidden" }, 403);
+  if (result.closed) return json({ error: "workspace_closed", message: "This workspace is closed. Its saved records remain available to export." }, 409);
+  if (result.conflict) return json({ error: "configuration_changed", message: "Saved details changed. Check the latest version before saving your edits." }, 409);
+  if (result.loop) return json({ error: "loop", ...result.loop, fieldErrors: { [result.loop.field]: result.loop.message } }, 400);
+  return json({ ok: true, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), editRevision: workspaceEditRevision(result.client) }, 200, { "Cache-Control": "no-store" });
+}
 
 export default async (req) => {
   let out;
@@ -95,7 +123,7 @@ async function handle(req) {
       for(const conversation of sms){const old=convs.find(row=>row.channel==="sms"&&row.contact===conversation.contact);if(old)Object.assign(old,conversation);else convs.push(conversation);}
     }
     return json({
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, serviceOnboarding: await serviceOnboardingStatus(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections), connections, serviceOnboarding: await serviceOnboardingStatus(c), operations: await listWorkspaceOperations(c.slug), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
@@ -111,8 +139,9 @@ async function handle(req) {
 
   if (req.method === "PUT") {
     let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+    if (!b || typeof b !== "object" || Array.isArray(b)) return json({ error: "invalid_request", message: "Check the format of your business details." }, 400);
     if (selfService && b.legal!==undefined) return json({error:"use_secure_registration",message:"Review legal business details in your texting connection form."},400);
-    if (isSelfServiceClient(c) && b.expectedRevision !== configurationRevision(c)) return json({ error: "configuration_changed", message: "Your saved rules changed. Reload before saving so another tab's changes are kept." }, 409);
+    if (selfService) return updateWorkspace(c, b, ownsCurrent);
     const before = JSON.stringify(c);
     const bz = c.business;
     if (b.business) Object.assign(bz, {
@@ -148,19 +177,6 @@ async function handle(req) {
     if (b.software) c.software = s(b.software, 30);
     const loop = loopCheck(c);
     if (loop) { Object.assign(c, JSON.parse(before)); return json({ error: "loop", ...loop }, 400); }
-    if (isSelfServiceClient(c)) {
-      const original = JSON.parse(before), revision = configurationRevision(original);
-      const changes = Object.fromEntries(Object.entries(c).filter(([field, value]) => JSON.stringify(value) !== JSON.stringify(original[field])));
-      const result = await atomicUpdate("clients", c.slug, current => {
-        if (!ownsCurrent(current)) return { result: null };
-        if (configurationRevision(current) !== revision || Object.keys(changes).some(field => JSON.stringify(current[field]) !== JSON.stringify(original[field]))) return { result: { conflict: true } };
-        const updated = { ...current, ...changes, updatedAt: new Date().toISOString() };
-        return { value: updated, result: { client: updated } };
-      });
-      if (!result) return json({ error: "forbidden" }, 403);
-      if (result.conflict) return json({ error: "configuration_changed", message: "Rules changed in another tab. Reload before saving." }, 409);
-      return json({ ok: true, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client) });
-    }
     await saveClient(c); await indexClient(c);
     await logEvent(c.slug, "config_updated", {});
     const priorVoice = JSON.stringify(c.voice);

@@ -4,7 +4,7 @@
   if (!slug || (!key && !ownerSession)) { document.body.dataset.workspaceState = 'recovery'; document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
   var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + (key ? '&k=' + encodeURIComponent(key) : '');
-  var portalGeneration = 0, leaving = false, chatController = null, cfgRevision = null, cfgDirty = false, guideStarted = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
+  var portalGeneration = 0, leaving = false, chatController = null, cfgRevision = null, cfgEditRevision = null, cfgDirty = false, guideStarted = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
   var $ = function (id) { return document.getElementById(id); };
   function ownerHeaders() { var headers = { 'Content-Type': 'application/json' }; if (ownerSession) headers.Authorization = 'Bearer ' + ownerSession; return headers; }
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
@@ -30,7 +30,7 @@
       var result = await response.json();
       if (!response.ok || result.error || result.ok === false) {
         var message = result.message || (result.error === 'not_ready' ? 'Finish the setup checklist before activating website chat.' : result.error === 'configuration_changed' ? 'Your rules changed in another tab. Refresh and review the current version.' : response.status === 401 || response.status === 403 ? 'This private link is invalid or expired. Sign in by email to recover your workspace.' : 'We could not confirm that change. Please retry.');
-        var error = new Error(message); error.status = response.status; error.code = result.error; error.field = result.field; error.setup = result.setup; throw error;
+        var error = new Error(message); error.status = response.status; error.code = result.error; error.field = result.field; error.fieldErrors = result.fieldErrors; error.setup = result.setup; throw error;
       }
       return result;
     } finally { clearTimeout(timeout); }
@@ -312,7 +312,7 @@
     ].filter(function (task) { return task.label !== 'Activate and install website chat' || wantsWeb || operational; });
     $('setupSteps').innerHTML = tasks.map(function (task) { return '<div class="setup-step"><div><strong>' + (task.done ? '✓ ' : '') + esc(task.label) + '</strong><p>' + esc(task.detail) + '</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" data-route="' + task.tab + '">' + esc(task.button) + '</button></div>'; }).join('');
     $('setupSteps').querySelectorAll('button').forEach(function (button) { button.addEventListener('click', function () { routeTo(button.dataset.route); }); });
-    $('reviewRules').disabled = cfgDirty || client.status === 'cancelled';
+    $('reviewRules').disabled = cfgDirty || cfgBusy || client.status === 'cancelled';
     $('aiAllowance').textContent = allowance ? 'AI replies left today: ' + allowance.private.remaining + ' practice · ' + allowance.web.remaining + ' customer chat. Resets at midnight Houston time.' : '';
     if (limited) { var activate = $('golive') || $('resume'); if (activate) activate.disabled = true; }
     $('reviewMessage').textContent = cfgDirty ? 'Save your changes before reviewing.' : proof.reviewedRevision === revision ? 'Review saved for the current version.' : '';
@@ -352,7 +352,7 @@
     finally { if (!leaving) $('saveConnections').disabled = false; }
   });
   $('reviewRules').addEventListener('click', function () {
-    if (!data || !data.setup || cfgDirty) return;
+    if (!data || !data.setup || cfgDirty || cfgBusy) return;
     $('reviewRules').disabled = true; $('reviewMessage').textContent = 'Saving your review…';
     action('review_rules', { revision: data.setup.revision }).then(function () { return load(); }).catch(function (error) { $('reviewMessage').textContent = error.message; $('reviewRules').disabled = false; });
   });
@@ -384,9 +384,9 @@
   $('tourAction').addEventListener('click', function () { var tab = tour[tourIndex].tab; closeTour(); routeTo(tab); });
 
   function load() {
-    var generation = portalGeneration;
+    var generation = portalGeneration, fence = cfgFence;
     return apiRequest().then(function (d) {
-      if (generation !== portalGeneration) return;
+      if (generation !== portalGeneration || fence !== cfgFence || leaving) return;
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
       $('portalRecovery').hidden = true; $('portalContent').hidden = false; document.body.dataset.workspaceState = 'ready'; $('deskRail').hidden = false;
       data = d; var c = d.client;
@@ -438,16 +438,12 @@
       $('convs').innerHTML = renderConversations(d.conversations); $('bookingCount').textContent = d.bookings.length; $('leadCount').textContent = d.leads.length; decorateRecordTables();
       document.querySelectorAll('button.flag').forEach(function (b) { b.addEventListener('click', function () { var note = window.prompt('What went wrong? One line is enough.') || ''; apiRequest('POST', { action: 'flag', channel: b.dataset.ch, contact: b.dataset.ct, note: note }).then(function () { toast('Issue recorded on this conversation.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
       document.querySelectorAll('a.unflag').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); apiRequest('POST', { action: 'unflag', channel: a.dataset.ch, contact: a.dataset.ct }).then(function () { return load(); }).catch(function (error) { toast(error.message); }); }); });
-      // config form
-      if (!cfgDirty) {
-      cfgRevision = d.configurationRevision;
-      var f = $('cfg'), lines = function (a) { return (a || []).join('\n'); };
-      f.elements['business.name'].value = c.business.name || ''; f.elements['business.trade'].value = c.business.trade || ''; f.elements['business.hours'].value = c.business.hours || ''; var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; var hr = document.getElementById('hoursRows'); if (!hr.children.length) hr.innerHTML = DAYS.map(function (d) { return '<div class="hours-row"><span>' + d.charAt(0).toUpperCase() + d.slice(1) + '</span><input type="time" data-d="' + d + '" data-k="open" aria-label="' + d + ' opening time"><span>to</span><input type="time" data-d="' + d + '" data-k="close" aria-label="' + d + ' closing time"></div>'; }).join(''); var hrs = c.rules.hours || {}; hr.querySelectorAll('input').forEach(function (inp) { var v = hrs[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); document.getElementById('hoursNote').textContent = c.rules.hours ? 'The front desk uses these for the callback promise and after-hours rules.' : 'We could not read your hours; using 7 am to 7 pm until you fill in the rows.'; f.elements['business.afterHours'].value = c.business.afterHours || '';
-      f.elements['business.serviceArea'].value = lines(c.business.serviceArea); f.elements['business.notServed'].value = lines(c.business.notServed); f.elements['business.spanish'].value = c.business.spanish ? 'yes' : 'no'; f.elements['business.licenses'].value = c.business.licenses || '';
-      f.elements['services'].value = lines(c.services); f.elements['fees'].value = (c.fees || []).map(function (x) { return x.label + ': ' + x.amount + (x.note ? ' (' + x.note + ')' : ''); }).join('\n'); f.elements['windows'].value = lines(c.windows);
-      f.elements['rules.handoff'].value = lines(c.rules.handoff); f.elements['rules.never'].value = lines(c.rules.never); var em = (c.rules.emergencies && typeof c.rules.emergencies === 'object') ? c.rules.emergencies : { tier0: [], tier1: [], tier2: '', script: c.rules.emergencies || '' }; f.elements['rules.emergencies.tier0'].value = lines(em.tier0); f.elements['rules.emergencies.tier1'].value = lines(em.tier1); f.elements['rules.emergencies.tier2'].value = em.tier2 || ''; f.elements['rules.emergencies.script'].value = em.script || ''; f.elements['widget.allowedOrigins'].value = lines(c.widget.allowedOrigins || []); f.elements['summary'].value = c.summary || ''; f.elements['widget.greeting'].value = c.widget.greeting || '';
-      f.elements['faq'].value = (c.faq || []).map(function (x) { return x.q + ' ' + x.a; }).join('\n'); f.elements['owner.name'].value = c.owner.name || ''; f.elements['owner.phone'].value = c.owner.phone || ''; f.elements['owner.backupPhone'].value = c.owner.backupPhone || ''; f.elements['phone.transferTo'].value = c.phone.transferTo || ''; f.elements['rules.ackMinutes'].value = String(c.rules.ackMinutes || 10); f.elements['phone.forwarding'].value = c.phone.forwarding || 'missed'; f.elements['rules.callbackHours'].value = c.rules.callbackHours || ''; f.elements['rules.callbackAfterHours'].value = c.rules.callbackAfterHours || ''; document.getElementById('transferGroup').style.display = (c.phone.forwarding === 'all') ? 'block' : 'none'; f.elements['business.reviewLink'].value = c.business.reviewLink || ''; f.elements['business.payLink'].value = c.business.payLink || ''; f.elements['rules.bypass'].value = lines(c.rules.bypass || []); f.elements['digest.text'].checked = !(c.digest && c.digest.text === false); f.elements['rules.consentAsk'].checked = !!c.rules.consentAsk; f.elements['rules.windowCapacity'].value = c.rules.windowCapacity || 1; $('acct').elements['rules.avgTicket'].value = c.rules.avgTicket || '';
+      // Background refreshes must never replace an edited or pending draft.
+      if (!cfgDirty && !cfgBusy && !cfgConflict) {
+        cfgFill(cfgFromClient(c)); cfgBaseline = cfgRead(); cfgRevision = d.configurationRevision; cfgEditRevision = d.editRevision; cfgClosed = !!(c.onboarding && c.onboarding.version === 1 && ['cancelled','archived'].includes(c.status));
+        cfgStatus(cfgClosed ? 'error' : cfgIncomplete(d.setup) ? 'incomplete' : 'saved', cfgClosed ? 'This workspace no longer accepts business edits.' : cfgSavedMessage(d.setup));
       }
+      acctObserve(d, false);
       var u = d.usage || {}; $('usage').textContent = u.month ? (u.minutes || 0) + ' of ' + (u.included && u.included.minutes) + ' call minutes, ' + (u.texts || 0) + ' of ' + (u.included && u.included.texts) + ' texts to customers (' + u.month + '). Past the plan it is $0.35 a minute and $0.03 a text; nothing changes on the line.' : '';
       [['expBookings','bookings'],['expLeads','leads'],['expConvs','conversations'],['expCustomers','customers']].forEach(function (item) { $(item[0]).href = '#download-' + item[1]; $(item[0]).dataset.export = item[1]; });
       // setup
@@ -480,32 +476,130 @@
       ].map(function (x) { return '<div class="check"><span class="dot ' + x[0] + '"></span><span>' + x[1] + '</span></div>'; }).join('');
       $('liveEvents').innerHTML = (d.events || []).length ? d.events.slice(0, 8).map(function (e) { return '<div>' + esc((e.at || '').slice(5, 16).replace('T', ' ')) + ' ' + esc(e.type) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') : 'No service activity yet. Practice conversations stay separate.';
       renderSetup(d);
-    }).catch(function (error) { if (generation === portalGeneration) recover(error.name === 'AbortError' ? 'Loading timed out. Try again or sign in by email.' : error.message); });
+    }).catch(function (error) { if (generation === portalGeneration && fence === cfgFence && !leaving) recover(error.name === 'AbortError' ? 'Loading timed out. Try again or sign in by email.' : error.message); });
   }
   function action(a, extra) { return apiRequest('POST', Object.assign({ action: a }, extra || {})); }
   function confirmAction(name, message) { return action(name).then(function () { toast(message); return load(); }).catch(function (error) { $('setupMessage').textContent = error.message; toast(error.message); }); }
   $('testSms').addEventListener('click', function () { action('test_sms').then(function (r) { $('smsText').textContent = r.ok ? 'Test text request accepted. Check your phone for delivery.' : 'No test text was sent.'; }).catch(function (error) { $('smsText').textContent = error.message; }); });
 
   $('cfg').elements['phone.forwarding'].addEventListener('change', function (ev) { document.getElementById('transferGroup').style.display = ev.target.value === 'all' ? 'block' : 'none'; });
-  $('cfg').addEventListener('submit', function (e) {
-    e.preventDefault(); var f = e.target, L = function (n) { return f.elements[n].value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); };
-    var body = { expectedRevision: cfgRevision, business: { name: f.elements['business.name'].value, trade: f.elements['business.trade'].value, hours: f.elements['business.hours'].value, afterHours: f.elements['business.afterHours'].value, serviceArea: L('business.serviceArea'), notServed: L('business.notServed'), spanish: f.elements['business.spanish'].value === 'yes', licenses: f.elements['business.licenses'].value, reviewLink: f.elements['business.reviewLink'].value, payLink: f.elements['business.payLink'].value, city: data.client.business.city, googlePlaceId: data.client.business.googlePlaceId },
-      owner: { name: f.elements['owner.name'].value, phone: f.elements['owner.phone'].value, backupPhone: f.elements['owner.backupPhone'].value }, phone: { businessNumber: data.client.phone.businessNumber, forwarding: f.elements['phone.forwarding'].value, carrier: data.client.phone.carrier, transferTo: f.elements['phone.transferTo'].value }, services: L('services'),
-      fees: L('fees').map(function (line) { var m = line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/); return m ? { label: m[1].trim(), amount: m[2].trim(), note: (m[3] || '').trim() } : { label: line, amount: '', note: '' }; }),
-      windows: L('windows'), rules: { handoff: L('rules.handoff'), never: L('rules.never'), emergencies: { tier0: L('rules.emergencies.tier0'), tier1: L('rules.emergencies.tier1'), tier2: f.elements['rules.emergencies.tier2'].value, script: f.elements['rules.emergencies.script'].value }, ackMinutes: Number(f.elements['rules.ackMinutes'].value), callbackHours: f.elements['rules.callbackHours'].value, callbackAfterHours: f.elements['rules.callbackAfterHours'].value, bypass: L('rules.bypass'), consentAsk: f.elements['rules.consentAsk'].checked, windowCapacity: Number(f.elements['rules.windowCapacity'].value) || 1, hours: (function () { var t = {}; document.querySelectorAll('#hoursRows input[data-k="open"]').forEach(function (o) { var c2 = document.querySelector('#hoursRows input[data-d="' + o.dataset.d + '"][data-k="close"]'); t[o.dataset.d] = o.value && c2.value ? { open: o.value, close: c2.value } : null; }); return t; })() }, digest: { text: f.elements['digest.text'].checked }, summary: f.elements['summary'].value, widget: { greeting: f.elements['widget.greeting'].value, allowedOrigins: L('widget.allowedOrigins') },
-      faq: L('faq').map(function (line) { var i = line.indexOf('?'); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : null; }).filter(Boolean) };
-    $('saveMsg').textContent = 'Saving…'; apiRequest('PUT', body).then(function () { cfgDirty = false; $('saveMsg').textContent = 'Saved. Review and test this version before activating website chat.'; return load(); }).catch(function (error) { $('saveMsg').textContent = error.message + ' Your edits are still on this page.'; });
-  });
+  var cfgBaseline = null, cfgBusy = false, cfgConflict = null, cfgFence = 0, cfgClosed = false, cfgEventValues = new WeakMap();
+  var acctBaseline = null, acctRevision = null, acctEditRevision = null, acctDirty = false, acctBusy = false, acctConflict = null, acctEventValue = null;
+  var cfgDays = ['mon','tue','wed','thu','fri','sat','sun'];
+  var cfgArrayFields = ['services','business.serviceArea','business.notServed','windows','rules.handoff','rules.never','rules.emergencies.tier0','rules.emergencies.tier1','rules.bypass','widget.allowedOrigins'];
+  function cfgRead() {
+    var values = {};
+    $('cfg').querySelectorAll('[name]').forEach(function(field){ values[field.name] = field.type === 'checkbox' ? field.checked : field.value; });
+    var hours = {}; cfgDays.forEach(function(day){ hours[day] = {}; ['open','close'].forEach(function(kind){ var field=$('hoursRows').querySelector('[data-d="'+day+'"][data-k="'+kind+'"]'); hours[day][kind]=field ? field.value : ''; }); });
+    values['rules.hours'] = JSON.stringify(hours); return values;
+  }
+  function cfgFromClient(client) {
+    var values = {}, read = function(path){return path.split('.').reduce(function(value,key){return value == null ? undefined : value[key];},client);};
+    $('cfg').querySelectorAll('[name]').forEach(function(field){var value=read(field.name);values[field.name]=field.type==='checkbox'?!!value:value == null?'':String(value);});
+    cfgArrayFields.forEach(function(name){values[name]=(read(name)||[]).join('\n');});
+    values['business.spanish']=client.business.spanish?'yes':'no'; values['phone.forwarding']=client.phone.forwarding||'missed';
+    values['rules.windowCapacity']=String(client.rules.windowCapacity||1);values['rules.ackMinutes']=String(client.rules.ackMinutes||10);values['digest.text']=!(client.digest&&client.digest.text===false);
+    values.fees=(client.fees||[]).map(function(row){return row.label+': '+row.amount+(row.note?' ('+row.note+')':'');}).join('\n');
+    values.faq=(client.faq||[]).map(function(row){return row.q+' '+row.a;}).join('\n');
+    var hours={};cfgDays.forEach(function(day){var row=client.rules.hours&&client.rules.hours[day];hours[day]={open:row&&row.open||'',close:row&&row.close||''};});values['rules.hours']=JSON.stringify(hours);return values;
+  }
+  function cfgFill(values, preserve) {
+    var rows=$('hoursRows');if(!rows.children.length)rows.innerHTML=cfgDays.map(function(day){return '<div class="hours-row"><span>'+day.charAt(0).toUpperCase()+day.slice(1)+'</span><input type="time" data-d="'+day+'" data-k="open" aria-label="'+day+' opening time"><span>to</span><input type="text" inputmode="numeric" maxlength="5" placeholder="17:00" data-d="'+day+'" data-k="close" aria-label="'+day+' closing time, 24:00 for midnight"></div>';}).join('');
+    $('cfg').querySelectorAll('[name]').forEach(function(field){if(preserve&&Object.hasOwn(preserve,field.name))return;if(field.type==='checkbox')field.checked=!!values[field.name];else field.value=values[field.name] == null?'':values[field.name];});
+    if(!preserve||!Object.hasOwn(preserve,'rules.hours')){var hours=JSON.parse(values['rules.hours']);rows.querySelectorAll('input').forEach(function(field){field.value=hours[field.dataset.d][field.dataset.k];});}
+    $('hoursNote').textContent='Leave both times blank for a closed day. Use 24:00 to end at midnight.';
+    $('transferGroup').style.display=$('cfg').elements['phone.forwarding'].value==='all'?'block':'none';
+    cfgErrorElements();$('cfg').querySelectorAll('[name],#hoursRows input').forEach(function(field){cfgEventValues.set(field,field.type==='checkbox'?String(field.checked):field.value);});
+  }
+  function cfgChanges(values, base) { return base?Object.keys(values).filter(function(name){return values[name]!==base[name];}):[]; }
+  function cfgStatus(kind,message) { $('cfg').dataset.saveState=kind;if($('saveMsg').textContent!==message)$('saveMsg').textContent=message;$('saveCfg').disabled=cfgBusy||acctBusy||cfgClosed;$('cfg').setAttribute('aria-busy',String(cfgBusy));$('cfgCheckLatest').disabled=cfgBusy||acctBusy;$('cfgKeepEdits').disabled=cfgBusy||acctBusy;$('saveAcct').disabled=cfgBusy||acctBusy||cfgClosed; }
+  function cfgIncomplete(setup) { return !!(setup&&setup.channels&&setup.channels.web&&setup.channels.web.blockers.some(function(row){return row.id==='rules'||row.id==='handoff';})); }
+  function cfgSavedMessage(setup) { return cfgIncomplete(setup)?'Saved as a draft. Complete your business rules and callback details before activation.':'All changes saved. Review and test these rules before activating website chat.'; }
+  function cfgField(name) {if(name.indexOf('rules.hours')!==0){var path=name;while(path&&!$('cfg').elements[path])path=path.includes('.')?path.slice(0,path.lastIndexOf('.')):'';return path?$('cfg').elements[path]:null;}var parts=name.split('.'),match=cfgDays.indexOf(parts[2])>=0?$('hoursRows').querySelector('[data-d="'+parts[2]+'"][data-k="'+(parts[3]==='close'?'close':'open')+'"]'):null;if(match)return match;var bad=null;cfgDays.some(function(day){var open=$('hoursRows').querySelector('[data-d="'+day+'"][data-k="open"]'),close=$('hoursRows').querySelector('[data-d="'+day+'"][data-k="close"]');if(!open||!close||!open.value&&!close.value)return false;if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(open.value)){bad=open;return true;}if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(close.value)&&close.value!=='24:00'||close.value<=open.value){bad=close;return true;}return false;});return bad||$('hoursRows').querySelector('input');}
+  function cfgErrorElements() {
+    $('cfg').querySelectorAll('[name],#hoursRows input').forEach(function(field,index){var name=field.name||'rules.hours',id=name==='rules.hours'?'cfgHoursError':'cfgError-'+(field.id||(field.id='cfgField-'+index));var error=$(id);if(!error){error=document.createElement('p');error.id=id;error.className='cfg-field-error';if(name==='rules.hours')$('hoursRows').after(error);else field.after(error);}var ids=(field.getAttribute('aria-describedby')||'').split(/\s+/).filter(Boolean);if(ids.indexOf(id)<0)ids.push(id);field.setAttribute('aria-describedby',ids.join(' '));field.dataset.cfgError=id;});
+  }
+  function cfgClearError(name) {if(name&&name.indexOf('rules.hours')===0)name='rules.hours';var fields=name==='rules.hours'?$('hoursRows').querySelectorAll('input'):name?[$('cfg').elements[name]]:$('cfg').querySelectorAll('[data-cfg-error]');Array.prototype.forEach.call(fields,function(field){if(!field)return;field.removeAttribute('aria-invalid');delete field.dataset.cfgInvalidValue;if(field.dataset.cfgError&&$(field.dataset.cfgError))$(field.dataset.cfgError).textContent='';});}
+  function cfgShowErrors(errors) {
+    cfgClearError();var first=null;
+    Object.keys(errors).forEach(function(name){var field=cfgField(name);if(!field)return;var fields=name.indexOf('rules.hours')===0?$('hoursRows').querySelectorAll('input'):[field];Array.prototype.forEach.call(fields,function(input){input.setAttribute('aria-invalid','true');input.dataset.cfgInvalidValue=input.type==='checkbox'?String(input.checked):input.value;if(input.dataset.cfgError)$(input.dataset.cfgError).textContent=errors[name];});if(!first&&!field.disabled)first=field;});
+    if(first){routeTo('know');var details=first.closest('details');if(details)details.open=true;first.focus();first.scrollIntoView({block:'center'});}else $('saveMsg').focus();
+  }
+  function cfgValidPhone(value) {var raw=value.trim();if(!raw)return true;if(!/^[+\d\s().-]+$/.test(raw)||raw.indexOf('+')>0||raw.indexOf('+',1)>=0)return false;var digits=raw.replace(/\D/g,'');if(raw[0]==='+'&&!raw.startsWith('+1'))return false;if(digits.length===11&&digits[0]==='1')digits=digits.slice(1);return /^[2-9]\d{2}[2-9]\d{6}$/.test(digits);}
+  function cfgValidate(values, changed) {
+    var errors={},lines=function(name){return String(values[name]||'').split('\n').map(function(row){return row.trim();}).filter(Boolean);};
+    ['owner.phone','owner.backupPhone','phone.transferTo'].forEach(function(name){if(changed.indexOf(name)>=0&&!cfgValidPhone(values[name]))errors[name]='Enter a valid US number, such as (713) 555-0142, or leave it blank for now.';});
+    if(changed.indexOf('rules.windowCapacity')>=0&&(!/^\d+$/.test(values['rules.windowCapacity'])||Number(values['rules.windowCapacity'])<1||Number(values['rules.windowCapacity'])>20))errors['rules.windowCapacity']='Choose a whole number from 1 to 20.';
+    if(changed.indexOf('rules.hours')>=0){var hours=JSON.parse(values['rules.hours']),valid=function(value,closing){return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)||closing&&value==='24:00';};cfgDays.forEach(function(day){var h=hours[day];if((h.open||h.close)&&(!valid(h.open,false)||!valid(h.close,true)||h.close<=h.open))errors['rules.hours']='Add valid opening and closing times for each open day. Closing time must be later; leave both blank for a closed day.';});}
+    if(changed.indexOf('faq')>=0&&lines('faq').some(function(line){var i=line.indexOf('?');return i<=0||!line.slice(i+1).trim();}))errors.faq='Use one question and answer per line, with a question mark between them.';
+    return errors;
+  }
+  function cfgPayload(values, changed) {
+    var body={expectedRevision:cfgRevision,expectedEditRevision:cfgEditRevision},lines=function(name){return String(values[name]||'').split('\n').map(function(row){return row.trim();}).filter(Boolean);};
+    var legacy=!(data.client.onboarding&&data.client.onboarding.version===1);if(legacy)changed=Object.keys(values);
+    changed.forEach(function(name){var value=values[name];if(cfgArrayFields.indexOf(name)>=0)value=lines(name);else if(name==='business.spanish')value=value==='yes';else if(['rules.windowCapacity','rules.ackMinutes'].indexOf(name)>=0)value=Number(value);else if(name==='rules.hours'){var hours=JSON.parse(value);cfgDays.forEach(function(day){if(!hours[day].open&&!hours[day].close)hours[day]=null;});value=hours;}else if(name==='fees')value=lines(name).map(function(line){var m=line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/);return m?{label:m[1].trim(),amount:m[2].trim(),note:(m[3]||'').trim()}:{label:line,amount:'',note:''};});else if(name==='faq')value=lines(name).map(function(line){var i=line.indexOf('?');return {q:line.slice(0,i+1).trim(),a:line.slice(i+1).trim()};});var parts=name.split('.'),target=body;parts.slice(0,-1).forEach(function(key){target=target[key]||(target[key]={});});target[parts[parts.length-1]]=value;});if(legacy){body.business.city=data.client.business.city;body.business.googlePlaceId=data.client.business.googlePlaceId;body.phone.businessNumber=data.client.phone.businessNumber;body.phone.carrier=data.client.phone.carrier;}return body;
+  }
+  function cfgChanged() {
+    if(!cfgBaseline||leaving)return;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;
+    if(data&&data.setup){$('reviewRules').disabled=cfgDirty||cfgBusy||data.client.status==='cancelled';$('reviewMessage').textContent=cfgDirty||cfgBusy?'Save your edits before reviewing this version.':'';}
+    if(cfgClosed)cfgStatus('error','This workspace no longer accepts business edits. Your typed changes are kept on this page.');else if(cfgBusy)cfgStatus('saving','Saving the submitted changes. Any newer edits will stay here.');else if(cfgConflict)cfgStatus('conflict','Your edits are kept. Review the latest saved version before saving again.');else cfgStatus(cfgDirty?'dirty':cfgIncomplete(data&&data.setup)?'incomplete':'saved',cfgDirty?'You have unsaved changes.':cfgSavedMessage(data&&data.setup));
+  }
+  async function saveCfg() {
+    if(cfgBusy||acctBusy||cfgClosed||leaving||!data||!cfgBaseline)return;
+    var snapshot=cfgRead(),changed=cfgChanges(snapshot,cfgBaseline);if(!changed.length){cfgChanged();return;}
+    if(cfgConflict){$('cfgConflictPanel').hidden=false;cfgStatus('conflict','Your edits are kept. Check the latest saved version before saving again.');$('cfgCheckLatest').focus();return;}
+    var errors=cfgValidate(snapshot,changed);if(Object.keys(errors).length){cfgStatus('error','Check the highlighted details. Your edits have not been saved.');cfgShowErrors(errors);return;}
+    var generation=portalGeneration;cfgBusy=true;cfgFence++;cfgClearError();cfgChanged();acctStatus();
+    try{var result=await apiRequest('PUT',cfgPayload(snapshot,changed));if(leaving||generation!==portalGeneration)return;if(!result.client||data.client.onboarding&&data.client.onboarding.version===1&&(!/^[a-f0-9]{64}$/.test(result.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(result.editRevision||'')))throw new Error('The saved version could not be confirmed.');
+      var current=cfgRead(),preserve={};Object.keys(current).forEach(function(name){if(current[name]!==snapshot[name])preserve[name]=current[name];});var saved=cfgFromClient(result.client);cfgFill(saved,preserve);cfgBaseline=saved;cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;cfgFence++;data.client=result.client;if(result.setup)data.setup=result.setup;if(result.configurationRevision)data.configurationRevision=result.configurationRevision;if(result.editRevision)data.editRevision=result.editRevision;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgConflict=null;$('cfgConflictPanel').hidden=true;renderSetup(data);if(!leaving)document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));
+      acctObserve(result,true);cfgBusy=false;cfgStatus(cfgDirty?'dirty':cfgIncomplete(result.setup)?'incomplete':'saved',cfgDirty?'Submitted changes saved. Your newer edits are still unsaved.':cfgSavedMessage(result.setup));
+    }catch(error){if(leaving||generation!==portalGeneration)return;cfgBusy=false;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}if(error.code==='configuration_changed'){cfgConflict={latest:null};$('cfgConflictPanel').hidden=false;$('cfgKeepEdits').hidden=true;cfgStatus('conflict','Your saved details changed elsewhere. Your edits are kept; check the latest version.');}else{if(error.code==='workspace_closed')cfgClosed=true;cfgStatus('error',(error.message||'The save could not be confirmed.')+' Your edits are still here.');var fieldErrors=Object.assign({},error.fieldErrors||{});if(error.field&&!Object.keys(fieldErrors).length)fieldErrors[error.field]=error.message;var present=cfgRead();Object.keys(fieldErrors).forEach(function(name){var field=cfgField(name),grouped=name.indexOf('rules.hours')===0?'rules.hours':field&&field.name||name;if(present[grouped]!==snapshot[grouped])delete fieldErrors[name];});if(Object.keys(fieldErrors).length)cfgShowErrors(fieldErrors);}}
+    finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;if(data&&data.setup)$('reviewRules').disabled=cfgDirty||data.client.status==='cancelled';acctStatus();}}
+  }
+  function cfgLabel(name) {var field=cfgField(name),label=field&&field.closest('.form-group')&&field.closest('.form-group').querySelector('label');return name==='rules.hours'?'Weekly hours':label?label.textContent.trim():name==='faq'?'Customer questions':name;}
+  function cfgDisplay(name,value) {if(name==='rules.hours'){var hours=JSON.parse(value);return cfgDays.map(function(day){return day+': '+(hours[day].open||hours[day].close?hours[day].open+' to '+hours[day].close:'closed');}).join('; ');}return typeof value==='boolean'?value?'Yes':'No':value||'Blank';}
+  $('cfgCheckLatest').addEventListener('click',async function(){if(cfgBusy||acctBusy||!cfgConflict||leaving)return;var generation=portalGeneration;cfgBusy=true;cfgStatus('conflict','Checking the latest saved details. Your edits will stay here.');try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!latest.client||!/^[a-f0-9]{64}$/.test(latest.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(latest.editRevision||''))throw new Error('The latest saved version could not be read.');if(['cancelled','archived'].includes(latest.client.status)){cfgClosed=true;cfgConflict=null;$('cfgConflictPanel').hidden=true;throw new Error('This workspace no longer accepts business edits.');}cfgConflict.latest={data:latest,values:cfgFromClient(latest.client)};var mine=cfgRead(),changed=cfgChanges(cfgConflict.latest.values,cfgBaseline),box=$('cfgConflictFields');box.replaceChildren();changed.forEach(function(name){var row=document.createElement('p');row.className='cfg-conflict-field';row.textContent=cfgLabel(name)+' | Latest saved: '+cfgDisplay(name,cfgConflict.latest.values[name])+'. Your current value: '+cfgDisplay(name,mine[name]);box.appendChild(row);});$('cfgConflictText').textContent=changed.length?'Compare these updates with your draft. Keeping your edits saves only the fields you changed.':'The latest saved version is ready to compare. Keeping your edits saves only the fields you changed.';$('cfgKeepEdits').hidden=false;cfgStatus('conflict','Latest saved version checked. Your draft is unchanged; review the differences before continuing.');}catch(error){if(!leaving&&generation===portalGeneration)cfgStatus(cfgClosed?'error':'conflict',error.message+' Your edits are still here.');}finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;}}});
+  $('cfgKeepEdits').addEventListener('click',function(){if(cfgBusy||acctBusy||cfgClosed||!cfgConflict||!cfgConflict.latest||leaving)return;var mine=cfgRead(),preserve={};cfgChanges(mine,cfgBaseline).forEach(function(name){preserve[name]=mine[name];});var latest=cfgConflict.latest;cfgFill(latest.values,preserve);cfgBaseline=latest.values;cfgRevision=latest.data.configurationRevision;cfgEditRevision=latest.data.editRevision;data=latest.data;cfgConflict=null;$('cfgConflictPanel').hidden=true;cfgFence++;cfgChanged();saveCfg();});
 
-  $('acct').addEventListener('submit', function (event) { event.preventDefault(); apiRequest('PUT', { expectedRevision: cfgRevision, rules: { avgTicket: event.target.elements['rules.avgTicket'].value } }).then(function () { $('acctMsg').textContent = 'Saved.'; return load(); }).catch(function (error) { $('acctMsg').textContent = error.message; }); });
+  $('cfg').addEventListener('submit',function(event){event.preventDefault();saveCfg();});
+
+  function acctValue(client) { return client.rules.avgTicket ? String(client.rules.avgTicket) : ''; }
+  function acctStatus(kind,message) {
+    if(leaving)return;var state=kind||(acctBusy?'saving':acctConflict?'conflict':acctDirty?'dirty':'saved');
+    $('acct').dataset.saveState=state;$('acct').setAttribute('aria-busy',String(acctBusy));$('saveAcct').disabled=acctBusy||cfgBusy||cfgClosed;$('cfgCheckLatest').disabled=acctBusy||cfgBusy;$('cfgKeepEdits').disabled=acctBusy||cfgBusy;$('acctCheckLatest').disabled=acctBusy||cfgBusy;$('acctKeepEdits').disabled=acctBusy||cfgBusy;
+    var text=message||(acctBusy?'Saving the submitted value. Newer edits will stay here.':acctConflict?'Your value is kept. Check the latest saved version.':acctDirty?'You have an unsaved value.':'All changes saved.');if($('acctMsg').textContent!==text)$('acctMsg').textContent=text;
+  }
+  function acctObserve(result,localAck) {
+    var saved=acctValue(result.client);
+    if(acctBaseline===null||!acctDirty&&!acctBusy&&!acctConflict){$('avgTicket').value=saved;acctEventValue=saved;acctBaseline=saved;acctRevision=result.configurationRevision;acctEditRevision=result.editRevision;acctDirty=false;acctStatus();}
+    else if(localAck&&saved===acctBaseline){acctRevision=result.configurationRevision;acctEditRevision=result.editRevision;}
+  }
+  function acctError(message) {$('acctError').textContent=message||'';if(message){$('avgTicket').setAttribute('aria-invalid','true');$('avgTicket').dataset.invalidValue=$('avgTicket').value;}else{$('avgTicket').removeAttribute('aria-invalid');delete $('avgTicket').dataset.invalidValue;}}
+  function acctChanged(event) {var field=$('avgTicket'),value=field.value;if(event&&event.type==='change'&&acctEventValue===value)return;acctEventValue=value;if(field.getAttribute('aria-invalid')==='true'&&field.dataset.invalidValue===value)return;acctDirty=value!==acctBaseline;acctError('');acctStatus();}
+  async function saveAcct() {
+    if(acctBusy||cfgBusy||cfgClosed||leaving||!data||acctBaseline===null)return;
+    var snapshot=$('avgTicket').value;if(snapshot===acctBaseline){acctStatus();return;}
+    if(acctConflict){acctStatus('conflict','Your value is kept. Check the latest saved version before saving again.');$('acctCheckLatest').focus();return;}
+    var raw=snapshot.trim();if(raw&&(!/^\d+(?:\.\d+)?$/.test(raw)||!Number.isFinite(Number(raw))||Number(raw)>1000000)){acctError('Enter a number from 0 to 1000000, or leave it blank.');acctStatus('error','Check the highlighted value. It has not been saved.');$('avgTicket').focus();return;}
+    var generation=portalGeneration;acctBusy=true;cfgFence++;acctError('');acctStatus();cfgChanged();
+    try{var result=await apiRequest('PUT',{expectedRevision:acctRevision,expectedEditRevision:acctEditRevision,rules:{avgTicket:snapshot}});if(leaving||generation!==portalGeneration)return;if(!result.client||data.client.onboarding&&data.client.onboarding.version===1&&(!/^[a-f0-9]{64}$/.test(result.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(result.editRevision||'')))throw new Error('The saved value could not be confirmed.');
+      var saved=acctValue(result.client);if($('avgTicket').value===snapshot)$('avgTicket').value=saved;acctEventValue=saved;acctBaseline=saved;acctRevision=result.configurationRevision;acctEditRevision=result.editRevision;acctDirty=$('avgTicket').value!==acctBaseline;acctConflict=null;$('acctConflictPanel').hidden=true;cfgFence++;data.client=result.client;if(result.setup)data.setup=result.setup;data.configurationRevision=result.configurationRevision;data.editRevision=result.editRevision;
+      if(!cfgChanges(cfgFromClient(result.client),cfgBaseline).length){cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;}renderSetup(data);document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));acctBusy=false;acctStatus(acctDirty?'dirty':'saved',acctDirty?'Submitted value saved. Your newer value is still unsaved.':'All changes saved.');
+    }catch(error){if(leaving||generation!==portalGeneration)return;acctBusy=false;acctDirty=$('avgTicket').value!==acctBaseline;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}if(error.code==='configuration_changed'){acctConflict={latest:null};$('acctConflictPanel').hidden=false;$('acctKeepEdits').hidden=true;acctStatus('conflict','Your saved details changed elsewhere. Your value is kept; check the latest version.');}else{if(error.code==='workspace_closed')cfgClosed=true;acctStatus('error',(error.message||'The save could not be confirmed.')+' Your value is still here.');if($('avgTicket').value===snapshot&&error.fieldErrors&&error.fieldErrors['rules.avgTicket']){acctError(error.fieldErrors['rules.avgTicket']);$('avgTicket').focus();}}}
+    finally{if(!leaving&&generation===portalGeneration){acctBusy=false;$('acct').setAttribute('aria-busy','false');$('saveAcct').disabled=cfgClosed;$('acctCheckLatest').disabled=false;$('acctKeepEdits').disabled=false;cfgChanged();}}
+  }
+  $('acct').addEventListener('submit',function(event){event.preventDefault();saveAcct();});
+  ['input','change'].forEach(function(type){$('avgTicket').addEventListener(type,acctChanged);});
+  $('acctCheckLatest').addEventListener('click',async function(){if(acctBusy||cfgBusy||!acctConflict||leaving)return;var generation=portalGeneration;acctBusy=true;acctStatus('conflict','Checking the latest saved value. Your value will stay here.');cfgChanged();try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!latest.client||!/^[a-f0-9]{64}$/.test(latest.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(latest.editRevision||''))throw new Error('The latest saved value could not be read.');if(['cancelled','archived'].includes(latest.client.status)){cfgClosed=true;acctConflict=null;$('acctConflictPanel').hidden=true;throw new Error('This workspace no longer accepts business edits.');}acctConflict.latest=latest;$('acctConflictText').textContent='Latest saved: '+(acctValue(latest.client)||'Blank')+'. Your current value: '+($('avgTicket').value||'Blank')+'. Keeping your value changes only the average job value.';$('acctKeepEdits').hidden=false;acctStatus('conflict','Latest saved value checked. Review it before keeping your value.');}catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}acctStatus('conflict',error.message+' Your value is still here.');}finally{if(!leaving&&generation===portalGeneration){acctBusy=false;$('acct').setAttribute('aria-busy','false');$('saveAcct').disabled=cfgClosed;$('acctCheckLatest').disabled=false;$('acctKeepEdits').disabled=false;cfgChanged();}}});
+  $('acctKeepEdits').addEventListener('click',function(){if(acctBusy||cfgBusy||cfgClosed||!acctConflict||!acctConflict.latest||leaving)return;var latest=acctConflict.latest;acctBaseline=acctValue(latest.client);acctRevision=latest.configurationRevision;acctEditRevision=latest.editRevision;acctConflict=null;$('acctConflictPanel').hidden=true;acctDirty=$('avgTicket').value!==acctBaseline;saveAcct();});
   $('legal').addEventListener('submit', function (e) {
     e.preventDefault(); var f = e.target;
     apiRequest('PUT', { legal: { legalName: f.elements['legalName'].value, ein: f.elements['ein'].value, businessType: f.elements['businessType'].value, street: f.elements['street'].value, city: f.elements['city'].value, state: f.elements['state'].value, zip: f.elements['zip'].value } })
       .then(function () { return action('provision'); }).then(function () { $('legalMsg').textContent = 'Saved. Filing now; check back in a day.'; setTimeout(load, 4000); }).catch(function (error) { $('legalMsg').textContent = error.message; });
   });
 
-  $('cfg').addEventListener('input', function () { cfgDirty = true; if (data && data.setup) { $('reviewRules').disabled = true; $('reviewMessage').textContent = 'Save your edits before reviewing this version.'; } });
-  $('cfg').addEventListener('change', function () { cfgDirty = true; if (data && data.setup) $('reviewRules').disabled = true; });
+  ['input','change'].forEach(function(type){$('cfg').addEventListener(type,function(event){var field=event.target,value=field.type==='checkbox'?String(field.checked):field.value;if(event.type==='change'&&cfgEventValues.get(field)===value)return;cfgEventValues.set(field,value);if(field.getAttribute('aria-invalid')==='true'&&field.dataset.cfgInvalidValue===value)return;cfgClearError(field.name||'rules.hours');cfgChanged();});});
+  window.addEventListener('beforeunload',function(event){if(cfgDirty||cfgBusy||acctDirty||acctBusy){event.preventDefault();event.returnValue='';}});
 
   $('deskSignOut').addEventListener('click', async function () {
     var button = $('deskSignOut'); button.disabled = true;
@@ -519,7 +613,7 @@
       history.replaceState(null, '', location.pathname);
       recover('Signed out. Use an email sign-in link to open your workspace again.');
       $('portalContent').innerHTML = '';
-    } catch (error) { leaving = false; await load(); toast(error.message); } finally { button.disabled = false; }
+    } catch (error) { if (!ownerSession && !key) return; leaving = false; cfgBusy = false; acctBusy = false; cfgFence++; cfgChanged(); acctStatus(); await load(); toast(error.message); } finally { button.disabled = false; }
   });
   ['expBookings','expLeads','expConvs','expCustomers'].forEach(function (id) {
     $(id).addEventListener('click', async function (event) {
