@@ -1,0 +1,117 @@
+{
+  "at": "2026-10-24T06:43:55.912465+00:00",
+  "scope": "Independent actual helper command paths; synthetic filesystem/auth/protocol fixtures, never real packet/config/credentials",
+  "sourceBefore": {
+    "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+    "scripts/calendar-live-guard.mjs": "f69f988aba7037e059d066df10474248c11fc3e3348a771f133cba3327f97249",
+    "scripts/calendar-live-actor.mjs": "9f7ed012fcddc8a44122e64dad73d1e979c4a7198d16f1b45b5c570098643496",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4"
+  },
+  "checks": [
+    {
+      "name": "Lost-response originally absent key is freshly inspected and deleted during targeted cleanup",
+      "observed": {
+        "serverExactOriginal": true,
+        "calls": [
+          {
+            "method": "GET",
+            "path": "/sites/f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          },
+          {
+            "method": "GET",
+            "path": "/accounts/69797d78f01c70674ffef858/env?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          },
+          {
+            "method": "DELETE",
+            "path": "/accounts/69797d78f01c70674ffef858/env/CALENDAR_EXECUTION_POLICY_JSON?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          }
+        ]
+      },
+      "pass": true
+    },
+    {
+      "name": "Fresh selected-key config drift stops before a destructive staging write",
+      "observed": {
+        "rejected": true,
+        "noMutation": true,
+        "calls": [
+          {
+            "method": "GET",
+            "path": "/sites/f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          },
+          {
+            "method": "GET",
+            "path": "/accounts/69797d78f01c70674ffef858/env?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          }
+        ]
+      },
+      "pass": true
+    },
+    {
+      "name": "Valid production-only staging remains possible with original preview/scope/unrelated values preserved",
+      "observed": {
+        "staged": true,
+        "previewAndUnrelatedPreserved": true,
+        "calls": [
+          {
+            "method": "GET",
+            "path": "/sites/f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          },
+          {
+            "method": "GET",
+            "path": "/accounts/69797d78f01c70674ffef858/env?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          },
+          {
+            "method": "PUT",
+            "path": "/accounts/69797d78f01c70674ffef858/env/CALENDAR_CONNECTION_ENABLED?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          }
+        ]
+      },
+      "pass": true
+    },
+    {
+      "name": "Staged readback cannot authorize a push after a later concurrent environment edit",
+      "observed": {
+        "rejected": true,
+        "noGitOrMutation": true,
+        "calls": [
+          {
+            "method": "GET",
+            "path": "/sites/f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          },
+          {
+            "method": "GET",
+            "path": "/accounts/69797d78f01c70674ffef858/env?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          }
+        ]
+      },
+      "pass": true
+    },
+    {
+      "name": "Restored readback cannot authorize a cleanup build after a later concurrent environment edit",
+      "observed": {
+        "rejected": true,
+        "noBuildPost": true,
+        "calls": [
+          {
+            "method": "GET",
+            "path": "/accounts/69797d78f01c70674ffef858/env?site_id=f87916f1-bcc4-4171-a96f-2900cbf0b6dc"
+          }
+        ]
+      },
+      "pass": true
+    }
+  ],
+  "sourceAfter": {
+    "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+    "scripts/calendar-live-guard.mjs": "f69f988aba7037e059d066df10474248c11fc3e3348a771f133cba3327f97249",
+    "scripts/calendar-live-actor.mjs": "9f7ed012fcddc8a44122e64dad73d1e979c4a7198d16f1b45b5c570098643496",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 5,
+    "failed": 0
+  },
+  "physicalEffects": 0
+}

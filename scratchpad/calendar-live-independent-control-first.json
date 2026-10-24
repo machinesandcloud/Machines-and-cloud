@@ -1,0 +1,39 @@
+{
+  "at": "2026-10-24T06:39:48.960539+00:00",
+  "scope": "Independent actual helper command paths; synthetic filesystem/auth/protocol fixtures, never real packet/config/credentials",
+  "sourceBefore": {
+    "scripts/calendar-live-control.py": "0ca036df55f0075bac3518e4bb8432701cbd850eb76e3cf2d885f03abf1d1f11",
+    "scripts/calendar-live-guard.mjs": "f69f988aba7037e059d066df10474248c11fc3e3348a771f133cba3327f97249",
+    "scripts/calendar-live-actor.mjs": "9f7ed012fcddc8a44122e64dad73d1e979c4a7198d16f1b45b5c570098643496",
+    "scripts/calendar-live-native.mjs": "c30843a4f2c2c59214c835d506c104c0a9f3d22a3ca502b4ef9f7820273095f7"
+  },
+  "checks": [
+    {
+      "name": "Lost-response originally absent key is freshly inspected and deleted during targeted cleanup",
+      "pass": false,
+      "error": "Lost originally-absent key remains on server because stale cache skipped DELETE: {\"calls\": [], \"result\": {\"key\": \"CALENDAR_EXECUTION_POLICY_JSON\", \"restoredOriginalSetting\": true, \"readbackAndDeployRequired\": false}}"
+    },
+    {
+      "name": "Fresh selected-key config drift stops before a destructive staging write",
+      "pass": false,
+      "error": "'list' object has no attribute 'get'"
+    },
+    {
+      "name": "Valid production-only staging remains possible with original preview/scope/unrelated values preserved",
+      "pass": false,
+      "error": "'list' object has no attribute 'get'"
+    }
+  ],
+  "sourceAfter": {
+    "scripts/calendar-live-control.py": "0ca036df55f0075bac3518e4bb8432701cbd850eb76e3cf2d885f03abf1d1f11",
+    "scripts/calendar-live-guard.mjs": "f69f988aba7037e059d066df10474248c11fc3e3348a771f133cba3327f97249",
+    "scripts/calendar-live-actor.mjs": "9f7ed012fcddc8a44122e64dad73d1e979c4a7198d16f1b45b5c570098643496",
+    "scripts/calendar-live-native.mjs": "c30843a4f2c2c59214c835d506c104c0a9f3d22a3ca502b4ef9f7820273095f7"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 0,
+    "failed": 3
+  },
+  "physicalEffects": 0
+}

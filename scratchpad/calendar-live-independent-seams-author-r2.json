@@ -1,0 +1,171 @@
+{
+  "at": "2026-10-24T06:31:49.343Z",
+  "scope": "Independent offline proof-adapter adversarial seams; no real packet/key/provider/native access",
+  "sourceBefore": {
+    "scripts/calendar-live-guard.mjs": "578b642738a164a0bf973e15d59c836500d79b029c4343d4c54cd6109bbf4995",
+    "scripts/calendar-live-native.mjs": "c30843a4f2c2c59214c835d506c104c0a9f3d22a3ca502b4ef9f7820273095f7",
+    "scripts/calendar-live-actor.mjs": "d54ae4406626c3466fc65bce3eaf81dcc7e92e096b00866622112bc5e677770a",
+    "scripts/calendar-live-control.py": "501857b593061054b36a4c935c0ad2b287ba7a6bb10b3b04e6b24b3eca6f2877",
+    "scripts/calendar-live-fixture.mjs": "45549a0c726ac638570ea573b238fbad1425cdb4205e084a4286e927f8a8a2e5",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "278d93400e4aa8bf22c0efce35a28fb7b4af9fff90c45635a250a1756b765026"
+  },
+  "checks": [
+    {
+      "name": "A staged key whose write succeeded but response was lost remains eligible for exact original restoration",
+      "observed": {
+        "applied": true,
+        "restorationCallbackCalled": true,
+        "guard": {
+          "phase": "cleanup",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 6,
+            "writes": 5,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 1,
+            "blobs": 7,
+            "workerPosts": 0,
+            "builds": 0,
+            "pushes": 0,
+            "environmentWrites": 2,
+            "control": 8,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [
+            "CALENDAR_CONNECTION_ENABLED"
+          ],
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "Known newly created native tab can be closed through guard after later seed failure",
+      "observed": {
+        "native": {
+          "windowId": 4021,
+          "tabId": 9021,
+          "attempted": true,
+          "seeded": false,
+          "navigated": false,
+          "closed": true
+        },
+        "closed": true,
+        "guard": {
+          "phase": "calendar",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 7,
+            "writes": 6,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 2,
+            "blobs": 9,
+            "workerPosts": 0,
+            "builds": 1,
+            "pushes": 1,
+            "environmentWrites": 4,
+            "control": 11,
+            "controlWrites": 0,
+            "nativeHandoffs": 1
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [
+            "CALENDAR_CONNECTION_ENABLED",
+            "CALENDAR_DELIVERY_ENABLED",
+            "CALENDAR_EXECUTION_POLICY_JSON",
+            "CALENDAR_EXECUTION_APPROVED_VERSION"
+          ],
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": true,
+          "nativeClosed": true,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "Unexpected concurrent published deployment halts the phase instead of retaining baseline authority",
+      "observed": {
+        "rejected": true,
+        "guard": {
+          "phase": "signup",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 0,
+            "writes": 0,
+            "hostedChecks": 0,
+            "email": 0,
+            "metadata": 2,
+            "blobs": 0,
+            "workerPosts": 0,
+            "builds": 0,
+            "pushes": 0,
+            "environmentWrites": 0,
+            "control": 2,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [],
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": null
+        }
+      },
+      "pass": true
+    }
+  ],
+  "sourceAfter": {
+    "scripts/calendar-live-guard.mjs": "578b642738a164a0bf973e15d59c836500d79b029c4343d4c54cd6109bbf4995",
+    "scripts/calendar-live-native.mjs": "c30843a4f2c2c59214c835d506c104c0a9f3d22a3ca502b4ef9f7820273095f7",
+    "scripts/calendar-live-actor.mjs": "d54ae4406626c3466fc65bce3eaf81dcc7e92e096b00866622112bc5e677770a",
+    "scripts/calendar-live-control.py": "501857b593061054b36a4c935c0ad2b287ba7a6bb10b3b04e6b24b3eca6f2877",
+    "scripts/calendar-live-fixture.mjs": "45549a0c726ac638570ea573b238fbad1425cdb4205e084a4286e927f8a8a2e5",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "278d93400e4aa8bf22c0efce35a28fb7b4af9fff90c45635a250a1756b765026"
+  },
+  "sourceStable": true,
+  "forbiddenEffects": 0,
+  "summary": {
+    "passed": 3,
+    "failed": 0
+  }
+}

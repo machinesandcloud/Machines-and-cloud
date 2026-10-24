@@ -1,0 +1,271 @@
+{
+  "at": "2026-10-24T06:43:55.796Z",
+  "scope": "Independent offline proof-adapter adversarial seams; no real packet/key/provider/native access",
+  "sourceBefore": {
+    "scripts/calendar-live-guard.mjs": "f69f988aba7037e059d066df10474248c11fc3e3348a771f133cba3327f97249",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-actor.mjs": "9f7ed012fcddc8a44122e64dad73d1e979c4a7198d16f1b45b5c570098643496",
+    "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+    "scripts/calendar-live-fixture.mjs": "d6319201ac1c05907b23e1dabefdea756884e34a8955f67a877ebf9bd932312c",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "60dea420e15e26747e00c99b327bd5c2c78b2a85c3306ae9315b804a6854b3fb"
+  },
+  "checks": [
+    {
+      "name": "A staged key whose write succeeded but response was lost remains eligible for exact original restoration",
+      "observed": {
+        "applied": true,
+        "restorationCallbackCalled": true,
+        "guard": {
+          "phase": "cleanup",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 6,
+            "writes": 5,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 1,
+            "blobs": 7,
+            "workerPosts": 0,
+            "builds": 0,
+            "pushes": 0,
+            "environmentWrites": 2,
+            "control": 8,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [
+            "CALENDAR_CONNECTION_ENABLED"
+          ],
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "Known newly created native tab can be closed through guard after later seed failure",
+      "observed": {
+        "native": {
+          "windowId": 4021,
+          "tabId": 9021,
+          "attempted": true,
+          "seeded": false,
+          "navigated": false,
+          "closed": true
+        },
+        "closed": true,
+        "guard": {
+          "phase": "calendar",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 7,
+            "writes": 6,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 2,
+            "blobs": 9,
+            "workerPosts": 0,
+            "builds": 1,
+            "pushes": 1,
+            "environmentWrites": 4,
+            "control": 11,
+            "controlWrites": 0,
+            "nativeHandoffs": 1
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [
+            "CALENDAR_CONNECTION_ENABLED",
+            "CALENDAR_DELIVERY_ENABLED",
+            "CALENDAR_EXECUTION_POLICY_JSON",
+            "CALENDAR_EXECUTION_APPROVED_VERSION"
+          ],
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": true,
+          "nativeClosed": true,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "Unexpected concurrent published deployment halts the phase instead of retaining baseline authority",
+      "observed": {
+        "rejected": true,
+        "guard": {
+          "phase": "signup",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 0,
+            "writes": 0,
+            "hostedChecks": 0,
+            "email": 0,
+            "metadata": 2,
+            "blobs": 0,
+            "workerPosts": 0,
+            "builds": 0,
+            "pushes": 0,
+            "environmentWrites": 0,
+            "control": 2,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [],
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": null
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "Premature close while cleanup publication is pending retains cleanup readback authority",
+      "observed": {
+        "error": "cleanup_environment_or_native_window_remains",
+        "state": {
+          "phase": "cleanup",
+          "halted": false,
+          "closed": false,
+          "counters": {
+            "site": 15,
+            "writes": 13,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 2,
+            "blobs": 20,
+            "workerPosts": 0,
+            "builds": 2,
+            "pushes": 1,
+            "environmentWrites": 8,
+            "control": 22,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [
+            "CALENDAR_CONNECTION_ENABLED",
+            "CALENDAR_DELIVERY_ENABLED",
+            "CALENDAR_EXECUTION_POLICY_JSON",
+            "CALENDAR_EXECUTION_APPROVED_VERSION"
+          ],
+          "receiptStage": "delete",
+          "localStage": "cancel",
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": true,
+          "environmentRestored": true,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "Cleanup accepts only the exact deployment returned by its reserved build",
+      "observed": {
+        "rejected": true,
+        "state": {
+          "phase": "cleanup",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 15,
+            "writes": 13,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 3,
+            "blobs": 20,
+            "workerPosts": 0,
+            "builds": 2,
+            "pushes": 1,
+            "environmentWrites": 8,
+            "control": 23,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "environmentAttempted": [
+            "CALENDAR_CONNECTION_ENABLED",
+            "CALENDAR_DELIVERY_ENABLED",
+            "CALENDAR_EXECUTION_POLICY_JSON",
+            "CALENDAR_EXECUTION_APPROVED_VERSION"
+          ],
+          "receiptStage": "delete",
+          "localStage": "cancel",
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": true,
+          "environmentRestored": true,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": true
+    }
+  ],
+  "sourceAfter": {
+    "scripts/calendar-live-guard.mjs": "f69f988aba7037e059d066df10474248c11fc3e3348a771f133cba3327f97249",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-actor.mjs": "9f7ed012fcddc8a44122e64dad73d1e979c4a7198d16f1b45b5c570098643496",
+    "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+    "scripts/calendar-live-fixture.mjs": "d6319201ac1c05907b23e1dabefdea756884e34a8955f67a877ebf9bd932312c",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "60dea420e15e26747e00c99b327bd5c2c78b2a85c3306ae9315b804a6854b3fb"
+  },
+  "sourceStable": true,
+  "forbiddenEffects": 0,
+  "summary": {
+    "passed": 5,
+    "failed": 0
+  }
+}

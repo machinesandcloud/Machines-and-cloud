@@ -1,0 +1,166 @@
+{
+  "at": "2026-10-24T06:29:09.909Z",
+  "scope": "Independent offline proof-adapter adversarial seams; no real packet/key/provider/native access",
+  "sourceBefore": {
+    "scripts/calendar-live-guard.mjs": "a4d62a12522148f2b50fdadd952d686e8fed414e4eed6ccc50e2e6b0a797d4bf",
+    "scripts/calendar-live-native.mjs": "6f842f0805b4398e4d29d6f720e0a8eec21a6c34e34035ddcdba80bbc284bca8",
+    "scripts/calendar-live-actor.mjs": "5aa71b8fc9970a56f0ff94d1bfa1d8e865a247757f341b3239ef82f37e1db6cf",
+    "scripts/calendar-live-control.py": "58a21b7cacdd7b99bb3b7f80299a9cdf648b0afd3f3680e2480f4016f64f115a",
+    "scripts/calendar-live-fixture.mjs": "45549a0c726ac638570ea573b238fbad1425cdb4205e084a4286e927f8a8a2e5",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "278d93400e4aa8bf22c0efce35a28fb7b4af9fff90c45635a250a1756b765026"
+  },
+  "checks": [
+    {
+      "name": "A staged key whose write succeeded but response was lost remains eligible for exact original restoration",
+      "observed": {
+        "applied": true,
+        "restorationCallbackCalled": false,
+        "rejection": "restore_environment_scope",
+        "guard": {
+          "phase": "cleanup",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 6,
+            "writes": 5,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 1,
+            "blobs": 7,
+            "workerPosts": 0,
+            "builds": 0,
+            "pushes": 0,
+            "environmentWrites": 1,
+            "control": 8,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Unknown attempted environment writes must remain restorable, without repeating the original mutation\n\nfalse !== true\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:15:101\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:9:52)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:10:1"
+    },
+    {
+      "name": "Known newly created native tab can be closed through guard after later seed failure",
+      "observed": {
+        "native": {
+          "windowId": 4021,
+          "tabId": 9021,
+          "attempted": true,
+          "seeded": false,
+          "navigated": false,
+          "closed": false
+        },
+        "closed": false,
+        "rejection": "native_close_not_admitted",
+        "guard": {
+          "phase": "calendar",
+          "halted": true,
+          "closed": false,
+          "counters": {
+            "site": 7,
+            "writes": 6,
+            "hostedChecks": 0,
+            "email": 2,
+            "metadata": 2,
+            "blobs": 9,
+            "workerPosts": 0,
+            "builds": 1,
+            "pushes": 1,
+            "environmentWrites": 4,
+            "control": 11,
+            "controlWrites": 0,
+            "nativeHandoffs": 1
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": true,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": {
+            "slug": "internal-calendar-1234",
+            "identity": "60ea6c8784ed8a23711c571ef8cccc146e6a6f1e4331eb606fcd2aa5d707e612",
+            "visitId": "1bfb5fa1a38717b26fead1adca16f0c4",
+            "eventId": "mc7c3a5cb496154f7082508d01be454887ee47449b259d49f28df717f2c570daf5",
+            "targetHash": "71c028ebf0c4a2eb7e55a6e5a60dd5f2513f8aa7094c746ecf396d0313061889",
+            "policyDigest": "0747d18c898d79bcefa6dd856c71f5b4bc9166b516ec621108445499a66f7d9a",
+            "policyVersion": "fixture_core_calendar_v1"
+          }
+        }
+      },
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Known exact native tab must remain cleanable after seeding fails\n\nfalse !== true\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:21:87\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:9:52)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:17:1"
+    },
+    {
+      "name": "Unexpected concurrent published deployment halts the phase instead of retaining baseline authority",
+      "observed": {
+        "rejected": false,
+        "guard": {
+          "phase": "signup",
+          "halted": false,
+          "closed": false,
+          "counters": {
+            "site": 0,
+            "writes": 0,
+            "hostedChecks": 0,
+            "email": 0,
+            "metadata": 2,
+            "blobs": 0,
+            "workerPosts": 0,
+            "builds": 0,
+            "pushes": 0,
+            "environmentWrites": 0,
+            "control": 2,
+            "controlWrites": 0,
+            "nativeHandoffs": 0
+          },
+          "candidateCommit": "cccccccccccccccccccccccccccccccccccccccc",
+          "receiptStage": "none",
+          "localStage": null,
+          "nativeStarted": false,
+          "nativeClosed": false,
+          "calendarCompleted": false,
+          "environmentRestored": false,
+          "cleanupPublished": false,
+          "tenant": null
+        }
+      },
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Unexpected current deployment must invalidate baseline admission\n\nfalse !== true\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:26:49\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:9:52)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-live-independent-seams.mjs:23:1"
+    }
+  ],
+  "sourceAfter": {
+    "scripts/calendar-live-guard.mjs": "a4d62a12522148f2b50fdadd952d686e8fed414e4eed6ccc50e2e6b0a797d4bf",
+    "scripts/calendar-live-native.mjs": "6f842f0805b4398e4d29d6f720e0a8eec21a6c34e34035ddcdba80bbc284bca8",
+    "scripts/calendar-live-actor.mjs": "5aa71b8fc9970a56f0ff94d1bfa1d8e865a247757f341b3239ef82f37e1db6cf",
+    "scripts/calendar-live-control.py": "58a21b7cacdd7b99bb3b7f80299a9cdf648b0afd3f3680e2480f4016f64f115a",
+    "scripts/calendar-live-fixture.mjs": "45549a0c726ac638570ea573b238fbad1425cdb4205e084a4286e927f8a8a2e5",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "278d93400e4aa8bf22c0efce35a28fb7b4af9fff90c45635a250a1756b765026"
+  },
+  "sourceStable": true,
+  "forbiddenEffects": 0,
+  "summary": {
+    "passed": 0,
+    "failed": 3
+  }
+}
