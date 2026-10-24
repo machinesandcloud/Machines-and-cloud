@@ -20,7 +20,7 @@ def last(path):
     if not lines: fail('Empty control ledger')
     return json.loads(lines[-1])
 def primary_fixed():
-    # Guard metadata<=12 and Blobs<=60 leave this adapter exactly48 of120.
+    # Guard metadata<=12 and Blobs<=84 leave this adapter exactly48 of144.
     # No shared counter can be reset or borrowed from another phase.
     if LEDGER is None or PHASE is None: fail('Initialize exact approved phase')
 def fresh():
@@ -205,7 +205,7 @@ def main():
     if args.command=='init':
         candidate=SITES['mc']['candidate']
         if subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()!=candidate or subprocess.run(['git','diff','--quiet','HEAD','--'],cwd=ROOT).returncode: fail('Exact clean source required')
-        private_write(LEDGER,{'phase':PHASE,'limits':{'requests':48,'mutations':16,'builds':2},'requests':0,'mutations':0,'builds':0,'rows':[]},exclusive=True);return {'initialized':True,'controlRequests':48,'guardControlRequests':72,'aggregateMaximum':120}
+        private_write(LEDGER,{'phase':PHASE,'limits':{'requests':48,'mutations':16,'builds':2},'requests':0,'mutations':0,'builds':0,'rows':[]},exclusive=True);return {'initialized':True,'controlRequests':48,'guardControlRequests':96,'aggregateMaximum':144}
     if args.command=='prepare': return prepare(args.input)
     with locked() as (s,append):
         if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']]}
