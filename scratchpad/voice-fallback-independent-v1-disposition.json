@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "at": "2026-10-24T10:41:30.643594+00:00",
+  "decision": "returned_for_focused_runtime_repair",
+  "captureClosed": true,
+  "freeze": {
+    "path": "scratchpad/voice-fallback-freeze-v1.json",
+    "sha256": "679cd242f0d36869b07abce75f93c7a265bd5515031218bc8e85c1ecd03a5820",
+    "sourceId": "sha256:4b0c4d80f2a75f3c2235cace9dfc1669fe018cce3eea572b4c915ac1aaa28e83",
+    "files": 115,
+    "runtimeSha256": "d48240b269f4b716c7b05e61f9a0c9dd3da6565f173edf83917abb30fba68e02"
+  },
+  "receipt": {
+    "path": "scratchpad/voice-fallback-independent-v1-closed.json",
+    "sha256": "31d8c81687af1c1036011cca44660579c630a4d3291893ef38f6993d64516ccf",
+    "passed": 13,
+    "total": 17,
+    "sourceStable": true,
+    "driver": "scratchpad/voice-fallback-independent-v1-closed-check.mjs",
+    "driverSha256": "14e917ce69ee4afe958cefbc90f5cd118f94ebc6d53574a59d1fe0b863136f69"
+  },
+  "findings": [
+    {
+      "id": "known_owner_forwarding_reentry",
+      "trigger": "Twilio-signed callback retains original customer From and ForwardedFrom equals unchanged separate owner fallback destination.",
+      "actual": "Dial to the same owner cell is emitted.",
+      "expected": "Message-only known-loop recovery; ordinary ForwardedFrom business-line remains allowed."
+    },
+    {
+      "id": "stored_policy_not_bound_to_approved_content",
+      "trigger": "Retained row.policy duration changes 300 to 600 while policyDigest remains approved300; or duration is removed.",
+      "actual": "Altered duration produces timeLimit600; missing duration reserves NaN serialized as null in shared account allowance before RangeError.",
+      "expected": "Validate stored policy and its exact digest before cost or paid-Dial admission; unchanged shared allowance on malformed record."
+    },
+    {
+      "id": "missing_child_sid_promotes_completion",
+      "trigger": "Signed Dial action reports completed and bridged true but supplies no DialCallSid.",
+      "actual": "Retained completed destination outcome/legacy answered alias and Hangup-only response.",
+      "expected": "Unknown destination outcome with spoken recovery; no confirmed child identity without child SID."
+    }
+  ],
+  "acceptedUnchangedGroups": [
+    "destination failures, missing/unknown status and unbridged completion speak recovery from the Dial action",
+    "parent transport status cannot certify destination connection; completed child is transport evidence only",
+    "signed account, parent/caller/number/token and signature mismatches cannot alter a retained call",
+    "known shop-number, managed-number and caller/destination loops never emit a Dial",
+    "concurrent preterminal retries and discarded responses emit one local Dial and one nonrefundable fallback reservation",
+    "terminal replay is immutable and a conflicting known destination SID is rejected",
+    "AI and fallback consume distinct existing allowance keys including ring buffer; minute exhaustion blocks a new parent",
+    "exhausted account or malformed allowance fails closed without a new paid attempt",
+    "unchanged approved fallback survives stale AI, paused AI and actual voice-only route detach",
+    "workspace replacement/cancel, parent release/cancel, account brake and provider-policy withdrawal stop paid fallback",
+    "final serving read refuses a changed owner, global withdrawal or generation after one retained attempt",
+    "lost SDK acknowledgement after attempt commit never authorizes a second Dial",
+    "elapsed admission reduces connection duration while preserving the 25+5 second cost envelope"
+  ],
+  "preservedFirstFailures": [
+    "scratchpad/voice-fallback-independent-first.json",
+    "scratchpad/voice-fallback-independent-r2.json",
+    "scratchpad/voice-fallback-independent-v1-final.json",
+    "scratchpad/voice-fallback-independent-v1-hook-trace.json",
+    "scratchpad/voice-fallback-independent-v1-captured.json"
+  ],
+  "fixtureDispositions": [
+    {
+      "finding": "A generated synthetic number collided with the fixed business line.",
+      "disposition": "Moved generated fixture numbers to separate valid713444 range; retained first failure, runtime unchanged."
+    },
+    {
+      "finding": "Interleave hooks did not run.",
+      "disposition": "Installed SDK prefixes store names with site:, discovered with synthetic-only trace; hooks now attach inside existing transport double after actual conditional commit."
+    },
+    {
+      "finding": "Lost SDK acknowledgement was expected to throw.",
+      "disposition": "Actual CAS readback/retry can safely return message-only; assert no Dial, one retained attempt and unchanged allowance rather than requiring an exception."
+    }
+  ],
+  "effects": {
+    "physicalNetworkRequests": 0,
+    "privateInputsRead": 0,
+    "browserCalls": 0,
+    "actualCalls": 0,
+    "texts": 0,
+    "emails": 0,
+    "modelRequests": 0,
+    "providerAccountsRead": 0,
+    "deploys": 0
+  },
+  "limits": [
+    "Local signed-handler and installed SDK protocol evidence only; no actual audio or carrier call.",
+    "Completed/bridged is transport evidence, not human acknowledgment, retained request or promised callback.",
+    "Known equality checks cannot prove arbitrary carrier forwarding graphs."
+  ]
+}

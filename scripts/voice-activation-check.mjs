@@ -70,7 +70,7 @@ const request = (e, c, extra = {}) => e.request(c, { actor: { role: "owner", ema
 async function complete(e, row, max = 8) { let view; for (let i = 0; i < max; i++) { view = await e.run(row.id); if (view.state === "ready") return view; } return view; }
 async function rowFor(c) { const status = await voice.voiceActivationStatus(c); return status.operation ? read("voice_activation_intents", status.operation.id) : null; }
 function signed(row, kind, extras = {}, signature = true) { const url = `${origin}/api/managed-voice?o=${row.callbackToken}&kind=${kind}`, params = { AccountSid: account, CallSid: "CA" + hash(row.id + "call").slice(0, 32), To: row.number.number, From: "+17135550999", ...extras }, sig = createHmac("sha1", twilioToken).update(url + Object.keys(params).sort().map(key => key + params[key]).join("")).digest("base64"); return new Request(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", ...(signature ? { "x-twilio-signature": sig } : {}) }, body: new URLSearchParams(params).toString() }); }
-function event(row, type, extra = {}, headers = true) { const call = { id: uuid(row.id + "vapi-call"), type: "inboundPhoneCall", phoneNumberId: row.imported.id, customer: { number: "+17135550999" }, transport: { provider: "twilio", accountSid: account, callSid: "CA" + hash(row.id + "call").slice(0, 32) } }; return new Request(origin + "/api/managed-vapi", { method: "POST", headers: { "content-type": "application/json", ...(headers ? { "x-vapi-secret": secret } : {}) }, body: JSON.stringify({ message: { type, call, phoneNumber: { number: row.number.number, name: `mc-phone-${row.correlationId.slice(0, 30)}` }, ...extra } }) }); }
+function event(row, type, extra = {}, headers = true, sidOverride = null) { const call = { id: uuid(row.id + "vapi-call"), type: "inboundPhoneCall", phoneNumberId: row.imported.id, customer: { number: "+17135550999" }, transport: { provider: "twilio", accountSid: account, callSid: sidOverride || "CA" + hash(row.id + "call").slice(0, 32) } }; return new Request(origin + "/api/managed-vapi", { method: "POST", headers: { "content-type": "application/json", ...(headers ? { "x-vapi-secret": secret } : {}) }, body: JSON.stringify({ message: { type, call, phoneNumber: { number: row.number.number, name: `mc-phone-${row.correlationId.slice(0, 30)}` }, ...extra } }) }); }
 const end = row => event(row, "end-of-call-report", { startedAt: new Date(clock - 20000).toISOString(), endedAt: new Date(clock).toISOString(), endedReason: "customer-ended-call", artifact: { transcript: "Fixture customer asked about AC service." }, analysis: { summary: "Fixture service inquiry." } });
 async function suite(mode) {
   process.env.MC_MEMORY_STORE = mode === "memory" ? "1" : "0"; const name = text => mode + ": " + text;
@@ -115,7 +115,116 @@ async function suite(mode) {
     assert.equal((await e.run(req.id)).state, "needs_review"); assert.equal((await voice.voiceActivationStatus(changed)).active, false); const before = result.requests.filter(row=>row.method==='POST' && ['/assistant','/phone-number'].includes(row.path)).length; changed.setupProof = { reviewedRevision: rev, testedRevision: rev, testMode: "live" }; await store.put("clients", c.slug, changed); assert.equal((await complete(e, req)).state, "ready"); const updated = await rowFor(changed); assert.equal(updated.assistant.id, original.assistant.id); assert.equal(updated.imported.id, original.imported.id); assert.equal(updated.assistant.inputRevision, rev); assert.equal(updated.adoptionReason,'reviewed_rules_changed'); assert.equal(result.requests.filter(row=>row.method==='POST' && ['/assistant','/phone-number'].includes(row.path)).length,before);
   });
   await check(name("fallback is provider-authenticated and separately reports observed and answered"), async () => {
-    const c = await client(mode, "fallback"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c); await voice.handleManagedVoiceWebhook(signed(row, "inbound")); const response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); const body = await response.text(); assert.match(body, /<Dial/); assert.match(body, /17135550100/); await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { DialCallStatus: "completed" })); const status = await voice.voiceActivationStatus(c); assert.ok(status.operation.evidence.fallbackObservedAt); assert.ok(status.operation.evidence.fallbackAnsweredAt); assert.equal(status.active, false);
+    const c = await client(mode, "fallback"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c); await voice.handleManagedVoiceWebhook(signed(row, "inbound")); const response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); const body = await response.text(); assert.match(body, /<Dial/); assert.match(body, /17135550100/); await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { DialCallStatus: "completed", DialCallSid: "CA" + hash(row.id + "destination").slice(0, 32) })); const status = await voice.voiceActivationStatus(c); assert.ok(status.operation.evidence.fallbackObservedAt); assert.ok(status.operation.evidence.fallbackAnsweredAt); assert.equal(status.active, false);
+  });
+  await check(name("unanswered fallback speaks from the Dial action and retains the exact destination outcome"), async () => {
+    for (const reported of ["busy", "no-answer", "failed", "canceled", "", "unexpected", "answered"]) {
+      const c = await client(mode, "dial-" + (reported || "missing")), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c);
+      await voice.handleManagedVoiceWebhook(signed(row, "inbound")); await voice.handleManagedVoiceWebhook(signed(row, "fallback"));
+      const sid = "CA" + hash(row.id + "destination").slice(0, 32), before = result.requests.length;
+      const response = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { CallStatus: "in-progress", DialCallStatus: reported, DialCallSid: sid, DialBridged: "false" })), body = await response.text();
+      assert.equal(response.status, 200); assert.match(body, /<Say>We could not connect you[^<]+<\/Say><Hangup\/>/); assert.doesNotMatch(body, /<Dial|<Redirect/);
+      const call = await read("managed_voice_calls", c.slug + "/CA" + hash(row.id + "call").slice(0, 32));
+      assert.equal(call.fallbackOutcome.status, ["busy", "no-answer", "failed", "canceled"].includes(reported) ? reported : "unknown");
+      assert.equal(call.fallbackOutcome.reportedStatus, reported || null); assert.equal(call.fallbackOutcome.callSid, sid); assert.equal(call.twilioStatus, "in-progress");
+      assert.equal((await rowFor(c)).evidence.fallbackAnsweredAt, undefined); const status = await voice.voiceActivationStatus(c); assert.equal(status.operation.evidence.fallbackDialStatus, call.fallbackOutcome.status); assert.ok(status.operation.evidence.fallbackDialAt); assert.equal(result.requests.length, before);
+      const terminalReplay = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await terminalReplay.text(), /<Dial|<Redirect/); assert.deepEqual((await read("managed_voice_calls", c.slug + "/CA" + hash(row.id + "call").slice(0, 32))).fallbackOutcome, call.fallbackOutcome);
+    }
+  });
+  await check(name("completed fallback records a transport connection once without promising a human or another call"), async () => {
+    const c = await client(mode, "dial-complete"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c);
+    await voice.handleManagedVoiceWebhook(signed(row, "inbound")); await voice.handleManagedVoiceWebhook(signed(row, "fallback"));
+    const extras = { CallStatus: "in-progress", DialCallStatus: "completed", DialCallSid: "CA" + hash(row.id + "destination").slice(0, 32), DialBridged: "true" }, first = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", extras));
+    assert.equal(await first.text(), '<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>');
+    const key = c.slug + "/CA" + hash(row.id + "call").slice(0, 32), saved = await read("managed_voice_calls", key); assert.equal(saved.fallbackOutcome.status, "completed"); assert.equal(saved.fallbackOutcome.bridged, true); assert.equal(saved.fallbackOutcome.humanAccepted, undefined);
+    clock += 1000; const second = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", extras)); assert.equal(second.status, 200); assert.deepEqual((await read("managed_voice_calls", key)).fallbackOutcome, saved.fallbackOutcome); assert.equal((await voice.voiceActivationStatus(c)).active, false);
+    const terminalReplay = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await terminalReplay.text(), /<Dial|<Redirect/);
+    const foreignLeg = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { ...extras, DialCallSid: "CA" + "9".repeat(32) })); assert.equal(foreignLeg.status, 403); assert.deepEqual((await read("managed_voice_calls", key)).fallbackOutcome, saved.fallbackOutcome);
+  });
+  await check(name("a fallback callback cannot adopt another caller or an unattempted dial"), async () => {
+    const c = await client(mode, "dial-caller"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c);
+    await voice.handleManagedVoiceWebhook(signed(row, "inbound"));
+    const before = await rowFor(c), unsolicited = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { DialCallStatus: "completed" })); assert.equal(unsolicited.status, 403); assert.deepEqual(await rowFor(c), before);
+    const mismatch = await voice.handleManagedVoiceWebhook(signed(row, "fallback", { From: "+17135550888" })); assert.equal(mismatch.status, 403); assert.deepEqual(await rowFor(c), before);
+  });
+  await check(name("known own-number reentry ends without dialing or routing back into the assistant"), async () => {
+    const c = await client(mode, "dial-loop"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c);
+    for (const from of [row.number.number, c.phone.businessNumber, "anonymous"]) {
+      const response = await voice.handleManagedVoiceWebhook(signed(row, "inbound", { From: from })), body = await response.text(); assert.equal(response.status, 200); assert.match(body, /<Say>/); assert.doesNotMatch(body, /<Dial|<Redirect/);
+    }
+    const ownerCall = await voice.handleManagedVoiceWebhook(signed(row, "inbound", { From: c.owner.phone })); assert.match(await ownerCall.text(), /<Redirect/);
+    const ownerFallback = await voice.handleManagedVoiceWebhook(signed(row, "fallback", { From: c.owner.phone })); assert.doesNotMatch(await ownerFallback.text(), /<Dial/);
+  });
+  await check(name("old callbacks never dial a replacement tenant or stamp its current voice generation"), async () => {
+    const c = await client(mode, "dial-replaced"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c); await voice.handleManagedVoiceWebhook(signed(row, "inbound"));
+    const replacement = { ...c, ownerKey: "new-owner-secret", owner: { ...c.owner, email: "replacement@example.test", phone: "+17135550888" } }; await store.put("clients", c.slug, replacement);
+    const before = await rowFor(c), response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.equal(response.status, 200); const body = await response.text(); assert.match(body, /<Say>/); assert.doesNotMatch(body, /<Dial|17135550888/); assert.deepEqual((await rowFor(c)).evidence, before.evidence);
+  });
+  await check(name("old generation dial events cannot become current readiness evidence"), async () => {
+    const c = await client(mode, "dial-generation"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c); await voice.handleManagedVoiceWebhook(signed(row, "inbound")); await voice.handleManagedVoiceWebhook(signed(row, "fallback"));
+    const changed = { ...c, summary: "A newly reviewed instruction" }, revision = configurationRevision(changed); changed.setupProof = { reviewedRevision: revision, testedRevision: revision, testMode: "live" }; await store.put("clients", c.slug, changed); await complete(e, req); const current = await rowFor(changed); assert.ok(current.generation > row.generation);
+    const response = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { DialCallStatus: "completed" })); assert.equal(response.status, 403); assert.deepEqual(await rowFor(changed), current);
+  });
+  await check(name("stale AI routing and paused AI retain only the unchanged approved owner fallback"), async () => {
+    for (const paused of [false, true]) {
+      const c = await client(mode, "dial-ai-stopped"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c);
+      if (paused) { await store.put("clients", c.slug, { ...c, status: "paused", operationLifecycleVersion: 1 }); await e.run(req.id); }
+      else clock += 26 * 60000;
+      const response = await voice.handleManagedVoiceWebhook(signed(row, "inbound")), body = await response.text(); assert.match(body, /<Dial[^>]+>\+17135550100<\/Dial>/); assert.doesNotMatch(body, /<Redirect/);
+      const continuation = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { DialCallStatus: "no-answer" })); assert.match(await continuation.text(), /<Say>/); assert.equal((await voice.voiceActivationStatus(paused ? { ...c, status: "paused" } : c)).active, false);
+    }
+  });
+  await check(name("voice-only detachment preserves approved fallback while account and number stops do not"), async () => {
+    const c = await client(mode, "dial-detached"), e = engine(), req = await request(e, c); await complete(e, req); const original = await rowFor(c);
+    await e.cancel(c, { actor: { role: "owner", email: c.owner.email }, expectedRevision: configurationRevision(c) });
+    for (let i = 0; i < 6 && !(await rowFor(c)).routingDetachedAt; i++) await e.run(req.id);
+    const row = await rowFor(c); assert.ok(row.routingDetachedAt); assert.match(numbers.get(row.number.id).voice_url, /kind=fallback/);
+    const response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.match(await response.text(), /<Dial/);
+    process.env.VOICE_ACTIVATION_ENABLED = "false"; const stopped = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await stopped.text(), /<Dial/); process.env.VOICE_ACTIVATION_ENABLED = "true";
+    await store.put("clients", c.slug, { ...c, status: "cancelled" }); const cancelled = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await cancelled.text(), /<Dial/);
+    await store.put("clients", c.slug, c); const parent = await phone.getAcquiredPhoneResource(c); await store.atomicUpdate("phone_activation_intents", parent.intentId, old => ({ value: { ...old, cancelRequestedAt: new Date().toISOString() } })); const releasing = await voice.handleManagedVoiceWebhook(signed(original, "fallback")); assert.doesNotMatch(await releasing.text(), /<Dial/);
+  });
+  await check(name("AI and fallback reserve separate bounded legs and an unknown same-parent outcome never dials twice"), async () => {
+    const c = await client(mode, "dial-budget"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c), day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()), key = c.slug + "/" + row.tenantIdentity + "/" + day;
+    await voice.handleManagedVoiceWebhook(signed(row, "inbound")); assert.ok((await (await voice.handleManagedVapiWebhook(event(row, "assistant-request"))).json()).assistant);
+    const first = await voice.handleManagedVoiceWebhook(signed(row, "fallback")), body = await first.text(); assert.match(body, /<Dial timeout="25" timeLimit="300"/);
+    const usage = await read("managed_voice_usage", key); assert.equal(usage.calls, 2); assert.equal(usage.reservedSeconds, 630); assert.equal(Object.keys(usage.reservations).length, 2);
+    const repeat = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await repeat.text(), /<Dial|<Redirect/); assert.deepEqual(await read("managed_voice_usage", key), usage);
+    const call = await read("managed_voice_calls", c.slug + "/CA" + hash(row.id + "call").slice(0, 32)); assert.ok(call.fallbackAttempt.id); assert.equal(call.fallbackOutcome, undefined);
+  });
+  await check(name("exhausted tenant and account capacity refuse fallback before a Dial without refund or refill"), async () => {
+    for (const scope of ["tenant", "account"]) {
+      const c = await client(mode, "dial-exhausted-" + scope), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c), day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()), key = scope === "account" ? "account/" + day : c.slug + "/" + row.tenantIdentity + "/" + day;
+      const before = await read("managed_voice_usage", key), full = { version: 1, day, calls: scope === "account" ? policy.accountDailyCalls : policy.maxDailyCalls, reservedSeconds: 0, reservations: {} }; await store.put("managed_voice_usage", key, full);
+      const response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await response.text(), /<Dial/); assert.deepEqual(await read("managed_voice_usage", key), full);
+      const callKey = c.slug + "/CA" + hash(row.id + "call").slice(0, 32), call = await read("managed_voice_calls", callKey); assert.equal(call.fallbackAdmission.status, "denied"); assert.equal(call.fallbackAdmission.reasonCode, "fallback_budget_exhausted"); assert.equal(call.fallbackAttempt, undefined);
+      // Reopening allowance does not refill the same parent operation.
+      await store.put("managed_voice_usage", key, { version: 1, day, calls: 0, reservedSeconds: 0, reservations: {} }); const replay = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await replay.text(), /<Dial/); assert.equal((await read("managed_voice_usage", key)).calls, 0);
+      if (scope === "account") await store.put("managed_voice_usage", key, before || { version: 1, day, calls: 0, reservedSeconds: 0, reservations: {} });
+    }
+  });
+  await check(name("signed forwarding context cannot dial the number that already forwarded this caller"), async () => {
+    for (const from of ["owner", "managed", "business"]) {
+      const c = await client(mode, "dial-forwarded-" + from), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c), forwardedFrom = from === "owner" ? c.owner.phone : from === "managed" ? row.number.number : c.phone.businessNumber;
+      const initial = await voice.handleManagedVoiceWebhook(signed(row, "inbound", { ForwardedFrom: forwardedFrom })); assert.match(await initial.text(), /<Redirect/);
+      const call = await read("managed_voice_calls", c.slug + "/CA" + hash(row.id + "call").slice(0, 32)); assert.equal(call.forwardedFrom, forwardedFrom);
+      // The fallback action may omit ForwardedFrom; the original signed marker survives.
+      const response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")), body = await response.text();
+      if (from === "business") assert.match(body, /<Dial/); else assert.doesNotMatch(body, /<Dial|<Redirect/);
+    }
+  });
+  await check(name("altered or missing retained policy cannot enlarge or corrupt a fallback reservation"), async () => {
+    for (const mutation of ["larger", "missing"]) {
+      const c = await client(mode, "dial-policy-" + mutation), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c), day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()), key = "account/" + day, before = await read("managed_voice_usage", key);
+      await store.atomicUpdate("voice_activation_intents", row.id, old => { const retained = { ...old.policy }; if (mutation === "larger") retained.maxDurationSeconds = 600; else delete retained.maxDurationSeconds; return { value: { ...old, policy: retained } }; });
+      const response = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.match(await response.text(), /<Say>/); assert.deepEqual(await read("managed_voice_usage", key), before);
+      const noDial = await voice.handleManagedVoiceWebhook(signed(row, "fallback")); assert.doesNotMatch(await noDial.text(), /<Dial|NaN|undefined/);
+    }
+  });
+  await check(name("completed without a destination identity remains an unknown transport outcome"), async () => {
+    const c = await client(mode, "dial-missing-child"), e = engine(), req = await request(e, c); await complete(e, req); const row = await rowFor(c); await voice.handleManagedVoiceWebhook(signed(row, "fallback"));
+    const response = await voice.handleManagedVoiceWebhook(signed(row, "dial-status", { DialCallStatus: "completed", DialBridged: "true" })); assert.match(await response.text(), /<Say>/);
+    const call = await read("managed_voice_calls", c.slug + "/CA" + hash(row.id + "call").slice(0, 32)); assert.equal(call.fallbackOutcome.status, "unknown"); assert.equal(call.fallbackOutcome.reportedStatus, "completed"); assert.equal(call.fallbackOutcome.callSid, null); assert.equal((await rowFor(c)).evidence.fallbackAnsweredAt, undefined);
   });
   await check(name("duplicate end reports retain one immutable call receipt and no duplicate effect"), async () => {
     const c = await client(mode, "repeat"), e = engine(), req = await request(e, c, { forwardingMode: "use_new_number" }); await complete(e, req); const row = await rowFor(c); await voice.handleManagedVoiceWebhook(signed(row, "inbound")); await voice.handleManagedVapiWebhook(event(row, "assistant-request")); await voice.handleManagedVapiWebhook(end(row)); const key = c.slug + "/CA" + hash(row.id + "call").slice(0, 32), before = await read("managed_voice_calls", key); clock += 1000; await voice.handleManagedVapiWebhook(end(row)); assert.deepEqual(await read("managed_voice_calls", key), before); assert.equal((await voice.voiceActivationStatus(c)).active, true);
@@ -182,7 +291,8 @@ async function suite(mode) {
   await check(name("pause and resume recover automatically without another purchase or owner approval"), async () => {
     const c=await client(mode,'resumed'),e=engine(),req=await request(e,c);await complete(e,req);const initial=await rowFor(c),before=result.requests.filter(row=>row.method==='POST' && ['/assistant','/phone-number'].includes(row.path)).length;
     await store.put('clients',c.slug,{...c,status:'paused',operationLifecycleVersion:1,pausedAt:new Date().toISOString()});assert.equal((await e.run(req.id)).state,'suspended');const paused=await voice.handleManagedVoiceWebhook(signed(initial,'inbound'));assert.doesNotMatch(await paused.text(),/Redirect/);
-    const resumed={...c,status:'live',operationLifecycleVersion:2,liveAt:new Date().toISOString(),pausedAt:null};await store.put('clients',c.slug,resumed);assert.equal((await complete(e,req)).state,'ready');const current=await rowFor(resumed);assert.equal(current.assistant.id,initial.assistant.id);assert.equal(current.imported.id,initial.imported.id);await voice.handleManagedVoiceWebhook(signed(current,'inbound'));assert.ok((await (await voice.handleManagedVapiWebhook(event(current,'assistant-request'))).json()).assistant);assert.equal(result.requests.filter(row=>row.method==='POST' && ['/assistant','/phone-number'].includes(row.path)).length,before);
+    const resumed={...c,status:'live',operationLifecycleVersion:2,liveAt:new Date().toISOString(),pausedAt:null};await store.put('clients',c.slug,resumed);assert.equal((await complete(e,req)).state,'ready');const current=await rowFor(resumed);assert.equal(current.assistant.id,initial.assistant.id);assert.equal(current.imported.id,initial.imported.id);// A later real call has a fresh provider SID; the paused call is now retained.
+    const resumedSid='CA'+hash(c.slug+'resumed-call').slice(0,32);await voice.handleManagedVoiceWebhook(signed(current,'inbound',{CallSid:resumedSid}));assert.ok((await (await voice.handleManagedVapiWebhook(event(current,'assistant-request',{},true,resumedSid))).json()).assistant);assert.equal(result.requests.filter(row=>row.method==='POST' && ['/assistant','/phone-number'].includes(row.path)).length,before);
   });
   await check(name("a solo operator can use the new number with a generic non-looping fallback"),async()=>{
     const c=await client(mode,'solo'),e=engine();c.phone.businessNumber=c.owner.phone;const rev=configurationRevision(c);c.setupProof={reviewedRevision:rev,testedRevision:rev,testMode:'live'};await store.put('clients',c.slug,c);await assert.rejects(()=>request(e,c),error=>error.code==='unsafe_forwarding');const req=await request(e,c,{forwardingMode:'use_new_number'});assert.equal((await complete(e,req)).state,'ready');const row=await rowFor(c);assert.equal(imports.get(row.imported.id).fallbackDestination,undefined);assert.equal(numbers.get(row.number.id).voice_fallback_url,process.env.VOICE_FALLBACK_TWIML_URL);await voice.handleManagedVoiceWebhook(signed(row,'inbound'));assert.ok((await(await voice.handleManagedVapiWebhook(event(row,'assistant-request'))).json()).assistant);const fallback=await voice.handleManagedVoiceWebhook(signed(row,'fallback'));assert.doesNotMatch(await fallback.text(),/<Dial/);

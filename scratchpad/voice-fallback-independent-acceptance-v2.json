@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "at": "2026-10-24T10:45:26.447953+00:00",
+  "decision": "accepted_local_focused_repair",
+  "captureClosed": true,
+  "baseCommit": "2d74d78648a056db3f64e587da0f2caf378a1864",
+  "freeze": {
+    "path": "scratchpad/voice-fallback-freeze-v2.json",
+    "sha256": "d96b5a4ca17fa6a635b42d58689f6f4eb83dce5d326e11458b279c824661ac1e",
+    "sourceId": "sha256:5a6cbe6458c08f4216a2f0c2d9f52665b3653af4d9fcfecb3aeee40bed5572e5",
+    "files": 115,
+    "allFilesMatchedBeforeAndAfter": true
+  },
+  "runtimeChanges": [
+    "netlify/functions/lib/voice-activation.mjs"
+  ],
+  "receipt": {
+    "path": "scratchpad/voice-fallback-independent-v2-final.json",
+    "sha256": "8fad9d72f23ad88a6797003e53a0077fb2c3c0ad3232fbd9026d885267a72c0d",
+    "passed": 18,
+    "total": 18,
+    "sourceStable": true,
+    "driver": "scratchpad/voice-fallback-independent-v2-final-check.mjs",
+    "driverSha256": "b8bc3ce7907698c8dcca28c0dd9640f1682631345670446129ed89c077aa8650"
+  },
+  "independentQA": {
+    "state": "independently_accepted_locally",
+    "receipt": "scratchpad/voice-fallback-independent-acceptance-v2.json",
+    "checks": {
+      "passed": 18,
+      "total": 18,
+      "physicalNetworkRequests": 0,
+      "privateInputsRead": 0,
+      "browserCalls": 0,
+      "actualCalls": 0,
+      "sdkConditionalConflicts": 22
+    },
+    "exactRuntimeSha256": "1f19c26df7f909f53ae24e496ac3bcda1d0c64b4e96d3f10b015416aaf88bd96",
+    "scope": "Actual signed managed-voice entrypoint and ordinary activation/retained records with synthetic provider and installed Blobs SDK protocols. Reused author fixture primitives; independently designed assertions and interleavings. No fresh author tally is counted as independent.",
+    "limits": [
+      "No actual call/audio/carrier result or human acknowledgment accepted.",
+      "No saved request, owner notification or promised callback inferred from fallback transport.",
+      "Known equal-number/reentry fences do not prove arbitrary carrier forwarding graphs.",
+      "Full launch/provider acceptance remains open."
+    ]
+  },
+  "sourceBridge": {
+    "v1": "scratchpad/voice-fallback-freeze-v1.json",
+    "v2": "scratchpad/voice-fallback-freeze-v2.json",
+    "changedInputs": [
+      "netlify/functions/lib/voice-activation.mjs",
+      "scripts/voice-activation-check.mjs"
+    ],
+    "other113InputsUnchanged": true,
+    "browserRuntimeChanged": false
+  },
+  "returnedFindings": {
+    "priorDisposition": "scratchpad/voice-fallback-independent-v1-disposition.json",
+    "priorDispositionSha256": "111b66377be76235d802215273ac8b1a7c2afb825a6693d94f9449c9abb751b8",
+    "roots": 3,
+    "failedAssertionsBefore": 4,
+    "allRetestedAndResolved": true,
+    "details": [
+      "Owner-cell ForwardedFrom reentry is message-only; retained original forwarding evidence survives later callback omission; ordinary shop forwarding remains allowed. Known managed-number/caller equality loops are separately refused.",
+      "Stored policy content must match its approved/current digest. Altered300\u2192600 and missing duration emit no Dial; missing duration leaves shared allowance unchanged.",
+      "Completed action without destination SID remains unknown, keeps raw status and speaks retry guidance without legacy answered alias."
+    ]
+  },
+  "acceptedBoundaryEvidence": [
+    "busy/no-answer/failed/canceled/unknown/unbridged-completed return fixed retry speech from Dial action, no trailing unreachable speech",
+    "parent CallStatus cannot promote destination result; completed child plus real SID is transport evidence only",
+    "wrong account/token/signature/To/From/parent/generation refuse or message-only without cross-tenant mutation",
+    "sequential+8concurrent preterminal retries, discarded response and SDK lost-ack recovery emit at most one local Dial and retain one nonrefundable deterministic attempt",
+    "terminal replay and late/out-of-order status cannot replace first outcome; conflicting known child SID rejected",
+    "AI and fallback consume distinct account/tenant keys with300+330seconds reserved; exhausted minute/account capacity and malformed allowance produce no paid attempt",
+    "90seconds of admission delay yields210second timeLimit, retaining25seconds ringing+5seconds buffer within330second reservation",
+    "stale AI, paused AI and actual voice-only detach preserve unchanged approved fallback; replaced/cancelled workspace, parent release/cancel, account brake and provider/policy withdrawal stop it",
+    "owner/config/global/generation changes after attempt CAS are re-read before response and suppress Dial; capacity remains conservatively consumed"
+  ],
+  "callerResponseSamples": [
+    {
+      "label": "no-answer action",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "unbridged completed => unknown",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "completed child / failed parent",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Hangup/></Response>"
+    },
+    {
+      "label": "preterminal replay after discarded first response",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "account brake blocks fallback",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "owner-cell forwarded reentry",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "retained policy duration altered from 300 to 600",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "completed action with no child SID",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    },
+    {
+      "label": "retained owner-cell forwarding / later field omitted",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/></Response>"
+    }
+  ],
+  "fixtureDispositions": "See preserved v1 disposition; first number collision, site: store hook mismatch and incorrect required-throw expectation remain recorded, not product failures.",
+  "effects": {
+    "physicalNetworkRequests": 0,
+    "deniedPhysicalAttempts": 0,
+    "providerRequests": "synthetic fixture only",
+    "actualCalls": 0,
+    "emails": 0,
+    "texts": 0,
+    "modelRequests": 0,
+    "providerAccountsRead": 0,
+    "privateInputsRead": 0,
+    "browserCalls": 0,
+    "builds": 0,
+    "deploys": 0
+  },
+  "claimBoundary": [
+    "One locally authorized attempt per exact parent identity, not proof of provider idempotency or a physically completed leg.",
+    "No UI files changed; this handler-only acceptance does not claim a fresh visual/audio review.",
+    "Full platform/provider readiness and actual phone service remain unaccepted."
+  ]
+}

@@ -1,0 +1,4074 @@
+{
+  "at": "2026-10-24T10:21:54.841Z",
+  "mode": "actual voice engine, HTTP adapter and webhook protocols; memory + installed Blobs SDK fixtures; zero real requests",
+  "sourceBefore": {
+    "netlify/functions/lib/voice-activation.mjs": "1fd9cb6bceb2658fa4c5c08ed27c0bf874fb8181323327d8c7870dfe66c4e537",
+    "netlify/functions/lib/voice-provider.mjs": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+    "netlify/functions/managed-voice.mjs": "323c3377f9798176c315d025b2fd458b064da539058151657f3d0c316c4fceac",
+    "netlify/functions/managed-vapi.mjs": "117dc3de50aa8d1c94b1741eae96b09e81de0f2e62e0fffed59f99acbfdd513a",
+    "netlify/functions/voice-activation-background.mjs": "25edd55f7189c5c0f01044dc72fb67c438b9054807b183ade499369609703165",
+    "netlify/functions/voice-activation-scheduler.mjs": "67095d0b7a91ca928a71ebcd08ff5bdecfac68a38818e237aed830ec610c3f1e"
+  },
+  "checks": [
+    {
+      "name": "memory: authority is saved while account gate is closed; unknown owner is rejected",
+      "pass": true
+    },
+    {
+      "name": "memory: real adapter chains assistant/import/routing with durable resource receipts and dependency",
+      "pass": true
+    },
+    {
+      "name": "memory: signed forwarded inbound plus bound successful Vapi report establishes observed readiness",
+      "pass": true
+    },
+    {
+      "name": "memory: untrusted, misrouted and unbound events never certify service",
+      "pass": true
+    },
+    {
+      "name": "memory: lost assistant create response before effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "memory: lost assistant create response after effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "memory: lost phone-number create response before effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "memory: lost phone-number create response after effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "memory: lost routing response is reconciled by readback without a second update",
+      "pass": true
+    },
+    {
+      "name": "memory: pause during assistant create retains the receipt but blocks call handling and stale activation",
+      "pass": true
+    },
+    {
+      "name": "memory: rules stop serving until current review/test, then automatically update the same resources",
+      "pass": true
+    },
+    {
+      "name": "memory: fallback is provider-authenticated and separately reports observed and answered",
+      "pass": true
+    },
+    {
+      "name": "memory: unanswered fallback speaks from the Dial action and retains the exact destination outcome",
+      "pass": true
+    },
+    {
+      "name": "memory: completed fallback records a transport connection once without promising a human or another call",
+      "pass": true
+    },
+    {
+      "name": "memory: a fallback callback cannot adopt another caller or an unattempted dial",
+      "pass": true
+    },
+    {
+      "name": "memory: known own-number reentry ends without dialing or routing back into the assistant",
+      "pass": true
+    },
+    {
+      "name": "memory: old callbacks never dial a replacement tenant or stamp its current voice generation",
+      "pass": true
+    },
+    {
+      "name": "memory: old generation dial events cannot become current readiness evidence",
+      "pass": true
+    },
+    {
+      "name": "memory: stale AI routing and paused AI retain only the unchanged approved owner fallback",
+      "pass": false,
+      "error": "The input did not match the regular expression /<Dial[^>]+>\\+17135550100<\\/Dial>/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<Dial[^>]+>\\+17135550100<\\/Dial>/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n\n    at file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:170:124\n    at async check (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:58:140)\n    at async suite (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:165:3)\n    at async file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:258:1"
+    },
+    {
+      "name": "memory: voice-only detachment preserves approved fallback while account and number stops do not",
+      "pass": false,
+      "error": "The input did not match the regular expression /<Dial/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<Dial/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n\n    at file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:179:93\n    at async check (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:58:140)\n    at async suite (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:174:3)\n    at async file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:258:1"
+    },
+    {
+      "name": "memory: duplicate end reports retain one immutable call receipt and no duplicate effect",
+      "pass": true
+    },
+    {
+      "name": "memory: customer cancellation confirms route detachment and resource cleanup before dependency release",
+      "pass": true
+    },
+    {
+      "name": "memory: parent number cancellation automatically starts child cleanup",
+      "pass": true
+    },
+    {
+      "name": "memory: concurrent requests and workers retain one assistant create and one import",
+      "pass": true
+    },
+    {
+      "name": "memory: cancellation during in-flight creation retains late receipt before cleanup",
+      "pass": true
+    },
+    {
+      "name": "memory: ended calls reject delayed tools and reserve call usage only once",
+      "pass": true
+    },
+    {
+      "name": "memory: root dispatcher saves one real lead for a repeated call tool and reports delivery honestly",
+      "pass": true
+    },
+    {
+      "name": "memory: three ready customers refresh in one leased background wave before stale routing expires",
+      "pass": true
+    },
+    {
+      "name": "memory: admission rejects the 26th active operation before provider resource creation",
+      "pass": true
+    },
+    {
+      "name": "memory: actual inbound calls stop at the approved per-customer daily budget",
+      "pass": true
+    },
+    {
+      "name": "memory: owner cancellation remains available after execution policy is removed",
+      "pass": true
+    },
+    {
+      "name": "memory: lost child acknowledgment after actual dependency CAS cannot strand number cleanup",
+      "pass": true
+    },
+    {
+      "name": "memory: testing to live adopts the lifecycle and answers with the same acquired resources",
+      "pass": true
+    },
+    {
+      "name": "memory: pause and resume recover automatically without another purchase or owner approval",
+      "pass": false,
+      "error": "The expression evaluated to a falsy value:\n\n  assert.ok((await (await voice.handleManagedVapiWebhook(event(current,'assistant-request'))).json()).assistant)\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok((await (await voice.handleManagedVapiWebhook(event(current,'assistant-request'))).json()).assistant)\n\n    at file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:249:426\n    at async check (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:58:140)\n    at async suite (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:246:3)\n    at async file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:258:1"
+    },
+    {
+      "name": "memory: a solo operator can use the new number with a generic non-looping fallback",
+      "pass": true
+    },
+    {
+      "name": "memory: the acquired new number can be the advertised business line without a forwarding loop",
+      "pass": true
+    },
+    {
+      "name": "sdk: authority is saved while account gate is closed; unknown owner is rejected",
+      "pass": true
+    },
+    {
+      "name": "sdk: real adapter chains assistant/import/routing with durable resource receipts and dependency",
+      "pass": true
+    },
+    {
+      "name": "sdk: signed forwarded inbound plus bound successful Vapi report establishes observed readiness",
+      "pass": true
+    },
+    {
+      "name": "sdk: untrusted, misrouted and unbound events never certify service",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost assistant create response before effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost assistant create response after effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost phone-number create response before effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost phone-number create response after effect never blindly creates again",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost routing response is reconciled by readback without a second update",
+      "pass": true
+    },
+    {
+      "name": "sdk: pause during assistant create retains the receipt but blocks call handling and stale activation",
+      "pass": true
+    },
+    {
+      "name": "sdk: rules stop serving until current review/test, then automatically update the same resources",
+      "pass": true
+    },
+    {
+      "name": "sdk: fallback is provider-authenticated and separately reports observed and answered",
+      "pass": true
+    },
+    {
+      "name": "sdk: unanswered fallback speaks from the Dial action and retains the exact destination outcome",
+      "pass": true
+    },
+    {
+      "name": "sdk: completed fallback records a transport connection once without promising a human or another call",
+      "pass": true
+    },
+    {
+      "name": "sdk: a fallback callback cannot adopt another caller or an unattempted dial",
+      "pass": true
+    },
+    {
+      "name": "sdk: known own-number reentry ends without dialing or routing back into the assistant",
+      "pass": true
+    },
+    {
+      "name": "sdk: old callbacks never dial a replacement tenant or stamp its current voice generation",
+      "pass": true
+    },
+    {
+      "name": "sdk: old generation dial events cannot become current readiness evidence",
+      "pass": true
+    },
+    {
+      "name": "sdk: stale AI routing and paused AI retain only the unchanged approved owner fallback",
+      "pass": false,
+      "error": "The input did not match the regular expression /<Dial[^>]+>\\+17135550100<\\/Dial>/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<Dial[^>]+>\\+17135550100<\\/Dial>/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n\n    at file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:170:124\n    at async check (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:58:140)\n    at async suite (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:165:3)\n    at async file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:258:24"
+    },
+    {
+      "name": "sdk: voice-only detachment preserves approved fallback while account and number stops do not",
+      "pass": false,
+      "error": "The input did not match the regular expression /<Dial/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<Dial/. Input:\n\n'{\"error\":\"call_mismatch\"}'\n\n    at file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:179:93\n    at async check (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:58:140)\n    at async suite (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:174:3)\n    at async file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:258:24"
+    },
+    {
+      "name": "sdk: duplicate end reports retain one immutable call receipt and no duplicate effect",
+      "pass": true
+    },
+    {
+      "name": "sdk: customer cancellation confirms route detachment and resource cleanup before dependency release",
+      "pass": true
+    },
+    {
+      "name": "sdk: parent number cancellation automatically starts child cleanup",
+      "pass": true
+    },
+    {
+      "name": "sdk: concurrent requests and workers retain one assistant create and one import",
+      "pass": true
+    },
+    {
+      "name": "sdk: cancellation during in-flight creation retains late receipt before cleanup",
+      "pass": true
+    },
+    {
+      "name": "sdk: ended calls reject delayed tools and reserve call usage only once",
+      "pass": true
+    },
+    {
+      "name": "sdk: root dispatcher saves one real lead for a repeated call tool and reports delivery honestly",
+      "pass": true
+    },
+    {
+      "name": "sdk: three ready customers refresh in one leased background wave before stale routing expires",
+      "pass": true
+    },
+    {
+      "name": "sdk: admission rejects the 26th active operation before provider resource creation",
+      "pass": true
+    },
+    {
+      "name": "sdk: actual inbound calls stop at the approved per-customer daily budget",
+      "pass": true
+    },
+    {
+      "name": "sdk: owner cancellation remains available after execution policy is removed",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost child acknowledgment after actual dependency CAS cannot strand number cleanup",
+      "pass": true
+    },
+    {
+      "name": "sdk: testing to live adopts the lifecycle and answers with the same acquired resources",
+      "pass": true
+    },
+    {
+      "name": "sdk: pause and resume recover automatically without another purchase or owner approval",
+      "pass": false,
+      "error": "The expression evaluated to a falsy value:\n\n  assert.ok((await (await voice.handleManagedVapiWebhook(event(current,'assistant-request'))).json()).assistant)\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok((await (await voice.handleManagedVapiWebhook(event(current,'assistant-request'))).json()).assistant)\n\n    at file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:249:426\n    at async check (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:58:140)\n    at async suite (file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:246:3)\n    at async file:///private/tmp/mc-lead-handoff-discovery-2d/scripts/voice-activation-check.mjs:258:24"
+    },
+    {
+      "name": "sdk: a solo operator can use the new number with a generic non-looping fallback",
+      "pass": true
+    },
+    {
+      "name": "sdk: the acquired new number can be the advertised business line without a forwarding loop",
+      "pass": true
+    }
+  ],
+  "conflicts": 20,
+  "blocked": [],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbbcebf03f984a8ed8796580f9ce82f9d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/7f138943-63e4-a009-501c-f10ac170a0c6"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbbcebf03f984a8ed8796580f9ce82f9d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/d9bbf9e6-b9f5-2863-fe43-b9ef9b158da9"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbbcebf03f984a8ed8796580f9ce82f9d.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbbcebf03f984a8ed8796580f9ce82f9d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbbcebf03f984a8ed8796580f9ce82f9d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbbcebf03f984a8ed8796580f9ce82f9d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/d9bbf9e6-b9f5-2863-fe43-b9ef9b158da9"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8c7ac68d613ef17306b145922b8f17d0.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/80baee71-bf3b-7d80-d2f3-8bd67b824aee"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8c7ac68d613ef17306b145922b8f17d0.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/9da47ada-924e-28fb-fbdb-23d42523f54d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8c7ac68d613ef17306b145922b8f17d0.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8c7ac68d613ef17306b145922b8f17d0.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8c7ac68d613ef17306b145922b8f17d0.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8c7ac68d613ef17306b145922b8f17d0.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/9da47ada-924e-28fb-fbdb-23d42523f54d"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN392d93fef5340d7109050c9bf80f9e51.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/dffa9fe8-c82f-093a-ad40-68a49789388f"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN392d93fef5340d7109050c9bf80f9e51.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/93da4088-791e-5029-f92a-842ddf7b0c7f"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN392d93fef5340d7109050c9bf80f9e51.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN392d93fef5340d7109050c9bf80f9e51.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN392d93fef5340d7109050c9bf80f9e51.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN392d93fef5340d7109050c9bf80f9e51.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/93da4088-791e-5029-f92a-842ddf7b0c7f"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0c59fb867ec73a4c072736e955ba8c86.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d63f5120-bfb5-129f-0e9a-d9a166938b1c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0c59fb867ec73a4c072736e955ba8c86.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/b4730586-694d-2a4b-e237-d71c7aa148ed"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0c59fb867ec73a4c072736e955ba8c86.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0c59fb867ec73a4c072736e955ba8c86.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0c59fb867ec73a4c072736e955ba8c86.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0c59fb867ec73a4c072736e955ba8c86.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/b4730586-694d-2a4b-e237-d71c7aa148ed"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d8c1732f-cc31-8a9c-9c31-93263a610d8c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/0b5f260a-a0b7-4c33-6b19-2f0bbfbdecc3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/0b5f260a-a0b7-4c33-6b19-2f0bbfbdecc3"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d8c1732f-cc31-8a9c-9c31-93263a610d8c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd93de9f1941e415da8d48a8f557be4fd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/0b5f260a-a0b7-4c33-6b19-2f0bbfbdecc3"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5132d14196e61d5066d4bb7174d038f3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/493cb7c9-017e-4ea5-46ab-d6112b3bf7b0"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5132d14196e61d5066d4bb7174d038f3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/740a48c4-86e6-61ab-25ef-ca82ed155714"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5132d14196e61d5066d4bb7174d038f3.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5132d14196e61d5066d4bb7174d038f3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/493cb7c9-017e-4ea5-46ab-d6112b3bf7b0"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5132d14196e61d5066d4bb7174d038f3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/740a48c4-86e6-61ab-25ef-ca82ed155714"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/472b063c-f42a-f8a3-72f7-e3a216d9f75d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/2c6010b4-581e-8e35-4c88-3e715f60363f"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/2c6010b4-581e-8e35-4c88-3e715f60363f"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/472b063c-f42a-f8a3-72f7-e3a216d9f75d"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/472b063c-f42a-f8a3-72f7-e3a216d9f75d"
+    },
+    {
+      "method": "PATCH",
+      "path": "/assistant/472b063c-f42a-f8a3-72f7-e3a216d9f75d"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/472b063c-f42a-f8a3-72f7-e3a216d9f75d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN60b8197fbf10ef5e366d7152737cd1aa.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/2c6010b4-581e-8e35-4c88-3e715f60363f"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3a9f0ec84b90c271594ed3d8f0b96152.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/7d21ef21-895e-11c8-f427-fc9c72aceaa7"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3a9f0ec84b90c271594ed3d8f0b96152.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/131b1c4c-a0f9-c162-6297-6b4148401f7a"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3a9f0ec84b90c271594ed3d8f0b96152.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3a9f0ec84b90c271594ed3d8f0b96152.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3a9f0ec84b90c271594ed3d8f0b96152.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3a9f0ec84b90c271594ed3d8f0b96152.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/131b1c4c-a0f9-c162-6297-6b4148401f7a"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4e15be4a1f27a6192a50a333f58bb159.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/50e1f4f0-ad8e-bba7-746b-25c91009a505"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4e15be4a1f27a6192a50a333f58bb159.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/4b11ce89-849d-9500-3073-325de2cfb71b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4e15be4a1f27a6192a50a333f58bb159.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4e15be4a1f27a6192a50a333f58bb159.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4e15be4a1f27a6192a50a333f58bb159.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4e15be4a1f27a6192a50a333f58bb159.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/4b11ce89-849d-9500-3073-325de2cfb71b"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN62b898aeeef6674c1c76a0c6acafca49.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/3133e38f-2495-c87b-adb6-11cf40b59e96"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN62b898aeeef6674c1c76a0c6acafca49.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a92bb52a-9681-758b-942b-9f9a027d84fb"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN62b898aeeef6674c1c76a0c6acafca49.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN62b898aeeef6674c1c76a0c6acafca49.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN62b898aeeef6674c1c76a0c6acafca49.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN62b898aeeef6674c1c76a0c6acafca49.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a92bb52a-9681-758b-942b-9f9a027d84fb"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc79d123f28973bfc6022a9b0162646d6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/1b7b5cb2-ca51-f7b0-fedb-3e624e1935da"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc79d123f28973bfc6022a9b0162646d6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/b6bf8ca1-06d6-14ef-ea53-578e60268074"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc79d123f28973bfc6022a9b0162646d6.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc79d123f28973bfc6022a9b0162646d6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc79d123f28973bfc6022a9b0162646d6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc79d123f28973bfc6022a9b0162646d6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/b6bf8ca1-06d6-14ef-ea53-578e60268074"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2a8cc9f30861e924ec2f161ce88579ed.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/01bc28c0-365c-9b08-f99e-ecacec69dbc8"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2a8cc9f30861e924ec2f161ce88579ed.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/2dfa45eb-5a3b-250d-f296-5cfbbc668b35"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2a8cc9f30861e924ec2f161ce88579ed.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2a8cc9f30861e924ec2f161ce88579ed.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2a8cc9f30861e924ec2f161ce88579ed.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN2a8cc9f30861e924ec2f161ce88579ed.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/2dfa45eb-5a3b-250d-f296-5cfbbc668b35"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef6b129e882e59526c922da69f6fded9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/76174c45-7e0e-e68d-7a52-a62edd07c9af"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef6b129e882e59526c922da69f6fded9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/29f7b4cc-581e-7d10-32bf-f1a43d4bc1cf"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef6b129e882e59526c922da69f6fded9.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef6b129e882e59526c922da69f6fded9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef6b129e882e59526c922da69f6fded9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNef6b129e882e59526c922da69f6fded9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/29f7b4cc-581e-7d10-32bf-f1a43d4bc1cf"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37acdc599f4a3e3d20c3523d79d6ea78.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4f371128-995d-16c6-2d5b-4c51916a6c17"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37acdc599f4a3e3d20c3523d79d6ea78.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/5008d89e-e37c-6a20-d7ca-c2a05db6b46a"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37acdc599f4a3e3d20c3523d79d6ea78.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37acdc599f4a3e3d20c3523d79d6ea78.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37acdc599f4a3e3d20c3523d79d6ea78.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37acdc599f4a3e3d20c3523d79d6ea78.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/5008d89e-e37c-6a20-d7ca-c2a05db6b46a"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN281c682096fe67156c6700bbe68fb009.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/e8275515-3d04-fc41-d8a5-18c69779064a"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN281c682096fe67156c6700bbe68fb009.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/aeda8fca-e45d-d2fe-8240-8f56701b0fe4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN281c682096fe67156c6700bbe68fb009.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN281c682096fe67156c6700bbe68fb009.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN281c682096fe67156c6700bbe68fb009.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN281c682096fe67156c6700bbe68fb009.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/aeda8fca-e45d-d2fe-8240-8f56701b0fe4"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6db2e1a588829cc4752e703e60dbf881.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/40628e35-7350-2950-53c6-0944e7291175"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6db2e1a588829cc4752e703e60dbf881.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f5609797-2814-26e9-adbe-c737c2ed4193"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6db2e1a588829cc4752e703e60dbf881.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6db2e1a588829cc4752e703e60dbf881.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6db2e1a588829cc4752e703e60dbf881.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6db2e1a588829cc4752e703e60dbf881.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f5609797-2814-26e9-adbe-c737c2ed4193"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc3ded63a829677b23dd6e2c9c33c0246.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/ebc5e4b0-1d6a-ae28-c604-d70b693ca1a6"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc3ded63a829677b23dd6e2c9c33c0246.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f9372493-5fa1-4dc5-7993-fccfa61d6b4b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc3ded63a829677b23dd6e2c9c33c0246.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc3ded63a829677b23dd6e2c9c33c0246.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc3ded63a829677b23dd6e2c9c33c0246.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc3ded63a829677b23dd6e2c9c33c0246.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f9372493-5fa1-4dc5-7993-fccfa61d6b4b"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa24ca3658ff60077d07640d170d361e3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4693b70c-db15-166b-23ec-46393c45285d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa24ca3658ff60077d07640d170d361e3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f66fa2df-d5f5-a830-96ca-9988b5d48ec3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa24ca3658ff60077d07640d170d361e3.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa24ca3658ff60077d07640d170d361e3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa24ca3658ff60077d07640d170d361e3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNa24ca3658ff60077d07640d170d361e3.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f66fa2df-d5f5-a830-96ca-9988b5d48ec3"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4b20a5dd246a05408edfa5cc95b50f8f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/b21dcfc9-e66c-217b-2b1d-85b38b59a3f1"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4b20a5dd246a05408edfa5cc95b50f8f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a8784401-73fb-4171-28c7-6342b1ee433d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4b20a5dd246a05408edfa5cc95b50f8f.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4b20a5dd246a05408edfa5cc95b50f8f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4b20a5dd246a05408edfa5cc95b50f8f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4b20a5dd246a05408edfa5cc95b50f8f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a8784401-73fb-4171-28c7-6342b1ee433d"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8c8fac76-0bf3-1224-6099-081874813b93"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/71cac6f2-37ee-0e52-47e0-f3fdaac23400"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/71cac6f2-37ee-0e52-47e0-f3fdaac23400"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8c8fac76-0bf3-1224-6099-081874813b93"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8c8fac76-0bf3-1224-6099-081874813b93"
+    },
+    {
+      "method": "PATCH",
+      "path": "/assistant/8c8fac76-0bf3-1224-6099-081874813b93"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8c8fac76-0bf3-1224-6099-081874813b93"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8b4122714e457f6249825e7ff57fbf8a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/71cac6f2-37ee-0e52-47e0-f3fdaac23400"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5e1d65601050222ea86ab0601c8df743.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/3410cb76-b823-c4fa-3fed-2872438769f4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5e1d65601050222ea86ab0601c8df743.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f1a5f21b-273b-a872-1a32-01c9d8f9feb4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5e1d65601050222ea86ab0601c8df743.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5e1d65601050222ea86ab0601c8df743.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5e1d65601050222ea86ab0601c8df743.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5e1d65601050222ea86ab0601c8df743.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f1a5f21b-273b-a872-1a32-01c9d8f9feb4"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/3c8ff5e2-256a-b38c-1603-41442c3cd567"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/59f49c51-3a1c-4c24-9537-7b3378062e6b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/59f49c51-3a1c-4c24-9537-7b3378062e6b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN9f24e9baeffb3493169c9e46d9d99227.json"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0a22112f6af5061b9dc9f18e06059194.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/0661bf81-90ed-cb24-3358-457b28dfc0d9"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0a22112f6af5061b9dc9f18e06059194.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/af20dbb2-12f7-f92a-d59e-f48248bb272b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0a22112f6af5061b9dc9f18e06059194.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0a22112f6af5061b9dc9f18e06059194.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0a22112f6af5061b9dc9f18e06059194.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0a22112f6af5061b9dc9f18e06059194.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/af20dbb2-12f7-f92a-d59e-f48248bb272b"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/aae0cbb8-d706-2a94-5ab8-36c4d2cd635d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e543802d-9303-d3fe-076c-2a8fb19882c7"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e543802d-9303-d3fe-076c-2a8fb19882c7"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN39455b5ac22a7b52fb7c2f71932eb9c9.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e543802d-9303-d3fe-076c-2a8fb19882c7"
+    },
+    {
+      "method": "DELETE",
+      "path": "/phone-number/e543802d-9303-d3fe-076c-2a8fb19882c7"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e543802d-9303-d3fe-076c-2a8fb19882c7"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/aae0cbb8-d706-2a94-5ab8-36c4d2cd635d"
+    },
+    {
+      "method": "DELETE",
+      "path": "/assistant/aae0cbb8-d706-2a94-5ab8-36c4d2cd635d"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/aae0cbb8-d706-2a94-5ab8-36c4d2cd635d"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/09e8a555-11c7-9548-caea-22c0a65b1daa"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ef23ecdd-eab7-242a-9517-25dde580f7d3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ef23ecdd-eab7-242a-9517-25dde580f7d3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN4ce300ea20b8740cd879a4bce89d3d84.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ef23ecdd-eab7-242a-9517-25dde580f7d3"
+    },
+    {
+      "method": "DELETE",
+      "path": "/phone-number/ef23ecdd-eab7-242a-9517-25dde580f7d3"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ef23ecdd-eab7-242a-9517-25dde580f7d3"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/09e8a555-11c7-9548-caea-22c0a65b1daa"
+    },
+    {
+      "method": "DELETE",
+      "path": "/assistant/09e8a555-11c7-9548-caea-22c0a65b1daa"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/09e8a555-11c7-9548-caea-22c0a65b1daa"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/80fb3a5c-408f-ee06-c643-07b838897580"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/85c6385f-8918-8ea7-6b58-1eeaa584db1c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/85c6385f-8918-8ea7-6b58-1eeaa584db1c"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/80fb3a5c-408f-ee06-c643-07b838897580"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN1a921d20f683c0224246a3c793cf947d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/85c6385f-8918-8ea7-6b58-1eeaa584db1c"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/9b40a470-3aa8-0db5-2ac5-aaa5550c018e"
+    },
+    {
+      "method": "DELETE",
+      "path": "/assistant/9b40a470-3aa8-0db5-2ac5-aaa5550c018e"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/9b40a470-3aa8-0db5-2ac5-aaa5550c018e"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8ebf7cd6a90601eef8734efa161374fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/c08f103d-9d08-732f-11af-196f2be78501"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8ebf7cd6a90601eef8734efa161374fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/1660c008-9824-4433-f65f-c46b9a4d3e3f"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8ebf7cd6a90601eef8734efa161374fe.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8ebf7cd6a90601eef8734efa161374fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8ebf7cd6a90601eef8734efa161374fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8ebf7cd6a90601eef8734efa161374fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/1660c008-9824-4433-f65f-c46b9a4d3e3f"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN74c4218b2cefa5b825685379d3a01a10.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/c7fe5a69-e7fd-2bb9-cb07-a42698663d1c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN74c4218b2cefa5b825685379d3a01a10.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/cfdc1e04-e069-f43c-de85-a6c0547de62c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN74c4218b2cefa5b825685379d3a01a10.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN74c4218b2cefa5b825685379d3a01a10.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN74c4218b2cefa5b825685379d3a01a10.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN74c4218b2cefa5b825685379d3a01a10.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/cfdc1e04-e069-f43c-de85-a6c0547de62c"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/52fa1e58-842e-eaab-b5cf-e3dfe7b11a6c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a0f7c1fa-d629-0696-82b0-ed6594ccba38"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a0f7c1fa-d629-0696-82b0-ed6594ccba38"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/ff699316-18eb-169a-4996-7b2365361031"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/fd566e19-8a4a-7436-92e9-7c3c83443ba4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/fd566e19-8a4a-7436-92e9-7c3c83443ba4"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8a5aa4b5-7928-adb5-ebc2-f7eab5ab4a43"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/7d775d93-77c7-91f0-199e-9b3800420c81"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/7d775d93-77c7-91f0-199e-9b3800420c81"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/52fa1e58-842e-eaab-b5cf-e3dfe7b11a6c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc6cf868aaaa2b1a59ebde930ae7a9f31.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a0f7c1fa-d629-0696-82b0-ed6594ccba38"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/ff699316-18eb-169a-4996-7b2365361031"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfaa89c3be0d6b49d55aa749675ff655d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/fd566e19-8a4a-7436-92e9-7c3c83443ba4"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8a5aa4b5-7928-adb5-ebc2-f7eab5ab4a43"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3daad42785a0fdf26194e7bb54b5aa94.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/7d775d93-77c7-91f0-199e-9b3800420c81"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6a7b728b3dbc46555c25663bb404f976.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/ede77322-b6d8-6024-f9c1-57cca86357e0"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6a7b728b3dbc46555c25663bb404f976.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/54916b72-c383-ba0c-ecc7-f3c2cf4d9a5b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6a7b728b3dbc46555c25663bb404f976.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6a7b728b3dbc46555c25663bb404f976.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6a7b728b3dbc46555c25663bb404f976.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6a7b728b3dbc46555c25663bb404f976.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/54916b72-c383-ba0c-ecc7-f3c2cf4d9a5b"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6072d1ca-99f2-e653-38fb-6f16c8ceaff1"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e5c00a96-3c0e-62df-162b-b71d4702b9bf"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e5c00a96-3c0e-62df-162b-b71d4702b9bf"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6072d1ca-99f2-e653-38fb-6f16c8ceaff1"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3731db0664cd69d8bb53449af294b3b6.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/e5c00a96-3c0e-62df-162b-b71d4702b9bf"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/7577b418-e01d-5856-fa0d-09e0a074fb68"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a7debc1a-d3f6-ec02-25ae-24f4496909b6"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a7debc1a-d3f6-ec02-25ae-24f4496909b6"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/7577b418-e01d-5856-fa0d-09e0a074fb68"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf79fe3790ca2807b75f8ecbdfc30579f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a7debc1a-d3f6-ec02-25ae-24f4496909b6"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe247312fa93b8fcd38f49af0af2c802d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/3b638d52-c9b2-9ae4-d71d-c1eb268b0629"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe247312fa93b8fcd38f49af0af2c802d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/0474b192-0838-27a0-f143-3c1989238537"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe247312fa93b8fcd38f49af0af2c802d.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe247312fa93b8fcd38f49af0af2c802d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe247312fa93b8fcd38f49af0af2c802d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe247312fa93b8fcd38f49af0af2c802d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/0474b192-0838-27a0-f143-3c1989238537"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6204236f952890dd85164ead585f8682.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6b7b5009-e4b4-6b2e-240c-64c694390775"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6204236f952890dd85164ead585f8682.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/73dcde82-8ee7-939d-82be-9b8eba5a2fbb"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6204236f952890dd85164ead585f8682.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6204236f952890dd85164ead585f8682.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6204236f952890dd85164ead585f8682.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN6204236f952890dd85164ead585f8682.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/73dcde82-8ee7-939d-82be-9b8eba5a2fbb"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc9f1440580d3814deadef9c1e5f7ef02.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/0b4b840d-5f45-4b76-b447-087cb26d9d7b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc9f1440580d3814deadef9c1e5f7ef02.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ed2e8284-bd6a-be87-705a-b46d9819c196"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc9f1440580d3814deadef9c1e5f7ef02.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc9f1440580d3814deadef9c1e5f7ef02.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc9f1440580d3814deadef9c1e5f7ef02.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc9f1440580d3814deadef9c1e5f7ef02.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ed2e8284-bd6a-be87-705a-b46d9819c196"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN334f3974b32d1ae7b3d041383895086c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/fade42b0-6754-f384-c953-9bf7ad8c6b29"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN334f3974b32d1ae7b3d041383895086c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/69893832-70cd-1fdd-96f2-b61612c4606e"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN334f3974b32d1ae7b3d041383895086c.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN334f3974b32d1ae7b3d041383895086c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN334f3974b32d1ae7b3d041383895086c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN334f3974b32d1ae7b3d041383895086c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/69893832-70cd-1fdd-96f2-b61612c4606e"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfedcdb60ca0687abb8aa73814d9c9fa1.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/b4eb858c-ed85-5f60-fd4c-27345a369c60"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfedcdb60ca0687abb8aa73814d9c9fa1.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/1da95ec1-8aa9-9704-70c6-b17bd2777011"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfedcdb60ca0687abb8aa73814d9c9fa1.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfedcdb60ca0687abb8aa73814d9c9fa1.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfedcdb60ca0687abb8aa73814d9c9fa1.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNfedcdb60ca0687abb8aa73814d9c9fa1.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/1da95ec1-8aa9-9704-70c6-b17bd2777011"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN58c7d7435d979ce0fb40b69a782fe091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/18514a46-19bf-dc57-f7c7-937f56270de7"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN58c7d7435d979ce0fb40b69a782fe091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/796161fc-0a0e-3d37-4642-fd6ef017626f"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN58c7d7435d979ce0fb40b69a782fe091.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN58c7d7435d979ce0fb40b69a782fe091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN58c7d7435d979ce0fb40b69a782fe091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN58c7d7435d979ce0fb40b69a782fe091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/796161fc-0a0e-3d37-4642-fd6ef017626f"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6fd0591f-c554-7d39-6eec-08ed26adb3aa"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/48c11cfe-04fe-b45e-5f99-4a6521b2312d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/48c11cfe-04fe-b45e-5f99-4a6521b2312d"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6fd0591f-c554-7d39-6eec-08ed26adb3aa"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN37bd4986620f25349e3c456f1bcf1096.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/48c11cfe-04fe-b45e-5f99-4a6521b2312d"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0906d98e21a86d9f796ce0cb41b2846d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/71ad1c89-cd6c-6b83-cc5c-c8d79096a639"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0906d98e21a86d9f796ce0cb41b2846d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/fe19105f-4560-f913-5c7d-d6b9faeb6ff3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0906d98e21a86d9f796ce0cb41b2846d.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0906d98e21a86d9f796ce0cb41b2846d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/71ad1c89-cd6c-6b83-cc5c-c8d79096a639"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0906d98e21a86d9f796ce0cb41b2846d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/fe19105f-4560-f913-5c7d-d6b9faeb6ff3"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4c38a1c0-436b-5fad-910a-273db610b507"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f65b2d46-6c38-c6d0-de43-6fb90da54796"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f65b2d46-6c38-c6d0-de43-6fb90da54796"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4c38a1c0-436b-5fad-910a-273db610b507"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4c38a1c0-436b-5fad-910a-273db610b507"
+    },
+    {
+      "method": "PATCH",
+      "path": "/assistant/4c38a1c0-436b-5fad-910a-273db610b507"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4c38a1c0-436b-5fad-910a-273db610b507"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNe8171ee55673d3589fe94a8328b35319.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f65b2d46-6c38-c6d0-de43-6fb90da54796"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf9b5ac5f8018b3912751826b40c2b958.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/038104a2-9a79-8273-e639-90c03ea07889"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf9b5ac5f8018b3912751826b40c2b958.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/8d1d10a9-4c77-0387-431d-265a57eaefba"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf9b5ac5f8018b3912751826b40c2b958.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf9b5ac5f8018b3912751826b40c2b958.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf9b5ac5f8018b3912751826b40c2b958.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNf9b5ac5f8018b3912751826b40c2b958.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/8d1d10a9-4c77-0387-431d-265a57eaefba"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNcfef344d3d0723eca69dad3c1631c091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/36f70f74-09f4-1f3e-6783-62f19c667d9d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNcfef344d3d0723eca69dad3c1631c091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/7c66dcbd-1d33-15d2-a31b-d66051d56f09"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNcfef344d3d0723eca69dad3c1631c091.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNcfef344d3d0723eca69dad3c1631c091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNcfef344d3d0723eca69dad3c1631c091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNcfef344d3d0723eca69dad3c1631c091.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/7c66dcbd-1d33-15d2-a31b-d66051d56f09"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNad4d4144995cf5e5b1058197070c3154.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/25b0fa51-1ad4-5a96-d603-637de9a478a1"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNad4d4144995cf5e5b1058197070c3154.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ad7a1b06-1d0c-d8d1-1204-786fc0b7e573"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNad4d4144995cf5e5b1058197070c3154.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNad4d4144995cf5e5b1058197070c3154.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNad4d4144995cf5e5b1058197070c3154.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNad4d4144995cf5e5b1058197070c3154.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ad7a1b06-1d0c-d8d1-1204-786fc0b7e573"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb630b7596781e96a91f5094ffb6643b5.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/3ce5d980-9ea0-e191-15d4-13650ab431da"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb630b7596781e96a91f5094ffb6643b5.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/b4708201-4060-4d8e-bb36-60b43e6f6d81"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb630b7596781e96a91f5094ffb6643b5.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb630b7596781e96a91f5094ffb6643b5.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb630b7596781e96a91f5094ffb6643b5.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNb630b7596781e96a91f5094ffb6643b5.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/b4708201-4060-4d8e-bb36-60b43e6f6d81"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbe4621f03a6f9ca382ab1d61845e1b41.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/99941a73-ea45-817d-c8b3-4f6aa7b34545"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbe4621f03a6f9ca382ab1d61845e1b41.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/72842aee-00e9-92e9-9524-f1babc942935"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbe4621f03a6f9ca382ab1d61845e1b41.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbe4621f03a6f9ca382ab1d61845e1b41.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbe4621f03a6f9ca382ab1d61845e1b41.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNbe4621f03a6f9ca382ab1d61845e1b41.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/72842aee-00e9-92e9-9524-f1babc942935"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd1080067ea08e51f7a1470fc823b3720.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/c38bc966-bc64-d8c5-2402-cbb1e2f4863a"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd1080067ea08e51f7a1470fc823b3720.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/04d74d47-1b1c-986e-bbd6-1c720a4de39c"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd1080067ea08e51f7a1470fc823b3720.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd1080067ea08e51f7a1470fc823b3720.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd1080067ea08e51f7a1470fc823b3720.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNd1080067ea08e51f7a1470fc823b3720.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/04d74d47-1b1c-986e-bbd6-1c720a4de39c"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8881d03460272e96bf2cb7e02253444c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d9d722ba-5e8b-3985-4146-8bf37d4b597a"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8881d03460272e96bf2cb7e02253444c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/57e00eda-fe5b-57a0-190a-e138aa169c6f"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8881d03460272e96bf2cb7e02253444c.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8881d03460272e96bf2cb7e02253444c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8881d03460272e96bf2cb7e02253444c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8881d03460272e96bf2cb7e02253444c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/57e00eda-fe5b-57a0-190a-e138aa169c6f"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN79e68a648f4d34bba3ff23d9115baaaf.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/7115fa79-bbb8-44db-7e1e-7e4aa318f337"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN79e68a648f4d34bba3ff23d9115baaaf.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/1c13a22d-62e5-a400-aef6-01f5071ff0d8"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN79e68a648f4d34bba3ff23d9115baaaf.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN79e68a648f4d34bba3ff23d9115baaaf.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN79e68a648f4d34bba3ff23d9115baaaf.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN79e68a648f4d34bba3ff23d9115baaaf.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/1c13a22d-62e5-a400-aef6-01f5071ff0d8"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN082302278cc0624478cf63ce530f6b54.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/4aa27a31-0a2d-993e-0c79-33af8a7ec4d8"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN082302278cc0624478cf63ce530f6b54.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ded17f49-d629-148e-90cb-8cfa220e4853"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN082302278cc0624478cf63ce530f6b54.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN082302278cc0624478cf63ce530f6b54.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN082302278cc0624478cf63ce530f6b54.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN082302278cc0624478cf63ce530f6b54.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ded17f49-d629-148e-90cb-8cfa220e4853"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f71e9087ee1c6bdad24b8a56282273b.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/f26303d9-137e-8741-a1ec-07d3dbc3fabb"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f71e9087ee1c6bdad24b8a56282273b.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/4becbcc6-51dd-8efd-dc3e-71d7b580f4ca"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f71e9087ee1c6bdad24b8a56282273b.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f71e9087ee1c6bdad24b8a56282273b.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f71e9087ee1c6bdad24b8a56282273b.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7f71e9087ee1c6bdad24b8a56282273b.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/4becbcc6-51dd-8efd-dc3e-71d7b580f4ca"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8eca4e601b8d10c5c3097534d4504c99.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/3bdb7dfc-7469-edde-21d5-54e3fbb65ad9"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8eca4e601b8d10c5c3097534d4504c99.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f0ddb0c5-5aba-aab2-797a-9fc808c635bf"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8eca4e601b8d10c5c3097534d4504c99.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8eca4e601b8d10c5c3097534d4504c99.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8eca4e601b8d10c5c3097534d4504c99.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN8eca4e601b8d10c5c3097534d4504c99.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/f0ddb0c5-5aba-aab2-797a-9fc808c635bf"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN54977c8da821edf105516c78dd59ec38.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/b5346a8f-34b8-a7c7-bfd9-bbba5e578e97"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN54977c8da821edf105516c78dd59ec38.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/3ca36944-d92a-d585-1409-c97668cb91b1"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN54977c8da821edf105516c78dd59ec38.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN54977c8da821edf105516c78dd59ec38.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN54977c8da821edf105516c78dd59ec38.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN54977c8da821edf105516c78dd59ec38.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/3ca36944-d92a-d585-1409-c97668cb91b1"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6c031e50-771f-71cb-3fad-e945253fd958"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/24f1fa0d-4888-6751-0dcb-7393bd5e6df4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/24f1fa0d-4888-6751-0dcb-7393bd5e6df4"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6c031e50-771f-71cb-3fad-e945253fd958"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6c031e50-771f-71cb-3fad-e945253fd958"
+    },
+    {
+      "method": "PATCH",
+      "path": "/assistant/6c031e50-771f-71cb-3fad-e945253fd958"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6c031e50-771f-71cb-3fad-e945253fd958"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN78f73a2cadf7888298daebad77190745.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/24f1fa0d-4888-6751-0dcb-7393bd5e6df4"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0181fb820c08ae9129705a7802bad5e2.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/7f2785e2-3221-911c-3880-96b9628c82ce"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0181fb820c08ae9129705a7802bad5e2.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a9dd5bf9-03c1-6a24-355e-1898c8538843"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0181fb820c08ae9129705a7802bad5e2.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0181fb820c08ae9129705a7802bad5e2.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0181fb820c08ae9129705a7802bad5e2.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0181fb820c08ae9129705a7802bad5e2.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a9dd5bf9-03c1-6a24-355e-1898c8538843"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/405e6912-9373-690f-8a0c-547bcc332531"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/856a6326-6a14-ff7d-1b19-093698317ace"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/856a6326-6a14-ff7d-1b19-093698317ace"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNeacc3b63637208273b17a28173b8e681.json"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5f8ab5de72a8a01b453f11b48605178f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/311e754c-0a20-8cc9-5af1-5896388d03ac"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5f8ab5de72a8a01b453f11b48605178f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/42e12cf6-d5b3-7211-c2d0-3fe3754614ef"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5f8ab5de72a8a01b453f11b48605178f.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5f8ab5de72a8a01b453f11b48605178f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5f8ab5de72a8a01b453f11b48605178f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5f8ab5de72a8a01b453f11b48605178f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/42e12cf6-d5b3-7211-c2d0-3fe3754614ef"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d32d1c41-4d34-365a-4833-b6c297f25537"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/d1916a7f-54fc-244d-110d-b9beadb68e66"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/d1916a7f-54fc-244d-110d-b9beadb68e66"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14572d7e455fe52c26b1f5fc39934a9c.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/d1916a7f-54fc-244d-110d-b9beadb68e66"
+    },
+    {
+      "method": "DELETE",
+      "path": "/phone-number/d1916a7f-54fc-244d-110d-b9beadb68e66"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/d1916a7f-54fc-244d-110d-b9beadb68e66"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d32d1c41-4d34-365a-4833-b6c297f25537"
+    },
+    {
+      "method": "DELETE",
+      "path": "/assistant/d32d1c41-4d34-365a-4833-b6c297f25537"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d32d1c41-4d34-365a-4833-b6c297f25537"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/9302c121-de2b-2638-8b60-c87361959d9b"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/6f6c2348-b2e9-c5be-6a48-8577e16fe090"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/6f6c2348-b2e9-c5be-6a48-8577e16fe090"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN66513d4e89ed763c350b49b3246dcd1a.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/6f6c2348-b2e9-c5be-6a48-8577e16fe090"
+    },
+    {
+      "method": "DELETE",
+      "path": "/phone-number/6f6c2348-b2e9-c5be-6a48-8577e16fe090"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/6f6c2348-b2e9-c5be-6a48-8577e16fe090"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/9302c121-de2b-2638-8b60-c87361959d9b"
+    },
+    {
+      "method": "DELETE",
+      "path": "/assistant/9302c121-de2b-2638-8b60-c87361959d9b"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/9302c121-de2b-2638-8b60-c87361959d9b"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d6d634d6-19db-78bf-aa24-bc0357e208fd"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a1cfaccf-6c39-a34f-665c-f76d9b13f2f4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a1cfaccf-6c39-a34f-665c-f76d9b13f2f4"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/d6d634d6-19db-78bf-aa24-bc0357e208fd"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNffe32aab8081e29c9b94c2ec9576c2fe.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a1cfaccf-6c39-a34f-665c-f76d9b13f2f4"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/70ced39e-0980-fa2b-314d-3c34bd834719"
+    },
+    {
+      "method": "DELETE",
+      "path": "/assistant/70ced39e-0980-fa2b-314d-3c34bd834719"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/70ced39e-0980-fa2b-314d-3c34bd834719"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3cac0c6d20053a20ed5c00c9dfcf28d4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/9c90358d-63f4-5cb4-0451-d5b0c10b73b2"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3cac0c6d20053a20ed5c00c9dfcf28d4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/dacef6d9-a29e-2876-3d98-03c7e0f1c3ec"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3cac0c6d20053a20ed5c00c9dfcf28d4.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3cac0c6d20053a20ed5c00c9dfcf28d4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3cac0c6d20053a20ed5c00c9dfcf28d4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3cac0c6d20053a20ed5c00c9dfcf28d4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/dacef6d9-a29e-2876-3d98-03c7e0f1c3ec"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0b5329f02501e6b59a1ef66fb35f02c4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/f1f71baa-172c-d192-c8de-1a420872f564"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0b5329f02501e6b59a1ef66fb35f02c4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/af58b434-d497-d86c-2ffe-432c8054cdc7"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0b5329f02501e6b59a1ef66fb35f02c4.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0b5329f02501e6b59a1ef66fb35f02c4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0b5329f02501e6b59a1ef66fb35f02c4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN0b5329f02501e6b59a1ef66fb35f02c4.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/af58b434-d497-d86c-2ffe-432c8054cdc7"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/31eabd37-09ab-0414-1f4a-310257e8e271"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/cb7a6f45-c973-eaa0-f8a4-b8453687c894"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/cb7a6f45-c973-eaa0-f8a4-b8453687c894"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/a4ae71d1-98c5-b263-fe41-b3d3478c23a0"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/8e309bc3-4f01-c6cc-a86c-d5fde88edd35"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/8e309bc3-4f01-c6cc-a86c-d5fde88edd35"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6b9f7620-6a0f-ecd9-3840-b088180377a3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/3960235e-efc5-5564-1341-f207107b0dea"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/3960235e-efc5-5564-1341-f207107b0dea"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/31eabd37-09ab-0414-1f4a-310257e8e271"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN14bbaaa01c10867fcec0003ea1d74653.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/cb7a6f45-c973-eaa0-f8a4-b8453687c894"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/a4ae71d1-98c5-b263-fe41-b3d3478c23a0"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN5a1699be3c31d913d3beb065ff15228f.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/8e309bc3-4f01-c6cc-a86c-d5fde88edd35"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/6b9f7620-6a0f-ecd9-3840-b088180377a3"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNc041614edbcb37063b5ae1ea64b93242.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/3960235e-efc5-5564-1341-f207107b0dea"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN381d0a3d690623e7c90d3b0035b80896.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/8e34c463-dc5a-cf82-66df-ef50c36d4c62"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN381d0a3d690623e7c90d3b0035b80896.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/84baa257-63b6-9a78-6030-c6f477bb626e"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN381d0a3d690623e7c90d3b0035b80896.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN381d0a3d690623e7c90d3b0035b80896.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN381d0a3d690623e7c90d3b0035b80896.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN381d0a3d690623e7c90d3b0035b80896.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/84baa257-63b6-9a78-6030-c6f477bb626e"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/1d455228-a26e-dcd0-27f9-c304e3af3607"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/c71899ea-e318-4eb0-d1a5-7b73e8daa939"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/c71899ea-e318-4eb0-d1a5-7b73e8daa939"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/1d455228-a26e-dcd0-27f9-c304e3af3607"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN7334c55e0ccf5b56e7cbc6c41254c9dd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/c71899ea-e318-4eb0-d1a5-7b73e8daa939"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/22d70dce-94a6-01b4-c099-238c7cce5be2"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/455048b8-ddfb-1040-2a7e-f75f4885d2c5"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/455048b8-ddfb-1040-2a7e-f75f4885d2c5"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/22d70dce-94a6-01b4-c099-238c7cce5be2"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN926f75a5a9a63340bc49b03d71d57956.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/455048b8-ddfb-1040-2a7e-f75f4885d2c5"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3e0ad2a65580995b174fddfbd76d05cd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/b15824d0-9523-39dd-78ff-57de7439d44d"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3e0ad2a65580995b174fddfbd76d05cd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a2ad6c44-2697-4219-7d18-3635e43312b4"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3e0ad2a65580995b174fddfbd76d05cd.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3e0ad2a65580995b174fddfbd76d05cd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3e0ad2a65580995b174fddfbd76d05cd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PN3e0ad2a65580995b174fddfbd76d05cd.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/a2ad6c44-2697-4219-7d18-3635e43312b4"
+    },
+    {
+      "method": "POST",
+      "path": "/assistant"
+    },
+    {
+      "method": "POST",
+      "path": "/phone-number"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNdb1bdad236ed5370921318ec666d353d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/eb8dc1d4-3102-1488-9d6c-32b3f5f084d5"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNdb1bdad236ed5370921318ec666d353d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ed95f077-aacd-6a86-d006-347dca94c4ab"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNdb1bdad236ed5370921318ec666d353d.json"
+    },
+    {
+      "method": "POST",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNdb1bdad236ed5370921318ec666d353d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNdb1bdad236ed5370921318ec666d353d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/2010-04-01/Accounts/AC11111111111111111111111111111111/IncomingPhoneNumbers/PNdb1bdad236ed5370921318ec666d353d.json"
+    },
+    {
+      "method": "GET",
+      "path": "/phone-number/ed95f077-aacd-6a86-d006-347dca94c4ab"
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/voice-activation.mjs": "1fd9cb6bceb2658fa4c5c08ed27c0bf874fb8181323327d8c7870dfe66c4e537",
+    "netlify/functions/lib/voice-provider.mjs": "0d564a5f11141b015f3db4034fe999ca57eb80121c910e570c760f8cbc28e4f1",
+    "netlify/functions/managed-voice.mjs": "323c3377f9798176c315d025b2fd458b064da539058151657f3d0c316c4fceac",
+    "netlify/functions/managed-vapi.mjs": "117dc3de50aa8d1c94b1741eae96b09e81de0f2e62e0fffed59f99acbfdd513a",
+    "netlify/functions/voice-activation-background.mjs": "25edd55f7189c5c0f01044dc72fb67c438b9054807b183ade499369609703165",
+    "netlify/functions/voice-activation-scheduler.mjs": "67095d0b7a91ca928a71ebcd08ff5bdecfac68a38818e237aed830ec610c3f1e"
+  },
+  "sourceStable": true,
+  "ok": false,
+  "passed": 66,
+  "total": 72
+}

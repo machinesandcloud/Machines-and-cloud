@@ -49,7 +49,7 @@ export function voiceActivationView(row, c) {
   const state = !current && row.state === "ready" ? "needs_review" : active ? "active" : row.state;
   const detail = ({ queued: "Your phone request is saved. Setup will continue automatically when phone service is available.", waiting_platform: "Your approval is saved. Phone service is not available yet; calls are not active.", waiting_number: "Your phone setup is waiting for the reserved number.", creating_assistant: "Preparing your phone assistant from your reviewed business rules.", importing_number: "Connecting your reserved number to the phone assistant.", configuring_routing: "Checking call routing and the fallback destination.", uncertain: "A provider response is being checked. Setup will not create another resource blindly.", needs_review: "Phone answering is stopped until your current business rules and setup can be confirmed.", suspended: "AI phone answering is stopped. Your recorded resources are retained.", cleanup_pending: "Phone cancellation is saved. Recorded resources are waiting for confirmed cleanup.", cleanup_uncertain: "Phone answering is stopped. Provider cleanup is being checked; resource receipts are retained.", cancelled: "AI phone answering is cancelled. Resource receipts are retained for confirmed cleanup.", ready: forwarded ? "The route is connected. Place a short test call to confirm phone answering." : "The route is connected. Forward your business line, then place a short test call to confirm it.", active: "Phone answering has a verified call and current business rules.", failed: "Phone setup needs attention. Recorded resources are retained." })[state] || "Phone setup is being checked.";
   return { id: row.id, state, active, ready: current && row.state === "ready" && row.routing?.confirmed === true, detail, reasonCode: stageReason(row), number: row.number?.number || null, forwardingMode: row.forwardingMode,
-    createdAt: row.createdAt, updatedAt: row.updatedAt, resourceRecorded: !!(row.assistant?.id || row.imported?.id), evidence: { inboundAt: evidence.inboundAt || null, forwardedAt: evidence.forwardedAt || null, successfulCallAt: evidence.successfulCallAt || null, fallbackConfigured: row.routing?.fallbackConfigured === true, fallbackObservedAt: evidence.fallbackObservedAt || null, fallbackAnsweredAt: evidence.fallbackAnsweredAt || null, lastFailureAt: evidence.lastFailureAt || null } };
+    createdAt: row.createdAt, updatedAt: row.updatedAt, resourceRecorded: !!(row.assistant?.id || row.imported?.id), evidence: { inboundAt: evidence.inboundAt || null, forwardedAt: evidence.forwardedAt || null, successfulCallAt: evidence.successfulCallAt || null, fallbackConfigured: row.routing?.fallbackConfigured === true, fallbackObservedAt: evidence.fallbackObservedAt || null, fallbackAnsweredAt: evidence.fallbackAnsweredAt || null, fallbackDialStatus: evidence.fallbackDialStatus || null, fallbackDialAt: evidence.fallbackDialAt || null, lastFailureAt: evidence.lastFailureAt || null } };
 }
 function reviewed(c) { const rev = configurationRevision(c); return c.build?.status === "built" && c.setupProof?.reviewedRevision === rev && c.setupProof?.testedRevision === rev && c.setupProof?.testMode === "live"; }
 async function ownerCurrent(c, body) {
@@ -327,12 +327,25 @@ async function callbackRow(token) {
   const row = await strictRead(STORE, ref.id); return row && row.callbackToken === token && row.tenantIdentity === ref.tenantIdentity ? row : null;
 }
 async function serving(row) {
-  const c = await strictRead("clients", row.slug), gate = productionPolicy();
+  const c = await strictRead("clients", row.slug);
   const parent = c && row.number ? await getPhoneResourceLifecycle(c) : null;
-  const valid = c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && configurationRevision(c) === row.inputRevision && life(c) === row.lifecycle && ["testing", "live"].includes(c.status) && reviewed(c) && validNumber(c.owner?.phone) && gate.enabled && digest(gate.policy) === row.policyDigest && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000 && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id && !(await strictRead("health", "brake"))?.on;
-  return { c, valid: !!valid };
+  const brake = await strictRead("health", "brake"), gate = productionPolicy();
+  const owned = c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && configurationRevision(c) === row.inputRevision && validNumber(c.owner?.phone) && gate.enabled && row.policy && digest(row.policy) === row.policyDigest && digest(gate.policy) === row.policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id && !brake?.on;
+  const valid = owned && life(c) === row.lifecycle && ["testing", "live"].includes(c.status) && reviewed(c) && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000;
+  // Pausing/detaching AI does not revoke an unchanged, approved owner route.
+  // Workspace/number cancellation, changed configuration or the account stop do.
+  const fallbackAllowed = owned && ["testing", "live", "paused"].includes(c.status) && row.authority?.acceptedAuthority === true && row.authority.policyDigest === row.policyDigest && normalizeAccountEmail(row.authority.actor?.email) === normalizeAccountEmail(c.owner?.email);
+  return { c, valid: !!valid, fallbackAllowed: !!fallbackAllowed };
 }
-function fallback(c, row) { const cell = safeFallback(c || {}); return cell && cell !== row.number?.number ? `<Dial timeout="25" action="${esc(siteUrl() + "/api/managed-voice?o=" + row.callbackToken + "&kind=dial-status")}" method="POST">${esc(cell)}</Dial><Say>Nobody is available. Please call back during business hours.</Say><Hangup/>` : "<Say>Nobody is available on this line. Please call back during business hours.</Say><Hangup/>"; }
+const unavailable = () => "<Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/>";
+const safeCaller = (c, row, from) => validNumber(from) && from !== row.number?.number && from !== c?.phone?.businessNumber;
+const currentCall = (call, row, params) => call && call.operationId === row.id && call.generation === row.generation && call.number === params.To && call.from === params.From;
+function fallback(c, row, from, allowed, timeLimit, forwardedFrom = []) {
+  const cell = allowed && safeCaller(c, row, from) ? safeFallback(c || {}) : null;
+  // An action takes control of the original call; trailing verbs cannot play.
+  // Its response below handles unsuccessful outcomes without dialing again.
+  return cell && cell !== row.number?.number && cell !== from && Number.isInteger(timeLimit) && timeLimit >= 1 && timeLimit <= row.policy.maxDurationSeconds && !forwardedFrom.some(number => number && (number === cell || number === row.number?.number)) ? `<Dial timeout="25" timeLimit="${timeLimit}" action="${esc(siteUrl() + "/api/managed-voice?o=" + row.callbackToken + "&kind=dial-status")}" method="POST">${esc(cell)}</Dial>` : unavailable();
+}
 export async function handleManagedVoiceWebhook(req) {
   if (req.method !== "POST") return json({ error: "method" }, 405);
   const url = new URL(req.url), publicUrl = siteUrl() + url.pathname + url.search;
@@ -343,13 +356,15 @@ export async function handleManagedVoiceWebhook(req) {
   if (!twilioValid(publicUrl, params, req.headers.get("x-twilio-signature"))) return json({ error: "forbidden" }, 403);
   const row = await callbackRow(url.searchParams.get("o"));
   if (!row || params.AccountSid !== process.env.TWILIO_ACCOUNT_SID || !/^CA[a-f0-9]{32}$/i.test(params.CallSid || "") || params.To !== row.number?.number) return json({ error: "call_mismatch" }, 403);
-  const { c, valid } = await serving(row), kind = url.searchParams.get("kind"), callKey = row.slug + "/" + params.CallSid;
+  const { c, valid, fallbackAllowed } = await serving(row), callKey = row.slug + "/" + params.CallSid;
+  let kind = url.searchParams.get("kind");
+  if (kind === "inbound" && !safeCaller(c, row, params.From)) return xml(unavailable());
+  if (kind === "inbound" && !valid) kind = "fallback";
   if (kind === "inbound") {
-    if (!valid || !validNumber(params.From) || params.From === row.number.number || params.From === c?.phone?.businessNumber) return xml(fallback(c, row));
     const forwardingMatches = row.forwardingMode === "forward_business_line" && validNumber(c.phone?.businessNumber) && params.ForwardedFrom === c.phone.businessNumber;
     const saved = await atomicUpdate(CALLS, callKey, previous => {
       if (previous && (previous.operationId !== row.id || previous.generation !== row.generation || previous.from !== params.From || previous.number !== params.To)) return { result: false };
-      return previous ? { result: true } : { value: { version: 1, slug: row.slug, operationId: row.id, generation: row.generation, inputRevision: row.inputRevision, lifecycle: row.lifecycle, twilioCallSid: params.CallSid, number: params.To, from: params.From, forwarded: forwardingMatches, createdAt: iso(), toolResults: {} }, result: true };
+      return previous ? { result: true } : { value: { version: 1, slug: row.slug, operationId: row.id, generation: row.generation, inputRevision: row.inputRevision, lifecycle: row.lifecycle, twilioCallSid: params.CallSid, number: params.To, from: params.From, forwardedFrom: validNumber(params.ForwardedFrom) ? params.ForwardedFrom : null, forwarded: forwardingMatches, createdAt: iso(), toolResults: {} }, result: true };
     });
     if (!saved) return json({ error: "call_mismatch" }, 403);
     await atomicUpdate("managed_voice_call_index", params.CallSid, prior => prior && prior.operationId !== row.id ? (() => { throw new Error("Voice call index conflict"); })() : { value: { operationId: row.id, slug: row.slug, generation: row.generation } });
@@ -357,16 +372,64 @@ export async function handleManagedVoiceWebhook(req) {
     return xml(`<Redirect method="POST">${esc(row.importedRoute.vapiUrl)}</Redirect>`);
   }
   let call = await strictRead(CALLS, callKey);
-  if (kind === "fallback" && !call) { call = { version: 1, slug: row.slug, operationId: row.id, generation: row.generation, number: params.To, from: params.From, twilioCallSid: params.CallSid, createdAt: iso(), fallbackOnly: true }; await atomicUpdate(CALLS, callKey, old => old ? {} : { value: call }); }
-  if (!call || call.operationId !== row.id || call.number !== params.To) return json({ error: "call_mismatch" }, 403);
-  if (kind === "fallback") { await change(row.id, old => ({ ...old, evidence: { ...old.evidence, fallbackObservedAt: iso(), lastFailureAt: iso() } })); return xml(fallback(c, row)); }
-  if (kind === "dial-status" && ["completed", "answered"].includes(params.DialCallStatus)) await change(row.id, old => ({ ...old, evidence: { ...old.evidence, fallbackAnsweredAt: iso() } }));
+  if (kind === "fallback" && (!fallbackAllowed || !safeCaller(c, row, params.From))) return xml(unavailable());
+  if (kind === "fallback" && !call) {
+    call = await atomicUpdate(CALLS, callKey, old => {
+      if (old) return { result: old };
+      const value = { version: 1, slug: row.slug, operationId: row.id, generation: row.generation, number: params.To, from: params.From, forwardedFrom: validNumber(params.ForwardedFrom) ? params.ForwardedFrom : null, twilioCallSid: params.CallSid, createdAt: iso(), fallbackOnly: true };
+      return { value, result: value };
+    });
+  }
+  if (!currentCall(call, row, params)) return json({ error: "call_mismatch" }, 403);
+  if (kind === "fallback") {
+    if (call.fallbackOutcome) return xml(call.fallbackOutcome.status === "completed" ? "<Hangup/>" : unavailable());
+    // Returning TwiML has an uncertain delivery boundary too. Once its one
+    // attempt is retained, do not return another paid Dial without a receipt.
+    if (call.fallbackAttempt) return xml(unavailable());
+    const knownForwarding = [params.ForwardedFrom, call.forwardedFrom], twiml = fallback(c, row, params.From, fallbackAllowed, row.policy.maxDurationSeconds, knownForwarding), dialing = twiml.startsWith("<Dial");
+    let admission = call.fallbackAdmission;
+    if (dialing && !admission) {
+      // A fallback is a distinct paid leg, not free use of an AI reservation.
+      // The existing ledger conservatively reserves the full connection limit
+      // plus 25 seconds ringing and Twilio's documented five-second buffer.
+      const admitted = await reserveVoiceBudget(row, params.CallSid, "fallback"), at = iso();
+      admission = await atomicUpdate(CALLS, callKey, old => {
+        if (!currentCall(old, row, params)) return { result: null };
+        if (old.fallbackAdmission) return { result: old.fallbackAdmission };
+        const value = { status: admitted ? "admitted" : "denied", reasonCode: admitted ? null : "fallback_budget_exhausted", at, expiresAt: new Date(Date.now() + (row.policy.maxDurationSeconds + 30) * 1000).toISOString() };
+        return { value: { ...old, fallbackAdmission: value }, result: value };
+      });
+    }
+    if (dialing && (admission?.status !== "admitted" || Date.parse(admission.expiresAt) <= Date.now())) return xml(unavailable());
+    const saved = await atomicUpdate(CALLS, callKey, old => currentCall(old, row, params) && !old.fallbackAttempt && !old.fallbackOutcome ? { value: { ...old, fallbackAttempt: { id: hash(row.id + ":" + params.CallSid + ":fallback"), at: iso(), destination: dialing ? safeFallback(c) : null } }, result: true } : { result: false });
+    if (!saved) return xml(unavailable());
+    await change(row.id, old => old.generation === row.generation && old.tenantIdentity === row.tenantIdentity ? { ...old, evidence: { ...old.evidence, fallbackObservedAt: iso(), lastFailureAt: iso() } } : null);
+    // Never route an old caller to a replacement owner's phone after a save.
+    const latest = await callbackRow(row.callbackToken), latestCall = await strictRead(CALLS, callKey), current = latest && await serving(latest);
+    const remaining = admission ? Math.min(row.policy.maxDurationSeconds, Math.floor((Date.parse(admission.expiresAt) - Date.now()) / 1000) - 30) : 0;
+    return xml(latest?.generation === row.generation && current?.fallbackAllowed && currentCall(latestCall, latest, params) && !latestCall.fallbackOutcome && (!dialing || remaining > 0) ? fallback(current.c, latest, params.From, true, remaining, [params.ForwardedFrom, latestCall.forwardedFrom]) : unavailable());
+  }
+  if (kind === "dial-status") {
+    if (!call.fallbackAttempt?.destination || params.DialCallSid && !/^CA[a-f0-9]{32}$/i.test(params.DialCallSid)) return json({ error: "call_mismatch" }, 403);
+    const reported = typeof params.DialCallStatus === "string" ? params.DialCallStatus.slice(0, 64) : null;
+    // This route dials a phone, not a conference. A connection is not human acceptance.
+    const status = ["completed", "busy", "no-answer", "failed", "canceled"].includes(reported) && !(reported === "completed" && (!params.DialCallSid || params.DialBridged === "false")) ? reported : "unknown";
+    const outcome = await atomicUpdate(CALLS, callKey, old => {
+      if (!currentCall(old, row, params) || !old.fallbackAttempt?.destination) return { result: null };
+      if (old.fallbackOutcome) return { result: old.fallbackOutcome.callSid && params.DialCallSid && old.fallbackOutcome.callSid !== params.DialCallSid ? null : old.fallbackOutcome };
+      const value = { status, reportedStatus: reported || null, callSid: params.DialCallSid || null, bridged: params.DialBridged === "true" ? true : params.DialBridged === "false" ? false : null, at: iso() };
+      return { value: { ...old, fallbackOutcome: value, twilioStatus: params.CallStatus || null, statusAt: iso() }, result: value };
+    });
+    if (!outcome) return json({ error: "call_mismatch" }, 403);
+    await change(row.id, old => old.generation === row.generation && old.tenantIdentity === row.tenantIdentity ? { ...old, evidence: { ...old.evidence, fallbackDialStatus: outcome.status, fallbackDialAt: outcome.at, ...(outcome.status === "completed" ? { fallbackAnsweredAt: outcome.at } : { lastFailureAt: outcome.at }) } } : null);
+    return xml(outcome.status === "completed" ? "<Hangup/>" : unavailable());
+  }
   await atomicUpdate(CALLS, callKey, old => old ? { value: { ...old, twilioStatus: params.CallStatus || params.DialCallStatus || null, statusAt: iso() } } : {});
-  return kind === "dial-status" ? xml("<Hangup/>") : json({ ok: true });
+  return json({ ok: true });
 }
 function callSid(message) { return message.call?.transport?.provider === "twilio" ? message.call.transport.callSid : message.call?.phoneCallProvider === "twilio" ? message.call.phoneCallProviderId : null; }
-async function reserveVoiceBudget(row, sid) {
-  const policy = row.policy, seconds = policy.maxDurationSeconds, key = hash(row.id + ":" + sid);
+async function reserveVoiceBudget(row, sid, purpose = "assistant") {
+  const policy = row.policy, seconds = policy.maxDurationSeconds + (purpose === "fallback" ? 30 : 0), key = hash(row.id + ":" + sid + (purpose === "fallback" ? ":fallback" : ""));
   async function reserve(scope, callsLimit, minutesLimit) {
     // Each Houston day has its own key. A delayed old-day request cannot reset
     // a newer day's counters, and an uncertain reservation is never refunded.

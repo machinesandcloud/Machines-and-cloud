@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "at": "2026-10-24T10:34:46.017473+00:00",
+  "stage": "independently_and_product_accepted_locally_pending_root_integration",
+  "baseCommit": "2d74d78648a056db3f64e587da0f2caf378a1864",
+  "sourceFreeze": "scratchpad/voice-fallback-freeze-v2.json",
+  "sourceFreezeSha256": "d96b5a4ca17fa6a635b42d58689f6f4eb83dce5d326e11458b279c824661ac1e",
+  "sourceId": "sha256:5a6cbe6458c08f4216a2f0c2d9f52665b3653af4d9fcfecb3aeee40bed5572e5",
+  "selectedCustomerJob": "An approved application fallback attempts the current safe owner route once; an unsuccessful attempt gives the original caller an honest spoken next step, instead of silently hanging up.",
+  "contract": {
+    "inboundIdentity": "Twilio-signed exact account, parent CallSid, managed To, current From, operation and generation; no arbitrary slug/path lookup. Original signed ForwardedFrom is retained; legitimate original AI/business forwarding is distinct from a fallback loop into its recorded source.",
+    "retainedFallback": "Active same policy and unchanged recorded configuration/owner authority/current tenant/retained number; stale AI, paused AI and voice-only detach may retain pass-through.",
+    "noPaidDial": [
+      "cancelled/archived/replaced workspace",
+      "cancelled/released parent number",
+      "changed owner configuration without matching accepted revision",
+      "global provider admission withdrawn",
+      "account brake",
+      "exhausted or unknown customer/account allowance",
+      "known shop/managed reentry or original caller is the destination"
+    ],
+    "cost": "Separate deterministic fallback key in existing account+tenant ledger; reserve policy maxDurationSeconds+30 for connection+25s ringing+5s provider buffer, with Dial timeLimit no greater than existing policy and reduced by elapsed admission time. Partial/uncertain reservations are never refunded. Retained policy content itself must hash to the bound active policy; missing/altered fields cannot reserve or emit a Dial.",
+    "replay": "CAS one-emission local attempt per parent; unknown response/outcome and terminal replay never emit another Dial. Local operation identity is not a remote child identity.",
+    "outcome": "Parent CallStatus and destination DialCallStatus/DialCallSid/DialBridged remain distinct; first destination receipt retained, mismatched known child rejected; phone completed is transport only, may be voicemail. fallbackAnsweredAt is its legacy alias, never human acknowledgment. Missing destination identity leaves reported completion unknown and plays recovery, without connection evidence.",
+    "spokenRecovery": "We could not connect you on this line. Please try calling the shop again during business hours.",
+    "notClaimed": [
+      "saved customer request",
+      "confirmed callback",
+      "notified owner",
+      "human acceptance or warm transfer",
+      "bilingual fallback quality",
+      "actual provider acceptance"
+    ]
+  },
+  "requiredCurrentInputs": [
+    "existing approved phone policy and owner authority",
+    "current workspace/owner phone configuration",
+    "retained acquired number and original callback binding",
+    "authenticated provider action receipt for any confirmed destination outcome"
+  ],
+  "engineering": {
+    "authorChecks": {
+      "passed": 82,
+      "total": 82,
+      "receipt": "scratchpad/voice-fallback-author-v2-final.json",
+      "qualifier": "Actual handlers/HTTP adapters; synthetic memory and installed Blobs SDK protocol fixtures; physical sockets denied."
+    },
+    "existingIndependentSuiteReplayedByAuthor": {
+      "passed": 8,
+      "total": 8,
+      "receipt": "scratchpad/voice-fallback-existing-regression-v2-final.json",
+      "qualifier": "Author replay of an existing independent suite; not fresh independent acceptance."
+    },
+    "preservedFailures": [
+      "scratchpad/voice-fallback-first-failures.json",
+      "scratchpad/voice-fallback-author-fixed-v2.json",
+      "scratchpad/voice-fallback-independent-v1-disposition.json"
+    ],
+    "fixtureCorrection": "The prior pause/resume scenario reused its paused parent CallSid for a later resumed call. Paused fallback is now durably retained; the resumed real call uses a fresh synthetic provider SID while preserving all original resource/lifecycle assertions. An old-generation call remains rejected. The original completed-action happy fixture now supplies its documented destination SID; the new missing-SID case asserts uncertainty/recovery instead of silently certifying a connection.",
+    "externalEffects": {
+      "actualProviderRequests": 0,
+      "calls": 0,
+      "texts": 0,
+      "emails": 0,
+      "modelRequests": 0,
+      "accountsOrKeysRead": 0,
+      "builds": 0
+    }
+  },
+  "independentQA": {
+    "state": "independently_accepted_locally",
+    "receipt": "scratchpad/voice-fallback-independent-acceptance-v2.json",
+    "checks": {
+      "passed": 18,
+      "total": 18,
+      "physicalNetworkRequests": 0,
+      "privateInputsRead": 0,
+      "browserCalls": 0,
+      "actualCalls": 0,
+      "sdkConditionalConflicts": 22
+    },
+    "exactRuntimeSha256": "1f19c26df7f909f53ae24e496ac3bcda1d0c64b4e96d3f10b015416aaf88bd96",
+    "scope": "Actual signed managed-voice entrypoint and ordinary activation/retained records with synthetic provider and installed Blobs SDK protocols. Reused author fixture primitives; independently designed assertions and interleavings. No fresh author tally is counted as independent.",
+    "limits": [
+      "No actual call/audio/carrier result or human acknowledgment accepted.",
+      "No saved request, owner notification or promised callback inferred from fallback transport.",
+      "Known equal-number/reentry fences do not prove arbitrary carrier forwarding graphs.",
+      "Full launch/provider acceptance remains open."
+    ]
+  },
+  "productOwner": {
+    "state": "accepted_locally_for_selected_caller_recovery_job",
+    "role": "product_owner_v2",
+    "at": "2026-10-24T10:47:17.439651+00:00",
+    "sourceId": "sha256:5a6cbe6458c08f4216a2f0c2d9f52665b3653af4d9fcfecb3aeee40bed5572e5",
+    "exactRuntimeSha256": "1f19c26df7f909f53ae24e496ac3bcda1d0c64b4e96d3f10b015416aaf88bd96",
+    "decision": "The approved current fallback can return one bounded safe-owner Dial, and its unsuccessful or uncertain destination action returns clear retry guidance instead of an unexplained hangup. This accepts the local handler outcome and retained meaning only.",
+    "observationBasis": "Independent inspection of frozen handler/serving/admission source, all115 manifest hashes and retained synthetic signed-handler response samples in the independent v2 receipt; no browser, call, audio, account or provider action by PO.",
+    "evidence": {
+      "independentReceipt": "scratchpad/voice-fallback-independent-acceptance-v2.json",
+      "independentReceiptSha256": "395c67e4df02c606d4dcf3c7f4cca970f0b3f5b5fda271952e6e82b20e9cc440",
+      "callerResponses": "callerResponseSamples: no-answer, unbridged/missing-child uncertainty, completed child/failed parent, preterminal replay, brake, owner-cell forwarding and altered policy.",
+      "sourceInventoryFiles": 115,
+      "allCurrentFilesMatchFreeze": true
+    },
+    "acceptedCustomerMeaning": [
+      "The no-answer and unknown responses give an actionable retry instruction without inventing a saved request, owner notification or promised callback. The response is supplied by the Dial action, not unreachable trailing speech.",
+      "A completed destination with its valid child SID is a provider transport result, which may be voicemail. It neither proves a person accepted the caller nor makes AI answering active; missing destination identity stays unknown.",
+      "The original caller, retained signed forwarding source, current owner/number/tenant/generation and approved policy remain bound. Known self/owner forwarding loops end with recovery; ordinary business-line forwarding remains allowed.",
+      "Unchanged approved fallback may survive paused/stale AI or voice-only detach. Workspace/number cancellation or replacement, changed approved facts, global provider admission withdrawal, account brake or unavailable allowance prevent a new paid Dial.",
+      "One CAS-retained local attempt and a distinct conservative fallback reservation bound retries and uncertain responses. The connection limit shrinks with elapsed admission time; uncertain capacity is retained, not refilled or treated as an invoice."
+    ],
+    "returnedFindings": "All three independent v1 root causes were re-exercised and resolved in v2; original failures and fixture dispositions remain retained.",
+    "limits": [
+      "Returned TwiML was inspected; actual caller playback, carrier acceptance, real call routing/fallback and outage recovery were not observed.",
+      "Known recorded-number fences do not prove arbitrary external carrier forwarding graphs. The new fixed recovery line is English; bilingual voice quality is not accepted here.",
+      "No full human transfer, human acknowledgment, saved callback request, dispatch or owner follow-through is supplied by this repair.",
+      "Conservative account/tenant admission is not exact paid usage, pricing entitlement or proof of provider-side idempotency.",
+      "No publication or full-platform launch acceptance. Phone, SMS, Calendar, billing and operational milestones retain their separate owners and proof requirements."
+    ],
+    "nextObservedOutcome": "Root integrates the exact accepted repair and current regression gate. A separately scoped, owner-authorized real call must establish caller audio, safe fallback destination/outcomes and recovery before phone delivery is accepted."
+  },
+  "remaining": [
+    "Root integration and full current required gate on a separate candidate; this record supplies no publication authority.",
+    "Separately scoped actual provider call/audio/fallback/routing recovery acceptance before any delivery claim.",
+    "Full human acknowledgment/transfer and saved-request follow-through remain separate whole-offer customer outcomes."
+  ],
+  "returnedDefects": [
+    {
+      "state": "independently_retested_and_resolved_v2",
+      "finding": "Signed owner-cell forwarding reentry could Dial that same cell; original signed marker now survives the later callback."
+    },
+    {
+      "state": "independently_retested_and_resolved_v2",
+      "finding": "Altered/missing retained duration could exceed approved policy or corrupt allowance with NaN; exact content binding now rejects before reservation."
+    },
+    {
+      "state": "independently_retested_and_resolved_v2",
+      "finding": "Missing child SID completion could promote connection evidence and suppress recovery; it is now an unknown outcome with retained raw status."
+    }
+  ]
+}
