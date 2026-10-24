@@ -4,7 +4,7 @@
   if (!slug || (!key && !ownerSession)) { document.body.dataset.workspaceState = 'recovery'; document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
   var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + (key ? '&k=' + encodeURIComponent(key) : '');
-  var portalGeneration = 0, leaving = false, chatController = null, cfgRevision = null, cfgEditRevision = null, cfgDirty = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
+  var portalGeneration = 0, loadSequence = 0, loadPending = null, reviewBusy = false, leaving = false, chatController = null, cfgRevision = null, cfgEditRevision = null, cfgDirty = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
   var preferenceBaseline=[],preferenceDirty=false,preferenceBusy=false;
   var $ = function (id) { return document.getElementById(id); };
   function ownerHeaders() { var headers = { 'Content-Type': 'application/json' }; if (ownerSession) headers.Authorization = 'Bearer ' + ownerSession; return headers; }
@@ -24,7 +24,7 @@
     leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; if (chatController) chatController.abort(); availabilityReset();
     websitePrivateClear();
     preferenceBaseline=[];preferenceDirty=false;preferenceBusy=false;
-    cfgBaseline = null; cfgRevision = null; cfgEditRevision = null; cfgConflict = null; cfgDirty = false; cfgBusy = false; cfgClosed = true;
+    cfgBaseline = null; cfgRevision = null; cfgEditRevision = null; cfgConflict = null; cfgDirty = false; cfgBusy = false; reviewBusy = false; cfgClosed = true;
     acctBaseline = null; acctRevision = null; acctEditRevision = null; acctConflict = null; acctDirty = false; acctBusy = false;
     try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); } catch (error) { /* Private content is still cleared. */ }
     closeTour(false, false);
@@ -367,7 +367,8 @@
     var check=websiteCurrentCheck(),checkURL=check&&websiteCheckLink(check),open=$('websiteInstallOpen');open.hidden=!checkURL;open.textContent='Open website check';open.removeAttribute('href');if(checkURL)open.href=checkURL;
     if(action==='save_website')primary.textContent='Add website';
   }
-  async function websiteRead(){var generation=portalGeneration,previous=data;await load();if(leaving||generation!==portalGeneration)return;if(data===previous)throw new Error('The latest website status could not be confirmed. Please check again.');}
+  async function latestWorkspaceRead(){var pending=load();for(;;){await pending;if(pending===loadPending)return;pending=loadPending;}}
+  async function websiteRead(){var generation=portalGeneration,previous=data;await latestWorkspaceRead();if(leaving||generation!==portalGeneration)return;if(data===previous)throw new Error('The latest website status could not be confirmed. Please check again.');}
   function websiteHandleError(error){if(error.code==='configuration_changed')websiteConflict=true;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}websiteMessage((error.message||'We could not confirm this step.')+' Your saved details are kept.',true);if(error.field==='business.website'||error.fieldErrors?.['business.website']){websiteEditing=true;$('websiteInstallEdit').hidden=false;$('websiteInstallWebsiteError').textContent=error.fieldErrors?.['business.website']||error.message;$('websiteInstallWebsite').setAttribute('aria-invalid','true');$('websiteInstallWebsite').focus();}}
   async function websiteChange(task){if(websiteBusy||leaving)return;var generation=portalGeneration;websiteBusy=true;renderWebsiteInstallation(data);cfgChanged();acctStatus();try{await task(generation);}catch(error){if(generation===portalGeneration&&!leaving)websiteHandleError(error);}finally{if(generation===portalGeneration&&!leaving){websiteBusy=false;renderWebsiteInstallation(data);cfgChanged();acctStatus();}}}
   function websiteNeedSavedRules(){if(cfgDirty||cfgBusy||acctBusy){websiteMessage('Save your business edits before changing your website setup.',true);routeTo('know');$('saveCfg').focus();return true;}return false;}
@@ -404,6 +405,11 @@
     if(next){guide.dataset.needed='true';$('guideTitle').textContent=next.title;$('guideIntro').textContent=next.detail;button.hidden=!next.tab;button.textContent=next.label||'';button.dataset.route=next.tab||'';if(next.anchor)button.dataset.anchor=next.anchor;}
     syncNextActionVisibility();
   }
+  function reviewState(d) {
+    if(!d||!d.setup)return;
+    $('reviewRules').disabled=leaving||reviewBusy||websiteBusy||cfgDirty||cfgBusy||acctBusy||cfgClosed||['cancelled','archived'].includes(d.client.status);
+    $('reviewMessage').textContent=reviewBusy?'Saving your review…':websiteBusy?'Wait for your website setup to finish updating.':cfgDirty||cfgBusy||acctBusy?'Save your edits before reviewing this version.':d.client.setupProof?.reviewedRevision===d.setup.revision?'Review saved for the current version.':'';
+  }
   function renderSetup(d) {
     renderWorkspaceOperations(d);
     renderPhoneActivation(d);
@@ -435,12 +441,10 @@
     $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Front desk paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
     $('status').className = 'st' + (operational ? ' live' : '');
     renderHomeNext(d);
-    var revision = setup.revision, proof = client.setupProof || {};
     $('setupSteps').replaceChildren();$('setupSteps').hidden=true;
-    $('reviewRules').disabled = cfgDirty || cfgBusy || client.status === 'cancelled';
+    reviewState(d);
     $('aiAllowance').textContent = allowance ? 'AI replies left today: ' + allowance.private.remaining + ' practice · ' + allowance.web.remaining + ' customer chat. Resets at midnight Houston time.' + (allowance.reconciliation ? ' ' + allowance.reconciliation : '') : '';
     if (limited) { var activate = $('golive') || $('resume'); if (activate) activate.disabled = true; }
-    $('reviewMessage').textContent = cfgDirty ? 'Save your changes before reviewing.' : proof.reviewedRevision === revision ? 'Review saved for the current version.' : '';
     $('checklist').innerHTML = setup.steps.map(function (step) { return '<div class="check"><span class="dot ' + (step.status === 'done' ? 'ok' : 'wait') + '"></span><div><strong>' + esc(step.label) + '</strong><p class="muted">' + esc(step.detail) + '</p></div></div>'; }).join('');
     $('numberText').textContent = 'No phone number has been purchased or connected for this workspace.';
     $('fwd').textContent = 'Call forwarding is not active. Keep your existing business phone setup.';
@@ -478,10 +482,12 @@
     } catch (error) { if (!leaving&&generation===portalGeneration){if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}$('connectionsMessage').textContent='Your preferences could not be confirmed. Your choices are kept; check saved status before trying again.';} }
     finally { if (!leaving&&generation===portalGeneration){preferenceBusy=false;preferenceState();} }
   });
-  $('reviewRules').addEventListener('click', function () {
-    if (!data || !data.setup || cfgDirty || cfgBusy) return;
-    $('reviewRules').disabled = true; $('reviewMessage').textContent = 'Saving your review…';
-    action('review_rules', { revision: data.setup.revision }).then(function () { return load(); }).catch(function (error) { $('reviewMessage').textContent = error.message; $('reviewRules').disabled = false; });
+  $('reviewRules').addEventListener('click', async function () {
+    if (!data || !data.setup || leaving || reviewBusy || websiteBusy || cfgDirty || cfgBusy || acctBusy || cfgClosed || ['cancelled','archived'].includes(data.client.status)) return;
+    var generation=portalGeneration,errorMessage=null;reviewBusy=true;cfgFence++;reviewState(data);
+    try{await action('review_rules',{revision:data.setup.revision});if(leaving||generation!==portalGeneration)return;cfgFence++;await latestWorkspaceRead();}
+    catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}errorMessage=error.message;}
+    finally{if(!leaving&&generation===portalGeneration){reviewBusy=false;reviewState(data);if(errorMessage)$('reviewMessage').textContent=errorMessage;}}
   });
   $('copySnippet').addEventListener('click', function () { websiteCopy(false); });
   var tour = [
@@ -690,9 +696,9 @@
   });
 
   function load(snapshot) {
-    var generation = portalGeneration, fence = cfgFence;
-    return (snapshot && snapshot.client ? Promise.resolve(snapshot) : apiRequest()).then(function (d) {
-      if (generation !== portalGeneration || fence !== cfgFence || leaving) return;
+    var generation = portalGeneration, fence = cfgFence, sequence = ++loadSequence;
+    loadPending = (snapshot && snapshot.client ? Promise.resolve(snapshot) : apiRequest()).then(function (d) {
+      if (generation !== portalGeneration || fence !== cfgFence || sequence !== loadSequence || leaving) return;
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
       $('portalRecovery').hidden = true; $('portalContent').hidden = false; document.body.dataset.workspaceState = 'ready'; $('deskRail').hidden = false;
       data = d; var c = d.client;
@@ -772,10 +778,11 @@
       $('liveEvents').innerHTML = (d.events || []).length ? d.events.slice(0, 8).map(function (e) { return '<div>' + esc((e.at || '').slice(5, 16).replace('T', ' ')) + ' ' + esc(e.type) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') : 'No service activity yet. Practice conversations stay separate.';
       renderSetup(d); renderAccount(d);
     }).catch(function (error) {
-      if (generation !== portalGeneration || leaving) return;
+      if (generation !== portalGeneration || fence !== cfgFence || sequence !== loadSequence || leaving) return;
       if (error.status === 401 || error.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
       if (fence === cfgFence) recover(error.name === 'AbortError' ? 'Loading timed out. Try again or sign in by email.' : error.message);
     });
+    return loadPending;
   }
   function action(a, extra) { return apiRequest('POST', Object.assign({ action: a }, extra || {})); }
   function confirmAction(name, message) { return action(name).then(function () { toast(message); return load(); }).catch(function (error) { $('setupMessage').textContent = error.message; toast(error.message); }); }
@@ -840,7 +847,7 @@
   }
   function cfgChanged() {
     if(!cfgBaseline||leaving)return;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;
-    if(data&&data.setup){$('reviewRules').disabled=cfgDirty||cfgBusy||data.client.status==='cancelled';$('reviewMessage').textContent=cfgDirty||cfgBusy?'Save your edits before reviewing this version.':'';}
+    reviewState(data);
     renderHomeNext(data);
     if(cfgClosed)cfgStatus('error','This workspace no longer accepts business edits. Your typed changes are kept on this page.');else if(cfgBusy)cfgStatus('saving','Saving the submitted changes. Any newer edits will stay here.');else if(cfgConflict)cfgStatus('conflict','Your edits are kept. Review the latest saved version before saving again.');else cfgStatus(cfgDirty?'dirty':cfgIncomplete(data&&data.setup)?'incomplete':'saved',cfgDirty?'You have unsaved changes.':cfgSavedMessage(data&&data.setup));
   }
@@ -854,7 +861,7 @@
       var current=cfgRead(),preserve={};Object.keys(current).forEach(function(name){if(current[name]!==snapshot[name])preserve[name]=current[name];});var saved=cfgFromClient(result.client);cfgFill(saved,preserve);cfgBaseline=saved;cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;cfgFence++;data.client=result.client;if(result.setup)data.setup=result.setup;if(result.configurationRevision)data.configurationRevision=result.configurationRevision;if(result.editRevision)data.editRevision=result.editRevision;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgConflict=null;$('cfgConflictPanel').hidden=true;renderSetup(data);if(!leaving)document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));
       acctObserve(result,true);cfgBusy=false;cfgStatus(cfgDirty?'dirty':cfgIncomplete(result.setup)?'incomplete':'saved',cfgDirty?'Submitted changes saved. Your newer edits are still unsaved.':cfgSavedMessage(result.setup));
     }catch(error){if(leaving||generation!==portalGeneration)return;cfgBusy=false;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}if(error.code==='configuration_changed'){cfgConflict={latest:null};$('cfgConflictPanel').hidden=false;$('cfgKeepEdits').hidden=true;cfgStatus('conflict','Your saved details changed elsewhere. Your edits are kept; check the latest version.');}else{if(error.code==='workspace_closed')cfgClosed=true;cfgStatus('error',(error.message||'The save could not be confirmed.')+' Your edits are still here.');var fieldErrors=Object.assign({},error.fieldErrors||{});if(error.field&&!Object.keys(fieldErrors).length)fieldErrors[error.field]=error.message;var present=cfgRead();Object.keys(fieldErrors).forEach(function(name){var field=cfgField(name),grouped=name.indexOf('rules.hours')===0?'rules.hours':field&&field.name||name;if(present[grouped]!==snapshot[grouped])delete fieldErrors[name];});if(Object.keys(fieldErrors).length)cfgShowErrors(fieldErrors);}}
-    finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;if(data&&data.setup)$('reviewRules').disabled=cfgDirty||data.client.status==='cancelled';acctStatus();}}
+    finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;reviewState(data);acctStatus();}}
   }
   function cfgLabel(name) {var field=cfgField(name),label=field&&field.closest('.form-group')&&field.closest('.form-group').querySelector('label');return name==='rules.hours'?'Weekly hours':label?label.textContent.trim():name==='faq'?'Customer questions':name;}
   function cfgDisplay(name,value) {if(name==='rules.hours'){var hours=JSON.parse(value);return cfgDays.map(function(day){return day+': '+(hours[day].open||hours[day].close?hours[day].open+' to '+hours[day].close:'closed');}).join('; ');}return typeof value==='boolean'?value?'Yes':'No':value||'Blank';}
@@ -914,7 +921,7 @@
       history.replaceState(null, '', location.pathname);
       recover('Signed out. Use an email sign-in link to open your workspace again.');
       $('portalContent').innerHTML = '';
-    } catch (error) { if (!ownerSession && !key) return; leaving = false; cfgBusy = false; acctBusy = false; websiteBusy=false;
+    } catch (error) { if (!ownerSession && !key) return; leaving = false; cfgBusy = false; acctBusy = false; websiteBusy=false; reviewBusy=false;
       if(interruptedExport){exportBusy=false;['expBookings','expLeads','expConvs','expCustomers'].forEach(function(id){$(id).disabled=false;});$('accountDownloads').setAttribute('aria-busy','false');$('exportMessage').dataset.error='true';$('exportMessage').textContent='Sign out could not be confirmed. Your earlier download was interrupted; try the download again.';}
       cfgFence++; cfgChanged(); acctStatus(); await load(); toast(error.message); } finally { button.disabled = false; }
   });

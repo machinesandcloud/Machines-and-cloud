@@ -1,0 +1,209 @@
+{
+  "at": "2026-10-24T03:30:00.217Z",
+  "mode": "actual operations helper and worker; memory plus intercepted installed Blobs SDK; no external calls",
+  "checks": [
+    {
+      "name": "memory: invalid revision, foreign mailbox and malformed audit cannot queue",
+      "pass": true
+    },
+    {
+      "name": "memory: duplicate requests persist one durable intent and one stable operation",
+      "pass": true
+    },
+    {
+      "name": "memory: overlapping recovery completes one local patch and keeps providers inactive",
+      "pass": true
+    },
+    {
+      "name": "memory: lost final caller response reopens same completion without requeue or secret DTO",
+      "pass": true
+    },
+    {
+      "name": "memory: later owner revision supersedes pending work without overwriting saved facts",
+      "pass": true
+    },
+    {
+      "name": "memory: pause and cancellation stop stale work while cancelled customers cannot request repair",
+      "pass": true
+    },
+    {
+      "name": "memory: explicit paused repair preserves pause and old paused work cannot resume it",
+      "pass": true
+    },
+    {
+      "name": "memory: explicit repair reopens same successful operation when its build later fails",
+      "pass": true
+    },
+    {
+      "name": "memory: expired deterministic claim retries within its three-attempt budget",
+      "pass": true
+    },
+    {
+      "name": "memory: same-rules replacement gets its own rebuild and current requests resume one operation",
+      "pass": true
+    },
+    {
+      "name": "memory: exact-current historical operation and missing projection resume without a second rebuild",
+      "pass": true
+    },
+    {
+      "name": "memory: fair cursor reaches later customers beyond fifty candidates with bounded execution",
+      "pass": true,
+      "detail": [
+        {
+          "inspected": 50,
+          "processed": 10
+        },
+        {
+          "inspected": 50,
+          "processed": 10
+        },
+        {
+          "inspected": 45,
+          "processed": 10
+        }
+      ]
+    },
+    {
+      "name": "sdk: invalid revision, foreign mailbox and malformed audit cannot queue",
+      "pass": true
+    },
+    {
+      "name": "sdk: duplicate requests persist one durable intent and one stable operation",
+      "pass": true
+    },
+    {
+      "name": "sdk: overlapping recovery completes one local patch and keeps providers inactive",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost final caller response reopens same completion without requeue or secret DTO",
+      "pass": true
+    },
+    {
+      "name": "sdk: later owner revision supersedes pending work without overwriting saved facts",
+      "pass": true
+    },
+    {
+      "name": "sdk: pause and cancellation stop stale work while cancelled customers cannot request repair",
+      "pass": true
+    },
+    {
+      "name": "sdk: explicit paused repair preserves pause and old paused work cannot resume it",
+      "pass": true
+    },
+    {
+      "name": "sdk: explicit repair reopens same successful operation when its build later fails",
+      "pass": true
+    },
+    {
+      "name": "sdk: expired deterministic claim retries within its three-attempt budget",
+      "pass": true
+    },
+    {
+      "name": "sdk: durable queue repairs missing operation projection after failed second write",
+      "pass": true
+    },
+    {
+      "name": "sdk: known storage failure remains due and then recovers without owner intervention",
+      "pass": true
+    },
+    {
+      "name": "sdk: exhausted automatic attempts stay visible and explicit retry grants only three more",
+      "pass": true
+    },
+    {
+      "name": "sdk: failed exception projection cannot erase its durable repair intent or claim health",
+      "pass": true
+    },
+    {
+      "name": "sdk: lost operation completion receipt reconciles same local receipt without repeat patch",
+      "pass": true
+    },
+    {
+      "name": "sdk: ambiguous committed client write reconciles same local receipt without repeat patch",
+      "pass": true
+    },
+    {
+      "name": "sdk: concurrent owner edit fences an old worker before its conditional patch",
+      "pass": true
+    },
+    {
+      "name": "sdk: reclaimed worker generation fences late completion and preserves one receipt",
+      "pass": true
+    },
+    {
+      "name": "sdk: committed newer client fence blocks old result even when newer result fails",
+      "pass": true
+    },
+    {
+      "name": "sdk: old completion queue cleanup cannot erase an accepted same-ID repair",
+      "pass": true
+    },
+    {
+      "name": "sdk: late failed projection cannot reopen a successfully resolved operation",
+      "pass": true
+    },
+    {
+      "name": "sdk: observing a running final attempt cannot resolve its later committed failure",
+      "pass": true
+    },
+    {
+      "name": "sdk: strict queue read failure cannot become empty or healthy",
+      "pass": true
+    },
+    {
+      "name": "sdk: same-rules replacement gets its own rebuild and current requests resume one operation",
+      "pass": true
+    },
+    {
+      "name": "sdk: exact-current historical operation and missing projection resume without a second rebuild",
+      "pass": true
+    },
+    {
+      "name": "sdk: fair cursor reaches later customers beyond fifty candidates with bounded execution",
+      "pass": true,
+      "detail": [
+        {
+          "inspected": 50,
+          "processed": 10
+        },
+        {
+          "inspected": 50,
+          "processed": 10
+        },
+        {
+          "inspected": 45,
+          "processed": 10
+        }
+      ]
+    },
+    {
+      "name": "worker is private, bounded and unavailable without dedicated configuration",
+      "pass": true
+    },
+    {
+      "name": "no model, provider, messaging, billing or other external request occurred",
+      "pass": true
+    }
+  ],
+  "conflicts": 13,
+  "blockedNetwork": [],
+  "sourceBefore": {
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15",
+    "netlify/functions/workspace-operations-background.mjs": "9103d1f78f8e464449a001ef1f3b8587e49b761bce54278710c865111d729bbf",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15",
+    "netlify/functions/workspace-operations-background.mjs": "9103d1f78f8e464449a001ef1f3b8587e49b761bce54278710c865111d729bbf",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3"
+  },
+  "summary": {
+    "passed": 39,
+    "failed": 0,
+    "total": 39
+  }
+}
