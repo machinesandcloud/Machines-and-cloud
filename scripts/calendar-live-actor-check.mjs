@@ -6,8 +6,8 @@ globalThis.fetch=deny;
 const {createActor}=await import('./calendar-live-actor.mjs');
 const {createNativeHandoff}=await import('./calendar-live-native.mjs');
 const {TARGET}=await import('./calendar-live-guard.mjs');
-const {fixture,NOW,token,hash}=await import('./calendar-live-fixture.mjs');
-const checks=[];async function check(name,fn){await fn();checks.push(name);}
+const {fixture,packet,NOW,token,hash}=await import('./calendar-live-fixture.mjs');
+const checks=[],protocolSummaries=[];async function check(name,fn){await fn();checks.push(name);}
 await check('Dedicated Chrome adapter seeds exact pending state and only closes its new recorded window',async()=>{
   const scripts=[];const bridge=createNativeHandoff({now:()=>NOW,execute:async script=>{scripts.push(script);if(script.includes('make new window')){assert(script.includes('{mode:"normal"}'));assert(script.includes('activate'));assert(script.includes('set index of controlledWindow to 1'));return '4021,9021';}if(script.includes('location.origin"'))return TARGET.origin;if(script.includes('sessionStorage.setItem'))return 'controlled-calendar-state-seeded';if(script.includes('close controlledTab'))return 'owned-calendar-target-absent';return '';}});
   const state=hash('one-state'),authorizationUrl='https://accounts.google.com/o/oauth2/v2/auth?state='+state+'&redirect_uri='+encodeURIComponent(TARGET.origin+'/api/google/callback');
@@ -44,8 +44,8 @@ await check('An unconfirmed native close is retained and cannot be repeated blin
   await bridge.open({slug:'internal-calendar-1234',token,state,authorizationUrl:'https://accounts.google.com/o/oauth2/v2/auth?state='+state+'&redirect_uri='+encodeURIComponent(TARGET.origin+'/api/google/callback'),expiresAt:new Date(NOW+600000).toISOString()});
   await assert.rejects(bridge.close());await assert.rejects(bridge.close(),/close_outcome_unconfirmed/);assert.equal(closes,1);assert.equal(bridge.state().closed,false);
 });
-await check('Fixed actor completes signup, native handshake, scheduled lifecycle, both busy rejections and restored-deployment cleanup',async()=>{
-  const f=await fixture({signed:true,strictRecordPaths:true}),privateFiles=new Map(),helperCalls=[];
+for(const checked of [false,true])await check((checked?'Checked-slot':'Legacy fixed-slot')+' actor completes signup, native handshake, scheduled lifecycle, both busy rejections and restored-deployment cleanup',async()=>{
+  const f=await fixture({p:packet({checked}),signed:true,strictRecordPaths:true,retainedRecords:checked?11:0}),privateFiles=new Map(),helperCalls=[];
   const privateRead=async file=>file==='primary.json'?{primaryAccount:TARGET.calendarAccount,primaryOwnedUIConfirmed:true,primaryCalendarId:TARGET.calendarAccount,primaryUIEvidenceSHA256:hash('owned-ui')}:{recipient:TARGET.ownerEmail,token:hash(file),exactMessageConfirmed:true};
   const helper=async(command,input)=>{
     helperCalls.push({command,input});
@@ -59,13 +59,14 @@ await check('Fixed actor completes signup, native handshake, scheduled lifecycle
   };
   const native={open:async input=>{assert.equal(input.token,token);f.nativeAccept();return {windowId:4021,tabId:9021,seeded:true,navigated:true,nativePhysicalRequestsCounted:false};},close:async()=>({windowId:4021,tabId:9021,closed:true})};
   const actor=createActor({controller:f.c,packet:f.p,helper,native,privateRead,privateWrite:async(name,value)=>{privateFiles.set(name,value);if(name==='calendar-binding.json')f.setBinding(value);},netlifyToken:'SYNTHETIC-METADATA',now:()=>NOW});
-  const run=(action,rest={})=>actor.command({action,...rest});
+  const run=(action,rest={})=>actor.command({action,...rest});let censusBlobs;
   await run('baseline');await run('request-link');await run('exchange',{file:'signup-mail.json'});await run('create-workspace');await run('request-link');await run('exchange',{file:'return-mail.json'});await run('owner');
-  await run('census-bind',{file:'primary.json'});await run('stage');await run('publish');await run('ready');await run('start');await run('native-open');await run('native-confirm');await run('create');
+  await run('census-bind',{file:'primary.json'});censusBlobs=f.c.state().counters.blobs;await run('stage');await run('publish');await run('ready');await run('start');await run('native-open');await run('native-confirm');if(checked){f.setAvailableSlots([{date:'2026-10-26',window:'12 to 5'},{date:'2026-10-27',window:'8 to 12'}]);const selected=await run('select-times');assert.deepEqual(selected.selection.create,{date:'2026-10-26',window:'12 to 5'});assert.deepEqual(selected.selection.move,{date:'2026-10-27',window:'8 to 12'});}await run('create');
   f.setJob('create');await run('receipt',{stage:'create'});await run('move');await run('probe-old');f.setJob('update');await run('receipt',{stage:'update'});await run('cancel-visit');await run('probe-cancelled');f.setJob('delete');await run('receipt',{stage:'delete'});
   await run('cleanup');await run('disconnect');await run('cancel-workspace');await run('native-close');await run('signout-all');await run('restore');await run('cleanup-build');const final=await run('closed');
-  assert.equal(final.closed,true);assert.equal(final.guard.counters.workerPosts,0);assert.equal(final.guard.counters.builds,2);assert.equal(final.guard.counters.nativeHandoffs,1);assert.equal(final.guard.counters.environmentWrites,8);
+  protocolSummaries.push({checked,retainedRecords:checked?11:0,censusBlobs,postCensusBlobs:final.guard.counters.blobs-censusBlobs,counters:final.guard.counters,runtimeUsed:f.used});assert.equal(final.closed,true);assert.equal(final.guard.counters.workerPosts,0);assert.equal(final.guard.counters.builds,2);assert.equal(final.guard.counters.nativeHandoffs,1);assert.equal(final.guard.counters.environmentWrites,8);
+  if(checked){assert.equal(f.previewCount,2);assert.equal(f.rows.filter(row=>row.event==='available_windows_bound').length,1);assert.equal(f.rows.filter(row=>row.event==='bound_move_rechecked').length,1);assert.equal(final.guard.selection.packetDigest,hash(JSON.stringify(f.p)));assert.ok(final.guard.counters.blobs<=84);assert.ok(f.used.totalRequests<=57);}
   assert.equal(helperCalls.filter(row=>row.command==='push').length,1);assert.equal(helperCalls.filter(row=>row.command==='cleanup-build').length,1);
   assert(!JSON.stringify(f.rows).includes(token));assert.equal(f.calls.filter(row=>new URL(row.url).pathname==='/api/calendar-delivery-background').length,0);
 });
-process.stdout.write(JSON.stringify({passed:checks.length,failed:0,checks,physicalNetworkRequests:0,actualNativeWindows:0,actualControlEffects:0},null,2)+'\n');
+process.stdout.write(JSON.stringify({passed:checks.length,failed:0,checks,protocolSummaries,physicalNetworkRequests:0,actualNativeWindows:0,actualControlEffects:0},null,2)+'\n');

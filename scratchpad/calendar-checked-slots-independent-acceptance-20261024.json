@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "scope": "Independent offline acceptance of checked-window Calendar proof preparation",
+  "checkout": "/private/tmp/mc-calendar-proof-free-32",
+  "baseCommit": "32a09cc5e301d17eaa2b82dcdc5139b65e6afd91",
+  "status": "accepted_local_proof_preparation_only",
+  "testedSource": {
+    "scripts/calendar-live-guard.mjs": "551eb69a9949b45a4807ff91cb30862195e837dd24f6109c008adcf75f22d6d8",
+    "scripts/calendar-live-actor.mjs": "9e26abf8c8917644f62c36d3c3de6b6f35e9cb19c280fa1277caf82ab3dc1ef8",
+    "scripts/calendar-live-fixture.mjs": "f389f2903d426202d7f70c3ecb5ef7a2d2e831965c5a06e29374c787ad7ee5b6",
+    "scripts/calendar-live-selection-check.mjs": "7ac50cfda09c2609eda40fafed4b3d6846be2afda3d78bf8e866564d0134641f",
+    "scripts/calendar-live-actor-check.mjs": "35a81965c92e348a41863855bf35db06dd99e6e356512d8f2e7f4f4a59cece77",
+    "scratchpad/calendar-checked-slots-independent.mjs": "b9899f38ab2dc4e84151ea9fd08031e43e3b07b38ee3341186aea9777ca0034d"
+  },
+  "currentSource": {
+    "scripts/calendar-live-guard.mjs": "d3b9e93c3080e423a19b1c5e93c1a21b877b73f58a18d6dd2ac5f732e12cd869",
+    "scripts/calendar-live-actor.mjs": "9e26abf8c8917644f62c36d3c3de6b6f35e9cb19c280fa1277caf82ab3dc1ef8",
+    "scripts/calendar-live-fixture.mjs": "f389f2903d426202d7f70c3ecb5ef7a2d2e831965c5a06e29374c787ad7ee5b6",
+    "scripts/calendar-live-selection-check.mjs": "7ac50cfda09c2609eda40fafed4b3d6846be2afda3d78bf8e866564d0134641f",
+    "scripts/calendar-live-actor-check.mjs": "35a81965c92e348a41863855bf35db06dd99e6e356512d8f2e7f4f4a59cece77",
+    "scratchpad/calendar-checked-slots-independent.mjs": "cdd537f6c0e7e871603a4365ccf3c5b895a5043a3ac9d3555ec9f27236ed3747"
+  },
+  "targetLiteralBridge": {
+    "path": "scratchpad/calendar-checked-slots-target-bridge.json",
+    "sha256": "4f838157d3ec269b3b8e56485bf39fa7630f082b22f948ecb0393486a69de253",
+    "independentlyVerified": true,
+    "checks": [
+      {
+        "path": "scripts/calendar-live-guard.mjs",
+        "currentSHA256": "d3b9e93c3080e423a19b1c5e93c1a21b877b73f58a18d6dd2ac5f732e12cd869",
+        "reversedSHA256": "551eb69a9949b45a4807ff91cb30862195e837dd24f6109c008adcf75f22d6d8",
+        "exactLiteralCount": 3,
+        "reverseExact": true
+      },
+      {
+        "path": "scripts/calendar-live-control.py",
+        "currentSHA256": "71284a66e1551bcc414ed8d0b608ce8b009ff2ca34ad437d80344f0e973e6ce8",
+        "reversedSHA256": "e44df2cc42c4e94834c596f78dae2cddc214046275cd54bf081470d7ad4cb1af",
+        "exactLiteralCount": 2,
+        "reverseExact": true
+      }
+    ],
+    "meaning": "The original independent12 and replay6 apply to their retained testedSource hashes. Exact reverse of the five Root-authorized baseline/deployment/alias literal changes reproduces those bytes and unchanged original control logic. They are not relabeled as new-source executions."
+  },
+  "evidence": {
+    "independent": {
+      "path": "scratchpad/calendar-checked-slots-independent-second.json",
+      "sha256": "dec643071dc17f774286dce8ce6d6b81c4acce05ddd5517454d83d7bcc91f3fe",
+      "passed": 12,
+      "total": 12,
+      "sourceStable": true
+    },
+    "coupledActorReplay": {
+      "path": "scratchpad/calendar-checked-slots-actor-replay.json",
+      "sha256": "588bafe68e475d3cfd033312f87bf5f4a791fbecae638ad76807ed27952c91c9",
+      "passed": 6,
+      "total": 6,
+      "sourceMatched": "Retained testedSource, followed by strict five-literal target bridge."
+    },
+    "authorAffectedReruns": [
+      {
+        "path": "scratchpad/calendar-free-selection-v6-final.json",
+        "sha256": "ee26e52a1b70a53e5f6ca9b55f05f1530b3df7e1294d8c9454ebe33f88efd75e"
+      },
+      {
+        "path": "scratchpad/calendar-free-actor-v6-final.json",
+        "sha256": "588bafe68e475d3cfd033312f87bf5f4a791fbecae638ad76807ed27952c91c9"
+      },
+      {
+        "path": "scratchpad/calendar-free-guard-v6-final.json",
+        "sha256": "809792084db75c129df5007a460630d431ac2df7f930877c2b0ee422e13e818c"
+      },
+      {
+        "path": "scratchpad/calendar-free-control-v6-final.json",
+        "sha256": "b802d0055caf9ff9b09af183f80a677ff70139b5b39e5977b33290df8bd48b8f"
+      }
+    ]
+  },
+  "acceptedInvariants": [
+    "Only the exact predeclared future seven-day range/current configuration is admitted; initial selection excludes caller-supplied visit IDs.",
+    "The public projection must be Google-backed, fresh, exact-shaped and private-field-free, with seven ordered dates and only declared windows.",
+    "Exactly the first two distinct eligible weekday windows in date/declared-window order are durably bound once, including when the provider returns reversed window order.",
+    "Empty, one-window, weekend-only, malformed, stale, lost-response, concurrent-repeat and lost-durable-binding cases cannot create or silently select alternatives.",
+    "Create consumes only its exact bound fresh first slot; current authoritative product Save still owns the final availability/conflict decision.",
+    "Move performs one fresh exact-owned-visit preview under the same configuration/revision; only the original second slot is permitted. A newly occupied target stops the move and retains cancellation for the exact existing visit.",
+    "Changed current visit after preview is refused before transport; state copies cannot mutate the immutable pair.",
+    "The coupled actor uses select-times before create and an exact original-target preview before move; both negative probes retain original operation identities and scheduled same-event receipt requirements.",
+    "Checked census binding requires at least46 remaining signed inspection hops;44 is rejected before environment/build effects. Legacy offline minimum42 remains supported."
+  ],
+  "budget": {
+    "limitsUnchanged": true,
+    "blobs": 84,
+    "metadata": 12,
+    "supplementalControl": 48,
+    "aggregateControl": 144,
+    "runtimeGoogleAndWorkerAttempts": 57,
+    "site": 240,
+    "writes": 40,
+    "email": 3,
+    "builds": 2,
+    "netlifyCreditsMaximum": 30,
+    "checkedFixture": {
+      "checked": true,
+      "retainedRecords": 11,
+      "censusBlobs": 30,
+      "postCensusBlobs": 46,
+      "counters": {
+        "site": 28,
+        "writes": 16,
+        "hostedChecks": 0,
+        "email": 2,
+        "metadata": 3,
+        "blobs": 76,
+        "workerPosts": 0,
+        "builds": 2,
+        "pushes": 1,
+        "environmentWrites": 8,
+        "control": 79,
+        "controlWrites": 0,
+        "nativeHandoffs": 1
+      },
+      "runtimeUsed": {
+        "oauthStart": 1,
+        "tokenExchange": 1,
+        "tokenRefresh": 0,
+        "calendarRead": 3,
+        "eventCreate": 0,
+        "eventUpdate": 0,
+        "eventDelete": 0,
+        "workerDispatch": 1,
+        "totalRequests": 5
+      }
+    },
+    "limitation": "The complete signed actor with11 retained census records consumes30+46=76 Blob hops, leaving8. This is routed-hop fixture evidence, not provider-attempt or timing proof. Root must reconcile actual census and a finite observation/cleanup plan; no counter reset, refill or borrowing is authorized."
+  },
+  "preservedFailures": [
+    {
+      "stage": "initial QA startup",
+      "result": "ERR_MODULE_NOT_FOUND before assertions/receipt",
+      "cause": "Copied dynamic import still pointed to scratchpad/calendar-live-fixture.mjs. Changed only the independent harness import to ../scripts/calendar-live-fixture.mjs."
+    },
+    {
+      "path": "scratchpad/calendar-checked-slots-independent-first.json",
+      "sha256": "d5b3439ace86ff7d52c9e34ad0dc50a5fca668db21983df6b01520555be72b23",
+      "passed": 10,
+      "total": 12,
+      "sourceStable": true,
+      "disposition": "Two assertions expected date/window fields on the fixture current ownerVisit, whose contract contains only id/revision/status. Replaced those assertions with captured exact create/move transport-body date/window/visit identity and no-reselection counts. Removed one accidental duplicate check after report emission. No product/proof source changed."
+    }
+  ],
+  "effects": {
+    "physicalNetwork": 0,
+    "actualBrowserOrNativeWindows": 0,
+    "credentialsOrAccountsRead": 0,
+    "emails": 0,
+    "providerCalls": 0,
+    "deploymentOrSettingsEffects": 0,
+    "gitIndexWritesOrCommits": 0
+  },
+  "releaseConditions": [
+    "The packet remains inert until Root binds the current combined candidate and complete source inventory, approval and expiry in a new owner-only private packet. The final template target uses the closed-v5 source/deployment, fresh v6 phase/policy/alias/IDs.",
+    "Earlier v2-v5 phases and their exhausted allowances remain closed. This receipt grants no release/provider/email or browser authority.",
+    "Actual Google permission, same-event scheduled move, both conflict probes, recovery and cleanup need matching observed evidence. Full provider lifecycle and launch acceptance remain open."
+  ],
+  "qaScriptFormatBridge": {
+    "path": "scratchpad/calendar-checked-slots-independent.mjs",
+    "testedSHA256": "b9899f38ab2dc4e84151ea9fd08031e43e3b07b38ee3341186aea9777ca0034d",
+    "currentSHA256": "cdd537f6c0e7e871603a4365ccf3c5b895a5043a3ac9d3555ec9f27236ed3747",
+    "change": "Remove exactly one extra blank LF at EOF; no code/assertion changes.",
+    "reverseExact": true,
+    "rerunRequired": false
+  }
+}
