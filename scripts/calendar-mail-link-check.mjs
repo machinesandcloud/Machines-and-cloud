@@ -5,4 +5,5 @@ const good={recipient:TARGET.ownerEmail,subject:'Your Machines & Cloud sign-in l
 assert.equal(exactCalendarMessage(good,{requestedAt,now}).token,'a'.repeat(64));
 let negatives=0;
 for(const mutate of [x=>x.recipient='other@example.test',x=>x.subject='Other',x=>x.receivedAt=new Date(now-60000).toISOString(),x=>x.link=x.link.replace('/onboard.html','/admin.html'),x=>x.link=x.link.replace(TARGET.origin,'https://other.example.test'),x=>x.link+='&verify='+'b'.repeat(64),x=>x.link=x.link.replace('starter','growth')]){const input={...good};mutate(input);assert.throws(()=>exactCalendarMessage(input,{requestedAt,now}));negatives++;}
+try{exactCalendarMessage({...good,link:'https://[malformed]/'+'a'.repeat(64)},{requestedAt,now});assert.fail('Malformed URL accepted');}catch(error){assert.equal(error.input,undefined);assert(!error.stack.includes('a'.repeat(64)));negatives++;}
 process.stdout.write(JSON.stringify({passed:negatives+1,failed:0,physicalRequests:0,browserReads:0,messageTokensPrinted:0})+'\n');
