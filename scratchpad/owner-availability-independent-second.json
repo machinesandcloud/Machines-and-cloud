@@ -1,0 +1,128 @@
+{
+  "before": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "ddf29f72aeab9aa06adc0054fceea9c37e0e61abd19735de34a4acc4c0008ecd",
+    "desk-visits.js": "3afb80d8ddf3c64f1cb08ef2e4dd8d35e0b7d32b2c95a3d3fa15d03cf6be6494",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "e8c365af2166db92cc144c2d8ce78644a1deee35e442a0373468d61991cff041",
+    "scripts/owner-availability-check.mjs": "160fff7a7169ebe5ab5aa7463c8aac2ad0706d64f47a1acee56d23d8242532f9",
+    "scripts/build-site.mjs": "66d5909ad1d5776b51f1e6e3ead9091c9d248c83d75d29172a02c4561cfe1d3a",
+    "scratchpad/owner-availability-independent-check.mjs": "828d629f8d44eeb83b364b5f83a72bbe41daa738c5867fcc0b9cf88fd74e3056"
+  },
+  "checks": [
+    {
+      "name": "Preview does not reserve a time or leak event metadata, even on repeat",
+      "pass": true
+    },
+    {
+      "name": "A visit changed while the provider answers cannot exclude its now-stale reservation",
+      "pass": true
+    },
+    {
+      "name": "Reordered same-range Calendar response cannot replace a newer busy projection with older free time",
+      "pass": true
+    },
+    {
+      "name": "Preview shares the durable provider budget and exhaustion never returns free openings",
+      "pass": true
+    },
+    {
+      "name": "Manual own-visit preview excludes only its current booking and keeps another saved reservation full",
+      "pass": true
+    },
+    {
+      "name": "Preview cannot turn foreign ownership, source/config change or revoked authorization into a valid result",
+      "pass": true
+    },
+    {
+      "name": "Failed preview and attempted caller exclusions cannot fabricate a free empty schedule",
+      "pass": true
+    },
+    {
+      "name": "1440px pending preview preserves newer customer typing and blocks unverified Save",
+      "pass": true
+    },
+    {
+      "name": "1440px a date outside the checked range is labelled unverified rather than unavailable",
+      "pass": true
+    },
+    {
+      "name": "1440px expired checked choices cannot be saved and retain the draft",
+      "pass": true
+    },
+    {
+      "name": "1440px newer date results survive an older delayed response",
+      "pass": true
+    },
+    {
+      "name": "1440px authoritative Save rejects a new Calendar conflict without losing customer fields",
+      "pass": true
+    },
+    {
+      "name": "1440px lost Save response reload retains exact pending operation and retry creates once",
+      "pass": true
+    },
+    {
+      "name": "1440px closing an in-flight preview cannot overwrite the next opened draft",
+      "pass": true
+    },
+    {
+      "name": "1440px sign-out invalidates a late preview without exposing choices or errors",
+      "pass": true
+    },
+    {
+      "name": "390px pending preview preserves newer customer typing and blocks unverified Save",
+      "pass": true
+    },
+    {
+      "name": "390px a date outside the checked range is labelled unverified rather than unavailable",
+      "pass": true
+    },
+    {
+      "name": "390px expired checked choices cannot be saved and retain the draft",
+      "pass": true
+    },
+    {
+      "name": "390px newer date results survive an older delayed response",
+      "pass": true
+    },
+    {
+      "name": "390px authoritative Save rejects a new Calendar conflict without losing customer fields",
+      "pass": true
+    },
+    {
+      "name": "390px lost Save response reload retains exact pending operation and retry creates once",
+      "pass": true
+    },
+    {
+      "name": "390px closing an in-flight preview cannot overwrite the next opened draft",
+      "pass": true
+    },
+    {
+      "name": "390px sign-out invalidates a late preview without exposing choices or errors",
+      "pass": true
+    }
+  ],
+  "physicalExternalRequests": 0,
+  "modelRequests": 0,
+  "browserErrors": [],
+  "after": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "ddf29f72aeab9aa06adc0054fceea9c37e0e61abd19735de34a4acc4c0008ecd",
+    "desk-visits.js": "3afb80d8ddf3c64f1cb08ef2e4dd8d35e0b7d32b2c95a3d3fa15d03cf6be6494",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "e8c365af2166db92cc144c2d8ce78644a1deee35e442a0373468d61991cff041",
+    "scripts/owner-availability-check.mjs": "160fff7a7169ebe5ab5aa7463c8aac2ad0706d64f47a1acee56d23d8242532f9",
+    "scripts/build-site.mjs": "66d5909ad1d5776b51f1e6e3ead9091c9d248c83d75d29172a02c4561cfe1d3a",
+    "scratchpad/owner-availability-independent-check.mjs": "828d629f8d44eeb83b364b5f83a72bbe41daa738c5867fcc0b9cf88fd74e3056"
+  },
+  "sourceStable": true,
+  "ok": true,
+  "googleProtocolRequests": 61
+}

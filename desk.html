@@ -266,6 +266,7 @@
   <p id="visitDeliveryNote" class="visit-delivery-note">Your workspace saves the visit first. Calendar and message delivery appear separately in Connections.</p>
   <form id="visitChangeForm" novalidate>
     <div id="newVisitFields" hidden><div class="visit-change-fields"><div class="form-group"><label class="form-label" for="visitName">Customer name</label><input class="form-input" id="visitName" maxlength="120" aria-describedby="visitNameError"><p id="visitNameError" class="visit-field-error"></p></div><div class="form-group"><label class="form-label" for="visitPhone">Callback number</label><input type="tel" class="form-input" id="visitPhone" maxlength="40" aria-describedby="visitPhoneError"><p id="visitPhoneError" class="visit-field-error"></p></div></div><div class="form-group"><label class="form-label" for="visitAddress">Service address</label><input class="form-input" id="visitAddress" maxlength="300" aria-describedby="visitAddressError"><p id="visitAddressError" class="visit-field-error"></p></div><div class="form-group"><label class="form-label" for="visitIssue">What do they need?</label><textarea class="form-input" id="visitIssue" maxlength="500" aria-describedby="visitIssueError"></textarea><p id="visitIssueError" class="visit-field-error"></p></div><p class="muted">Customer texts use their saved messaging permission and your connection status.</p></div>
+    <section class="visit-availability" id="visitAvailability" aria-labelledby="visitAvailabilityTitle"><h3 id="visitAvailabilityTitle">Choose an available time</h3><p class="muted">Check the next seven days from your chosen date. We check again when you save.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitFindTimes">Find available times</button><p id="visitAvailabilityStatus" role="status" aria-live="polite" tabindex="-1"></p><div id="visitAvailableTimes" class="visit-available-times"></div></section>
     <div class="visit-change-fields"><div class="form-group"><label class="form-label" for="visitDate">Visit date</label><input class="form-input" type="date" id="visitDate" aria-describedby="visitDateError"><p id="visitDateError" class="visit-field-error"></p></div>
     <div class="form-group"><label class="form-label" for="visitWindow">Arrival window</label><select class="form-input" id="visitWindow" aria-describedby="visitWindowError"></select><p id="visitWindowError" class="visit-field-error"></p></div></div>
     <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button>
@@ -284,6 +285,7 @@
 <script src="desk-connections.js" defer=""></script>
 <script src="desk-billing.js" defer=""></script>
 <script src="desk.js" defer=""></script>
+<script src="desk-visits.js" defer=""></script>
 <script src="desk-requests.js" defer=""></script>
 <script src="desk-activity.js" defer=""></script>
 <script src="desk-conversations.js" defer=""></script>

@@ -1,0 +1,70 @@
+{
+  "before": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "7bc82563c2f35d2661d1523982028eed7a4e59c2da7f651f799b3dca5bf8d918",
+    "desk-visits.js": "adecb22b77a501a4be804df77b1ee01862867c6c691e245c34bbdabd3d769e85",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "922d08034bc0d5089c6bbeeac4964c6f42e40b7acd5e9cf0e31581c912c3e06c",
+    "scripts/owner-availability-check.mjs": "ff9e737bc2c8f495b4543da7c9ca8a9b5d21f3192c39161cbb545ffa77ac06e6"
+  },
+  "checks": [
+    {
+      "name": "actual owner API exposes only checked free windows, current revision and privacy-safe provenance",
+      "pass": false,
+      "error": "The expression evaluated to a falsy value:\n\n  assert.ok(f.requests.slice(before).every(q=>q.method==='GET'))\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(f.requests.slice(before).every(q=>q.method==='GET'))\n\n    at file:///private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:21:679\n    at async check (file:///private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:20:36)\n    at async file:///private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:21:1"
+    },
+    {
+      "name": "manual-only preview uses existing blocks, field windows and capacity with zero Google/model requests",
+      "pass": true
+    },
+    {
+      "name": "owner preview rejects anonymous, wrong owner, revoked session and foreign origin before provider work",
+      "pass": true
+    },
+    {
+      "name": "strict date/range/shape and stale rules fail without a Calendar read",
+      "pass": true
+    },
+    {
+      "name": "move preview excludes only its own reservation and exact Google copy, retaining external conflicts",
+      "pass": true
+    },
+    {
+      "name": "foreign/stale/cancelled visit exclusion is rejected rather than hiding someone else’s occupied time",
+      "pass": true
+    },
+    {
+      "name": "provider failure or incomplete pagination is unavailable/retry, never an empty free schedule",
+      "pass": true
+    },
+    {
+      "name": "availability preview shares short cache but authoritative save sees a later Google conflict",
+      "pass": true
+    },
+    {
+      "name": "rules, session and tenant changes during Google response cannot return stale owner availability",
+      "pass": true
+    }
+  ],
+  "physicalExternalRequests": 0,
+  "modelRequests": 0,
+  "browserErrors": [],
+  "after": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "7bc82563c2f35d2661d1523982028eed7a4e59c2da7f651f799b3dca5bf8d918",
+    "desk-visits.js": "adecb22b77a501a4be804df77b1ee01862867c6c691e245c34bbdabd3d769e85",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "922d08034bc0d5089c6bbeeac4964c6f42e40b7acd5e9cf0e31581c912c3e06c",
+    "scripts/owner-availability-check.mjs": "ff9e737bc2c8f495b4543da7c9ca8a9b5d21f3192c39161cbb545ffa77ac06e6"
+  },
+  "sourceStable": true,
+  "ok": false,
+  "googleProtocolRequests": 43
+}

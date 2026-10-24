@@ -1,0 +1,177 @@
+{
+  "date": "2026-10-24",
+  "stage": "Implemented, independently QA/PO-accepted locally and exact54-command deploy gate verified. Publication and actual provider acceptance remain separate.",
+  "baseCommit": "1be5608c23b4f957f656f3a463b4b32831812a7f",
+  "worktree": "/tmp/mc-calendar-availability-1be",
+  "sourceHashes": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "desk.js": "ddf29f72aeab9aa06adc0054fceea9c37e0e61abd19735de34a4acc4c0008ecd",
+    "desk-visits.js": "3afb80d8ddf3c64f1cb08ef2e4dd8d35e0b7d32b2c95a3d3fa15d03cf6be6494",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "e8c365af2166db92cc144c2d8ce78644a1deee35e442a0373468d61991cff041",
+    "scripts/owner-availability-check.mjs": "160fff7a7169ebe5ab5aa7463c8aac2ad0706d64f47a1acee56d23d8242532f9",
+    "scripts/build-site.mjs": "66d5909ad1d5776b51f1e6e3ead9091c9d248c83d75d29172a02c4561cfe1d3a",
+    "netlify.toml": "b2a09b4ab71aa3bdea05d38cdec6177ea3cf4ed72f343c5e3854bba216695f67"
+  },
+  "customerJob": "Before adding or moving a customer visit, the signed-in owner sees free dates/windows from the saved field-visit schedule and connected owned Google Calendar, selects one and saves with a fresh authoritative recheck.",
+  "motivation": "The live proof encountered a genuine external Calendar conflict; the chosen fixed afternoon had not been proven free. This adds the missing ordinary owner preview rather than treating correct conflict protection as a product defect.",
+  "existingModelReused": [
+    "Same getAvailability/capacity state, owner blocks and listed arrival windows. Office callback hours remain intentionally separate from field-visit availability.",
+    "Same bounded privacy-preserving calendarBusyProjection and current owner grant/target/current rules revision/Calendar execution allowance. No extra Google scope, freeBusy API, model call, queue or event mutation from preview.",
+    "Same create/move authoritative reserveBookingWindow fresh Calendar read and capacity CAS; a preview neither reserves a slot nor confirms Google delivery."
+  ],
+  "api": {
+    "route": "POST /api/client?c=<current-owner-slug>",
+    "action": "visit_availability",
+    "fields": [
+      "action",
+      "expectedRevision",
+      "date",
+      "days"
+    ],
+    "optionalMoveFields": [
+      "visitId",
+      "expectedVisitRevision"
+    ],
+    "range": "1..7 dates, strict current/future Houston YYYY-MM-DD",
+    "authority": "Ordinary onboarding owner bearer, allowed Origin and supported current workspace; current rules/optional owned active visit revision validated before and after reads. Caller cannot exclude an arbitrary booking.",
+    "projection": [
+      "timezone",
+      "from",
+      "days",
+      "openings:[{date,windows}]",
+      "configurationRevision",
+      "visitId",
+      "visitRevision",
+      "checkedAt",
+      "expiresAt",
+      "source:workspace|workspace_and_google",
+      "message"
+    ],
+    "privacy": "No external event titles, IDs, descriptions, contacts, attendees, tokens, target IDs or busy interval list.",
+    "cost": "Explicit owner action only; same60second Google busy cache and existing token-refresh/calendarRead limits, up to4bounded event pages. No provider polling or preview on dialog open.",
+    "save": "Original create/move authority, configuration/visit revision, fresh Google conflict protection and local capacity checks remain authoritative."
+  },
+  "ui": [
+    "Find available times checks the next7dates from the chosen date (or today). Only checked free windows populate the selector; first3available dates are visible, later dates use a native disclosure.",
+    "Customer details remain intact through preview/error/retry and invalid phone correction; a lost/slow result from a closed dialog cannot overwrite a new draft.",
+    "Results expire and changed rules/visit/known availability rejection require another check. Google failure is unavailable/retry, not no-openings.",
+    "Existing uncertain saved changes retain exact retry identity and are not replaced by new preview operations. Cancel visit remains available independently of a new time."
+  ],
+  "authorAcceptance": {
+    "newSuite": {
+      "path": "scratchpad/owner-availability-author-final-r2.json",
+      "passed": 11,
+      "handlerGroups": 9,
+      "ordinaryBrowserJobs": 2,
+      "widths": [
+        1440,
+        390
+      ],
+      "browserJobsInclude": [
+        "create",
+        "invalid phone fix preserves checked time",
+        "provider failure/retry",
+        "move same visit",
+        "late response after close preserves newer draft"
+      ],
+      "sourceStable": true,
+      "browserErrors": 0,
+      "physicalExternalRequests": 0,
+      "modelRequests": 0,
+      "sha256": "1e382b6abe1c4d7eccf57d4b2a2e66023fbef11b7ea6e8e92c3599a91ca972a2"
+    },
+    "retainedRegressions": {
+      "ownerVisits": 27,
+      "calendarBusy": 20,
+      "record": "Required gate output also retains exact command outputs."
+    },
+    "requiredGate": {
+      "path": "scratchpad/owner-availability-required-gate-final.json",
+      "sha256": "8d72370154e72bb9b929f74e9bdca6943c160c75fb81cae757db3e6a43956a73",
+      "passed": 54,
+      "total": 54,
+      "sourceFiles": 520,
+      "sourceStable": true,
+      "physicalAttempts": 0,
+      "preservedFirstRun": {
+        "path": "scratchpad/owner-availability-required-gate-first.json",
+        "sha256": "77474b2062fe8bc0f11c40321040152f894667448c24abb86030cb45fa6a575b",
+        "passed": 53,
+        "total": 54,
+        "disposition": "Only build packaging failed: new desk-visits.js was absent from the explicit allowlist. Adding that asset repaired the real build defect; exact final54 commands pass."
+      },
+      "historicalGeneratedArtifacts": "The pre-existing tracked intake/build evidence was restored byte-for-byte from HEAD after the gate; new immutable outputs are retained separately."
+    }
+  },
+  "preservedFixtureReturns": [
+    {
+      "path": "scratchpad/owner-availability-author-first.json",
+      "disposition": "8/9; first new assertion wrongly assumed every provider call must be GET and rejected legitimate token refresh under the existing Calendar allowance. Fixture assertion corrected, no runtime fix."
+    },
+    {
+      "path": "scratchpad/owner-availability-author-browser-first.json",
+      "disposition": "9/11; browser fixture used nonexistent #bookings route, so Add visit remained hidden. Corrected fixture to existing #availability; no runtime fix."
+    },
+    {
+      "path": "scratchpad/owner-availability-independent-first.json",
+      "sha256": "45b81aa50a1d822dd02ed44826d75feb84b7896976126c583dd2bbda7d5fe8c0",
+      "disposition": "15/21. Expiry fixture used fixed browser+65seconds after backend clock had already advanced61seconds, so actual returned result was still valid and Save correctly completed. Revised fixture uses actual expiresAt+1 and restores the browser clock; final23 pass."
+    }
+  ],
+  "independentQA": {
+    "path": "scratchpad/owner-availability-independent-acceptance-20261024.json",
+    "sha256": "c7b154e6874ce94b88993077f2bc3ad58237a4180f31038be63e7f593d153d4f",
+    "passed": 23,
+    "total": 23,
+    "handlerGroups": 7,
+    "actualAssetBrowserJobs": 16,
+    "widths": [
+      1440,
+      390
+    ],
+    "sourceStable": true,
+    "browserErrors": 0,
+    "physicalExternalRequests": 0,
+    "limits": "Local actual handlers and assets with synthetic Calendar responses; no actual Google move, provider lifecycle, publication or full launch acceptance."
+  },
+  "poAcceptance": {
+    "path": "scratchpad/owner-availability-po-acceptance.json",
+    "sha256": "bf2d8af17e201d95ba3adeb71c703c87cee51323a581655724806b3f658000ba",
+    "decision": "accepted_local_owner_availability_customer_job",
+    "widths": [
+      1440,
+      390
+    ],
+    "retainedBaselineGroups": 11,
+    "occupiedWindowGroupsBeforeLiteralRepair": 2,
+    "affectedCurrentSourceJobs": 4,
+    "sourceStable": true,
+    "browserErrors": 0,
+    "physicalExternalRequests": 0,
+    "bridge": "Prior11 baseline and2 occupied-window jobs remain exact earlier-source evidence; current focused2 unchecked-date plus2 ordinary occupied-window jobs rerun after the single missing-day conditional. No fresh17-group current-run claim."
+  },
+  "effects": {
+    "actualProviderRequests": 0,
+    "modelRequests": 0,
+    "privateCredentialReads": 0,
+    "browserAccountAccess": 0,
+    "eventsCreated": 0,
+    "deployments": 0,
+    "settingsChanges": 0
+  },
+  "nextUnresolvedStep": {
+    "driver": "Root/PM with independent QA and replacement PO",
+    "action": "Root integrates exact locally accepted source after the closed live phase and reconciles the grouped release; then binds a fresh Calendar proof to checked free windows and completes actual same-event lifecycle/cleanup.",
+    "limits": "This local preview is not publication or actual Google/provider delivery; current proof actor and frozen root checkout were not changed."
+  },
+  "returnedProductRepairs": [
+    {
+      "path": "scratchpad/owner-availability-po-unchecked-first.json",
+      "sha256": "556a96809dcfb2d69c0060624d5003018b9e4439237acdcedc27d77237d590fb",
+      "disposition": "Actual desktop/mobile picker labeled a date outside the checked range as unavailable. Narrow conditional now distinguishes not-yet-checked from checked-with-zero-openings. Independent affected UI coverage and PO focused2/2 now pass; the subsequent narrow regex-only0/2 fixture mismatch is also retained separately."
+    }
+  ]
+}

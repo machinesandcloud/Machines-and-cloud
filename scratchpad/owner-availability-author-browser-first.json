@@ -1,0 +1,80 @@
+{
+  "before": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "7bc82563c2f35d2661d1523982028eed7a4e59c2da7f651f799b3dca5bf8d918",
+    "desk-visits.js": "adecb22b77a501a4be804df77b1ee01862867c6c691e245c34bbdabd3d769e85",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "922d08034bc0d5089c6bbeeac4964c6f42e40b7acd5e9cf0e31581c912c3e06c",
+    "scripts/owner-availability-check.mjs": "c1e8cbbec5b777027665924618d92df1cd5097cd6e6e8e2944b2a690520037ee"
+  },
+  "checks": [
+    {
+      "name": "actual owner API exposes only checked free windows, current revision and privacy-safe provenance",
+      "pass": true
+    },
+    {
+      "name": "manual-only preview uses existing blocks, field windows and capacity with zero Google/model requests",
+      "pass": true
+    },
+    {
+      "name": "owner preview rejects anonymous, wrong owner, revoked session and foreign origin before provider work",
+      "pass": true
+    },
+    {
+      "name": "strict date/range/shape and stale rules fail without a Calendar read",
+      "pass": true
+    },
+    {
+      "name": "move preview excludes only its own reservation and exact Google copy, retaining external conflicts",
+      "pass": true
+    },
+    {
+      "name": "foreign/stale/cancelled visit exclusion is rejected rather than hiding someone else’s occupied time",
+      "pass": true
+    },
+    {
+      "name": "provider failure or incomplete pagination is unavailable/retry, never an empty free schedule",
+      "pass": true
+    },
+    {
+      "name": "availability preview shares short cache but authoritative save sees a later Google conflict",
+      "pass": true
+    },
+    {
+      "name": "rules, session and tenant changes during Google response cannot return stale owner availability",
+      "pass": true
+    },
+    {
+      "name": "ordinary actual workspace 1440px owner finds free times, preserves customer fields and saves one visit",
+      "pass": false,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#newVisit')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"newVisit\" class=\"btn-pill btn-pill-blue btn-sm\">Add visit</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#newVisit')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"newVisit\" class=\"btn-pill btn-pill-blue btn-sm\">Add visit</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:36:391\n    at async check (/private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:20:36)\n    at async file:///private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:32:33"
+    },
+    {
+      "name": "ordinary actual workspace 390px owner finds free times, preserves customer fields and saves one visit",
+      "pass": false,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#newVisit')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"newVisit\" class=\"btn-pill btn-pill-blue btn-sm\">Add visit</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#newVisit')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"newVisit\" class=\"btn-pill btn-pill-blue btn-sm\">Add visit</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:36:391\n    at async check (/private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:20:36)\n    at async file:///private/tmp/mc-calendar-availability-1be/scripts/owner-availability-check.mjs:32:33"
+    }
+  ],
+  "physicalExternalRequests": 0,
+  "modelRequests": 0,
+  "browserErrors": [],
+  "after": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "7bc82563c2f35d2661d1523982028eed7a4e59c2da7f651f799b3dca5bf8d918",
+    "desk-visits.js": "adecb22b77a501a4be804df77b1ee01862867c6c691e245c34bbdabd3d769e85",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "922d08034bc0d5089c6bbeeac4964c6f42e40b7acd5e9cf0e31581c912c3e06c",
+    "scripts/owner-availability-check.mjs": "c1e8cbbec5b777027665924618d92df1cd5097cd6e6e8e2944b2a690520037ee"
+  },
+  "sourceStable": true,
+  "ok": false,
+  "googleProtocolRequests": 47
+}

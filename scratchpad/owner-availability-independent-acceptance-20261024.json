@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T16:45:24.731820+00:00",
+  "reviewer": "lead_independent_qa",
+  "decision": "accepted_local_owner_availability_preview",
+  "baseCommit": "1be5608c23b4f957f656f3a463b4b32831812a7f",
+  "sourceStable": true,
+  "sourceFilesSHA256": {
+    "netlify/functions/client.mjs": "dd4b32eb49d43e1ea6c558d5a0862a57c61d697d4855d7fbb9b42124951b9d97",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "desk.js": "ddf29f72aeab9aa06adc0054fceea9c37e0e61abd19735de34a4acc4c0008ecd",
+    "desk-visits.js": "3afb80d8ddf3c64f1cb08ef2e4dd8d35e0b7d32b2c95a3d3fa15d03cf6be6494",
+    "desk.html": "760c34d1e54bc5cdbb5df8cfe4144ccdae41f2af1c124aa7d4b82ecd8c7ea2d8",
+    "desk.css": "e8c365af2166db92cc144c2d8ce78644a1deee35e442a0373468d61991cff041",
+    "scripts/owner-availability-check.mjs": "160fff7a7169ebe5ab5aa7463c8aac2ad0706d64f47a1acee56d23d8242532f9",
+    "scripts/build-site.mjs": "66d5909ad1d5776b51f1e6e3ead9091c9d248c83d75d29172a02c4561cfe1d3a",
+    "scratchpad/owner-availability-independent-check.mjs": "828d629f8d44eeb83b364b5f83a72bbe41daa738c5867fcc0b9cf88fd74e3056",
+    "netlify.toml": "b2a09b4ab71aa3bdea05d38cdec6177ea3cf4ed72f343c5e3854bba216695f67"
+  },
+  "independentResult": {
+    "path": "scratchpad/owner-availability-independent-second.json",
+    "sha256": "30f1d7ae719e843002e182305e944f45ee7af74ef93cf8c3bb7c91896011fad1",
+    "passed": 23,
+    "total": 23,
+    "actualHandlerGroups": 7,
+    "actualAssetBrowserJobs": 16,
+    "browserWidths": [
+      1440,
+      390
+    ],
+    "browserErrors": 0,
+    "physicalExternalRequests": 0,
+    "modelRequests": 0,
+    "providerCredentialFilesRead": 0,
+    "syntheticGoogleProtocolRequests": 61
+  },
+  "method": "Existing synthetic Calendar fixture/bootstrap and actual owner/client/store handlers; new independent adversarial assertions. Actual workspace assets run in isolated headless Chrome profiles with DNS blocked and all routes fulfilled locally. No provider/account browser context is accessed.",
+  "screenshotsViewed": [
+    {
+      "path": "scratchpad/owner-availability-independent-1440-checked.png",
+      "sha256": "b1b9f99cde8c71265fc23f5dc18dba74ff42c873f803c5f610a5211feb72bcd7"
+    },
+    {
+      "path": "scratchpad/owner-availability-independent-390-checked.png",
+      "sha256": "3eab6d0d4bf20d6bc942b470ed51d3fa259541f55ba46aa9dee77605e14e20fc"
+    }
+  ],
+  "preservedFailure": {
+    "path": "scratchpad/owner-availability-independent-first.json",
+    "sha256": "45b81aa50a1d822dd02ed44826d75feb84b7896976126c583dd2bbda7d5fe8c0",
+    "passed": 15,
+    "total": 21,
+    "sourceStable": true,
+    "disposition": "The first desktop expiry test used fixed browser+65seconds while an earlier backend fixture had advanced61seconds. It did not expire the actual returned snapshot; a valid Save completed, then five dependent desktop cases failed. Backend7 and mobile7 passed. The revised fixture advances browser Date.now to actual returned expiresAt+1 and restores it in finally; all affected jobs pass. No runtime repair is attributed to these fixture failures."
+  },
+  "acceptedBehavior": [
+    "The actual owner receives only checked date/window choices, public source provenance and freshness; no provider event IDs/titles/attendees/description/credentials are exposed, and a preview creates no booking/reservation operation.",
+    "Current visit/revision/tenant/owner/source rules fence exclusion and responses; stale changed visits and revoked sessions return no availability. Caller-invented exclusion or nonce fields are rejected.",
+    "Concurrent reordered same-range Calendar responses cannot overwrite a newer busy projection. Preview shares the durable physical-read envelope; exhausted or incomplete/provider-failed checks never become free choices.",
+    "Own reservation exclusion retains other reservations and exact foreign-event ownership checks.",
+    "Desktop/mobile actual slow preview preserves newer customer typing; the expiry gate prevents Save while preserving fields. An unchecked later date is labelled as requiring a check rather than falsely unavailable.",
+    "An older delayed UI response cannot overwrite a newer date result or a later reopened draft. Sign-out clears pending private choices.",
+    "Save rechecks actual current Calendar availability and rejects a new conflict without creating a booking or losing customer fields.",
+    "An accepted Save whose response is lost survives ordinary reload as the same pending operation; retry produces exactly one retained booking.",
+    "Observed desktop/mobile checked-choice layouts remain within viewport width; both screenshots were inspected.",
+    "Build packaging includes desk-visits.js; required gate/build evidence remains owned by Engineering and is not counted as an independent browser/provider pass."
+  ],
+  "limits": {
+    "publicationAccepted": false,
+    "actualCalendarMoveAccepted": false,
+    "actualCompleteProviderLifecycleAccepted": false,
+    "providerAutomationAcceptance": false,
+    "fullLaunchAccepted": false,
+    "next": "Root must integrate the exact accepted source, reconcile grouped release evidence, then perform a fresh bounded actual Calendar phase selecting proven-free windows. V5 connection/create/delete remain separate narrower actual acceptance."
+  },
+  "ownedEvidencePaths": [
+    "scratchpad/owner-availability-independent-check.mjs",
+    "scratchpad/owner-availability-independent-first.json",
+    "scratchpad/owner-availability-independent-second.json",
+    "scratchpad/owner-availability-independent-1440-checked.png",
+    "scratchpad/owner-availability-independent-390-checked.png",
+    "scratchpad/owner-availability-independent-acceptance-20261024.json"
+  ]
+}

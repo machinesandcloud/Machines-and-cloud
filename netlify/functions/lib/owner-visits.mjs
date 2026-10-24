@@ -1,7 +1,7 @@
 // Owner visit changes are local transactions. Provider reconcilers receive saved source
 // records separately; neither a visit save nor a queue attempt is a delivery receipt.
 import { createHash } from 'node:crypto';
-import { list, atomicUpdate, reserveBookingWindow, finishStableBookingWindow, finishBookingWindow, capacityKey, indexWorkspaceRecord, addToIndex } from './store.mjs';
+import { list, atomicUpdate, reserveBookingWindow, finishStableBookingWindow, finishBookingWindow, capacityKey, indexWorkspaceRecord, addToIndex, getAvailability } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { configurationRevision, isSupportedSelfServiceClient } from './setup.mjs';
 import { e164 } from './send.mjs';
@@ -30,6 +30,23 @@ async function authority(client, session, expectedRevision, { checkRevision = tr
   if (checkRevision && !['testing', 'live', 'paused'].includes(current.status)) throw new OwnerVisitError('workspace_unavailable', 'This workspace cannot change visits in its current state.');
   if (checkRevision && configurationRevision(current) !== expectedRevision) throw new OwnerVisitError('configuration_changed', 'Your saved business rules changed. Refresh before trying this change.');
   return current;
+}
+// An explicit owner check reuses ordinary availability and Calendar admission.
+// The projection never contains external event IDs, titles or attendee data.
+export async function previewOwnerVisitAvailability(client,session,body){
+  const fields=['action','expectedRevision','date','days',...(body?.visitId?['visitId','expectedVisitRevision']:[])];
+  if(!body||Array.isArray(body)||JSON.stringify(body).length>900||Object.keys(body).sort().join(',')!==fields.sort().join(',')||body.action!=='visit_availability'||!/^[a-f0-9]{64}$/.test(body.expectedRevision||'')||!Number.isInteger(body.days)||body.days<1||body.days>7||body.visitId&&(!/^[a-zA-Z0-9_-]{1,80}$/.test(body.visitId)||!/^[a-f0-9]{64}$/.test(body.expectedVisitRevision||'')))throw new OwnerVisitError('invalid_request','Choose a date and check up to seven days.',400);
+  let date;try{date=requestedDate(body.date,{isoOnly:true});}catch(error){if(error instanceof AvailabilityInputError)throw new OwnerVisitError(error.code,error.message,400,'date');throw error;}
+  const current=await authority(client,session,body.expectedRevision);
+  const visit=body.visitId?await strictRead('bookings',`${client.slug}/${body.visitId}`):null;
+  if(body.visitId&&(!owns(visit,current)||!active(visit.status)))throw new OwnerVisitError('visit_not_found','Refresh this visit before checking another time.',404);
+  if(visit&&ownerVisitRevision(visit)!==body.expectedVisitRevision)throw new OwnerVisitError('visit_changed','This visit changed. Refresh it before checking another time.');
+  let found;try{found=await getAvailability(current,date,body.days,{excludeBookingId:visit?.id||null});}
+  catch(error){if(String(error.code||'').startsWith('calendar_'))throw new OwnerVisitError(error.code,error.code==='calendar_consent_required'?'Reconnect Google Calendar in Connections, then check available times again.':'We couldn’t confirm Calendar availability. Try again; no visit has been changed.',error.code==='calendar_consent_required'?409:503);if(error instanceof AvailabilityInputError)throw new OwnerVisitError(error.code,error.message,400,'date');throw error;}
+  if(visit){const latest=await strictRead('bookings',`${client.slug}/${visit.id}`);if(!owns(latest,current)||ownerVisitRevision(latest)!==body.expectedVisitRevision)throw new OwnerVisitError('visit_changed','This visit changed while availability was checked. Refresh it before choosing a time.');}
+  await authority(client,session,body.expectedRevision);
+  const checkedAt=found.calendar?.checkedAt||stamp(),expiresAt=new Date(Math.min(Date.now()+60000,Date.parse(checkedAt)+60000)).toISOString();
+  return {ok:true,availability:{timezone:found.timezone,from:found.from,days:found.days,openings:found.openings,configurationRevision:body.expectedRevision,visitId:visit?.id||null,visitRevision:visit?body.expectedVisitRevision:null,checkedAt,expiresAt,source:found.calendar?'workspace_and_google':'workspace',message:'Available when checked. We check again when you save; choosing a time does not reserve it.'}};
 }
 function shape(body) {
   const allowed = ['action', 'visitId', 'expectedRevision', 'expectedVisitRevision', 'submissionId', ...(['create_visit','reschedule_visit'].includes(body.action) ? ['date', 'window'] : []), ...(body.action === 'create_visit' ? ['customer_name','phone','address','issue'] : [])];

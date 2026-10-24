@@ -33,7 +33,7 @@ import { dispatchCalendarDeliveryWave } from "./lib/calendar-delivery.mjs";
 import { serviceOnboardingStatus, requestServiceOnboarding, cancelServiceOnboarding, ServiceOnboardingError } from "./lib/service-onboarding.mjs";
 import { dispatchServiceOnboarding } from "./lib/service-onboarding-dispatch.mjs";
 
-import { changeOwnerVisit, ownerVisitView, pendingOwnerVisitChange, pendingOwnerVisitCreations, OwnerVisitError } from "./lib/owner-visits.mjs";
+import { changeOwnerVisit, previewOwnerVisitAvailability, ownerVisitView, pendingOwnerVisitChange, pendingOwnerVisitCreations, OwnerVisitError } from "./lib/owner-visits.mjs";
 import { parseWorkspacePatch, applyWorkspacePatch, workspacePatchConflicts, workspaceEditRevision, WorkspaceEditError } from "./lib/workspace-edit.mjs";
 import { websiteInstallationView, startWebsiteCheck, WebsiteInstallationError } from "./lib/website-installation.mjs";
 
@@ -245,12 +245,12 @@ async function handle(req) {
       try { return json(await startWebsiteCheck(c, session, b), 200, { 'Cache-Control': 'no-store' }); }
       catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message, ...(error.field ? { field: error.field } : {}) }, error.status, { 'Cache-Control': 'no-store' }); throw error; }
     }
-    if (["create_visit", "reschedule_visit", "cancel_visit"].includes(b?.action)) {
+    if (["create_visit", "reschedule_visit", "cancel_visit", "visit_availability"].includes(b?.action)) {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
-      try { return json(await changeOwnerVisit(c, session, b), 200, { "Cache-Control": "no-store" }); }
+      try { return json(await (b.action==='visit_availability'?previewOwnerVisitAvailability(c,session,b):changeOwnerVisit(c, session, b)), 200, { "Cache-Control": "no-store", "Netlify-CDN-Cache-Control":"no-store" }); }
       catch (error) {
         if (error instanceof OwnerVisitError) return json({ error: error.code, message: error.message, field: error.field }, error.status, { "Cache-Control": "no-store" });
-        return json({ error: "visit_outcome_uncertain", message: "The visit change could not be confirmed. Retry the same saved change." }, 503, { "Cache-Control": "no-store" });
+        return json({ error: b.action==='visit_availability'?"availability_unavailable":"visit_outcome_uncertain", message: b.action==='visit_availability'?"Available times could not be confirmed. Try again; no visit has been changed.":"The visit change could not be confirmed. Retry the same saved change." }, 503, { "Cache-Control": "no-store" });
       }
     }
     const serviceActions = {

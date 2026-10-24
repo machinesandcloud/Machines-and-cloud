@@ -459,13 +459,13 @@ function blockCount(state, date, windowKey) {
 function blockViews(state) {
   return (state.blocks || []).map((b) => ({ date: b.date, window: b.window, existingBookings: blockCount(state, b.date, b.windowKey) })).sort((a, b) => a.date.localeCompare(b.date) || a.window.localeCompare(b.window));
 }
-function openingsFromState(c, state, date, days, calendar = null, occupied = null) {
+function openingsFromState(c, state, date, days, calendar = null, occupied = null, excludeBookingId = null) {
   const dates = Array.from({ length: days }, (_, n) => addDays(date, n)).filter(isoDateValid);
   return { timezone: "America/Chicago", from: date, days: dates.length, openings: dates.map((day) => {
-    return { date: day, windows: listedWindows(c).filter((window) => !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && (calendar?occupied(c,state,calendar,day,window):reservedCount(state, bookingSlot(day, window))) < capacityLimit(c)) };
+    return { date: day, windows: listedWindows(c).filter((window) => !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && (calendar?occupied(c,state,calendar,day,window,excludeBookingId):excludeBookingId?Object.entries(state.reservations).filter(([id,slots])=>id!==excludeBookingId&&slots.includes(bookingSlot(day,window))).length:reservedCount(state, bookingSlot(day, window))) < capacityLimit(c)) };
   }),...(calendar?{calendar:{checkedAt:new Date(calendar.checkedAt).toISOString(),freshForSeconds:60,scope:'Connected owned Google calendar and saved workspace reservations'}}:{}) };
 }
-export async function getAvailability(c, date, days) {
+export async function getAvailability(c, date, days, { excludeBookingId = null } = {}) {
   await assertCurrentWorkspace(c);
   const from = requestedDate(date);
   if (!Number.isInteger(days) || days < 1 || days > 14) throw new AvailabilityInputError("invalid_days", "Check from 1 to 14 consecutive dates.");
@@ -474,7 +474,7 @@ export async function getAvailability(c, date, days) {
   return atomicUpdate("index", capacityKey(c), async (current) => {
     const state = validateCapacity(c, current) || await initialCapacity(c);
     await assertCalendarBusyProjection(c,calendar);
-    return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days,calendar,calendarOccupiedCount) };
+    return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days,calendar,calendarOccupiedCount,excludeBookingId) };
   });
 }
 // Used immediately before Calendar create/move, with the same local capacity

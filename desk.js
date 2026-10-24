@@ -74,7 +74,7 @@
     $('visitWindow').innerHTML=windows.map(function(window){return '<option value="'+esc(window)+'">'+esc(window)+'</option>';}).join(''); $('visitWindow').value=windowValue;
     $('visitCancelConfirm').checked=!!(pending && pending.action==='cancel_visit'); $('visitChangeForm').hidden=!visitSelected.canChange && !pending;
     visitFieldsDisabled(!!pending); $('retryVisit').hidden=!pending; $('visitMessage').textContent=pending?'A saved change still needs confirmation. Retry it using the same details.':visitSelected.canChange?(creating?"We’ll check availability when you save.":'Choose a listed arrival window. Full or blocked windows keep the original visit unchanged.'):'This visit is retained for your records.';
-    $('visitDialog').showModal(); $('closeVisit').focus();
+    $('visitDialog').showModal();document.dispatchEvent(new CustomEvent('mc:visit-open',{detail:{visitId:creating?null:visitSelected.id,visitRevision:creating?null:visitSelected.revision,configurationRevision:data.configurationRevision,pending:!!pending,canChange:visitSelected.canChange}})); $('closeVisit').focus();
   }
   function closeVisit() { if(visitBusy)return; $('visitDialog').close(); if(visitOpener && visitOpener.isConnected)visitOpener.focus(); }
   $('closeVisit').addEventListener('click',closeVisit);
@@ -95,7 +95,7 @@
       else {for(var field of [['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']]){if(!$(field[0]).value.trim()){visitPending=null;visitFieldError(field[1],'Complete this customer detail.');return;}visitPending[field[1]]=$(field[0]).value.trim();}}
       if(actionName==='create_visit' || actionName==='reschedule_visit'){visitPending.date=$('visitDate').value;visitPending.window=$('visitWindow').value;}
     }
-    visitBusy=true; visitFieldsDisabled(true); $('retryVisit').hidden=true; $('closeVisit').disabled=true; $('visitMessage').textContent='Confirming your saved change…';
+    visitBusy=true;document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:true,pending:!!visitPending}})); visitFieldsDisabled(true); $('retryVisit').hidden=true; $('closeVisit').disabled=true; $('visitMessage').textContent='Confirming your saved change…';
     try {
       var retained=await storeVisitInput(visitPending); if(leaving || generation!==portalGeneration)return;
       if(!retained)$('visitMessage').textContent='Keep this page open while the change is confirmed. Browser recovery storage is unavailable.';
@@ -106,9 +106,9 @@
     } catch(error) {
       if(leaving || generation!==portalGeneration)return;
       $('visitMessage').textContent=error.message;
-      if(error.status && error.status<500){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return;visitFieldsDisabled(false);if(error.field)visitFieldError(error.field,error.message);else $('visitMessage').focus();}
+      if(error.status && error.status<500){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return;visitFieldsDisabled(false);if(error.field==='window'||error.field==='date'||['configuration_changed','visit_changed','visit_not_found'].includes(error.code))document.dispatchEvent(new CustomEvent('mc:visit-availability-invalid',{detail:{reason:error.code}}));if(error.field)visitFieldError(error.field,error.message);else $('visitMessage').focus();}
       else {$('retryVisit').hidden=false; $('visitMessage').textContent+=' Retry saved change safely; the original submission will be reused.';}
-    } finally {if(!leaving && generation===portalGeneration){visitBusy=false; $('closeVisit').disabled=false;}}
+    } finally {if(!leaving && generation===portalGeneration){visitBusy=false;document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:false,pending:!!visitPending}})); $('closeVisit').disabled=false;}}
   }
   $('newVisit').addEventListener('click',function(){openVisit(null);});
   $('visitChangeForm').addEventListener('submit',function(event){event.preventDefault();saveVisitChange('reschedule_visit');});
