@@ -1,0 +1,449 @@
+{
+  "at": "2026-10-24T11:12:30.493Z",
+  "role": "product_owner_v2 and UI/UX",
+  "boundary": "Actual customer assets with mocked API responses and stub workspace destination. External traffic blocked. No physical email/model/provider or production request.",
+  "sourceBefore": {
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "jobs": [
+    {
+      "name": "customer-confirmed-1440",
+      "path": "scratchpad/signup-feedback-po-customer-confirmed-1440-r2.png",
+      "title": "Check your email",
+      "intro": "Your secure sign-in link is on its way to",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes.",
+      "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "owner.long-address+setup@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-uncertain-1440",
+      "path": "scratchpad/signup-feedback-po-customer-uncertain-1440-r2.png",
+      "title": "Check your inbox first",
+      "intro": "We couldn’t confirm whether a sign-in email was sent to",
+      "help": "Check your inbox before requesting another link. If an email arrives, you can use it to continue.",
+      "status": "We couldn’t confirm whether the email was sent. Check your inbox before requesting another link.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "uncertain@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-failed-1440",
+      "path": "scratchpad/signup-feedback-po-customer-failed-1440-r2.png",
+      "title": "Let’s get started.",
+      "intro": "We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.",
+      "help": "",
+      "status": "We could not send the sign-in email. Please try again shortly.",
+      "focus": "access-status",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "retained@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-local-preview-1440",
+      "path": "scratchpad/signup-feedback-po-customer-local-preview-1440-r2.png",
+      "title": "Your test link is ready",
+      "intro": "A local test link is ready for",
+      "help": "This preview uses a local test inbox. No email was sent.",
+      "status": "A link was saved in the local test inbox. No email was sent.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "preview@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-confirmed-390",
+      "path": "scratchpad/signup-feedback-po-customer-confirmed-390-r2.png",
+      "title": "Check your email",
+      "intro": "Your secure sign-in link is on its way to",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes.",
+      "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "owner.long-address+setup@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-uncertain-390",
+      "path": "scratchpad/signup-feedback-po-customer-uncertain-390-r2.png",
+      "title": "Check your inbox first",
+      "intro": "We couldn’t confirm whether a sign-in email was sent to",
+      "help": "Check your inbox before requesting another link. If an email arrives, you can use it to continue.",
+      "status": "We couldn’t confirm whether the email was sent. Check your inbox before requesting another link.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "uncertain@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-failed-390",
+      "path": "scratchpad/signup-feedback-po-customer-failed-390-r2.png",
+      "title": "Let’s get started.",
+      "intro": "We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.",
+      "help": "",
+      "status": "We could not send the sign-in email. Please try again shortly.",
+      "focus": "access-status",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "retained@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-local-preview-390",
+      "path": "scratchpad/signup-feedback-po-customer-local-preview-390-r2.png",
+      "title": "Your test link is ready",
+      "intro": "A local test link is ready for",
+      "help": "This preview uses a local test inbox. No email was sent.",
+      "status": "A link was saved in the local test inbox. No email was sent.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "preview@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-confirmed-320",
+      "path": "scratchpad/signup-feedback-po-customer-confirmed-320-r2.png",
+      "title": "Check your email",
+      "intro": "Your secure sign-in link is on its way to",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes.",
+      "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "owner.long-address+setup@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-uncertain-320",
+      "path": "scratchpad/signup-feedback-po-customer-uncertain-320-r2.png",
+      "title": "Check your inbox first",
+      "intro": "We couldn’t confirm whether a sign-in email was sent to",
+      "help": "Check your inbox before requesting another link. If an email arrives, you can use it to continue.",
+      "status": "We couldn’t confirm whether the email was sent. Check your inbox before requesting another link.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "uncertain@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-failed-320",
+      "path": "scratchpad/signup-feedback-po-customer-failed-320-r2.png",
+      "title": "Let’s get started.",
+      "intro": "We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.",
+      "help": "",
+      "status": "We could not send the sign-in email. Please try again shortly.",
+      "focus": "access-status",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "retained@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "customer-local-preview-320",
+      "path": "scratchpad/signup-feedback-po-customer-local-preview-320-r2.png",
+      "title": "Your test link is ready",
+      "intro": "A local test link is ready for",
+      "help": "This preview uses a local test inbox. No email was sent.",
+      "status": "A link was saved in the local test inbox. No email was sent.",
+      "focus": "access-title",
+      "overflow": false,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "preview@example.test",
+            "plan": "growth"
+          }
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "customer-confirmed-1440: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440: ordinary submit clearly finishes in a focused confirmation",
+      "pass": true
+    },
+    {
+      "name": "1440: success instructions appear once; live announcement remains accessible",
+      "pass": true,
+      "detail": "Check your inbox for a link to continue. It expires in 20 minutes."
+    },
+    {
+      "name": "1440: change address restores current value and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "1440: corrected explicit submission names new recipient only",
+      "pass": true
+    },
+    {
+      "name": "1440: email-link fragment still opens existing workspace automatically",
+      "pass": true
+    },
+    {
+      "name": "customer-uncertain-1440: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440: lost response is uncertain with check-inbox recovery and no automatic repeat",
+      "pass": true
+    },
+    {
+      "name": "customer-failed-1440: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440: declared error retains email, exposes real error and focuses recovery",
+      "pass": true
+    },
+    {
+      "name": "1440: explicit retry after failure resolves to confirmation",
+      "pass": true
+    },
+    {
+      "name": "customer-local-preview-1440: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "1440: local preview never claims real email",
+      "pass": true
+    },
+    {
+      "name": "customer-confirmed-390: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390: ordinary submit clearly finishes in a focused confirmation",
+      "pass": true
+    },
+    {
+      "name": "390: success instructions appear once; live announcement remains accessible",
+      "pass": true,
+      "detail": "Check your inbox for a link to continue. It expires in 20 minutes."
+    },
+    {
+      "name": "390: change address restores current value and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "390: corrected explicit submission names new recipient only",
+      "pass": true
+    },
+    {
+      "name": "390: email-link fragment still opens existing workspace automatically",
+      "pass": true
+    },
+    {
+      "name": "customer-uncertain-390: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390: lost response is uncertain with check-inbox recovery and no automatic repeat",
+      "pass": true
+    },
+    {
+      "name": "customer-failed-390: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390: declared error retains email, exposes real error and focuses recovery",
+      "pass": true
+    },
+    {
+      "name": "390: explicit retry after failure resolves to confirmation",
+      "pass": true
+    },
+    {
+      "name": "customer-local-preview-390: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "390: local preview never claims real email",
+      "pass": true
+    },
+    {
+      "name": "customer-confirmed-320: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320: ordinary submit clearly finishes in a focused confirmation",
+      "pass": true
+    },
+    {
+      "name": "320: success instructions appear once; live announcement remains accessible",
+      "pass": true,
+      "detail": "Check your inbox for a link to continue. It expires in 20 minutes."
+    },
+    {
+      "name": "320: change address restores current value and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "320: corrected explicit submission names new recipient only",
+      "pass": true
+    },
+    {
+      "name": "320: email-link fragment still opens existing workspace automatically",
+      "pass": true
+    },
+    {
+      "name": "customer-uncertain-320: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320: lost response is uncertain with check-inbox recovery and no automatic repeat",
+      "pass": true
+    },
+    {
+      "name": "customer-failed-320: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320: declared error retains email, exposes real error and focuses recovery",
+      "pass": true
+    },
+    {
+      "name": "320: explicit retry after failure resolves to confirmation",
+      "pass": true
+    },
+    {
+      "name": "customer-local-preview-320: no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "320: local preview never claims real email",
+      "pass": true
+    },
+    {
+      "name": "Customer source remained stable for PO walkthrough",
+      "pass": true
+    },
+    {
+      "name": "No browser script errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "pageErrors": [],
+  "sourceAfter": {
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "summary": {
+    "passed": 41,
+    "failed": 0,
+    "total": 41
+  }
+}

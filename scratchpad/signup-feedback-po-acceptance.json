@@ -1,0 +1,84 @@
+{
+  "at": "2026-10-24T11:13:07.910Z",
+  "role": "product_owner_v2",
+  "baseCommit": "29f020bfab6834de4144af04729aa30d50305f81",
+  "decision": "ACCEPTED LOCALLY for the selected sign-in feedback and access recovery slice only",
+  "customerJob": "Request a sign-in link, immediately understand its destination and next step, correct the email without an accidental send, then return automatically from the email to existing work. Operators also recover from expired links or initial portal-read failures through a real next action.",
+  "sourceFiles": {
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+    "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+    "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85"
+  },
+  "evidence": [
+    {
+      "path": "scratchpad/signup-feedback-po-customer-review-r2.json",
+      "sha256": "a7cce4bc08af042cbadcaefdd4d2104aec50acca4208637d7f6239b59c5d95c6",
+      "summary": {
+        "passed": 41,
+        "failed": 0,
+        "total": 41
+      },
+      "boundary": "Actual customer assets with mocked API responses and stub workspace destination. External traffic blocked. No physical email/model/provider or production request."
+    },
+    {
+      "path": "scratchpad/signup-feedback-po-admin-final.json",
+      "sha256": "6de322206981e4bc91d1481e921a1bdc43b2c9b9543fad8ee27e90ea9ef985ee",
+      "summary": {
+        "passed": 59,
+        "failed": 0,
+        "total": 59
+      },
+      "boundary": "Actual admin assets with intercepted API/static files only. No actual emails, provider, hosted or deployment effect."
+    }
+  ],
+  "visualReview": {
+    "customer": [
+      "1440px and390px accepted confirmation",
+      "320px uncertain transport",
+      "390px declared send failure"
+    ],
+    "operator": [
+      "1440px accepted confirmation",
+      "320px conditional eligibility",
+      "390px expired-link recovery",
+      "390px verified-session retry"
+    ],
+    "observed": "Prominent changed heading, exact submitted address, one visible accepted-send instruction, controlled resend and a clear change-email action. Long addresses wrap. Recovery has an actionable control. No observed overflow or clipping at320/390/1440.",
+    "latestCustomerRefresh": "Customer r2 observed same ordinary visual states on final29f020b hidden-control guard source; prior screenshots retained."
+  },
+  "defectsClosed": [
+    {
+      "id": "customer-send-feedback",
+      "before": "Successful send left initial form/title and enabled original button.",
+      "after": "The focused Check your email confirmation replaces the form and identifies the submitted address."
+    },
+    {
+      "id": "operator-send-feedback",
+      "before": "Same unchanged-form pattern.",
+      "after": "Equivalent visible confirmation; unlisted operator email stays conditional; local preview explicitly says no email."
+    },
+    {
+      "id": "operator-expired-link-deadend",
+      "before": "410 said request a new link but left only the same Continue securely button.",
+      "after": "410 now reveals fresh-request form. Successful verification followed by503 retains session and offers GET-only retry without another exchange/email."
+    }
+  ],
+  "failurePreservation": {
+    "baseline": "scratchpad/signup-feedback-po-baseline.json",
+    "expiredDeadend": "scratchpad/signup-feedback-po-admin-expired-deadend.json",
+    "overlyLiteralAdminAssertions": "scratchpad/signup-feedback-po-admin-review.json",
+    "disposition": "Three old assertions required literal email rather than rendered address; this was a test-language defect. Final actual browser review uses conditional semantics and passes59checks. Original failures are retained."
+  },
+  "minorFollowup": "Unknown transport views repeat some inbox-check wording in instructional text and warning status. The honest actionable outcome is accepted; this minor copy polish does not block the slice.",
+  "neighborAudit": "scratchpad/signup-feedback-po-audit.json",
+  "neighborLimits": "Acquisition intake, Account saves/downloads, billing and admin refresh/export were source-reviewed with prior accepted evidence reused. This review does not newly certify all those workflows.",
+  "publication": false,
+  "actualEmailDelivery": false,
+  "actualProviderDelivery": false,
+  "launchDecision": "Full unattended or paid complete-offer launch remains NO-GO. Calendar owner permission, actual same-event lifecycle/scheduled recovery and other provider/operational gates remain open. No closed Calendar allowance was reused."
+}

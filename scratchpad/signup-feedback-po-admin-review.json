@@ -1,0 +1,789 @@
+{
+  "at": "2026-10-24T11:04:52.187Z",
+  "role": "product_owner_v2",
+  "boundary": "Actual admin UI; local intercepted API/static files only. No external/production email/provider traffic.",
+  "sourcesBefore": {
+    "admin.html": "480f6a5a815d25f194288fe12161749812d91d80ba5ea27f6b94b39230c03df4",
+    "admin.js": "de8fe3db49df773f8de6356f6ed1233c2bb35985e1187bc52ce12d17f8a2929a",
+    "admin.css": "f689d9e82a5d926a0a1dbe32a7994dc85477141fcf9b8ec5f8747d2fe2de68a6",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3"
+  },
+  "cases": [
+    {
+      "width": 1440,
+      "mode": "email",
+      "title": "Check your email",
+      "intro": "Your secure sign-in link is on its way to",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+      "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-email-1440.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 762,
+          "y": 357.296875,
+          "width": 435,
+          "height": 185.625,
+          "top": 357.296875,
+          "right": 1197,
+          "bottom": 542.921875,
+          "left": 762
+        }
+      }
+    },
+    {
+      "width": 1440,
+      "mode": "conditional",
+      "title": "Check your email",
+      "intro": "If this address has operator access, a sign-in link will arrive shortly.",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+      "status": "If this email has operator access, a sign-in link will arrive shortly.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-conditional-1440.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 762,
+          "y": 357.296875,
+          "width": 435,
+          "height": 185.625,
+          "top": 357.296875,
+          "right": 1197,
+          "bottom": 542.921875,
+          "left": 762
+        }
+      }
+    },
+    {
+      "width": 1440,
+      "mode": "test_outbox",
+      "title": "Your test link is ready",
+      "intro": "A sign-in link was saved in the local test inbox for",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "No email was sent. Use the local test inbox to continue.",
+      "status": "A link was saved in the local test inbox. No email was sent.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-test_outbox-1440.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 762,
+          "y": 368.015625,
+          "width": 435,
+          "height": 164.1875,
+          "top": 368.015625,
+          "right": 1197,
+          "bottom": 532.203125,
+          "left": 762
+        }
+      }
+    },
+    {
+      "width": 390,
+      "mode": "email",
+      "title": "Check your email",
+      "intro": "Your secure sign-in link is on its way to",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+      "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-email-390.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 262.59375,
+          "width": 308,
+          "height": 287.8125,
+          "top": 262.59375,
+          "right": 349,
+          "bottom": 550.40625,
+          "left": 41
+        }
+      }
+    },
+    {
+      "width": 390,
+      "mode": "conditional",
+      "title": "Check your email",
+      "intro": "If this address has operator access, a sign-in link will arrive shortly.",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+      "status": "If this email has operator access, a sign-in link will arrive shortly.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-conditional-390.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 284.03125,
+          "width": 308,
+          "height": 287.8125,
+          "top": 284.03125,
+          "right": 349,
+          "bottom": 571.84375,
+          "left": 41
+        }
+      }
+    },
+    {
+      "width": 390,
+      "mode": "test_outbox",
+      "title": "Your test link is ready",
+      "intro": "A sign-in link was saved in the local test inbox for",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "No email was sent. Use the local test inbox to continue.",
+      "status": "A link was saved in the local test inbox. No email was sent.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-test_outbox-390.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 262.59375,
+          "width": 308,
+          "height": 266.375,
+          "top": 262.59375,
+          "right": 349,
+          "bottom": 528.96875,
+          "left": 41
+        }
+      }
+    },
+    {
+      "width": 320,
+      "mode": "email",
+      "title": "Check your email",
+      "intro": "Your secure sign-in link is on its way to",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+      "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-email-320.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 262.59375,
+          "width": 238,
+          "height": 334,
+          "top": 262.59375,
+          "right": 279,
+          "bottom": 596.59375,
+          "left": 41
+        }
+      }
+    },
+    {
+      "width": 320,
+      "mode": "conditional",
+      "title": "Check your email",
+      "intro": "If this address has operator access, a sign-in link will arrive shortly.",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+      "status": "If this email has operator access, a sign-in link will arrive shortly.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-conditional-320.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 284.03125,
+          "width": 238,
+          "height": 334,
+          "top": 284.03125,
+          "right": 279,
+          "bottom": 618.03125,
+          "left": 41
+        }
+      }
+    },
+    {
+      "width": 320,
+      "mode": "test_outbox",
+      "title": "Your test link is ready",
+      "intro": "A sign-in link was saved in the local test inbox for",
+      "recipient": "owner.long-address+operator@example.test",
+      "help": "No email was sent. Use the local test inbox to continue.",
+      "status": "A link was saved in the local test inbox. No email was sent.",
+      "focus": "loginTitle",
+      "formVisible": false,
+      "resendDisabled": true,
+      "requestCount": 1,
+      "errors": [],
+      "screenshot": "scratchpad/signup-feedback-po-admin-test_outbox-320.png",
+      "geometry": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 317.625,
+          "width": 238,
+          "height": 291.125,
+          "top": 317.625,
+          "right": 279,
+          "bottom": 608.75,
+          "left": 41
+        }
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "1440 email: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "mode": "email",
+        "title": "Check your email",
+        "intro": "Your secure sign-in link is on its way to",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+        "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-email-1440.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 762,
+            "y": 357.296875,
+            "width": 435,
+            "height": 185.625,
+            "top": 357.296875,
+            "right": 1197,
+            "bottom": 542.921875,
+            "left": 762
+          }
+        }
+      }
+    },
+    {
+      "name": "1440 email: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 762,
+          "y": 357.296875,
+          "width": 435,
+          "height": 185.625,
+          "top": 357.296875,
+          "right": 1197,
+          "bottom": 542.921875,
+          "left": 762
+        }
+      }
+    },
+    {
+      "name": "1440 email: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "1440 conditional: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "mode": "conditional",
+        "title": "Check your email",
+        "intro": "If this address has operator access, a sign-in link will arrive shortly.",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+        "status": "If this email has operator access, a sign-in link will arrive shortly.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-conditional-1440.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 762,
+            "y": 357.296875,
+            "width": 435,
+            "height": 185.625,
+            "top": 357.296875,
+            "right": 1197,
+            "bottom": 542.921875,
+            "left": 762
+          }
+        }
+      }
+    },
+    {
+      "name": "1440 conditional: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 762,
+          "y": 357.296875,
+          "width": 435,
+          "height": 185.625,
+          "top": 357.296875,
+          "right": 1197,
+          "bottom": 542.921875,
+          "left": 762
+        }
+      }
+    },
+    {
+      "name": "1440: conditional response does not claim email sent",
+      "pass": false,
+      "detail": "If this address has operator access, a sign-in link will arrive shortly."
+    },
+    {
+      "name": "1440 conditional: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "1440 test_outbox: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "mode": "test_outbox",
+        "title": "Your test link is ready",
+        "intro": "A sign-in link was saved in the local test inbox for",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "No email was sent. Use the local test inbox to continue.",
+        "status": "A link was saved in the local test inbox. No email was sent.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-test_outbox-1440.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 762,
+            "y": 368.015625,
+            "width": 435,
+            "height": 164.1875,
+            "top": 368.015625,
+            "right": 1197,
+            "bottom": 532.203125,
+            "left": 762
+          }
+        }
+      }
+    },
+    {
+      "name": "1440 test_outbox: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 762,
+          "y": 368.015625,
+          "width": 435,
+          "height": 164.1875,
+          "top": 368.015625,
+          "right": 1197,
+          "bottom": 532.203125,
+          "left": 762
+        }
+      }
+    },
+    {
+      "name": "1440: local preview explicitly discloses no email",
+      "pass": true,
+      "detail": "No email was sent. Use the local test inbox to continue."
+    },
+    {
+      "name": "1440 test_outbox: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "390 email: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 390,
+        "mode": "email",
+        "title": "Check your email",
+        "intro": "Your secure sign-in link is on its way to",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+        "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-email-390.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 41,
+            "y": 262.59375,
+            "width": 308,
+            "height": 287.8125,
+            "top": 262.59375,
+            "right": 349,
+            "bottom": 550.40625,
+            "left": 41
+          }
+        }
+      }
+    },
+    {
+      "name": "390 email: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 262.59375,
+          "width": 308,
+          "height": 287.8125,
+          "top": 262.59375,
+          "right": 349,
+          "bottom": 550.40625,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "390 email: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "390 conditional: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 390,
+        "mode": "conditional",
+        "title": "Check your email",
+        "intro": "If this address has operator access, a sign-in link will arrive shortly.",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+        "status": "If this email has operator access, a sign-in link will arrive shortly.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-conditional-390.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 41,
+            "y": 284.03125,
+            "width": 308,
+            "height": 287.8125,
+            "top": 284.03125,
+            "right": 349,
+            "bottom": 571.84375,
+            "left": 41
+          }
+        }
+      }
+    },
+    {
+      "name": "390 conditional: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 284.03125,
+          "width": 308,
+          "height": 287.8125,
+          "top": 284.03125,
+          "right": 349,
+          "bottom": 571.84375,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "390: conditional response does not claim email sent",
+      "pass": false,
+      "detail": "If this address has operator access, a sign-in link will arrive shortly."
+    },
+    {
+      "name": "390 conditional: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "390 test_outbox: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 390,
+        "mode": "test_outbox",
+        "title": "Your test link is ready",
+        "intro": "A sign-in link was saved in the local test inbox for",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "No email was sent. Use the local test inbox to continue.",
+        "status": "A link was saved in the local test inbox. No email was sent.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-test_outbox-390.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 41,
+            "y": 262.59375,
+            "width": 308,
+            "height": 266.375,
+            "top": 262.59375,
+            "right": 349,
+            "bottom": 528.96875,
+            "left": 41
+          }
+        }
+      }
+    },
+    {
+      "name": "390 test_outbox: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 262.59375,
+          "width": 308,
+          "height": 266.375,
+          "top": 262.59375,
+          "right": 349,
+          "bottom": 528.96875,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "390: local preview explicitly discloses no email",
+      "pass": true,
+      "detail": "No email was sent. Use the local test inbox to continue."
+    },
+    {
+      "name": "390 test_outbox: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "320 email: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 320,
+        "mode": "email",
+        "title": "Check your email",
+        "intro": "Your secure sign-in link is on its way to",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+        "status": "Check your inbox for a link to continue. It expires in 20 minutes.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-email-320.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 41,
+            "y": 262.59375,
+            "width": 238,
+            "height": 334,
+            "top": 262.59375,
+            "right": 279,
+            "bottom": 596.59375,
+            "left": 41
+          }
+        }
+      }
+    },
+    {
+      "name": "320 email: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 262.59375,
+          "width": 238,
+          "height": 334,
+          "top": 262.59375,
+          "right": 279,
+          "bottom": 596.59375,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "320 email: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "320 conditional: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 320,
+        "mode": "conditional",
+        "title": "Check your email",
+        "intro": "If this address has operator access, a sign-in link will arrive shortly.",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.",
+        "status": "If this email has operator access, a sign-in link will arrive shortly.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-conditional-320.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 41,
+            "y": 284.03125,
+            "width": 238,
+            "height": 334,
+            "top": 284.03125,
+            "right": 279,
+            "bottom": 618.03125,
+            "left": 41
+          }
+        }
+      }
+    },
+    {
+      "name": "320 conditional: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 284.03125,
+          "width": 238,
+          "height": 334,
+          "top": 284.03125,
+          "right": 279,
+          "bottom": 618.03125,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "320: conditional response does not claim email sent",
+      "pass": false,
+      "detail": "If this address has operator access, a sign-in link will arrive shortly."
+    },
+    {
+      "name": "320 conditional: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "320 test_outbox: clear confirmation, exact address and focus",
+      "pass": true,
+      "detail": {
+        "width": 320,
+        "mode": "test_outbox",
+        "title": "Your test link is ready",
+        "intro": "A sign-in link was saved in the local test inbox for",
+        "recipient": "owner.long-address+operator@example.test",
+        "help": "No email was sent. Use the local test inbox to continue.",
+        "status": "A link was saved in the local test inbox. No email was sent.",
+        "focus": "loginTitle",
+        "formVisible": false,
+        "resendDisabled": true,
+        "requestCount": 1,
+        "errors": [],
+        "screenshot": "scratchpad/signup-feedback-po-admin-test_outbox-320.png",
+        "geometry": {
+          "overflow": false,
+          "b": {
+            "x": 41,
+            "y": 317.625,
+            "width": 238,
+            "height": 291.125,
+            "top": 317.625,
+            "right": 279,
+            "bottom": 608.75,
+            "left": 41
+          }
+        }
+      }
+    },
+    {
+      "name": "320 test_outbox: mobile/desktop layout no overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "b": {
+          "x": 41,
+          "y": 317.625,
+          "width": 238,
+          "height": 291.125,
+          "top": 317.625,
+          "right": 279,
+          "bottom": 608.75,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "320: local preview explicitly discloses no email",
+      "pass": true,
+      "detail": "No email was sent. Use the local test inbox to continue."
+    },
+    {
+      "name": "320 test_outbox: edit returns saved address and focus without sending",
+      "pass": true
+    },
+    {
+      "name": "Admin source stable for review",
+      "pass": true
+    }
+  ],
+  "sourcesAfter": {
+    "admin.html": "480f6a5a815d25f194288fe12161749812d91d80ba5ea27f6b94b39230c03df4",
+    "admin.js": "de8fe3db49df773f8de6356f6ed1233c2bb35985e1187bc52ce12d17f8a2929a",
+    "admin.css": "f689d9e82a5d926a0a1dbe32a7994dc85477141fcf9b8ec5f8747d2fe2de68a6",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3"
+  },
+  "summary": {
+    "passed": 31,
+    "failed": 3,
+    "total": 34
+  }
+}

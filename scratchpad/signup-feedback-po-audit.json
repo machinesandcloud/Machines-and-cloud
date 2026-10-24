@@ -1,0 +1,92 @@
+{
+  "at": "2026-10-24T11:04:12.858Z",
+  "role": "product_owner_v2 with UI/UX review",
+  "selectedCustomerJob": "Request a secure sign-in email, understand the next step immediately, correct the address or resend intentionally, and continue automatically from the emailed link.",
+  "baselineEvidence": "scratchpad/signup-feedback-po-baseline.json",
+  "confirmedDefects": [
+    {
+      "id": "access-feedback-customer",
+      "severity": "P1 customer access usability",
+      "source": "onboard.js submit handler at baseline1e73",
+      "reproduction": "On onboard.html enter owner@example.test and submit; return successful202 {ok:true,delivery:\"email\"} from local mock.",
+      "observed": "1440px and390px retain initial title, email field and enabled initial-submit button. Only a small status sentence changes; focus leaves the hidden busy control with no new heading focus.",
+      "customerImpact": "The ordinary action does not clearly finish. Owners can mistake the unchanged form for a failed submission and request repeated emails.",
+      "minimalRepair": "A distinct check-email card state with submitted address, next action, explicit edit and controlled resend."
+    },
+    {
+      "id": "access-feedback-operator",
+      "severity": "P1 operator access usability",
+      "source": "admin.js236-241 at baseline1e73",
+      "reproduction": "Repeat request on admin.html with accepted mocked email response.",
+      "observed": "Same unchanged-form/title defect at1440px and390px.",
+      "customerImpact": "Operator gets the same ambiguous feedback and may repeat a request.",
+      "minimalRepair": "Equivalent obvious state, retaining neutral conditional copy for unknown/unlisted operator email."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "state-change",
+      "criterion": "Success hides first-submit form and presents prominent Check your email heading, exact submitted address and concise next instruction."
+    },
+    {
+      "id": "honest-outcome",
+      "criterion": "Only accepted delivery=email uses email-sent/on-the-way copy; local test_outbox explicitly says no email; operator anti-enumeration response remains conditional; lost/malformed response remains uncertain."
+    },
+    {
+      "id": "controlled-actions",
+      "criterion": "Resend only from explicit user action after visible short cooldown. Correct address returns retained value and focus to email input without sending; do not resend automatically."
+    },
+    {
+      "id": "loading-and-errors",
+      "criterion": "One request in flight; visible loading and busy state; declared failure preserves current address and provides useful recovery. Rate-limit message is visible and does not become success."
+    },
+    {
+      "id": "accessible-transition",
+      "criterion": "Heading/status receives meaningful focus/announcement; new controls remain keyboard reachable; mobile320/390 and desktop1440 have no overflow/overlap or clipped address."
+    },
+    {
+      "id": "resume",
+      "criterion": "An emailed link retains automatic verification and routes to saved setup/workspace; late original responses cannot overwrite a newer access generation."
+    }
+  ],
+  "neighborReview": [
+    {
+      "path": "signup-intake.js",
+      "basis": "Source audit only",
+      "observed": "Existing pending/busy state, actual accepted handoff validation, Saved/Opening transition and timed-error recovery with retained answers; not the unchanged email-send form pattern."
+    },
+    {
+      "path": "desk.js account saves and downloads",
+      "basis": "Source audit plus retained accepted evidence, not re-executed yet",
+      "observed": "Current source has dedicated save/conflict/error states and retained-newer-edits feedback; CSV explicitly says download started and identifies browser downloads. Existing Account independent handler/browser suites remain applicable; no new confirmed defect from this narrow source audit."
+    },
+    {
+      "path": "desk-billing.js",
+      "basis": "Source audit only",
+      "observed": "Pending review/checkout/portal messages and uncertainty check-status path already present; actual Stripe completion remains unaccepted."
+    },
+    {
+      "path": "admin.js refresh/export",
+      "basis": "Source audit only",
+      "observed": "Busy disabled controls, updated timestamp, stale-data refresh failure notice and explicit export status are present. This review does not establish all operator actions work."
+    },
+    {
+      "path": "script.js legacy.contact-form code",
+      "basis": "Source audit only",
+      "observed": "No current HTML uses contact-form selector in this checkout; dormant code is not counted as a customer-facing defect."
+    }
+  ],
+  "limits": "Local UX implementation/review only. No production email, inbox delivery, provider, hosted or deployment result. Calendar remains next provider milestone; full-service paid/unattended launch remains NO-GO. The closed Calendar allowance is not reused.",
+  "filesReviewed": {
+    "onboard.js": "3dcfc7cb53fec083bc821921786db0e5e7c89b09544913208e4f9a788ce93207",
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "admin.js": "de8fe3db49df773f8de6356f6ed1233c2bb35985e1187bc52ce12d17f8a2929a",
+    "admin.html": "480f6a5a815d25f194288fe12161749812d91d80ba5ea27f6b94b39230c03df4",
+    "admin.css": "f689d9e82a5d926a0a1dbe32a7994dc85477141fcf9b8ec5f8747d2fe2de68a6",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk-billing.js": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5"
+  }
+}
