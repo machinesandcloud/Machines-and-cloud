@@ -240,12 +240,14 @@ export async function createController({mode='plan',approvedPacketPath,approvedP
     if(counters.blobs>=LIMITS.blobs||counters.control>=LIMITS.control)fail('limit_blobs_or_control');
     counters.blobs++;counters.control++;id=++sequence;
     await persist({event:'reserved_unknown',id,kind:'blobs',method:'GET',path:'/signed-read/'+c.details.store+'/:approved-record',action:c.action,signedRecordBinding:digest([c.details.store,c.details.key])});
+    // A failed second-hop transport must not inherit the first-hop HTTP 200.
+    response=null;
     response=await send(resolved,{method:'GET',headers:{Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(20000)});
     bodyBytes=Buffer.from(await response.arrayBuffer());raw=bodyBytes.toString('utf8');try{data=JSON.parse(raw);}catch{if(!(response.status===404&&['budget_inspection','brake_inspection'].includes(c.action)))fail('json_response');}
    }
    await observe(c,response,data);await persist({event:'completed',id,status:response.status,bytes:bodyBytes.length,responseSHA256:sha(bodyBytes)});
    return {status:response.status,headers:new Headers(response.headers),data,text:raw,bodyBytes};
-  }catch(error){halted=true;await persist({event:'failed_or_uncertain',id,code:error.code||'transport_or_response_failure'});throw error;}
+  }catch(error){halted=true;await persist({event:'failed_or_uncertain',id,code:error.code||'transport_or_response_failure',httpStatus:response?.status??null});throw error;}
  });}
  return {
   request,state:()=>structuredClone(state()),

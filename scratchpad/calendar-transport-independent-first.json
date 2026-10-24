@@ -1,0 +1,91 @@
+{
+  "at": "2026-10-24T10:00:22.886Z",
+  "scope": "Offline proof-adapter repair only; no private packet, credentials, actual provider/browser/native/control/API request",
+  "before": {
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+    "scripts/calendar-live-guard.mjs": "004ee29d91fe895d31dd8c5aac49972d662d75824c23e8be87373d886dcf3863",
+    "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+    "scripts/calendar-live-actor-check.mjs": "b6042b17e27b902a25580eb59fa8e933b6a0dcb379b8208bde44eb8dc6e5f285",
+    "scripts/calendar-live-guard-check.mjs": "4f43de82b1857e563a9f343846d459c384719d2afd1161c8d46ca5c7d1d1b163",
+    "scripts/calendar-record-transport-check.mjs": "206a8f5dc5e3f6bcfae9960d87be9b40184f140ebe901ef0e7e583cdaac0769d",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+    "scratchpad/calendar-transport-independent-check.mjs": "6dc8fb137f1cc500678ecdce93e50b80556acc3074678b671e0800f6aaaf72a0"
+  },
+  "checks": [
+    {
+      "name": "Actor budget paths match installed SDK for valid short, mixed and maximum80-character versions",
+      "pass": true,
+      "observed": [
+        {
+          "versionLength": 1,
+          "rawColon": true
+        },
+        {
+          "versionLength": 24,
+          "rawColon": true
+        },
+        {
+          "versionLength": 80,
+          "rawColon": true
+        }
+      ]
+    },
+    {
+      "name": "Current actor health and nested job record reads use SDK-identical raw paths through separately counted signed hops",
+      "pass": false,
+      "error": "Core Calendar controller: receipt_sequence",
+      "stack": "Error: Core Calendar controller: receipt_sequence\n    at fail (file:///private/tmp/mc-calendar-transport-repair-2d/scripts/calendar-live-guard.mjs:23:25)\n    at deny (file:///private/tmp/mc-calendar-transport-repair-2d/scripts/calendar-live-guard.mjs:77:75)"
+    },
+    {
+      "name": "Foreign budget versions, traversal and health-query substitution are refused before dispatch",
+      "pass": true,
+      "observed": {
+        "refused": 3,
+        "dispatches": 0
+      }
+    },
+    {
+      "name": "Signed health status failure records current-hop status and keeps both read attempts consumed",
+      "pass": true,
+      "observed": {
+        "httpStatus": 500,
+        "attempts": 2,
+        "closed": true
+      }
+    },
+    {
+      "name": "Signed health throw failure records current-hop status and keeps both read attempts consumed",
+      "pass": true,
+      "observed": {
+        "httpStatus": null,
+        "attempts": 2,
+        "closed": true
+      }
+    },
+    {
+      "name": "Foreign or expired signed destinations are stopped before their second hop and remain out of public ledger",
+      "pass": true,
+      "observed": {
+        "refused": 2,
+        "secondHopDispatches": 0
+      }
+    }
+  ],
+  "physicalNetwork": 0,
+  "after": {
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+    "scripts/calendar-live-guard.mjs": "004ee29d91fe895d31dd8c5aac49972d662d75824c23e8be87373d886dcf3863",
+    "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+    "scripts/calendar-live-actor-check.mjs": "b6042b17e27b902a25580eb59fa8e933b6a0dcb379b8208bde44eb8dc6e5f285",
+    "scripts/calendar-live-guard-check.mjs": "4f43de82b1857e563a9f343846d459c384719d2afd1161c8d46ca5c7d1d1b163",
+    "scripts/calendar-record-transport-check.mjs": "206a8f5dc5e3f6bcfae9960d87be9b40184f140ebe901ef0e7e583cdaac0769d",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+    "scratchpad/calendar-transport-independent-check.mjs": "6dc8fb137f1cc500678ecdce93e50b80556acc3074678b671e0800f6aaaf72a0"
+  },
+  "sourceStable": true,
+  "passed": 5,
+  "total": 6,
+  "ok": false
+}

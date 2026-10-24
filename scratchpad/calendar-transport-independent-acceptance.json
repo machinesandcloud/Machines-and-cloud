@@ -1,0 +1,87 @@
+{
+  "at": "2026-10-24T10:03:25.404712+00:00",
+  "decision": "Accepted proof-only transport/read-failure repair in offline synthetic scope; no actual provider diagnosis, live authorization, publication or Calendar lifecycle acceptance.",
+  "independentGroups": {
+    "passed": 7,
+    "total": 7
+  },
+  "physicalNetwork": 0,
+  "privateInputsRead": 0,
+  "actualNativeWindows": 0,
+  "sourceStable": true,
+  "tested": [
+    "Actor budget paths match installed SDK for valid short, mixed and maximum80-character versions",
+    "Current actor health and nested job record reads use SDK-identical raw paths through separately counted signed hops",
+    "Foreign budget versions, traversal and health-query substitution are refused before dispatch",
+    "Signed health status failure records current-hop status and keeps both read attempts consumed",
+    "Signed health throw failure records current-hop status and keeps both read attempts consumed",
+    "Foreign or expired signed destinations are stopped before their second hop and remain out of public ledger",
+    "A signed budget transport failure after publication retains cleanup authority, consumed attempts and distinct cleanup deployment"
+  ],
+  "source": {
+    "before": {
+      "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+      "scripts/calendar-live-guard.mjs": "004ee29d91fe895d31dd8c5aac49972d662d75824c23e8be87373d886dcf3863",
+      "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+      "scripts/calendar-live-actor-check.mjs": "b6042b17e27b902a25580eb59fa8e933b6a0dcb379b8208bde44eb8dc6e5f285",
+      "scripts/calendar-live-guard-check.mjs": "4f43de82b1857e563a9f343846d459c384719d2afd1161c8d46ca5c7d1d1b163",
+      "scripts/calendar-record-transport-check.mjs": "206a8f5dc5e3f6bcfae9960d87be9b40184f140ebe901ef0e7e583cdaac0769d",
+      "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+      "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+      "scratchpad/calendar-transport-independent-check.mjs": "8210c5d3f7c53f624fe0363377a9e23d5a3a05eb074489c337293a748efbc442"
+    },
+    "after": {
+      "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+      "scripts/calendar-live-guard.mjs": "004ee29d91fe895d31dd8c5aac49972d662d75824c23e8be87373d886dcf3863",
+      "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+      "scripts/calendar-live-actor-check.mjs": "b6042b17e27b902a25580eb59fa8e933b6a0dcb379b8208bde44eb8dc6e5f285",
+      "scripts/calendar-live-guard-check.mjs": "4f43de82b1857e563a9f343846d459c384719d2afd1161c8d46ca5c7d1d1b163",
+      "scripts/calendar-record-transport-check.mjs": "206a8f5dc5e3f6bcfae9960d87be9b40184f140ebe901ef0e7e583cdaac0769d",
+      "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+      "scripts/calendar-live-control.py": "0736ae35ff119127e5328e47a29148f6172ea4406363e200f6550fd355f9bb69",
+      "scratchpad/calendar-transport-independent-check.mjs": "8210c5d3f7c53f624fe0363377a9e23d5a3a05eb074489c337293a748efbc442"
+    },
+    "baselineManifest": "scratchpad/calendar-live-source-manifest.json",
+    "baselineFiles": 497,
+    "changedAgainstApproved2d": [
+      "scripts/calendar-live-actor-check.mjs",
+      "scripts/calendar-live-actor.mjs",
+      "scripts/calendar-live-fixture.mjs",
+      "scripts/calendar-live-guard.mjs"
+    ],
+    "remainingBaselineFilesExact": 493,
+    "newSDKCheck": "scripts/calendar-record-transport-check.mjs",
+    "newSDKCheckSha256": "206a8f5dc5e3f6bcfae9960d87be9b40184f140ebe901ef0e7e583cdaac0769d",
+    "scopeNote": "Four changed proof files plus new SDK comparison check only. App runtime, Netlify config and all other493 baseline inputs unchanged. Separate new calendar-budget-readonly-diagnostic*.mjs files are excluded and NOT accepted."
+  },
+  "observed": [
+    "Installed SDK and actor agree on literal-colon budget keys for short/mixed/80-character versions, both health keys and nested job path.",
+    "Each initial record lookup and signed follow-up is reserved/counts separately; signed request forwards neither auth nor cookie; signed credentials/tokens are absent from public ledger.",
+    "Foreign budget versions, path traversal and health-query substitutions refuse before transport; expired/foreign signed destinations do not receive a second hop.",
+    "HTTP500 signed response records500. No-response signed hop recordsnull, preserving both attempted GETs; it never inherits first-hop200.",
+    "Postpublication signed budget failure preserves halt and exact cleanup authority, four original settings restored and distinct cleanup build confirmed before close."
+  ],
+  "firstRunDisposition": {
+    "receipt": "scratchpad/calendar-transport-independent-first.json",
+    "cause": "Independent positive fixture attempted delete receipt immediately after create in calendar phase; controller correctly refused receipt_sequence. Corrected fixture enters cleanup before delete, where existing explicit cleanup delete transition applies. No source repair resulted."
+  },
+  "oldActualPhase": {
+    "closed": true,
+    "halted": true,
+    "nativeHandoffs": 0,
+    "calendarCompleted": false,
+    "failureStatus": "Unknown; old receipt contains http_failure only. New status field does not retroactively establish old status.",
+    "supplementalDiagnosticGETsExecuted": 0,
+    "allowance": "Closed, never reopened or reused by this review."
+  },
+  "evidence": {
+    "scratchpad/calendar-transport-independent-final.json": "95f55fcfb6f8d814ff41cc8c7629b3a0b0464f37aeb2b299916851545f94bcd0",
+    "scratchpad/calendar-transport-independent-first.json": "618f97da4f35f1a4352319c0a977068190174f799af6a5723e2542377f41eba8",
+    "scratchpad/calendar-transport-independent-first-check.mjs": "6dc8fb137f1cc500678ecdce93e50b80556acc3074678b671e0800f6aaaf72a0",
+    "scratchpad/calendar-transport-independent-final-check.mjs": "8210c5d3f7c53f624fe0363377a9e23d5a3a05eb074489c337293a748efbc442",
+    "scratchpad/calendar-record-transport-before.txt": "d05497fb3fa7dd09570513bea393b2799cb6f0fbcfecf389b63e37c5f7d4d78c",
+    "scratchpad/calendar-record-transport-final-r2.json": "010c0278b0caa921cde48fceabb59294c333c707189d43977391c2f943b9ab5f",
+    "scratchpad/calendar-live-actor-transport-final-r2.json": "58a8d420b5dd42f9143c4a7f7bd43c90cf81f28e37ad4dd7a8d012d832a2f7b5",
+    "scratchpad/calendar-live-guard-transport-final-r2.json": "c25e219391d30a882c8dd374b04a4d8855220a24407f27aef4a6e1a1c86c5333"
+  }
+}

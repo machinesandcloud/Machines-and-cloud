@@ -11,16 +11,20 @@ const hash=x=>createHash('sha256').update(x).digest('hex'),canon=x=>Array.isArra
 const NOW=Date.parse('2026-10-24T22:00:00.000Z'),site=TARGET.origin,slug='internal-calendar-1234',ownerKey='offline-permanent-owner-key',identity=hash(JSON.stringify([slug,ownerKey,TARGET.ownerEmail])),token=hash('offline-owner-session'),state=hash('offline-oauth-state'),revision=hash('offline-rules');
 let serial=0;
 function packet(){const signupFields={name:'Internal Owner',email:TARGET.ownerEmail,business:'M&C Internal Calendar Verification',phone:'+17135550142',plan:'starter',desiredChannels:['calendar'],botfield:'',windows:'8 to 12\n12 to 5'};return {version:1,scope:SCOPE,phaseId:'core-calendar-fixture-'+(++serial),approved:false,approvalId:null,approvedAt:new Date(NOW).toISOString(),approvalExpiresAt:new Date(NOW+120*60000).toISOString(),candidateCommit:'c'.repeat(40),target:structuredClone(TARGET),limits:structuredClone(LIMITS),runtimeLimits:structuredClone(RUNTIME_LIMITS),policyVersion:'fixture_core_calendar_v1',googleClientIdHash:hash('offline-google-client'),sourceManifestSHA256:hash('offline-source'),fixture:{name:signupFields.name,business:signupFields.business,ownerPhone:signupFields.phone,signupFields,intakeSubmissionId:'1'.repeat(32),visitSubmissionId:'2'.repeat(32),moveSubmissionId:'3'.repeat(32),cancelSubmissionId:'4'.repeat(32),oldWindowProbeSubmissionId:'5'.repeat(32),cancelledWindowProbeSubmissionId:'6'.repeat(32),date:'2031-11-04',window:'8 to 12',moveDate:'2031-11-05',moveWindow:'12 to 5'},blobRoutes:['calendar_connections','calendar_deliveries','calendar_oauth','clients','health','calendar_execution_budgets'].map(store=>({store,origin:'https://api.netlify.com',prefix:`/api/v1/blobs/${TARGET.siteId}/site:${store}/`}))};}
-async function fixture({p=packet(),clock=()=>NOW,persistence,signed=false,signedOverride=null,wrongSignedRecord=false}={}){
+async function fixture({p=packet(),clock=()=>NOW,persistence,signed=false,signedOverride=null,wrongSignedRecord=false,strictRecordPaths=false,signedHopFailure=null}={}){
  const signedRecords=new Map();let lastSigned=null;const rows=[],calls=[],used=Object.fromEntries(Object.keys(RUNTIME_LIMITS).map(k=>[k,0]));let dispatchAt=NOW,runAt=NOW,runCompletedAt=NOW,confirmedAt=NOW,nativeComplete=false,cCleanup=false,published=false,bound=null,current=null,job=null,failNext=false,redirectNext=false;
  const owner=()=>({slug,owner:{email:TARGET.ownerEmail},business:{name:p.fixture.business},status:'testing'});
  const json=(data,status=200)=>Response.json(data,{status});
  const store=persistence||{async append(row){rows.push(structuredClone(row));}};
  const transport=async(url,init)=>{
   assert.equal(init.redirect,new URL(url).pathname==='/api/google/callback'?'manual':'error');assert.equal(rows.at(-1)?.event,'reserved_unknown');calls.push({url,method:init.method});if(failNext){failNext=false;throw Error('Offline ambiguous transport');}if(redirectNext){redirectNext=false;return new Response(null,{status:302,headers:{Location:'https://evil.example.test/'}});}
-  const u=new URL(url),body=init.body?JSON.parse(init.body):null;u.pathname=decodeURIComponent(u.pathname);
+  const u=new URL(url),body=init.body?JSON.parse(init.body):null;
+  if(strictRecordPaths&&u.origin==='https://api.netlify.com'&&u.pathname.includes('/site:'))assert.equal(/%3a/i.test(u.pathname),false,'Provider record paths preserve literal colons');
+  u.pathname=decodeURIComponent(u.pathname);
   if(u.origin==='https://fixture-records.s3.amazonaws.com'){
    assert.equal(new Headers(init.headers).has('authorization'),false);assert.equal(new Headers(init.headers).has('cookie'),false);
+   if(signedHopFailure==='throw')throw Error('Synthetic no-response signed-hop failure');
+   if(signedHopFailure==='status')return json({error:'synthetic_signed_failure'},500);
    const record=signedRecords.get(u.href);assert.ok(record,'Only the immediate exact signed result can be used');signedRecords.delete(u.href);
    return json(wrongSignedRecord?{...record,owner:{email:'other@example.test'}}:record);
   }

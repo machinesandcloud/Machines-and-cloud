@@ -24,7 +24,9 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
   };
   const blob=async(store,key='')=>{
     const route=p.blobRoutes.find(row=>row.store===store);
-    const result=await c.request({url:route.origin+route.prefix+encodeURIComponent(key).replace(/%2F/gi,'/'),headers:{Authorization:'Bearer '+netlifyToken}});
+    // The Netlify SDK preserves ':' and '/' in record paths. Encoding ':'
+    // changes budget/health lookups before the API issues its signed URL.
+    const result=await c.request({url:route.origin+route.prefix+encodeURIComponent(key).replace(/%2F/gi,'/').replace(/%3A/gi,':'),headers:{Authorization:'Bearer '+netlifyToken}});
     return result.data;
   };
   const metadata=()=>c.request({url:'https://api.netlify.com/api/v1/sites/'+TARGET.siteId,headers:{Authorization:'Bearer '+netlifyToken}});

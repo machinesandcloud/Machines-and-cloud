@@ -40,7 +40,7 @@ await check('Changing active tab or adding tabs cannot redirect seeding; moved o
   assert(!scripts.some(script=>script.includes('close window')||script.includes('every tab')||script.includes('every window')));
 });
 await check('Fixed actor completes signup, native handshake, scheduled lifecycle, both busy rejections and restored-deployment cleanup',async()=>{
-  const f=await fixture(),privateFiles=new Map(),helperCalls=[];
+  const f=await fixture({signed:true,strictRecordPaths:true}),privateFiles=new Map(),helperCalls=[];
   const privateRead=async file=>file==='primary.json'?{primaryAccount:TARGET.calendarAccount,primaryOwnedUIConfirmed:true,primaryCalendarId:TARGET.calendarAccount,primaryUIEvidenceSHA256:hash('owned-ui')}:{recipient:TARGET.ownerEmail,token:hash(file),exactMessageConfirmed:true};
   const helper=async(command,input)=>{
     helperCalls.push({command,input});

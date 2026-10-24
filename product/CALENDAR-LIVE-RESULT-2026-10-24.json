@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "phaseId": "core-calendar-20261024-busy-v1",
+  "approvedCommit": "2d74d78648a056db3f64e587da0f2caf378a1864",
+  "state": "CLOSED after failed proof transport; cleanup verified",
+  "closedAt": "2026-10-24T09:44:33.496Z",
+  "decision": "Calendar provider delivery NOT accepted; full platform launch remains NO-GO",
+  "observed": {
+    "workspaceCreated": true,
+    "returningAccessSameWorkspace": true,
+    "sourcePublished": true,
+    "initialDeployId": "6adc79c4acbdca45dd742d90",
+    "cleanupDeployId": "6adc7ce255b6e04e6ce40059",
+    "cleanupReadyObservedAt": "2026-10-24T09:44:33.143Z",
+    "originalFourCalendarSettingsRestored": true,
+    "completeEnvironmentReadback": true,
+    "sessionsRevoked": 2,
+    "workspaceCancelled": true,
+    "googleWindowOpened": false,
+    "calendarGrantCompleted": false,
+    "calendarEventOperationsObserved": 0
+  },
+  "limitsAndCounts": {
+    "guard": {
+      "site": 14,
+      "writes": 11,
+      "hostedChecks": 0,
+      "email": 3,
+      "metadata": 3,
+      "blobs": 18,
+      "workerPosts": 0,
+      "builds": 2,
+      "pushes": 1,
+      "environmentWrites": 8,
+      "control": 21,
+      "controlWrites": 0,
+      "nativeHandoffs": 0
+    },
+    "helperRequests": 45,
+    "helperMutations": 10,
+    "helperBuilds": 2,
+    "supplementalDiagnosticGETsExecuted": 0,
+    "aggregateControl": 66,
+    "aggregateBlobs": 18,
+    "uniqueBuilds": 2,
+    "note": "Guard and helper build counters refer to the same two builds. No third build or reuse of remaining allowances. Native mail/Google browser traffic is outside these HTTP counters per approved procedural scope."
+  },
+  "failure": {
+    "step": "native-open preliminary budget read",
+    "code": "http_failure",
+    "firstAt": "2026-10-24T09:29:49.866Z",
+    "repeatedReadAt": "2026-10-24T09:33:24.352Z",
+    "meaning": "The signed record lookup failed after the authorization URL was prepared, before any Google window opened. The guard halted and only cleanup followed.",
+    "statusAndBodyRetained": false,
+    "diagnosis": "Local comparison with the installed Netlify SDK reproduces different path encoding: the actor encoded the colon in calendar-v1:VERSION, while the SDK preserves it. This defect is repaired locally; zero supplemental hosted reads were performed, so attribution of the actual hosted failure remains unconfirmed."
+  },
+  "mailAndBrowserProcedure": {
+    "sends": 3,
+    "firstLinkExpiredUnused": true,
+    "successfulExchanges": 2,
+    "exactMessageEvidence": "Recipient, subject, newly arrived message, minute-resolution date and unique fixed customer destination were observed. Backend exchange enforced one-use/expiry. Optional pure mailbox parser was not used; no invented second-resolution date.",
+    "replacementGmailWindowApproved": true,
+    "dedicatedGmailTabClosed": true,
+    "googleNativeHandoffs": 0,
+    "focusIncident": "One global Enter key was sent after scoped DOM focus before OS focus was verified. Keyboard automation stopped when the foreground window differed. The resulting target effect is unknown; no associated external transaction is established. Subsequent message extraction used the exact owned tab.",
+    "disappearedWindowCause": "Unknown; no claim that the user closed it or that a concurrent process caused it."
+  },
+  "source": {
+    "manifest": "scratchpad/calendar-live-source-manifest.json",
+    "manifestSha256": "044630b7a15ec7709cb07f547b3e947be275fd52f3e8f9b18c36313b9fc990d3",
+    "filesHashed": 497,
+    "changed": [],
+    "runnerCorrection": "An interim poll assumed dictionary rows and skipped comparison. Final review converts actual list entries to path/hash and explicitly hashes all497; skipped interim poll is not additional source proof."
+  },
+  "evidence": {
+    "scratchpad/core-calendar-20261024-busy-v1-ledger.jsonl": "2cc688005462e9f25430d2f228bbbef49f1d47812dee51ee896a843938ccb8da",
+    "scratchpad/core-calendar-20261024-busy-v1-control.jsonl": "667720f633553f7926b4b4531f60ca1c8e0ce721b49ac92aaab7e1aa86d6ad27",
+    "scratchpad/calendar-live-source-manifest.json": "044630b7a15ec7709cb07f547b3e947be275fd52f3e8f9b18c36313b9fc990d3"
+  },
+  "independentAcceptance": "scratchpad/core-calendar-20261024-busy-v1-independent-qa.json",
+  "next": "Repair and independently verify the record transport and preflight it before any new build/email/Google attempt. Prepare fresh exact-source effect authority; this phase and all its allowances remain closed. Continue separate whole-offer implementation."
+}

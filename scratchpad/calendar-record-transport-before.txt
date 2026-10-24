@@ -1,0 +1,21 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Budget lookup must preserve the same record path as the installed SDK
++ actual - expected
+
++ 'https://api.netlify.com/api/v1/blobs/f87916f1-bcc4-4171-a96f-2900cbf0b6dc/site:calendar_execution_budgets/calendar-v1%3Afixture_record_transport_v1'
+- 'https://api.netlify.com/api/v1/blobs/f87916f1-bcc4-4171-a96f-2900cbf0b6dc/site:calendar_execution_budgets/calendar-v1:fixture_record_transport_v1'
+
+    at file:///private/tmp/mc-calendar-transport-repair-2d/scripts/calendar-record-transport-check.mjs:36:8
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'https://api.netlify.com/api/v1/blobs/f87916f1-bcc4-4171-a96f-2900cbf0b6dc/site:calendar_execution_budgets/calendar-v1%3Afixture_record_transport_v1',
+  expected: 'https://api.netlify.com/api/v1/blobs/f87916f1-bcc4-4171-a96f-2900cbf0b6dc/site:calendar_execution_budgets/calendar-v1:fixture_record_transport_v1',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0
