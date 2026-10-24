@@ -14,6 +14,7 @@ import { phoneRecoveryHealth } from "./lib/phone-activation.mjs";
 import { serviceDeliveryHealth } from "./lib/service-health.mjs";
 import { recoverWorkspaceOperations } from "./lib/platform-operations.mjs";
 import { recoverLeadConnections } from './lib/lead-connections.mjs';
+import {recoverSupportReports} from './lib/support-reports.mjs';
 import { strictRead } from './lib/accounts.mjs';
 
 export const config = { schedule: "*/10 * * * *" };
@@ -199,6 +200,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
   // independently of the usage brake or an initial browser dispatch.
   await block(record, "setupRecovery", async () => recoverWorkspaceOperations());
   await block(record, "leadIntakeRecovery", async () => recoverLeadConnections());
+  await block(record, "supportReportRecovery", async () => recoverSupportReports());
   // Provider work has its own scheduled function and 15-second aggregate budget.
   // The main scheduler only reads its durable receipt and pending-work counters.
   await block(record, "phoneSetupRecovery", async () => phoneRecoveryHealth());

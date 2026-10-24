@@ -1,0 +1,114 @@
+{
+  "at": "2026-10-24T18:30:03.038726+00:00",
+  "worktree": "/tmp/mc-g8-support-engineering-d06",
+  "baseCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "role": "product_owner_v2 customer-job observation plus assigned UI engineering; independent QA identified separately",
+  "decision": "Accepted locally for the selected owner report \u2192 operator review \u2192 customer-visible resolution job; not published or accepted as a live support/incident operation.",
+  "customerJob": "From a saved conversation, explain a problem once; find that same report in the existing operator Issues/account context; acknowledge it, provide a public resolution, and return to the workspace to see progress and the reply.",
+  "authorship": "I implemented the six assigned owner/admin frontend files. My browser runs are author evidence. Independent QA ran separate actual-handler adversarial/backend and actual-asset browser jobs before this scoped PO observation.",
+  "frontendSource": {
+    "desk.js": "8b97b1b8c4c2eaec1b5104800771b31df5b1302f36cb34a85f10ce0780eb0c2d",
+    "desk.html": "cfa93caddef32be2baaa13f433fd5cea87aa221e1c517b278fdff9157086724b",
+    "desk.css": "eda8ce4b1139056fab7e8241b7498a7f8be761660b479356e64d976661fd61c9",
+    "admin.js": "48672bf2c5697141896cc4f5cc2cb24247ceed5952773d513aa4d9748a7df883",
+    "admin.html": "02d4ca876f11525a4d8cc2191ce4cea6b0a3ed55eceb17acfe451432c91f8bac",
+    "admin.css": "4f61fc0bf2840fb481d1b657951c275105a6feae90269c297b9b9bdeace52775"
+  },
+  "runtimeSource": {
+    "desk.html": "cfa93caddef32be2baaa13f433fd5cea87aa221e1c517b278fdff9157086724b",
+    "desk.js": "8b97b1b8c4c2eaec1b5104800771b31df5b1302f36cb34a85f10ce0780eb0c2d",
+    "desk.css": "eda8ce4b1139056fab7e8241b7498a7f8be761660b479356e64d976661fd61c9",
+    "desk-requests.js": "fa2ecc46a3581f80df58bce5ed149af678fe41348abc1f3273e7ddaeb3aa4343",
+    "admin.html": "02d4ca876f11525a4d8cc2191ce4cea6b0a3ed55eceb17acfe451432c91f8bac",
+    "admin.js": "48672bf2c5697141896cc4f5cc2cb24247ceed5952773d513aa4d9748a7df883",
+    "admin.css": "4f61fc0bf2840fb481d1b657951c275105a6feae90269c297b9b9bdeace52775",
+    "netlify/functions/client.mjs": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07",
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/scheduler.mjs": "77be2c15cc60edaa7007a767867d7fde9c7041084ce6eae8d4a6d952162c44e9",
+    "netlify/functions/lib/operator.mjs": "faac3b2594dfdc45295935499c6430cdad75e0e80eef23217be11ea36d4ca6fe",
+    "netlify/functions/lib/store.mjs": "94fccece31d8d59cd9e96987ca1090aad580de7b53bbc41a6cc6f1704c58fe34",
+    "netlify/functions/lib/send.mjs": "4cab08334554822a8101432949cf1440f729df921123611155968941f7e9be09",
+    "netlify/functions/lib/fanout.mjs": "4f56ab400503d3bff74ceccd08f789b4f9bf336697caeaa4954464cafcd01257",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15",
+    "netlify/functions/lib/managed-delivery.mjs": "5ce2133acde1dc7fba2b92a683fd64ad7cd6e03298bd123cff6a9b31ab911652",
+    "netlify/functions/lib/support-reports.mjs": "a81f55d749ab1e1e974afd97b9f4026365c4959fc39cb1042fca85415b1fb3c6"
+  },
+  "evidence": {
+    "authorOrdinaryDesktopMobile": {
+      "path": "scratchpad/g8-support-author-ui-return-fixed.json",
+      "sha256": "46d977dcf9b6d82763eca2d5af84fb138a7dc5bee8fc934f3e495f20bf8a56d7",
+      "passed": 32,
+      "total": 32
+    },
+    "independentBackendAndScheduledLegacyRecovery": {
+      "path": "scratchpad/support-reports-independent-second.json",
+      "sha256": "bb440d3b15731e27f913dbe5dd479ab0a7538778312ee2c44624386ace4908fb",
+      "passed": 34,
+      "total": 34
+    },
+    "independentAdverseDesktopMobile": {
+      "path": "scratchpad/support-reports-independent-ui-repaired.json",
+      "sha256": "e71cc57daa389e61659899739fbb82cec9112a6268066e2edc825b998538e8da",
+      "passed": 12,
+      "total": 12
+    }
+  },
+  "observedCustomerOutcomes": [
+    "Report opens a focused, labelled dialog with saved conversation context. Empty notes get focused inline guidance; Enter adds a line and Cancel/Escape write nothing.",
+    "An unsent note and its focus survive a slow/background workspace refresh. Desktop1440/mobile390 dialogs fit; mobile actions wrap clearly.",
+    "The owner and operator share one canonical report identity. The saved report appears immediately in existing operator Issues with the bounded reported conversation; no second support queue.",
+    "Acknowledgement shows Under review to the returning owner. A distinct public resolution appears with the same conversation; internal operator reasons remain private.",
+    "A committed but lost owner save is reconciled by immutable creation operation after later operator review/resolution. An uncertain precommit result checks before retrying the exact same request.",
+    "Operator lost acknowledgement, other-actor resolution and returning access preserve the original operation and show current status without repeat mutation. Delayed responses after owner expiry/operator sign-out do not restore private data.",
+    "A new report after a resolved case carries the exact current resolved revision. Its draft no longer offers the old case status check that could hide it."
+  ],
+  "preservedReturns": [
+    {
+      "observation": "Baseline saved owner flag produced no operator issue/acknowledgement/resolution; prompt Cancel wrote a blank flag.",
+      "evidenceRoot": "/tmp/mc-g8-support-d06/scratchpad",
+      "disposition": "Replaced selected self-service report path with the existing canonical client/support DTO and operator Issues; legacy prompt Cancel also exits before write."
+    },
+    {
+      "observation": "First independent current UI run10/12: old resolved-case Check remained visible beside a new draft at1440/390.",
+      "evidence": {
+        "path": "scratchpad/support-reports-independent-ui-first.json",
+        "sha256": "110df961a8ca562a1457921ec3613bc5de670dfee87ce45e6bfbb4fd224e4d98"
+      },
+      "disposition": "Single conditional visibility repair. Strict reversal reproduces prior desk.js593ceed hash; affected independent12/12 and full author32/32 rerun on frozen new source."
+    }
+  ],
+  "sourceBridge": {
+    "file": "desk.js",
+    "beforeSHA256": "593ceed09e7f15dd5eb94a1cf84ff5de2de7123cd00032f333823e8fa9c0350d",
+    "afterSHA256": "8b97b1b8c4c2eaec1b5104800771b31df5b1302f36cb34a85f10ce0780eb0c2d",
+    "beforeLiteral": "$('supportCheck').hidden=!supportCurrent && !supportPending;",
+    "afterLiteral": "$('supportCheck').hidden=!active && !supportPending;",
+    "exactReverseVerified": true
+  },
+  "visualReview": [
+    {
+      "path": "scratchpad/g8-support-author-ui-return-fixed-dialog-1440.png",
+      "sha256": "4275d39e6e7d1b32cce3e80356de13dbed15552d4d9c64583cf99a0c797615f6"
+    },
+    {
+      "path": "scratchpad/g8-support-author-ui-return-fixed-dialog-390.png",
+      "sha256": "a3d217fd4413e69702861841b667e003111c331cd65920bc5983200528d0fbd9"
+    },
+    {
+      "path": "scratchpad/g8-support-author-ui-return-fixed-operator-390.png",
+      "sha256": "7e2464048b4be07cb379bb72def6ae0937dfd04ff9b986579c014ff7d8fa5119"
+    }
+  ],
+  "limits": [
+    "All handler/browser work used synthetic tenants, sessions, storage and controlled transport with physical networking blocked; no live account, model, provider, message or deployment effect.",
+    "A typed resolution demonstrates retained customer feedback. It does not by itself prove that the underlying AI answer, external service or incident was repaired.",
+    "New canonical report visibility is atomic in the client write. Independent ordinary scheduled legacy adoption establishes only local recovery behavior.",
+    "Actual named support recipient and backup receipt, response handling, hosted recovery/incident outcomes, and funded hosting continuity remain G8 launch work. No automatic support email or live response SLA is established.",
+    "Calendar remains Root\u2019s primary live milestone. This local repair grants no new provider/release/outreach authority."
+  ],
+  "nextUnresolvedStep": {
+    "action": "Architect completes final required gate and scoped handoff for Root integration; OM/Root later observes the named support/backup and incident response job on an explicitly scoped live phase.",
+    "driver": "Architect/Root for local integration; OM with independent QA and product_owner_v2 for actual operational acceptance",
+    "requiredEvidence": "Exact integrated source and independent scoped evidence; then actual support/backup receipt and a useful acknowledged/resolved response, incident/scheduled recovery and hosting continuity without routine founder repair."
+  }
+}

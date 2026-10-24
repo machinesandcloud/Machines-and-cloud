@@ -307,7 +307,7 @@ export async function indexWorkspaceRecord(kind, record) {
     return { value: { version: 1, tenantIdentity: tenant, kind, legacyScanned: previous?.legacyScanned || false, scanLimit: previous?.scanLimit || 0, incomplete: previous?.incomplete ?? true, retentionIncomplete: !!previous?.retentionIncomplete || ids.length > RECORD_INDEX_LIMIT, ids: ids.slice(-RECORD_INDEX_LIMIT) } };
   });
 }
-async function boundedRecordKeys(kind, prefix, limit) {
+export async function boundedRecordKeys(kind, prefix, limit) {
   if (process.env.MC_MEMORY_STORE === '1') {
     const keys = (await store(kind).list({ prefix: safe(prefix) })).blobs.map(row => unsafe(row.key)).sort();
     return { keys: keys.slice(0, limit), incomplete: keys.length > limit };

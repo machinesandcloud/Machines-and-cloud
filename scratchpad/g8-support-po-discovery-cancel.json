@@ -1,0 +1,179 @@
+{
+  "at": "2026-10-24T17:32:17.718Z",
+  "baseCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "mode": "PO actual handler/browser support-job discovery, synthetic sessions/store/provider-disabled, no physical network or actual accounts",
+  "sourceBefore": {
+    "desk.html": "4f79f811a85284f13655925822b39ff5114493d10fd1e7ca1fa8dfcb56749b3c",
+    "desk.js": "d2f7dee6f057c54367a462c0d31fcecf018cc5c735c7726399228a3002bd793a",
+    "desk.css": "e8c365af2166db92cc144c2d8ce78644a1deee35e442a0373468d61991cff041",
+    "desk-requests.js": "fa2ecc46a3581f80df58bce5ed149af678fe41348abc1f3273e7ddaeb3aa4343",
+    "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+    "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+    "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85",
+    "netlify/functions/client.mjs": "c51916ba7f869285ed02db4c74167141e9c4da1daea15eb7f52fc69e20af5dc6",
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/scheduler.mjs": "081764772e2839c9e9d0774734ad7e29aa3babb971bf944095cb67db0cad1d6c",
+    "netlify/functions/lib/operator.mjs": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/send.mjs": "4cab08334554822a8101432949cf1440f729df921123611155968941f7e9be09",
+    "netlify/functions/lib/fanout.mjs": "4f56ab400503d3bff74ceccd08f789b4f9bf336697caeaa4954464cafcd01257",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15",
+    "netlify/functions/lib/managed-delivery.mjs": "5ce2133acde1dc7fba2b92a683fd64ad7cd6e03298bd123cff6a9b31ab911652"
+  },
+  "observations": [
+    {
+      "name": "Initial healthy fixture operator issues",
+      "value": []
+    },
+    {
+      "name": "Owner flag saves and rereads",
+      "status": 200,
+      "flag": {
+        "at": "2026-10-24T17:32:17.884Z",
+        "note": "The front desk gave the wrong repair advice. Please review this answer.",
+        "by": "owner"
+      }
+    },
+    {
+      "name": "Actual operator view after owner flag",
+      "issues": [],
+      "activity": [],
+      "conversation": {
+        "id": null,
+        "at": "2026-10-24T17:32:17.884Z",
+        "status": null,
+        "name": "",
+        "phone": "g8-support-conversation",
+        "issue": "",
+        "date": "",
+        "window": "",
+        "channel": "web",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Can you help with an AC repair in Katy?",
+            "at": "2026-10-24T17:32:17.864Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Synthetic bad answer that the shop owner wants reviewed.",
+            "at": "2026-10-24T17:32:17.864Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ordinary existing scheduler entry after report",
+      "queuedBefore": {
+        "tasks": [],
+        "operations": [],
+        "delivery": []
+      },
+      "ok": true,
+      "blocks": [
+        "tasks",
+        "tenDlc",
+        "setupRecovery",
+        "leadIntakeRecovery",
+        "phoneSetupRecovery",
+        "serviceDeliveryRecovery",
+        "healthLifecycle",
+        "release",
+        "fanout:autoflag"
+      ],
+      "issues": []
+    },
+    {
+      "name": "Ordinary owner CANCELS report prompt 1440",
+      "returnedFlag": {
+        "at": "2026-10-24T17:32:19.301Z",
+        "note": "",
+        "by": "owner"
+      }
+    },
+    {
+      "name": "Actual owner conversation page 1440",
+      "text": "g8-support-conversation\nwebOct 24, 2026, 12:32 PM CT · Flagged:\nRead saved conversation\nUnflag\nCUSTOMER\nCan you help with an AC repair in Katy?\nFRONT DESK\nSynthetic bad answer that the shop owner wants reviewed."
+    },
+    {
+      "name": "Actual operator Needs attention page 1440",
+      "text": "KEEP CUSTOMERS MOVING\n\nIssues\n\nCurrent checks and recorded issues, with the account context to investigate.\n\nNo current issues reported\n\nNew setup or service issues will appear here, with a link to the customer account.\n\nView customers"
+    },
+    {
+      "name": "Ordinary owner CANCELS report prompt 390",
+      "returnedFlag": {
+        "at": "2026-10-24T17:32:19.892Z",
+        "note": "",
+        "by": "owner"
+      }
+    },
+    {
+      "name": "Actual owner conversation page 390",
+      "text": "g8-support-conversation\nwebOct 24, 2026, 12:32 PM CT · Flagged:\nRead saved conversation\nUnflag\nCUSTOMER\nCan you help with an AC repair in Katy?\nFRONT DESK\nSynthetic bad answer that the shop owner wants reviewed."
+    },
+    {
+      "name": "Actual operator Needs attention page 390",
+      "text": "KEEP CUSTOMERS MOVING\n\nIssues\n\nCurrent checks and recorded issues, with the account context to investigate.\n\nNo current issues reported\n\nNew setup or service issues will appear here, with a link to the customer account.\n\nView customers"
+    }
+  ],
+  "customerJobReturns": [
+    {
+      "job": "Owner report becomes operator attention with its note",
+      "accepted": false,
+      "observed": "Operator issues and activity do not include the owner report; conversation DTO omits the flag and note."
+    },
+    {
+      "job": "Operator acknowledges the retained owner report",
+      "accepted": false,
+      "observed": {
+        "status": 400,
+        "error": "invalid_action",
+        "message": "Choose an available support action."
+      }
+    },
+    {
+      "job": "Owner sees acknowledgement or resolution after operator internal note",
+      "accepted": false,
+      "observed": "Internal support note is not returned as a customer-facing acknowledgement or resolution; original owner flag remains unchanged."
+    },
+    {
+      "job": "Cancelling report saves no issue 1440",
+      "accepted": false,
+      "observed": "Flag exists after owner dismissed the report prompt."
+    },
+    {
+      "job": "Cancelling report saves no issue 390",
+      "accepted": false,
+      "observed": "Flag exists after owner dismissed the report prompt."
+    }
+  ],
+  "screenshots": [
+    "scratchpad/g8-support-po-cancel-owner-1440.png",
+    "scratchpad/g8-support-po-cancel-operator-1440.png",
+    "scratchpad/g8-support-po-cancel-owner-390.png",
+    "scratchpad/g8-support-po-cancel-operator-390.png"
+  ],
+  "browserErrors": [],
+  "networkAttempts": [],
+  "sourceAfter": {
+    "desk.html": "4f79f811a85284f13655925822b39ff5114493d10fd1e7ca1fa8dfcb56749b3c",
+    "desk.js": "d2f7dee6f057c54367a462c0d31fcecf018cc5c735c7726399228a3002bd793a",
+    "desk.css": "e8c365af2166db92cc144c2d8ce78644a1deee35e442a0373468d61991cff041",
+    "desk-requests.js": "fa2ecc46a3581f80df58bce5ed149af678fe41348abc1f3273e7ddaeb3aa4343",
+    "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+    "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+    "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85",
+    "netlify/functions/client.mjs": "c51916ba7f869285ed02db4c74167141e9c4da1daea15eb7f52fc69e20af5dc6",
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/scheduler.mjs": "081764772e2839c9e9d0774734ad7e29aa3babb971bf944095cb67db0cad1d6c",
+    "netlify/functions/lib/operator.mjs": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/send.mjs": "4cab08334554822a8101432949cf1440f729df921123611155968941f7e9be09",
+    "netlify/functions/lib/fanout.mjs": "4f56ab400503d3bff74ceccd08f789b4f9bf336697caeaa4954464cafcd01257",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15",
+    "netlify/functions/lib/managed-delivery.mjs": "5ce2133acde1dc7fba2b92a683fd64ad7cd6e03298bd123cff6a9b31ab911652"
+  },
+  "sourceStable": true,
+  "poDecision": "RETURN: flag saving is functional; operator attention, acknowledgement and customer-visible resolution are not connected.",
+  "physicalRequests": 0
+}

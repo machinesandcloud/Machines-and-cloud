@@ -1,0 +1,842 @@
+scheduler: 13 due [
+  [ 'review_request', 'channel_not_active' ],
+  [ 'quote_check', 'channel_not_active' ],
+  [ 'review_nudge', 'channel_not_active' ],
+  [ 'referral_ask', 'channel_not_active' ],
+  [ 'escalate', 'channel_not_active' ],
+  [ 'maintenance_reminder', 'channel_not_active' ],
+  [ 'reminder_24h', 'channel_not_active' ],
+  [ 'visit_check', 'channel_not_active' ],
+  [ 'consent_ask', 'channel_not_active' ],
+  [ 'reminder_1h', 'channel_not_active' ],
+  [ 'lead_chase', 'channel_not_active' ],
+  [ 'payment_reminder', 'channel_not_active' ],
+  [ 'callback_check', 'channel_not_active' ]
+] digests 0 weeklies 0 released 0 ok
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+... Skipped lines
+
+  {
+    bookings: [
+      [
+        'new-live/booking',
+        {
+...
+          liveAt: '2026-04-02T14:00:00.000Z',
++         management: {
++           supportDiscovery: {
++             at: '2026-06-01T14:00:00.000Z',
++             cursor: '',
++             incomplete: false,
++             tenantIdentity: '6f1919b70a8062c43309af731ea382dfdd073b7853bfbee3ea7069a5b9f927cc'
++           }
++         },
+          onboarding: {
+            verifiedEmail: 'qa@example.invalid',
+            version: 1
+          },
+          owner: {
+...
+          liveAt: '2026-04-02T14:00:00.000Z',
++         management: {
++           supportDiscovery: {
++             at: '2026-06-01T14:00:00.000Z',
++             cursor: '',
++             incomplete: false,
++             tenantIdentity: 'f101ec43db3d83f6c488356d83e61a8f66a5e74308e8eafc2518485180fe312e'
++           }
++         },
+          onboarding: {
+            verifiedEmail: 'qa@example.invalid',
+            version: 1
+          },
+          owner: {
+...
+          liveAt: '2026-04-02T14:00:00.000Z',
++         management: {
++           supportDiscovery: {
++             at: '2026-06-01T14:00:00.000Z',
++             cursor: '',
++             incomplete: false,
++             tenantIdentity: 'e7ac64d94cdc71ee19dbbdd1bf361b02cc1a824c027dcb7af2b112cee70854e8'
++           }
++         },
+          onboarding: {
+            verifiedEmail: 'qa@example.invalid',
+            version: 1
+          },
+          owner: {
+...
+          liveAt: '2026-04-02T14:00:00.000Z',
++         management: {
++           supportDiscovery: {
++             at: '2026-06-01T14:00:00.000Z',
++             cursor: '',
++             incomplete: false,
++             tenantIdentity: '062a8f85a69c590df9fca4d0bf4d207a39cc1bcab2ddf326b1fd33d9ce202d56'
++           }
++         },
+          onboarding: {
+            verifiedEmail: 'qa@example.invalid',
+            version: 1
+          },
+          owner: {
+
+    at file:///private/tmp/mc-g8-support-engineering-d06/scripts/self-service-scheduler-check.mjs:79:8 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: {
+    clients: [
+      [
+        'new-campaign',
+        {
+          slug: 'new-campaign',
+          ownerKey: 'private',
+          status: 'live',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'campaign_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          updatedAt: '2026-06-01T14:00:00.000Z',
+          management: { supportDiscovery: [Object] }
+        }
+      ],
+      [
+        'new-cancelled',
+        {
+          slug: 'new-cancelled',
+          ownerKey: 'private',
+          status: 'cancelled',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'brand_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          cancelledAt: '2026-04-02T14:00:00.000Z',
+          serviceEndsAt: '2026-04-02T14:00:00.000Z',
+          updatedAt: '2026-06-01T14:00:00.000Z',
+          management: { supportDiscovery: [Object] }
+        }
+      ],
+      [
+        'new-live',
+        {
+          slug: 'new-live',
+          ownerKey: 'private',
+          status: 'live',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'brand_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          updatedAt: '2026-06-01T14:00:00.000Z',
+          management: { supportDiscovery: [Object] }
+        }
+      ],
+      [
+        'new-testing',
+        {
+          slug: 'new-testing',
+          ownerKey: 'private',
+          status: 'testing',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'brand_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          updatedAt: '2026-06-01T14:00:00.000Z',
+          management: { supportDiscovery: [Object] }
+        }
+      ]
+    ],
+    bookings: [
+      [
+        'new-live/booking',
+        {
+          id: 'booking',
+          slug: 'new-live',
+          status: 'booked',
+          phone: '+17135550142',
+          date: '2026-06-02',
+          window: '8 to 12',
+          issue: 'AC',
+          channel: 'web'
+        }
+      ]
+    ],
+    leads: [
+      [
+        'new-live/lead',
+        {
+          id: 'lead',
+          slug: 'new-live',
+          status: 'open',
+          phone: '+17135550143',
+          reason: 'emergency',
+          urgency: 'emergency'
+        }
+      ]
+    ],
+    conversations: [
+      [
+        'new-live/web/customer',
+        {
+          slug: 'new-live',
+          channel: 'web',
+          contact: 'customer',
+          messages: [ [Object], [Object] ]
+        }
+      ]
+    ],
+    index: [
+      [ 'number:+17135550100', 'new-cancelled' ],
+      [ 'vapi:new-assistant', 'new-cancelled' ]
+    ]
+  },
+  expected: {
+    clients: [
+      [
+        'new-campaign',
+        {
+          slug: 'new-campaign',
+          ownerKey: 'private',
+          status: 'live',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'campaign_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          updatedAt: '2026-06-01T14:00:00.000Z'
+        }
+      ],
+      [
+        'new-cancelled',
+        {
+          slug: 'new-cancelled',
+          ownerKey: 'private',
+          status: 'cancelled',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'brand_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          cancelledAt: '2026-04-02T14:00:00.000Z',
+          serviceEndsAt: '2026-04-02T14:00:00.000Z',
+          updatedAt: '2026-06-01T14:00:00.000Z'
+        }
+      ],
+      [
+        'new-live',
+        {
+          slug: 'new-live',
+          ownerKey: 'private',
+          status: 'live',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'brand_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          updatedAt: '2026-06-01T14:00:00.000Z'
+        }
+      ],
+      [
+        'new-testing',
+        {
+          slug: 'new-testing',
+          ownerKey: 'private',
+          status: 'testing',
+          plan: 'growth',
+          createdAt: '2026-04-02T14:00:00.000Z',
+          owner: {
+            name: 'QA Owner',
+            email: 'qa@example.invalid',
+            phone: '+17135550140',
+            backupPhone: '+17135550141'
+          },
+          business: {
+            name: 'QA Air',
+            website: '',
+            trade: 'HVAC',
+            city: 'Houston',
+            serviceArea: [Array],
+            notServed: [],
+            hours: 'Mon-Fri 8am-5pm',
+            afterHours: '',
+            spanish: true,
+            licenses: '',
+            legal: {}
+          },
+          services: [],
+          fees: [],
+          windows: [ '8 to 12', '12 to 5' ],
+          rules: {
+            never: [Array],
+            handoff: [Array],
+            emergencies: [Object],
+            hours: [Object],
+            emergency247: false,
+            consentAsk: false,
+            windowCapacity: 1,
+            ackMinutes: 10,
+            callbackHours: 'within 30 minutes',
+            callbackAfterHours: 'by 8 am tomorrow',
+            bypass: []
+          },
+          digest: { text: true },
+          faq: [],
+          leadSources: [],
+          leads: { angiKey: '', thumbtackSecret: '' },
+          software: 'google',
+          phone: {
+            businessNumber: '+17135550101',
+            twilioNumber: '+17135550100',
+            forwarding: 'missed',
+            carrier: 'other',
+            transferTo: '',
+            handoffEnabled: false,
+            voiceForwardTo: '',
+            textBack: true,
+            tenDlc: 'brand_pending',
+            twilioNumberSid: 'PNnew',
+            brandSid: 'BNnew',
+            messagingServiceSid: 'MGnew',
+            campaignSid: 'QEnew',
+            forwardingVerified: true
+          },
+          voice: {
+            assistantId: 'new-assistant',
+            phoneNumberId: 'new-vapi-number'
+          },
+          provision: { status: 'done', startedAt: '2026-04-02T14:00:00.000Z' },
+          calendar: { provider: 'none' },
+          billing: { status: 'none' },
+          build: { status: 'built', builtAt: '2026-04-02T14:00:00.000Z' },
+          widget: { greeting: '', allowedOrigins: [] },
+          summary: '',
+          onboarding: { version: 1, verifiedEmail: 'qa@example.invalid' },
+          liveAt: '2026-04-02T14:00:00.000Z',
+          lifecycle: { day7Sent: '2026-04-02T14:00:00.000Z' },
+          updatedAt: '2026-06-01T14:00:00.000Z'
+        }
+      ]
+    ],
+    bookings: [
+      [
+        'new-live/booking',
+        {
+          id: 'booking',
+          slug: 'new-live',
+          status: 'booked',
+          phone: '+17135550142',
+          date: '2026-06-02',
+          window: '8 to 12',
+          issue: 'AC',
+          channel: 'web'
+        }
+      ]
+    ],
+    leads: [
+      [
+        'new-live/lead',
+        {
+          id: 'lead',
+          slug: 'new-live',
+          status: 'open',
+          phone: '+17135550143',
+          reason: 'emergency',
+          urgency: 'emergency'
+        }
+      ]
+    ],
+    conversations: [
+      [
+        'new-live/web/customer',
+        {
+          slug: 'new-live',
+          channel: 'web',
+          contact: 'customer',
+          messages: [ [Object], [Object] ]
+        }
+      ]
+    ],
+    index: [
+      [ 'number:+17135550100', 'new-cancelled' ],
+      [ 'vapi:new-assistant', 'new-cancelled' ]
+    ]
+  },
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0

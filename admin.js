@@ -4,6 +4,7 @@
   var meta = document.querySelector('meta[name="mc-api-base"]'), base = meta && meta.content ? meta.content.replace(/\/$/, '') : '';
   var storageKey = 'mc-operator-session-v1', session = null, generation = 0, data = null, selected = null, selectedRecord = null, detailVersion = 0, view = 'overview', action = null, busy = false, toastTimer;
   var controllers = new Set();
+  var pendingSupportAction=null, pendingSupportLoaded=false, supportActionStorage='mc-support-action-pending-v1';
   var loginPending = false, loginRecipient = '', loginRetryAt = 0, loginRetryTimer = null;
   var verifyToken = new URLSearchParams(location.hash.slice(1)).get('verify');
   if (location.hash || location.search) history.replaceState(null, '', location.pathname);
@@ -21,12 +22,13 @@
   function setSession(value) { session = value; try { if (value) sessionStorage.setItem(storageKey, value); else sessionStorage.removeItem(storageKey); } catch (error) { /* Retain the current in-memory session only. */ } }
   function abortRequests() { controllers.forEach(function (controller) { controller.abort(); }); controllers.clear(); }
   function clearPrivate(message) {
+    pendingSupportAction=null;pendingSupportLoaded=false;try{sessionStorage.removeItem(supportActionStorage);}catch(error){}if($('pendingSupportAction'))$('pendingSupportAction').remove();
     generation++; abortRequests(); data = null; selected = null; selectedRecord = null; detailVersion++; action = null; busy = false; loading = null; setSession(null);
     if ($('actionDialog').open) $('actionDialog').close();
     ['summary', 'overviewIssues', 'overviewActivity', 'customers', 'customerDetail', 'issues', 'activity', 'prospects', 'platformSMS', 'system'].forEach(function (id) { $(id).replaceChildren(); });
     $('scopeNotice').hidden = true; $('scopeNotice').textContent = ''; $('issueNavCount').hidden = true; $('issueNavCount').textContent = ''; $('currentLocation').textContent = 'Overview';
     $('operator').textContent = ''; $('lastUpdated').textContent = ''; $('prospectsStatus').textContent = ''; $('platformSMSStatus').textContent = ''; $('customerSearch').value = ''; $('customerStatus').value = 'all';
-    ['actionNote', 'actionReason', 'ruleServices', 'ruleServiceArea', 'ruleNotServed', 'ruleSummary'].forEach(function (id) { $(id).value = ''; }); ['actionStatus', 'actionTitle', 'actionDescription', 'appStatus', 'customerCount', 'toast'].forEach(function (id) { $(id).textContent = ''; }); $('toast').hidden = true; clearTimeout(toastTimer);
+    ['actionNote', 'actionResolution', 'actionReason', 'ruleServices', 'ruleServiceArea', 'ruleNotServed', 'ruleSummary'].forEach(function (id) { $(id).value = ''; }); ['actionStatus', 'actionTitle', 'actionDescription', 'actionSupportReference', 'appStatus', 'customerCount', 'toast'].forEach(function (id) { $(id).textContent = ''; }); $('toast').hidden = true; clearTimeout(toastTimer);
     resetLoginEmail();
     $('app').hidden = true; $('login').hidden = false; $('loginStatus').textContent = message || ''; $('verifyPanel').hidden = !verifyToken; $('loginForm').hidden = !!verifyToken;
   }
@@ -55,7 +57,7 @@
   function issueRows() { return data ? array(data.customers).flatMap(function (customer) { return array(customer.issues).map(function (issue) { return Object.assign({}, issue, { slug: customer.slug, name: customer.name || customer.slug }); }); }).sort(function (a, b) { var priority = { critical: 0, error: 1, high: 1, warning: 2, attention: 3 }; return (priority[a.severity] == null ? 4 : priority[a.severity]) - (priority[b.severity] == null ? 4 : priority[b.severity]); }) : []; }
   function activities() { return data ? array(data.customers).flatMap(function (customer) { return array(customer.activity).map(function (event) { return Object.assign({}, event, { slug: customer.slug, name: customer.name || customer.slug }); }); }).sort(function (a, b) { return String(b.at || '').localeCompare(String(a.at || '')); }) : []; }
   function renderIssues(rows, target) {
-    $(target).innerHTML = rows.length ? '<ul class="record-list">' + rows.map(function (issue) { return '<li><div class="record-top"><b>' + esc(issue.title || 'Needs attention') + '</b>' + badge(issue.severity || 'attention') + '</div><p>' + esc(issue.detail) + '</p><button class="btn small" type="button" data-customer="' + esc(issue.slug) + '" style="margin-top:10px">' + esc(issue.name) + ' →</button></li>'; }).join('') + '</ul>' : emptyState('No current issues reported', 'New setup or service issues will appear here, with a link to the customer account.', 'customers', 'View customers');
+    $(target).innerHTML = rows.length ? '<ul class="record-list">' + rows.map(function (issue) { return '<li><div class="record-top"><b>' + esc(issue.title || 'Needs attention') + '</b>' + badge(issue.severity || 'attention') + '</div><p>' + esc(issue.detail) + '</p><button class="btn small" type="button" data-customer="' + esc(issue.slug) + '"' + (issue.reportId ? ' data-support-target="' + esc(issue.reportId) + '"' : '') + ' style="margin-top:10px">' + (issue.reportId ? 'Review report · ' : '') + esc(issue.name) + ' →</button></li>'; }).join('') + '</ul>' : emptyState('No current issues reported', 'New setup or service issues will appear here, with a link to the customer account.', 'customers', 'View customers');
   }
   function renderActivity(rows, target, includeCustomer) {
     $(target).innerHTML = rows.length ? '<ul class="record-list">' + rows.map(function (event) { return '<li><div class="record-top"><b>' + esc(label(event.type)) + '</b><span class="timestamp">' + esc(date(event.at)) + '</span></div><p>' + esc(event.detail || '') + '</p>' + (includeCustomer ? '<button type="button" class="btn small" data-customer="' + esc(event.slug) + '" style="margin-top:8px">' + esc(event.name) + '</button>' : '') + '</li>'; }).join('') + '</ul>' : emptyState('No activity recorded yet', 'Customer setup and support actions will build a clear history here.');
@@ -81,6 +83,28 @@
   }
   function historyIncomplete(listing) { return Object.keys(listing || {}).some(function (kind) { return listing[kind] && listing[kind].incomplete === true; }); }
   function historyNotice(listing) { return historyIncomplete(listing) ? '<p class="notice" data-history-notice><strong>Showing part of this customer’s history.</strong> Counts cover only the records shown. Some history still needs checking. Exports require a complete matching record history.</p>' : ''; }
+  function supportStatus(value) { return ({reported:'Reported',acknowledged:'Under review',resolved:'Resolved'})[value] || 'Check report status'; }
+  function supportOperationId() { return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(n){return n.toString(16).padStart(2,'0');}).join(''); }
+  async function supportSessionTag() { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(session || '')))).map(function(n){return n.toString(16).padStart(2,'0');}).join(''); }
+  async function storeSupportAction(body) { var current=generation;try{var tag=await supportSessionTag();if(current!==generation||!session)return;if(body)sessionStorage.setItem(supportActionStorage,JSON.stringify({sessionTag:tag,body:body}));else sessionStorage.removeItem(supportActionStorage);}catch(error){} }
+  function supportActionApplied(customer,body) { return array(customer?.supportReports).find(function(report){return report.id===body.reportId && (report.operationIds || []).includes(body.operationId);}); }
+  function renderPendingSupport() {
+    var previous=$('pendingSupportAction');if(previous)previous.remove();if(!pendingSupportAction||!data)return;
+    var notice=document.createElement('div');notice.id='pendingSupportAction';notice.className='support-pending-action';notice.innerHTML='<p><strong>A support change still needs confirmation.</strong> Check its saved result before making another support change.</p><button type="button" class="btn small" id="resumeSupportAction">Check saved support action</button>';$('appStatus').after(notice);
+  }
+  async function restoreSupportAction() {
+    if(pendingSupportLoaded||!session)return;pendingSupportLoaded=true;var current=generation;
+    try{var tag=await supportSessionTag();if(current!==generation)return;var saved=JSON.parse(sessionStorage.getItem(supportActionStorage)||'null');if(saved?.sessionTag===tag && ['acknowledge_report','resolve_report'].includes(saved.body?.action) && /^[a-f0-9]{32}$/.test(saved.body.operationId || ''))pendingSupportAction=saved.body;}catch(error){}
+    if(current===generation)renderPendingSupport();
+  }
+  function renderSupportReports(customer) {
+    var rows=array(customer.supportReports);if(!rows.length)return '';
+    return '<section class="panel" id="supportReports"><h2>Customer support reports</h2><p class="muted">Acknowledge the report to start review. The resolution is shown to the customer in their workspace; internal notes stay private.</p>'+rows.map(function(report){
+      var actions=report.status==='reported'?'<button class="btn small primary" type="button" data-action="acknowledge_report" data-report="'+esc(report.id)+'">Acknowledge report</button>':report.status==='acknowledged'?'<button class="btn small primary" type="button" data-action="resolve_report" data-report="'+esc(report.id)+'">Resolve report</button>':'';
+      return '<article class="support-case" data-support-case="'+esc(report.id)+'"><div class="record-top"><h3 tabindex="-1">'+esc(report.reference)+'</h3><span class="badge '+(report.status==='resolved'?'good':'warn')+'">'+esc(supportStatus(report.status))+'</span></div><p><strong>'+esc(report.channel)+' · '+esc(report.contact)+'</strong></p><p>'+esc(report.note)+'</p><p class="timestamp">Reported '+esc(date(report.reportedAt))+(report.acknowledgedAt?' · Review started '+esc(date(report.acknowledgedAt)):'')+(report.resolvedAt?' · Resolved '+esc(date(report.resolvedAt)):'')+'</p>'+(array(report.messages).length?'<details class="support-context"><summary>Reported conversation</summary>'+report.messages.map(function(message){return '<p><b>'+(message.role==='user'?'Customer':'Front desk')+':</b> '+esc(message.content)+'</p>';}).join('')+'</details>':'')+(report.resolution?'<div class="support-public-reply"><strong>Resolution for the customer</strong><p>'+esc(report.resolution)+'</p></div>':'')+'<div class="actions">'+actions+'</div></article>';
+    }).join('')+'</section>';
+  }
+  function focusSupportReport(id) { var card=Array.from(document.querySelectorAll('[data-support-case]')).find(function(node){return node.dataset.supportCase===id;});if(card){card.scrollIntoView({block:'center'});card.querySelector('h3').focus({preventScroll:true});} }
   function renderRecords(records, listing) {
     var bookings = array(records.bookings), leads = array(records.leads), conversations = array(records.conversations);
     var processingLabels = { queued: 'Reply queued', running: 'Processing', failed: 'Processing failed', suppressed: 'Reply withheld', awaiting_delivery: 'Awaiting delivery confirmation', uncertain: 'Delivery uncertain; do not resend', superseded: 'Replaced by a newer reply', expired: 'Reply expired' };
@@ -109,6 +133,7 @@
       $('detailActivity').closest('section').before(deliveryPanel);
     }
     var recordPanel = document.createElement('section'); recordPanel.className = 'panel'; recordPanel.innerHTML = '<h2>Customer records</h2>' + historyNotice(customer.recordListing) + '<p class="muted" data-count-scope>' + esc(metrics.scope || 'Latest 100 records per category') + ' Read only. Provider messages and billing are not changed here.</p>' + renderRecords(customer.records || {}, customer.recordListing || {}); $('detailActivity').closest('section').before(recordPanel);
+    if (array(customer.supportReports).length) { var supportPanel=document.createElement('div');supportPanel.innerHTML=renderSupportReports(customer);$('customerDetail').querySelector('.detail-main').prepend(supportPanel.firstElementChild); }
     // Keep daily account work in view; open deeper receipts only when needed.
     var detailMain = $('customerDetail').querySelector('.detail-grid > div');
     if (array(customer.issues).length) {
@@ -150,7 +175,7 @@
     $('summary').innerHTML = [{ value: summary.customers, label: 'Customers' + scope, go: 'customers', filter: 'all' }, { value: summary.active, label: 'Live accounts' + scope, go: 'customers', filter: 'live' }, { value: summary.needsAttention, label: 'Need attention' + scope, attention: true, go: 'issues' }, { value: summary.setupPending, label: 'Setup pending' + scope, go: 'customers', filter: 'setup_pending' }].map(function (stat) { return '<button type="button" class="stat' + (stat.attention ? ' attention' : '') + '" data-go="' + stat.go + '"' + (stat.filter ? ' data-filter="' + stat.filter + '"' : '') + '><span>' + esc(stat.label) + '</span><span class="stat-arrow" aria-hidden="true">↗</span><b>' + (Number.isFinite(stat.value) ? stat.value : '—') + '</b></button>'; }).join('');
     $('issueNavCount').hidden = !issues.length; $('issueNavCount').textContent = issues.length ? String(issues.length) : '';
     renderIssues(issues.slice(0, 4), 'overviewIssues'); renderIssues(issues, 'issues'); renderActivity(events.slice(0, 5), 'overviewActivity', true); renderActivity(events, 'activity', true);
-    renderCustomers(); renderDetail(false); renderInquiries(); renderSystem();
+    renderCustomers(); renderDetail(false); renderInquiries(); renderSystem(); renderPendingSupport();
   }
   var loading = null;
   async function loadData() {
@@ -161,7 +186,7 @@
       if (current !== generation) return;
       if (!Array.isArray(result.customers) || !result.operator || typeof result.operator.email !== 'string') throw new Error('The operations response was incomplete. Try refreshing.');
       data = result; $('login').hidden = true; $('app').hidden = false; $('appStatus').hidden = true;
-      $('lastUpdated').textContent = 'Updated ' + date(new Date().toISOString()); render();
+      $('lastUpdated').textContent = 'Updated ' + date(new Date().toISOString()); render(); restoreSupportAction();
     }).catch(function (error) {
       if (current !== generation || error.stale) return;
       if (data) { $('appStatus').textContent = 'Could not refresh. The information below may be out of date. ' + error.message; $('appStatus').className = 'notice error'; $('appStatus').hidden = false; }
@@ -183,16 +208,19 @@
     try { var result = await request('GET', undefined, '?c=' + encodeURIComponent(slug)); if (current !== generation || version !== detailVersion || selected !== slug) return; if (!result.customer || result.customer.slug !== slug) throw new Error('The customer response was incomplete. Refresh and try again.'); selectedRecord = result.customer; var index = data.customers.findIndex(function (customer) { return customer.slug === slug; }); if (index >= 0) data.customers[index] = result.customer; renderDetail(focus); }
     catch (error) { if (current !== generation || version !== detailVersion || error.stale) return; if (selectedRecord) { renderDetail(false); var warning = document.createElement('p'); warning.className = 'notice error'; warning.textContent = 'Could not refresh this account. The details below may be out of date. ' + error.message; $('customerDetail').prepend(warning); } else { $('customerDetail').innerHTML = '<p class="notice error">' + esc(error.message) + '</p><button class="btn" type="button" id="backCustomers">← All customers</button>'; } }
   }
-  function selectCustomer(slug) { if (!data || !array(data.customers).some(function (customer) { return customer.slug === slug; })) return; loadDetail(slug, true); }
+  function selectCustomer(slug,reportId) { if (!data || !array(data.customers).some(function (customer) { return customer.slug === slug; })) return; return loadDetail(slug, !reportId).then(function(){if(selected===slug && reportId)focusSupportReport(reportId);}); }
   document.addEventListener('click', function (event) {
-    var customer = event.target.closest('[data-customer]'); if (customer) { selectCustomer(customer.dataset.customer); return; }
+    var customer = event.target.closest('[data-customer]'); if (customer) { selectCustomer(customer.dataset.customer,customer.dataset.supportTarget); return; }
     var nav = event.target.closest('[data-view],[data-go]'); if (nav) { if ((nav.dataset.view || nav.dataset.go) === 'customers') { selected = null; if (nav.dataset.filter) { $('customerSearch').value = ''; $('customerStatus').value = nav.dataset.filter; renderCustomers(); } } navigate(nav.dataset.view || nav.dataset.go, true); return; }
     if (event.target.closest('#refreshCustomerDetail')) { if (selected) loadDetail(selected, true); return; }
     if (event.target.closest('#backCustomers')) { selected = null; selectedRecord = null; detailVersion++; renderDetail(false); $('customerSearch').focus(); return; }
-    var trigger = event.target.closest('[data-action]'); if (trigger) openAction(trigger.dataset.action, trigger.dataset.operation);
+    if(event.target.closest('#resumeSupportAction')){resumeSupportAction();return;}
+    var trigger = event.target.closest('[data-action]'); if (trigger) openAction(trigger.dataset.action, trigger.dataset.operation, trigger.dataset.report);
   });
   $('customerFilters').addEventListener('submit', function (event) { event.preventDefault(); renderCustomers(); }); $('customerSearch').addEventListener('input', renderCustomers); $('customerStatus').addEventListener('change', renderCustomers);
   var actionCopy = {
+    acknowledge_report: {title:'Acknowledge support report',description:'The customer will see that their report is under review. This does not mark the problem fixed.',submit:'Acknowledge report'},
+    resolve_report: {title:'Resolve support report',description:'Explain what you found and what happens next. This reply will be shown to the customer in their workspace.',submit:'Save resolution'},
     cancel_service: { title: 'Cancel front desk', description: 'This stops new chat, phone answering, customer texts and calendar sync. Saved records remain available. Provider cleanup is recovered in the background for attached services; billing is unchanged.', submit: 'Cancel front desk' },
     pause: { title: 'Pause front desk', description: 'Chat, phone answering, texts and calendar updates pause. Existing call forwarding may still need to be switched off at the phone carrier. Saved records and business answers remain.', submit: 'Pause front desk' },
     resume: { title: 'Resume front desk', description: 'Restore the previous service state after the current setup and AI checks pass. Existing accepted phone, texting and calendar connections are checked in the background. Website chat is restored only if it was previously active and is selected.', submit: 'Resume front desk' },
@@ -202,12 +230,16 @@
     retry_operation: { title: 'Retry the workspace refresh', description: 'Retry this recorded refresh if it is still eligible. The server checks its current revision and retry limit first.', submit: 'Retry refresh' }
     ,reconcile_services: { title: 'Check authorized services', description: 'Save an audited request to recheck existing customer-authorized phone, texting, calendar and message work. Platform workers may also check other already-authorized work. Execution gates and existing approvals remain in force. This does not authorize a purchase, create customer consent, or resend an uncertain message. A queued check is not proof of successful service delivery.', submit: 'Request service checks' }
   };
-  function openAction(name, operationId) {
-    var customer = currentCustomer(), copy = actionCopy[name]; if (!customer || !customer.selfService || !copy || busy || ['cancelled', 'archived'].includes(customer.status) && !['save_note','reconcile_services'].includes(name)) return;
-    action = { name: name, slug: customer.slug, expectedRevision: customer.revision, operationId: operationId };
+  function openAction(name, operationId, reportId) {
+    var customer = currentCustomer(), copy = actionCopy[name]; if (!customer || !customer.selfService || !copy || busy || ['cancelled', 'archived'].includes(customer.status) && !['save_note','reconcile_services','acknowledge_report','resolve_report'].includes(name)) return;
+    var reportAction=['acknowledge_report','resolve_report'].includes(name),report=reportAction?array(customer.supportReports).find(function(row){return row.id===reportId;}):null;
+    if(reportAction && (!report || name==='acknowledge_report' && report.status!=='reported' || name==='resolve_report' && report.status!=='acknowledged'))return;
+    if(reportAction && pendingSupportAction){toast('Check the saved support change before starting another.');return;}
+    action = { name: name, slug: customer.slug, expectedRevision: customer.revision, operationId: reportAction?supportOperationId():operationId, reportId:reportId, expectedReportRevision:report?.revision };
+    $('resolutionField').hidden=name!=='resolve_report';$('actionResolution').required=name==='resolve_report';$('actionResolution').value='';$('actionResolution').readOnly=false;$('actionReason').readOnly=false;$('actionCheck').hidden=true;$('actionSupportReference').hidden=!report;$('actionSupportReference').textContent=report?'Report '+report.reference:'';
     $('actionTitle').textContent = copy.title; $('actionDescription').textContent = (customer.name || customer.slug) + ': ' + copy.description; $('actionSubmit').textContent = copy.submit; $('actionSubmit').className = name === 'cancel_service' ? 'btn danger' : 'btn primary'; $('actionSubmit').disabled = false;
     $('actionReason').value = ''; $('actionNote').value = ''; $('rulesFields').hidden = name !== 'update_rules'; var rules = customer.rules || {}; $('ruleServices').value = array(rules.services).join('\n'); $('ruleServiceArea').value = array((rules.business || {}).serviceArea).join('\n'); $('ruleNotServed').value = array((rules.business || {}).notServed).join('\n'); $('ruleSummary').value = rules.summary || ''; $('noteField').hidden = name !== 'save_note'; $('actionNote').required = name === 'save_note'; $('actionStatus').textContent = ''; $('actionCancel').disabled = false;
-    $('actionDialog').showModal(); (name === 'save_note' ? $('actionNote') : $('actionReason')).focus();
+    $('actionDialog').showModal(); (name==='resolve_report'?$('actionResolution'):name === 'save_note' ? $('actionNote') : $('actionReason')).focus();
   }
   $('actionCancel').addEventListener('click', function () { if (!busy) { $('actionDialog').close(); action = null; } });
   $('actionDialog').addEventListener('cancel', function (event) { if (busy) event.preventDefault(); else action = null; });
@@ -217,9 +249,15 @@
     if (!body.reason) { $('actionStatus').textContent = 'Add a reason for this action.'; $('actionReason').focus(); return; }
     if (action.name === 'update_rules') { var lines = function (id) { return $(id).value.split('\n').map(function (line) { return line.trim(); }).filter(Boolean); }; body.patch = { services: lines('ruleServices'), business: { serviceArea: lines('ruleServiceArea'), notServed: lines('ruleNotServed') }, summary: $('ruleSummary').value.trim() }; }
     if (action.name === 'save_note') body.text = $('actionNote').value.trim(); if (action.name === 'retry_operation') body.operationId = action.operationId;
+    var reportAction=['acknowledge_report','resolve_report'].includes(action.name);
+    if(reportAction){body.reportId=action.reportId;body.expectedReportRevision=action.expectedReportRevision;body.operationId=action.operationId;if(action.name==='resolve_report'){body.resolution=$('actionResolution').value.trim();if(body.resolution.length<10){$('actionStatus').textContent='Add a clear resolution of at least 10 characters for the customer.';$('actionResolution').focus();return;}}if(action.savedBody)body=action.savedBody;else action.savedBody=structuredClone(body);snapshot=Object.assign({},action);}
+
+    var reportSaved=false;
     busy = true; $('actionSubmit').disabled = true; $('actionCancel').disabled = true; $('actionStatus').textContent = 'Saving…';
     try {
+      if(reportAction){pendingSupportAction=body;await storeSupportAction(body);if(current!==generation)return;}
       var result = await request('POST', body); if (current !== generation) return;
+      if(reportAction){reportSaved=true;pendingSupportAction=null;await storeSupportAction(null);if(current!==generation)return;renderPendingSupport();}
       $('actionDialog').close(); action = null; selected = snapshot.slug;
       if (result.refreshRequired === true) {
         selectedRecord = null; detailVersion++; data.customers = array(data.customers).filter(function (customer) { return customer.slug !== snapshot.slug; });
@@ -228,13 +266,29 @@
       }
       if (result.customer && result.customer.slug === snapshot.slug) selectedRecord = result.customer;
       await loadData(); if (current === generation) await loadDetail(snapshot.slug, false);
-      if (current === generation) { renderDetail(false); toast(snapshot.name === 'save_note' ? 'Internal note saved.' : snapshot.name === 'reconcile_services' ? 'Service-check request saved. Its receipt shows whether checks were dispatched; delivery is confirmed separately.' : snapshot.name === 'update_rules' ? 'Corrected answers saved. Review and test are required before using changed rules.' : snapshot.name === 'rebuild_workspace' || snapshot.name === 'retry_operation' ? 'Refresh request saved. Check Background work for its result.' : 'Change saved. Current service status is shown on the account.'); }
+      if (current === generation) { renderDetail(false); if(snapshot.reportId)focusSupportReport(snapshot.reportId); toast(snapshot.name==='acknowledge_report'?'Report acknowledged. The customer can see it is under review.':snapshot.name==='resolve_report'?'Resolution saved in the customer’s workspace.':snapshot.name === 'save_note' ? 'Internal note saved.' : snapshot.name === 'reconcile_services' ? 'Service-check request saved. Its receipt shows whether checks were dispatched; delivery is confirmed separately.' : snapshot.name === 'update_rules' ? 'Corrected answers saved. Review and test are required before using changed rules.' : snapshot.name === 'rebuild_workspace' || snapshot.name === 'retry_operation' ? 'Refresh request saved. Check Background work for its result.' : 'Change saved. Current service status is shown on the account.'); }
     } catch (error) {
       if (current !== generation || error.stale) return;
+      if(reportAction && reportSaved){toast('The support change is saved. Refresh customer details to see its current status.');return;}
+      if(reportAction){
+        if(error.status && error.status<500){pendingSupportAction=null;await storeSupportAction(null);if(current!==generation)return;renderPendingSupport();if(action)action.savedBody=null;}
+        else{if(action)action.uncertain=true;$('actionReason').readOnly=true;$('actionResolution').readOnly=true;$('actionCheck').hidden=false;$('actionStatus').textContent='The result is not confirmed. Your saved details are kept. Check the report before retrying the same change.';renderPendingSupport();return;}
+      }
       if (error.status === 409) { await loadDetail(snapshot.slug, false); if (current === generation) { if (action) action.stale = true; } }
       if (current === generation && $('actionDialog').open) $('actionStatus').textContent = error.status === 409 ? error.message + ' Close this dialog, review the latest account details, then start the action again.' : error.message;
-    } finally { if (current === generation) { busy = false; $('actionSubmit').disabled = !!(action && action.stale); $('actionCancel').disabled = false; } }
+    } finally { if (current === generation) { busy = false; $('actionSubmit').disabled = !!(action && (action.stale || action.uncertain)); $('actionCancel').disabled = false; } }
   });
+  async function checkSupportAction() {
+    var body=pendingSupportAction;if(!body||busy||!session)return;var current=generation;busy=true;$('actionCheck').disabled=true;
+    try{var result=await request('GET',undefined,'?c='+encodeURIComponent(body.slug));if(current!==generation)return;selected=body.slug;selectedRecord=result.customer;
+      if(supportActionApplied(result.customer,body)){pendingSupportAction=null;await storeSupportAction(null);if(current!==generation)return;if($('actionDialog').open)$('actionDialog').close();action=null;renderPendingSupport();await loadData();if(current!==generation)return;await loadDetail(body.slug,false);focusSupportReport(body.reportId);toast('The support change is saved. The current report status is shown.');}
+      else{renderDetail(false);if($('actionDialog').open && action){action.uncertain=false;$('actionSubmit').disabled=false;$('actionSubmit').textContent='Retry saved change';$('actionStatus').textContent='The saved result is not confirmed. Retry this exact change; the same request will be used.';}else{var report=array(result.customer.supportReports).find(function(row){return row.id===body.reportId;});if(!report)throw new Error('The report could not be found. Keep the saved change on hold.');
+        action={name:body.action,slug:body.slug,expectedRevision:body.expectedRevision,operationId:body.operationId,reportId:body.reportId,expectedReportRevision:body.expectedReportRevision,savedBody:body};var copy=actionCopy[body.action];$('actionTitle').textContent=copy.title;$('actionDescription').textContent='Check the retained change on this report. A retry reuses the same request.';$('rulesFields').hidden=true;$('noteField').hidden=true;$('actionNote').required=false;$('resolutionField').hidden=body.action!=='resolve_report';$('actionResolution').required=body.action==='resolve_report';$('actionResolution').value=body.resolution||'';$('actionResolution').readOnly=true;$('actionReason').value=body.reason;$('actionReason').readOnly=true;$('actionCheck').hidden=false;$('actionSupportReference').hidden=false;$('actionSupportReference').textContent='Report '+report.reference;$('actionSubmit').textContent='Retry saved change';$('actionSubmit').disabled=false;$('actionCancel').disabled=false;$('actionStatus').textContent='The result is not confirmed. Retry this same saved change or check again.';$('actionDialog').showModal();$('actionTitle').setAttribute('tabindex','-1');$('actionTitle').focus();}}
+    }catch(error){if(current!==generation||error.stale)return;if($('actionDialog').open)$('actionStatus').textContent=error.message;else toast(error.message);}
+    finally{if(current===generation){busy=false;$('actionCheck').disabled=false;}}
+  }
+  function resumeSupportAction(){checkSupportAction();}
+  $('actionCheck').addEventListener('click',checkSupportAction);
   function updateLoginControls() {
     var seconds = Math.max(0, Math.ceil((loginRetryAt - Date.now()) / 1000));
     $('requestLink').disabled = loginPending || seconds > 0;

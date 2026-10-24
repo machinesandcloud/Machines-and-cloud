@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "decision": "Accepted locally for the selected support loop; not published and not complete G8 operations acceptance",
+  "baseCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "branch": "work/g8-support-delivery-d06",
+  "worktree": "/tmp/mc-g8-support-engineering-d06",
+  "customerJob": "A verified shop owner reports one saved conversation, finds the same case when returning, and receives an operator acknowledgement/public resolution through existing Inbox and Issues.",
+  "sourceFiles": [
+    {
+      "path": "desk.js",
+      "sha256": "8b97b1b8c4c2eaec1b5104800771b31df5b1302f36cb34a85f10ce0780eb0c2d"
+    },
+    {
+      "path": "desk.html",
+      "sha256": "cfa93caddef32be2baaa13f433fd5cea87aa221e1c517b278fdff9157086724b"
+    },
+    {
+      "path": "desk.css",
+      "sha256": "eda8ce4b1139056fab7e8241b7498a7f8be761660b479356e64d976661fd61c9"
+    },
+    {
+      "path": "admin.js",
+      "sha256": "48672bf2c5697141896cc4f5cc2cb24247ceed5952773d513aa4d9748a7df883"
+    },
+    {
+      "path": "admin.html",
+      "sha256": "02d4ca876f11525a4d8cc2191ce4cea6b0a3ed55eceb17acfe451432c91f8bac"
+    },
+    {
+      "path": "admin.css",
+      "sha256": "4f61fc0bf2840fb481d1b657951c275105a6feae90269c297b9b9bdeace52775"
+    },
+    {
+      "path": "netlify.toml",
+      "sha256": "5c7613f57eaca473fa7ea3c1935e6ccb017fcfdc232bde77b4a975618ac3a7f7"
+    },
+    {
+      "path": "netlify/functions/lib/support-reports.mjs",
+      "sha256": "a81f55d749ab1e1e974afd97b9f4026365c4959fc39cb1042fca85415b1fb3c6"
+    },
+    {
+      "path": "netlify/functions/client.mjs",
+      "sha256": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07"
+    },
+    {
+      "path": "netlify/functions/lib/operator.mjs",
+      "sha256": "faac3b2594dfdc45295935499c6430cdad75e0e80eef23217be11ea36d4ca6fe"
+    },
+    {
+      "path": "netlify/functions/lib/store.mjs",
+      "sha256": "94fccece31d8d59cd9e96987ca1090aad580de7b53bbc41a6cc6f1704c58fe34"
+    },
+    {
+      "path": "netlify/functions/scheduler.mjs",
+      "sha256": "77be2c15cc60edaa7007a767867d7fde9c7041084ce6eae8d4a6d952162c44e9"
+    },
+    {
+      "path": "scripts/support-report-check.mjs",
+      "sha256": "3806fe96042dfacb5ee35108697b7dcb3d168b95d7b915a7f1df8063b7322c67"
+    },
+    {
+      "path": "scripts/support-report-fixtures.mjs",
+      "sha256": "043fbbb8660fc7e99d9a60a9e473146545afa52e29bb6022478eedf2c564ab5f"
+    }
+  ],
+  "design": "One conditional client.management.supportReports source atomically governs owner progress and operator Issues. No separate helpdesk/issue queue/projection or external notification send. Existing conversation flags are bounded scheduled adoption input; new reports cannot be stranded by missed initial dispatch.",
+  "procedure": "product/SUPPORT-REPORT-DELIVERY-2026-10-24.md",
+  "localEvidence": {
+    "requiredGate": {
+      "path": "scratchpad/support-report-required-gate-first.json",
+      "sha256": "de2fe41600ff5ed488a9f741267fc487d2ebc3db78095b04e1a9cda63f2ab784",
+      "passed": 57,
+      "total": 57,
+      "sourceStable": true,
+      "sourceFiles": 534
+    },
+    "authorHandler": {
+      "path": "scratchpad/support-report-author-noop-repaired.json",
+      "sha256": "07ce83e1a409911a1a94046d75a1d4ceb1bea60359fffbac3dd5394a6d0c392d",
+      "passed": 23,
+      "total": 23,
+      "physicalRequests": 0
+    },
+    "independent": {
+      "path": "product/G8-SUPPORT-INDEPENDENT-ACCEPTANCE-2026-10-24.json",
+      "sha256": "e010fb3cdf8acef6ea7c38bbda86077486e8b330edd3c17d186eb3a564be26a1",
+      "backendPassed": 34,
+      "uiPassed": 12,
+      "sourceStable": true,
+      "physicalRequests": 0
+    },
+    "uiEngineering": {
+      "path": "scratchpad/g8-support-author-ui-return-fixed.json",
+      "sha256": "46d977dcf9b6d82763eca2d5af84fb138a7dc5bee8fc934f3e495f20bf8a56d7",
+      "passed": 32,
+      "widths": [
+        1440,
+        390
+      ],
+      "authorship": "Frontend engineering and observed review by PO/UI agent; not relabeled independent testing"
+    },
+    "poObserved": {
+      "path": "scratchpad/g8-support-po-observed-acceptance.json",
+      "sha256": "0e569eb21d6ea99321b7f129171091b7b3e0b4838a943deed768ea5229ddad9f"
+    }
+  },
+  "returnedDefects": [
+    {
+      "evidence": "scratchpad/g8-support-po-discovery-first.json",
+      "finding": "Original owner flag persisted while operator Issues omitted report/context; no acknowledgement/resolution path."
+    },
+    {
+      "evidence": "scratchpad/g8-support-po-discovery-cancel.json",
+      "finding": "Canceling old prompt still saved blank flag; replaced by explicit accessible report form with no-write cancel."
+    },
+    {
+      "evidence": "scratchpad/support-report-order-first.json",
+      "finding": "New operation hashing wrongly depended on JSON key order; canonical payload hashing plus owner/operator replay regression fixes it."
+    },
+    {
+      "evidence": "scratchpad/support-report-scheduler-regression-first-full.log",
+      "finding": "New empty legacy discovery mutated client metadata without owned conversations; skip-noop cursor writes restores the unchanged-record gate."
+    },
+    {
+      "evidence": "scratchpad/support-reports-independent-ui-first.json",
+      "finding": "After resolved case, Check saved report could replace a fresh unsent next-problem draft with prior progress. One current/pending conditional repaired; original10/12 kept and replacement12/12 accepted."
+    }
+  ],
+  "fixtureDispositions": "Independent first31/34 contained only fixture setup failures: history created after cancellation, archived timestamps replaced. Corrected fixtures retain source/message history and use existing conversations before service close. Originals and replacement34/34 retained.",
+  "artifactHandling": "Required build generated two existing scratchpad receipts; current generated outputs are preserved under fresh support-report-required-generated-* names and original fixed-path baseline bytes restored. No old acceptance is overwritten/relabelled as current. Intermediate unrelated/duplicate/empty receipts, local node_modules and generated dist stay uncommitted.",
+  "effects": {
+    "physicalNetwork": 0,
+    "actualProvider": 0,
+    "realEmails": 0,
+    "actualBrowserAccounts": 0,
+    "RootCheckoutWrites": 0,
+    "GitPushOrDeployment": 0
+  },
+  "nextUnresolvedStep": {
+    "driver": "Root/PM integrates only after current Calendar phase fully closes; independent QA/PO preserve actual provider and operation proof duties.",
+    "action": "Review/cherry-pick exact local source, reconcile current control/combined source, then publication/provider validation under its own fresh concrete scope. Continue actual support/backup receipt and incident/hosting acceptance.",
+    "requiredEvidence": "Publication/source verification plus actual named operator/backup receipt and controlled failure/repair/hosting continuity. A portal case, saved status, local pass or task is not email/human/provider receipt."
+  },
+  "limits": [
+    "Full paid platform launch remains NO-GO.",
+    "G8 named support and backup mailbox receipt, controlled operational incident, funded hosting continuity and actual service repair verification remain open.",
+    "100 retained reports per client; capacity blocks new cases only. Earlier flags use bounded4client/8conversation/deadline checks with incomplete/error health, not an unbounded guaranteed history migration.",
+    "No new email/SMS/provider execution authority, SLA or continuously staffed responder claim."
+  ]
+}

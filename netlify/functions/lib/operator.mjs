@@ -15,6 +15,7 @@ import { parseWorkspacePatch, WorkspaceEditError } from './workspace-edit.mjs';
 import { workspaceTenant, belongsToWorkspace } from './workspace-identity.mjs';
 import { calendarExecutionPolicy } from './calendar-execution.mjs';
 import { workspaceBillingConfiguration } from './workspace-billing.mjs';
+import {supportReportViews,supportReportIssues,changeSupportReport} from './support-reports.mjs';
 
 export class OperatorError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
@@ -64,6 +65,7 @@ export async function customerView(c, detail = false) {
   const [operations, aiAllowance, phoneActivation, services] = await Promise.all([selfService ? listWorkspaceOperations(c) : [], selfService ? getAIAllowance(c) : null, selfService ? phoneActivationStatus(c) : null, selfService ? serviceConnections(c) : null]);
   if (services) setup=serviceSetupView(c,services);
   const issues = [];
+  if(selfService)issues.push(...supportReportIssues(c));
   if (c.build?.status === 'failed') issues.push({ id: 'draft', severity: 'high', title: 'Desk draft needs repair', detail: 'Saved customer answers are retained. Queue a workspace rebuild.' });
   for (const op of operations.filter(row => ['failed', 'uncertain'].includes(row.state))) issues.push({ id: op.id, severity: 'high', title: 'Background work needs attention', detail: op.detail || 'Review the operation before retrying.' });
   if (phoneActivation?.operation && ['uncertain','cleanup_uncertain','needs_review'].includes(phoneActivation.operation.state)) issues.push({ id: phoneActivation.operation.id, severity: 'high', title: 'Phone setup needs attention', detail: phoneActivation.detail });
@@ -82,7 +84,7 @@ export async function customerView(c, detail = false) {
     const service=services && ({voice:services.voice,sms:services.messaging,calendar:services.calendar})[row.id];
     return service?{...row,status:service.active?'active':service.status || service.state,detail:service.operation?.detail || service.detail || row.detail}:row;
   });
-  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, issues, aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
+  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, issues, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
   if (detail) {
     for (const operation of operations) {
       const raw = await strictRead('workspace_operations', operation.id);
@@ -128,6 +130,13 @@ function validatedPatch(patch) {
   }
 }
 export async function supportAction(session, body) {
+  if(['acknowledge_report','resolve_report'].includes(body?.action)){
+    if(!/^[a-z0-9-]{1,40}$/.test(body.slug||''))throw new OperatorError('invalid_request','Choose a customer report.');
+    const c=await strictRead('clients',body.slug);if(!c||!isSelfServiceClient(c))throw new OperatorError('not_found','This customer report was not found.',404);
+    const result=await changeSupportReport(c,session,body,{authorize:async active=>operatorEmails().has(active.email),expectedManagementRevision:body.expectedRevision,currentManagementRevision:managementRevision});
+    try{return {ok:true,supportReport:result.supportReport,receipt:result.receipt,customer:await customerView(result.client,true)};}
+    catch{return {ok:true,saved:true,refreshRequired:true,supportReport:result.supportReport,receipt:result.receipt,customer:null,message:'The report update is saved. Refresh customer details to confirm its current status.'};}
+  }
   const allowed = { pause: [], resume: [], cancel_service: [], save_note: ['text'], update_rules: ['patch'], rebuild_workspace: [], retry_operation: ['operationId'], reconcile_services: [] };
   if (!body || !Object.hasOwn(allowed, body.action)) throw new OperatorError('invalid_action', 'Choose an available support action.');
   if (Object.keys(body).some(key => !['action', 'slug', 'expectedRevision', 'reason', ...allowed[body.action]].includes(key))) throw new OperatorError('invalid_request', 'Unexpected support action fields.');

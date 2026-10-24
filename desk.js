@@ -12,6 +12,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function recover(message) {
     closeTour(false, false);
+    if (leaving) supportReset(); else if ($('supportDialog')?.open) $('supportDialog').close();
     if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; if ($('phoneAuthority')) $('phoneAuthority').checked = false; if ($('phoneCosts')) $('phoneCosts').checked = false;
     if ($('cancelBox').open) $('cancelBox').close();
     if ($('visitDialog').open) $('visitDialog').close(); visitPending = null; visitSelected = null;
@@ -228,9 +229,93 @@
       notice.innerHTML = '<strong>Showing part of your history</strong><br>' + (item[0] === 'exportHistoryNotice' ? 'Booking, lead and customer downloads require complete history. A download is unavailable if those records still need checking. Contact support if you need an earlier request.' : 'The requests and counts shown cover only the records loaded here. Some history still needs checking. Contact support if you need an earlier request.');
     });
   }
-  function renderConversations(rows) {
-    return rows.length ? rows.map(function (v) { return '<article class="conv"><header class="conv-header"><div><b>' + esc(v.contact) + '</b><div class="conv-meta"><span class="conv-channel">' + esc(v.channel) + '</span>' + esc(recordTimeLabel(v.updatedAt)) + (v.flag ? ' · Flagged: ' + esc(v.flag.note || '') : '') + '</div></div>' + (v.reference ? '<button type="button" class="btn-pill btn-pill-dark btn-sm" data-conversation-open="' + esc(v.reference) + '" data-conversation-contact="' + esc(v.contact) + '">Read saved conversation</button>' : '') + (v.flag ? '<a href="#" class="unflag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Unflag</a>' : '<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="' + esc(v.channel) + '" data-ct="' + esc(v.contact) + '">Flag</button>') + '</header><div class="conv-thread">' + v.messages.map(function (m) { return '<div class="conv-message ' + (m.role === 'user' ? 'u' : 'a') + '"><span>' + (m.role === 'user' ? 'Customer' : 'Front desk') + '</span>' + esc(m.content) + (m.processing ? '<small class="muted"> · ' + esc(m.processing.replace(/_/g, ' ')) + '</small>' : '') + '</div>'; }).join('') + '</div></article>'; }).join('') : emptyState('No conversations yet', 'Customer conversations appear here after a customer sends a message. Private practice stays separate.', 'Review your connections', 'setup');
+  var supportTarget = null, supportCurrent = null, supportOpener = null, supportBusy = false, supportPending = null, supportRestored = false;
+  var supportStorageKey = 'mc-support-report-pending-v1:' + slug;
+  function supportLabel(status) { return ({reported:'Reported',acknowledged:'Under review',resolved:'Resolved'})[status] || 'Checking report'; }
+  function supportFor(channel, contact) { return (data && data.supportReports || []).filter(function(row){return row.channel===channel && row.contact===contact;}).sort(function(a,b){return String(b.reportedAt||'').localeCompare(String(a.reportedAt||''));})[0] || null; }
+  function supportCard(report) {
+    if (!report) return '';
+    var message = report.status==='resolved' ? 'Our reply' : report.status==='acknowledged' ? 'We’ve started reviewing your report.' : 'Your report is saved. You can follow its progress here.';
+    return '<section class="support-report" aria-label="Support report '+esc(report.reference)+'"><div class="support-report-head"><strong>Support · '+esc(report.reference)+'</strong><span class="support-state" data-support-status="'+esc(report.status)+'">'+esc(supportLabel(report.status))+'</span></div><p class="support-note">'+esc(report.note)+'</p><p><strong>'+esc(message)+'</strong></p>'+(report.status==='resolved'?'<p class="support-resolution">'+esc(report.resolution)+'</p>':'')+'<small>Reported '+esc(recordTimeLabel(report.reportedAt))+(report.acknowledgedAt?' · Review started '+esc(recordTimeLabel(report.acknowledgedAt)):'')+(report.resolvedAt?' · Resolved '+esc(recordTimeLabel(report.resolvedAt)):'')+'</small></section>';
   }
+  function renderConversations(rows) {
+    var selfService=!!(data && data.client && data.client.onboarding?.version===1);
+    var pending=selfService&&supportPending?'<div class="support-report"><strong>A report still needs confirmation</strong><p>Your saved details are kept. Check this report before sending another.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" data-support-pending>Check saved report</button></div>':'';
+    return pending + (rows.length ? rows.map(function(v){
+      var report=selfService?(v.supportReport || supportFor(v.channel,v.contact)):null;
+      var button=selfService?'<button type="button" class="btn-pill btn-pill-dark btn-sm support-open" data-ch="'+esc(v.channel)+'" data-ct="'+esc(v.contact)+'">'+(report&&report.status!=='resolved'?'View report':report?'Report another problem':'Report a problem')+'</button>':v.flag?'<a href="#" class="unflag" data-ch="'+esc(v.channel)+'" data-ct="'+esc(v.contact)+'">Unflag</a>':'<button type="button" class="btn-pill btn-pill-dark btn-sm flag" data-ch="'+esc(v.channel)+'" data-ct="'+esc(v.contact)+'">Flag</button>';
+      return '<article class="conv"><header class="conv-header"><div><b>'+esc(v.contact)+'</b><div class="conv-meta"><span class="conv-channel">'+esc(v.channel)+'</span>'+esc(recordTimeLabel(v.updatedAt))+(!selfService&&v.flag?' · Flagged: '+esc(v.flag.note || ''):'')+'</div></div>'+(v.reference?'<button type="button" class="btn-pill btn-pill-dark btn-sm" data-conversation-open="'+esc(v.reference)+'" data-conversation-contact="'+esc(v.contact)+'">Read saved conversation</button>':'')+button+'</header><div class="conv-thread">'+v.messages.map(function(m){return '<div class="conv-message '+(m.role==='user'?'u':'a')+'"><span>'+(m.role==='user'?'Customer':'Front desk')+'</span>'+esc(m.content)+(m.processing?'<small class="muted"> · '+esc(m.processing.replace(/_/g,' '))+'</small>':'')+'</div>';}).join('')+'</div>'+supportCard(report)+'</article>';
+    }).join('') : emptyState('No conversations yet','Customer conversations appear here after a customer sends a message. Private practice stays separate.','Review your connections','setup'));
+  }
+  async function supportStore(value) {
+    var generation=portalGeneration;try{var tag=await visitSessionTag;if(leaving||generation!==portalGeneration)return false;if(value)sessionStorage.setItem(supportStorageKey,JSON.stringify({sessionTag:tag,input:value}));else sessionStorage.removeItem(supportStorageKey);return true;}catch(error){return false;}
+  }
+  function supportReset() {
+    supportTarget=null;supportCurrent=null;supportPending=null;supportBusy=false;
+    try{sessionStorage.removeItem(supportStorageKey);}catch(error){}
+    if($('supportDialog')?.open)$('supportDialog').close();
+    ['supportNote','supportMessage','supportSaved'].forEach(function(id){if($(id)){if(id==='supportNote')$(id).value='';else $(id).textContent='';}});
+  }
+  function supportMatched(pending) { return (data && data.supportReports || []).find(function(row){return row.reportOperationId===pending.operationId || (row.operationIds || []).includes(pending.operationId);}); }
+  function supportControls() {
+    ['supportClose','supportCancel','supportCheck','supportRetry'].forEach(function(id){$(id).disabled=supportBusy;});
+    $('supportSend').disabled=supportBusy || !!supportPending; $('supportNote').disabled=supportBusy || !!supportPending;
+    $('supportForm').setAttribute('aria-busy',String(supportBusy));
+  }
+  async function supportConfirmed(report) {
+    supportCurrent=report;supportPending=null;await supportStore(null);if(leaving)return;
+    $('supportSaved').innerHTML=supportCard(report);$('supportSaved').hidden=false;$('supportForm').hidden=true;$('supportCheck').hidden=false;$('supportRetry').hidden=true;
+    $('supportTitle').textContent='Your support report';$('supportIntro').textContent='Your report and our reply stay with this conversation.';$('supportMessage').textContent=report.status==='resolved'?'The saved resolution is shown above.':'Your report is saved. Check here for updates.';supportControls();
+    if($('supportDialog').open)$('supportMessage').focus();
+  }
+  async function supportObserve() {
+    if(leaving || !data)return;
+    if(!supportRestored){supportRestored=true;var generation=portalGeneration;try{var tag=await visitSessionTag;if(leaving||generation!==portalGeneration)return;var cached=JSON.parse(sessionStorage.getItem(supportStorageKey)||'null');if(cached?.sessionTag===tag && cached.input?.action==='report_conversation' && /^[a-f0-9]{32}$/.test(cached.input.operationId || ''))supportPending=cached.input;}catch(error){}}
+    if(supportPending){var matched=supportMatched(supportPending);if(matched){if($('supportDialog').open)await supportConfirmed(matched);else{supportPending=null;await supportStore(null);}}}
+    if(!leaving && data)$('convs').innerHTML=renderConversations(data.conversations || []);
+  }
+  function openSupport(channel,contact,opener) {
+    if(leaving || supportBusy || !data)return;
+    if(supportPending){channel=supportPending.channel;contact=supportPending.contact;}
+    supportOpener=opener || document.activeElement;supportTarget={channel:channel,contact:contact};supportCurrent=supportFor(channel,contact);
+    $('supportNoteError').textContent='';$('supportNote').removeAttribute('aria-invalid');$('supportMessage').textContent='';$('supportRetry').hidden=true;
+    $('supportSaved').innerHTML=supportCard(supportCurrent);$('supportSaved').hidden=!supportCurrent;
+    var active=supportCurrent && supportCurrent.status!=='resolved';
+    $('supportForm').hidden=!!active && !supportPending;$('supportNote').value=supportPending?supportPending.note:'';
+    $('supportCheck').hidden=!active && !supportPending;
+    $('supportTitle').textContent=active?'Your support report':supportCurrent?'Report another problem':'Report a problem';
+    $('supportIntro').textContent=active?'Your report and our reply stay with this conversation.':'Tell us what went wrong. The saved conversation will be included with your report.';
+    if(supportPending)$('supportMessage').textContent='The earlier send is not confirmed. Check its saved status before retrying the same report.';
+    supportControls();$('supportDialog').showModal();$('supportDialog').scrollTop=0;(active?$('supportTitle'):$('supportNote')).focus();
+  }
+  function closeSupport() { if(supportBusy)return;$('supportDialog').close();if(supportOpener?.isConnected)supportOpener.focus({preventScroll:true});else document.querySelector('.support-open')?.focus({preventScroll:true}); }
+  $('supportClose').addEventListener('click',closeSupport);$('supportCancel').addEventListener('click',closeSupport);
+  $('supportDialog').addEventListener('cancel',function(event){event.preventDefault();closeSupport();});
+  $('supportForm').addEventListener('submit',async function(event){
+    event.preventDefault();if(supportBusy||supportPending||!supportTarget||leaving)return;
+    var note=$('supportNote').value.trim();if(note.length<3){$('supportNoteError').textContent='Tell us what went wrong in a few words.';$('supportNote').setAttribute('aria-invalid','true');$('supportNote').focus();return;}
+    supportPending={action:'report_conversation',channel:supportTarget.channel,contact:supportTarget.contact,note:note,operationId:visitSubmissionId(),expectedReportRevision:supportCurrent?.revision || null};
+    await sendSupport();
+  });
+  $('supportNote').addEventListener('input',function(){$('supportNote').removeAttribute('aria-invalid');$('supportNoteError').textContent='';});
+  async function sendSupport() {
+    if(supportBusy||!supportPending||leaving)return;var generation=portalGeneration,pending=supportPending;supportBusy=true;supportControls();$('supportMessage').textContent='Saving your report…';$('supportRetry').hidden=true;
+    try{await supportStore(pending);if(leaving||generation!==portalGeneration)return;var result=await apiRequest('POST',pending);if(leaving||generation!==portalGeneration)return;if(!result.supportReport?.id)throw new Error('The saved report could not be confirmed.');await supportConfirmed(result.supportReport);await load();}
+    catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}if(error.status && error.status<500){supportPending=null;await supportStore(null);if(leaving||generation!==portalGeneration)return;$('supportMessage').textContent=error.message;$('supportCheck').hidden=false;if(error.status===409){await load();if(leaving||generation!==portalGeneration)return;var existing=supportFor(supportTarget?.channel,supportTarget?.contact);if(existing){supportCurrent=existing;$('supportSaved').innerHTML=supportCard(existing);$('supportSaved').hidden=false;if(existing.status!=='resolved')$('supportForm').hidden=true;}}}else{$('supportMessage').textContent='We could not confirm the save. Your report details are kept. Check the saved status before retrying.';$('supportCheck').hidden=false;}}
+    finally{if(!leaving&&generation===portalGeneration){supportBusy=false;supportControls();}}
+  }
+  $('supportRetry').addEventListener('click',sendSupport);
+  $('supportCheck').addEventListener('click',async function(){
+    if(supportBusy||leaving)return;var generation=portalGeneration;supportBusy=true;supportControls();$('supportMessage').textContent='Checking your report…';
+    try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;await load(latest);if(leaving||generation!==portalGeneration)return;var found=supportPending?supportMatched(supportPending):supportFor(supportTarget?.channel,supportTarget?.contact);if(found)await supportConfirmed(found);else if(supportPending){$('supportMessage').textContent='A saved result is not confirmed yet. Retry this same report using the button below.';$('supportRetry').hidden=false;}else{$('supportMessage').textContent='The latest report could not be found. Close this dialog and review the conversation before sending a new report.';}}
+    catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}$('supportMessage').textContent='We could not check the report. Your details are kept. Try checking again when your connection returns.';}
+    finally{if(!leaving&&generation===portalGeneration){supportBusy=false;supportControls();}}
+  });
+  document.addEventListener('click',function(event){
+    var report=event.target.closest('.support-open,[data-support-pending]');if(report){openSupport(report.dataset.ch,report.dataset.ct,report);return;}
+    var flag=event.target.closest('button.flag');if(flag){var note=window.prompt('What went wrong? One line is enough.');if(note===null)return;apiRequest('POST',{action:'flag',channel:flag.dataset.ch,contact:flag.dataset.ct,note:note}).then(load).catch(function(error){toast(error.message);});return;}
+    var unflag=event.target.closest('a.unflag');if(unflag){event.preventDefault();apiRequest('POST',{action:'unflag',channel:unflag.dataset.ch,contact:unflag.dataset.ct}).then(load).catch(function(error){toast(error.message);});}
+  });
   var phoneBusy = false, phoneRequestIdentity = null, phoneCancelSnapshot = null, phoneCancelReturnFocus = null;
   function validPhoneOffer(offer) {
     return offer && offer.scope === 'number_acquisition_only' && offer.country === 'US' && offer.currency === 'USD' && /^[2-9]\d{2}$/.test(offer.areaCode || '') && /^[a-z0-9_-]{1,80}$/.test(offer.version || '') && /^[a-f0-9]{64}$/.test(offer.digest || '') && [offer.oneTimeCents, offer.monthlyCents, offer.maxAcquisitionCents].every(function (value) { return Number.isSafeInteger(value) && value >= 0 && value <= 100000; }) && Date.parse(offer.expiresAt) > Date.now() && typeof offer.authorityText === 'string' && offer.authorityText.length >= 20;
@@ -740,8 +825,7 @@
       $('leads').innerHTML = d.leads.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Outcome</th><th>Status</th><th>Ref</th></tr>' + d.leads.map(function (l) { return '<tr data-record-kind="leads" data-record-id="'+esc(l.id)+'"><td>' + esc(recordTimeLabel(l.createdAt)) + '</td><td>' + esc(l.customer_name || 'no name') + (platformLeadLabel(l)?' <span class="tag" data-lead-source-badge>'+esc(platformLeadLabel(l))+'</span>':'') + (l.websiteSetupCheck?' <span class="tag">Setup check</span>':'') + ' <span class="muted">(' + (l.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(l.phone) + '</span></td><td>' + esc(l.issue) + (l.unsure ? '<br><span class="muted">Unsure: ' + esc(l.unsure) + '</span>' : '') + '</td><td>' + esc((l.outcome || l.reason || '').replace('_', ' ')) + humanHandoffStatus(l) + (l.urgency === 'emergency' ? ' <b>EMERGENCY</b>' : '') + (l.overdueAt && l.status === 'open' ? '<span class="tag-overdue">overdue callback</span>' : '') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</td><td>' + (selfService&&l.followthrough?esc(l.followthrough.reviewRequired?'Review updated request':l.followthrough.state.completedAt?'Follow-up complete':l.followthrough.due?'Follow-up due':l.followthrough.state.contact.replace(/_/g,' '))+'<br><span class="muted">'+esc(l.followthrough.state.nextAction||'No next action recorded')+'</span>':esc(l.status)) + '</td><td>' + esc(leadReference(l)) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + '</td></tr>'; }).join('') + '</table></div>' : emptyState(leadsLimited ? 'No customer requests in this view' : 'No customer requests yet', leadsLimited ? 'Some request history still needs checking. Contact support if you need an earlier request.' : 'Customer requests appear here with the details you need to review and follow up.');
       document.querySelectorAll('button.ack').forEach(function (b) { b.addEventListener('click', function () { apiRequest('POST', { action: 'ack', leadId: b.dataset.id }).then(function () { toast('Acknowledged.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
       $('convs').innerHTML = renderConversations(d.conversations); $('bookingCount').textContent = d.bookings.length + (bookingsLimited ? ' shown' : ''); $('leadCount').textContent = d.leads.length + (leadsLimited ? ' shown' : ''); decorateRecordTables();
-      document.querySelectorAll('button.flag').forEach(function (b) { b.addEventListener('click', function () { var note = window.prompt('What went wrong? One line is enough.') || ''; apiRequest('POST', { action: 'flag', channel: b.dataset.ch, contact: b.dataset.ct, note: note }).then(function () { toast('Issue recorded on this conversation.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
-      document.querySelectorAll('a.unflag').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); apiRequest('POST', { action: 'unflag', channel: a.dataset.ch, contact: a.dataset.ct }).then(function () { return load(); }).catch(function (error) { toast(error.message); }); }); });
+      supportObserve();
       // Background refreshes must never replace an edited or pending draft.
       if (!cfgDirty && !cfgBusy && !cfgConflict) {
         cfgFill(cfgFromClient(c)); cfgBaseline = cfgRead(); cfgRevision = d.configurationRevision; cfgEditRevision = d.editRevision; cfgClosed = !!(c.onboarding && c.onboarding.version === 1 && ['cancelled','archived'].includes(c.status));

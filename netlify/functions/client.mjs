@@ -47,6 +47,7 @@ import { workspaceActivity } from './lib/workspace-activity.mjs';
 import { changePlatformAutomation } from './lib/platform-ai.mjs';
 import { leadConnectionsView, changeLeadConnection, LeadConnectionError } from './lib/lead-connections.mjs';
 import { startThumbtackConnection, continueOwnerThumbtack, selectThumbtackBusiness, sendPlatformReply } from './lib/thumbtack-connection.mjs';
+import {reportConversation,supportReportViews,SupportReportError} from './lib/support-reports.mjs';
 
 export const config = { path: "/api/client" };
 
@@ -84,7 +85,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
 
 export default async (req) => {
   let out;
-  try { out = await handle(req); } catch(error) { if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req); } catch(error) { if(error instanceof SupportReportError)out=json({error:error.code,message:error.message,field:error.field,...(Object.hasOwn(error,'supportReport')?{supportReport:error.supportReport}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -160,9 +161,13 @@ async function handle(req) {
     }
     const serviceOnboarding=selfService?await serviceOnboardingStatus(c):null;
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
+    const supportReports=selfService?supportReportViews(c):[];
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, leadConnections: await leadConnectionsView(c), serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
-      conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, ...(selfService && v.channel === 'web' ? { reference: conversationReference(c,v.channel,v.contact), retainedMessages: v.history?.total ?? v.messages.length, historyComplete: v.history?.complete === true } : {}), messages: v.messages.slice(-12) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, leadConnections: await leadConnectionsView(c), serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
+      conversations: convs.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).map(v=>{
+        const supportReport=selfService?supportReports.find(row=>row.channel===v.channel&&row.contact===v.contact)||null:null;
+        return {channel:v.channel,contact:v.contact,updatedAt:v.updatedAt,flag:supportReport?(supportReport.status==='resolved'?null:{at:supportReport.reportedAt,note:supportReport.note,by:'owner',supportReportId:supportReport.id}):v.flag||null,...(selfService?{supportReport}:{}),...(selfService&&v.channel==='web'?{reference:conversationReference(c,v.channel,v.contact),retainedMessages:v.history?.total??v.messages.length,historyComplete:v.history?.complete===true}:{}),messages:v.messages.slice(-12)};
+      }),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
       health: lineHealth(c, events, await lastInbound(c)),
@@ -226,6 +231,7 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if(b?.action==='report_conversation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await reportConversation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='platform_automation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const result=await changePlatformAutomation(c,session,b);return json({...result,leadConnections:await leadConnectionsView(c),...(['takeover','resume'].includes(b.operation)?await readRequestFollowthrough(c,session,b.requestId):{})},200,{'Cache-Control':'no-store'});}
     if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await changeLeadConnection(c,session,b),200,{'Cache-Control':'no-store'});}
     if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business','send_platform_reply'].includes(b?.action)){
@@ -428,6 +434,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
       return json({ ok: true, acked: n });
     }
     if (b.action === "flag" || b.action === "unflag") {
+      if(selfService)return json({error:'use_report_form',message:'Use Report a problem to send a note and follow its progress.'},409,{'Cache-Control':'no-store'});
       const channel = s(b.channel, 10), contact = s(b.contact, 60);
       const conv = await getConversation(c, channel, contact);
       if (!conv.messages.length) return json({ error: "no_conversation" }, 404);

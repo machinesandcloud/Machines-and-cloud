@@ -274,6 +274,13 @@
   </form>
   <p id="visitMessage" role="status" aria-live="polite" tabindex="-1"></p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="retryVisit" hidden>Retry saved change</button>
 </dialog>
+<dialog class="walkthrough support-dialog" id="supportDialog" aria-labelledby="supportTitle" aria-describedby="supportIntro">
+  <div class="support-dialog-head"><span class="product-eyebrow">MACHINES &amp; CLOUD SUPPORT</span><button type="button" class="walkthrough-dismiss" id="supportClose" aria-label="Close report">Close</button></div>
+  <h2 id="supportTitle" tabindex="-1">Report a problem</h2><p class="muted" id="supportIntro">Tell us what went wrong. The saved conversation will be included with your report.</p>
+  <div id="supportSaved" hidden></div>
+  <form id="supportForm" novalidate><div class="form-group"><label class="form-label" for="supportNote">What went wrong?</label><textarea class="form-input" id="supportNote" maxlength="1000" rows="5" aria-describedby="supportNoteHelp supportNoteError"></textarea><p class="muted" id="supportNoteHelp">Include what you expected the front desk to do.</p><p class="visit-field-error" id="supportNoteError"></p></div><div class="support-dialog-actions"><button type="submit" class="btn-pill btn-pill-blue btn-sm" id="supportSend">Send report</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="supportCancel">Cancel</button></div></form>
+  <p id="supportMessage" class="muted" role="status" aria-live="polite" tabindex="-1"></p><div class="support-dialog-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="supportCheck" hidden>Check saved report</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="supportRetry" hidden>Retry saved report</button></div>
+</dialog>
 <div class="toast" id="toast"></div>
 <dialog class="walkthrough" id="phoneCancelDialog" aria-labelledby="phoneCancelTitle">
   <h2 id="phoneCancelTitle">Cancel this number request?</h2>
