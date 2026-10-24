@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-24T16:54:57.154400+00:00",
+  "reviewer": "lead_independent_qa",
+  "decision": "obsolete_journey_step_replaced_with_actual_checked_availability_flow",
+  "baseCommit": "af9c1f6f54eebec392c16c30fcc565353b9cb202",
+  "originalFailure": {
+    "path": "/tmp/mc-launch-finish-7c/scratchpad/launch-combined-availability-voice-billing-journey.json",
+    "sha256": "36d46182fc64419fed6439d7910d40f271300a407fb01b9da7614e6772bf43dd",
+    "passedBeforeStop": 37,
+    "assertionsFailed": 0,
+    "fullJourneyCompleted": false,
+    "fatal": "waitForResponse timeout at old date-only reschedule step194",
+    "observedPage": "Check available times and choose a listed opening before saving."
+  },
+  "repair": {
+    "onlyChangedTrackedFile": "scripts/launch-journey-qa-check.mjs",
+    "sha256": "749adba67a35bd3e63b36784f712b1464705056d5caba60e8738ce9cdbb91497",
+    "runtimeFilesChanged": 0,
+    "description": "Replace unchecked date-only Save with an assertion that unchecked Save sends no reschedule, then actual owner availability request, current-visit/free-target/privacy assertions and an ordinary checked-window selection before the original same-event scheduled move/cancel/admin path.",
+    "meaningfulNewAssertions": [
+      "Unchecked owner time cannot bypass availability or change the saved visit",
+      "Actual Schedule preview binds the current visit and offers the selected free move window without private event data",
+      "Owner chooses an actually checked date/window through the ordinary Schedule control",
+      "Owner reschedule updates the same remote event identity",
+      "Owner cancellation removes only the same owned event",
+      "Actual admin reads the retained same customer and delivery evidence"
+    ]
+  },
+  "replacement": {
+    "path": "scratchpad/launch-journey-availability-repaired-first.json",
+    "sha256": "1b0dd6a59257a6fadf1647d863bbf5de42604847c2a4488598d9c03abf2150b2",
+    "passed": 52,
+    "total": 52,
+    "fatal": null,
+    "sourceStable": true,
+    "hashedInputs": 529,
+    "physicalNetworkRequests": 0,
+    "pageErrors": 0,
+    "unexpectedServerTransports": 0
+  },
+  "claimLimits": [
+    "The original stopped journey remains incomplete;37passing assertions and zero recorded assertion failures did not make it a full pass.",
+    "The new52group complete local actual-handler/browser journey is accepted against exact af9runtime plus this test-only change. Existing other role evidence/required-gate results are not relabelled as this suite.",
+    "This replacement exercises actual local workspace assets and handlers with synthetic model/Calendar/email transports; it proves no hosted/provider/customer delivery.",
+    "Root checkout and its source/ledgers remain untouched by QA; no Git index or commit writes were made. Root may integrate only this exact test delta and supporting evidence."
+  ]
+}
