@@ -316,7 +316,7 @@
   });
   accessResend.addEventListener('click', function () { if (requestedEmail) sendAccessLink(requestedEmail, true); });
   accessChangeEmail.addEventListener('click', function () {
-    if (linkRequestPending) return;
+    if (linkRequestPending || gate.hidden || accessConfirmation.hidden) return;
     resetEmailConfirmation(true); verifyButton.hidden = true; accessMessage(''); accessEmail.removeAttribute('aria-describedby'); accessEmail.focus(); accessEmail.select();
   });
   var verifyButton = document.getElementById('access-verify'), verificationAttempt = null;
