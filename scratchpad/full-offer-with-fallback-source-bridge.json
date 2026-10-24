@@ -1,0 +1,57 @@
+{
+  "at": "2026-10-24T10:50:30.628092+00:00",
+  "executor": "Root integration reconciliation",
+  "sourceCommit": "36ae44a6f87d11e9157100b54dfdb8c3bc4e291f",
+  "sourceManifest": "scratchpad/full-offer-with-fallback-source-manifest.json",
+  "sourceManifestSHA256": "d567f55ad3a5ad29566998b60fcc3474bbab9780b705eb20bf5ddefc16870581",
+  "sourceFiles": 503,
+  "priorAcceptedSource": "scratchpad/full-offer-next-source-manifest.json",
+  "changedSincePrior503": [
+    "netlify/functions/lib/voice-activation.mjs",
+    "scripts/voice-activation-check.mjs"
+  ],
+  "requiredGate": {
+    "receipt": "scratchpad/full-offer-required-gate-r5.json",
+    "commands": 48,
+    "allPassed": true,
+    "sourceStable": true,
+    "currentInputsMatched": 272
+  },
+  "feature": {
+    "exactPriorIntegrationInputs": 123,
+    "overrideForSeparatelyAcceptedVoice": [
+      "netlify/functions/lib/voice-activation.mjs"
+    ],
+    "allOtherInputsExact": true,
+    "originalAcceptance": "scratchpad/request-followup-integration-independent-acceptance.json"
+  },
+  "voice": {
+    "manifest": "scratchpad/voice-fallback-freeze-v2.json",
+    "inputs": 115,
+    "currentFeatureContextOverrides": [
+      "netlify/functions/chat.mjs",
+      "netlify/functions/client.mjs",
+      "netlify/functions/lib/managed-consent.mjs",
+      "netlify/functions/lib/managed-delivery.mjs",
+      "netlify/functions/lib/managed-sms.mjs",
+      "netlify/functions/lib/messaging-program.mjs",
+      "netlify/functions/lib/request-followthrough.mjs",
+      "netlify/functions/policy.mjs"
+    ],
+    "overrideDisposition": "Each is byte-exact to the separately independently accepted feature integration; old voice/core manifests unchanged.",
+    "runtimeAndCheckExact": true,
+    "independent": "scratchpad/voice-fallback-independent-acceptance-v2.json",
+    "independentGroups": 18,
+    "poAcceptance": "product/VOICE-FALLBACK-LOCAL-ACCEPTANCE-2026-10-24.json"
+  },
+  "proof": {
+    "acceptedInputsExact": 9,
+    "independent": "scratchpad/calendar-transport-independent-acceptance.json"
+  },
+  "diagnostic": {
+    "scriptSHA256": "a0dabff380a78905b76d26c52258cea35360a22a22e9a99e3e030acf2581ed1e",
+    "state": "Unexecuted, fresh two-read approval pending; no prior allowance reused"
+  },
+  "externalRequests": 0,
+  "decision": "Combined local application/source accepted for packaging; no publication or actual Calendar/phone/SMS/financial/launch acceptance."
+}
