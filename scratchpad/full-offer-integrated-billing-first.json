@@ -1,0 +1,100 @@
+{
+  "at": "2026-10-24T06:08:20.794Z",
+  "scope": "Actual HTTP handlers and memory records; Stripe protocol double only; no live model/provider requests",
+  "before": {
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/workspace-billing-scheduler.mjs": "689c16479a2588792f7e512dfc3f1b7622801a2d240a04d6f77237d2a78a0646",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "netlify/functions/workspace-billing-webhook.mjs": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "netlify/functions/client.mjs": "fd9468fee2d01b05f6a3fffc52975914a6de3367746ec7953bcb50673b28a5f0",
+    "desk-billing.js": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+    "desk-billing.css": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+    "desk.html": "70e9d90b28a7d8991f7e0d6e664a6227139fce45daef8e2eff6ca06a6a7fa810",
+    "scripts/workspace-billing-check.mjs": "1f4098267fdeab14f25c4b44baaa6911bd3bec7d1ecc8d19323bbc0bc6f8261c",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "scratchpad/full-offer-integrated-billing.mjs": "1cf9ae3144f427159e95affb5294cf100da2164587953cd03a541db7d824316a"
+  },
+  "checks": [
+    {
+      "name": "Integrated Calendar-only billing rejects stale grants before provider reads and rechecks consent before Checkout",
+      "pass": true
+    },
+    {
+      "name": "No physical transport or unrelated provider/notification attempts",
+      "pass": true
+    }
+  ],
+  "stripeRequests": [
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-63d65395dbe44c97d82728f621af1cdd"
+    }
+  ],
+  "physicalExternalRequests": 0,
+  "notificationDispatchAttempts": 0,
+  "outcome": {
+    "oldAndWrongVersion409NoStripe": true,
+    "withdrawnBeforeCheckout409NoPost": true,
+    "currentReviewedCalendarOnlyCheckout200": true,
+    "testingAndWebOffPreserved": true
+  },
+  "after": {
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/workspace-billing-scheduler.mjs": "689c16479a2588792f7e512dfc3f1b7622801a2d240a04d6f77237d2a78a0646",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "netlify/functions/workspace-billing-webhook.mjs": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "netlify/functions/client.mjs": "fd9468fee2d01b05f6a3fffc52975914a6de3367746ec7953bcb50673b28a5f0",
+    "desk-billing.js": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+    "desk-billing.css": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+    "desk.html": "70e9d90b28a7d8991f7e0d6e664a6227139fce45daef8e2eff6ca06a6a7fa810",
+    "scripts/workspace-billing-check.mjs": "1f4098267fdeab14f25c4b44baaa6911bd3bec7d1ecc8d19323bbc0bc6f8261c",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "scratchpad/full-offer-integrated-billing.mjs": "1cf9ae3144f427159e95affb5294cf100da2164587953cd03a541db7d824316a"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2
+  },
+  "ok": true
+}

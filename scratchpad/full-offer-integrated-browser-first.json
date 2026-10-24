@@ -1,0 +1,391 @@
+{
+  "at": "2026-10-24T06:07:28.643Z",
+  "baseCommit": "577961c6a406be22a7fb479db055145881776729",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "desk-activity.js": "c2346a03e98471542f0350e9b6360e66719e8d43b8b427c9a6fd939b9458c99b",
+    "netlify/functions/lib/workspace-activity.mjs": "11e48787905c3402be19dff109f3c24eb94ad06af59bc66783aae92cae39e243",
+    "scripts/workspace-activity-check.mjs": "da91729faa65300e23f43d1c5bde43c9e1a63af45f723fca489bb353917abf9d",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/build-site.mjs": "2a99c14eaef0dbc8234908184c566829f5b34ce9b0c6e67dc662d0f5a12ad654",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "scratchpad/full-offer-integrated-browser.mjs": "1687f551e3b327c3a63d541a7e63e4b449f2414225ce8cd735aea2c789bb4a68",
+    "desk.html": "70e9d90b28a7d8991f7e0d6e664a6227139fce45daef8e2eff6ca06a6a7fa810",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "9177e0d851c15089072fc02046e89ef2c834b4b7fef75a987153efeda25a508f",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "b6c9da0abb5272895347fc00695eebdb6d2877037b6f5d09e166c56c504d8b14",
+    "netlify/functions/lib/connection-journey.mjs": "ac2d86ad1023744427fbbc4e596d0f2ab1481380468661a2c3c20c453c0b7336",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "fd9468fee2d01b05f6a3fffc52975914a6de3367746ec7953bcb50673b28a5f0",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "390px integrated Home old due request opens complete protected conversation",
+      "pass": true
+    },
+    {
+      "name": "1440px integrated Home old due request opens complete protected conversation",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destination or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "96303feab4114ce370ef7fc4bb9ab4c7fbd815420475e9405dd4015cf37174b7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "addf009866154d334253e4c9f99571f8d102728ed0a87bb50701299ec897f3fd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ce0ecda059604af104e9b4b6586e505feeb50712ea210df36db7111b725c86be",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&requestId=9521977686",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "360ab96fd9f34c44c8cc41740ff5c42b731fe7f536fe3e9f52b47416a2d26554",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=9ca38b4f9fab4cf68f60cfcef3235d6424ae9b57b2f9383766670fd58d1961be&conversationContact=old-visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ec50c823ee45419bf7e9b7588293999135cab207f64d1ee06ebefc103c301ddc",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=9ca38b4f9fab4cf68f60cfcef3235d6424ae9b57b2f9383766670fd58d1961be&conversationContact=old-visitor&before=eyJ2IjoxLCJyZWYiOiI5Y2EzOGI0ZjlmYWI0Y2Y2OGY2MGNmY2VmMzIzNWQ2NDI0YWU5YjU3YjJmOTM4Mzc2NjY3MGZkNThkMTk2MWJlIiwidGVuYW50IjoiOWM4YTQ0M2M2Y2U0OGY3NTBlNTA5N2E1NGY4MTI2Y2Y5ZWNjYTYzNWM1YjE3YmEyMjJjNjY0Njk3NTFlY2YxYiIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.9fba672b9f75cc33fa5b100b947a222f0ce9f40bc6beaedc777be2b3461c7e4a",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3f04187c9cdeaea54a052ee4dcd5526927bdae213fafc92f96d4356d9768fe89",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=9ca38b4f9fab4cf68f60cfcef3235d6424ae9b57b2f9383766670fd58d1961be&conversationContact=old-visitor&before=eyJ2IjoxLCJyZWYiOiI5Y2EzOGI0ZjlmYWI0Y2Y2OGY2MGNmY2VmMzIzNWQ2NDI0YWU5YjU3YjJmOTM4Mzc2NjY3MGZkNThkMTk2MWJlIiwidGVuYW50IjoiOWM4YTQ0M2M2Y2U0OGY3NTBlNTA5N2E1NGY4MTI2Y2Y5ZWNjYTYzNWM1YjE3YmEyMjJjNjY0Njk3NTFlY2YxYiIsInVwcGVyIjo2MCwiYmVmb3JlIjoyMH0.7cab5f8fac1995a2ac7152e2b29a27b1ee7c3f86252d51cc20cb5cea2ff55330",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "955e42aef65a4817602e1aac9e6e67652d10b861a9694d9e31426689f6a594c1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a450cc21ed2ecb35799c3c57010da972d0e876c44ea80015028f5184a84fca41",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b2360aeb81fce8c36855df8da59da438cf4304c3ccf4e55f2ed5ad384e80fa00",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a1c31672835b8a19c542bbcc0227a369fd8b1288a164c5efbaeed727c9d65791",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&requestId=c8f8990ecc",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ccbcb0d5ad9fc564f7c76644b468122dbff347401e542ed54750c13ce5191147",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=5ae824db3356e0b0d330ff5b429ee38a1c43940c422b7accca9ab98791ebf750&conversationContact=old-visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0b408b15dea76d3d3a003e85625b51bf058a3cb9665b951d4a69d8a9667221d4",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=5ae824db3356e0b0d330ff5b429ee38a1c43940c422b7accca9ab98791ebf750&conversationContact=old-visitor&before=eyJ2IjoxLCJyZWYiOiI1YWU4MjRkYjMzNTZlMGIwZDMzMGZmNWI0MjllZTM4YTFjNDM5NDBjNDIyYjdhY2NjYTlhYjk4NzkxZWJmNzUwIiwidGVuYW50IjoiYWEzYjRmMWQ2M2Y0OGQ3YzZjODE2MDExYTU1MzBjNWM2YzY2YWMyNDFmNjdmMDQzOTg0ZDk1OGY3YmUwNGQ0ZCIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.5a15b50e176e06d550c5d9adbbc01e6c6e53ec3d43552fb97f95cf54490b6d6b",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c850cbd09ef99da3298797e980d70b40fc4ea2194ca71866ad83b22540862eb9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=5ae824db3356e0b0d330ff5b429ee38a1c43940c422b7accca9ab98791ebf750&conversationContact=old-visitor&before=eyJ2IjoxLCJyZWYiOiI1YWU4MjRkYjMzNTZlMGIwZDMzMGZmNWI0MjllZTM4YTFjNDM5NDBjNDIyYjdhY2NjYTlhYjk4NzkxZWJmNzUwIiwidGVuYW50IjoiYWEzYjRmMWQ2M2Y0OGQ3YzZjODE2MDExYTU1MzBjNWM2YzY2YWMyNDFmNjdmMDQzOTg0ZDk1OGY3YmUwNGQ0ZCIsInVwcGVyIjo2MCwiYmVmb3JlIjoyMH0.40f0a4c18f8ec8452f18eb03c30b1d7e06ae732039b094e664a993ac5f829335",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2b19feab4d060c3025adc602ee2e878ed08a5dfa1010b242d89c11f3e34a1d80",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/full-offer-integrated-browser-first-old-followup-390.png",
+    "scratchpad/full-offer-integrated-browser-first-earliest-history-390.png",
+    "scratchpad/full-offer-integrated-browser-first-old-followup-1440.png",
+    "scratchpad/full-offer-integrated-browser-first-earliest-history-1440.png"
+  ],
+  "integration": [
+    {
+      "width": 390,
+      "oldRequest": "9521977686",
+      "previewExcluded": true,
+      "reportAndReader200": true,
+      "messages": 60,
+      "noWritesAfterDiscovery": true
+    },
+    {
+      "width": 1440,
+      "oldRequest": "c8f8990ecc",
+      "previewExcluded": true,
+      "reportAndReader200": true,
+      "messages": 60,
+      "noWritesAfterDiscovery": true
+    }
+  ],
+  "sourceAfter": {
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "desk-activity.js": "c2346a03e98471542f0350e9b6360e66719e8d43b8b427c9a6fd939b9458c99b",
+    "netlify/functions/lib/workspace-activity.mjs": "11e48787905c3402be19dff109f3c24eb94ad06af59bc66783aae92cae39e243",
+    "scripts/workspace-activity-check.mjs": "da91729faa65300e23f43d1c5bde43c9e1a63af45f723fca489bb353917abf9d",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/build-site.mjs": "2a99c14eaef0dbc8234908184c566829f5b34ce9b0c6e67dc662d0f5a12ad654",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "scratchpad/full-offer-integrated-browser.mjs": "1687f551e3b327c3a63d541a7e63e4b449f2414225ce8cd735aea2c789bb4a68",
+    "desk.html": "70e9d90b28a7d8991f7e0d6e664a6227139fce45daef8e2eff6ca06a6a7fa810",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "9177e0d851c15089072fc02046e89ef2c834b4b7fef75a987153efeda25a508f",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "b6c9da0abb5272895347fc00695eebdb6d2877037b6f5d09e166c56c504d8b14",
+    "netlify/functions/lib/connection-journey.mjs": "ac2d86ad1023744427fbbc4e596d0f2ab1481380468661a2c3c20c453c0b7336",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "fd9468fee2d01b05f6a3fffc52975914a6de3367746ec7953bcb50673b28a5f0",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

@@ -26,6 +26,8 @@ Current published source is e8fac43. Controlled website signup/install/real Engl
 **Orders2–3 implementation is also accepted locally**, with ordinary merged-source PO jobs and named independent evidence in `FULL-OFFER-CONTEXT-CALENDAR-ACCEPTANCE-2026-10-24.json`. The combined technical bridge and publication remain pending; Calendar is not actually connected or delivered by this local acceptance. Orders4–10 and phone/text/commercial/operational outcomes stay owned.
 
 
+**Integrated local group accepted:** QA proved the exact Activity/Calendar/conversation source union, all47 required commands pass on unchanged source, and ordinary older Home follow-up→full transcript plus Calendar-only billing consent boundaries pass. PO observed the selected desktop/mobile jobs. [Combined acceptance](FULL-OFFER-CONTEXT-CALENDAR-ACCEPTANCE-2026-10-24.json). Publication remains open. Executable Calendar proof and a separate current-source Stripe TEST isolation/lifecycle candidate are being prepared in parallel; neither is an actual provider/payment result.
+
 The earlier rounds below preserve historical priorities, research and original evidence. They are not current freeze, pricing, activation or billing instructions where they conflict with this round and launch control.
 
 ---
