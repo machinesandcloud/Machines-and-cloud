@@ -1,0 +1,16 @@
+{
+  "scope": "Source-only owner cleanup review, no invocation or private binding/report read.",
+  "sourcePath": "/tmp/mc-stripe-recovery-v4r2-control/owner-cleanup.mjs",
+  "sourceSHA256": "f1cfe7c0514da67b1431e98d951185d9df27819fddf3d06177fbafb281e0f956",
+  "ordinaryRequestCallsites": 6,
+  "explicitPreconditions": [
+    "Exact phase; financial phaseState closed; financialCleanup complete; endpointDeletion confirmed.",
+    "Current owner slug/email/current tenant before cancel.",
+    "Current saved financial proof closed/cleaned with status none/canceled before stop.",
+    "Cancel response and fresh GET confirm cancelled/inactive web; signout200 then GET401."
+  ],
+  "noEmailOrModelOrNewFinancialAction": true,
+  "qualification": "Generic internal request guard allows20rows/12POST but the fixed unexported call sequence has exactly6 requests/2POST; no loop or user supplied dynamic command path exists. Existing owner cancel closed-proof path has no inline provider work.",
+  "actualEffects": 0,
+  "ok": true
+}
