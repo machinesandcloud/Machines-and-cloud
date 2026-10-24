@@ -1,0 +1,74 @@
+{
+  "decision": "NO_PRODUCT_DEFECT_ESTABLISHED; actual proof execution used an undeclared plan sequence",
+  "exactSourceFiles": {
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+    "scripts/hosted-onboarding-guard.mjs": "6cb22e864bbafa594d0a4d0010feb72e3d81ba9a59f7938b64396930fbf6fcdd",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85"
+  },
+  "fullSourceStable": true,
+  "sourceCount": 538,
+  "currentActualFailure": "Root reports v3 intake_binding_required before third email; retained phase is not resumed or reset.",
+  "localReproduction": {
+    "bare": {
+      "selectedPlan": "growth",
+      "boundIntake": true,
+      "thirdSyntheticMailDispatches": 0,
+      "guardHalted": true,
+      "workspaceCount": 0
+    },
+    "coverageCTA": {
+      "ordinaryClick": "Explore plan options, then Explore Coverage link",
+      "entry": {
+        "pathname": "/index.html",
+        "search": "?plan=starter"
+      },
+      "onboard": {
+        "pathname": "/onboard.html",
+        "search": "?plan=starter"
+      },
+      "selectedPlan": "starter",
+      "boundIntake": true,
+      "thirdSyntheticMailDispatches": 1,
+      "guardHalted": false,
+      "actualDraftPrefillNameBusinessAndStarterVerified": true,
+      "workspaceCount": 0
+    }
+  },
+  "correctedProcedure": [
+    "Start from homepage; expand Explore plan options.",
+    "Click Explore Coverage (index.html?plan=starter#pilot) before entering intake.",
+    "Fill the bound test details and booking goal, then Continue to setup.",
+    "Verify onboard.html?plan=starter, carried bound intake and prefilled email before requesting the third link."
+  ],
+  "checks": {
+    "browserJobs": 2,
+    "actualHandlerFixtures": true,
+    "browserAssets": "current exact bytes",
+    "modelCalls": 0,
+    "physicalAttempts": 0,
+    "browserPageErrors": 0
+  },
+  "receipts": [
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/intake-sequence-bare-first.json",
+      "sha256": "3e7ed3afedf5ee5649840771f0ba6cfb5ec3fa717c301967cf4b21a85cb3edb2"
+    },
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/intake-sequence-coverage-first.json",
+      "sha256": "3f4091f5f38ad68ed4df6dbc410cd12b3ebeb54fed3fbd0598ac1ce7f50d9559"
+    },
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/intake-sequence-browser-independent.mjs",
+      "sha256": "e5efc917f9d2eebb2c069f817b983b4614d8d7cd8bc33708851ca88d05f131f1"
+    }
+  ],
+  "limitations": [
+    "Offline actual-handler/browser acceptance does not establish hosted signup or real email delivery.",
+    "Bare entry is permitted by the app and intentionally defaults to growth. This finite proof declared starter, so the guard correctly rejects the differing plan.",
+    "No application or Root source edits, no network/native/mail/provider/credential actions."
+  ]
+}

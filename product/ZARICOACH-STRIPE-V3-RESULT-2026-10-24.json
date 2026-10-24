@@ -1,0 +1,99 @@
+{
+  "state": "CLOSED_PARTIAL_NOT_ACCEPTED",
+  "at": "2026-10-24T20:47:06.879369+00:00",
+  "phaseId": "hosted-onboarding-stripe-20261024-v3",
+  "source": {
+    "commit": "76822dab5c9db6b9200c9227b3263a30d670d79a",
+    "files": 538,
+    "allCurrentBytesStable": true
+  },
+  "production": "Unchanged fc344d8 M&C and421f1 Zari; fresh metadata still READY/enabled. No deployment occurred.",
+  "observed": [
+    "Actual operator sign-in/exchange and authorized customer list",
+    "Actual new-alias owner sign-in, sign-out and revoked-session401",
+    "Both sign-in forms render their Check your email confirmation",
+    "One synthetic website intake saved without marketing consent"
+  ],
+  "stop": {
+    "code": "intake_binding_required",
+    "cause": "Root entered the bare homepage intake instead of the actual Coverage CTA. Saved intake was retained, but bare setup defaults to growth while this proof approved starter. Correctly blocked before a third email or workspace creation.",
+    "owner": "Root test sequence",
+    "appDefectEstablished": false,
+    "independentLocalReproduction": "scratchpad/stripe-v3-intake-sequence-independent-acceptance.json",
+    "correctedOrdinarySequence": "Homepage Explore plan options, then actual Explore Coverage link to index.html?plan=starter#pilot, then intake and matching onboard?plan=starter. No guard relaxation."
+  },
+  "nativeFinding": {
+    "cause": "Actual Gmail Search mail input appends trailing space; strict raw comparison stopped before opening the operator email.",
+    "repair": "Independent accepted replacement normalizes boundary whitespace only; same existing email was used.",
+    "originalReservations": 5,
+    "replacementReservations": 13,
+    "separateMetadataDiagnosticAttempts": 2,
+    "aggregateNativeAttempts": 20,
+    "chargedMessageReservations": 3,
+    "actualMessageBodiesRead": 2,
+    "rootMisstep": "Root attempted private extraction after found:false; it returned metadata only. The charged reservation is retained, not refunded.",
+    "originalViewRestore": "Two distinct adapter retirement restores dispatched under exact-source guards; dispatch is not a separately verified final arrival.",
+    "diagnosticException": "First AppleScript metadata diagnosis returned exit1 without usable result; stderr was not retained. Second fixed-PID Swift metadata read established the trailing-space cause."
+  },
+  "effects": {
+    "siteAndGuardMetadataRequests": {
+      "total": 63,
+      "platform": 61,
+      "api": 11,
+      "mutation": 7,
+      "draft": 0,
+      "asset": 50,
+      "external": 0,
+      "email": 2,
+      "ownerEmail": 1,
+      "operatorEmail": 1,
+      "metadata": 2,
+      "logical": 0,
+      "bytes": 2861401
+    },
+    "additionalNetlifyControlRequests": 7,
+    "netlifyMutations": 0,
+    "productionBuilds": 0,
+    "buildCredits": 0,
+    "signInEmails": 2,
+    "workspaceCreations": 0,
+    "AIRequests": 0,
+    "ownerAlerts": 0,
+    "stripeEndpointPreparationRequests": 8,
+    "stripeCoreProofRequests": 0,
+    "checkouts": 0,
+    "realCharges": 0,
+    "callsTextsCalendarOperationsPurchases": 0
+  },
+  "cleanup": {
+    "activeSessions": 0,
+    "unconfirmedPlatformMutations": [],
+    "ownTestEndpoint": {
+      "id": "we_1UUBWrJW47xiUUpY5cZTUQIR",
+      "deleted": true,
+      "disabledVerifiedBeforeDelete": true
+    },
+    "settings": {
+      "mc": {
+        "originalCount": 27,
+        "currentCount": 27,
+        "functionalRowsEqual": true,
+        "differentKeys": [],
+        "rawListOrderEqual": false
+      },
+      "zari": {
+        "originalCount": 42,
+        "currentCount": 42,
+        "functionalRowsEqual": true,
+        "differentKeys": [],
+        "rawListOrderEqual": false
+      }
+    },
+    "fixtures": "Never activated or changed",
+    "mainGuardFlags": "Original halted=true/closed=true preserved. Unreached full platform/deployment cleanup flags stay false; actual absence of acquired workspace/config resources is separately established.",
+    "allowances": "All v3 and replacement allowances CLOSED; unused allowances not reusable."
+  },
+  "evidence": "scratchpad/stripe-v3-closed-receipt-20261024.json",
+  "fullPaidLaunchAccepted": false,
+  "next": "Fresh source-bound v4 with locally proved Coverage flow and normalized Gmail query; same whole customer/payment outcome remains open."
+}

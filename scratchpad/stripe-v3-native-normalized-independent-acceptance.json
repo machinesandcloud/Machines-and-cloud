@@ -1,0 +1,154 @@
+{
+  "decision": "ACCEPTED_SOURCE_ONLY_NARROW_REPLACEMENT",
+  "phaseId": "hosted-onboarding-stripe-20261024-v3",
+  "nativeSourceSHA256": "4422341540739b414c7513f64fa26da01657f5df17ceb0fbb28596d316e73be5",
+  "configSHA256": "6c31e749e9ba036edc871f2f924d01e681bb30a33d8390ff920795dd4009c04b",
+  "factoryExactBridge": [
+    {
+      "before": "sourcePin=NATIVE_MAIL_SOURCES_SHA256",
+      "after": "sourcePin='6c31e749e9ba036edc871f2f924d01e681bb30a33d8390ff920795dd4009c04b'"
+    },
+    {
+      "before": "mail-sources.json",
+      "after": "mail-sources-normalized.json"
+    },
+    {
+      "before": "cfg.limits.invocations!==40",
+      "after": "cfg.limits.invocations!==28"
+    },
+    {
+      "before": "cfg.limits.messageReads!==6",
+      "after": "cfg.limits.messageReads!==5"
+    },
+    {
+      "before": "n.maxInvocations!==40",
+      "after": "n.maxInvocations!==28"
+    },
+    {
+      "before": "n.maxMessageReads!==6",
+      "after": "n.maxMessageReads!==5"
+    },
+    {
+      "before": "v.restore?40:39",
+      "after": "v.restore?28:27"
+    },
+    {
+      "before": "n.messageReads>=6",
+      "after": "n.messageReads>=5"
+    }
+  ],
+  "scripts": [
+    {
+      "file": "account-meta-normalized.js",
+      "type": "metadata",
+      "sha256": "43583184a2388003bd941b222308ed9c5c1c9de5bd58627d91eb2c91d772365b",
+      "trimOnlyReplacements": 0
+    },
+    {
+      "file": "alert-open-normalized.js",
+      "type": "action",
+      "sha256": "0c2cfa0338a441aecf5efa2aceb9b057426b69866899da7dc4239910e392f746",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "alert-read-normalized.js",
+      "type": "message",
+      "sha256": "c026710f8f327620f3ee7fe546d98a7fb74c30a40fdf7fd55827388329087ff8",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "alert-return-normalized.js",
+      "type": "action",
+      "sha256": "52e5dca620bd329ffe75a169386d0f3681b0d36a697a42f331c3623bcf6243d7",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "alert-rows-normalized.js",
+      "type": "metadata",
+      "sha256": "4228f548f2fc80a6e9aabc5bcc4b088a2f513238aa082dc7890e992bd53a025b",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "operator-extract-normalized.js",
+      "type": "message",
+      "sha256": "dc57c9281ef77e7c0798e8018da19294674722c46d722bd5c590302677e55768",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "operator-message-meta-normalized.js",
+      "type": "metadata",
+      "sha256": "1b4453b5c84262e43c2dfc9d5f81ab44c36ae14737f357b6891ee15c86177c53",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "operator-open-normalized.js",
+      "type": "action",
+      "sha256": "cd5c51de0cac405c523cf39f8010dd558d5a6147de2875f57204ae4b8595377d",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "operator-return-normalized.js",
+      "type": "action",
+      "sha256": "7c9a0a0f5226c40722f3ce0265612ada7770cee8947a21787c92b5b862de8405",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "operator-rows-normalized.js",
+      "type": "metadata",
+      "sha256": "1703d8609a4edfc0c03c642cca8a8ec66e0ca9a66911a5ab4fead200cadbd5ee",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "owner-extract-normalized.js",
+      "type": "message",
+      "sha256": "f3bfd661f4ec60b29245097eb81a9ad26434e0732f124cca0878ccedbe4f44e1",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "owner-message-meta-normalized.js",
+      "type": "metadata",
+      "sha256": "1d45af6e26c9428089e3a99c7a32d2a3eac06e5aa58be6dfc4309c3ddbe5c3e2",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "owner-open-normalized.js",
+      "type": "action",
+      "sha256": "c242411db9d87ab7deccdcb7bc3cb9524212bb4c7087d36248d563e390efe2d0",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "owner-return-normalized.js",
+      "type": "action",
+      "sha256": "844c551fda469daedf2535b99e718c672a50a9b08b7c6bcba58a25a9d8c4b3d1",
+      "trimOnlyReplacements": 1
+    },
+    {
+      "file": "owner-rows-normalized.js",
+      "type": "metadata",
+      "sha256": "59b4e98b1c878bb0ce543e637a4d7bc5813d1fe3ee3515dbb0eb6e82361f991b",
+      "trimOnlyReplacements": 1
+    }
+  ],
+  "scriptNormalizationCount": 14,
+  "samePhaseClockHelperNavigation": true,
+  "limits": {
+    "invocations": 28,
+    "messageReads": 5
+  },
+  "aggregateNativeCeiling": 35,
+  "aggregateMessageReservationCeiling": 6,
+  "exclusiveFreshLedgerAndLoopbackNativeOnly": true,
+  "originalRetirement": "Root reports successful one original restore with restoreAttempted true; private original ledger not read by QA",
+  "actualDOMStatus": "pending; no browser/helper/module execution by QA",
+  "effects": {
+    "network": 0,
+    "browser": 0,
+    "nativeHelper": 0,
+    "credentials": 0
+  },
+  "limitations": [
+    "Source-copy acceptance does not establish Gmail actual DOM or sign-in delivery.",
+    "Main web/control counters, issuedAt, expiry and existing email are unchanged; prior charged message reservation retained."
+  ],
+  "reviewCorrections": "Initial bridge probes corrected function boundary and literal patterns in QA script only. No product changes."
+}

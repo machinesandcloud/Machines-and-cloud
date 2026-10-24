@@ -1,0 +1,42 @@
+{
+  "mode": "Narrow exact endpoint request function with injected response/ledger; top-level scope/key code never invoked",
+  "sourceSHA256": {
+    "before": "01fc0ec814b9f831d9bb03421647609ce7aea8034adc0bc833998b20b2c44be7",
+    "current": "01fc0ec814b9f831d9bb03421647609ce7aea8034adc0bc833998b20b2c44be7"
+  },
+  "checks": [
+    {
+      "name": "captured source snapshot was already repaired and matches current exact bytes",
+      "passed": true,
+      "result": {
+        "snapshotAlreadyRepaired": true,
+        "oldFailureNotReproducedOnThisSnapshot": true
+      }
+    },
+    {
+      "name": "new malformed or invalid-ID/secret create receipts retain unknown plusHTTP evidence",
+      "passed": true,
+      "result": {
+        "syntheticCases": 3,
+        "actualProviderCalls": 0
+      }
+    },
+    {
+      "name": "valid creation receipt remains observed once and cleanup-only reconciliation cannot enable",
+      "passed": true,
+      "result": {
+        "state": "observed",
+        "status": 200,
+        "requestCount": 1,
+        "endpointId": null,
+        "calls": 1
+      }
+    }
+  ],
+  "passed": 3,
+  "total": 3,
+  "actualNetwork": 0,
+  "privateKeyReads": 0,
+  "actualEndpointCreatesOrWrites": 0,
+  "limits": "Source review plus three narrow injected groups only; sequential Root-only execution and future scope pin binding remain required."
+}
