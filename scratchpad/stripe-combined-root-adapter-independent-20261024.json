@@ -1,0 +1,122 @@
+{
+  "at": "2026-10-24T19:51:59.913606+00:00",
+  "mode": "Independent local-only preparation/control adapter rehearsal with injected transport, clock, private files and native boundaries",
+  "accepted": true,
+  "scope": "Root inert preparation adapters; no final source/clock/tenant/credential binding or authority to execute a live proof.",
+  "sources": {
+    "/tmp/mc-zari-stripe-v3-prep-20261024/controller.mjs": "519405c16d6fb8372211a5a596084b7c80aacb148bd2ba0b9db9ec04c49a0d87",
+    "/tmp/mc-zari-stripe-v3-prep-20261024/deploy-control.py": "67b28f0e76ac2079a11d23ac3447cf8501a9539866e7e1b1fb8db2c1662efb0e"
+  },
+  "sourceCopiesExactAndUnchanged": true,
+  "checks": {
+    "passed": 24,
+    "total": 24,
+    "reports": [
+      {
+        "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/controller-final-r2.json",
+        "sha256": "fef2316036441e19e669c022ef19f12ac5c94a799d6c3d7da8f05d253d92137a",
+        "passed": 8,
+        "total": 8
+      },
+      {
+        "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/helper-repaired.json",
+        "sha256": "8c9586c3f9dac8c3fbeaff6ea6c4d0a3cef7f110c0c9ec75eb8f9ca85911b0a0",
+        "passed": 2,
+        "total": 2
+      },
+      {
+        "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/extended-final/result.json",
+        "sha256": "a7b92f26ef82cb700ef715010fbb2847546a7a817fa1e7fa71030915bf8cd3c8",
+        "passed": 12,
+        "total": 12
+      },
+      {
+        "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/build-final/result.json",
+        "sha256": "520cd2bfe88720904ccd6c2ede3dd5888ffa03004a60f820a515a81cccaaaf1d",
+        "passed": 2,
+        "total": 2
+      }
+    ]
+  },
+  "preservedReturns": [
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/controller-original.mjs",
+      "sha256": "240b80f320916633e6358de282e3dff65ef817ebe975105bddbe7453d4100fe0",
+      "reproduction": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/controller-final-r2.json",
+      "finding": "Original valid TEST declaration was incorrectly treated as a release object, refusing every otherwise valid manifest before ledgers. Fixed by separate strict billing declaration schema and release/cleanup-only source binding."
+    },
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/helper-first.json",
+      "sha256": "b4b6600b7ecc56f53d1cdcc1554583371ff08c9bcd15093fb61205ef244a6099",
+      "finding": "Lost ACK after committed bulk policy POST left cache stale. Original restore skipped11 remotely created policy/key rows and still claimed restoredOriginalSettings:true.",
+      "repair": "Restore now refreshes server-owned env first, skips exact already-original rows and closes both SERVICE/BILLING gates first; cleanup-build refreshes before original-equivalence decision."
+    }
+  ],
+  "harnessDispositions": [
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/controller-prelude.json",
+      "sha256": "0a394d2af7a1afc77fab169fddac9c4a31efac43a474898986e956389c290528",
+      "passed": 5,
+      "total": 6,
+      "reason": "Removing required billingTest triggers the outer exact-manifest schema before the dedicated schema. Both are valid zero-effect refusals; expected reason was overly narrow."
+    },
+    {
+      "path": "/tmp/mc-zari-stripe-v3-adapter-qa-20261024/controller-final.json",
+      "sha256": "1922122badcd2b8ff02cfdd0c085d2790f15230896a99108be425ce569280282",
+      "passed": 7,
+      "total": 8,
+      "reason": "Synthetic page.evaluate stub expected one parameter instead of actual function+argument signature; fixed fixture only."
+    }
+  ],
+  "acceptedBoundaries": {
+    "phase": "hosted-onboarding-stripe-20261024-v3",
+    "inertMcCandidateStillAllZeros": true,
+    "ownerBearerExport": "Only owner phase-ready-client private save;0600 exclusive file; bearer omitted from returned command summary. No new endpoint.",
+    "settings": {
+      "mc": 13,
+      "zari": 2,
+      "gatesEnabledAfterAllPolicies": true,
+      "originalContextsScopesSecretFlagPreserved": true,
+      "cleanupRefreshReadsAddedMaximum": 3,
+      "cleanupUnknownRowsNotRewritten": true
+    },
+    "control": {
+      "controllerFixed": 1,
+      "supplementalMax": 119,
+      "aggregateMax": 120,
+      "cleanupRequestsReserved": 42,
+      "mutationsMax": 40,
+      "cleanupMutationsReserved": 20,
+      "buildsMax": 3,
+      "cleanupBuildsReserved": 1,
+      "noAllowancesResetOrRefunded": true
+    },
+    "testRuntime": {
+      "maxAttempts": 80,
+      "cleanupReserve": 20,
+      "cleanupOnExpiry": true,
+      "tenantFromOrdinaryBindingRequired": true,
+      "phaseAndHashesBoundToStaticSyntheticPreparation": true
+    }
+  },
+  "limits": [
+    "All API, native git, file-state and page-session behavior was injected. These cases did not contact Netlify, GitHub, Stripe, email, Google, a browser, or a database, and did not inspect native credentials.",
+    "Controller pure initialization is evaluated only up to the ledger boundary; project-save uses a synthetic page/guard. Real ledger initialization, listening IPC, actual Playwright lifecycle and native authentication remain unexecuted.",
+    "Helper actual prepare/stage/restore/reservation branches run on exclusive QA directories with in-memory Netlify. Private fixture credentials are synthetic and never dispatched externally.",
+    "Known resource readback permits remaining cleanup after an unknown ACK, while original reserved/unknown journal rows remain unchanged. This does not relabel the uncertain command as acknowledged.",
+    "The current all-zero MC candidate and prior inert handoff hashes must be rebound/refreshed by Root after exact final source acceptance, before any live execution. No closed allowance is reopened.",
+    "Safe real Gmail/native-window identity and unresolved recorder cleanup remain separate readiness limits. This receipt does not accept native capture, actual sign-in mail, actual installation/first-request delivery or public Stripe service."
+  ],
+  "effects": {
+    "actualNetwork": 0,
+    "browserOrNativeQueries": 0,
+    "actualProviderCalls": 0,
+    "actualBuilds": 0,
+    "nativeCredentialReads": 0,
+    "actualProductionEnvReads": 0,
+    "liveLedgersCreated": 0,
+    "rootCheckoutEdits": 0,
+    "rootAdapterEdits": 0,
+    "gitIndexWrites": 0
+  }
+}
