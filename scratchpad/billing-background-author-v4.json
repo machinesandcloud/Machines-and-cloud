@@ -1,0 +1,3635 @@
+{
+  "at": "2026-10-24T14:51:59.312Z",
+  "scope": "Actual HTTP handlers and memory records; Stripe protocol double only; no live model/provider requests",
+  "before": {
+    "netlify/functions/lib/billing-test-admission.mjs": "4e7fc3ff2bb3d8ea5b8039d51cda8f9de97e67b1e2de3b6ee51b38a9c0ab5307",
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+    "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "netlify/functions/workspace-billing-webhook.mjs": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "desk-billing.js": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+    "desk-billing.css": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+    "desk.html": "d3c9862cea6873c0fcd6c72e2b50c5f648b4c7d65a4f77a40e3a2cf28f96a73e",
+    "scripts/workspace-billing-check.mjs": "38bb210f9987f536575c1b832f5a6fb8971ea91a7f58197137d3730c79368f2a"
+  },
+  "checks": [
+    {
+      "name": "dedicated webhook requires its own distinct secret and never falls back to the legacy destination secret",
+      "pass": true
+    },
+    {
+      "name": "dedicated raw-body signatures support multiplev1 rotation and reject changed bytes, duplicate/stale/future timestamps and malformed envelopes",
+      "pass": true
+    },
+    {
+      "name": "signed unrelated Zari events with colliding legacy slug are acknowledged with no storage, notification or provider mutation",
+      "pass": true
+    },
+    {
+      "name": "legacy webhook retains its original secret and legacy checkout projection without accepting the dedicated secret",
+      "pass": true
+    },
+    {
+      "name": "actual billing endpoint requires owner session and same-site origin; legacy key GET cannot create self-service checkout",
+      "pass": true
+    },
+    {
+      "name": "review and real-handler Checkout preserve accepted99monthly price, tenant, terms and one idempotent session across parallel clicks",
+      "pass": true
+    },
+    {
+      "name": "unapproved offers, unsupported Enterprise, missing agreement, stale revision and changed Stripe currency/price/account stop checkout",
+      "pass": true
+    },
+    {
+      "name": "requests for unfinished connections or caps inconsistent with enforced policies cannot start paid service",
+      "pass": true
+    },
+    {
+      "name": "lost Checkout response retries the same parameters/key inside retention and reconciles instead of charging again",
+      "pass": true
+    },
+    {
+      "name": "signed completion records actual active subscription; duplicate and older event snapshots cannot regress canonical state",
+      "pass": true
+    },
+    {
+      "name": "invoice failure follows exact customer/subscription binding and authoritative current subscription, without trusting invoice snapshot",
+      "pass": true
+    },
+    {
+      "name": "tenant reincarnation and foreign customer/subscription cannot inherit old subscription or grant paid status",
+      "pass": true
+    },
+    {
+      "name": "renewal cancellation survives lost response and ordinary scheduler confirms the same subscription with no duplicate mutation",
+      "pass": true
+    },
+    {
+      "name": "signature failures, stale signed deliveries and legacy slug metadata cannot mutate a self-service customer",
+      "pass": true
+    },
+    {
+      "name": "revoking the owner while account read is pending prevents the actual Checkout POST",
+      "pass": true
+    },
+    {
+      "name": "unknown Checkout older than retention is held and searched, never retried with a reusable expired key",
+      "pass": true
+    },
+    {
+      "name": "month-end cancellation and incomplete-expired failure allow a new explicitly reviewed checkout without changing customer identity",
+      "pass": true
+    },
+    {
+      "name": "a lost cancellation still unapplied after retention safely renews only its idempotent end-renewal mutation",
+      "pass": true
+    },
+    {
+      "name": "ordinary stop-service expires the same unpaid hosted Checkout; late events cannot reopen it",
+      "pass": true
+    },
+    {
+      "name": "a payment that completed while stop was being processed is retained and its next renewal ends automatically",
+      "pass": true
+    },
+    {
+      "name": "an early signed completion cannot be downgraded by a delayed open-session POST response",
+      "pass": true
+    },
+    {
+      "name": "restricted live credentials require separate activation and invalid commercial offers make no Stripe request",
+      "pass": true
+    },
+    {
+      "name": "a Price changed after review abandons its unsent request safely and allows a fresh accepted checkout",
+      "pass": true
+    },
+    {
+      "name": "authoritative line-item quantity mismatch and wrong test/live event cannot record paid status",
+      "pass": true
+    },
+    {
+      "name": "existing confirmed customer opens only its scoped payment-details and invoice portal even when new purchases are disabled",
+      "pass": true
+    },
+    {
+      "name": "portal refuses shared default, inactive, live, foreign app, wrong metadata, login and expanded feature configurations before dispatch",
+      "pass": true
+    },
+    {
+      "name": "portal rejects foreign owners, custom body redirects, unconfirmed payment, replaced tenants and mismatched canonical customer/subscription",
+      "pass": true
+    },
+    {
+      "name": "revoked owner during portal validation cannot dispatch a hosted session",
+      "pass": true
+    },
+    {
+      "name": "lost portal response retries only the same capability request; expired retry needs a fresh explicit owner action",
+      "pass": true
+    },
+    {
+      "name": "portal rejects unexpected hosted response host, account mode, customer, configuration and return URL",
+      "pass": true
+    },
+    {
+      "name": "all-service offer charges only the requested ready service scope and a changed selection invalidates review",
+      "pass": true
+    },
+    {
+      "name": "Calendar-only billing waits for current access review; a reviewed operating testing customer can purchase without website installation and billing never activates channels",
+      "pass": true
+    },
+    {
+      "name": "TEST new purchases require one exact expiring tenant, owner, merchant, offer and bounded policy",
+      "pass": true
+    },
+    {
+      "name": "TEST cohort rejects another ready owner and a reused slug incarnation without any Stripe read or write",
+      "pass": true
+    },
+    {
+      "name": "Revoked owner cannot use a valid TEST cohort to review or dispatch Checkout",
+      "pass": true
+    },
+    {
+      "name": "Changing the approved offer digest invalidates TEST admission before provider work",
+      "pass": true
+    },
+    {
+      "name": "Expiring TEST cohort during awaited account validation prevents physical Checkout creation",
+      "pass": true
+    },
+    {
+      "name": "TEST policy expiry during the final awaited Price read prevents Checkout dispatch and retains the owned attempt",
+      "pass": true
+    },
+    {
+      "name": "Known TEST financial maintenance uses its immutable offer after new offers close; expired policy still blocks new Portal capabilities",
+      "pass": true
+    },
+    {
+      "name": "Expiring TEST cohort during canonical Portal validation prevents creating a hosted capability",
+      "pass": true
+    },
+    {
+      "name": "Checkout return and signed canonical event reconcile after TEST expiry without reopening offers; renewal cancellation remains usable",
+      "pass": true
+    },
+    {
+      "name": "Unknown same-attempt Checkout is reconciled after TEST policy withdrawal without a second create",
+      "pass": true
+    },
+    {
+      "name": "Paused and cancelled TEST cohort cannot display or dispatch a new offer while known financial controls remain separate",
+      "pass": true
+    },
+    {
+      "name": "Policy withdrawal after a Portal intent is saved is a known abandoned local refusal, not an unknown provider result",
+      "pass": true
+    },
+    {
+      "name": "LIVE configuration still needs both existing live gates and does not borrow TEST cohort authority",
+      "pass": true
+    }
+  ],
+  "stripeRequests": [
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-58132851693f12cf77b716cd999fc0a0"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-645fb749b02b5c1a84e62dc46f9927bf"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-645fb749b02b5c1a84e62dc46f9927bf"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-8a2cf754919d5d3f296b1549fb3d9d2b"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-070f786d1b0f307de22d6146b831862f"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-e121cc3efcf8c467efaef95cc4ab992e"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture24",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture26",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-8c7be3be6f2e6eb56d8e79c2e88689f9"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": "workspace-renewal-de4cc002bb45a75b8f1effc6533b6875"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-6d8d3ebed51652e4df9969e8a1b2448d"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-5f2355cb4652c3dcb284c26c1eba2a98"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture40",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture42",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_growth_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_growth_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-386dedeb78e00ed932cb6a4cab3ea28c"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-b9e30006013bc500a81ce6e3cc3b9a77"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture46",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture48",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_growth_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_growth_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-a7e0f15c3540bd1f889a1249db9c0817"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-615c3758bde8647d6911da641dca5d27"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": "workspace-renewal-f3fb5e45d32922f51bce1fba5a37fdfd"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-a93c721d5ac18063261ba9ebab89fb4e"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture57",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions/cs_test_fixture57/expire",
+      "idempotency": "workspace-expire-a93c721d5ac18063261ba9ebab89fb4e"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture57",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture57",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-2a4df128a2d77e80e229a3efb71f5dc1"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": "workspace-renewal-e376938e256ee045795eb56ba774b426"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture30",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture32",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture52",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture54",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture60",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture62",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture17",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture19",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-807b20a08f69dab588ce2ac5f73faaf2"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture64",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture66",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-5d5bfb4a47947e4fe88a242dcde657dd"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-7082455fcd94d4b3314812f24dd55c00"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture72",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-25429fad7c4ca6f9bcbdec908d11e32c"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture78",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture80",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture78",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture80",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-332bebecb4313ffb2ad4fd3b272dd446"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-efdb50e155329ff64349ef6f020f8a56"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture84",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture86",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-76229b99298cf1f6499687b263552142"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture89",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture91",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture89",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture91",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-727011d48e90d234410daa1b5596a5ca"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture95",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture97",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture95",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture97",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-6446511b9597aa13c3ccbc34990cb345"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture100",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture102",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture100",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture102",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-74a3163eee9231788b19cb35db6a1162"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture100",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture102",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-74a3163eee9231788b19cb35db6a1162"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture100",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture102",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture100",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture102",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-50349efd1b88e6adb539fc247814c855"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-8afdc1f56220528f196e7032db2c2557"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture107",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture109",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture107",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture109",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-dee4b1c5bdee61b8872bf7726051f784"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-c515334586db64518b780a79ce15cdf9"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture113",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture115",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture113",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture115",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-e18b5973eb4ea81e31ce170404125ea8"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-9bedb07fafed4017b0cc4665c369a2b3"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture119",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture121",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture119",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture121",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-290e8ccc1f00583dfb3215ae52dd89e8"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-9a99cd7384d28768974dac2b4a9855dd"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture125",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture127",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture125",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture127",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-de10ddb22aa435dd4801e862b2ecb571"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-16e703db4af8480685bcb776daed5e51"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture131",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture133",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture131",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture133",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-58f4a5afab488dce70b3f5ea4d63b0b6"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-bbcc000578fa9ada4df8217ec3d7242e"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-319ffed566cad19cb42bed788d497c25"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-996ecf1785db089612cb4bdfcb83a99a"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture148",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture150",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture148",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture150",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing_portal/sessions",
+      "idempotency": "workspace-portal-f66ff1ffeddabab78d2a5ba2fc243669"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture150",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_fixture150",
+      "idempotency": "workspace-renewal-5e696ad8b26a99310b82640bf9dca3c0"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture148",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture150",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-5ca4e9064bf89645e0b7fe4bc038e963"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture154",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture156",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture154",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture156",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-dc028bb22b85b94256a93937b28a0a5c"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture159",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture161",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture161",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_fixture161",
+      "idempotency": "workspace-renewal-d4f4840ad0f7c60e994203aac4f53c2c"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture159",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture161",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-96df780d7e3351019510310b75b67483"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture164",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/prices/price_starter_fixture",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/checkout/sessions",
+      "idempotency": "workspace-checkout-7253e2cee6d8ff530b58ef7fee296ad3"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture168",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture170",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing_portal/configurations/bpc_fixture123",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_fixture168",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_fixture170",
+      "idempotency": null
+    }
+  ],
+  "physicalExternalRequests": 0,
+  "notificationDispatchAttempts": 0,
+  "uiFixture": {
+    "client": {
+      "slug": "billing-qa-3",
+      "status": "live",
+      "plan": "growth",
+      "createdAt": "2026-10-23T18:00:00.000Z",
+      "owner": {
+        "name": "Fixture Owner",
+        "email": "billing-qa-3@example.test",
+        "phone": "+17135550140",
+        "backupPhone": ""
+      },
+      "business": {
+        "name": "Fixture Air",
+        "website": "https://shop.example.test",
+        "trade": "HVAC",
+        "city": "Houston",
+        "serviceArea": [
+          "Katy"
+        ],
+        "notServed": [],
+        "hours": "Mon-Fri8am-5pm",
+        "afterHours": "",
+        "spanish": true,
+        "licenses": "",
+        "legal": {}
+      },
+      "services": [
+        "AC repair"
+      ],
+      "fees": [],
+      "windows": [
+        "8 to 12",
+        "12 to 5"
+      ],
+      "rules": {
+        "never": [
+          "Quote a price the owner has not published",
+          "Promise an exact arrival time; offer the arrival windows only",
+          "Pretend to be a person",
+          "Give advice on gas, electrical, or safety beyond: leave the area if there is a gas smell or fire, call 911, then call us"
+        ],
+        "handoff": [
+          "Complaints about past work",
+          "Warranty questions",
+          "Anything about a bill or refund",
+          "Commercial or large projects"
+        ],
+        "emergencies": {
+          "tier0": [
+            "Gas smell",
+            "Carbon monoxide alarm",
+            "Smoke or fire",
+            "Sparks or a burning smell from the panel or an outlet",
+            "Sewage flooding a living space"
+          ],
+          "tier1": [
+            "No cooling when the forecast high is 90°F or more",
+            "No cooling with an infant, elderly, or medically dependent person in the home",
+            "No heat when it is at or below freezing outside",
+            "Water pouring from the air handler"
+          ],
+          "tier2": "Everything else: offer the next available window.",
+          "script": ""
+        },
+        "hours": {
+          "mon": {
+            "open": "08:00",
+            "close": "17:00"
+          },
+          "tue": {
+            "open": "08:00",
+            "close": "17:00"
+          },
+          "wed": {
+            "open": "08:00",
+            "close": "17:00"
+          },
+          "thu": {
+            "open": "08:00",
+            "close": "17:00"
+          },
+          "fri": {
+            "open": "08:00",
+            "close": "17:00"
+          },
+          "sat": null,
+          "sun": null
+        },
+        "emergency247": false,
+        "consentAsk": false,
+        "windowCapacity": 1,
+        "ackMinutes": 10,
+        "callbackHours": "within 30 minutes",
+        "callbackAfterHours": "by 8 am tomorrow",
+        "bypass": []
+      },
+      "digest": {
+        "text": true
+      },
+      "faq": [],
+      "leadSources": [],
+      "leads": {
+        "angiKey": "",
+        "thumbtackSecret": ""
+      },
+      "software": "google",
+      "phone": {
+        "businessNumber": "",
+        "twilioNumber": "",
+        "forwarding": "missed",
+        "carrier": "other",
+        "transferTo": "",
+        "voiceForwardTo": "",
+        "textBack": true,
+        "tenDlc": "not_started"
+      },
+      "voice": {
+        "provider": "none"
+      },
+      "provision": {
+        "status": "pending",
+        "steps": {}
+      },
+      "calendar": {
+        "provider": "none"
+      },
+      "billing": {
+        "status": "none"
+      },
+      "build": {
+        "status": "built"
+      },
+      "widget": {
+        "greeting": "",
+        "allowedOrigins": []
+      },
+      "summary": "",
+      "onboarding": {
+        "version": 1,
+        "desiredChannels": [
+          "web"
+        ]
+      },
+      "channels": {
+        "web": {
+          "active": true
+        },
+        "voice": {
+          "active": false
+        },
+        "sms": {
+          "active": false
+        }
+      },
+      "setupProof": {
+        "reviewedRevision": "e441114275824c5ca557058282a567d7473c04e378f34a45d77ec10198154656",
+        "testedRevision": "e441114275824c5ca557058282a567d7473c04e378f34a45d77ec10198154656",
+        "testMode": "live"
+      }
+    },
+    "configurationRevision": "e441114275824c5ca557058282a567d7473c04e378f34a45d77ec10198154656",
+    "billing": {
+      "status": "none",
+      "plan": null,
+      "services": [],
+      "name": null,
+      "currentPeriodEnd": null,
+      "cancelAtPeriodEnd": false,
+      "cancellationState": null,
+      "checkout": {
+        "requestId": "126ba370d1d2c23e9fbb6622fa6cb477",
+        "state": "open",
+        "expiresAt": "2026-10-23T19:00:00.000Z",
+        "url": "https://checkout.stripe.com/c/pay/cs_test_fixture4"
+      },
+      "portalAvailable": false,
+      "offerAvailable": true,
+      "availablePlans": [
+        {
+          "id": "starter",
+          "name": "Coverage",
+          "amountCents": 9900,
+          "currency": "usd"
+        },
+        {
+          "id": "growth",
+          "name": "Follow-through",
+          "amountCents": 24900,
+          "currency": "usd"
+        }
+      ],
+      "livemode": false
+    },
+    "review": {
+      "reviewId": "85b1ad2134f200c5b74110056943dc01",
+      "expiresAt": "2026-10-23T18:15:00.000Z",
+      "offer": {
+        "version": "qa_fixed_v1",
+        "digest": "5915e8689fa8ba69ab6ef7ff5738687b4c786ba57b1bccbe1c78a03177203901",
+        "plan": "starter",
+        "name": "Coverage",
+        "amountCents": 9900,
+        "currency": "usd",
+        "interval": "month",
+        "services": [
+          "web"
+        ],
+        "limits": {
+          "webRepliesPerDay": 50,
+          "practiceRepliesPerDay": 20,
+          "voiceCallsPerDay": 0,
+          "voiceReservedMinutesPerDay": 0,
+          "maxCallSeconds": 0,
+          "smsExposureMessages": 0,
+          "smsExposureSegments": 0,
+          "smsExposureCostMicros": 0
+        },
+        "limitsDescription": "Synthetic fixture maxima:50 website replies/day and20 practice replies/day, subject to shared capacity. No included allowance or paid entitlement is asserted.",
+        "terms": {
+          "version": "qa_terms_v1",
+          "text": "Synthetic fixed monthly subscription for this local test only. Renews monthly until cancelled. End renewal at period end; stopping service ends renewal. No usage overages or trial are added. This is not approved commercial or tax language.",
+          "url": "https://billing-fixture.example.test/terms-of-service.html"
+        },
+        "livemode": false,
+        "additionalUsageCharges": false,
+        "trialDays": 0
+      }
+    },
+    "source": "Actual owner GET/review/Checkout handlers with synthetic records"
+  },
+  "after": {
+    "netlify/functions/lib/billing-test-admission.mjs": "4e7fc3ff2bb3d8ea5b8039d51cda8f9de97e67b1e2de3b6ee51b38a9c0ab5307",
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+    "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "netlify/functions/workspace-billing-webhook.mjs": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "desk-billing.js": "e9c270c97c169d4ffed17a3734ec0b862aeb6ac107b0e34c65494c236e3ff9b8",
+    "desk-billing.css": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+    "desk.html": "d3c9862cea6873c0fcd6c72e2b50c5f648b4c7d65a4f77a40e3a2cf28f96a73e",
+    "scripts/workspace-billing-check.mjs": "38bb210f9987f536575c1b832f5a6fb8971ea91a7f58197137d3730c79368f2a"
+  },
+  "sourceStable": true,
+  "passed": 45,
+  "total": 45,
+  "ok": true
+}

@@ -1,13 +1,13 @@
 {
   "date": "2026-10-24",
-  "stage": "Prepared current-source billing proposal; author local acceptance complete; independent QA pending. No new actual Stripe TEST phase or public webhook proof is authorized or executed.",
-  "baseCommit": "703336499607e42ec0cdcd46f453b07c5ad43715",
-  "sourceId": "sha256:cedca119222e4ee487919be0faf9cfda79f4966ab6669e87b3f64fbc2f66ac02",
+  "stage": "Refreshed exact-source local TEST preparation after bounded billing recovery; own current offline acceptance and independent recovery acceptance remain separate. No new provider/public webhook phase authorized or executed.",
+  "baseCommit": "7b69b031a1411aa35fbb144acb5fbe1e78a5f068",
+  "sourceId": "sha256:a11f7c7115ab8db84ac4ad198f9d5bf762fe812fe01f8d01c74f625fc32d7e29",
   "sourceManifest": "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json",
-  "sourceManifestSha256": "f93e023e6fe04495cd4cc5bb52b28a21a14246051b53e593ef9998973aa4bb80",
-  "sourceFiles": 485,
+  "sourceManifestSha256": "ad64d4f40c090c03c0982823266e78dfde786ece0b5bacbbc9a8657a918f3660",
+  "sourceFiles": 520,
   "script": "scripts/stripe-test-lifecycle-proof.mjs",
-  "scriptSha256": "f75dca39b5a8539a99d47a11fd2a4cb998986ea5b672f1bbbb971061f2394fa8",
+  "scriptSha256": "f326af32fd4d09d11c2c37fb0c2e1eb31d81cd598675669594ab04f65ed60672",
   "provenance": "The manifest freezes runtime, assets, build configuration, dependency locks and check sources. It excludes this scope, itself and the runner to avoid a hash cycle. The runner pins the manifest SHA; this scope separately pins the runner SHA. A future exact-source approval must bind all three and a fresh exclusive phase output. This is a proposal separate from the accepted 7033364 runtime batch.",
   "account": {
     "merchant": "Existing Zari Marketing, as selected by Steve",
@@ -23,7 +23,7 @@
     "closedPriorPhase": "product/STRIPE-TEST-LIFECYCLE-PROOF-SCOPE-2026-10-23.json is historical and unchanged. Its source961 phase a closed after 7 actual requests, 0 Checkout sessions and 0 subscriptions; the exact owned fixture was rearchived. Its allowance cannot be reused."
   },
   "invocation": {
-    "cwd": "/tmp/mc-billing-proof-703, or the same separately verified frozen source checkout",
+    "cwd": "/tmp/mc-billing-recovery-7b, or the separately verified frozen-source checkout",
     "guards": "node scripts/stripe-test-lifecycle-proof.mjs --self-check",
     "fullyOffline": "node scripts/stripe-test-lifecycle-proof.mjs --offline-rehearsal --output /tmp/mc-stripe-test-lifecycle-OFFLINE-NEW.json",
     "futureActualTestOnlyAfterFreshApproval": "node scripts/stripe-test-lifecycle-proof.mjs --execute --output /tmp/mc-stripe-test-lifecycle-AUTHORIZED-NEW.json",
@@ -207,7 +207,8 @@
       "manifest": "scratchpad/billing-test-proof-source-v2.json",
       "sourceId": "sha256:35f97c69544bec5a3fd9514e92ed444a82995645921007139d7711a350fbb5c0",
       "disposition": "Valid v2 lifecycle evidence is retained with its scope. The returned missing-key read projection was repaired; no new actual phase is authorized."
-    }
+    },
+    "revision4": "Revision3 historical receipts below retain their original source. Current recovery and refreshed runner acceptance are recorded separately in BILLING-RECOVERY-AND-PUBLIC-TEST-PREPARATION-2026-10-24.json."
   },
   "references": [
     {
@@ -231,5 +232,12 @@
       "use": "Dedicated TEST destination and signing-secret identity are separate from local synthetic event transport."
     }
   ],
-  "revision": 3
+  "revision": 4,
+  "retainedRevision3Source": {
+    "baseCommit": "703336499607e42ec0cdcd46f453b07c5ad43715",
+    "sourceId": "sha256:cedca119222e4ee487919be0faf9cfda79f4966ab6669e87b3f64fbc2f66ac02",
+    "sourceManifestSha256": "f93e023e6fe04495cd4cc5bb52b28a21a14246051b53e593ef9998973aa4bb80",
+    "sourceFiles": 485,
+    "scriptSha256": "f75dca39b5a8539a99d47a11fd2a4cb998986ea5b672f1bbbb971061f2394fa8"
+  }
 }

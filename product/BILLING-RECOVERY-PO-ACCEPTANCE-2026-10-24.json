@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-24T15:03:43.230610+00:00",
+  "role": "product_owner_v2 and UI/UX",
+  "checkout": "/tmp/mc-billing-recovery-7b",
+  "base": "7b69b03",
+  "status": "accepted_local_owner_billing_recovery_job",
+  "customer_outcome": "An owner understands the reviewed monthly offer, recovers a lost Checkout response through its saved status, returns to the same Checkout/subscription, intentionally keeps or ends renewal, and sees accurate pending or confirmed cancellation status.",
+  "acceptance_scope": "Actual desktop/mobile workspace assets and owner/webhook/scheduled/background HTTP handlers with memory/CAS and synthetic Stripe responses. Physical Node transport and unhandled browser/network routes were blocked; no real account, credentials, purchases, payments, provider calls, deployment or hosted scheduler outcome.",
+  "evidence": {
+    "path": "scratchpad/billing-po-second.json",
+    "sha256": "89f5471900113435aa3e46bed15257aba1dabd3dcd6db48ed02db06b9511a1eb",
+    "passed": 4,
+    "total": 4,
+    "sourceStable": true,
+    "physical_external_requests": 0,
+    "browser_errors": 0,
+    "actual_stripe_requests": 0,
+    "synthetic_stripe_requests": 72
+  },
+  "observed_jobs": [
+    "1440px ordinary reviewed checkout, lost owner receipt, returning active state and intentional keep/end renewal",
+    "1440px returned owner understands saved uncertain renewal and ordinary background confirms the same subscription",
+    "390px ordinary reviewed checkout, lost owner receipt, returning active state and intentional keep/end renewal",
+    "390px returned owner understands saved uncertain renewal and ordinary background confirms the same subscription"
+  ],
+  "observed_details": [
+    "Reviewed agreement is required; missing agreement focuses the checkbox and creates no Checkout.",
+    "A lost owner-side Checkout receipt retains one server Checkout identity. Explicit Check payment status exposes continuation; returning through the same Checkout creates no second Checkout.",
+    "A signed synthetic completion produces the actual retained active subscription.",
+    "Keep subscription closes the confirmation and returns focus without a provider cancellation. Intentional End renewal applies to the actual current subscription.",
+    "A cancellation attempt that never reached the provider remains durably uncertain. On reload the UI now shows Renewal cancellation pending, hides a fresh End action, and exposes Check payment status.",
+    "Ordinary scheduled dispatch and actual background recovery confirm that same retained cancellation and subscription with one financial idempotency identity. A failed-before-apply transport may be attempted again under that identity; no different financial operation is created.",
+    "Actual canonical cancelAtPeriodEnd shows the paid-period end date and hides End.",
+    "Focused1440px and390px billing captures fit the viewport with readable status and actions."
+  ],
+  "ui_repair": {
+    "path": "desk-billing.js",
+    "sha256": "eecf22dfb205c068cde5383741791612ebf6235db83acfb094bb0ce07a799e7d",
+    "change": "Derive renewal waiting from both persisted pending/uncertain state and the existing local unknown-response guard; display pending status, hide duplicate End CTA, and keep pending confirmation wording during a still-unconfirmed status check. Canonical confirmed end-date copy remains intact.",
+    "financial_behavior_changes": false,
+    "authorization": "Root released the isolated frontend freeze for this minimal returned-state repair only."
+  },
+  "screenshots": [
+    "scratchpad/billing-po-second-1440-lost-checkout.png",
+    "scratchpad/billing-po-second-1440-renewal-ended.png",
+    "scratchpad/billing-po-second-1440-returned-uncertain.png",
+    "scratchpad/billing-po-second-1440-background-confirmed.png",
+    "scratchpad/billing-po-second-390-lost-checkout.png",
+    "scratchpad/billing-po-second-390-renewal-ended.png",
+    "scratchpad/billing-po-second-390-returned-uncertain.png",
+    "scratchpad/billing-po-second-390-background-confirmed.png"
+  ],
+  "actual_observations": [
+    {
+      "width": 1440,
+      "phase": "returned saved Checkout",
+      "checkoutState": "open",
+      "urlAvailable": true,
+      "offerAvailable": true
+    },
+    {
+      "width": 1440,
+      "phase": "returned uncertain cancellation",
+      "status": "Renewal cancellation pending",
+      "summary": "Coverage \u00b7 Current period ends Nov 22, 2026. Your request to end renewal is saved; confirmation is being checked.",
+      "endRenewalVisible": false,
+      "checkStatusVisible": true
+    },
+    {
+      "width": 390,
+      "phase": "returned saved Checkout",
+      "checkoutState": "open",
+      "urlAvailable": true,
+      "offerAvailable": true
+    },
+    {
+      "width": 390,
+      "phase": "returned uncertain cancellation",
+      "status": "Renewal cancellation pending",
+      "summary": "Coverage \u00b7 Current period ends Nov 22, 2026. Your request to end renewal is saved; confirmation is being checked.",
+      "endRenewalVisible": false,
+      "checkStatusVisible": true
+    }
+  ],
+  "preserved_first_run": {
+    "path": "scratchpad/billing-po-first.json",
+    "sha256": "edb8d3a05cec14748e84b67dfee69479cfe57aa2e20db5541cd3a34896ffd04e",
+    "disposition": "Preserves the genuine desktop/mobile pending-cancellation CTA defect. Also retains an immediate-Continue expectation and a cumulative Checkout counter assertion. The accepted replacement follows the visible Check payment status recovery path and compares request deltas per job; it does not claim automatic continuation without checking status."
+  },
+  "independent_qa": "Independent QA owns additional recovery, health generation, concurrency, isolation and320px/pending-state reload coverage. Those totals are separate and are not added to these four PO jobs.",
+  "not_accepted_by_this_record": [
+    "Actual Stripe account/configuration, financial event verification or settlement.",
+    "Actual wall-clock Netlify background delivery and operational recovery.",
+    "Commercial limits/tax terms, live charging, provider activation or full paid-customer launch readiness.",
+    "Unrelated Calendar, phone/text, lead-platform or customer-installation acceptance."
+  ],
+  "source_sha256": {
+    "desk-billing.js": "eecf22dfb205c068cde5383741791612ebf6235db83acfb094bb0ce07a799e7d",
+    "desk-billing.css": "8b95945d084bb271d1114dce944883b124ce17885931fc57abf5957e717c3d7a",
+    "desk.html": "d3c9862cea6873c0fcd6c72e2b50c5f648b4c7d65a4f77a40e3a2cf28f96a73e",
+    "desk.js": "b23c35b20b7f7b345e781b5e4906278d3abd5a8981e2db6f32b2014d9c26a0dc",
+    "netlify.toml": "469be41cc6f50b40b3a1d624c76d985a27b610aa1457fc96db9bedd1ef03c50c",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/workspace-billing-webhook.mjs": "f1a4f62ee5b304cf6e5759a8827b7dd02e5950376341b387bcb2065c2651fbb5",
+    "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+    "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "scratchpad/billing-po-observe.mjs": "7b3a3de435e819375eeccd3821e26a9ea0422a4303a141e256cb588e26b94546"
+  }
+}

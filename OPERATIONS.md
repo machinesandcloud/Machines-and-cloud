@@ -2,6 +2,16 @@
 
 How a shop goes from the pilot form to a live front desk, what runs where, and what Steve has to switch on once.
 
+## Billing recovery and the next TEST proof
+
+The ten-minute `workspace-billing-scheduler` dispatches one fixed empty request to `/api/workspace-billing-background` using the existing `SERVICE_WORKER_KEY`. Its three-second dispatch allowance is separate from completed reconciliation. `health/workspaceBilling:lastDispatch` records invocation acceptance; only the background worker records `health/workspaceBilling:lastRun`. A 202 is not a payment, cancellation or recovery receipt.
+
+The background worker reuses `workspace_billing` financial records and the existing `workspace_billing_cursor/active` cursor. One conditional lease admits a wave of at most three records, with a four-minute provider deadline and 45 seconds per record. Stripe requests keep a five-second timeout; a mutation requires at least a complete five-second remaining budget. The worker checks its lease, current tenant, original Checkout and merchant/key binding before and after provider responses, including response-body reads. Late or lost results stay uncertain. Cursor advancement covers failed records so later customers remain reachable, and an expired process-death claim is recovered on an ordinary later schedule. Existing known financial maintenance remains separate from new-purchase flags. These bounds do not establish hosted throughput or a hard latency guarantee for a storage outage.
+
+Renewal cancellation shares one retained claim across owner and background actions. It retains the original subscription/idempotency identity, reads canonical state before a retry and rotates the 23-hour idempotency identity only after confirming the earlier mutation is still unapplied. An uncertain Checkout is searched by its original metadata; recovery never creates a replacement Checkout. Workspace stopping and current-tenant fences continue to apply.
+
+`scripts/stripe-test-lifecycle-proof.mjs` is refreshed for this exact source and can rehearse the owner Checkout, canonical subscription, renewal cancellation and cleanup entirely offline. Its locally signed webhook trigger remains deliberately narrower than actual public Stripe delivery. The current public preparation, required hosted tenant, transport-budget isolation and exact cleanup prerequisites are recorded in `product/BILLING-RECOVERY-AND-PUBLIC-TEST-PREPARATION-2026-10-24.json`. No public TEST phase should start from the local-memory proof or infer that a draft deploy isolates Blobs or the shared merchant.
+
 ## Four-connection customer setup (local candidate)
 
 The active connection-journey candidate reuses each shop's saved business answers. Selecting a connection records a preference; it does not authorize purchases, messaging or Google access. The customer stays in one workspace and is not asked to create Twilio, Vapi or Google Cloud developer accounts or supply API keys. Every chosen connection shows its current next step, the platform's work, the owner's one-time action and the evidence needed to call it ready.

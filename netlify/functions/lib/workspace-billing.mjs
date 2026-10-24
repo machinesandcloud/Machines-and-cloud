@@ -1,6 +1,7 @@
 // Fixed-price self-service billing. Commercial approval is configuration, never
 // inferred from a saved plan preference or legacy usage counters.
 import { createHash, randomBytes } from 'node:crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { atomicUpdate, list } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { isSupportedSelfServiceClient, configurationRevision, setupReadiness } from './setup.mjs';
@@ -12,6 +13,8 @@ import { billingTestAdmissionPolicy, billingTestAdmits, billingTestMaintenanceAd
 import { workspaceBillingWebhookSecret } from './billing.mjs';
 
 const STORE='workspace_billing', REVIEWS='workspace_billing_reviews', EVENTS='workspace_billing_events';
+const RECOVERY_CURSOR='workspace_billing_cursor', RECOVERY_WAVE_MS=240000, RECOVERY_RECORD_MS=45000;
+const recoveryScope=new AsyncLocalStorage();
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 const hash=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(canonical(value))).digest('hex');
 const stamp=()=>new Date().toISOString(), token=()=>randomBytes(16).toString('hex'), key=c=>`${c.slug}/${workspaceTenant(c)}`;
@@ -27,10 +30,21 @@ const fail=(code,message,status=409)=>{throw new WorkspaceBillingError(code,mess
 function mode(){const secret=process.env.STRIPE_SECRET_KEY||'';if(/^(sk|rk)_test_/.test(secret))return false;if(/^(sk|rk)_live_/.test(secret))return true;fail('billing_unavailable','Billing is being prepared. Your workspace is saved.',503);}
 function paymentURL(value,host='checkout.stripe.com'){let url;try{url=new URL(value);}catch{return null;}return url.protocol==='https:'&&url.hostname===host&&!url.username&&!url.password&&!url.port?url.href:null;}
 async function stripe(path,{method='GET',params=null,idempotencyKey=null}={}){
+  // Only background recovery supplies this context. Owner requests keep their
+  // existing five-second provider timeout, with no ambient recovery authority.
+  const scope=recoveryScope.getStore();
+  if(scope)await scope.assertCurrent();
+  const remaining=scope?scope.deadlineAt-Date.now():5000;
+  if(remaining<1)fail('billing_recovery_deadline','Billing recovery will continue on its next scheduled run.',503);
+  // Do not start a financial mutation with less than a complete request budget.
+  if(scope&&method!=='GET'&&remaining<5000)fail('billing_recovery_deadline','Billing recovery will continue on its next scheduled run.',503);
   const headers={Authorization:'Bearer '+(process.env.STRIPE_SECRET_KEY||''),'Stripe-Version':'2025-06-30.basil'};
   if(params)headers['Content-Type']='application/x-www-form-urlencoded';if(idempotencyKey)headers['Idempotency-Key']=idempotencyKey;
-  const response=await fetch('https://api.stripe.com/v1/'+path,{method,headers,...(params?{body:new URLSearchParams(params).toString()}:{}),signal:AbortSignal.timeout(5000),redirect:'error'});
+  const response=await fetch('https://api.stripe.com/v1/'+path,{method,headers,...(params?{body:new URLSearchParams(params).toString()}:{}),signal:AbortSignal.timeout(Math.min(5000,remaining)),redirect:'error'});
   let data;try{data=await response.json();}catch{fail('billing_response_uncertain','The payment provider response could not be confirmed. Check billing status before trying again.',503);}
+  // A late response or a replaced wave never authorizes the next request or a
+  // success projection. A possibly applied mutation retains its same identity.
+  if(scope)await scope.assertCurrent();
   if(!response.ok)fail('billing_provider_unavailable','The payment provider could not finish this request. Your saved request is kept.',503);return data;
 }
 function approvedOffer(){
@@ -182,16 +196,38 @@ export async function cancelWorkspaceRenewal(c,actor,body){
 }
 async function recoverCancellation(c){
   let row=await strictRead(STORE,key(c));if(!row?.cancellation||row.cancellation.state==='complete')return;
+  // Owner controls and scheduled continuation share this same claim. In
+  // particular, concurrent recovery cannot rotate a 23-hour idempotency key
+  // twice after reading the same older provider snapshot.
+  const claim=token(),until=new Date((recoveryScope.getStore()?.deadlineAt||Date.now()+55000)+5000).toISOString();
+  const locked=await atomicUpdate(STORE,key(c),current=>{
+    if(current?.cancellation?.id!==row.cancellation.id||current.cancellation.state==='complete')return {result:false};
+    if(current.cancellation.recoveryClaim&&Date.parse(current.cancellation.recoveryClaim.until)>Date.now())return {result:false};
+    return {value:{...current,cancellation:{...current.cancellation,recoveryClaim:{token:claim,until}}},result:true};
+  });
+  if(!locked)fail('billing_busy','Billing is already checking the saved renewal request. Please check again shortly.',503);
+  const originalAttempt=row.checkout?.id,originalTenant=row.tenant,subscriptionId=row.cancellation.subscriptionId;
+  const currentClaim=async()=>{
+    const current=await strictRead(STORE,key(c)),client=await strictRead('clients',c.slug);
+    if(!isSupportedSelfServiceClient(client)||workspaceTenant(client)!==originalTenant||current?.tenant!==originalTenant||current.checkout?.id!==originalAttempt||current.cancellation?.subscriptionId!==subscriptionId)fail('billing_binding_mismatch','The saved renewal request belongs to the original workspace and subscription.',503);
+    if(current.cancellation.recoveryClaim?.token!==claim||Date.parse(current.cancellation.recoveryClaim.until)<=Date.now())fail('billing_busy','A newer recovery owns this renewal request. Check its saved status.',503);
+    return current;
+  };
+  try{
+  row=await currentClaim();
   if(mode()!==row.livemode)fail('billing_mode_changed','Renewal cancellation is saved and waiting for the original payment account.',503);await assertAccount(row.stripeAccountId);
+  await currentClaim();
   if(row.cancellation.subscriptionId!==row.subscription?.id)return;
   const sub=await stripe('subscriptions/'+row.cancellation.subscriptionId);if(sub.customer!==row.customerId||sub.metadata?.mc_tenant!==row.tenant||sub.metadata?.mc_attempt!==row.checkout.id)fail('billing_binding_mismatch','The renewal request could not be matched to your subscription.',503);
-  const latest=await strictRead(STORE,key(c));if(latest?.subscription?.id!==row.subscription.id||latest?.cancellation?.id!==row.cancellation.id)return;
+  const latest=await currentClaim();if(latest?.subscription?.id!==row.subscription.id||latest?.cancellation?.id!==row.cancellation.id)return;
   if(sub.cancel_at_period_end!==true&&sub.status!=='canceled'){
-    if(Date.parse(row.cancellation.attemptedAt||row.cancellation.requestedAt)<Date.now()-23*3600000){const previousId=row.cancellation.id;await atomicUpdate(STORE,key(c),current=>current?.cancellation?.id!==previousId?{}:{value:{...current,cancellation:{...current.cancellation,id:token(),generation:(current.cancellation.generation||0)+1,attemptedAt:stamp(),state:'pending'}}});row=await strictRead(STORE,key(c));}
-    await atomicUpdate(STORE,key(c),current=>({value:{...current,cancellation:{...current.cancellation,attemptedAt:current.cancellation.attemptedAt||stamp()}}}));
-    try{await stripe('subscriptions/'+sub.id,{method:'POST',params:{cancel_at_period_end:'true'},idempotencyKey:'workspace-renewal-'+row.cancellation.id});}catch{await atomicUpdate(STORE,key(c),current=>({value:{...current,cancellation:{...current.cancellation,state:'uncertain'}}}));return;}
+    if(Date.parse(row.cancellation.attemptedAt||row.cancellation.requestedAt)<Date.now()-23*3600000){const previousId=row.cancellation.id;await atomicUpdate(STORE,key(c),current=>current?.cancellation?.id!==previousId||current.cancellation.recoveryClaim?.token!==claim?{}:{value:{...current,cancellation:{...current.cancellation,id:token(),generation:(current.cancellation.generation||0)+1,attemptedAt:stamp(),state:'pending'}}});row=await currentClaim();}
+    await atomicUpdate(STORE,key(c),current=>current?.cancellation?.recoveryClaim?.token===claim?{value:{...current,cancellation:{...current.cancellation,attemptedAt:current.cancellation.attemptedAt||stamp()}}}:{});
+    await currentClaim();
+    try{await stripe('subscriptions/'+sub.id,{method:'POST',params:{cancel_at_period_end:'true'},idempotencyKey:'workspace-renewal-'+row.cancellation.id});}catch{await atomicUpdate(STORE,key(c),current=>current?.cancellation?.recoveryClaim?.token===claim&&current.cancellation.state!=='complete'?{value:{...current,cancellation:{...current.cancellation,state:'uncertain'}}}:{});return;}
   }
-  await reconcile(c);row=await strictRead(STORE,key(c));if(row.subscription?.cancelAtPeriodEnd||row.subscription?.status==='canceled')await atomicUpdate(STORE,key(c),current=>({value:{...current,cancellation:{...current.cancellation,state:'complete',confirmedAt:stamp()}}}));
+  await reconcile(c);row=await currentClaim();if(row.subscription?.cancelAtPeriodEnd||row.subscription?.status==='canceled')await atomicUpdate(STORE,key(c),current=>current?.cancellation?.recoveryClaim?.token===claim?{value:{...current,cancellation:{...current.cancellation,state:'complete',confirmedAt:stamp()}}}:{});
+  }finally{await atomicUpdate(STORE,key(c),current=>current?.cancellation?.recoveryClaim?.token===claim?{value:{...current,cancellation:{...current.cancellation,recoveryClaim:null}}}:{});}
 }
 // Stop-service acceptance includes ending the monthly renewal. This durable
 // write is also repaired by the ordinary scheduler after a lost stop response.
@@ -199,10 +235,70 @@ export async function queueWorkspaceStopBilling(c,{reconcileCheckout=true}={}){
   await atomicUpdate(STORE,key(c),row=>{if(!row||row.tenant!==workspaceTenant(c))return {};const cancellation=activeSubscription(row.subscription?.status)&&row.cancellation?.subscriptionId!==row.subscription.id?{id:token(),requestId:token(),subscriptionId:row.subscription.id,state:'pending',actor:normalizeAccountEmail(c.owner.email),requestedAt:stamp(),source:'workspace_stopped'}:row.cancellation||null;return {value:{...row,stopRequestedAt:row.stopRequestedAt||stamp(),cancellation}};});
   const saved=await strictRead(STORE,key(c));if(reconcileCheckout&&saved?.checkout?.sessionId&&saved.checkout.state==='open')try{await reconcile(c);}catch{/* Ordinary recovery retains the same session to expire. */}
 }
-export async function recoverWorkspaceBilling({limit=3}={}){
-  const keys=await list(STORE,''),cursor=await strictRead('workspace_billing_cursor','active'),page=[...keys.filter(value=>value>(cursor?.key||'')),...keys.filter(value=>value<=(cursor?.key||''))].slice(0,Math.min(3,limit));const outcomes=[];
-  for(const recordKey of page){let row=await strictRead(STORE,recordKey);const c=row&&await strictRead('clients',row.slug);if(!isSupportedSelfServiceClient(c)||workspaceTenant(c)!==row.tenant){outcomes.push({state:'workspace_changed'});continue;}try{if(c.status==='cancelled'){await queueWorkspaceStopBilling(c);row=await strictRead(STORE,recordKey);}if(row.cancellation&&row.cancellation.state!=='complete')await recoverCancellation(c);else if(row.checkout&&(['pending','uncertain','complete'].includes(row.checkout.state)||row.stopRequestedAt&&row.checkout.state==='open'))await reconcile(c);outcomes.push({state:'checked'});}catch{outcomes.push({state:'unconfirmed'});}}
-  if(page.length)await atomicUpdate('workspace_billing_cursor','active',()=>({value:{key:page.at(-1)}}));return {ok:outcomes.every(row=>row.state==='checked'),visited:page.length,outcomes};
+export async function recoverWorkspaceBilling({limit=3,deadlineAt=Date.now()+RECOVERY_WAVE_MS}={}){
+  if(!Number.isInteger(limit)||limit<1||limit>3||!Number.isSafeInteger(deadlineAt)||deadlineAt<=Date.now()||deadlineAt>Date.now()+RECOVERY_WAVE_MS)fail('invalid_billing_recovery','Billing recovery requires a bounded wave.',400);
+  const at=stamp(),started=Date.now(),lease=token(),outcomes=[];
+  const locked=await atomicUpdate(RECOVERY_CURSOR,'active',cursor=>{
+    if(cursor?.lease&&Date.parse(cursor.lease.until)>Date.now())return {result:false};
+    const generation=(cursor?.generation||0)+1;
+    if(!Number.isSafeInteger(generation)||generation<1)fail('billing_recovery_review','Billing recovery needs an operator review of its saved cursor.',503);
+    return {value:{...cursor,generation,lease:{token:lease,at,until:new Date(deadlineAt+5000).toISOString()}},result:generation};
+  });
+  if(!locked)return {ok:true,visited:0,outcomes,skipped:'wave_running'};
+  let reasonCode=null;
+  try{
+    const keys=await list(STORE,''),cursor=await strictRead(RECOVERY_CURSOR,'active');
+    const page=[...keys.filter(value=>value>(cursor?.key||'')),...keys.filter(value=>value<=(cursor?.key||''))].slice(0,limit);
+    for(const recordKey of page){
+      if(Date.now()>=deadlineAt){reasonCode='billing_recovery_deadline';break;}
+      const currentLease=await strictRead(RECOVERY_CURSOR,'active');
+      if(currentLease?.lease?.token!==lease){reasonCode='billing_recovery_replaced';break;}
+      let row=await strictRead(STORE,recordKey);const c=row&&await strictRead('clients',row.slug);
+      if(!isSupportedSelfServiceClient(c)||workspaceTenant(c)!==row.tenant||recordKey!==key(c))outcomes.push({state:'workspace_changed'});
+      else{
+        const secret=process.env.STRIPE_SECRET_KEY||'',attemptId=row.checkout?.id,accountId=row.stripeAccountId,tenant=row.tenant,live=row.livemode,recordDeadline=Math.min(deadlineAt,Date.now()+RECOVERY_RECORD_MS);
+        const assertCurrent=async()=>{
+          const active=await strictRead(RECOVERY_CURSOR,'active'),client=await strictRead('clients',c.slug),saved=await strictRead(STORE,recordKey);
+          if(Date.now()>=recordDeadline)fail('billing_recovery_deadline','Billing recovery will continue on its next scheduled run.',503);
+          if(active?.lease?.token!==lease||Date.parse(active.lease.until)<=Date.now())fail('billing_recovery_replaced','A newer recovery run owns this billing request.',503);
+          if(!isSupportedSelfServiceClient(client)||workspaceTenant(client)!==tenant||saved?.tenant!==tenant||saved.checkout?.id!==attemptId||saved.stripeAccountId!==accountId||saved.livemode!==live||(process.env.STRIPE_SECRET_KEY||'')!==secret)fail('billing_recovery_changed','The original workspace or payment account changed. Its billing record is kept.',503);
+        };
+        try{
+          await recoveryScope.run({deadlineAt:recordDeadline,assertCurrent},async()=>{
+            await assertCurrent();
+            if(c.status==='cancelled'){await queueWorkspaceStopBilling(c);row=await strictRead(STORE,recordKey);}
+            if(row.cancellation&&row.cancellation.state!=='complete')await recoverCancellation(c);
+            else if(row.checkout&&(['pending','uncertain','complete'].includes(row.checkout.state)||row.stopRequestedAt&&row.checkout.state==='open'))await reconcile(c);
+            await assertCurrent();
+          });
+          const saved=await strictRead(STORE,recordKey);
+          outcomes.push(saved?.cancellation&&saved.cancellation.state!=='complete'?{state:'unconfirmed',reasonCode:'renewal_unconfirmed'}:saved?.checkout&&['pending','uncertain'].includes(saved.checkout.state)?{state:'unconfirmed',reasonCode:'checkout_unconfirmed'}:{state:'checked'});
+        }catch(error){outcomes.push({state:'unconfirmed',reasonCode:error.code||'billing_recovery_unconfirmed'});}
+      }
+      // Advance for each visited record, including invalid/slow records, so a
+      // failing customer never starves the tail. Preserve the same wave lease.
+      const advanced=await atomicUpdate(RECOVERY_CURSOR,'active',current=>current?.lease?.token===lease?{value:{...current,key:recordKey},result:true}:{result:false});
+      if(!advanced){reasonCode='billing_recovery_replaced';break;}
+    }
+  }catch(error){reasonCode=error.code||'billing_recovery_unavailable';}
+  finally{
+    const result={at,completedAt:stamp(),waveGeneration:locked,ok:!reasonCode&&outcomes.every(row=>row.state==='checked'),visited:outcomes.length,outcomes,durationMs:Date.now()-started,...(reasonCode?{reasonCode}:{})};
+    // A stale response cannot erase a newer run's health or release its lease.
+    const released=await atomicUpdate(RECOVERY_CURSOR,'active',current=>current?.lease?.token===lease?{value:{...current,lease:null,lastCompletedAt:result.completedAt},result:true}:{result:false});
+    if(released)await atomicUpdate('health','workspaceBilling:lastRun',previous=>{
+      if(previous&&(Number.isSafeInteger(previous.waveGeneration)?previous.waveGeneration>=locked:previous.at>at))return {};
+      return {value:result};
+    });
+  }
+  return {ok:!reasonCode&&outcomes.every(row=>row.state==='checked'),visited:outcomes.length,outcomes,durationMs:Date.now()-started,...(reasonCode?{reasonCode}:{})};
+}
+export async function dispatchWorkspaceBillingWave(){
+  if((process.env.SERVICE_WORKER_KEY||'').length<32)return {ok:false,dispatched:false,visited:0,reasonCode:'billing_worker_unconfigured'};
+  try{
+    const response=await fetch(accessSite()+'/api/workspace-billing-background',{method:'POST',headers:{'Content-Type':'application/json','x-service-worker-key':process.env.SERVICE_WORKER_KEY},body:'{}',signal:AbortSignal.timeout(3000),redirect:'error'});
+    if(response.status!==202)return {ok:false,dispatched:false,visited:0,reasonCode:'billing_dispatch_unconfirmed'};
+    return {ok:true,dispatched:true,visited:0};
+  }catch{return {ok:false,dispatched:false,visited:0,reasonCode:'billing_dispatch_unconfirmed'};}
 }
 export async function handleWorkspaceBillingEvent(event,payload){
   if(!['checkout.session.completed','checkout.session.expired','checkout.session.async_payment_succeeded','checkout.session.async_payment_failed','customer.subscription.created','customer.subscription.updated','customer.subscription.deleted','invoice.paid','invoice.payment_failed'].includes(event.type))return false;

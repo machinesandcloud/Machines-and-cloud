@@ -1,0 +1,184 @@
+{
+  "date": "2026-10-24",
+  "stage": "Independently accepted locally for bounded billing recovery and owner returning-state repair; unpublished. Root owns integration/release and the active Calendar provider milestone.",
+  "baseCommit": "7b69b031a1411aa35fbb144acb5fbe1e78a5f068",
+  "worktree": "/tmp/mc-billing-recovery-7b",
+  "branch": "work/billing-recovery-7b",
+  "customerOutcome": "An owner can trust the saved subscription and renewal controls even when Stripe or a request response is slow or lost; ordinary scheduled recovery completes the original operation without routine founder dispatch.",
+  "implementation": {
+    "scheduler": "Every ten minutes, one fixed authenticated POST {} to /api/workspace-billing-background; three-second request timeout. Only 202 is an accepted invocation. No inline Stripe call and no immediate retry after unknown dispatch.",
+    "background": "Existing workspace_billing records and workspace_billing_cursor/active cursor only. One conditional lease, at most three visited records, four-minute wave provider deadline and 45 seconds per record. Five-second Stripe request timeout includes response JSON; financial mutations require at least five seconds remaining.",
+    "ownership": "Current cursor lease, workspace incarnation, original Checkout identity, merchant/mode and unchanged configured key checked before and after each background provider response. Current renewal claim also fences ordinary owner actions. A late old wave cannot release a newer lease or advance its cursor.",
+    "identity": "Existing original Checkout, subscription and idempotency keys retained. Lost applied renewal mutations reconcile by canonical GET without another POST. A still-unapplied mutation reuses its identity; a23-hour identity rotation requires canonical verification under the same retained renewal claim.",
+    "fairness": "Cursor advances for each visited valid, invalid or failed record. Expired process-death wave/renewal claims are repaired by the next scheduled invocation. No new job store, queue, worker key or provider framework.",
+    "observability": "health/workspaceBilling:lastDispatch is invocation acceptance only. health/workspaceBilling:lastRun is completed recovery; unresolved Checkout or renewal states are unconfirmed, never a healthy financial completion. A monotonic generation in that same cursor orders completed health even if separate waves share the exact millisecond timestamp.",
+    "unchangedBoundaries": "Dedicated versus legacy Stripe webhook isolation, owner terms acceptance, strict TEST cohort and LIVE gates remain. New-purchase flags do not disable maintenance of known financial resources. No live billing, service activation or entitlements added.",
+    "limit": "The installed storage SDK list/read latency is not a hard hosting wall-clock guarantee. The worker processes at most three records and fences all provider continuation at its deadline, but storage outage timing and actual Netlify execution remain unobserved."
+  },
+  "source": {
+    "manifest": "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json",
+    "manifestSha256": "ad64d4f40c090c03c0982823266e78dfde786ece0b5bacbbc9a8657a918f3660",
+    "sourceId": "sha256:a11f7c7115ab8db84ac4ad198f9d5bf762fe812fe01f8d01c74f625fc32d7e29",
+    "files": 520,
+    "runner": "scripts/stripe-test-lifecycle-proof.mjs",
+    "runnerSha256": "f326af32fd4d09d11c2c37fb0c2e1eb31d81cd598675669594ab04f65ed60672",
+    "runtimeHashes": {
+      "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+      "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+      "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+      "desk-billing.js": "eecf22dfb205c068cde5383741791612ebf6235db83acfb094bb0ce07a799e7d"
+    }
+  },
+  "authorEvidence": [
+    {
+      "path": "scratchpad/billing-recovery-required-gate-ui-final.json",
+      "passed": 45,
+      "total": 45,
+      "scope": "All45 existing actual owner/billing/webhook handler groups pass in a fresh child of the final required gate on current520-file source. Author scheduler fixture dispatches into the actual background handler; UI is independently accepted separately.",
+      "command": "node scripts/workspace-billing-check.mjs"
+    },
+    {
+      "path": "scratchpad/billing-background-recovery-v5.json",
+      "passed": 25,
+      "total": 25,
+      "scope": "Actual scheduler, background and owner handlers; deadline/body/late/lost/concurrency/claim/tenant/credential/cursor/process-death/unknown Checkout cases. Zero physical network."
+    },
+    {
+      "path": "scratchpad/billing-recovery-required-gate-ui-final.json",
+      "passed": 53,
+      "total": 53,
+      "sourceStable": true,
+      "scope": "Every current required build command in a fresh child process. New recovery check is included in netlify.toml."
+    },
+    {
+      "path": "scratchpad/billing-background-admin-projection-final.json",
+      "passed": 1,
+      "total": 1,
+      "sourceStable": true
+    },
+    {
+      "path": "scratchpad/billing-background-test-admission-projection-final.json",
+      "passed": 8,
+      "total": 8,
+      "sourceStable": true
+    },
+    {
+      "path": "scratchpad/billing-recovery-stripe-offline-ui-final.json",
+      "completedSyntheticCheckouts": 1,
+      "actualStripeTestCheckouts": 0,
+      "mockOperationalAttempts": 24,
+      "privateKeyFilesRead": 0,
+      "actualProviderRequests": 0,
+      "unknown": 0,
+      "sourceStable": true,
+      "scope": "Existing local-memory owner review, browser TEST fixture, local HMAC trigger, canonical subscription/invoice, renewal ending and exact-ID synthetic cleanup. This is not actual public webhook delivery."
+    }
+  ],
+  "privateInputPresenceOnly": {
+    "checkedThisSlice": "Presence, file mode and TEST/LIVE prefix only; no value printed, account/API validity not checked.",
+    "existingLocalStripeSetting": "LIVE prefix; not safe authority to substitute TEST in production.",
+    "existingPrivateTestCredential": "Preexisting 0600 TEST credential file and owned fixture receipt present; validity, merchant and fixture state require a fresh bounded read-only check.",
+    "existingWorkerKey": "Present; use the same key, do not create one.",
+    "dedicatedVerifierAndBillingSettings": "Dedicated workspace signing secret, approved offer/version, exact TEST cohort and portal settings were absent in local ignored settings. This is not a current hosted configuration observation."
+  },
+  "executableLocalPreparation": {
+    "selfCheck": "node scripts/stripe-test-lifecycle-proof.mjs --self-check",
+    "offline": "node scripts/stripe-test-lifecycle-proof.mjs --offline-rehearsal --output /tmp/NEW-EXCLUSIVE-OFFLINE-RECEIPT.json",
+    "futureActualLocalTest": "The existing --execute path can use the preexisting private TEST credential and exact owned fixture after Root binds a fresh phase and current frozen source. It deliberately uses synthetic local readiness and cannot accept public delivery.",
+    "closedAllowances": "Historical TEST/provider/build/email ledgers stay closed; no prior request allowance is reused."
+  },
+  "nextPublicCustomerProof": {
+    "state": "Concrete prerequisites identified; actual public transport/cleanup scope deferred to Root until Calendar closes. Not executable from this local-memory runner.",
+    "firstReadOnlyPreflight": "Verify existing TEST key belongs to the approved Zari Marketing merchant; inspect only the exact owned Product/Price receipts and dedicated webhook/Portal configuration baseline. Census current workspace and legacy financial rows before any shared TEST-key substitution; stop on unknown/truncated resource scope.",
+    "hostedTenant": "Use a fresh current-owner internal workspace with an actually verified selected service, not local memory or fabricated readiness. Bind slug, workspaceTenant, verified owner, merchant, offer digest and a maximum-four-hour TEST policy. A public webhook cannot see the runner\u2019s memory tenant.",
+    "providerAttemptFence": "Prepare a durable merchant/mode/tenant/expiry-bound physical-attempt ceiling covering deployed webhook and scheduled/background Stripe calls as well as Node/browser traffic, with a cleanup reserve. The existing local 40-attempt wrapper does not cover hosted function transport; do not silently omit it.",
+    "configurationIsolation": "The Stripe credential is shared with legacy billing. A draft deploy is not Blobs isolation. Prove a safe test environment or exact baseline/census and conditional rollback before switching any hosted key or signing secret. Existing LIVE financial maintenance must remain usable.",
+    "destination": "A new dedicated TEST snapshot destination for the existing account at HTTPS /api/workspace-billing-webhook; pinned runtime API 2025-06-30.basil and only the nine existing supported event types. Dedicated WORKSPACE_BILLING_WEBHOOK_SECRET distinct from STRIPE_WEBHOOK_SECRET. Never edit the existing legacy destination/defaults.",
+    "portal": "A dedicated nondefault restricted configuration must be observed before enabling payment-details/invoice access. Prior preparation stopped when no safe default baseline was established. Do not create the first configuration or change shared defaults by assumption.",
+    "proof": "Ordinary owner TEST Checkout using Stripe public dummy card, same canonical subscription/customer/paid invoice, actual provider event and destination/delivery receipt plus completed authenticated own-event record, duplicate isolation, owner renewal ending, automatic slow/lost-response recovery and exact cleanup. Return redirects, local HMACs or202 health alone are insufficient.",
+    "cleanup": "Stop new TEST admission, disable only the exact newly owned TEST destination, expire/cancel only bound owned test financial resources, rearchive only the owned fixture, revoke test sessions/cancel workspace and conditionally restore the entire recorded settings/source baseline if still current. Keep immutable TEST invoice/event audit IDs and unknown outcomes.",
+    "ownerActions": "Root/OM prepares the exact request/deployment/settings/cleanup ledger; the owner handles password/MFA, permission/identity/legal attestations and genuine payment decisions. Ordinary configuration and recovery are platform work, not a customer developer setup."
+  },
+  "otherWholeOfferBoundaries": {
+    "voice": "Existing managed number/routing/assistant/background implementation is retained. Actual signed telephone/audio/fallback/handoff and exact resource cleanup still require a bounded proof and valid account/cost authority; a browser practice call does not establish them.",
+    "sms": "Company rejected campaign remains separate from dedicated shop registration. Actual shop carrier approval, two-way/STOP/HELP/reminder delivery and recipient consent proof remain open.",
+    "commercial": "The $99/$249 offer and usage/cost/entitlement scope still require approval and actual acceptance; current billing service schema covers web, voice, SMS and Calendar, not a purchased entitlement for autonomous lead-platform AI."
+  },
+  "externalEffects": {
+    "providerRequests": 0,
+    "browserAccountAccess": 0,
+    "privateCredentialValuesLogged": 0,
+    "settingsWrites": 0,
+    "deployments": 0,
+    "charges": 0,
+    "newKeys": 0,
+    "outreach": 0
+  },
+  "healthOrderingRepair": "Static review found timestamp-only ordering could allow a delayed older same-millisecond completion to overwrite newer health. A monotonic generation in the existing cursor fixes it; original broad green receipts remain retained, and a new independent actual two-wave deferred-health probe verifies the repair.",
+  "independentBackend": {
+    "path": "scratchpad/billing-recovery-independent-final-backend.json",
+    "passed": 17,
+    "total": 17,
+    "sourceStable": true,
+    "physicalExternalRequests": 0,
+    "limits": "Actual local handlers/CAS with synthetic provider transport. Public Stripe/hosting acceptance remains unobserved.",
+    "acceptance": "scratchpad/billing-recovery-independent-acceptance-20261024.json",
+    "acceptanceSha256": "fec9a2f738944fa84156ac6c705a1164f6800ac1ed89545b09f385304fb9865a"
+  },
+  "retainedObsoleteSuiteResult": {
+    "path": "scratchpad/billing-recovery-independent-existing-first.json",
+    "passed": 9,
+    "total": 11,
+    "disposition": "Two original assertions expected scheduler() itself to reconcile inline. Independent QA preserved the failures, then adapted only the test transport to capture202 and execute the actual background handler. Final financial outcomes and adversarial assertions remain."
+  },
+  "retainedEarlierSourceEvidence": [
+    "scratchpad/billing-background-author-v3.json",
+    "scratchpad/billing-background-recovery-v3.json",
+    "scratchpad/billing-recovery-required-gate.json",
+    "scratchpad/billing-recovery-stripe-offline-v1.json"
+  ],
+  "poReturn": {
+    "original": "scratchpad/billing-po-first.json",
+    "issue": "Returning after a saved uncertain renewal cancellation could show a new End monthly renewal action because only transient cancelUncertain was checked. Backend same-operation behavior remained accepted. PO owns the minimal durable-state UI repair and desktop/mobile replay before this branch is committed.",
+    "status": "Minimal durable-state repair independently accepted in the final38/38 and by PO in4/4 ordinary desktop/mobile jobs.",
+    "repair": "Persisted cancellationState pending/uncertain and the existing transient lost-response guard show Renewal cancellation pending, hide another End monthly renewal action and keep Check payment status. A successful refresh that still reports pending does not claim completed cancellation.",
+    "file": "desk-billing.js",
+    "sha256": "eecf22dfb205c068cde5383741791612ebf6235db83acfb094bb0ce07a799e7d"
+  },
+  "poAcceptance": {
+    "path": "product/BILLING-RECOVERY-PO-ACCEPTANCE-2026-10-24.json",
+    "sha256": "8cb3f19e231fcd7246f54692200eb2d0fae22945ad148b3736868866481b5853",
+    "ordinaryJobs": 4,
+    "passed": 4,
+    "widths": [
+      1440,
+      390
+    ],
+    "sourceStable": true,
+    "physicalExternalRequests": 0,
+    "limits": "Local actual workspace/handlers with synthetic Stripe; no hosted/provider acceptance."
+  },
+  "independentAcceptance": {
+    "path": "scratchpad/billing-recovery-independent-final-acceptance-20261024.json",
+    "sha256": "9bc113e09eef47d535f867801fa49eb1c0709a45dec8fe50fefa18ff1c83c1a5",
+    "run": "scratchpad/billing-recovery-independent-final-full-r2.json",
+    "passed": 38,
+    "total": 38,
+    "backendGroups": 17,
+    "actualBrowserGroups": 21,
+    "widths": [
+      1440,
+      390,
+      320
+    ],
+    "sourceStable": true,
+    "physicalExternalRequests": 0,
+    "limits": "Local actual handlers/CAS/browser assets with synthetic Stripe. No actual Stripe/hosting delivery accepted."
+  },
+  "retainedBroaderFixtureFailure": {
+    "path": "scratchpad/billing-recovery-independent-final-full.json",
+    "passed": 23,
+    "total": 38,
+    "disposition": "New returned pending/uncertain jobs passed all widths. Fifteen other cases cascaded because the synthetic TEST policy still admitted a previously selected tenant after a fixture owner switch; the product correctly hid offers. Independent QA changed only explicit current-fixture admission and reran38/38 on stable source."
+  }
+}

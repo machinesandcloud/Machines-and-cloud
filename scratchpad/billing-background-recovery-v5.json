@@ -1,0 +1,640 @@
+{
+  "at": "2026-10-24T14:52:28.651Z",
+  "before": {
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+    "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+    "scripts/workspace-billing-recovery-check.mjs": "2f99b8f9bcb6980d613c484f78ada2e949623eaf3bfc7cadcc16e99a408470a2"
+  },
+  "checks": [
+    {
+      "name": "worker rejects unauthenticated, method, malformed and nonempty inputs before reading Stripe",
+      "pass": true
+    },
+    {
+      "name": "scheduled handler only admits one fixed keyed background dispatch; completion health waits for execution",
+      "pass": true
+    },
+    {
+      "name": "lost dispatch ACK stays unconfirmed; accepted original and later invocation share one financial operation",
+      "pass": true
+    },
+    {
+      "name": "no key and unexpected background response never claim accepted dispatch",
+      "pass": true
+    },
+    {
+      "name": "three-record fair cursor advances past invalid customers and reaches later recoverable work",
+      "pass": true
+    },
+    {
+      "name": "concurrent background waves share the durable lease instead of duplicating provider work",
+      "pass": true
+    },
+    {
+      "name": "a late canonical GET stops all follow-on transport and leaves the same request for ordinary recovery",
+      "pass": true
+    },
+    {
+      "name": "slow body consumption is also fenced before any financial mutation",
+      "pass": true
+    },
+    {
+      "name": "per-record deadline advances fairly to the next customer within the global wave",
+      "pass": true
+    },
+    {
+      "name": "insufficient remaining mutation budget never dispatches a cancellation POST",
+      "pass": true
+    },
+    {
+      "name": "lost_ack uses canonical same-subscription reconciliation and the retained idempotency identity",
+      "pass": true
+    },
+    {
+      "name": "late_ack uses canonical same-subscription reconciliation and the retained idempotency identity",
+      "pass": true
+    },
+    {
+      "name": "lost_before_apply uses canonical same-subscription reconciliation and the retained idempotency identity",
+      "pass": true
+    },
+    {
+      "name": "owner cancellation and background continuation cannot rotate the same expired idempotency identity twice",
+      "pass": true
+    },
+    {
+      "name": "in-flight tenant replacement cannot authorize subsequent provider work",
+      "pass": true
+    },
+    {
+      "name": "in-flight credentials replacement cannot authorize subsequent provider work",
+      "pass": true
+    },
+    {
+      "name": "in-flight attempt replacement cannot authorize subsequent provider work",
+      "pass": true
+    },
+    {
+      "name": "a replaced lease is neither released nor overwritten by a late old wave",
+      "pass": true
+    },
+    {
+      "name": "expired process-death wave and renewal claims recover the original operation without founder repair",
+      "pass": true
+    },
+    {
+      "name": "ordinary owner cancellation also fences an in-flight tenant replacement before mutation",
+      "pass": true
+    },
+    {
+      "name": "ordinary owner cancellation also fences an in-flight claim replacement before mutation",
+      "pass": true
+    },
+    {
+      "name": "unknown Checkout recovery only searches/reads its original metadata and never creates a replacement",
+      "pass": true
+    },
+    {
+      "name": "unmatched or truncated Checkout lookup stays unresolved and never yields healthy completed recovery",
+      "pass": true
+    },
+    {
+      "name": "invalid recovery limits and unbounded/expired deadlines are refused before provider requests",
+      "pass": true
+    },
+    {
+      "name": "monotonic cursor generations distinguish completed waves with identical timestamps",
+      "pass": true
+    }
+  ],
+  "stripeRequests": [
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery1",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery1",
+      "idempotency": "workspace-renewal-3485980bf8835ba56fdbe08c0239d2e2"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery1",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery1",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery2",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery2",
+      "idempotency": "workspace-renewal-53cb66bb3543c41dfb88042939e0a1ab"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery2",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery2",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery2",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery2",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery3",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery3",
+      "idempotency": "workspace-renewal-0eeea5d942a146f1828c3ea8a88d3dd4"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery3",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery3",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery4",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery4",
+      "idempotency": "workspace-renewal-766dbe774ecd5017d5e8fcaeb80166fc"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery4",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery4",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery5",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery5",
+      "idempotency": "workspace-renewal-7568875820468bf609cac941f7d4e5de"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery5",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery5",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery8",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery8",
+      "idempotency": "workspace-renewal-2ec88dfb82a3a8d37cda7ac4d1d0fa74"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery8",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery8",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery9",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery9",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery9",
+      "idempotency": "workspace-renewal-58055332b7f9f394886e18cc83aec657"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery9",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery9",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery10",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery10",
+      "idempotency": "workspace-renewal-a0510923fe958f5828100c4eb45c8552"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery10",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery11",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery11",
+      "idempotency": "workspace-renewal-47889894d835b436207d4f0e44edcc4b"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery11",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery11",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery11",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery12",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery12",
+      "idempotency": "workspace-renewal-704c845fee7d6b2175eee6526029bf9c"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery12",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery12",
+      "idempotency": "workspace-renewal-704c845fee7d6b2175eee6526029bf9c"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery12",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery13",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery13",
+      "idempotency": "workspace-renewal-44257ce0a622df67edc9359b749172eb"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery13",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery13",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery18",
+      "idempotency": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscriptions/sub_recovery18",
+      "idempotency": "workspace-renewal-93f5d957bf19e820117b3492b2a2540e"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery18",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery18",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions/cs_test_recovery21",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscriptions/sub_recovery21",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/account",
+      "idempotency": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/checkout/sessions",
+      "idempotency": null
+    }
+  ],
+  "dispatches": [
+    {
+      "at": 1792868400000,
+      "method": "POST",
+      "path": "/api/workspace-billing-background"
+    },
+    {
+      "at": 1792868400000,
+      "method": "POST",
+      "path": "/api/workspace-billing-background"
+    },
+    {
+      "at": 1792868400000,
+      "method": "POST",
+      "path": "/api/workspace-billing-background"
+    },
+    {
+      "at": 1792868400000,
+      "method": "POST",
+      "path": "/api/workspace-billing-background"
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "scope": "Offline actual handlers; durable memory CAS and synthetic Stripe transport. No provider delivery or wall-clock hosting acceptance.",
+  "after": {
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+    "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+    "scripts/workspace-billing-recovery-check.mjs": "2f99b8f9bcb6980d613c484f78ada2e949623eaf3bfc7cadcc16e99a408470a2"
+  },
+  "sourceStable": true,
+  "ok": true
+}

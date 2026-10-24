@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-24T14:54:50.165Z",
+  "sourceBefore": {
+    "netlify/functions/lib/billing-test-admission.mjs": "4e7fc3ff2bb3d8ea5b8039d51cda8f9de97e67b1e2de3b6ee51b38a9c0ab5307",
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "scripts/billing-test-admission-projection-check.mjs": "39b3b32667b5569258f6b33687cbd3c9500b8b20d725b1043a51e575a40ad2de"
+  },
+  "scope": "Actual owner billing read handler; synthetic retained subscription, no physical transport or credential file",
+  "checks": [
+    {
+      "name": "missing key retains saved financial state and old public metadata without offers",
+      "pass": true
+    },
+    {
+      "name": "unsupported key retains saved financial state and old public metadata without offers",
+      "pass": true
+    },
+    {
+      "name": "LIVE closed approval preserves plan metadata while offers stay closed",
+      "pass": true
+    },
+    {
+      "name": "LIVE approved configuration retains existing metadata and explicit double gate",
+      "pass": true
+    },
+    {
+      "name": "LIVE purchase gate off preserves metadata and does not borrow TEST authority",
+      "pass": true
+    },
+    {
+      "name": "TEST policy absent hides offer metadata while retaining known financial state",
+      "pass": true
+    },
+    {
+      "name": "TEST exact policy displays metadata and new offer only for its owned incarnation",
+      "pass": true
+    },
+    {
+      "name": "TEST expired policy hides metadata while renewal state remains readable",
+      "pass": true
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/billing-test-admission.mjs": "4e7fc3ff2bb3d8ea5b8039d51cda8f9de97e67b1e2de3b6ee51b38a9c0ab5307",
+    "netlify/functions/lib/workspace-billing.mjs": "cf0ab1429c30741d4b2738bf276afdf1620576bd6c151f7d66d1313415f0905a",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "scripts/billing-test-admission-projection-check.mjs": "39b3b32667b5569258f6b33687cbd3c9500b8b20d725b1043a51e575a40ad2de"
+  },
+  "sourceStable": true,
+  "physicalExternalRequests": 0,
+  "providerDispatches": 0,
+  "passed": 8,
+  "total": 8,
+  "ok": true
+}
