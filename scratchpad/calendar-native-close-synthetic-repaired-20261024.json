@@ -1,0 +1,66 @@
+{
+  "phase": "native-close-synthetic-20261024-r2",
+  "at": "2026-10-24T18:54:17.711Z",
+  "authority": "Fresh reversible synthetic browser diagnosis under standing fix/test mandate; all prior phases stay closed.",
+  "source": "f27c049",
+  "scope": {
+    "newWindows": 2,
+    "content": "about:blank only",
+    "helperCloseCommands": 2,
+    "simulatedOwnerCloses": 1,
+    "exactExistenceReads": 4,
+    "HTTP": 0,
+    "OAuth": 0,
+    "accountContentReads": 0,
+    "capture": 0
+  },
+  "openStateInjected": true,
+  "browserCloseAndExistenceReal": true,
+  "state": "CLOSED",
+  "cases": [
+    {
+      "scenario": "ordinary_close",
+      "windowId": 1802420257,
+      "tabId": 1802420258,
+      "helperCloseCalls": 1,
+      "helperExistenceReads": 0,
+      "receipt": {
+        "windowId": 1802420257,
+        "tabId": 1802420258,
+        "closed": true,
+        "scope": "original_window",
+        "globalTabDestructionConfirmed": false,
+        "closeCommandOutcome": "confirmed",
+        "absenceReadOutcome": "not_needed",
+        "provenance": "close_command_confirmed"
+      },
+      "sameReceiptOnRepeat": true,
+      "exactOriginalScopeObservation": "owned-calendar-window-absent",
+      "pass": true
+    },
+    {
+      "scenario": "already_absent_original_window",
+      "windowId": 1802420263,
+      "tabId": 1802420264,
+      "helperCloseCalls": 1,
+      "helperExistenceReads": 1,
+      "simulatedOwnerClose": "owned-calendar-target-absent",
+      "receipt": {
+        "windowId": 1802420263,
+        "tabId": 1802420264,
+        "closed": true,
+        "scope": "original_window",
+        "globalTabDestructionConfirmed": false,
+        "closeCommandOutcome": "failed",
+        "absenceReadOutcome": "window_absent",
+        "provenance": "scoped_window_absence_observed"
+      },
+      "sameReceiptOnRepeat": true,
+      "exactOriginalScopeObservation": "owned-calendar-window-absent",
+      "pass": true
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "finishedAt": "2026-10-24T18:54:19.987Z"
+}

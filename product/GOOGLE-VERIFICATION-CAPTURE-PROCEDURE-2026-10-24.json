@@ -1,0 +1,133 @@
+{
+  "at": "2026-10-24T18:47:59.169381+00:00",
+  "state": "Corrected preparation only. No video recording, browser/account inspection, upload, Console change, new OAuth or attestation.",
+  "supersedesForNextCapture": {
+    "path": "/tmp/mc-google-video-prep-20261024/capture-procedure.json",
+    "sha256": "2adeec90674b8e53725f72cda66ab76aec098f1e81fc0b3e9268f0c4912ebe23",
+    "preservedUnchanged": true,
+    "correction": "A generic accessible video URL and blanket browser-address-bar exclusion are insufficient. Use Google’s documented upload destination/visibility and retain required public OAuth client ID evidence."
+  },
+  "primarySources": [
+    {
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "checkedOn": "2026-10-24",
+      "pageLastUpdated": "2026-08-19",
+      "supports": "Video destination/visibility, actual English OAuth grant/consent, app identity, address-bar client ID and per-scope feature demonstration."
+    },
+    {
+      "url": "https://developers.google.com/workspace/calendar/api/auth",
+      "checkedOn": "2026-10-24",
+      "supports": "Meanings of calendars.readonly and events.owned; do not describe events.owned as a write-only or freebusy-only permission."
+    },
+    {
+      "url": "https://developers.google.com/identity/protocols/oauth2/web-server",
+      "checkedOn": "2026-10-24",
+      "supports": "Authorization request client_id differs from confidential client_secret and returned authorization code; callback code exchange remains off camera."
+    }
+  ],
+  "officialRequirementsParaphrased": [
+    "Upload the completed demonstration through YouTube Studio with Unlisted visibility; provide that video link.",
+    "Demonstrate the actual English OAuth grant and consent experience, the app name, and the consent-page address bar containing the app’s OAuth client ID.",
+    "Demonstrate what the app does with each requested sensitive permission. Include Google Sign-In only if the app uses it."
+  ],
+  "appFactsFromReadOnlyCurrentSource": {
+    "rootReadOnly": true,
+    "connectionSource": "/tmp/mc-launch-finish-7c/netlify/functions/lib/calendar-connection.mjs",
+    "connectionSHA256": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "requestedScopes": [
+      "https://www.googleapis.com/auth/calendar.events.owned",
+      "https://www.googleapis.com/auth/calendar.calendars.readonly"
+    ],
+    "googleSignInForAppIdentity": false,
+    "appIdentity": "Existing emailed-link owner session; Google OAuth separately grants Calendar access.",
+    "englishPrecondition": "The current authorization builder does not explicitly set hl=en. Owner/Root must confirm actual grant screens are English before capture; this preparation changes no request parameters.",
+    "scopeDemonstrations": [
+      {
+        "scope": "calendar.calendars.readonly",
+        "actualAppClip": "After actual grant, show the connected existing primary Calendar and its time zone/identity in the app. Do not expose another calendar’s content."
+      },
+      {
+        "scope": "calendar.events.owned",
+        "actualAppClip": "Show checked arrival-window availability and one synthetic owned visit successfully created, moved and cancelled with matching delivery status. Existing unrelated busy intervals may suppress windows but their titles/descriptions/attendee identities stay off screen."
+      }
+    ]
+  },
+  "startGate": [
+    "Root diagnoses the owner’s exact current OAuth issue before another authorization request. No assumption that a missing popup, declined consent, request expiry and Google configuration errors are the same problem.",
+    "Complete source, app/provider readiness, bounded proof/capture/cleanup scope and recorder preflight before opening any new expiring handoff.",
+    "Confirm the owner is actively present and ready to complete the permission screen now. A new window is not a substitute for readiness or error diagnosis.",
+    "Use a separate fresh capture phase only after Root closes the active proof. Existing v7 timers, budgets and cleanup remain unchanged."
+  ],
+  "captureProcedure": [
+    {
+      "step": 1,
+      "clip": "App entry",
+      "action": "Use the newly bound regular Chrome window only. Record the actual signed-in synthetic workspace, public app identity, privacy/access explanation and Connect Calendar control. Stop and await finalized-file receipt before navigation."
+    },
+    {
+      "step": 2,
+      "clip": "Credential gap",
+      "action": "Capture OFF for account chooser, password, MFA and recovery. Owner handles these without recording. No agent explores other tabs/accounts. Start no consent clip while an error is unresolved."
+    },
+    {
+      "step": 3,
+      "clip": "English consent and public client identity",
+      "action": "On the exact safe stationary Google permission screen, capture app name, the full English permission descriptions and any scope selections. Include the Chrome address bar with the real client_id readable. If needed, focus the existing bar without editing/navigating to make that parameter readable. Do not replace it with a title card, mock URL or a different OAuth request."
+    },
+    {
+      "step": 4,
+      "clip": "Scope pages and grant boundary",
+      "action": "Record every distinct permission-review page needed to explain the actual grant, including current selections and the final grant control. Stop and confirm finalization before any action that can navigate to the authorization-code callback. Owner grants while capture is OFF; disclose that cut explicitly. Do not record a callback URL even briefly."
+    },
+    {
+      "step": 5,
+      "clip": "Actual granted app return",
+      "action": "Resume only after the same owned window returns to a normal approved app route without OAuth code/token parameters. Show the actual connected state and primary Calendar identity/time zone. Do not present a prior grant or static mock as this grant’s return."
+    },
+    {
+      "step": 6,
+      "clip": "Both scope uses",
+      "action": "Demonstrate actual checked availability and the same synthetic managed event’s successful create, move and cancel through the app with observed delivery results, followed by disconnect. Queued status or a refused move is not substituted for successful provider delivery. Keep unrelated personal events and the Google Calendar event grid out of capture."
+    },
+    {
+      "step": 7,
+      "clip": "Honest waits and joins",
+      "action": "Pause/finalize capture during ordinary scheduled waits and insert labelled cuts with elapsed-time context. Use reviewed clips from the same bound phase, not recreated successes. Native AVFoundation can join H264/MP4 clips without ffmpeg."
+    },
+    {
+      "step": 8,
+      "clip": "Local review then Unlisted upload",
+      "action": "After phase cleanup, review the complete local export including every boundary frame. Confirm all shown state/nonces are consumed or expired, public client ID is readable, English grant/each scope use are understandable, and no password/MFA/code/token/client secret/personal event or unrelated window appears. Root then arranges separately authorized YouTube Studio Unlisted upload of that exact reviewed file and a reviewer-accessible link; Steve reviews the completed verification draft and any final attestation."
+    }
+  ],
+  "honestCutsConstraint": {
+    "status": "Proposed privacy-preserving capture design, not a Google acceptance determination.",
+    "officialVsInference": "The official page requires a full grant demonstration but does not explicitly approve the proposed stop-before-callback editing pattern. The segmented design is our inference, not a documented exception.",
+    "acceptanceGate": "Before upload, Root/PO must assess whether the app-entry, complete English permission review/selections/final control and actual granted return together clearly demonstrate the grant. If the cut obscures it, the video stays incomplete; prepare a separately reviewed safe method or obtain Google guidance rather than claim compliance or record credentials/callback codes."
+  },
+  "safeRecorderReuse": {
+    "prototype": "/tmp/mc-google-video-prep-20261024/capability-check.swift",
+    "prototypeSHA256": "b5c1229a5e9f52a0e5b8e9d675416688ca87e917e85cdf0340b8ecc81151e64b",
+    "priorObservation": "Compile-only Swift ScreenCaptureKit/SCRecordingOutput plus AVFoundation APIs typechecked; current-context capture permission preflight was granted. No capture was started or window enumerated.",
+    "binding": "Single-window OS picker selects only the exact newly owned regular Chrome window; do not equate AppleScript window ID and CGWindowID. No entire-display capture or other tab/window enumeration.",
+    "pendingImplementation": "Bounded validated recorder/start-stop/finalized receipts, private output files and an authorized synthetic-window usability test are still needed.",
+    "noBlanketAddressBarCrop": "Consent identity clip keeps the browser address bar/client ID. A callback exclusion constraint does not justify hiding required OAuth identity evidence."
+  },
+  "scopeAndDraft": {
+    "originalDraftSnapshot": "/tmp/mc-google-video-prep-20261024/GOOGLE-DATA-ACCESS-VERIFICATION-DRAFT-source-2026-10-24.md",
+    "originalDraftSHA256": "2d7f05a64efd6b171fff0dda587d8b83eb17ec692f1ab77b42fd7b3a448daf1b",
+    "correctedDraft": "/tmp/mc-google-video-prep-20261024/GOOGLE-DATA-ACCESS-VERIFICATION-DRAFT-CORRECTED-2026-10-24.md",
+    "rootFilesChanged": false
+  },
+  "effects": {
+    "publicDocumentationPagesRead": 3,
+    "localFilesRead": true,
+    "framesCaptured": 0,
+    "browserWindowsInspected": 0,
+    "newOAuthRequests": 0,
+    "providerCalls": 0,
+    "uploads": 0,
+    "consoleChanges": 0,
+    "attestations": 0
+  }
+}
