@@ -1,0 +1,29 @@
+{
+  "check": "calendar-busy-protection",
+  "at": "2026-10-24T16:16:29.923Z",
+  "passed": 20,
+  "failed": 0,
+  "checks": [
+    "Existing owned-event scopes support bounded Events.list without a FreeBusy grant",
+    "Lookup cache is short-lived; booking refreshes and sees a newly added conflict",
+    "All-day events use calendar timezone and exclusive end dates; recurrence is expanded by Google",
+    "Transparent, cancelled and self-declined entries do not block; boundary touching is not overlap",
+    "Provider failures, malformed opaque events and incomplete pagination never become free time",
+    "Disconnected selected calendar fails closed; a manual-only owner stays functional",
+    "Local booking and exact managed remote copy count once, including overlapping saved windows",
+    "Foreign same-ID owner tag remains an independent busy interval",
+    "Actual owner move rejects external conflict and leaves original record/capacity unchanged",
+    "Old grant cannot gain busy-reading use; explicit current disclosure and OAuth restore it",
+    "An old pending disclosure cannot install a new-purpose grant",
+    "A manual projection cannot outlive a newly selected Calendar requirement",
+    "Concurrent different-window bookings use one capacity CAS and cannot overbook",
+    "Connection/policy change during a provider response cannot admit a booking",
+    "Owner capacity change during a provider response rejects the stale booking configuration",
+    "Delayed older free response cannot overwrite a later busy cache projection",
+    "Scheduled worker retains conflict without creating event, then reconciles automatically after it clears",
+    "A newly conflicting move preserves the old event and scheduled recovery updates its same ID",
+    "Old-grant worker waits for review without provider transport or failure-limit churn",
+    "Houston DST and offset conversion retain half-open minute accuracy"
+  ],
+  "externalRequests": 0
+}

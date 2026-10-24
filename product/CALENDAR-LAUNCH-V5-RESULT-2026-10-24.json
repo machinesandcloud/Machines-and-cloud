@@ -1,0 +1,106 @@
+{
+  "at": "2026-10-24T16:29:36.868031+00:00",
+  "phase": "core-calendar-20261024-launch-v5",
+  "candidateCommit": "1be5608c23b4f957f656f3a463b4b32831812a7f",
+  "status": "CLOSED; actual connection and naturally scheduled same-event creation/deletion accepted; successful move/full selected lifecycle not accepted",
+  "sourceManifest": "scratchpad/calendar-launch-v5-executed-source-manifest.json",
+  "sourceManifestSHA256": "4ff3a9d348e2ea26b0da4433c781da5ea6553a82aaf45b6004c6b30180ad962f",
+  "sourceFiles": 523,
+  "initialReadyDeployId": "6adcd6bfd7bc11585df561ca",
+  "distinctCleanupReadyDeployId": "6adcdbe2876e0b0a7398da9c",
+  "issuerRepair": "136c1c2 from da361eaf; actual Google iss callback completed without bypass/normalization",
+  "native": {
+    "native_handoff_started": "2026-10-24T16:06:09.150Z",
+    "native_completion_observed": "2026-10-24T16:08:43.237Z",
+    "native_window_closed": "2026-10-24T16:09:12.063Z",
+    "elapsedSeconds": 182.913,
+    "closedWithin600Seconds": true,
+    "GoogleUnverifiedAppObserved": true,
+    "ownerPerformedPermissionDecision": true,
+    "noPasswordsMFACodesOAuthCodeValuesRead": true
+  },
+  "tenant": "m-c-internal-calendar-launch-v5--391a",
+  "visitId": "96e69aa3bbdf0648ebb206823c322855",
+  "eventId": "mceac3c38696e11d104ab4bdcda7975bc7c712b376892945f695b9e6abb0c2ec61",
+  "actualAccepted": [
+    {
+      "job": "Owned primary Calendar connection with disclosure and original owner session",
+      "evidence": "native_completion_observed"
+    },
+    {
+      "job": "same-event creation",
+      "confirmedAt": "2026-10-24T16:10:27.126Z",
+      "ordinaryScheduled": true
+    },
+    {
+      "job": "same-event cancellation/deletion",
+      "confirmedAt": "2026-10-24T16:20:25.293Z",
+      "ordinaryScheduled": true
+    }
+  ],
+  "move": {
+    "status": "rejected",
+    "http": 409,
+    "code": "calendar_conflict",
+    "sourceNotIdentified": "Afternoon was never proven free; no personal event details read. Exact-source47checks and identity/noon assertions found no product bug.",
+    "diagnosis": "scratchpad/calendar-v5-move-readonly-diagnosis-20261024.json",
+    "independentAssessment": "scratchpad/calendar-v5-move-independent-assessment-20261024.json",
+    "negativeProbesNotExecuted": true,
+    "remaining": "Fresh preview selects two proven-free windows before another actual create/move/cancel proof."
+  },
+  "runtimeBudgetObservedAfterDeletion": {
+    "oauthStart": 1,
+    "tokenExchange": 1,
+    "tokenRefresh": 4,
+    "calendarRead": 6,
+    "eventCreate": 1,
+    "eventUpdate": 0,
+    "eventDelete": 1,
+    "workerDispatch": 3,
+    "totalRequests": 16
+  },
+  "cleanup": {
+    "testWorkspaceCancelled": true,
+    "sessionsRevoked": 2,
+    "ownedGmailClosed": true,
+    "exactAliasMessagesRead": 2,
+    "fullOriginalFunctionalEnvironmentRestored": true,
+    "sameSourceDistinctCleanupREADYVerified": true,
+    "allOtherCredentialsAndServiceGatesPreserved": true
+  },
+  "directCounters": {
+    "site": 20,
+    "writes": 13,
+    "email": 2,
+    "metadata": 4,
+    "blobs": 58,
+    "workerPosts": 0,
+    "builds": 2,
+    "pushes": 1,
+    "environmentWrites": 8,
+    "control": 62,
+    "nativeHandoffs": 1
+  },
+  "supplementalControl": {
+    "requests": 45,
+    "mutations": 10,
+    "builds": 2,
+    "unknown": []
+  },
+  "aggregateControlReservations": 107,
+  "separateClosedReadOnlyDiagnosis": {
+    "reads": 2,
+    "writes": 0,
+    "GoogleRequests": 0,
+    "phase": "calendar-v5-move-readonly-diagnosis-20261024-r1"
+  },
+  "creditsAt15PerBuild": 30,
+  "launchStillRequires": [
+    "Successful live move/full lifecycle",
+    "Google public-app verification",
+    "Actual Stripe hosted TEST and financial recovery",
+    "Phone/text provider and human fallback acceptance",
+    "Operational support/recovery",
+    "Partner API approval/native lead delivery"
+  ]
+}

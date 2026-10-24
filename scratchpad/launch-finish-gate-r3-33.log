@@ -1,0 +1,98 @@
+scheduler: 34 due [
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'acked' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'acked' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'acked' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'workspace_changed' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'workspace_changed' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'attention_due' ],
+  [ 'escalate', 'acked' ],
+  [ 'escalate', 'attention_due' ]
+] digests 0 weeklies 0 released 0 ok
+task failed escalate Error: Conditional storage write returned no ETag
+    at atomicUpdate (file:///private/tmp/mc-launch-finish-7c/netlify/functions/lib/store.mjs:64:32)
+    at async file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:157:38
+    at async block (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:140:21)
+    at async Module.run (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:152:3)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:106:497
+    at async check (file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:51:152)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:106:1
+scheduler block tasks Error: Managed request attention work is retained for scheduled retry
+    at file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:161:30
+    at async block (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:140:21)
+    at async Module.run (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:152:3)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:106:497
+    at async check (file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:51:152)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:106:1
+scheduler: 2 due [ [ 'escalate', 'attention_due' ], [ 'escalate', 'error' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 ok
+task failed escalate BlobsInternalError: Netlify Blobs has generated an internal error (400 status code)
+    at file:///private/tmp/mc-lead-source-deps-726/node_modules/@netlify/blobs/dist/main.js:200:15
+    at async atomicUpdate (file:///private/tmp/mc-launch-finish-7c/netlify/functions/lib/store.mjs:56:21)
+    at async runTask (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:25:28)
+    at async file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:157:38
+    at async block (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:140:21)
+    at async Module.run (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:152:3)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:107:441
+    at async check (file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:51:152)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:107:1 {
+  status: 400,
+  responseBody: undefined
+}
+scheduler block tasks Error: Managed request attention work is retained for scheduled retry
+    at file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:161:30
+    at async block (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:140:21)
+    at async Module.run (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:152:3)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:107:441
+    at async check (file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:51:152)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:107:1
+scheduler block leadIntakeRecovery BlobsInternalError: Netlify Blobs has generated an internal error (400 status code)
+    at file:///private/tmp/mc-lead-source-deps-726/node_modules/@netlify/blobs/dist/main.js:200:15
+    at async atomicUpdate (file:///private/tmp/mc-launch-finish-7c/netlify/functions/lib/store.mjs:56:21)
+    at async recoverLeadConnections (file:///private/tmp/mc-launch-finish-7c/netlify/functions/lib/lead-connections.mjs:175:18)
+    at async block (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:140:21)
+    at async Module.run (file:///private/tmp/mc-launch-finish-7c/netlify/functions/scheduler.mjs:201:3)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:107:441
+    at async check (file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:51:152)
+    at async file:///private/tmp/mc-launch-finish-7c/scripts/managed-voice-handoff-check.mjs:107:1 {
+  status: 400,
+  responseBody: undefined
+}
+scheduler: 1 due [ [ 'escalate', 'error' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 ok
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 ok
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 ok
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 ok
+{
+  "ok": true,
+  "passed": 35,
+  "total": 35,
+  "sourceMatched": true,
+  "failures": [],
+  "output": null
+}

@@ -1,0 +1,60 @@
+{
+  "at": "2026-10-24T16:43:21.511175+00:00",
+  "reviewer": "lead_independent_qa",
+  "decision": "accepted_actual_partial_calendar_result_and_cleanup_only",
+  "sourceCommit": "1be5608c23b4f957f656f3a463b4b32831812a7f",
+  "result": {
+    "path": "product/CALENDAR-LAUNCH-V5-RESULT-2026-10-24.json",
+    "sha256": "d482d36d30c1c9643c3ea5f478e91e9f1be51fc7553ab16db9dfe48c88575125"
+  },
+  "manifest": {
+    "path": "scratchpad/calendar-launch-v5-executed-source-manifest.json",
+    "sha256": "4ff3a9d348e2ea26b0da4433c781da5ea6553a82aaf45b6004c6b30180ad962f",
+    "files": 523,
+    "exactCommittedInventoryAndAllBytesMatch": true,
+    "reviewedAgainstExecutedCommitNotCurrentCheckoutHEAD": true
+  },
+  "ledgerEvidence": [
+    {
+      "path": "scratchpad/core-calendar-20261024-launch-v5-ledger.jsonl",
+      "sha256": "338dc96403f8a004900e768f3e569688a3828b244ec1949fac512da810e3af21"
+    },
+    {
+      "path": "scratchpad/core-calendar-20261024-launch-v5-control.jsonl",
+      "sha256": "0e39311f2f51680f203e38b0855944ddb6498c71b0267195b14ffcdb1c95db69"
+    }
+  ],
+  "observed": {
+    "guardReservations": 82,
+    "confirmedGuardResponses": 81,
+    "retainedMove409Failures": 1,
+    "scheduledReceipts": [
+      "create",
+      "delete"
+    ],
+    "sameRetainedVisitAndEvent": true,
+    "successfulUpdateReceipt": false,
+    "nativeClosedWithinSeconds": 182.913,
+    "environmentRestored": true,
+    "distinctCleanupPublished": true,
+    "workspaceCancelled": true,
+    "sessionsRevoked": 2,
+    "guardControlReservations": 62,
+    "supplementalControlReservations": 45,
+    "aggregate": 107,
+    "aggregateCap": 144,
+    "builds": 2,
+    "credits": 30,
+    "reportedDurableRuntimeAttempts": 16,
+    "durableRuntimeArithmeticConsistent": true,
+    "separateClosedMoveDiagnosisReads": 2
+  },
+  "claimLimits": [
+    "Actual owner-authorized connection and natural scheduled same-event creation/deletion have matching guard observations and are credited as the narrower accepted provider outcome.",
+    "The move was rejected with409 calendar_conflict; no update receipt or negative-window probe was observed. No successful full create/move/cancel lifecycle is accepted.",
+    "No personal busy event or exact conflict source was inspected; the existing independent assessment does not establish a product defect.",
+    "Exact provider confirmedAt values and final durable per-action usage are from Root sanitized result; this audit checked ledger provenance, quota arithmetic and closing postconditions without opening private response captures or credentials.",
+    "The phase is closed/halted with cleanup complete. No allowance is reopened and no new external/browser/provider effects were performed by this audit.",
+    "Google app verification, live successful move/full lifecycle, other providers/commercial/operational acceptance and full customer launch remain open."
+  ]
+}

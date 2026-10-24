@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-24T16:18:27.174Z",
+  "reviewer": "lead_independent_qa",
+  "exactCommit": "1be5608c23b4f957f656f3a463b4b32831812a7f",
+  "diagnosis": {
+    "path": "scratchpad/calendar-v5-move-readonly-diagnosis-20261024.json",
+    "sha256": "b988202efe095b507169aa60700831fc45371535bca88a7e05d8542fcf8bf65a",
+    "state": "rejected",
+    "error": "calendar_conflict",
+    "field": "window",
+    "http": 409,
+    "physicalReads": 2,
+    "GoogleRequests": 0,
+    "writes": 0
+  },
+  "offlineChecks": {
+    "existingBusySuite": 20,
+    "existingOwnerSuite": 27,
+    "focusedIdentityAndIntervalChecks": true,
+    "actualGoogleRequests": 0,
+    "actualBrowserReads": 0,
+    "evidence": [
+      {
+        "path": "scratchpad/calendar-v5-move-busy-offline-20261024.json",
+        "sha256": "61a1349f992f0fda62a41065cbb4c1ed246efea04a191960bd8216b3ecb75275"
+      },
+      {
+        "path": "scratchpad/calendar-v5-move-owner-offline-20261024.json",
+        "sha256": "5494f6cd99fbf74a654988180268af05d86b00e5737a65789a8d2d73f17c9ffc"
+      }
+    ]
+  },
+  "sourceFilesSHA256": {
+    "netlify/functions/lib/owner-visits.mjs": "08a99712afc9ca0f76a394844ac1c5ef2a1eb310b9d1355f135fd95e392266a2",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-delivery.mjs": "ccab60b8af46e239119494badef0963169629442565498db756f2751355fb98c",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957"
+  },
+  "findings": [
+    "The retained operation records explicit calendar_conflict, not stale revision/submission/lock, for the requested target.",
+    "The reservation path counts saved reservations and normalized Calendar busy intervals, excluding the moving booking and only its exact deterministic owned remote event identity.",
+    "Delivery and busy exclusion use matching tenant/event/owner-tag formulas. The exact managed event is excluded even when overlapping the target; a foreign owner tag remains busy.",
+    "On2026-10-26 Houston time,8to12 ends exactly when12to5 starts; half-open intervals do not overlap at noon, with the correct DST-aware UTC offset.",
+    "Affected actual-handler local regressions preserve the original record/capacity on conflict and reconcile the same remote event after a conflict clears."
+  ],
+  "assessment": {
+    "productBugEstablished": false,
+    "personalEventEstablished": false,
+    "confirmed": "The requested target was rejected by the connected-calendar/local-capacity conflict check. Source and affected offline tests are consistent with protective refusal.",
+    "unknown": "No live busy projection, personal calendar details or conflicting event was inspected, so the precise busy source is not identified.",
+    "fixtureDisposition": "The proof preselected an afternoon window without evidence it was available. Do not promote the refusal to a product defect or silently retry another date.",
+    "calendarLifecycleAccepted": false,
+    "narrowCreateAcceptedOnlyByRootActualReceipt": true,
+    "nextProofRecommendation": "In a fresh bounded phase, verify proposed move availability through the existing privacy-preserving availability path before creating its event. Keep immutable phase IDs/source matching and treat an occupied target as a fixture prerequisite failure. No runtime change is justified by this observation."
+  }
+}

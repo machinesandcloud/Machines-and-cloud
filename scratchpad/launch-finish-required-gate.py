@@ -19,7 +19,7 @@ command = re.search(r'^  command = "([^"]+)"', Path('netlify.toml').read_text(),
 commands = [shlex.split(part.strip()) for part in command.split('&&')]
 assert all(len(c) == 2 and c[0] == 'node' and c[1].startswith('scripts/') for c in commands)
 files = sorted(str(p) for p in Path('.').rglob('*') if p.is_file() and p.parts[0] in ('netlify', 'scripts'))
-files += ['netlify.toml', 'desk.html', 'desk.css', 'desk.js', 'desk-activity.js', 'desk-conversations.js', 'desk-connections.js', 'embed.js', 'privacy-policy.html', 'desk-lead-sources.js', 'desk-lead-sources.css', 'desk-requests.js', 'onboard.js', 'onboard.html', 'onboard.css', 'admin.js', 'admin.html', 'admin.css', 'package.json', 'package-lock.json']
+files += ['netlify.toml', 'desk.html', 'desk.css', 'desk.js', 'desk-activity.js', 'desk-visits.js', 'desk-conversations.js', 'desk-connections.js', 'embed.js', 'privacy-policy.html', 'desk-lead-sources.js', 'desk-lead-sources.css', 'desk-requests.js', 'onboard.js', 'onboard.html', 'onboard.css', 'admin.js', 'admin.html', 'admin.css', 'package.json', 'package-lock.json']
 hashes = lambda: {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in files}
 report = {'at': datetime.now(timezone.utc).isoformat(), 'baseCommit': subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(), 'scope': 'Exact current Netlify required command list, each in a fresh process; provider environment removed, physical Node transport blocked; synthetic protocol doubles remain synthetic.', 'sourceBefore': hashes(), 'checks': [], 'externalEffectsAuthorized': False}
 receipt.write_text(json.dumps(report, indent=2) + '\n')
