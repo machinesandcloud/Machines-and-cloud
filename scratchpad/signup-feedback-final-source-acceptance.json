@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T11:20:18.095590+00:00",
+  "reviewer": "signup_feedback_qa independent final source/provenance review",
+  "decision": "ACCEPTED current local access-feedback packaging and preserved predecessor backend evidence. Unpublished; no production/provider/full-launch acceptance.",
+  "sourceCommit": "aee38b47ae1d10f2c1afd66d3d0483050c52d88f",
+  "sourceManifest": {
+    "path": "scratchpad/signup-feedback-source-manifest.json",
+    "sha256": "a40f9f1eba1f243f17e1c728166814fdd795301e2b3500ee949af475500affd0",
+    "files": 503,
+    "allCurrentAndNamedCommitHashesMatch": true
+  },
+  "bridge": {
+    "path": "scratchpad/signup-feedback-source-bridge.json",
+    "sha256": "934f941b0c0fb9c1a9e71db0b3c593d906fc26e202e114fe4d1f9612378a1ae2",
+    "priorManifest": "scratchpad/full-offer-with-fallback-source-manifest.json",
+    "priorSHA256": "d567f55ad3a5ad29566998b60fcc3474bbab9780b705eb20bf5ddefc16870581",
+    "priorExactCommit": "1e73e43db041bacf55246b2d65ce33812be46c9c",
+    "identicalPathSet": true,
+    "unchangedFiles": 495,
+    "changedFiles": 8,
+    "runtimeChanges": [
+      "admin.css",
+      "admin.html",
+      "admin.js",
+      "onboard.css",
+      "onboard.html",
+      "onboard.js"
+    ],
+    "verificationChanges": [
+      "scripts/customer-onboarding-ui-check.mjs",
+      "scripts/signup-intake-ui-check.mjs"
+    ],
+    "unchangedBackendFiles": 112,
+    "backendDelta": []
+  },
+  "matchedEvidence": [
+    {
+      "path": "scratchpad/signup-feedback-independent-ui-r3.json",
+      "sha256": "47edd44b441ddab0aa984b929e68c6491c5e22e99cdb02ebd31fde2c593a5f82",
+      "matchedInputs": 8
+    },
+    {
+      "path": "scratchpad/signup-feedback-po-customer-review-r2.json",
+      "sha256": "a7cce4bc08af042cbadcaefdd4d2104aec50acca4208637d7f6239b59c5d95c6",
+      "matchedInputs": 5
+    },
+    {
+      "path": "scratchpad/signup-feedback-po-admin-final.json",
+      "sha256": "6de322206981e4bc91d1481e921a1bdc43b2c9b9543fad8ee27e90ea9ef985ee",
+      "matchedInputs": 4
+    },
+    {
+      "path": "scratchpad/signup-feedback-actual-handler-full-r2.json",
+      "sha256": "cca956c14a337f9a254e2d808883a037b1079c493b81a8a70527ba5425d51d7d",
+      "matchedInputs": 20
+    }
+  ],
+  "qaPOAssetUnion": {
+    "eightPageAndSharedAssetsCurrent": true,
+    "sourceHashes": {
+      "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+      "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+      "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+      "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+      "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+      "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+      "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+      "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85"
+    },
+    "actualHandlerFinalRegression": {
+      "checks": 53,
+      "passed": 53,
+      "sourceStable": true,
+      "trackedInputsCurrent": 20
+    },
+    "independentUI": {
+      "groups": 48,
+      "sourceStable": true
+    },
+    "separateActualHandlerContractGroups": 9,
+    "limits": "Distinct overlapping scopes; counts are not added into one result. API fixture UI includes stubbed destinations; actual-handler workspace run separately exercises real local workspace assets with fake effects."
+  },
+  "staticBuild": {
+    "manifest": "scratchpad/signup-feedback-public-build-manifest.json",
+    "sha256": "fd1ee1edf9f698723f6218db3a2ee4401f76f3f10b6f23b860c5ebedf8da851b",
+    "html": 182,
+    "files": 233,
+    "outboundRequestsRecorded": 0,
+    "sixRuntimeAssetHashesCurrent": true
+  },
+  "productAcceptance": {
+    "path": "product/ACCESS-FEEDBACK-LOCAL-ACCEPTANCE-2026-10-24.json",
+    "sha256": "8c43fb12790c5e78c1da8eb0b13b2c525feaabf2b87603902a62c5c77bb7faf4",
+    "referencedQAPOActualHandlerHashesCurrent": true
+  },
+  "currentControl": {
+    "productionCommit": "2d74d78648a056db3f64e587da0f2caf378a1864",
+    "productionDeploy": "6adc7ce255b6e04e6ce40059",
+    "launch": "NO-GO",
+    "localCandidateUnpublished": true,
+    "calendarPhase": "CLOSED; no allowance reusable",
+    "nextDiagnostic": "Prepared and unexecuted; fresh approval still pending for at most2 physicalGETs",
+    "predecessorGate": "The48-command result belongs to1e73e43. Six changed page assets/two verification scripts use the affected current-source checks and static build; no unchanged-current-full-gate claim."
+  },
+  "returnedDocumentationClaims": {
+    "fixed": [
+      "Current48-command wording bound to predecessor1e73e43, distinct from current48UI groups.",
+      "Next unresolved step is the pending two-read prerequisite; accepted proof/followup integration no longer presented as unfinished.",
+      "Current PRODUCTSTATUS/BACKLOG identify integrated6fef17c and the newer access-feedback candidate."
+    ],
+    "runtimeRetestRequired": false
+  },
+  "effectsOfThisReview": {
+    "tests": 0,
+    "networkOrProviderRequests": 0,
+    "realEmails": 0,
+    "deploymentOrConfigurationChanges": 0,
+    "runtimeEdits": 0
+  },
+  "remaining": "Root may commit/mirror owned documents and evidence only; no new provider, release, send, payment or activation authority."
+}
