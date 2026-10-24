@@ -1,0 +1,36 @@
+{
+  "status": "LOCAL_AUTHOR_ACCEPTED_INDEPENDENT_REVIEW_PENDING",
+  "base": "9b96784a3861fb252209cc45c8c58fca1aa388c4",
+  "toolChange": "Existing public runner native hosted checkpoint only",
+  "applicationRuntimeChanged": false,
+  "automatedGuardChanged": false,
+  "sourceHashes": {
+    "scripts/lib/stripe-public-execution.mjs": "0a7826fd499cf8dd461ee78d206afbeacd29dd2a2167b3156f9e3a7fb99192fb",
+    "scripts/stripe-test-lifecycle-proof.mjs": "693c89dd22e4e810ad9fef25033a10e0b06d6aeb55107923b516f5543bc3a3f0",
+    "scripts/stripe-native-hosted-checkpoint-check.mjs": "e312e317439a2fb19c13d876310e1c1910cb067b5e6e8190b6e974676b4b3b83"
+  },
+  "author": {
+    "nativeBoundary": 12,
+    "retainedTools": 8,
+    "retainedDelivery": 13,
+    "sourceStable": true,
+    "effects": {
+      "providerRequests": 0,
+      "browser": 0,
+      "keys": 0
+    }
+  },
+  "evidence": {
+    "scratchpad/stripe-native-hosted-author-first.json": "5f12a8b5213ffb376e8708261b6bc617aaa8c18b1f2d67e2250a55775d50bb52",
+    "scratchpad/stripe-native-hosted-author-private-gate.json": "1957196ad15db98a5545838e03debfc3a3d5de19c1c86f68f663c7c237075359",
+    "scratchpad/stripe-native-hosted-author-ready-fault-repaired.json": "3b6ada147c766c84bb33aaed14d6278f3493b774b13a1d8ca1998a049b537cd2",
+    "scratchpad/stripe-native-hosted-retained-tools-ready-fault-repaired.json": "1dfa2ddf72fdf8b7a10857571104ee10189ef7d5d11eebe0b602721e07bf90c0",
+    "scratchpad/stripe-native-hosted-retained-delivery-ready-fault-repaired.json": "59805a8df188f6588452a88eb7664a95c0ed4cc366ff0a132ecbfb94cc59646a"
+  },
+  "sourceReviewReturn": "Initial private ready metadata lacked shared deadline/retirement (source-review return, not claimed failed runtime). After that repair, independent actual branch extraction reproduced a phase-save failure after ready publication leaving ready durable. The final grouped repair wraps ready publication/phase/log/input/iterator/wait in one retirement finally; author actual branch faults now cover all those edges. Independent original failure remains retained outside this checkout pending final seal.",
+  "limits": [
+    "No actual native hosted UI, payment, webhook, Workbench or full launch acceptance.",
+    "Root must separately bind fresh source/phase/clock/endpoints/helpers and explicitly scope native network outside guarded160.",
+    "Closed earlier phases and their original unknown native creation/challenge/resource failures remain immutable."
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "before": {
+    "scripts/lib/stripe-public-execution.mjs": "b3bc2811bf22b876378a8026206cdd2616e920b58f9856ba5982dba53ad1d999",
+    "scripts/stripe-test-lifecycle-proof.mjs": "693c89dd22e4e810ad9fef25033a10e0b06d6aeb55107923b516f5543bc3a3f0",
+    "scripts/stripe-native-hosted-checkpoint-check.mjs": "596abf9d2150d6d220279c3f7cbf52da1ec449d1b8c1deed50a9c8d48ebed60b"
+  },
+  "checks": [
+    {
+      "name": "Exact owned top-level navigation is intercepted with explicit local handoff and no third-party transport",
+      "pass": true
+    },
+    {
+      "name": "Only one exact private Checkout URL, GET document and top-level frame can be handed off",
+      "pass": true
+    },
+    {
+      "name": "Lost handoff save cannot return a page or grant native readiness",
+      "pass": true
+    },
+    {
+      "name": "Root observation matches exact phase/Checkout and permits only subsequent canonical verification",
+      "pass": true
+    },
+    {
+      "name": "Wrong phase, Checkout, incomplete observation, hash-only or action count cannot resume",
+      "pass": true
+    },
+    {
+      "name": "EOF and lost input close the checkpoint without completion",
+      "pass": true
+    },
+    {
+      "name": "Timeout is at most600s and shortened by the immutable financial phase expiry",
+      "pass": true
+    },
+    {
+      "name": "Expiry exactly at returned acknowledgement refuses resume",
+      "pass": true
+    },
+    {
+      "name": "Initial durable checkpoint failure still closes the input reader",
+      "pass": true
+    },
+    {
+      "name": "Existing automatic flow/guard, public financial verification and cleanup remain authoritative",
+      "pass": true
+    }
+  ],
+  "effects": {
+    "providerRequests": 0,
+    "browser": 0,
+    "keys": 0
+  },
+  "after": {
+    "scripts/lib/stripe-public-execution.mjs": "b3bc2811bf22b876378a8026206cdd2616e920b58f9856ba5982dba53ad1d999",
+    "scripts/stripe-test-lifecycle-proof.mjs": "693c89dd22e4e810ad9fef25033a10e0b06d6aeb55107923b516f5543bc3a3f0",
+    "scripts/stripe-native-hosted-checkpoint-check.mjs": "596abf9d2150d6d220279c3f7cbf52da1ec449d1b8c1deed50a9c8d48ebed60b"
+  },
+  "sourceStable": true,
+  "passed": 10,
+  "total": 10,
+  "ok": true
+}
