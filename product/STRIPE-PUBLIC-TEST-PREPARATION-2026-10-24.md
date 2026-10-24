@@ -47,6 +47,28 @@ The return page alone is insufficient. The runner waits for a retained dedicated
 
 Cleanup closes the isolated payer first. `proof_cleanup` retains one operation, expires the same open Checkout or immediately cancels its exact dedicated TEST subscription with `invoice_now=false` and `prorate=false`. Lost results are reconciled canonically and continue on the ordinary schedule. The runner follows a retained expiry-cleanup operation rather than replacing it. It disables, verifies and deletes only the phase-owned destination and rearchives only the prior owned fixture. `proof_close` fences the original row after confirmed financial cleanup. Customer/invoice/event audit records remain; no provider-erasure claim is made.
 
+### Optional bounded Workbench checkpoint
+
+The default command above retains immediate destination cleanup for compatibility. It does not leave the endpoint available for a later Workbench inspection. For the fresh public-delivery proof, Root must include this opt-in checkpoint and its finite read-only Workbench inspection in the final scope:
+
+```sh
+node scripts/stripe-test-lifecycle-proof.mjs --execute-public --delivery-evidence-checkpoint --packet /tmp/mc-stripe-public-proof-packet.json --output /tmp/mc-stripe-public-AUTHORIZED-NEW.json
+```
+
+Keep this same process's standard input open. After closing the isolated payer browser, the runner confirms the same financial cleanup, disables and reads back the exact phase-owned endpoint, and confirms both owned fixture archives. It then prints the expected endpoint and canonical paid-Checkout event IDs and waits at most ten minutes. The runner leaves the endpoint disabled during the wait. No payment, subscription, model, Portal or new destination is created by this pause. It uses the original phase/report/budget; it is not a resumable phase or a fresh allowance.
+
+Root now inspects only that exact TEST account endpoint and event in Workbench, observes Delivered and its actual2xx response/time, and records the reviewed artifact privately. The Event API's aggregate pending count, an artifact hash alone or a typed acknowledgement does not establish that observation. Root's actual inspection and independent evidence review remain required. Once reviewed, send one JSON line to the waiting process, replacing every example value with the exact recorded values:
+
+```json
+{"action":"record_delivery_and_delete","phaseId":"<same phase>","endpointId":"<same we_ ID>","eventId":"<canonical paid Checkout evt_ ID>","httpStatus":200,"deliveredAt":"2026-10-24T18:00:00.000Z","evidenceSHA256":"<64 lowercase hex SHA256 of the reviewed artifact>","confirmed":true}
+```
+
+The line explicitly authorizes deletion of the same saved endpoint after review. The runner validates the phase, endpoint, event's accepted dedicated receipt/current Checkout, actual2xx code, delivery time and artifact digest. It never logs rejected input values; invalid lines remain unaccepted, with a maximum16 inputs before aborting the review. On acceptance it freshly reads the endpoint again and confirms the same phase metadata, URL, TEST mode and disabled status before deleting that ID. This extra GET shares the unchanged40 runner attempts and ten reserved cleanup attempts. A model beginning cleanup with30 attempts spent finishes the successful checkpoint path at38, leaving two; no additional requests are implied.
+
+Timeout, closed input, failed input or an unready financial/event/archive result prevents delivery-review acceptance and proceeds with bounded exact-resource cleanup. A changed/re-enabled endpoint, exhausted allowance or unknown DELETE result remains unconfirmed; the runner retains the exact attempted endpoint ID/state and never blindly repeats DELETE. `proof_close` still requires known financial cleanup and confirmed endpoint deletion. No successful report is issued for a missing review or unresolved cleanup. Settings/source/session/workspace cleanup and actual evidence review remain Root-owned even after a matched acknowledgement; full Stripe delivery acceptance remains false in the runner. Portal, scheduled-failure recovery, LIVE charging and full launch are separate.
+
+If the process disappears during the pause, retain its private packet/report and disabled endpoint identity. Do not restart this runner with a new output or reset its counter. Root must reconcile the same owned resource and remaining cleanup authority under the concrete phase scope. No new endpoint or Checkout may be substituted. The final source manifest and runner source pin still need Root's manual refresh after the grouped integration; this checkpoint implementation deliberately does not change those pins.
+
 Root finally restores the exact prior settings and source only if the proof's versions remain current, verifies a distinct cleanup deployment where required, revokes the controlled session and cancels the workspace under the final scope. Financial cleanup cannot be claimed from a dispatch202 or configuration save. Missing receipts or incomplete restoration remain open. Actual Portal delivery, LIVE charging, phone/text and full paid launch are separate acceptance gates.
 
 Primary contracts: [Webhook endpoint create](https://docs.stripe.com/api/webhook_endpoints/create?api-version=2025-06-30.basil), [delivery inspection](https://docs.stripe.com/webhooks#view-event-deliveries), [Event object](https://docs.stripe.com/api/events/object?api-version=2025-06-30.basil), and [immediate subscription cancellation](https://docs.stripe.com/api/subscriptions/cancel?api-version=2025-06-30.basil). Cancellation may affect other finalized invoices for that customer, which is why a fresh isolated customer is mandatory.

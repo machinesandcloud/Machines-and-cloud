@@ -53,6 +53,17 @@ export function verifyPublicWebhook(p,endpoint,{disabled=false}={}){
   assert.equal(endpoint.metadata?.mc_phase,p.webhook.phaseMetadata);assert.equal(endpoint.metadata?.mc_purpose,'workspace_public_test');
   assert.deepEqual([...endpoint.enabled_events].sort(),[...PUBLIC_WEBHOOK_EVENTS].sort());
 }
+// Root supplies this only after inspecting the exact Workbench delivery and
+// recording its artifact. A hash binds that artifact; it is not delivery proof.
+export function verifyPublicDeliveryReview(p,report,value,{now=Date.now()}={}){
+  assert.ok(exact(value,['action','phaseId','endpointId','eventId','httpStatus','deliveredAt','evidenceSHA256','confirmed']));
+  assert.equal(value.action,'record_delivery_and_delete');assert.equal(value.phaseId,p.phaseId);assert.equal(value.endpointId,p.webhook.id);assert.equal(value.confirmed,true);
+  assert.equal(report.signedPublicReceiptAccepted,true);assert.equal(report.completedTestCheckouts,1);assert.ok(id(report.verifiedPublicEventId,'evt_'));assert.ok(id(report.checkoutId,'cs_test_'));assert.equal(value.eventId,report.verifiedPublicEventId);
+  assert.ok(report.publicReceipts?.some(r=>r.id===value.eventId&&r.type==='checkout.session.completed'&&r.verifiedDestination==='workspace'&&r.objectId===report.checkoutId&&r.checkoutId===report.checkoutId));
+  assert.ok(Number.isInteger(value.httpStatus)&&value.httpStatus>=200&&value.httpStatus<300);assert.ok(digest(value.evidenceSHA256));
+  assert.equal(new Date(value.deliveredAt).toISOString(),value.deliveredAt);assert.ok(Date.parse(value.deliveredAt)>=Date.parse(report.at)-60000&&Date.parse(value.deliveredAt)<=now+1000);
+  return {...value,reviewedAt:new Date(now).toISOString(),authority:'Root-reviewed read-only exact-endpoint Workbench evidence; artifact hash alone does not verify delivery'};
+}
 export function verifyPublicSession(p,session,owned){
   assert.equal(session.id,owned.checkout);assert.equal(session.livemode,false);assert.equal(session.mode,'subscription');assert.equal(session.metadata?.mc_billing,'v1');
   assert.equal(session.metadata?.mc_slug,p.owner.slug);assert.equal(session.metadata?.mc_tenant,p.owner.tenantIdentity);assert.equal(session.metadata?.mc_offer,p.phase.offerDigest);assert.equal(session.metadata?.mc_plan,'starter');assert.equal(session.metadata?.mc_services,'web');

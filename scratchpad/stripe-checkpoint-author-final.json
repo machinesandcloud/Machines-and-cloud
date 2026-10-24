@@ -1,0 +1,73 @@
+{
+  "before": {
+    "scripts/lib/stripe-public-execution.mjs": "654db603701c74d50c3820725301a93e61687e5aab04552f2625b03e06fc9243",
+    "scripts/lib/stripe-public-proof.mjs": "c8e5d9174ba1db208aa57c3914fae05aa5df046684c30ff3b88a0a31ed33a83a",
+    "scripts/stripe-test-lifecycle-proof.mjs": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
+    "scripts/stripe-delivery-checkpoint-check.mjs": "c8f9f210c86f1119f6f02df69ba32d85e5c0b3eb59de2eb8359dc5b285f9fafe"
+  },
+  "checks": [
+    {
+      "name": "Default finalizer remains immediate exact endpoint deletion and same retained phase close",
+      "pass": true
+    },
+    {
+      "name": "Checkpoint waits only after exact financial cleanup, disabled readback and both fixture archives",
+      "pass": true
+    },
+    {
+      "name": "Strict acknowledgement binds exact phase, endpoint, canonical verified event, 2xx, time and artifact",
+      "pass": true
+    },
+    {
+      "name": "Acknowledgement never manufactures a missing signed receipt or canonical Checkout acceptance",
+      "pass": true
+    },
+    {
+      "name": "Wrong input remains unaccepted and unrecorded until a later matching acknowledgement",
+      "pass": true
+    },
+    {
+      "name": "EOF cleans up the same endpoint and reports missing review instead of success",
+      "pass": true
+    },
+    {
+      "name": "Ten-minute timeout also cleans up with no review acceptance or budget reset",
+      "pass": true
+    },
+    {
+      "name": "A re-enabled or repurposed endpoint during review is not deleted after stale readback",
+      "pass": true
+    },
+    {
+      "name": "Unknown DELETE remains reserved, identity retained and no blind second DELETE occurs",
+      "pass": true
+    },
+    {
+      "name": "Archive failure skips the wait, retains failure and completes exact endpoint cleanup",
+      "pass": true
+    },
+    {
+      "name": "Checkpoint adds one fresh GET but fits unchanged ten cleanup attempts after thirty spent",
+      "pass": true
+    },
+    {
+      "name": "Exhausted physical allowance cannot turn acknowledged review into endpoint deletion",
+      "pass": true
+    },
+    {
+      "name": "Expired phase still retains original cleanup authority without another Checkout or subscription",
+      "pass": true
+    }
+  ],
+  "after": {
+    "scripts/lib/stripe-public-execution.mjs": "654db603701c74d50c3820725301a93e61687e5aab04552f2625b03e06fc9243",
+    "scripts/lib/stripe-public-proof.mjs": "c8e5d9174ba1db208aa57c3914fae05aa5df046684c30ff3b88a0a31ed33a83a",
+    "scripts/stripe-test-lifecycle-proof.mjs": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
+    "scripts/stripe-delivery-checkpoint-check.mjs": "c8f9f210c86f1119f6f02df69ba32d85e5c0b3eb59de2eb8359dc5b285f9fafe"
+  },
+  "sourceStable": true,
+  "physicalRequests": 0,
+  "passed": 13,
+  "total": 13,
+  "ok": true
+}

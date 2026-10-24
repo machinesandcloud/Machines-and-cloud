@@ -1,0 +1,76 @@
+{
+  "before": {
+    "scripts/lib/stripe-public-execution.mjs": "70277cb0cf771d3713502dce46ac4a7068590c5b382f4b8a11053b031b86c9e1",
+    "scripts/lib/stripe-public-proof.mjs": "c8e5d9174ba1db208aa57c3914fae05aa5df046684c30ff3b88a0a31ed33a83a",
+    "scripts/stripe-test-lifecycle-proof.mjs": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
+    "scripts/stripe-delivery-checkpoint-check.mjs": "c8f9f210c86f1119f6f02df69ba32d85e5c0b3eb59de2eb8359dc5b285f9fafe",
+    "scratchpad/stripe-checkpoint-independent-check.mjs": "2fc668487ca392a772cb85a9660fe16e93c2a5e33b66cc7410b3ecd844f9c965"
+  },
+  "checks": [
+    {
+      "name": "A forged proof record for another Checkout or destination never certifies a reviewed event",
+      "pass": true
+    },
+    {
+      "name": "The exact deadline rejects even valid acknowledgement and closes input/timer once",
+      "pass": true
+    },
+    {
+      "name": "Sixteen invalid lines stop before a later valid line and retain no private input",
+      "pass": true
+    },
+    {
+      "name": "Oversized acknowledgement and extra fields are refused before the one valid exact record",
+      "pass": true
+    },
+    {
+      "name": "Lost input result cannot become reviewed acceptance; bounded finalizer still removes same endpoint",
+      "pass": true
+    },
+    {
+      "name": "Financial cleanup failure skips the checkpoint and cannot close the financial phase",
+      "pass": true
+    },
+    {
+      "name": "An unverified account cannot disable/delete an endpoint or open a checkpoint",
+      "pass": true
+    },
+    {
+      "name": "Both exact archives must be confirmed before waiting; one archive failure still triggers deletion",
+      "pass": true
+    },
+    {
+      "name": "Retained cleanup may finish after expiry during review without another create or budget identity",
+      "pass": true
+    },
+    {
+      "name": "A lost durable pre-DELETE journal write prevents physical DELETE and cannot be blindly replayed",
+      "pass": true
+    },
+    {
+      "name": "Remaining physical allowance cannot be reset by acknowledgement or cleanup retries",
+      "pass": true
+    },
+    {
+      "name": "The endpoint is read again after review; a phase, mode or version change prevents deletion",
+      "pass": true
+    },
+    {
+      "name": "A failed initial checkpoint save still closes the owned input source",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/mc-stripe-delivery-checkpoint-051/scratchpad/stripe-checkpoint-independent-check.mjs:39:421\n    at async check (file:///private/tmp/mc-stripe-delivery-checkpoint-051/scratchpad/stripe-checkpoint-independent-check.mjs:13:35)\n    at async file:///private/tmp/mc-stripe-delivery-checkpoint-051/scratchpad/stripe-checkpoint-independent-check.mjs:39:1"
+    }
+  ],
+  "after": {
+    "scripts/lib/stripe-public-execution.mjs": "70277cb0cf771d3713502dce46ac4a7068590c5b382f4b8a11053b031b86c9e1",
+    "scripts/lib/stripe-public-proof.mjs": "c8e5d9174ba1db208aa57c3914fae05aa5df046684c30ff3b88a0a31ed33a83a",
+    "scripts/stripe-test-lifecycle-proof.mjs": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
+    "scripts/stripe-delivery-checkpoint-check.mjs": "c8f9f210c86f1119f6f02df69ba32d85e5c0b3eb59de2eb8359dc5b285f9fafe",
+    "scratchpad/stripe-checkpoint-independent-check.mjs": "2fc668487ca392a772cb85a9660fe16e93c2a5e33b66cc7410b3ecd844f9c965"
+  },
+  "sourceStable": true,
+  "physicalRequests": 0,
+  "passed": 12,
+  "total": 13,
+  "ok": false
+}
