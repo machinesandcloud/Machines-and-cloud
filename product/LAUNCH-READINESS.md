@@ -4,13 +4,13 @@
 
 The [current launch control](LAUNCH-CONTROL.json) remains authoritative. This review is under the replacement `product_owner_v2` mandate: one saved business profile must support website chat, phone answering, dedicated two-way texting and Google visit synchronization. There is no accepted launch date and no website-only product pivot.
 
-## Controlled external-site proof prepared
+## Actual signup result and prepared replacement proof
 
-Steve selected `https://zaricoach.com/`. The isolated route, exact tenant binding, protected CI build, bounded AI/owner-email delivery and current-source guard are accepted locally. M&C runtime candidate is `e27354f2d9b33b80209f6fc69e9fd25b7ee67362`; Zari candidate is `626d8a61ddfd512d223502e5601614512c31e8a7`. Nothing has been installed or published by this preparation.
+The approved first run verified operator and owner access, early intake, saved-draft reload, one workspace creation and automatic return to that workspace. It stopped before publication because the test guard missed the current revision returned by a successful save. Independent replay confirmed the customer review was valid. The internal workspace is cancelled, all test sessions are revoked and no mutation is uncertain. Both sites and all 27 M&C setting values/scopes are unchanged. Four sign-in emails were sent; zero builds, AI requests or managed owner alerts were used. [Actual result and PO disposition](ZARICOACH-LIVE-RESULT-2026-10-24.json).
 
-The final required build passes **44/44**. Independent AI10, scoped-worker5, full guarded journey27 and final protocol27 cover different, overlapping local scopes. The Zari production webpack build passes before a reviewed static-CSS-only bridge, with final13 unit cases and four browser groups. See the [independent acceptance](../scratchpad/zaricoach-independent-acceptance.json), [PO preparation review](ZARICOACH-PREPARATION-PO-ACCEPTANCE-2026-10-23.json) and [exact proposed live scope](ZARICOACH-CONTROLLED-INSTALLATION-PLAN-2026-10-23.json).
+The guard repair and separate delayed-response UI repairs are independently accepted locally. Final required commands pass 44/44; the complete synthetic guarded journey passes 38/38, independent auth controls 2/2 and the new read-limit boundaries 36/36. These scopes overlap and use simulated delivery; they are not live customer acceptance. [Independent evidence](../scratchpad/zaricoach-v2-final-independent-acceptance.json).
 
-The proposal reserves up to three production builds (45 credits): M&C proof and cleanup, plus Zari installation. Cleanup restores the exact prior Zari deploy only if no intervening legitimate deployment exists. Netlify Function settings are frozen per deployment, so configuration deletion alone cannot establish runtime cleanup. The actual signup, installed real-model request, owner inbox receipt and cleanup remain unaccepted; the full launch decision stays **NO-GO**.
+The original phase is closed. A [fresh v2 proposal](ZARICOACH-CONTROLLED-INSTALLATION-PLAN-2026-10-24.json) uses a new alias, exact phase binding, exclusive ledger, corrected source and read-only redirect headroom. Up to three builds (45 credits), four verification emails, two owner alerts and bounded real AI remain proposed. Nothing in the replacement has been published or executed. Actual installation, ordinary customer request and owner inbox receipt remain open; full launch remains **NO-GO**.
 
 ## Exact product reviewed
 
