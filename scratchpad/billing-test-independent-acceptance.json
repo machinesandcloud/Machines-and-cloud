@@ -1,0 +1,102 @@
+{
+  "at": "2026-10-24T06:50:16.341542+00:00",
+  "role": "Independent QA",
+  "decision": "ACCEPTED locally: scoped mandatory TEST tenant admission, preserved LIVE/read-only behavior, known financial maintenance/reconciliation and current-source offline proof preparation. No new actual Stripe/provider, publication or account action authorized or performed.",
+  "baseCommit": "703336499607e42ec0cdcd46f453b07c5ad43715",
+  "source": {
+    "manifest": "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json",
+    "manifestSHA256": "f93e023e6fe04495cd4cc5bb52b28a21a14246051b53e593ef9998973aa4bb80",
+    "sourceId": "sha256:cedca119222e4ee487919be0faf9cfda79f4966ab6669e87b3f64fbc2f66ac02",
+    "files": 485,
+    "currentAllMatch": true,
+    "independentBeforeAfterStable": true,
+    "runnerSHA256": "f75dca39b5a8539a99d47a11fd2a4cb998986ea5b672f1bbbb971061f2394fa8",
+    "scopeSHA256": "784550c5c656abfc23ddf7f7b2d888d80739a64c868afdd2b2ac1eabc02bc27f",
+    "v2ToV3Bridge": {
+      "v2ToV3ChangedFiles": [
+        "netlify/functions/lib/workspace-billing.mjs"
+      ],
+      "addedSource": [
+        "scripts/billing-test-admission-projection-check.mjs"
+      ],
+      "runnerOnlyManifestPinChanged": true,
+      "runnerCurrentSha": "f75dca39b5a8539a99d47a11fd2a4cb998986ea5b672f1bbbb971061f2394fa8",
+      "manifestCurrentSha": "f93e023e6fe04495cd4cc5bb52b28a21a14246051b53e593ef9998973aa4bb80"
+    }
+  },
+  "independentHandlers": {
+    "receipt": "scratchpad/billing-test-cohort-independent-v3-final.json",
+    "summary": {
+      "passed": 9,
+      "failed": 0,
+      "total": 9
+    },
+    "physicalNetwork": 0,
+    "notificationAttempts": 0,
+    "observed": [
+      "Nine malformed, widened, expired, future or wrong tenant/merchant/offer policies hide TEST offers and fail review before Stripe. Exact valid policy admits one current workspace.",
+      "Second tenant and reused slug incarnation are refused. Raw independent calls preserve policy without the author fixture auto-mint, so scope withdrawal cannot be masked.",
+      "Withdrawal during the final awaited Price read leaves an abandoned attempt, no Checkout POST and no URL. HTTP200 reports that saved state; it does not report successful creation.",
+      "Paused known TEST subscription retains Portal maintenance from its immutable offer after current new-purchase offer closes. Scope withdrawal hides/refuses new Portal capabilities while exact renewal cancellation remains available.",
+      "Unknown same Checkout creation reconciles after scope withdrawal without another create, retaining original attempt/session identity and hiding its URL.",
+      "Both original LIVE gates remain necessary; TEST policy cannot authorize LIVE. Closed LIVE/new-purchase gates preserve original plan metadata.",
+      "Missing/unsupported credentials preserve read-only saved status/plan metadata with unavailable purchases instead of throwing503."
+    ]
+  },
+  "offlineRunner": {
+    "receipt": "scratchpad/billing-proof-independent-offline-v2.json",
+    "observedSource": "v2 exact484-file source under private-read/Node-transport deny wrapper; isolated headless0700 Chrome with DNS denial, all hosted mock routes intercepted.",
+    "completedSyntheticCheckouts": 1,
+    "completedActualTestCheckouts": 0,
+    "mockOperationalAttempts": 24,
+    "actualProviderRequests": 0,
+    "privateInputReads": 0,
+    "unknown": [],
+    "sourceStable": true,
+    "cleanup": [
+      {
+        "kind": "TEST subscription",
+        "id": "sub_offline_owned",
+        "state": "canceled_without_extra_invoice_or_proration"
+      },
+      {
+        "kind": "owned TEST prices",
+        "id": "price_offline_coverage",
+        "state": "archived"
+      },
+      {
+        "kind": "owned TEST products",
+        "id": "prod_offline_coverage",
+        "state": "archived"
+      }
+    ],
+    "v3Reuse": "Only runtime read-projection helper changed; no purchase/Portal/financial write fence changed. New pure projection check added. Reversing the runner manifest pin reconstructs exact v2 runner SHA5a08931c..., so complete offline lifecycle reused through this explicit source bridge; no v3 lifecycle rerun claimed.",
+    "proofLimits": "Shared<=40 operational attempts including failures, hosted document/preflights and cleanup;10 reserved. Static<=200/35MiB with MIME validation and telemetry block. One exact TEST Checkout/subscription, ordinary public dummy-card UI, same merchant/IDs, exact cancel/expire and fixture archive. No Portal/config changes; locally signed canonical trigger is not public webhook delivery.",
+    "safetyReview": "Exclusive0600 output/private ledger claimed before credential access; source hashes and TEST/account binding precede writes; no user profile/CDP attachment or hidden payment API completion. Unknown host/CAPTCHA/additional auth stops. b.stripecdn.com remains intentionally blocked, so actual current hosted UI runnability is unconfirmed."
+  },
+  "triage": {
+    "independentFirst": "6/8: one real LIVE metadata regression returned; one incorrect QA expectation of non2xx despite correct abandoned/no-create saved state. Both preserved.",
+    "independentV2": "8/8 and complete offline lifecycle green; then a new missing-key projection case independently reproduced0/1 (GET503). v3 nonthrowing read helper repaired it and final9/9 passes.",
+    "affectedHistoricalHarnesses": "Reviewed four actual diffs: launch-billing(11), launch-provider-state(23), launch-billing-admin-projection(1), launch-webhook-isolation(8). TEST factories explicitly mint one synthetic cohort per selected fixture; assertions otherwise retained. Tests of withdrawal explicitly preserve policy. Admin TEST Portal configuration without its current bound offer now refuses, with a separate LIVE case retaining prior configuration semantics. Author source-matched receipts reused as supporting evidence, not counted independently and not relabeled blanket platform acceptance.",
+    "authorSupport": "Source-qualified v2 45handler+18current browser groups retained. The author final local Portal-preflight refusal is abandoned/not_attempted; actual lost dispatch remains uncertain. Independent focused checks plus exact runtime diff review qualify this reuse."
+  },
+  "pendingAndLimits": [
+    "No actual private key or owned provider fixture file read. Generated offline *-private.json is synthetic but excluded from staging.",
+    "Root must bind final integrated source/manifests/runner and request a fresh bounded actual TEST phase if desired. All prior actual payment/model/provider budgets remain closed.",
+    "Actual hosted TEST completion is still unobserved on this source; static-host/challenge differences may stop it safely.",
+    "Real public Stripe webhook delivery remains explicitly unprepared and unobserved. The local40-attempt wrapper cannot cap deployed webhook/scheduler provider transports; those need separately bounded tenant/account/mode/expiry/census and rollback scope.",
+    "No real-money payment, LIVE activation, production environment change/build, paid entitlement, full launch or commercial/provider readiness established."
+  ],
+  "evidenceHashes": {
+    "scratchpad/billing-test-cohort-independent-v3-final.json": "4b4482a5cee90c652a9373870753ecce24cb7503c047249b924230bd2330c7da",
+    "scratchpad/billing-proof-independent-offline-v2.json": "120a3bc00a377bb9d43c4e81257782f558b5c6192e41c788b0fc6981c34f883b",
+    "scratchpad/billing-test-independent-v3-source-bridge.json": "2be887c1765d6384c9c51f966274d6584adfca0d481aa5b231448391e3388ffd",
+    "scratchpad/billing-proof-independent-offline-v2.log": "8cea30235c74637b2c3dd06a473716274ea7d6c4845e8bd42de13f8f88f5fec4",
+    "scratchpad/billing-test-cohort-independent-first.json": "bab0144529058d25ca7ff72bca984edda5632ecfe5939cb61c74027e7718dfd4",
+    "scratchpad/billing-test-cohort-independent-final.json": "9e31357dfb79a1ed355b380ef19ac2d6b6ae6aea6626e40b66a3c783bf26b414",
+    "scratchpad/billing-test-cohort-independent-projection-first.json": "7ddd2206b08c0e02df97ff516b6397938e52ebe272e60afcedb9f46e44ff3157",
+    "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json": "f93e023e6fe04495cd4cc5bb52b28a21a14246051b53e593ef9998973aa4bb80",
+    "product/STRIPE-TEST-LIFECYCLE-PROOF-SCOPE-2026-10-24.json": "784550c5c656abfc23ddf7f7b2d888d80739a64c868afdd2b2ac1eabc02bc27f",
+    "scripts/stripe-test-lifecycle-proof.mjs": "f75dca39b5a8539a99d47a11fd2a4cb998986ea5b672f1bbbb971061f2394fa8"
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "date": "2026-10-24",
+  "stage": "Prepared current-source billing proposal; author local acceptance complete; independent QA pending. No new actual Stripe TEST phase or public webhook proof is authorized or executed.",
+  "baseCommit": "703336499607e42ec0cdcd46f453b07c5ad43715",
+  "sourceId": "sha256:529929d1ead670318dfc4e326a59c342f9c69fa968de4dbba087773acd1bb678",
+  "sourceManifest": "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json",
+  "sourceManifestSha256": "2be09783e3ff32edf8e66a7ae71f1e34146bdeb6b1377ed986feb7f75254860c",
+  "sourceFiles": 484,
+  "script": "scripts/stripe-test-lifecycle-proof.mjs",
+  "scriptSha256": "2b5db1cd75418e0a6fbdc8a1e040873e2393b4df2880581cfb8b5817a3d4f1e6",
+  "provenance": "The manifest freezes runtime, assets, build configuration, dependency locks and check sources. It excludes this scope, itself and the runner to avoid a hash cycle. The runner pins the manifest SHA; this scope separately pins the runner SHA. A future exact-source approval must bind all three and a fresh exclusive phase output. This is a proposal separate from the accepted 7033364 runtime batch.",
+  "account": {
+    "merchant": "Existing Zari Marketing, as selected by Steve",
+    "stripeAccountId": "acct_1NK0c6JW47xiUUpY",
+    "mode": "TEST only",
+    "observedThisPreparation": false,
+    "privateInputsRead": 0
+  },
+  "authority": {
+    "newActualProviderRequestsAuthorized": false,
+    "publicationAuthorized": false,
+    "environmentChangesAuthorized": false,
+    "closedPriorPhase": "product/STRIPE-TEST-LIFECYCLE-PROOF-SCOPE-2026-10-23.json is historical and unchanged. Its source961 phase a closed after 7 actual requests, 0 Checkout sessions and 0 subscriptions; the exact owned fixture was rearchived. Its allowance cannot be reused."
+  },
+  "invocation": {
+    "cwd": "/tmp/mc-billing-proof-703, or the same separately verified frozen source checkout",
+    "guards": "node scripts/stripe-test-lifecycle-proof.mjs --self-check",
+    "fullyOffline": "node scripts/stripe-test-lifecycle-proof.mjs --offline-rehearsal --output /tmp/mc-stripe-test-lifecycle-OFFLINE-NEW.json",
+    "futureActualTestOnlyAfterFreshApproval": "node scripts/stripe-test-lifecycle-proof.mjs --execute --output /tmp/mc-stripe-test-lifecycle-AUTHORIZED-NEW.json",
+    "noDefaultExecution": "Without an execution flag the script prints preparation guidance. Existing public/private phase outputs cannot be reopened or overwritten. Source drift stops before private inputs or transport."
+  },
+  "fixedBounds": {
+    "operationalAttempts": 40,
+    "ordinaryAttempts": 30,
+    "cleanupAttemptsReserved": 10,
+    "testCheckoutCreates": 1,
+    "testSubscriptions": 1,
+    "staticAssetAttempts": 200,
+    "staticAssetObservedBytes": 36700160,
+    "counter": "Node and hosted browser operational attempts share one reserve-before-dispatch counter, including failures, preflight, the hosted document and cleanup. Known Stripe telemetry is blocked. Only bounded expected JS/CSS/image/font resources with matching MIME qualify as static; provider JSON and api.stripe.com never do. The last streaming chunk can exceed the byte ceiling and causes a retained failure.",
+    "hostRestrictions": "Only the existing stripe.com/stripe.network host guard applies; expected static hosts remain js.stripe.com, files.stripe.com and checkout.stripe.com. b.stripecdn.com remains blocked. Stripe ownership is not evidence that an unexpected host is necessary for this Checkout. CAPTCHA, challenge, 3DS or extra-authentication paths stop and clean up; no bypass or silent expansion.",
+    "profile": "Fresh isolated 0700 temporary Chrome profile; headed only for a future actual phase, headless for the offline fixture. No user profile, account tabs or CDP attachment. Service workers and WebSockets denied; browser closed and profile removed before cleanup.",
+    "credentials": "Only --execute may read the preexisting 0600 /tmp/mc-stripe-test-private.env and prior owned /tmp/mc-stripe-test-fixtures.json. Accept sk_test_/rk_test_ only with the exact merchant binding. Preparation and offline rehearsal read neither. Hosted capability/client secrets stay in a 0600 sibling private ledger; public receipts redact them.",
+    "otherEffects": "No LIVE API or real card/money, production build/settings change, provider email, model, Google, phone/text action, new Product/Price, shared branding/default or Portal configuration."
+  },
+  "flow": [
+    "Validate all current-source hashes before private input access. Verify the exact approved TEST merchant, prior owned archived Coverage Product and $99 monthly TEST Price. Do not infer that the unchanged private files still provide usable access.",
+    "Temporarily reactivate only those two confirmed archived fixture IDs. Build one deliberately synthetic example.test owner/session and memory workspace with artificial checked web readiness, a dummy nonfunctional model-availability marker and explicit TEST terms. No model request is allowed.",
+    "Use the actual current Account UI and authenticated review/Checkout handlers. An exact expiring TEST policy admits this workspace only. Observe $99/month, Test checkout and the agreement before creating one bound cs_test session.",
+    "Use the ordinary hosted TEST Checkout fields with Stripe public 4242 dummy data, future expiry, 123 CVC and synthetic identity. Require visible Test mode and the captured cs_test identity. Unknown UI, host, extra auth or budget exhaustion stops; do not call a payment API to bypass UI.",
+    "After the fixed owner return, invoke the actual dedicated webhook handler with a locally signed synthetic trigger. Canonical Session and subscription reads establish the owner state; exact replay must make no further provider attempt. This is not actual public Stripe event delivery.",
+    "Reload the ordinary owner Account view; verify the same canonical active subscription, customer and $99 paid TEST invoice. The browser return alone never certifies payment.",
+    "Use the ordinary End monthly renewal action and verify cancel_at_period_end on that exact subscription. Close the isolated payer and complete exact-ID cleanup under the reserved allowance."
+  ],
+  "cleanupAndRetention": [
+    "Before any cleanup, require the same merchant, TEST mode and exact tenant/slug/attempt binding. Reconcile an unknown create through the existing immutable attempt once; never blindly recreate it. Truncated, ambiguous or absent authoritative search results remain uncertain.",
+    "Expire the same open Checkout or cancel its exact TEST subscription using invoice_now=false and prorate=false. Rearchive only the original owned Coverage Price and Product. No generic provider deletion scan.",
+    "Retain the synthetic TEST customer and paid TEST invoice as financial audit history. No real-money or provider-erasure claim. Preserve failed/unknown receipts; incomplete cleanup or source drift prevents success.",
+    "No permanent production settings are altered by this local runner. Any future hosted proof needs a separately prepared exact configuration rollback and deployment plan."
+  ],
+  "narrowTestAdmission": {
+    "environmentName": "WORKSPACE_BILLING_TEST_PROOF_POLICY_JSON",
+    "mandatoryFor": "New TEST purchase offers/Checkout URLs and creation; new TEST payment-details Portal capabilities for known financial records. LIVE retains the existing two live gates and no TEST policy can authorize LIVE.",
+    "fields": {
+      "version": "Exact approved offer version",
+      "phaseId": "1-100 lowercase letters, digits, underscore or hyphen",
+      "issuedAt": "Exact UTC ISO milliseconds; not in the future",
+      "expiresAt": "Exact UTC ISO milliseconds; later than issue, after now, maximum four hours after issue",
+      "stripeAccountId": "Exact approved merchant",
+      "offerDigest": "Existing canonical offer digest; the offer does not contain this policy",
+      "tenant": {
+        "slug": "Exact current workspace slug",
+        "identity": "workspaceTenant(current client), 64 lowercase hex",
+        "ownerEmailHash": "SHA256 of normalized current owner email, 64 lowercase hex"
+      }
+    },
+    "checkout": "The owner session, operating workspace status, incarnation and offer are checked when reviewed and again before physical Checkout create after awaited account/Price reads and the durable dispatch marker. Paused/cancelled TEST workspaces do not see new offers. A scope removal or expiry during awaited validation prevents creation.",
+    "knownFinancialMaintenance": "The existing row supplies its immutable offer for exact TEST Portal admission, independently of the global new-purchase offer. Portal creation rechecks owner/session and scope immediately before dispatch after canonical account/configuration/Session/subscription validation. Expired/removed scope hides and refuses new Portal capabilities, but never gates known subscription status, canonical webhook/reconciliation, same-attempt unknown-result recovery or renewal cancellation.",
+    "noActivationClaim": "Saving the policy admits only one test capability and does not purchase, activate customer services or prove a paid entitlement."
+  },
+  "publicWebhookProof": {
+    "status": "Not prepared for execution and not observed. The local signed trigger is deliberately narrower. No current provider readiness or production payment acceptance is claimed.",
+    "leastNecessaryTarget": "A separately approved publicly accessible HTTPS /api/workspace-billing-webhook on exact published current source. A Netlify draft is not tenant/storage isolation: this repository states draft deploys share production Blobs.",
+    "destination": "Create a dedicated TEST destination on the exact Zari Marketing merchant using Your account and snapshot payloads matching pinned 2025-06-30.basil runtime expectations. Do not edit/reuse the legacy webhook, choose Connect/organization scope or subscribe to all events.",
+    "eventTypes": [
+      "checkout.session.completed",
+      "checkout.session.expired",
+      "checkout.session.async_payment_succeeded",
+      "checkout.session.async_payment_failed",
+      "customer.subscription.created",
+      "customer.subscription.updated",
+      "customer.subscription.deleted",
+      "invoice.paid",
+      "invoice.payment_failed"
+    ],
+    "environment": "Dedicated WORKSPACE_BILLING_WEBHOOK_SECRET distinct from STRIPE_WEBHOOK_SECRET; existing TEST credential, exact approved TEST offer/version and the one-tenant expiring policy. Functions-only secret scope, explicit deployment snapshot/rollback, no LIVE gates, no global customer offer. Any Portal enable needs a separately verified dedicated restricted configuration and additional scope; this runner omits it.",
+    "missingBoundedTransport": "The local 40-attempt wrapper does not intercept deployed webhook or scheduled-worker Stripe calls. Before public TEST enable, prepare an exact tenant/merchant/mode/expiry provider-attempt fence with cleanup reserve for those transports, check for existing TEST billing resources that would use the shared credential, and preserve their known-resource cancellation/reconciliation. No generic queue or broad new activation is implied. Until these boundaries and their independent tests exist, this public phase is not runnable.",
+    "acceptance": "Capture actual Stripe destination/event/delivery IDs, exact-source endpoint status and successful 2xx delivery; verify signed raw body, dedicated secret, canonical own subscription/invoice, duplicate delivery isolation and renewal/cleanup. A dashboard save, CLI event, local signed POST, redirect or scheduler health result does not establish public delivery.",
+    "cleanup": "Stop new TEST admission; disable only the new owned TEST destination; reconcile and cancel/expire only exact owned test resources; restore exact prior Functions settings and hosted source conditionally if still current. Retain event/financial audit IDs. Automatic retries and warm Functions must remain fenced after stopping."
+  },
+  "authorAcceptance": {
+    "actualProviderRequests": 0,
+    "privateInputsRead": 0,
+    "releaseOrSettingsChanges": 0,
+    "independentQA": "Pending; no commit until Root assigns and accepts it.",
+    "handlersAndBrowser": {
+      "receipt": "scratchpad/billing-test-admission-current-browser-r5.json",
+      "passed": 62,
+      "total": 62,
+      "handlerGroups": 44,
+      "browserGroups": 18,
+      "widths": [
+        1440,
+        390,
+        320
+      ],
+      "physicalRequests": 0,
+      "notificationDispatchAttempts": 0
+    },
+    "affectedIndependentHarnesses": [
+      {
+        "receipt": "scratchpad/billing-test-admission-launch-r4.json",
+        "passed": 11
+      },
+      {
+        "receipt": "scratchpad/billing-test-admission-provider-projection-r4.json",
+        "passed": 23
+      },
+      {
+        "receipt": "scratchpad/billing-test-admission-admin-r4.json",
+        "passed": 1
+      },
+      {
+        "receipt": "scratchpad/billing-test-admission-webhook-r4.json",
+        "passed": 8
+      }
+    ],
+    "runnerGuards": {
+      "receipt": "scratchpad/stripe-proof-current-guards-r5.json",
+      "passed": 10,
+      "privateInputReads": 0,
+      "providerRequests": 0,
+      "browserProfilesOpened": 0
+    },
+    "offlineLifecycle": {
+      "receipt": "scratchpad/stripe-proof-current-offline-r5.json",
+      "fenceLog": "scratchpad/stripe-proof-current-offline-run-r5.txt",
+      "completedSyntheticCheckouts": 1,
+      "completedActualStripeTestCheckouts": 0,
+      "mockOperationalAttempts": 24,
+      "actualProviderRequests": 0,
+      "privateInputsRead": 0,
+      "sourceStable": true,
+      "unknown": 0,
+      "cleanup": "Synthetic own subscription cancelled; exact synthetic Product and Price rearchived. Isolated browser removed."
+    },
+    "retainedFailures": [
+      {
+        "receipt": "scratchpad/billing-test-admission-current-r3.json",
+        "result": "41/42; paused Calendar readiness regressed from409 to503. Repaired product ordering; original Calendar assertions retained."
+      },
+      {
+        "receipt": "scratchpad/billing-test-admission-launch-r3.json",
+        "result": "10/11; existing payment maintenance was gated by the removed new-purchase offer. Repaired using the known immutable billing offer, with exact unexpired TEST policy still required for new Portal sessions."
+      }
+    ],
+    "fixtureDisposition": "The 32 original workspace-billing handler groups and existing financial/isolation assertions remain. Existing TEST-only fixture factories now explicitly mint the exact synthetic cohort policy for the selected fixture; no runtime test bypass exists. When the current new-purchase offer is absent, the harness preserves its explicit prior policy so maintenance is tested. The provider-configuration-only TEST case now correctly declines configuration when its offer/policy binding is absent; a new LIVE configuration-only case preserves independent existing Portal semantics. These fixture/assertion changes require independent QA acceptance.",
+    "browserHarnessDisposition": "Bundled Chromium was absent. The author retained the launcher failure in the work transcript and changed only the offline harness to use installed Chrome; no browser installation or regular profile was used."
+  },
+  "references": [
+    {
+      "url": "https://docs.stripe.com/testing",
+      "use": "Use TEST keys and public dummy card data; never real payment details."
+    },
+    {
+      "url": "https://docs.stripe.com/automated-testing",
+      "use": "Offline protocol/browser mocks cannot establish actual hosted Checkout acceptance; do not bypass provider anti-automation controls."
+    },
+    {
+      "url": "https://status.stripe.com/reachability",
+      "use": "b.stripecdn.com is Stripe-owned; ownership alone does not establish Checkout asset necessity or broaden this allowlist."
+    },
+    {
+      "url": "https://docs.stripe.com/webhooks",
+      "use": "Actual registered destinations require public HTTPS, selected account/event/payload scope, raw-body signature verification and observed delivery."
+    },
+    {
+      "url": "https://docs.stripe.com/api/webhook_endpoints",
+      "use": "Dedicated TEST destination and signing-secret identity are separate from local synthetic event transport."
+    }
+  ]
+}
