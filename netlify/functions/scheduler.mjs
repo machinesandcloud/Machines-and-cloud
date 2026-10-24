@@ -14,15 +14,18 @@ import { phoneRecoveryHealth } from "./lib/phone-activation.mjs";
 import { serviceDeliveryHealth } from "./lib/service-health.mjs";
 import { recoverWorkspaceOperations } from "./lib/platform-operations.mjs";
 import { recoverLeadConnections } from './lib/lead-connections.mjs';
+import { strictRead } from './lib/accounts.mjs';
 
 export const config = { schedule: "*/10 * * * *" };
 
 const D = 24 * 3600 * 1000;
 
 async function runTask(t) {
-  const c = await getClient(t.slug);
+  const managedAlert=t.type==='escalate' && /^[a-f0-9]{64}$/.test(t.data?.tenantIdentity || '');
+  const c = managedAlert ? await strictRead('clients',t.slug) : await getClient(t.slug);
   if (!c) return "no client";
   if (isSelfServiceClient(c)) {
+    if (t.type==='escalate' && /^[a-f0-9]{64}$/.test(t.data?.tenantIdentity || '')) return runEscalation(c,t);
     await logEvent(t.slug, "task_skipped", { type: t.type, reason: "self_service_portal_only" });
     return "channel_not_active";
   }
@@ -148,11 +151,14 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
   let dueCount = 0;
   await block(record, "tasks", async () => {
     const due = await dueTasks(nowISO); dueCount = due.length;
+    let managedFailures=0;
     for (const { key, task } of due) {
+      let retain=false;
       try { results.push([task.type, await runTask(task)]); }
-      catch (err) { console.error("task failed", task.type, err); results.push([task.type, "error"]); try { await logEvent(task.slug, "task_error", { type: task.type, error: String(err?.message || err).slice(0, 200) }); } catch { /* ignore */ } }
-      await del("tasks", key);
+      catch (err) { retain=task.type==='escalate' && /^[a-f0-9]{64}$/.test(task.data?.tenantIdentity || ''); if(retain)managedFailures++; console.error("task failed", task.type, err); results.push([task.type, "error"]); try { await logEvent(task.slug, "task_error", { type: task.type, error: String(err?.message || err).slice(0, 200) }); } catch { /* ignore */ } }
+      if (!retain) await del("tasks", key);
     }
+    if(managedFailures)throw new Error('Managed request attention work is retained for scheduled retry');
     return { due: due.length };
   });
   const minuteNow = forceHour !== undefined ? 0 : Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", minute: "numeric" }).formatToParts(new Date()).find((p) => p.type === "minute")?.value);

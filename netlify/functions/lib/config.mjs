@@ -172,7 +172,7 @@ export function newClient({ slug, ownerKey, owner, business }) {
     rules: { never: DEFAULT_NEVER.slice(), handoff: DEFAULT_HANDOFF.slice(), emergencies: defaultEmergencies(business?.trade), hours: parseHours(business?.hours) || null, emergency247: emergency247(business?.hours), consentAsk: false, windowCapacity: 1, ackMinutes: 10, callbackHours: "within 30 minutes", callbackAfterHours: "by 8 am tomorrow", bypass: [] },
     digest: { text: true },
     faq: [], leadSources: [], leads: { angiKey: "", thumbtackSecret: "" }, software: "google",
-    phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
+    phone: { businessNumber: "", twilioNumber: "", forwarding: "missed", carrier: "other", transferTo: "", handoffEnabled: false, voiceForwardTo: "", textBack: true, tenDlc: "not_started" },
     voice: { provider: "none" }, provision: { status: "pending", steps: {} },
     calendar: { provider: "none" }, billing: { status: "none" },
     build: { status: "pending", notes: "", sourcePages: [] },
@@ -186,6 +186,7 @@ export function loopCheck(c) {
   const p = c.phone || {}, o = c.owner || {};
   const same = (a, b) => a && b && a === b;
   if (same(o.phone, p.twilioNumber)) return { field: "owner.phone", message: "Your cell cannot be the front desk number." };
+  if (p.handoffEnabled === true && (!/^\+1[2-9]\d{9}$/.test(p.transferTo || '') || same(p.transferTo,p.businessNumber) || same(p.transferTo,p.twilioNumber))) return {field:'phone.transferTo',message:'Choose a valid transfer phone that is separate from your business line and front desk number.'};
   if (o.backupPhone && (same(o.backupPhone, p.businessNumber) || same(o.backupPhone, p.twilioNumber) || same(o.backupPhone, o.phone))) return { field: "owner.backupPhone", message: "The backup number must be a different phone from your cell, your business line, and the front desk number." };
   if (p.forwarding === "all" && p.transferTo && same(p.transferTo, p.businessNumber)) return { field: "phone.transferTo", message: "With all calls forwarded, transfers must go to a phone that is not the forwarded line, or every transfer comes straight back to the front desk. Leave it blank and the front desk takes a message and promises a callback instead." };
   for (const n of c.rules?.bypass || []) {

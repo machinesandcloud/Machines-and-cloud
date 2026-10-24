@@ -3,6 +3,7 @@
 // idempotency key. Correlation plus GET can recover a lost response, never prove
 // that a timed-out creation is safe to repeat.
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
+import { REQUEST_HUMAN } from "./managed-voice-handoff.mjs";
 
 const uuid = value => typeof value === "string" && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
 const pn = value => /^PN[a-f0-9]{32}$/i.test(value || "");
@@ -18,11 +19,11 @@ function independentFallback() {
 }
 export function managedAssistantBody(c, { correlationId, inputRevision, policy, site }) {
   const server = managedVoiceServer(site);
-  const definitions = [GET_AVAILABILITY, BOOK_VISIT, NOTIFY_OWNER].map(def => ({ type: "function", async: false,
+  const definitions = [GET_AVAILABILITY, BOOK_VISIT, NOTIFY_OWNER, REQUEST_HUMAN].map(def => ({ type: "function", async: false,
     function: { name: def.name, description: def.name === "book_visit" ? "Reserve an available listed visit after the caller explicitly agrees. Report only the returned status; do not claim an email, text or calendar delivery unless confirmed in the result." : def.name === "notify_owner" ? "Save the caller's request in the owner's workspace. Report only the returned delivery status, without promising a callback deadline." : def.description,
       parameters: structuredClone(def.input_schema) }, server }));
   return { name: label("voice", correlationId), firstMessage: `Thanks for calling ${c.business.name}. This is the front desk assistant.${c.business.spanish ? " Hablamos español." : ""} How can I help?`, firstMessageMode: "assistant-speaks-first",
-    model: { provider: "anthropic", model: policy.model, temperature: 0.3, maxTokens: 350, messages: [{ role: "system", content: buildSystemPrompt(c, "voice") + "\nPhone delivery contract: Speak one short natural sentence at a time. Confirm the name, callback phone, address and selected date/window, and ask for agreement before booking. Tool results are authoritative. A workspace record is not proof of a text, email, calendar sync or human callback. Never invent successful delivery or a callback time. If a tool fails, say the request could not be confirmed and ask the caller to contact the shop directly. If asked, say you are an AI front desk assistant." }], tools: definitions },
+    model: { provider: "anthropic", model: policy.model, temperature: 0.3, maxTokens: 350, messages: [{ role: "system", content: buildSystemPrompt(c, "voice") + "\nPhone delivery contract: Speak one short natural sentence at a time. Confirm the name, callback phone, address and selected date/window, and ask for agreement before booking. Tool results are authoritative. A workspace record is not proof of a text, email, calendar sync or human callback. Never invent successful delivery or a callback time. For a caller asking for a person, or a saved handoff rule, confirm the callback details and ask whether they want a live connection attempt or just a callback request. Use request_human only after their agreement. A callback request must never start a transfer. Never say a phone is ringing, someone accepted, help was dispatched, or a callback is scheduled without the corresponding authoritative result. Life-safety instructions come first; a transfer is not emergency dispatch. If a tool fails, say the request could not be confirmed and ask the caller to contact the shop directly. If asked, say you are an AI front desk assistant." }], tools: definitions },
     transcriber: { provider: "deepgram", model: "nova-3", language: c.business.spanish ? "multi" : "en" },
     ...(policy.voiceProvider && policy.voiceId ? { voice: { provider: policy.voiceProvider, voiceId: policy.voiceId } } : {}),
     maxDurationSeconds: policy.maxDurationSeconds, server, serverMessages: ["tool-calls", "end-of-call-report", "status-update"],
@@ -115,6 +116,19 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
     return { confirmed: true, numberId: number.sid, phoneNumberId: imported.resource.id, vapiUrl: vapiUrl(args.savedVapiUrl), fallbackConfigured: true, checkedAt: new Date().toISOString() };
   }
   return {
+    async redirectCall({ call, callbackUrl, authorizeDispatch }) {
+      let dispatched=false;
+      try {
+      if (!/^CA[a-f0-9]{32}$/i.test(call?.twilioCallSid || "")) throw new Error("Invalid parent call");
+      const path = `/Calls/${call.twilioCallSid}.json`, current = await request("twilio", path);
+      if (!current || current.sid !== call.twilioCallSid || current.account_sid !== process.env.TWILIO_ACCOUNT_SID || current.from !== call.from || current.to !== call.number || current.direction !== "inbound" || current.status !== "in-progress") throw new Error("Parent call no longer available");
+      await authorize(authorizeDispatch);
+      dispatched=true;
+      const receipt = await request("twilio", path, "POST", { Url: callbackUrl, Method: "POST" });
+      if (receipt?.sid !== call.twilioCallSid || receipt.account_sid !== process.env.TWILIO_ACCOUNT_SID) throw new Error("Call control receipt unavailable");
+      return { callSid: receipt.sid, status: "accepted" };
+      } catch(error) { if (!dispatched) error.code='handoff_not_dispatched'; throw error; }
+    },
     async createAssistant(args) { await authorize(args.authorizeDispatch); return assistantReceipt(await request("vapi", "/assistant", "POST", managedAssistantBody(args.client, args)), args); },
     async lookupAssistant(args) { return lookup("assistant", args); },
     async updateAssistant(args) {

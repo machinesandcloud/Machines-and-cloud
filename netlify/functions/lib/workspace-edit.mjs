@@ -9,7 +9,7 @@ const plain = value => !!value && typeof value === 'object' && !Array.isArray(va
 const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const editable = {
   business: ['name', 'website', 'trade', 'city', 'serviceArea', 'notServed', 'hours', 'afterHours', 'spanish', 'licenses', 'googlePlaceId', 'reviewLink', 'payLink'],
-  owner: ['name', 'phone', 'backupPhone'], phone: ['businessNumber', 'transferTo', 'forwarding', 'carrier'],
+  owner: ['name', 'phone', 'backupPhone'], phone: ['businessNumber', 'transferTo', 'handoffEnabled', 'forwarding', 'carrier'],
   widget: ['greeting', 'allowedOrigins'], digest: ['text'],
   rules: ['never', 'handoff', 'emergencies', 'ackMinutes', 'callbackHours', 'callbackAfterHours', 'windowCapacity', 'consentAsk', 'emergency247', 'hours', 'bypass', 'avgTicket'],
 };
@@ -123,7 +123,7 @@ export function parseWorkspacePatch(input, { operator = false } = {}) {
   };
   if (!operator) Object.assign(schema, {
     owner: object({ name: text(300), phone, backupPhone: phone }),
-    phone: object({ businessNumber: phone, transferTo: phone, forwarding: choice(['missed', 'all', 'none']), carrier: choice(['att', 'verizon', 'tmobile', 'voip', 'other', '']) }),
+    phone: object({ businessNumber: phone, transferTo: phone, handoffEnabled:bool, forwarding: choice(['missed', 'all', 'none']), carrier: choice(['att', 'verizon', 'tmobile', 'voip', 'other', '']) }),
     widget: object({ greeting: text(200), allowedOrigins: list(5, 300, link(true)) }),
     digest: object({ text: bool }),
     rules: object({

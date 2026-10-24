@@ -13,6 +13,7 @@ import { deliveryTenant } from "./managed-consent.mjs";
 import { queueManagedRecord, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
 import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-delivery.mjs";
 import { strictRead } from "./accounts.mjs";
+import { atomicUpdate } from './store.mjs';
 
 async function queueSavedDelivery(c, record, kind) {
   if (!isSelfServiceClient(c) || record.websiteSetupCheck || record.simulation) return;
@@ -415,6 +416,7 @@ export async function flagLead(c, input, ctx = {}) {
   }
   const l = await (stable ? createRecordOnce : addRecord)("leads", c.slug, {
     ...(stable ? { id: ctx.managedActionId.slice(0,32), managedActionId: ctx.managedActionId } : {}),
+    ...(stable && Number.isFinite(Date.parse(ctx.managedHumanDeadlineAt)) ? {managedHumanDeadlineAt:ctx.managedHumanDeadlineAt} : {}),
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
     channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c, phone),
@@ -490,7 +492,17 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
 
 // ---- Acknowledge and escalate ----
 export async function openAlert(c, lead, kind) {
-  if (isSelfServiceClient(c)) return { status: "channel_not_active" };
+  if (isSelfServiceClient(c)) {
+    if (lead?.channel!=='call' || !/^[a-f0-9]{64}$/.test(lead.managedActionId || '') || lead.id!==lead.managedActionId.slice(0,32)) return {status:'channel_not_active'};
+    await assertCurrentWorkspace(c);
+    if (!belongsToWorkspace(c,lead) || !/^[a-f0-9]{32}$/.test(lead.id || '')) throw new Error('Alert source changed');
+    const deadlineAt=Number.isFinite(Date.parse(lead.managedHumanDeadlineAt))?lead.managedHumanDeadlineAt:new Date(Date.parse(lead.createdAt)+(Number(c.rules?.ackMinutes)||10)*60000).toISOString();
+    // The existing task is also creation intent. Replays restore the same task,
+    // and its tenant binding prevents a former workspace's task reaching a new one.
+    const taskKey=`${deadlineAt}_${lead.id}`;
+    await atomicUpdate('tasks',taskKey,old=>old?{result:old}:{value:{id:lead.id,slug:c.slug,type:'escalate',dueAt:deadlineAt,data:{alertId:lead.id,tenantIdentity:workspaceTenant(c)},createdAt:new Date().toISOString()}});
+    return createRecordOnce('alerts',c.slug,{id:lead.id,tenantIdentity:workspaceTenant(c),leadId:lead.id,kind,status:'waiting',step:0,deadlineAt,createdAt:lead.createdAt,history:[],deliveryMode:'workspace_only'});
+  }
   const a = await addRecord("alerts", c.slug, { ...(isSelfServiceClient(c)?{tenantIdentity:workspaceTenant(c)}:{}),leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
   const mins = Number(c.rules?.ackMinutes) || 10;
   await scheduleTask(c.slug, new Date(Date.now() + mins * 60 * 1000), "escalate", { alertId: a.id });
@@ -499,6 +511,14 @@ export async function openAlert(c, lead, kind) {
 }
 
 export async function ackAlertsFor(c, recordId, by = "owner") {
+  if (isSelfServiceClient(c)) {
+    await assertCurrentWorkspace(c);
+    const key=`${c.slug}/${recordId}`, at=new Date().toISOString();
+    const n=await atomicUpdate('alerts',key,a=>a && belongsToWorkspace(c,a) && a.leadId===recordId && a.status==='waiting'?{value:{...a,status:'acked',ackedAt:at,ackedBy:by},result:1}:{result:0});
+    // Keep the deterministic task; its ordinary scheduled run observes acked
+    // status and retires it without scanning/cancelling another incarnation.
+    return n;
+  }
   const alerts = (await workspaceRows(c,"alerts",200)).filter((a) => belongsToWorkspace(c,a)&&a.leadId === recordId && a.status === "waiting");
   for (const a of alerts) { a.status = "acked"; a.ackedAt = new Date().toISOString(); a.ackedBy = by; await saveRecord("alerts", a); await logEvent(c, "alert_acked", { id: a.id, by }); }
   if (alerts.length) { const ids = new Set(alerts.map((a) => a.id)); await cancelTasks(c.slug, (t) => t.type === "escalate" && ids.has(t.data?.alertId)); }
@@ -506,7 +526,29 @@ export async function ackAlertsFor(c, recordId, by = "owner") {
 }
 
 export async function runEscalation(c, task) {
-  if (isSelfServiceClient(c)) return "channel_not_active";
+  if (isSelfServiceClient(c)) {
+    await assertCurrentWorkspace(c);
+    if (!/^[a-f0-9]{64}$/.test(task.data?.tenantIdentity || '')) return 'channel_not_active';
+    if (task.data?.tenantIdentity!==workspaceTenant(c)) return 'workspace_changed';
+    let lead=await strictRead('leads',`${c.slug}/${task.data?.alertId}`);
+    if (!lead && task.data?.humanRequest) {
+      const r=task.data.humanRequest, call=await strictRead('managed_voice_calls',`${c.slug}/${r.parentCallSid}`);
+      const {createHash}=await import('node:crypto'), expected=createHash('sha256').update(`${workspaceTenant(c)}:${r.parentCallSid}:human`).digest('hex');
+      if (!call || call.operationId!==r.operationId || call.from!==r.contact || r.actionId!==expected || r.actionId.slice(0,32)!==task.data.alertId || !Number.isFinite(Date.parse(r.deadlineAt))) return 'workspace_changed';
+      lead=await flagLead(c,r.input,{channel:'call',contact:r.contact,managedActionId:r.actionId,managedHumanDeadlineAt:r.deadlineAt});
+    }
+    if (!belongsToWorkspace(c,lead)) return 'workspace_changed';
+    if (!await strictRead('alerts',`${c.slug}/${task.data.alertId}`) && lead.status==='open') await openAlert(c,lead,lead.urgency==='emergency'?'emergency':'wants_call');
+    return atomicUpdate('alerts',`${c.slug}/${task.data.alertId}`,a=>{
+      if (!a || !belongsToWorkspace(c,a)) return {result:'workspace_changed'};
+      if (a.status!=='waiting') return {result:a.status};
+      if (lead.status!=='open') return {value:{...a,status:'closed'},result:'lead closed'};
+      if (Date.parse(a.deadlineAt)>Date.now()) throw new Error('Alert is not due');
+      if (a.attentionDueAt) return {result:'attention_due'};
+      const at=new Date().toISOString();
+      return {value:{...a,attentionDueAt:at,history:[...a.history,{step:1,how:'Workspace attention due; no external contact or callback promise',at}]},result:'attention_due'};
+    });
+  }
   const a = await getRecord("alerts", c.slug, task.data?.alertId);
   if (!a) return "no alert";
   if (a.status !== "waiting") return a.status;

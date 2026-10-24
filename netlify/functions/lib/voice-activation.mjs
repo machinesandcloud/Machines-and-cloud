@@ -6,6 +6,7 @@ import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient } from "./setup.mjs";
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle } from "./phone-activation.mjs";
 import { createManagedVoiceProvider, managedAssistantBody } from "./voice-provider.mjs";
+import { requestManagedHuman, handleManagedHumanCallback } from './managed-voice-handoff.mjs';
 
 export class VoiceActivationError extends Error { constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; } }
 const STORE = "voice_activation_intents", QUEUE = "voice_activation_queue", KEY = "active_v1", CALLS = "managed_voice_calls", CALLBACKS = "managed_voice_callbacks";
@@ -331,7 +332,7 @@ async function serving(row) {
   const parent = c && row.number ? await getPhoneResourceLifecycle(c) : null;
   const brake = await strictRead("health", "brake"), gate = productionPolicy();
   const owned = c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && configurationRevision(c) === row.inputRevision && validNumber(c.owner?.phone) && gate.enabled && row.policy && digest(row.policy) === row.policyDigest && digest(gate.policy) === row.policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id && !brake?.on;
-  const valid = owned && life(c) === row.lifecycle && ["testing", "live"].includes(c.status) && reviewed(c) && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000;
+  const valid = owned && !row.cancelRequestedAt && life(c) === row.lifecycle && ["testing", "live"].includes(c.status) && reviewed(c) && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000;
   // Pausing/detaching AI does not revoke an unchanged, approved owner route.
   // Workspace/number cancellation, changed configuration or the account stop do.
   const fallbackAllowed = owned && ["testing", "live", "paused"].includes(c.status) && row.authority?.acceptedAuthority === true && row.authority.policyDigest === row.policyDigest && normalizeAccountEmail(row.authority.actor?.email) === normalizeAccountEmail(c.owner?.email);
@@ -349,12 +350,17 @@ function fallback(c, row, from, allowed, timeLimit, forwardedFrom = []) {
 export async function handleManagedVoiceWebhook(req) {
   if (req.method !== "POST") return json({ error: "method" }, 405);
   const url = new URL(req.url), publicUrl = siteUrl() + url.pathname + url.search;
-  if (url.pathname !== "/api/managed-voice" || !["inbound", "fallback", "status", "dial-status"].includes(url.searchParams.get("kind")) || url.searchParams.size !== 2) return json({ error: "route" }, 400);
+  const humanKind = ['handoff','handoff-screen','handoff-accept','handoff-status'].includes(url.searchParams.get('kind'));
+  if (url.pathname !== "/api/managed-voice" || !humanKind && !["inbound", "fallback", "status", "dial-status"].includes(url.searchParams.get("kind")) || url.searchParams.size !== (humanKind?4:2) || [...url.searchParams.keys()].some(key=>!(humanKind?['o','kind','p','leg']:['o','kind']).includes(key))) return json({ error: "route" }, 400);
   const raw = await req.text(); if (Buffer.byteLength(raw) > 16000) return json({ error: "too_large" }, 413);
   const entries = new URLSearchParams(raw); if ([...new Set(entries.keys())].length !== [...entries.keys()].length) return json({ error: "ambiguous_form" }, 400);
   const params = Object.fromEntries(entries);
   if (!twilioValid(publicUrl, params, req.headers.get("x-twilio-signature"))) return json({ error: "forbidden" }, 403);
   const row = await callbackRow(url.searchParams.get("o"));
+  if (humanKind) {
+    if (!row || params.AccountSid !== process.env.TWILIO_ACCOUNT_SID) return json({error:'call_mismatch'},403);
+    return handleManagedHumanCallback({row,params,url,site:siteUrl(),reserve:reserveVoiceBudget,current:async()=>{const latest=await callbackRow(row.callbackToken);if (!latest || latest.generation!==row.generation) return null;const state=await serving(latest);return state.valid?state:null;}});
+  }
   if (!row || params.AccountSid !== process.env.TWILIO_ACCOUNT_SID || !/^CA[a-f0-9]{32}$/i.test(params.CallSid || "") || params.To !== row.number?.number) return json({ error: "call_mismatch" }, 403);
   const { c, valid, fallbackAllowed } = await serving(row), callKey = row.slug + "/" + params.CallSid;
   let kind = url.searchParams.get("kind");
@@ -382,6 +388,7 @@ export async function handleManagedVoiceWebhook(req) {
   }
   if (!currentCall(call, row, params)) return json({ error: "call_mismatch" }, 403);
   if (kind === "fallback") {
+    if (call.handoff?.connection==='live_transfer') return xml(unavailable());
     if (call.fallbackOutcome) return xml(call.fallbackOutcome.status === "completed" ? "<Hangup/>" : unavailable());
     // Returning TwiML has an uncertain delivery boundary too. Once its one
     // attempt is retained, do not return another paid Dial without a receipt.
@@ -401,7 +408,7 @@ export async function handleManagedVoiceWebhook(req) {
       });
     }
     if (dialing && (admission?.status !== "admitted" || Date.parse(admission.expiresAt) <= Date.now())) return xml(unavailable());
-    const saved = await atomicUpdate(CALLS, callKey, old => currentCall(old, row, params) && !old.fallbackAttempt && !old.fallbackOutcome ? { value: { ...old, fallbackAttempt: { id: hash(row.id + ":" + params.CallSid + ":fallback"), at: iso(), destination: dialing ? safeFallback(c) : null } }, result: true } : { result: false });
+    const saved = await atomicUpdate(CALLS, callKey, old => currentCall(old, row, params) && old.handoff?.connection!=='live_transfer' && !old.fallbackAttempt && !old.fallbackOutcome ? { value: { ...old, fallbackAttempt: { id: hash(row.id + ":" + params.CallSid + ":fallback"), at: iso(), destination: dialing ? safeFallback(c) : null } }, result: true } : { result: false });
     if (!saved) return xml(unavailable());
     await change(row.id, old => old.generation === row.generation && old.tenantIdentity === row.tenantIdentity ? { ...old, evidence: { ...old.evidence, fallbackObservedAt: iso(), lastFailureAt: iso() } } : null);
     // Never route an old caller to a replacement owner's phone after a save.
@@ -429,7 +436,8 @@ export async function handleManagedVoiceWebhook(req) {
 }
 function callSid(message) { return message.call?.transport?.provider === "twilio" ? message.call.transport.callSid : message.call?.phoneCallProvider === "twilio" ? message.call.phoneCallProviderId : null; }
 async function reserveVoiceBudget(row, sid, purpose = "assistant") {
-  const policy = row.policy, seconds = policy.maxDurationSeconds + (purpose === "fallback" ? 30 : 0), key = hash(row.id + ":" + sid + (purpose === "fallback" ? ":fallback" : ""));
+  if (!['assistant','fallback','handoff-primary','handoff-backup'].includes(purpose)) throw new Error('Invalid voice budget purpose');
+  const policy = row.policy, seconds = policy.maxDurationSeconds + (purpose !== "assistant" ? 30 : 0), key = hash(row.id + ":" + sid + (purpose !== "assistant" ? ":"+purpose : ""));
   async function reserve(scope, callsLimit, minutesLimit) {
     // Each Houston day has its own key. A delayed old-day request cannot reset
     // a newer day's counters, and an uncertain reservation is never refunded.
@@ -487,13 +495,14 @@ export async function handleManagedVapiWebhook(req, { dispatchTool } = {}) {
     const results = [];
     for (const tool of m.toolCallList) {
       const name = tool.function?.name || tool.name, id = tool.id;
-      if (typeof id !== "string" || id.length < 1 || id.length > 100 || !["get_availability", "book_visit", "notify_owner"].includes(name)) { results.push({ toolCallId: String(id || ""), error: "Unsupported tool." }); continue; }
+      if (typeof id !== "string" || id.length < 1 || id.length > 100 || !["get_availability", "book_visit", "notify_owner", "request_human"].includes(name)) { results.push({ toolCallId: String(id || ""), error: "Unsupported tool." }); continue; }
       if (!valid || typeof dispatchTool !== "function") { results.push({ toolCallId: id, error: "This request cannot be confirmed. Please ask the caller to contact the shop directly." }); continue; }
       let input = tool.function?.arguments ?? tool.arguments ?? {}; try { if (typeof input === "string") input = JSON.parse(input); } catch { input = null; }
       if (!input || typeof input !== "object" || Array.isArray(input)) { results.push({ toolCallId: id, error: "Invalid tool details." }); continue; }
       // Dispatcher must persist stable effects keyed by call+toolCallId. It
       // returns explicit saved/confirmed delivery statuses, not optimistic text.
-      try { const currentRow = await strictRead(STORE, row.id), [latest, currentCall] = await Promise.all([serving(currentRow), strictRead(CALLS, callKey)]); if (!latest.valid || currentRow.generation !== row.generation || !currentCall || currentCall.endReportAt || ["completed", "busy", "failed", "no-answer", "canceled"].includes(currentCall.twilioStatus) || currentCall.vapiCallId !== vapiCallId || currentCall.generation !== currentRow.generation) throw new Error("Workspace or call changed"); const result = await dispatchTool({ client: latest.c, callId: vapiCallId, toolCallId: id, name, input, caller: call.from, operationId: row.id }); results.push({ toolCallId: id, result: typeof result === "string" ? result : JSON.stringify(result) }); }
+      try { const currentRow = await strictRead(STORE, row.id), [latest, currentCall] = await Promise.all([serving(currentRow), strictRead(CALLS, callKey)]); if (!latest.valid || currentRow.generation !== row.generation || !currentCall || currentCall.endReportAt || ["completed", "busy", "failed", "no-answer", "canceled"].includes(currentCall.twilioStatus) || currentCall.vapiCallId !== vapiCallId || currentCall.generation !== currentRow.generation) throw new Error("Workspace or call changed");
+        const result = name==='request_human' ? await requestManagedHuman({row:currentRow,call:currentCall,input,site:siteUrl(),reserve:reserveVoiceBudget,redirectCall:args=>createManagedVoiceProvider({executionAllowed:()=>productionPolicy().enabled}).redirectCall(args),current:async()=>{const saved=await strictRead(STORE,row.id),active=await strictRead(CALLS,callKey);if (!saved || saved.generation!==row.generation || !active || active.endReportAt || active.vapiCallId!==vapiCallId || ['completed','busy','failed','no-answer','canceled'].includes(active.twilioStatus)) return null;const state=await serving(saved);return state.valid?state:null;}}) : await dispatchTool({ client: latest.c, callId: vapiCallId, toolCallId: id, name, input, caller: call.from, operationId: row.id }); results.push({ toolCallId: id, result: typeof result === "string" ? result : JSON.stringify(result) }); }
       catch { results.push({ toolCallId: id, error: "This request could not be confirmed. Do not claim it was booked or delivered." }); }
     }
     return json({ results });

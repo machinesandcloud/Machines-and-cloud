@@ -14,6 +14,7 @@ import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mj
 import { googleEnabled } from "./lib/calendar.mjs";
 import { stripeEnabled } from "./lib/billing.mjs";
 import { dailyDigest, lineHealth, ackAlertsFor, weeklyReport, monthlyReport } from "./lib/desk.mjs";
+import { managedHumanLeadView } from './lib/managed-voice-handoff.mjs';
 import { getUsage, usageView } from "./lib/usage.mjs";
 import { updateVoicePrompt, detachVoice, attachVoice } from "./lib/vapi.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
@@ -148,9 +149,10 @@ async function handle(req) {
     ]);
     let bookings=bookingPage.records,leads=leadPage.records,alerts=alertPage.records;
     bookings=bookings.filter(row=>belongsToWorkspace(c,row));leads=leads.filter(row=>belongsToWorkspace(c,row));convs=convs.filter(row=>belongsToWorkspace(c,row));events=events.filter(row=>belongsToWorkspace(c,row));alerts=alerts.filter(row=>belongsToWorkspace(c,row));
-    if(selfService)leads=await requestFollowthroughSummaries(c,leads);
+    if(selfService)leads=await requestFollowthroughSummaries(c,await Promise.all(leads.map(lead=>managedHumanLeadView(c,lead))));
     const ownerBookings = selfService ? await Promise.all(bookings.filter(booking => visibleOwnerBooking(c, booking)).map(async booking => ({ ...booking, ownerVisit: ownerVisitView(booking), pendingVisitChange: await pendingOwnerVisitChange(c, booking.id) }))) : bookings;
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
+    const attentionDue = new Set(alerts.filter(a=>a.status==='waiting' && a.attentionDueAt).map(a=>a.leadId));
     const connections=selfService?await serviceConnections(c):null;
     if(selfService){
       const sms=await managedSMSConversations(c,{limit:60});
@@ -159,7 +161,7 @@ async function handle(req) {
     const serviceOnboarding=selfService?await serviceOnboardingStatus(c):null;
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, leadConnections: await leadConnectionsView(c), serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, leadConnections: await leadConnectionsView(c), serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, ...(selfService && v.channel === 'web' ? { reference: conversationReference(c,v.channel,v.contact), retainedMessages: v.history?.total ?? v.messages.length, historyComplete: v.history?.complete === true } : {}), messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
@@ -422,7 +424,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
       return json({ ok: true, status: c.status, serviceEndsAt: c.serviceEndsAt, off: fw.off });
     }
     if (b.action === "ack") {
-      const n = await ackAlertsFor(c, s(b.leadId, 20), "portal");
+      const n = await ackAlertsFor(c, s(b.leadId, 64), "portal");
       return json({ ok: true, acked: n });
     }
     if (b.action === "flag" || b.action === "unflag") {

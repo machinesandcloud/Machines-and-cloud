@@ -1,0 +1,279 @@
+{
+  "at": "2026-10-24T16:06:10.912Z",
+  "scope": "Actual local handlers with in-memory storage and intercepted Twilio HTTP protocol; no real requests/calls/messages",
+  "sourceBefore": {
+    "netlify/functions/lib/managed-voice-handoff.mjs": "c964188aee82e5fe34d1204bb3167895e5bf1447084e0c6f95d6004552802502",
+    "netlify/functions/lib/voice-activation.mjs": "979bc1eabc864d790c7e5108cd426adfe2a550eeea02079fe5b54cdc4ab5a271",
+    "netlify/functions/lib/voice-provider.mjs": "6dec2c96942c4a9484d775869c1e64f2e7244149e5887db23a7c745c2d58e443",
+    "netlify/functions/lib/desk.mjs": "96818fe4732c84b603d51c3f0288bb3b4d7689791173a90adc79a85780a9400e",
+    "netlify/functions/lib/setup.mjs": "0a32317b15aad42db101b100124b35fe5904c162e6db436a97fc769a86059a78",
+    "netlify/functions/lib/config.mjs": "988b3a94dbf4d111e89fb5fa16f3705e98b7f2b3dc4ef26d7dd3e0c92db9ec46",
+    "netlify/functions/lib/workspace-edit.mjs": "ec3e19c63229c88854ab3375051e8c3d87341350a690e9996e4062f7b141dc83",
+    "netlify/functions/client.mjs": "82ce440d902ae3552c6ba18739937654cb3a05717e6efe052a96299fe52ee401",
+    "netlify/functions/scheduler.mjs": "55aa3a8aa1477e1c5e3362e4a0881f3f88d46a7f3321270d899f2badf5ec7c32",
+    "desk.html": "06842b565564f04e1040e56dd43a83f8f63c3f2dff235bc63d0869cd5853f829",
+    "desk.js": "4bb6ab94ebc9712a4343c29728cf8a1b06403a92818d96fa85a1896d58af08c1"
+  },
+  "checks": [
+    {
+      "name": "Owner saves explicit off-by-default transfer authority through the actual revisioned handler",
+      "pass": true
+    },
+    {
+      "name": "Malformed or foreign owner cannot widen transfer authority",
+      "pass": true
+    },
+    {
+      "name": "Callback choice saves a request and acknowledgment record without a transfer or callback promise",
+      "pass": true
+    },
+    {
+      "name": "Old voice approvals without the saved transfer opt-in stay callback-only",
+      "pass": true
+    },
+    {
+      "name": "Caller agreement, confirmed details and destination allowlist reject model-controlled routing",
+      "pass": true
+    },
+    {
+      "name": "Concurrent new model tool IDs own one immutable handoff and one control update",
+      "pass": true
+    },
+    {
+      "name": "One signed handoff response emits one paid leg and a replay cannot redial",
+      "pass": true
+    },
+    {
+      "name": "Human must press 1 before bridge; signed acceptance acknowledges without claiming service completion",
+      "pass": true
+    },
+    {
+      "name": "Known no-answer tries one distinct approved backup and final failure speaks the saved-request limit",
+      "pass": true
+    },
+    {
+      "name": "Voicemail/no input declines rather than accepting a human and can try the backup",
+      "pass": true
+    },
+    {
+      "name": "Missing or conflicting provider child identity never triggers a backup or false connection",
+      "pass": true
+    },
+    {
+      "name": "Signed screening child cannot be replaced by another call or destination",
+      "pass": true
+    },
+    {
+      "name": "Control responses lost before or after effect retain one uncertain operation across new tool IDs",
+      "pass": true
+    },
+    {
+      "name": "Explicit provider parent identity mismatch cannot transfer a different customer call",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'not_attempted'\n- 'control_uncertain'\n\n    at file:///private/tmp/mc-managed-voice-a0bd/scripts/managed-voice-handoff-check.mjs:80:200\n    at async check (file:///private/tmp/mc-managed-voice-a0bd/scripts/managed-voice-handoff-check.mjs:40:152)\n    at async file:///private/tmp/mc-managed-voice-a0bd/scripts/managed-voice-handoff-check.mjs:80:1"
+    },
+    {
+      "name": "Known forwarding source, business line and original caller are never destinations",
+      "pass": true
+    },
+    {
+      "name": "Pause, cancellation, account brake, policy changes and owner replacement stop a new paid leg",
+      "pass": true
+    },
+    {
+      "name": "Changed authority between call-control GET and dispatch refuses the POST",
+      "pass": true
+    },
+    {
+      "name": "Daily and account leg capacity reject the Dial while keeping the saved request",
+      "pass": true
+    },
+    {
+      "name": "A signed stale operation or ended call cannot start another transfer",
+      "pass": true
+    },
+    {
+      "name": "Ordinary scheduled attention uses the existing task and never sends or calls a founder",
+      "pass": true
+    },
+    {
+      "name": "Scheduled alert and acknowledgment remain isolated from a recreated workspace",
+      "pass": true
+    },
+    {
+      "name": "Spanish failed connection has spoken recovery and no promised callback deadline",
+      "pass": true
+    }
+  ],
+  "providerProtocol": [
+    {
+      "method": "GET",
+      "sid": "CA0da86f5b078741fc02ede5d8112fe71e"
+    },
+    {
+      "method": "POST",
+      "sid": "CA0da86f5b078741fc02ede5d8112fe71e"
+    },
+    {
+      "method": "GET",
+      "sid": "CA854f840d9813dcfe31f6d192d6e77fb6"
+    },
+    {
+      "method": "POST",
+      "sid": "CA854f840d9813dcfe31f6d192d6e77fb6"
+    },
+    {
+      "method": "GET",
+      "sid": "CAaf7244885faec9f844a4c83c088e8239"
+    },
+    {
+      "method": "POST",
+      "sid": "CAaf7244885faec9f844a4c83c088e8239"
+    },
+    {
+      "method": "GET",
+      "sid": "CA309407f4509af3c243ac6269dfcf901f"
+    },
+    {
+      "method": "POST",
+      "sid": "CA309407f4509af3c243ac6269dfcf901f"
+    },
+    {
+      "method": "GET",
+      "sid": "CAa07262f676db8865f79d0f2698ce7aa7"
+    },
+    {
+      "method": "POST",
+      "sid": "CAa07262f676db8865f79d0f2698ce7aa7"
+    },
+    {
+      "method": "GET",
+      "sid": "CA1978957b60890f26ecee31dd17e02783"
+    },
+    {
+      "method": "POST",
+      "sid": "CA1978957b60890f26ecee31dd17e02783"
+    },
+    {
+      "method": "GET",
+      "sid": "CA9b4a310472bc4133db0455f264b4f029"
+    },
+    {
+      "method": "POST",
+      "sid": "CA9b4a310472bc4133db0455f264b4f029"
+    },
+    {
+      "method": "GET",
+      "sid": "CAb914d6290f9a76b2b90fa7acbe2fc9a1"
+    },
+    {
+      "method": "POST",
+      "sid": "CAb914d6290f9a76b2b90fa7acbe2fc9a1"
+    },
+    {
+      "method": "GET",
+      "sid": "CA192361b93b3bfe3d56793270ddba1af2"
+    },
+    {
+      "method": "POST",
+      "sid": "CA192361b93b3bfe3d56793270ddba1af2"
+    },
+    {
+      "method": "GET",
+      "sid": "CA5ac9c7434280b7eaa125a9f555db73fc"
+    },
+    {
+      "method": "POST",
+      "sid": "CA5ac9c7434280b7eaa125a9f555db73fc"
+    },
+    {
+      "method": "GET",
+      "sid": "CA247aabdafcf9815bf150e13d8937eda0"
+    },
+    {
+      "method": "GET",
+      "sid": "CAa055659c98a5c1b3d8a24cdfdb322230"
+    },
+    {
+      "method": "POST",
+      "sid": "CAa055659c98a5c1b3d8a24cdfdb322230"
+    },
+    {
+      "method": "GET",
+      "sid": "CAe1e1cb795c5c1053feb11d325db8ae7f"
+    },
+    {
+      "method": "POST",
+      "sid": "CAe1e1cb795c5c1053feb11d325db8ae7f"
+    },
+    {
+      "method": "GET",
+      "sid": "CA52cb786b713831771444fb1a9cfb97f2"
+    },
+    {
+      "method": "POST",
+      "sid": "CA52cb786b713831771444fb1a9cfb97f2"
+    },
+    {
+      "method": "GET",
+      "sid": "CA5e544dd888e2bb73f175c659e9745275"
+    },
+    {
+      "method": "POST",
+      "sid": "CA5e544dd888e2bb73f175c659e9745275"
+    },
+    {
+      "method": "GET",
+      "sid": "CAfaddee1665b88bd19d245b720e1e276d"
+    },
+    {
+      "method": "POST",
+      "sid": "CAfaddee1665b88bd19d245b720e1e276d"
+    },
+    {
+      "method": "GET",
+      "sid": "CAf9500f13d58207b13dbaa1dbe425c62c"
+    },
+    {
+      "method": "GET",
+      "sid": "CAf0428aa0838a88af23e2bd199ec2102d"
+    },
+    {
+      "method": "POST",
+      "sid": "CAf0428aa0838a88af23e2bd199ec2102d"
+    },
+    {
+      "method": "GET",
+      "sid": "CA8edd233d322879680d546c8dc0958fc6"
+    },
+    {
+      "method": "POST",
+      "sid": "CA8edd233d322879680d546c8dc0958fc6"
+    },
+    {
+      "method": "GET",
+      "sid": "CA257df50ce5bbb745e0b639b281362e4a"
+    },
+    {
+      "method": "POST",
+      "sid": "CA257df50ce5bbb745e0b639b281362e4a"
+    }
+  ],
+  "sourceAfter": {
+    "netlify/functions/lib/managed-voice-handoff.mjs": "c964188aee82e5fe34d1204bb3167895e5bf1447084e0c6f95d6004552802502",
+    "netlify/functions/lib/voice-activation.mjs": "979bc1eabc864d790c7e5108cd426adfe2a550eeea02079fe5b54cdc4ab5a271",
+    "netlify/functions/lib/voice-provider.mjs": "6dec2c96942c4a9484d775869c1e64f2e7244149e5887db23a7c745c2d58e443",
+    "netlify/functions/lib/desk.mjs": "96818fe4732c84b603d51c3f0288bb3b4d7689791173a90adc79a85780a9400e",
+    "netlify/functions/lib/setup.mjs": "0a32317b15aad42db101b100124b35fe5904c162e6db436a97fc769a86059a78",
+    "netlify/functions/lib/config.mjs": "988b3a94dbf4d111e89fb5fa16f3705e98b7f2b3dc4ef26d7dd3e0c92db9ec46",
+    "netlify/functions/lib/workspace-edit.mjs": "ec3e19c63229c88854ab3375051e8c3d87341350a690e9996e4062f7b141dc83",
+    "netlify/functions/client.mjs": "82ce440d902ae3552c6ba18739937654cb3a05717e6efe052a96299fe52ee401",
+    "netlify/functions/scheduler.mjs": "55aa3a8aa1477e1c5e3362e4a0881f3f88d46a7f3321270d899f2badf5ec7c32",
+    "desk.html": "06842b565564f04e1040e56dd43a83f8f63c3f2dff235bc63d0869cd5853f829",
+    "desk.js": "4bb6ab94ebc9712a4343c29728cf8a1b06403a92818d96fa85a1896d58af08c1"
+  },
+  "sourceMatched": true,
+  "ok": false,
+  "passed": 21,
+  "total": 22
+}

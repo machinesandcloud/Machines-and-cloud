@@ -1,0 +1,35 @@
+scheduler: 13 due [
+  [ 'payment_reminder', 'channel_not_active' ],
+  [ 'reminder_1h', 'channel_not_active' ],
+  [ 'maintenance_reminder', 'channel_not_active' ],
+  [ 'reminder_24h', 'channel_not_active' ],
+  [ 'consent_ask', 'channel_not_active' ],
+  [ 'escalate', 'workspace_changed' ],
+  [ 'quote_check', 'channel_not_active' ],
+  [ 'lead_chase', 'channel_not_active' ],
+  [ 'review_nudge', 'channel_not_active' ],
+  [ 'referral_ask', 'channel_not_active' ],
+  [ 'callback_check', 'channel_not_active' ],
+  [ 'review_request', 'channel_not_active' ],
+  [ 'visit_check', 'channel_not_active' ]
+] digests 0 weeklies 0 released 0 ok
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+false !== true
+
+    at file:///private/tmp/mc-managed-voice-a0bd/scripts/self-service-scheduler-check.mjs:71:22
+    at check (file:///private/tmp/mc-managed-voice-a0bd/scripts/self-service-scheduler-check.mjs:62:39)
+    at file:///private/tmp/mc-managed-voice-a0bd/scripts/self-service-scheduler-check.mjs:71:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0

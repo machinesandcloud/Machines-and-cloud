@@ -7,7 +7,7 @@ export const isSupportedSelfServiceClient = c => c?.onboarding?.version === 1;
 const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 export function configurationRevision(c) {
   const business = Object.fromEntries(["name", "trade", "city", "serviceArea", "notServed", "hours", "afterHours", "spanish", "licenses"].map(key => [key, c.business?.[key] ?? null]));
-  const config = { business, owner: { name: c.owner?.name, phone: c.owner?.phone, backupPhone: c.owner?.backupPhone }, services: c.services, fees: c.fees, windows: c.windows, rules: c.rules, faq: c.faq, summary: c.summary, phone: { businessNumber: c.phone?.businessNumber, forwarding: c.phone?.forwarding, transferTo: c.phone?.transferTo }, widget: c.widget };
+  const config = { business, owner: { name: c.owner?.name, phone: c.owner?.phone, backupPhone: c.owner?.backupPhone }, services: c.services, fees: c.fees, windows: c.windows, rules: c.rules, faq: c.faq, summary: c.summary, phone: { businessNumber: c.phone?.businessNumber, forwarding: c.phone?.forwarding, transferTo: c.phone?.transferTo, ...(c.phone?.handoffEnabled === true ? {handoffEnabled:true}:{}) }, widget: c.widget };
   return createHash("sha256").update(JSON.stringify(canonical(config))).digest("hex");
 }
 export function setupReadiness(c) {
