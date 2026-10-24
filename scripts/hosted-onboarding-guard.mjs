@@ -3,18 +3,19 @@ import { open } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PUBLIC_STRIPE_ACCOUNT } from './lib/stripe-public-proof.mjs';
 
 export const HOSTED_ONBOARDING_SCOPE = 'hosted_onboarding_zaricoach_v1';
 // Proposed ceilings only. No manifest in this repository grants live authority.
 export const HOSTED_ONBOARDING_LIMITS = Object.freeze({total:240,platform:220,api:100,mutation:45,draft:14,asset:120,external:12,email:4,ownerEmail:3,operatorEmail:1,metadata:6,logical:10,bytes:35000000});
 export const HOSTED_ONBOARDING_TARGET = Object.freeze({
   origin:'https://machinesandcloud.com',canonicalOrigin:'https://www.machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',accountSlug:'docteureminem',
-  commit:'47e3c64163d20166970b6d309fbf6045a9de33b2',deployId:'6adbc34931bb7268db6db4f7',
-  externalOrigin:'https://zaricoach.com',externalPath:'/mc-front-desk-acceptance-20261023',pageExpiresAt:'2026-10-24T23:59:59Z',phaseId:'hosted-onboarding-zaricoach-20261024-v2',
-  ownerEmail:'ngoumnaisteve+mc-zaricoach-20261024@gmail.com',operatorEmail:'ngoumnaisteve@gmail.com',ownerName:'Internal QA Owner',business:'MC Acceptance Zari',callback:'+17135550142'
+  commit:'fc344d869086598accb8539ca2367dcb58dc9800',deployId:'6add0372cd11ef8c0a8a064f',
+  externalOrigin:'https://zaricoach.com',externalPath:'/mc-front-desk-acceptance-20261023',pageExpiresAt:'2026-10-24T23:59:59Z',phaseId:'hosted-onboarding-stripe-20261024-v3',
+  ownerEmail:'ngoumnaisteve+mc-zari-stripe-v3-20261024@gmail.com',operatorEmail:'ngoumnaisteve@gmail.com',ownerName:'Internal QA Owner',business:'MC Acceptance Zari',callback:'+17135550142'
 });
 export const HOSTED_ONBOARDING_GATES = Object.freeze(['PHONE_ACQUISITION_ENABLED','VOICE_ACTIVATION_ENABLED','MESSAGING_ACTIVATION_ENABLED','SERVICE_DELIVERY_ENABLED','CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','MC_PLATFORM_SMS_ENABLED','WORKSPACE_BILLING_ENABLED','WORKSPACE_BILLING_LIVE_ENABLED']);
-export const HOSTED_ONBOARDING_ASSETS = Object.freeze(['/','/index','/index.html','/onboard','/onboard.html','/desk','/desk.html','/admin','/admin.html','/styles.css','/site-refresh.css','/product-ui.css','/onboard.css','/desk.css','/desk-connections.css','/desk-billing.css','/admin.css','/script.js','/hero-photos.js','/agent-widget.js','/stories.js','/signup-intake.js','/onboard.js','/desk.js','/desk-connections.js','/desk-billing.js','/desk-requests.js','/admin.js','/embed.js','/assets/favicon.png','/assets/logo-dark.png','/assets/logo.png','/assets/photos/hero-hvac.jpg','/assets/photos/hero-electrician.jpg','/assets/photos/hero-home-repair.jpg','/assets/photos/cleaning.jpg']);
+export const HOSTED_ONBOARDING_ASSETS = Object.freeze(['/','/index','/index.html','/onboard','/onboard.html','/desk','/desk.html','/admin','/admin.html','/styles.css','/site-refresh.css','/product-ui.css','/onboard.css','/desk.css','/desk-connections.css','/desk-billing.css','/admin.css','/script.js','/hero-photos.js','/agent-widget.js','/stories.js','/signup-intake.js','/onboard.js','/desk.js','/desk-connections.js','/desk-billing.js','/desk-requests.js','/desk-activity.js','/desk-visits.js','/desk-conversations.js','/desk-lead-sources.js','/desk-lead-sources.css','/admin.js','/embed.js','/assets/favicon.png','/assets/logo-dark.png','/assets/logo.png','/assets/photos/hero-hvac.jpg','/assets/photos/hero-electrician.jpg','/assets/photos/hero-home-repair.jpg','/assets/photos/cleaning.jpg']);
 const T=HOSTED_ONBOARDING_TARGET,L=HOSTED_ONBOARDING_LIMITS;
 const fileStores=new WeakMap();
 const STATIC=new Set(HOSTED_ONBOARDING_ASSETS);
@@ -23,13 +24,31 @@ const hex=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
 const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;
 const hash=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const exact=(v,keys)=>obj(v)&&Object.keys(v).every(k=>keys.includes(k));
+const shape=(v,keys)=>exact(v,keys)&&Object.keys(v).length===keys.length;
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const canonical=v=>Array.isArray(v)?v.map(canonical):obj(v)?Object.fromEntries(Object.keys(v).sort().map(key=>[key,canonical(v[key])])):v;
+const digest=v=>createHash('sha256').update(typeof v==='string'?v:JSON.stringify(canonical(v))).digest('hex');
 const fail=code=>{throw new GuardError(code);};
 export class GuardError extends Error { constructor(code){super(`Hosted onboarding guard: ${code}`);this.name='GuardError';this.code=code;} }
 const TIER0='Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space';
+const BILLING_KEYS=['WORKSPACE_BILLING_ENABLED','WORKSPACE_BILLING_STRIPE_SECRET_KEY','WORKSPACE_BILLING_APPROVED_VERSION','WORKSPACE_BILLING_OFFER_JSON','WORKSPACE_BILLING_WEBHOOK_SECRET','WORKSPACE_BILLING_TEST_PROOF_POLICY_JSON','WORKSPACE_BILLING_TEST_PHASE_JSON','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','WORKSPACE_BILLING_LIVE_ENABLED','WORKSPACE_BILLING_PORTAL_ENABLED','WORKSPACE_BILLING_PORTAL_CONFIGURATION_ID'];
+const billingSnapshot=env=>Object.fromEntries(BILLING_KEYS.map(key=>[key,digest(key.endsWith('_ENABLED')?String(env[key]==='true'):env[key]||'')]));
+export function verifyHostedBillingTestConfiguration(manifest,env,{slug,identity,now=Date.now()}={}){
+  const declaration=manifest.billingTest;
+  if(!shape(declaration,['version','stripeAccountId','offerDigest','credentialHash','webhookSecretHash'])||declaration.stripeAccountId!==PUBLIC_STRIPE_ACCOUNT||!/^[a-z0-9_-]{1,80}$/.test(declaration.version||'')||!['offerDigest','credentialHash','webhookSecretHash'].every(key=>hex(declaration[key])))fail('billing_test_manifest_required');
+  if(env.WORKSPACE_BILLING_ENABLED!=='true'||env.WORKSPACE_BILLING_LIVE_ENABLED==='true'||env.WORKSPACE_BILLING_PORTAL_ENABLED==='true'||!/^(?:sk|rk)_test_[A-Za-z0-9_]+$/.test(env.WORKSPACE_BILLING_STRIPE_SECRET_KEY||'')||digest(env.WORKSPACE_BILLING_STRIPE_SECRET_KEY)!==declaration.credentialHash||!/^whsec_[A-Za-z0-9_]+$/.test(env.WORKSPACE_BILLING_WEBHOOK_SECRET||'')||digest(env.WORKSPACE_BILLING_WEBHOOK_SECRET)!==declaration.webhookSecretHash||env.WORKSPACE_BILLING_APPROVED_VERSION!==declaration.version)fail('billing_test_credentials_or_gates');
+  let offer,cohort,phase;try{offer=JSON.parse(env.WORKSPACE_BILLING_OFFER_JSON);cohort=JSON.parse(env.WORKSPACE_BILLING_TEST_PROOF_POLICY_JSON);phase=JSON.parse(env.WORKSPACE_BILLING_TEST_PHASE_JSON);}catch{fail('billing_test_policy_not_bound');}
+  const tenant={slug,identity,ownerEmailHash:digest(T.ownerEmail)},limits={webRepliesPerDay:50,practiceRepliesPerDay:20,voiceCallsPerDay:0,voiceReservedMinutesPerDay:0,maxCallSeconds:0,smsExposureMessages:0,smsExposureSegments:0,smsExposureCostMicros:0};
+  if(!shape(offer,['version','stripeAccountId','currency','terms','plans'])||offer.version!==declaration.version||offer.stripeAccountId!==PUBLIC_STRIPE_ACCOUNT||offer.currency!=='usd'||digest(offer)!==declaration.offerDigest||!shape(offer.terms,['version','text','url'])||!/^[a-z0-9_-]{1,80}$/.test(offer.terms.version||'')||typeof offer.terms.text!=='string'||offer.terms.text.length<100||offer.terms.text.length>20000||offer.terms.url!==T.origin+'/terms-of-service.html'||!shape(offer.plans,['starter','growth']))fail('billing_test_offer_not_bound');
+  for(const [plan,amount] of [['starter',9900],['growth',24900]]){const choice=offer.plans[plan];if(!shape(choice,['amountCents','priceId','services','limits','limitsDescription'])||choice.amountCents!==amount||!/^price_[A-Za-z0-9_]{3,160}$/.test(choice.priceId||'')||!same(choice.services,['web'])||!same(canonical(choice.limits),canonical(limits))||typeof choice.limitsDescription!=='string'||choice.limitsDescription.length<40||choice.limitsDescription.length>3000)fail('billing_test_offer_not_bound');}
+  const common=['version','phaseId','issuedAt','expiresAt','stripeAccountId','offerDigest','tenant'];
+  if(!shape(cohort,common)||!shape(phase,[...common,'maxAttempts','cleanupReserve','cleanupOnExpiry'])||!same(canonical(Object.fromEntries(common.map(key=>[key,phase[key]]))),canonical(cohort))||cohort.version!==declaration.version||cohort.phaseId!==manifest.phaseId||cohort.stripeAccountId!==PUBLIC_STRIPE_ACCOUNT||cohort.offerDigest!==declaration.offerDigest||!same(canonical(cohort.tenant),canonical(tenant))||cohort.expiresAt!==manifest.expiresAt||!Number.isFinite(Date.parse(cohort.issuedAt))||Date.parse(cohort.issuedAt)>now||Date.parse(cohort.expiresAt)<=now||Date.parse(cohort.expiresAt)-Date.parse(cohort.issuedAt)>4*3600000||Date.parse(cohort.expiresAt)<=Date.parse(cohort.issuedAt)||phase.maxAttempts!==80||phase.cleanupReserve!==20||phase.cleanupOnExpiry!==true)fail('billing_test_policy_not_bound');
+  return {version:declaration.version,phaseId:manifest.phaseId,stripeAccountId:PUBLIC_STRIPE_ACCOUNT,offerDigest:declaration.offerDigest,tenantIdentity:identity,maxAttempts:80,cleanupReserve:20};
+}
 
 function validateManifest(m,mode,now){
-  if(!exact(m,['version','scope','phaseId','approved','approvalId','approvedAt','expiresAt','ownerMailboxConfirmed','callbackApproved','targets','limits','release','baselineGates','assets','signupAssets','signupRelease','cleanupRelease'])||m.version!==2||m.scope!==HOSTED_ONBOARDING_SCOPE||m.phaseId!==T.phaseId)fail('invalid_manifest');
+  if(!exact(m,['version','scope','phaseId','approved','approvalId','approvedAt','expiresAt','ownerMailboxConfirmed','callbackApproved','targets','limits','release','baselineGates','assets','signupAssets','signupRelease','cleanupRelease','billingTest'])||m.version!==2||m.scope!==HOSTED_ONBOARDING_SCOPE||m.phaseId!==T.phaseId)fail('invalid_manifest');
+  if(m.billingTest!==undefined&&(!shape(m.billingTest,['version','stripeAccountId','offerDigest','credentialHash','webhookSecretHash'])||m.billingTest.stripeAccountId!==PUBLIC_STRIPE_ACCOUNT||!/^[a-z0-9_-]{1,80}$/.test(m.billingTest.version||'')||!['offerDigest','credentialHash','webhookSecretHash'].every(key=>hex(m.billingTest[key]))))fail('billing_test_manifest_required');
   if(!same(m.targets,T)||!same(m.limits,L))fail('manifest_target_or_limits');
   if(!exact(m.release,['commit','deployId','sourceManifestSHA256'])||!/^([a-f0-9]{40})$/.test(m.release.commit||'')||!(m.release.deployId===null||/^([a-f0-9]{24})$/.test(m.release.deployId||''))||!hex(m.release.sourceManifestSHA256))fail('invalid_release_binding');
   if(!exact(m.cleanupRelease,['commit','deployId','sourceManifestSHA256'])||!/^([a-f0-9]{40})$/.test(m.cleanupRelease.commit||'')||!(m.cleanupRelease.deployId===null||/^([a-f0-9]{24})$/.test(m.cleanupRelease.deployId||''))||m.cleanupRelease.deployId!==null&&m.cleanupRelease.deployId===m.release.deployId||!hex(m.cleanupRelease.sourceManifestSHA256))fail('cleanup_release_required');
@@ -39,6 +58,7 @@ function validateManifest(m,mode,now){
   if(!['offline','live'].includes(mode))fail('invalid_mode');
   if(!Number.isFinite(Date.parse(m.expiresAt))||Date.parse(m.expiresAt)<=now||Date.parse(m.expiresAt)>Date.parse(T.pageExpiresAt))fail('phase_expired');
   if(mode==='live'&&(m.approved!==true||m.ownerMailboxConfirmed!==true||m.callbackApproved!==true||!/^approval-[a-zA-Z0-9-]{4,100}$/.test(m.approvalId||'')||!Number.isFinite(Date.parse(m.approvedAt))||Date.parse(m.approvedAt)>now+60000||Date.parse(m.expiresAt)-Date.parse(m.approvedAt)>4*3600000))fail('approval_required');
+  if(mode==='live'&&!m.billingTest)fail('billing_test_manifest_required');
   if(mode==='offline'&&m.approved===true)fail('offline_manifest_must_not_claim_approval');
 }
 
@@ -67,7 +87,7 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
   const privateRequests=new Map(), contexts=new Map(), sessions=new Map(), revoked=new Set(), links=new Map(), used=new Set();
   let siteOK=false,gatesOK=false,releaseOK=false,proofOK=false,cleanupReleaseOK=false,operatorAbsent=false,ownerEmpty=false,preflightRevoked=false,preflightRevocationVerified=false,mainRevoked=false;
   let handoff=null,binding=null,creationFingerprint=null,managementRevision=null,configurationRevision=null,createAttempts=0;
-  let currentOwnerStage=null,currentOperatorStage=null,lastDraftRevision=null,editRevision=null,tenantIdentity=null,checkBinding=null,webActive=false;
+  let currentOwnerStage=null,currentOperatorStage=null,lastDraftRevision=null,editRevision=null,tenantIdentity=null,checkBinding=null,webActive=false,billingBaseline=null;
   let ownerRevisionEpoch=0,ownerRevisionObservedId=0;
   const deploymentBindings={signup:null,proof:null,cleanup:null};let workspaceCancelled=false,configurationClosed=false;
   const contacts=new Map(),pendingTurns=new Set(),recordIDs=new Set(),internalToken=Symbol('phase-internal-dispatch');let workerKeyHash=null;
@@ -148,10 +168,10 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
       query(url,[]);if(role!=='setup'||method!=='POST'||!checkBinding||headers.has('authorization')||headers.get('origin')!==T.externalOrigin||!exact(b,['action','client','checkId','challenge','turnId','completionRef'])||b.client!==binding.slug||b.checkId!==checkBinding.id||b.challenge!==checkBinding.challenge||!['observe','status','acknowledge'].includes(action)||b.turnId!==undefined&&!/^[a-f0-9]{32}$/.test(b.turnId)||action==='acknowledge'&&!hex(b.completionRef))fail('website_check_not_bound');return result();
     }
     if(url.pathname==='/api/chat'){
-      query(url,[]);if(method!=='POST'||!binding||!releaseOK||!proofOK||!exact(b,['client','key','contact','messages','channel','stream','page','websiteCheck'])||b.client!==binding.slug||b.stream!==true||!Array.isArray(b.messages)||!b.messages.length||b.messages.length>20||b.messages.some((m,i)=>!exact(m,['role','content'])||m.role!==(i%2?'assistant':'user')||typeof m.content!=='string'||!m.content.trim()||m.content.length>6000)||b.messages.length%2!==1)fail('chat_not_bound');
-      if(role==='owner'){bearer=knownBearer(role,headers);if(b.key!==null||b.channel!=='test'||b.websiteCheck!==undefined||b.page!==undefined)fail('private_chat_not_allowed');}
+      query(url,[]);if(method!=='POST'||!binding||!releaseOK||!proofOK||!exact(b,['client','key','contact','messages','channel','stream','page','websiteCheck','turnId'])||b.client!==binding.slug||b.stream!==true||!Array.isArray(b.messages)||!b.messages.length||b.messages.length>20||b.messages.some((m,i)=>!exact(m,['role','content'])||m.role!==(i%2?'assistant':'user')||typeof m.content!=='string'||!m.content.trim()||m.content.length>6000)||b.messages.length%2!==1)fail('chat_not_bound');
+      if(role==='owner'){bearer=knownBearer(role,headers);if(b.key!==null||b.channel!=='test'||b.websiteCheck!==undefined||b.page!==undefined||b.turnId!==undefined)fail('private_chat_not_allowed');}
       else{
-        if(b.key!==undefined||!visitor||headers.has('authorization')||headers.get('origin')!==T.externalOrigin||b.page!==T.externalPath||b.channel!==undefined)fail('visitor_chat_not_allowed');
+        if(b.key!==undefined||!visitor||headers.has('authorization')||headers.get('origin')!==T.externalOrigin||b.page!==T.externalPath||b.channel!==undefined||!/^[a-f0-9]{32}$/.test(b.turnId||''))fail('visitor_chat_not_allowed');
         if(role==='setup'){if(!checkBinding||!exact(b.websiteCheck,['checkId','challenge','turnId'])||b.websiteCheck.checkId!==checkBinding.id||b.websiteCheck.challenge!==checkBinding.challenge||!/^([a-f0-9]{32})$/.test(b.websiteCheck.turnId||'')||b.contact!=='websitecheck_'+checkBinding.id)fail('setup_chat_not_bound');}
         else if(b.websiteCheck!==undefined||typeof b.contact!=='string'||!/^w[a-z0-9]{8,35}$/.test(b.contact))fail('ordinary_chat_not_allowed');
       }
@@ -376,15 +396,16 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
     }
     if(!Array.isArray(b))fail('invalid_environment_response');
     const env={};for(const row of b){if(!obj(row)||typeof row.key!=='string'||!Array.isArray(row.values))fail('ambiguous_gate');const vals=row.values.filter(v=>['production','all'].includes(v.context));if(vals.length>1)fail('ambiguous_gate');if(vals.length){if(typeof vals[0].value!=='string'||Object.hasOwn(env,row.key))fail('ambiguous_gate');env[row.key]=vals[0].value;}}
-    for(const key of HOSTED_ONBOARDING_GATES){const expected=kind==='proof'&&key==='SERVICE_DELIVERY_ENABLED'?true:manifest.baselineGates[key];if((env[key]==='true')!==expected||env[key]&&!['true','false','0'].includes(env[key]))fail('execution_gate_changed');}
-    if(kind==='gates'){gatesOK=true;return;}
-    if(kind==='closedgates'){if(!cleanupReleaseOK)fail('cleanup_deployment_readback_required');if(env.MC_SELF_SERVICE_AI_PROOF_SLUG||env.MC_SELF_SERVICE_AI_PROOF_POLICY_JSON||env.MANAGED_EMAIL_BUDGET_POLICY_JSON)fail('proof_configuration_not_closed');proofOK=false;configurationClosed=true;return;}
+    for(const key of HOSTED_ONBOARDING_GATES){const expected=kind==='proof'&&(key==='SERVICE_DELIVERY_ENABLED'||key==='WORKSPACE_BILLING_ENABLED'&&!!manifest.billingTest)?true:manifest.baselineGates[key];if((env[key]==='true')!==expected||env[key]&&!['true','false','0'].includes(env[key]))fail('execution_gate_changed');}
+    if(kind==='gates'){billingBaseline=billingSnapshot(env);gatesOK=true;return;}
+    if(kind==='closedgates'){if(!cleanupReleaseOK)fail('cleanup_deployment_readback_required');if(env.MC_SELF_SERVICE_AI_PROOF_SLUG||env.MC_SELF_SERVICE_AI_PROOF_POLICY_JSON||env.MANAGED_EMAIL_BUDGET_POLICY_JSON)fail('proof_configuration_not_closed');if(manifest.billingTest&&!same(billingSnapshot(env),billingBaseline))fail('billing_test_configuration_not_restored');proofOK=false;configurationClosed=true;return;}
     let ai,email;try{ai=JSON.parse(env.MC_SELF_SERVICE_AI_PROOF_POLICY_JSON);email=JSON.parse(env.MANAGED_EMAIL_BUDGET_POLICY_JSON);}catch{fail('invalid_proof_configuration');}
     const normalizedHash=createHash('sha256').update(T.ownerEmail).digest('hex');
     if(!binding||!tenantIdentity||env.MC_SELF_SERVICE_AI_PROOF_SLUG!==binding.slug||env.MC_SELF_SERVICE_AI_PROOF_APPROVED_VERSION!==ai.version||ai.phaseId!==manifest.phaseId||ai.tenant?.slug!==binding.slug||ai.tenant.identity!==tenantIdentity||ai.tenant.emailHash!==normalizedHash||ai.model!=='claude-opus-5-5'||ai.maxOutputTokens!==1500||ai.maxRequestBytes!==120000||!same(ai.limits,{logical:10,physical:30,ordinaryMutations:1,setupMutations:1})||Date.parse(ai.expiresAt)>Date.parse(manifest.expiresAt)||Date.parse(ai.expiresAt)<=now())fail('ai_proof_not_bound');
     const eh=v=>createHash('sha256').update(v||'').digest('hex');
     if((env.SERVICE_WORKER_KEY||'').length<32)fail('owner_email_worker_unavailable');workerKeyHash=eh(env.SERVICE_WORKER_KEY);
     if(env.MANAGED_EMAIL_BUDGET_APPROVED_VERSION!==email.version||email.mode!=='cohort'||email.accountLimit!==2||email.tenantLimit!==2||email.providerCredentialHash!==eh(env.RESEND_API_KEY)||email.senderHash!==eh(env.FROM_EMAIL)||!env.RESEND_API_KEY||!env.FROM_EMAIL||!same(email.tenants,[{slug:binding.slug,identity:tenantIdentity,emailHash:normalizedHash}])||Date.parse(email.expiresAt)>Date.parse(manifest.expiresAt)||Date.parse(email.expiresAt)<=now())fail('owner_email_proof_not_bound');
+    if(manifest.billingTest){if(!billingBaseline||BILLING_KEYS.slice(7).some(key=>billingSnapshot(env)[key]!==billingBaseline[key]))fail('billing_test_preserved_settings_changed');verifyHostedBillingTestConfiguration(manifest,env,{slug:binding.slug,identity:tenantIdentity,now:now()});}
     proofOK=true;
   }
   async function metadataRequest({kind,url,headers={},transport}){

@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 
 export const PUBLIC_STRIPE_ACCOUNT='acct_1NK0c6JW47xiUUpY';
 export const PUBLIC_ORIGIN='https://machinesandcloud.com';
+export const PUBLIC_WORKSPACE_WEBSITE=Object.freeze({origin:'https://zaricoach.com',path:'/mc-front-desk-acceptance-20261023'});
 export const PUBLIC_WEBHOOK_EVENTS=Object.freeze([
   'checkout.session.completed','checkout.session.expired',
   'checkout.session.async_payment_succeeded','checkout.session.async_payment_failed',
@@ -17,6 +18,35 @@ const id=(v,p)=>typeof v==='string'&&new RegExp('^'+p+'[A-Za-z0-9_]{3,160}$').te
 const digest=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
 const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
 const sha=v=>createHash('sha256').update(typeof v==='string'?v:JSON.stringify(canonical(v))).digest('hex');
+export function verifyPublicWorkspace(p,dto,{now=Date.now()}={}){
+  const require=(condition,code)=>{if(!condition){const error=new Error('The actual website workspace preflight failed: '+code);error.code=code;throw error;}};
+  const c=dto?.client,install=dto?.websiteInstallation,revision=dto?.configurationRevision;
+  const validTime=value=>typeof value==='string'&&Number.isFinite(Date.parse(value))&&Date.parse(value)<=now+60000;
+  require(dto?.site===PUBLIC_ORIGIN,'workspace_origin_mismatch');
+  require(c?.slug===p.owner.slug&&typeof c.owner?.email==='string'&&c.owner.email.trim().toLowerCase()===p.owner.email.trim().toLowerCase(),'workspace_owner_mismatch');
+  require(c.onboarding?.version===1&&Array.isArray(c.onboarding.desiredChannels)&&c.onboarding.desiredChannels.length===1&&c.onboarding.desiredChannels[0]==='web','workspace_service_scope');
+  require(c.status==='live'&&c.build?.status==='built'&&c.channels?.web?.active===true&&dto.webAvailable===true&&dto.aiAllowance?.available===true&&Number.isSafeInteger(dto.aiAllowance?.web?.remaining)&&dto.aiAllowance.web.remaining>0,'workspace_not_active');
+  require(digest(revision)&&digest(dto.editRevision)&&dto.setup?.revision===revision&&dto.setup.canActivateWeb===true&&dto.setup.channels?.web?.ready===true&&dto.setup.channels.web.active===true&&Array.isArray(dto.setup.channels.web.blockers)&&dto.setup.channels.web.blockers.length===0,'workspace_rules_not_ready');
+  require(c.setupProof?.reviewedRevision===revision&&c.setupProof.testedRevision===revision&&c.setupProof.testMode==='live'&&validTime(c.createdAt)&&validTime(c.setupProof.reviewedAt)&&validTime(c.setupProof.testedAt)&&Date.parse(c.setupProof.reviewedAt)>=Date.parse(c.createdAt)&&Date.parse(c.setupProof.testedAt)>=Date.parse(c.createdAt),'workspace_review_or_practice_stale');
+  require(install?.tenantIdentity===p.owner.tenantIdentity&&install.configurationRevision===revision&&install.editRevision===dto.editRevision,'workspace_installation_identity');
+  let website;try{website=new URL(c.business?.website);}catch{}
+  require(website&&website.origin===PUBLIC_WORKSPACE_WEBSITE.origin&&website.pathname===PUBLIC_WORKSPACE_WEBSITE.path&&!website.username&&!website.password&&!website.port&&!website.hash&&website.searchParams.get('client')===p.owner.slug&&website.searchParams.get('phase')===p.phaseId&&[...website.searchParams.keys()].sort().join(',')==='client,phase'&&install.website===c.business.website,'workspace_website_not_bound');
+  require(Array.isArray(c.widget?.allowedOrigins)&&c.widget.allowedOrigins.length===1&&c.widget.allowedOrigins[0]===PUBLIC_WORKSPACE_WEBSITE.origin,'workspace_origin_scope');
+  require(install.selectedOrigin===website.origin&&install.originAllowed===true&&install.observation?.state==='found'&&install.observation.origin===website.origin&&validTime(install.observation.at)&&install.customerChat?.state==='active'&&install.customerChat.available===true,'workspace_installation_not_current');
+  require(install.setupRequest?.state==='complete'&&install.attempt?.state==='complete'&&/^[a-f0-9]{32}$/.test(install.attempt.id||'')&&validTime(install.setupRequest.at),'workspace_setup_request_missing');
+  require(install.firstExternalRequest?.state==='received'&&install.firstExternalRequest.origin===website.origin&&validTime(install.firstExternalRequest.at),'workspace_ordinary_request_missing');
+  const record=(reference,setup)=>{
+    require(exact(reference,['kind','id','createdAt'])&&['leads','bookings'].includes(reference.kind)&&/^[a-f0-9]{10,64}$/.test(reference.id||'')&&validTime(reference.createdAt)&&Date.parse(reference.createdAt)>=Date.parse(c.createdAt),'workspace_record_reference');
+    const rows=dto[reference.kind];require(Array.isArray(rows),'workspace_record_not_retained');const matches=rows.filter(row=>row?.id===reference.id);require(matches.length===1,'workspace_record_not_retained');const row=matches[0];
+    require(row.slug===p.owner.slug&&row.channel==='web'&&row.createdAt===reference.createdAt&&row.status!=='spam'&&!row.simulation&&row.delivery?.tenantIdentity===p.owner.tenantIdentity&&(row.tenantIdentity===undefined||row.tenantIdentity===p.owner.tenantIdentity),'workspace_record_identity');
+    if(setup)require(row.websiteSetupCheck?.checkId===install.attempt.id&&row.websiteSetupCheck.origin===website.origin&&/^[a-f0-9]{32}$/.test(row.websiteSetupCheck.turnId||'')&&row.contact==='websitecheck_'+install.attempt.id,'workspace_setup_record_mismatch');
+    else require(!row.websiteSetupCheck&&typeof row.contact==='string'&&!!row.contact&&!row.contact.startsWith('websitecheck_'),'workspace_ordinary_record_mismatch');
+    return {kind:reference.kind,id:reference.id,createdAt:reference.createdAt};
+  };
+  const setupRequest=record(install.setupRequest.record,true),ordinaryRequest=record(install.firstExternalRequest.record,false);
+  require(setupRequest.id!==ordinaryRequest.id,'workspace_setup_is_not_ordinary');
+  return {slug:p.owner.slug,tenantIdentity:p.owner.tenantIdentity,configurationRevision:revision,editRevision:dto.editRevision,websiteOrigin:website.origin,websitePath:website.pathname,phaseId:p.phaseId,reviewedAt:c.setupProof.reviewedAt,testedAt:c.setupProof.testedAt,testMode:'live',setupRequest,ordinaryRequest,observedAt:new Date(now).toISOString()};
+}
 export function validatePublicPacket(p,{sourceId,manifestSHA,now=Date.now()}={}){
   assert.ok(exact(p,['version','phaseId','origin','sourceId','sourceManifestSHA','publishedCommit','publishedDeployId','issuedAt','expiresAt','owner','phase','fixture','webhook','cleanupOperationId','closeOperationId']),'Exact current public proof packet required');
   assert.equal(p.version,1);assert.equal(p.origin,PUBLIC_ORIGIN);assert.equal(p.sourceId,sourceId);assert.equal(p.sourceManifestSHA,manifestSHA);

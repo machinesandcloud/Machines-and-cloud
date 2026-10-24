@@ -5,7 +5,27 @@ import {resolve,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {pathToFileURL} from 'node:url';
 import {createInterface} from 'node:readline';
-import {validatePublicPacket,verifyPublicSnapshot,verifyPublicWebhook,verifyPublicDeliveryReview,verifyPublicSession,verifyPublicSubscription,PublicProofGuard,PUBLIC_STRIPE_ACCOUNT,PUBLIC_ORIGIN} from './stripe-public-proof.mjs';
+import {validatePublicPacket,verifyPublicWorkspace,verifyPublicSnapshot,verifyPublicWebhook,verifyPublicDeliveryReview,verifyPublicSession,verifyPublicSubscription,PublicProofGuard,PUBLIC_STRIPE_ACCOUNT,PUBLIC_ORIGIN} from './stripe-public-proof.mjs';
+
+// The public runner reads actual authenticated evidence; it never imports app
+// handlers, seeds readiness, activates a service or retries an uncertain read.
+export async function preflightPublicWorkspace({packet,guard,fetch,save,runtimeHashes,sha,now=()=>Date.now()}){
+  const headers={Origin:PUBLIC_ORIGIN,Authorization:'Bearer '+packet.owner.bearer,'Cache-Control':'no-cache'};
+  const url=new URL('/api/client?c='+packet.owner.slug,PUBLIC_ORIGIN),entry=guard.site(url,'GET','',headers);let readiness;
+  try{
+    const response=await fetch(url,{method:'GET',headers,cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15000)});entry.http=response.status;
+    if(!response.ok)throw Error('Owner read not confirmed');
+    readiness=verifyPublicWorkspace(packet,await response.json(),{now:now()});entry.state='confirmed';save();
+  }catch(error){entry.state='uncertain';entry.reason=/^workspace_[a-z_]+$/.test(error?.code||'')?error.code:'workspace_read_unconfirmed';save();const failure=new Error('The actual website workspace preflight failed: '+entry.reason);failure.code=entry.reason;throw failure;}
+  const assets={};
+  // Served source checks precede all Stripe requests, including fixture changes.
+  for(const file of ['desk.js','desk-billing.js','desk.css']){
+    const assetURL=new URL('/'+file,PUBLIC_ORIGIN),asset=guard.site(assetURL,'GET');
+    try{const response=await fetch(assetURL,{redirect:'error',cache:'no-store',signal:AbortSignal.timeout(10000)});asset.http=response.status;if(response.status!==200||!/^[a-f0-9]{64}$/.test(runtimeHashes[file]||''))throw Error('Source not confirmed');const digest=sha(Buffer.from(await response.arrayBuffer()));if(digest!==runtimeHashes[file])throw Error('Source changed');assets[file]=digest;asset.state='confirmed';save();}
+    catch{asset.state='uncertain';asset.reason='workspace_source_unconfirmed';save();const failure=new Error('The actual website workspace preflight failed: workspace_source_unconfirmed');failure.code='workspace_source_unconfirmed';throw failure;}
+  }
+  return {...readiness,servedAssets:assets};
+}
 
 export const DELIVERY_REVIEW_WAIT_MS=10*60000;
 export async function awaitPublicDeliveryReview({packet,report,save,commands,now=()=>Date.now(),setTimer=setTimeout,clearTimer=clearTimeout}){
@@ -55,13 +75,11 @@ export async function executePublicProof(shared){
   async function stripe(path,{method='GET',params=null}={}){const url=new URL('/v1/'+path,'https://api.stripe.com'),entry=guard.stripe(url,method,new URLSearchParams(params||{}));report.actualProviderRequests++;save();try{const response=await nativeFetch(url,{method,headers:{Authorization:'Bearer '+credentials.STRIPE_SECRET_KEY,'Stripe-Version':'2025-06-30.basil',...(params?{'Content-Type':'application/x-www-form-urlencoded'}:{})},...(params?{body:new URLSearchParams(params).toString()}:{}),redirect:'error',signal:AbortSignal.timeout(10000)});entry.http=response.status;const data=await response.json();assert.ok(response.ok,'The TEST provider request was not confirmed');if('livemode'in data)assert.equal(data.livemode,false,'A live resource was returned');if(path==='account'){assert.equal(data.id,PUBLIC_STRIPE_ACCOUNT);guard.accountVerified=accountConfirmed=true;}entry.state='confirmed';save();return data;}catch(error){entry.state='uncertain';entry.reason=safe(error);save();throw error;}}
   async function pollSaved(predicate,{attempts=24,interval=2500}={}){for(let i=0;i<attempts;i++){const result=await app();if(predicate(result.billing))return result.billing;await new Promise(resolve=>setTimeout(resolve,interval));}throw Error('Saved public TEST result remains unconfirmed within its bounded wait');}
   try{
+    phase('verify-actual-ready-website-workspace-and-served-source');report.workspacePreflight=await preflightPublicWorkspace({packet,guard,fetch:nativeFetch,save,runtimeHashes:RUNTIME_HASHES,sha});check('Actual owned website installation, live practice, ordinary request and served source are current before Stripe activity',true);
     phase('verify-current-owned-tenant-and-public-destination');const initial=(await app()).billing;assert.equal(initial.status,'none');assert.equal(initial.checkout,null);assert.ok(!initial.testProof,'A public phase cannot adopt an earlier billing proof');
     await stripe('account');const expected={id:packet.fixture.priceId,product:packet.fixture.productId};const price=await stripe('prices/'+expected.id);verifyPrice(price,expected);assert.equal(price.active,false,'Only the recorded archived TEST fixture may be reused');const product=await stripe('products/'+expected.product);assert.equal(product.id,expected.product);assert.equal(product.active,false);verifyPublicWebhook(packet,await stripe('webhook_endpoints/'+packet.webhook.id));
     for(const path of ['products/'+expected.product,'prices/'+expected.id]){fixtureTouched=true;const object=await stripe(path,{method:'POST',params:{active:'true'}});assert.equal(object.active,true);}
     phaseAdmitted=true;const started=await app({action:'proof_begin',phaseId:packet.phaseId,plan:'starter'});verifyPublicSnapshot(packet,started.billing);check('Published owner tenant, TEST merchant, owned Price and dedicated snapshot destination are bound',true);
-    // JS/CSS are served byte-for-byte; compiled HTML has its separate release
-    // check in the Root publication packet. These requests are in the site cap.
-    for(const file of ['desk.js','desk-billing.js','desk.css']){const url=new URL('/'+file,PUBLIC_ORIGIN),entry=guard.site(url,'GET');const response=await nativeFetch(url,{redirect:'error',signal:AbortSignal.timeout(10000)});entry.http=response.status;assert.equal(response.status,200);assert.equal(sha(Buffer.from(await response.arrayBuffer())),RUNTIME_HASHES[file]);entry.state='confirmed';save();}
     const playwright=arg('--playwright','/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs'),{chromium}=await import(pathToFileURL(resolve(playwright)).href);profile=mkdtempSync(join(tmpdir(),'mc-stripe-public-test-'));chmodSync(profile,0o700);
     context=await chromium.launchPersistentContext(profile,{channel:'chrome',headless:false,viewport:{width:1365,height:1000},locale:'en-US',serviceWorkers:'block',args:['--disable-background-networking','--disable-component-update','--disable-sync','--no-first-run']});
     assert.equal(typeof context.routeWebSocket,'function');await context.routeWebSocket('**/*',socket=>socket.close({code:1008,reason:'No WebSocket authorized by this TEST proof'}));await context.addInitScript(value=>{if(location.origin===value.origin)sessionStorage.setItem('mc-onboarding-session-v1',value.bearer);},{origin:PUBLIC_ORIGIN,bearer:packet.owner.bearer});
