@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-24T11:14:45.601685+00:00",
+  "reviewer": "signup_feedback_qa independent read-only triage",
+  "scope": "Accept the replacement assertion for all-four discoverability; no rerun or runtime edit by QA. Root executed original and replacement actual-handler suites. Their broader outcomes remain separately attributed.",
+  "original": {
+    "path": "scratchpad/signup-feedback-actual-handler-full.json",
+    "sha256": "2d23cc338d0954806c788e3935ac11e134cc2ce74269130489fbbab8826fc83e",
+    "summary": {
+      "checks": 53,
+      "passed": 52,
+      "failed": 1
+    },
+    "failed": [
+      {
+        "name": "Web-only practice leaves unselected phone and text services inactive without a connected claim",
+        "pass": false
+      }
+    ]
+  },
+  "intent": "product/COMPLETE-CONNECTIONS-PO-2026-10-23.json:81 requires all four choices/cards visible even for web-only owners. Old absence predicate is obsolete; no product repair warranted for that predicate.",
+  "replacement": {
+    "path": "scratchpad/signup-feedback-actual-handler-full-r2.json",
+    "sha256": "cca956c14a337f9a254e2d808883a037b1079c493b81a8a70527ba5425d51d7d",
+    "summary": {
+      "checks": 53,
+      "passed": 53,
+      "failed": 0
+    },
+    "sourceStable": true,
+    "observedComponentValues": [
+      {
+        "channel": "voice",
+        "badge": "Not selected",
+        "choose": true,
+        "visible": true
+      },
+      {
+        "channel": "sms",
+        "badge": "Not selected",
+        "choose": true,
+        "visible": true
+      }
+    ],
+    "retainedSourceChannels": {
+      "web": {
+        "active": false
+      },
+      "voice": {
+        "active": false
+      },
+      "sms": {
+        "active": false
+      }
+    },
+    "scriptSHA256": "16dab06b5bf23763f35359491c795e587cea3657651ac9e27b37449a36a81806"
+  },
+  "acceptance": "Replacement predicate accepted. Keeps essential inactive selected-state checks and directly checks visible Not selected cards with Choose actions and four-card count. Original52/53 retained; distinct replacement53/53 not retroactively applied to original.",
+  "providerEffects": "No real network/provider/email effects in these memory/fake source-matched runs."
+}
