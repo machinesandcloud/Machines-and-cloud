@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-24T15:06:47.944Z",
+  "authority": "Current user instruction to fix/test all remaining defects and take browser control as needed",
+  "scope": "One new regular Chrome window with two owned about:blank tabs; exact close helper twice; no account/session/code inspection and no application/provider URL navigation",
+  "sourceBefore": "aaefa98a5576e4d86fa462ebf37f959f7e814d50d390de171812e91c207469c9",
+  "maximumWindows": 1,
+  "maximumOwnedTabs": 2,
+  "maximumCloseAttempts": 2,
+  "nativeBrowserResourceTrafficNotIndividuallyIntercepted": true,
+  "checks": [
+    {
+      "name": "Actual app-scope helper closes the first exact blank tab and verifies absence",
+      "pass": true
+    },
+    {
+      "name": "Other tab in the same window is preserved",
+      "pass": true
+    },
+    {
+      "name": "Same helper closes its remaining exact blank tab and verifies absence",
+      "pass": true
+    }
+  ],
+  "targets": {
+    "windowId": 1802420130,
+    "first": 1802420131,
+    "second": 1802420133
+  },
+  "sourceAfter": "aaefa98a5576e4d86fa462ebf37f959f7e814d50d390de171812e91c207469c9",
+  "sourceStable": true,
+  "passed": true,
+  "windowsCreated": 1,
+  "allOwnedTabsClosed": true,
+  "applicationOrProviderNavigations": 0
+}

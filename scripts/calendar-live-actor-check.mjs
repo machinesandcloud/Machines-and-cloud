@@ -9,13 +9,13 @@ const {TARGET}=await import('./calendar-live-guard.mjs');
 const {fixture,NOW,token,hash}=await import('./calendar-live-fixture.mjs');
 const checks=[];async function check(name,fn){await fn();checks.push(name);}
 await check('Dedicated Chrome adapter seeds exact pending state and only closes its new recorded window',async()=>{
-  const scripts=[];const bridge=createNativeHandoff({now:()=>NOW,execute:async script=>{scripts.push(script);if(script.includes('make new window')){assert(script.includes('{mode:"normal"}'));return '4021,9021';}if(script.includes('location.origin"'))return TARGET.origin;if(script.includes('sessionStorage.setItem'))return 'controlled-calendar-state-seeded';return '';}});
+  const scripts=[];const bridge=createNativeHandoff({now:()=>NOW,execute:async script=>{scripts.push(script);if(script.includes('make new window')){assert(script.includes('{mode:"normal"}'));return '4021,9021';}if(script.includes('location.origin"'))return TARGET.origin;if(script.includes('sessionStorage.setItem'))return 'controlled-calendar-state-seeded';if(script.includes('close controlledTab'))return 'owned-calendar-target-absent';return '';}});
   const state=hash('one-state'),authorizationUrl='https://accounts.google.com/o/oauth2/v2/auth?state='+state+'&redirect_uri='+encodeURIComponent(TARGET.origin+'/api/google/callback');
   const result=await bridge.open({slug:'internal-calendar-1234',token,state,authorizationUrl,expiresAt:new Date(NOW+600000).toISOString()});
   assert.equal(result.windowId,4021);assert.equal(result.nativePhysicalRequestsCounted,false);
   const injection=scripts.find(script=>script.includes('sessionStorage.setItem'));
   assert(injection.includes('mc-onboarding-session-v1'));assert(injection.includes('mc-calendar-pending-v1'));assert(injection.includes(hash(token)));assert(!scripts.some(script=>/every (window|tab)|front window|cookies/i.test(script)));
-  await assert.rejects(bridge.open({}));await bridge.close();assert.match(scripts.at(-1),/close tab id 9021 of window id 4021/);
+  await assert.rejects(bridge.open({}));await bridge.close();assert.match(scripts.at(-1),/set controlledTab to tab id 9021 of window id 4021/);assert.match(scripts.at(-1),/close controlledTab/);assert.match(scripts.at(-1),/Dedicated tab still present/);assert(!scripts.at(-1).includes('tell tab'));assert.equal((await bridge.close()).closed,true);
 });
 await check('Unknown native window creation cannot be retried and never inspects existing tabs',async()=>{
   let starts=0;const bridge=createNativeHandoff({now:()=>NOW,execute:async()=>{starts++;throw Error('Synthetic lost window result');}}),state=hash('unknown-state');
@@ -32,12 +32,17 @@ await check('Changing active tab or adding tabs cannot redirect seeding; moved o
     if(moved)throw Error('Dedicated tab missing');
     if(script.includes('location.origin"'))return TARGET.origin;
     if(script.includes('sessionStorage.setItem')){assert(added);seeded=true;return 'controlled-calendar-state-seeded';}
-    if(script.includes('close tab'))closed=true;
+    if(script.includes('close controlledTab')){closed=true;return 'owned-calendar-target-absent';}
     return '';
   }}),state=hash('tab-bound-state');
   await bridge.open({slug:'internal-calendar-1234',token,state,authorizationUrl:'https://accounts.google.com/o/oauth2/v2/auth?state='+state+'&redirect_uri='+encodeURIComponent(TARGET.origin+'/api/google/callback'),expiresAt:new Date(NOW+600000).toISOString()});
   assert(seeded);moved=true;await assert.rejects(bridge.close());assert.equal(closed,false);assert.equal(bridge.state().closed,false);
   assert(!scripts.some(script=>script.includes('close window')||script.includes('every tab')||script.includes('every window')));
+});
+await check('An unconfirmed native close is retained and cannot be repeated blindly',async()=>{
+  let closes=0;const bridge=createNativeHandoff({now:()=>NOW,execute:async script=>{if(script.includes('make new window'))return '4021,9021';if(script.includes('location.origin"'))return TARGET.origin;if(script.includes('sessionStorage.setItem'))return 'controlled-calendar-state-seeded';if(script.includes('close controlledTab')){closes++;throw Error('Synthetic lost close acknowledgement');}return '';}}),state=hash('unknown-close');
+  await bridge.open({slug:'internal-calendar-1234',token,state,authorizationUrl:'https://accounts.google.com/o/oauth2/v2/auth?state='+state+'&redirect_uri='+encodeURIComponent(TARGET.origin+'/api/google/callback'),expiresAt:new Date(NOW+600000).toISOString()});
+  await assert.rejects(bridge.close());await assert.rejects(bridge.close(),/close_outcome_unconfirmed/);assert.equal(closes,1);assert.equal(bridge.state().closed,false);
 });
 await check('Fixed actor completes signup, native handshake, scheduled lifecycle, both busy rejections and restored-deployment cleanup',async()=>{
   const f=await fixture({signed:true,strictRecordPaths:true}),privateFiles=new Map(),helperCalls=[];

@@ -20,8 +20,21 @@ export async function runAppleScript(script) {
     child.stdin.end(script);
   });
 }
+export function ownedTabCloseScript(windowId,tabId) {
+  if(!Number.isSafeInteger(windowId)||windowId<1||!Number.isSafeInteger(tabId)||tabId<1)fail('close_binding');
+  return `tell application "Google Chrome"
+if not (exists window id ${windowId}) then error "Dedicated window missing"
+if not (exists tab id ${tabId} of window id ${windowId}) then error "Dedicated tab missing"
+set controlledTab to tab id ${tabId} of window id ${windowId}
+close controlledTab
+if (exists window id ${windowId}) then
+if (exists tab id ${tabId} of window id ${windowId}) then error "Dedicated tab still present"
+end if
+return "owned-calendar-target-absent"
+end tell`;
+}
 export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now() }={}) {
-  let windowId=null, tabId=null, attempted=false, seeded=false, navigated=false, closed=false;
+  let windowId=null, tabId=null, attempted=false, seeded=false, navigated=false, closed=false, closeAttempted=false;
   const inWindow=command=>`tell application "Google Chrome"\nif not (exists window id ${windowId}) then error "Dedicated window missing"\nif not (exists tab id ${tabId} of window id ${windowId}) then error "Dedicated tab missing"\ntell tab id ${tabId} of window id ${windowId}\n${command}\nend tell\nend tell`;
   return {
     async open({slug,token,authorizationUrl,state,expiresAt}) {
@@ -57,9 +70,11 @@ export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now()
     async close() {
       if(windowId===null)fail('no_owned_window');
       if(closed)return {windowId,tabId,closed:true};
-      await execute(inWindow(`close tab id ${tabId} of window id ${windowId}`));
+      if(closeAttempted)fail('close_outcome_unconfirmed');
+      closeAttempted=true;
+      if(await execute(ownedTabCloseScript(windowId,tabId))!=='owned-calendar-target-absent')fail('close_unconfirmed');
       closed=true;return {windowId,tabId,closed:true};
     },
-    state:()=>({windowId,tabId,attempted,seeded,navigated,closed})
+    state:()=>({windowId,tabId,attempted,seeded,navigated,closed,closeAttempted})
   };
 }
