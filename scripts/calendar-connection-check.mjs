@@ -11,7 +11,49 @@ await check("Start issues opaque state, PKCE and owned-event plus metadata-only 
 await check("Foreign tenant and wrong session cannot consume authorization", async () => { const other = await f.seed("other-calendar"); await assert.rejects(f.connection.completeCalendarConnection(other.client, other.session, { state, code: "dummy" }), e => e.code === "invalid_state"); const otherSession = { ...s, sessionHash: hash("second-session") }; await f.store.put("access_sessions", otherSession.sessionHash, otherSession); await assert.rejects(f.connection.completeCalendarConnection(c, otherSession, { state, code: "dummy" }), e => e.code === "invalid_state"); assert.equal((await f.store.get("calendar_oauth", hash(state))).state, "pending"); });
 await check("Legacy owner key and operator purpose never authorize new connection", async () => { await assert.rejects(f.connection.startCalendarConnection(c, { ...s, scope: "operator" }), e => e.status === 403); await assert.rejects(f.connection.startCalendarConnection({ ...c, onboarding: { version: 2 } }, s), e => e.status === 403); });
 await check("Callback selects fixed tenant portal fragment without code exchange or key", async () => { const handler = (await import("../netlify/functions/google.mjs")).default; const result = await handler(new Request(`https://calendar.example.test/api/google/callback?state=${state}&code=dummy-code`)); assert.equal(result.status, 303); const url = new URL(result.headers.get("Location")); assert.equal(url.origin, "https://calendar.example.test"); assert.equal(url.pathname, "/desk"); assert.equal(url.searchParams.get("c"), c.slug); assert.equal(new URLSearchParams(url.hash.slice(1)).get("calendar_code"), "dummy-code"); assert.equal(result.headers.get("Referrer-Policy"), "no-referrer"); assert.equal(f.requests.length, 0); assert.ok(!url.href.includes(c.ownerKey)); assert.equal((await handler(new Request("https://calendar.example.test/api/google/auth?c=calendar-shop&k=permanent-owner-secret"))).status, 410); });
+await check("Google issuer callback preserves the original pending grant and fixed owner handoff", async () => {
+  const handler = (await import("../netlify/functions/google.mjs")).default, before = await f.store.get("calendar_oauth", hash(state)), requests = f.requests.length;
+  const query = new URLSearchParams({ state, iss: "https://accounts.google.com", code: "dummy-code", scope: f.scopes });
+  const response = await handler(new Request(`https://calendar.example.test/api/google/callback?${query}`));
+  assert.equal(response.status, 303);
+  const location = new URL(response.headers.get("Location")), fragment = new URLSearchParams(location.hash.slice(1));
+  assert.equal(location.origin, "https://calendar.example.test"); assert.equal(location.pathname, "/desk"); assert.equal(location.searchParams.get("c"), c.slug);
+  assert.deepEqual([...fragment.keys()].sort(), ["calendar_code", "calendar_state"]); assert.equal(fragment.get("calendar_state"), state); assert.equal(fragment.get("calendar_code"), "dummy-code");
+  assert.equal(response.headers.get("Cache-Control"), "no-store"); assert.equal(response.headers.get("Referrer-Policy"), "no-referrer");
+  assert.deepEqual(await f.store.get("calendar_oauth", hash(state)), before); assert.equal(f.requests.length, requests);
+});
+await check("Wrong malformed empty and repeated issuers fail before state handling or provider requests", async () => {
+  const handler = (await import("../netlify/functions/google.mjs")).default, before = await f.store.get("calendar_oauth", hash(state)), requests = f.requests.length;
+  for (const issuer of ["", "https://attacker.example.test", "accounts.google.com", "http://accounts.google.com", "https://accounts.google.com/", "https://ACCOUNTS.google.com", "https://accounts.google.com:443", "https://accounts.google.com.attacker.example.test", "https://accounts.google.com@attacker.example.test", " https://accounts.google.com", "https://accounts.google.com\n", "%", "https://accounts.google.com?x=1"]) {
+    const query = new URLSearchParams({ state, code: "dummy-code", iss: issuer });
+    for (const candidate of [query, new URLSearchParams({ state: "unknown-state", code: "dummy-code", iss: issuer })]) {
+      const response = await handler(new Request(`https://calendar.example.test/api/google/callback?${candidate}`));
+      assert.equal(response.status, 400); assert.deepEqual(await response.json(), { error: "invalid_callback" }); assert.equal(response.headers.get("Location"), null);
+    }
+  }
+  for (const duplicate of ["https://accounts.google.com", "https://attacker.example.test", ""]) {
+    const query = new URLSearchParams({ state, code: "dummy-code", iss: "https://accounts.google.com" }); query.append("iss", duplicate);
+    const response = await handler(new Request(`https://calendar.example.test/api/google/callback?${query}`)); assert.equal(response.status, 400); assert.deepEqual(await response.json(), { error: "invalid_callback" });
+  }
+  assert.deepEqual(await f.store.get("calendar_oauth", hash(state)), before); assert.equal(f.requests.length, requests);
+});
+await check("Issuer support retains unknown query and core duplicate rejection", async () => {
+  const handler = (await import("../netlify/functions/google.mjs")).default, before = await f.store.get("calendar_oauth", hash(state)), requests = f.requests.length;
+  for (const key of ["state", "code", "error", "unexpected"]) {
+    const query = new URLSearchParams({ state, code: "dummy-code", iss: "https://accounts.google.com" });
+    if (key === "error") query.append("error", "access_denied"); query.append(key, key === "error" ? "access_denied" : "dummy");
+    const response = await handler(new Request(`https://calendar.example.test/api/google/callback?${query}`)); assert.equal(response.status, 400); assert.deepEqual(await response.json(), { error: "invalid_callback" });
+  }
+  const unknown = await handler(new Request(`https://calendar.example.test/api/google/callback?state=unknown-state&iss=https%3A%2F%2Faccounts.google.com&code=dummy-code`)); assert.equal(unknown.status, 410);
+  assert.deepEqual(await f.store.get("calendar_oauth", hash(state)), before); assert.equal(f.requests.length, requests);
+});
 await check("Original owner completes once; refresh token is authenticated-encrypted and not in DTO", async () => { const result = await f.connection.completeCalendarConnection(c, s, { state, code: "dummy-code" }); assert.equal(result.calendar.connected, true); assert.equal(result.calendar.label, "Google Calendar"); const row = await f.store.get("calendar_connections", c.slug); assert.equal(row.targetId, "owner@calendar.example.test"); assert.ok(row.refresh.iv && row.refresh.tag && row.refresh.data); assert.ok(!JSON.stringify(row).includes("dummy-private-refresh")); assert.ok(!JSON.stringify(result).includes("refresh")); await assert.rejects(f.connection.completeCalendarConnection(c, s, { state, code: "dummy-code" }), e => e.code === "invalid_state"); });
+await check("A valid issuer cannot replay the consumed original authorization", async () => {
+  const handler = (await import("../netlify/functions/google.mjs")).default, before = await f.store.get("calendar_oauth", hash(state)), requests = f.requests.length;
+  const query = new URLSearchParams({ state, code: "dummy-code", iss: "https://accounts.google.com" }), response = await handler(new Request(`https://calendar.example.test/api/google/callback?${query}`));
+  assert.equal(response.status, 410); assert.equal((await response.json()).error, "invalid_state"); assert.equal(response.headers.get("Location"), null);
+  assert.deepEqual(await f.store.get("calendar_oauth", hash(state)), before); assert.equal(f.requests.length, requests);
+});
 await check("PKCE challenge matches the exact verifier sent to token endpoint", async () => { const request = f.requests.find(r => r.url.endsWith("/token")), verifier = new URLSearchParams(request.body).get("code_verifier"); assert.equal(createHash("sha256").update(verifier).digest("base64url"), new URL(start.authorizationUrl).searchParams.get("code_challenge")); });
 await check("Denied return consumes state without provider calls and preserves connection", async () => { const { authorizationUrl } = await f.connection.startCalendarConnection(c, s, {availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), denied = new URL(authorizationUrl).searchParams.get("state"), before = f.requests.length; const response = await f.connection.completeCalendarConnection(c, s, { state: denied, error: "access_denied" }); assert.equal(response.denied, true); assert.equal(response.calendar.connected, true); assert.equal(f.requests.length, before); await assert.rejects(f.connection.completeCalendarConnection(c, s, { state: denied, code: "dummy" }), e => e.code === "invalid_state"); });
 await check("Expired state and revoked owner session fail without token exchange", async () => { const pending = await f.connection.startCalendarConnection(c, s, {availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), token = new URL(pending.authorizationUrl).searchParams.get("state"); await f.store.atomicUpdate("calendar_oauth", hash(token), row => ({ value: { ...row, expiresAt: "2000-01-01T00:00:00.000Z" } })); const before = f.requests.length; await assert.rejects(f.connection.completeCalendarConnection(c, s, { state: token, code: "dummy" }), e => e.code === "invalid_state"); await f.store.put("access_sessions", s.sessionHash, { ...s, status: "revoked" }); await assert.rejects(f.connection.startCalendarConnection(c, s, {availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), e => e.status === 403); await f.store.put("access_sessions", s.sessionHash, s); assert.equal(f.requests.length, before); });

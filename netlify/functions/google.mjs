@@ -7,7 +7,9 @@ export default async req => {
   const url = new URL(req.url);
   if (req.method !== "GET") return new Response(JSON.stringify({ error: "method_not_allowed" }), { status: 405, headers: { ...headers, Allow: "GET" } });
   if (url.pathname.endsWith("/auth")) return new Response(JSON.stringify({ error: "owner_session_required", message: "Connect Calendar from your signed-in workspace." }), { status: 410, headers });
-  if ([...url.searchParams.keys()].some(key => !["state", "code", "error", "scope", "authuser", "prompt", "hd"].includes(key)) || ["state", "code", "error"].some(key => url.searchParams.getAll(key).length > 1)) return new Response(JSON.stringify({ error: "invalid_callback" }), { status: 400, headers });
+  // Google authorization responses include RFC 9207's issuer; compare the decoded
+  // string exactly before looking up state. Keep legacy returns without it valid.
+  if ([...url.searchParams.keys()].some(key => !["state", "code", "error", "scope", "authuser", "prompt", "hd", "iss"].includes(key)) || ["state", "code", "error", "iss"].some(key => url.searchParams.getAll(key).length > 1) || (url.searchParams.has("iss") && url.searchParams.get("iss") !== "https://accounts.google.com")) return new Response(JSON.stringify({ error: "invalid_callback" }), { status: 400, headers });
   try {
     const location = await calendarCallbackDestination({ state: url.searchParams.get("state"), code: url.searchParams.get("code"), error: url.searchParams.get("error") });
     return new Response(null, { status: 303, headers: { ...headers, Location: location } });
