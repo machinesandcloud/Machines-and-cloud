@@ -10,8 +10,8 @@ export const HOSTED_ONBOARDING_LIMITS = Object.freeze({total:218,platform:200,ap
 export const HOSTED_ONBOARDING_TARGET = Object.freeze({
   origin:'https://machinesandcloud.com',canonicalOrigin:'https://www.machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',accountSlug:'docteureminem',
   commit:'47e3c64163d20166970b6d309fbf6045a9de33b2',deployId:'6adbc34931bb7268db6db4f7',
-  externalOrigin:'https://zaricoach.com',externalPath:'/mc-front-desk-acceptance-20261023',pageExpiresAt:'2026-10-24T23:59:59Z',phaseId:'hosted-onboarding-zaricoach-20261023-v1',
-  ownerEmail:'ngoumnaisteve+mc-zaricoach-20261023@gmail.com',operatorEmail:'ngoumnaisteve@gmail.com',ownerName:'Internal QA Owner',business:'MC Acceptance Zari',callback:'+17135550142'
+  externalOrigin:'https://zaricoach.com',externalPath:'/mc-front-desk-acceptance-20261023',pageExpiresAt:'2026-10-24T23:59:59Z',phaseId:'hosted-onboarding-zaricoach-20261024-v2',
+  ownerEmail:'ngoumnaisteve+mc-zaricoach-20261024@gmail.com',operatorEmail:'ngoumnaisteve@gmail.com',ownerName:'Internal QA Owner',business:'MC Acceptance Zari',callback:'+17135550142'
 });
 export const HOSTED_ONBOARDING_GATES = Object.freeze(['PHONE_ACQUISITION_ENABLED','VOICE_ACTIVATION_ENABLED','MESSAGING_ACTIVATION_ENABLED','SERVICE_DELIVERY_ENABLED','CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','MC_PLATFORM_SMS_ENABLED','WORKSPACE_BILLING_ENABLED','WORKSPACE_BILLING_LIVE_ENABLED']);
 export const HOSTED_ONBOARDING_ASSETS = Object.freeze(['/','/index','/index.html','/onboard','/onboard.html','/desk','/desk.html','/admin','/admin.html','/styles.css','/site-refresh.css','/product-ui.css','/onboard.css','/desk.css','/desk-connections.css','/desk-billing.css','/admin.css','/script.js','/hero-photos.js','/agent-widget.js','/stories.js','/signup-intake.js','/onboard.js','/desk.js','/desk-connections.js','/desk-billing.js','/desk-requests.js','/admin.js','/embed.js','/assets/favicon.png','/assets/logo-dark.png','/assets/logo.png','/assets/photos/hero-hvac.jpg','/assets/photos/hero-electrician.jpg','/assets/photos/hero-home-repair.jpg','/assets/photos/cleaning.jpg']);
@@ -68,6 +68,7 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
   let siteOK=false,gatesOK=false,releaseOK=false,proofOK=false,cleanupReleaseOK=false,operatorAbsent=false,ownerEmpty=false,preflightRevoked=false,preflightRevocationVerified=false,mainRevoked=false;
   let handoff=null,binding=null,creationFingerprint=null,managementRevision=null,configurationRevision=null,createAttempts=0;
   let currentOwnerStage=null,currentOperatorStage=null,lastDraftRevision=null,editRevision=null,tenantIdentity=null,checkBinding=null,webActive=false;
+  let ownerRevisionEpoch=0,ownerRevisionObservedId=0;
   const deploymentBindings={signup:null,proof:null,cleanup:null};let workspaceCancelled=false,configurationClosed=false;
   const contacts=new Map(),pendingTurns=new Set(),recordIDs=new Set(),internalToken=Symbol('phase-internal-dispatch');let workerKeyHash=null;
   const externalURL=()=>T.externalOrigin+T.externalPath+'?client='+binding.slug+'&phase='+manifest.phaseId;
@@ -266,7 +267,9 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
     counts=next;
     const id=++seq,at=now();
     records.push({id,method:r.method,path:r.url.pathname,queryNames:[...r.url.searchParams.keys()].sort(),action:r.action,status:'reserved_unknown',startedAt:at,counters:{...counts}});
-    privateRequests.set(id,{...r,id,at,outcome:'reserved_unknown'});
+    // A GET begun before or during a configuration mutation must not replace its result.
+    if(r.role==='owner'&&r.url.pathname==='/api/client'&&r.mutation)ownerRevisionEpoch++;
+    privateRequests.set(id,{...r,id,at,ownerRevisionEpoch,outcome:'reserved_unknown'});
     if(r.emailSlot){used.add('mail:'+r.emailSlot);if(r.role==='owner')currentOwnerStage=r.emailSlot;else currentOperatorStage='operator';}
     if(r.action==='exchange')used.add('exchange:'+r.body.token);
     if(r.action==='sign_out')used.add('signout:'+r.bearer.token);
@@ -296,6 +299,7 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
       if(r.url.pathname==='/api/access'&&r.bearer.stage==='owner_preflight')preflightRevocationVerified=true;
     }
     if(status>=400){if(r.mutation)halted=true;return;}
+    if(r.role==='owner'&&r.url.pathname==='/api/client'&&r.mutation)ownerRevisionEpoch++;
     if(r.action==='pause'){if(b?.ok!==true)fail('pause_unconfirmed');webActive=false;}
     if(r.action==='go_live'){if(b?.ok!==true)fail('activation_unconfirmed');webActive=true;}
     if(r.action==='start_website_check'){const c=b?.check;if(!c||!/^([a-f0-9]{32})$/.test(c.id)||!hex(c.challenge)||c.contact!=='websitecheck_'+c.id||c.origin!==T.externalOrigin||c.url!==externalURL()+'#mc-website-check='+c.id+'.'+c.challenge||Date.parse(c.expiresAt)<=now())fail('website_check_response_not_bound');checkBinding=c;}
@@ -324,7 +328,19 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
       if(!r.url.searchParams.has('c')){if(!Array.isArray(b?.inquiries)||b.inquiries.some(x=>x.email===T.ownerEmail)&&!used.has('intake'))fail('existing_inquiry');if(b.inquiries.some(x=>x.email===T.ownerEmail&&x.marketingEligible===true))fail('unexpected_marketing_eligibility');operatorAbsent=true;}
       else{const c=b?.customer;if(c?.slug!==binding?.slug||c.owner?.email!==T.ownerEmail||c.name!==T.business||c.createdAt!==binding.createdAt||c.selfService!==true||!hex(c.revision))fail('operator_identity_changed');managementRevision=c.revision;}
     }
-    if(r.url.pathname==='/api/client'&&r.method==='GET'&&r.role==='owner'&&r.bearer&&!revoked.has(r.bearer.token)&&b?.client){if(b.client.slug!==binding?.slug||b.client.owner?.email!==T.ownerEmail||b.client.business?.name!==T.business||Object.hasOwn(b.client,'ownerKey')||Object.hasOwn(b.client,'management'))fail('owner_view_identity_or_secret');if(hex(b.configurationRevision))configurationRevision=b.configurationRevision;if(hex(b.editRevision))editRevision=b.editRevision;if(hex(b.websiteInstallation?.tenantIdentity))tenantIdentity=b.websiteInstallation.tenantIdentity;for(const record of b.leads||[])if(record.slug===binding.slug&&record.channel==='web'&&record.delivery?.tenantIdentity===tenantIdentity&&Date.parse(record.createdAt)>=Date.parse(binding.createdAt)&&/^[a-f0-9]{12,64}$/.test(record.id||''))recordIDs.add(record.id);}
+    if(r.url.pathname==='/api/client'&&['GET','PUT'].includes(r.method)&&r.role==='owner'&&r.bearer&&!revoked.has(r.bearer.token)&&(b?.client||r.method==='PUT')){
+      if(!b?.client||b.client.slug!==binding?.slug||b.client.owner?.email!==T.ownerEmail||b.client.business?.name!==T.business||Object.hasOwn(b.client,'ownerKey')||Object.hasOwn(b.client,'management'))fail('owner_view_identity_or_secret');
+      if(r.method==='PUT'&&(b.ok!==true||!hex(b.configurationRevision)||!hex(b.editRevision)||b.setup?.revision!==b.configurationRevision))fail('owner_update_unconfirmed');
+      // PUT is authoritative immediately. Later-started GETs may advance it; older
+      // GETs and GETs overlapping a mutation remain identity-checked but cannot rewind it.
+      if(r.method==='PUT'||r.ownerRevisionEpoch===ownerRevisionEpoch&&r.id>=ownerRevisionObservedId){
+        if(hex(b.configurationRevision))configurationRevision=b.configurationRevision;
+        if(hex(b.editRevision))editRevision=b.editRevision;
+        ownerRevisionObservedId=r.id;
+      }
+      if(hex(b.websiteInstallation?.tenantIdentity))tenantIdentity=b.websiteInstallation.tenantIdentity;
+      for(const record of b.leads||[])if(record.slug===binding.slug&&record.channel==='web'&&record.delivery?.tenantIdentity===tenantIdentity&&Date.parse(record.createdAt)>=Date.parse(binding.createdAt)&&/^[a-f0-9]{12,64}$/.test(record.id||''))recordIDs.add(record.id);
+    }
     if(['save_note','cancel_service'].includes(r.action)){
       if(r.action==='cancel_service'&&b?.ok===true&&b.customer?.status==='cancelled')workspaceCancelled=true;
       if(b?.ok!==true)fail('operator_change_unconfirmed');

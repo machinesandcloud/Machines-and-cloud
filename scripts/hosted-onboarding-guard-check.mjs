@@ -68,6 +68,11 @@ await check('live use requires exact explicit approval; malformed/expanded manif
   const approved={...manifest(),approved:true,approvalId:'approval-offline-proof',ownerMailboxConfirmed:true,callbackApproved:true};await deny(()=>create({manifest:approved,persistence:memory(),mode:'live'}),'live_durable_phase_ledger_required');
   const f=await fresh();await deny(()=>f.guard.projectRequest({role:'anonymous',url:T.origin+'/',transport:()=>j({})}),'offline_fixture_transport_required');
 });
+await check('closed v1 phase and its owner alias cannot authorize the unapproved v2 successor',async()=>{
+ const old=manifest();old.phaseId='hosted-onboarding-zaricoach-20261023-v1';await deny(()=>fresh({manifest:old}),'invalid_manifest');
+ const prior=manifest();prior.targets.ownerEmail='ngoumnaisteve+mc-zaricoach-20261023@gmail.com';await deny(()=>fresh({manifest:prior}),'manifest_target_or_limits');
+ const f=await fresh();await metadata(f.guard);let calls=0;await deny(()=>send(f.guard,'owner','/api/access',{method:'POST',body:{action:'request_link',email:'ngoumnaisteve+mc-zaricoach-20261023@gmail.com',plan:'starter'},transport:fixture(async()=>{calls++;return j({delivery:'email'},202);})}),'wrong_mail_target');assert.equal(calls,0);assert.equal(f.guard.snapshot().counters.email,0);assert.equal(manifest().approved,false);
+});
 await check('existing ledger cannot resume or reset; persistence must precede every effect',async()=>{
   await deny(()=>fresh({persistence:memory({exists:true})}),'phase_ledger_already_exists');
   const p=memory({failAfter:0}),{guard}=await fresh({persistence:p});let calls=0;
@@ -210,6 +215,7 @@ await check('stale source bytes and expired phase fail closed without hidden ret
  const bad=manifest();bad.expiresAt=new Date(stamp-1).toISOString();await deny(()=>fresh({manifest:bad}),'phase_expired');
 });
 
+await ownerRevisionChecks();
 await check('future deploy IDs bind once from exact authenticated READY source and cleanup never reuses proof deploy',async()=>{
  const m=manifest();m.release.deployId=null;m.cleanupRelease.deployId=null;const f=await fresh({manifest:m}),s=await created(f.guard);await proofReady(f.guard,s);assert.equal(f.guard.snapshot().deploymentBindings.proof.deployId,'a'.repeat(24));assert.equal(f.guard.snapshot().deploymentBindings.cleanup,null);
  await deny(()=>f.guard.metadataRequest({kind:'release',url:`https://api.netlify.com/api/v1/sites/${T.siteId}`,headers:headers('fixture'),transport:fixture(async()=>j({...metadataSite(),published_deploy:{id:'c'.repeat(24),commit_ref:m.release.commit,state:'ready'}}))}),'metadata_not_allowed');
@@ -281,3 +287,91 @@ async function actualBrowser(){return check('current-source ordinary browser sig
  }catch(error){report.actualBrowserFailure={stage,error:error.message,ledger:guard.snapshot(),wire,errors,otherPaths};throw error;}finally{await browser.close();globalThis.fetch=denyPhysical;}
 });}
 
+
+// Exercise real configuration writes independently of a later browser refresh.
+async function ownerRevisionChecks(){
+ for(const key of Object.keys(process.env))if(/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_|PHONE_|VOICE_|MESSAGING_|CALENDAR_|SERVICE_|PLATFORM_|MC_SELF_SERVICE_AI_|MANAGED_EMAIL_|NETLIFY_)/.test(key))delete process.env[key];
+ Object.assign(process.env,{MC_MEMORY_STORE:'1',MC_FAKE_MODEL:'1',URL:T.origin,PUBLIC_SITE_URL:T.origin,...Object.fromEntries(G.map(k=>[k,'false']))});
+ const store=await import('../netlify/functions/lib/store.mjs'),{accessHash}=await import('../netlify/functions/lib/access.mjs'),{newClient,parseHours}=await import('../netlify/functions/lib/config.mjs'),handler=(await import('../netlify/functions/client.mjs')).default;
+ async function ready({website=true}={}){
+  const f=await fresh(),s=await created(f.guard),c=newClient({slug,ownerKey:'SYNTHETIC-UNUSED',owner:{name:T.ownerName,email:T.ownerEmail,phone:T.callback},business:{name:T.business,trade:'Internal QA',serviceArea:['Houston'],hours:'Mon to Fri 8 to 5'}});
+  Object.assign(c,{createdAt:iso,summary:client().summary,onboarding:{version:1,verifiedEmail:T.ownerEmail,desiredChannels:['web']},services:['Synthetic acceptance'],windows:['8 to 12','12 to 5'],build:{status:'built',source:'owner_answers'},status:'testing'});c.rules.hours=parseHours('Mon to Fri 8 to 5');c.business.website=website?f.guard.binding().website:'';
+  await store.put('clients',slug,c);await store.put('access_sessions',accessHash(s.owner),{scope:'onboarding',status:'active',email:T.ownerEmail,expiresAt:new Date(stamp+3600000).toISOString()});
+  const transport=fixture((url,options)=>handler(new Request(url,options),{ip:'192.0.2.253'}));
+  const get=async()=>{const response=await send(f.guard,'owner','/api/client?c='+slug,{bearer:s.owner,transport});assert.equal(response.status,200);return response.json();};
+  const a=await get();return {...f,s,transport,get,a};
+ }
+ async function save(f,kind='allow_origin'){
+  const patch=kind==='save_website'?{business:{website:f.guard.binding().website}}:{widget:{allowedOrigins:[T.externalOrigin]}};
+  const response=await send(f.guard,'owner','/api/client?c='+slug,{method:'PUT',bearer:f.s.owner,body:{expectedRevision:f.a.configurationRevision,expectedEditRevision:f.a.editRevision,...patch},transport:f.transport});assert.equal(response.status,200);const b=await response.json();assert.equal(b.setup.revision,b.configurationRevision);if(kind==='allow_origin')assert.notEqual(b.configurationRevision,f.a.configurationRevision);return b;
+ }
+ const review=(f,b)=>send(f.guard,'owner','/api/client?c='+slug,{method:'POST',bearer:f.s.owner,body:{action:'review_rules',revision:b.configurationRevision},transport:f.transport});
+ await check('actual owner PUT revision immediately permits current review without waiting for GET',async()=>{
+  const f=await ready(),b=await save(f);let guardedError;
+  try{const response=await review(f,b);assert.equal(response.status,200);}
+  catch(error){guardedError=error.code||error.message;const direct=await f.transport(T.origin+'/api/client?c='+slug,{method:'POST',headers:{...headers(f.s.owner),origin:T.origin,'content-type':'application/json'},body:JSON.stringify({action:'review_rules',revision:b.configurationRevision})});report.ownerRevisionRace={originalGuardSHA256:sourceBefore['scripts/hosted-onboarding-guard.mjs'],revisionBefore:f.a.configurationRevision,successfulPUTRevision:b.configurationRevision,setupRevision:b.setup.revision,guardedError,directHandlerStatus:direct.status,physicalAttempts};assert.equal(direct.status,200);throw error;}
+  report.ownerRevisionRace={revisionBefore:f.a.configurationRevision,successfulPUTRevision:b.configurationRevision,setupRevision:b.setup.revision,reviewStatus:200,physicalAttempts};
+ });
+ await check('actual website save edit revision immediately permits allow-origin without GET',async()=>{
+  const f=await ready({website:false}),website=await save(f,'save_website');assert.equal(website.configurationRevision,f.a.configurationRevision);assert.notEqual(website.editRevision,f.a.editRevision);f.a=website;const b=await save(f);assert.equal((await review(f,b)).status,200);
+ });
+ await check('GET completed during PUT cannot prevent its later authoritative revision',async()=>{
+  const f=await ready();let release,entered;const waiting=new Promise(r=>entered=r),gate=new Promise(r=>release=r);
+  const put=send(f.guard,'owner','/api/client?c='+slug,{method:'PUT',bearer:f.s.owner,body:{expectedRevision:f.a.configurationRevision,expectedEditRevision:f.a.editRevision,widget:{allowedOrigins:[T.externalOrigin]}},transport:fixture(async(u,o)=>{entered();await gate;return f.transport(u,o);})});await waiting;
+  const during=await f.get();assert.equal(during.configurationRevision,f.a.configurationRevision);release();const b=await (await put).json();assert.equal((await review(f,b)).status,200);
+ });
+ await check('GET reserved before PUT cannot overwrite its successful authoritative revision',async()=>{
+  const f=await ready();let release,entered;const waiting=new Promise(r=>entered=r),gate=new Promise(r=>release=r);
+  const old=send(f.guard,'owner','/api/client?c='+slug,{bearer:f.s.owner,transport:fixture(async(u,o)=>{const response=await f.transport(u,o);entered();await gate;return response;})});await waiting;
+  const b=await save(f);release();await old;assert.equal((await review(f,b)).status,200);
+ });
+ await check('GET reserved during PUT cannot overwrite its newer successful response',async()=>{
+  const f=await ready();let releaseWrite,enteredWrite,releaseRead,enteredRead;const writeWaiting=new Promise(r=>enteredWrite=r),writeGate=new Promise(r=>releaseWrite=r),readWaiting=new Promise(r=>enteredRead=r),readGate=new Promise(r=>releaseRead=r);
+  const put=send(f.guard,'owner','/api/client?c='+slug,{method:'PUT',bearer:f.s.owner,body:{expectedRevision:f.a.configurationRevision,expectedEditRevision:f.a.editRevision,widget:{allowedOrigins:[T.externalOrigin]}},transport:fixture(async(u,o)=>{enteredWrite();await writeGate;return f.transport(u,o);})});await writeWaiting;
+  const old=send(f.guard,'owner','/api/client?c='+slug,{bearer:f.s.owner,transport:fixture(async(u,o)=>{const response=await f.transport(u,o);enteredRead();await readGate;return response;})});await readWaiting;releaseWrite();const b=await (await put).json();releaseRead();await old;assert.equal((await review(f,b)).status,200);
+ });
+ await check('newer owner GET remains authoritative when an earlier GET completes last',async()=>{
+  const f=await ready();let release,entered;const waiting=new Promise(r=>entered=r),gate=new Promise(r=>release=r);const old=send(f.guard,'owner','/api/client?c='+slug,{bearer:f.s.owner,transport:fixture(async(u,o)=>{const response=await f.transport(u,o);entered();await gate;return response;})});await waiting;
+  const c=await store.getClient(slug);c.widget.allowedOrigins=[T.externalOrigin];await store.put('clients',slug,c);const b=await f.get();release();await old;assert.notEqual(b.configurationRevision,f.a.configurationRevision);assert.equal((await review(f,b)).status,200);
+ });
+ await check('malformed successful owner PUT cannot install new guard revisions',async()=>{
+  for(const change of [b=>delete b.configurationRevision,b=>b.client.owner.email='foreign@example.test',b=>b.setup.revision='0'.repeat(64)]){
+   const f=await ready();const body={expectedRevision:f.a.configurationRevision,expectedEditRevision:f.a.editRevision,widget:{allowedOrigins:[T.externalOrigin]}};
+   await deny(()=>send(f.guard,'owner','/api/client?c='+slug,{method:'PUT',bearer:f.s.owner,body,transport:fixture(async(u,o)=>{const response=await f.transport(u,o),b=await response.json();change(b);return j(b);})}),['owner_view_identity_or_secret','owner_update_unconfirmed']);assert.equal(f.guard.snapshot().halted,true);
+  }
+ });
+ if(process.argv.includes('--revision-race-browser')){
+  const {chromium}=await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs'),billing=(await import('../netlify/functions/workspace-billing.mjs')).default;
+  const browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-background-networking','--disable-component-update','--disable-sync','--no-first-run','--host-resolver-rules=MAP * ~NOTFOUND']});
+  try{for(const width of [390,1440])await check('ordinary browser allows current review during delayed website refresh at '+width,async()=>{
+   const f=await ready(),context=await browser.newContext({viewport:{width,height:950},serviceWorkers:'block',reducedMotion:'reduce'}),held=[],wire=[],errors=[];let hold=false;
+   try{
+    await context.addInitScript(({owner,slug})=>{sessionStorage.setItem('mc-onboarding-session-v1',owner);localStorage.setItem('mc-walkthrough-v1:'+slug,'seen');},{owner:f.s.owner,slug});
+    await context.routeWebSocket('**/*',socket=>socket.close());
+    await context.route('**/*',async route=>{
+     const request=route.request(),u=new URL(request.url());
+     if(u.origin!==T.origin){assert(['fonts.googleapis.com','fonts.gstatic.com'].includes(u.hostname));return route.fulfill({status:200,body:'',contentType:'text/css'});}
+     if(u.pathname.startsWith('/api/')){
+      const method=request.method(),body=request.postData()?request.postDataJSON():undefined,item={method,path:u.pathname,action:body?.action};wire.push(item);
+      let response;
+      if(u.pathname==='/api/workspace-billing')response=await billing(new Request(u.href,{method,headers:request.headers(),...(body?{body:JSON.stringify(body)}:{})}));
+      else response=await send(f.guard,'owner',u.pathname+u.search,{method,bearer:f.s.owner,body,transport:fixture(async(url,options)=>{const result=await f.transport(url,options);if(method==='GET'&&hold){await new Promise(release=>held.push(release));}return result;})});
+      item.status=response.status;if(method==='PUT'){item.reply=await response.clone().json();hold=true;}if(body?.action==='review_rules')item.body=body;
+      return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});
+     }
+     const file=u.pathname.slice(1);assert(file&&!file.includes('..'));const type=/\.js$/.test(file)?'text/javascript':/\.css$/.test(file)?'text/css':/\.png$/.test(file)?'image/png':'text/html';return route.fulfill({contentType:type,body:await readFile(file)});
+    });
+    const page=await context.newPage();page.setDefaultTimeout(6500);page.on('pageerror',e=>errors.push(e.message));await page.goto(T.origin+'/desk.html?c='+slug);await page.locator('body[data-workspace-state="ready"]').waitFor();await page.locator('#guideDialog').evaluate(el=>{if(el.open)el.close();});await page.locator('.tabs [data-t="setup"]').click();await page.locator('#websiteSetupDetails > summary').evaluate(el=>{if(!el.parentElement.open)el.click();});
+    // Capture an older actual GET, then hold every post-save refresh too.
+    hold=true;await page.evaluate(()=>document.dispatchEvent(new CustomEvent('mc:desk-refresh')));await assertEventually(()=>held.length>=1);
+    const putResponse=page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname==='/api/client');await page.locator('#websiteInstallPrimary[data-action="allow_origin"]').click();await putResponse;await assertEventually(()=>held.length>=2);
+    await page.locator('[data-workspace-route="know"]').click();const disabledDuringRefresh=await page.locator('#reviewRules').isDisabled();if(disabledDuringRefresh){assert.equal(wire.filter(r=>r.action==='review_rules').length,0);hold=false;while(held.length)held.pop()();await page.locator('#websiteInstallMessage').filter({hasText:'Website allowed'}).waitFor();}const reviewResponse=page.waitForResponse(r=>r.request().method()==='POST'&&r.request().postDataJSON()?.action==='review_rules');await page.locator('#reviewRules').click();assert.equal((await reviewResponse).status(),200);
+    const put=wire.find(r=>r.method==='PUT'),reviewed=wire.find(r=>r.action==='review_rules');assert.equal(reviewed.body.revision,put.reply.configurationRevision);assert.equal(reviewed.body.revision,put.reply.setup.revision);assert.notEqual(reviewed.body.revision,f.a.configurationRevision);assert.equal(f.guard.snapshot().halted,false);
+    hold=false;while(held.length)held.pop()();await page.locator('#reviewMessage').filter({hasText:'Review saved'}).waitFor();assert.equal(errors.length,0);
+    const path=output.slice(0,-5)+'-review-current-'+width+'.png';await page.screenshot({path,fullPage:false});(report.screenshots||=[]).push(path);(report.ownerRevisionBrowser||=[]).push({width,heldRefreshes:wire.filter(r=>r.method==='GET'&&r.path==='/api/client').length,putRevision:put.reply.configurationRevision,reviewRevision:reviewed.body.revision,reviewStatus:reviewed.status,pageErrors:errors,guardHalted:false,disabledDuringRefresh});
+   }finally{while(held.length)held.pop()();await context.close();}
+  });}finally{await browser.close();}
+ }
+ async function assertEventually(condition){for(let i=0;i<200;i++){if(condition())return;await new Promise(r=>setTimeout(r,10));}assert(condition(),'Expected local concurrency barrier');}
+
+}

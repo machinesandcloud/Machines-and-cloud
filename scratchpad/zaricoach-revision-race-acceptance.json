@@ -1,0 +1,99 @@
+{
+  "at": "2026-10-24T03:23:33.159434+00:00",
+  "role": "Independent QA; verification-only guard repair",
+  "baseCommit": "7d0e2430ed2063f50eaad927ff051b6e36faf4de",
+  "decision": "Accept local guard repair and unapproved successor preparation only. Closed live v1 remains closed; no external retry authority. UI concurrency repair is separate and pending independent source-bound acceptance.",
+  "defect": {
+    "source": "Original guard successful owner PUT responses did not update configurationRevision/editRevision. Every completed owner GET could overwrite them regardless of request order.",
+    "actualHandlerReproduction": "allow_origin PUT200 returns revision B; ordinary review_rules(B) is guard-denied client_action_not_allowed while identical direct actual handler returns200.",
+    "originalGuardSHA256": "6d3bc10b7f50cef68c0c0227b5a3f5a4921ab0bcd462f7122634ba226f49ae67",
+    "browser": "Original7d0 actual UI at390/1440 sends the same current PUT/setup revision B while earlier and post-save GETs are held; repaired guard accepts200 and ordinary UI shows Review saved. This does not establish the exact private denied live request body.",
+    "liveAttribution": "Confirmed guard defect sufficient to explain the live denial. No stale customer review body inferred from sanitized live ledger alone."
+  },
+  "repair": {
+    "files": [
+      "scripts/hosted-onboarding-guard.mjs",
+      "scripts/hosted-onboarding-guard-check.mjs"
+    ],
+    "behavior": [
+      "Validate identity, success and revision pair on successful owner PUT; consume authoritative revisions immediately.",
+      "Fence GETs begun before/during owner configuration mutations and earlier GET responses, retaining identity checks.",
+      "Keep all existing scope, budget, no-retry, halt, durable-ledger and cleanup rules."
+    ],
+    "newTarget": {
+      "phaseId": "hosted-onboarding-zaricoach-20261024-v2",
+      "approved": false,
+      "alias": "ngoumnaisteve+mc-zaricoach-20261024@gmail.com",
+      "oldPhaseAndAliasRejected": true,
+      "limitsChanged": false,
+      "pagePathOrExpiryChanged": false
+    }
+  },
+  "verification": {
+    "passed": 37,
+    "total": 37,
+    "sourceStable": true,
+    "physicalAttempts": 0,
+    "sourceFiles": 474,
+    "sourceDeltaFromApproved474": [
+      "scripts/hosted-onboarding-guard-check.mjs",
+      "scripts/hosted-onboarding-guard.mjs"
+    ],
+    "scriptSHA256": {
+      "scripts/hosted-onboarding-guard.mjs": "44a633b80570392048c3ceed73287be330177e92a0fb0d7a0ba4d5ac7ea2e998",
+      "scripts/hosted-onboarding-guard-check.mjs": "4d0fee3f22501a41115d5165071cdd82b464a06bf0f5d3a51fad3998794dc450"
+    },
+    "coverage": [
+      "PUT\u2192current review without GET",
+      "website edit revision\u2192allow-origin without GET",
+      "old GET before PUT completes last",
+      "GET begun during PUT completes before or after successful PUT",
+      "newer GET remains authoritative over earlier GET",
+      "malformed PUT success/identity/setup revision rejected",
+      "ordinary original UI delayed-refresh390/1440",
+      "explicit closed-v1 phase/owner alias rejected",
+      "existing guard authorization/budgets/unknown results/cleanup/stage/source checks"
+    ],
+    "receipts": [
+      {
+        "path": "scratchpad/zaricoach-revision-race-first.json",
+        "sha256": "2e12c803b878c9c808f5b239cbfcaa5f6b4ad8d3e3a59a6b0c88f33b4887c243"
+      },
+      {
+        "path": "scratchpad/zaricoach-revision-race-original.json",
+        "sha256": "9b64cef186422dfaedf15718f12598042b5dc6ea50f8d83700e6b83f07501fa6"
+      },
+      {
+        "path": "scratchpad/zaricoach-revision-race-browser.json",
+        "sha256": "e5adf14df5a6b1ae05208837226f08ba4e6f883b0f5a64d7b0d01e047e39dec0"
+      },
+      {
+        "path": "scratchpad/zaricoach-revision-race-final-v1.json",
+        "sha256": "aa0b105577859b4fe31fa02a3a908b3e6f8213ac1377459c7a8f9c07b4972fec"
+      },
+      {
+        "path": "scratchpad/zaricoach-revision-race-final-v2.json",
+        "sha256": "82d7095ec793612c686fc7d5977dcc2cbd312f2ac40fc07de8f1f614a3686f84"
+      }
+    ],
+    "screenshots": [
+      "scratchpad/zaricoach-revision-race-final-v2-review-current-390.png",
+      "scratchpad/zaricoach-revision-race-final-v2-review-current-1440.png"
+    ],
+    "firstFailures": [
+      {
+        "path": "scratchpad/zaricoach-revision-race-first.json",
+        "disposition": "Fixture-only incorrect expectation that website URL save changes rules revision; retained."
+      },
+      {
+        "path": "scratchpad/zaricoach-revision-race-original.json",
+        "disposition": "Actual original guard defect reproduced; retained."
+      },
+      {
+        "path": "scratchpad/zaricoach-revision-race-browser.json",
+        "disposition": "Fixture-only missing journey button on minimal seeded fixture; corrected to ordinary Business details navigation; retained."
+      }
+    ]
+  },
+  "limits": "Local memory storage and actual candidate handlers/assets with synthetic protocols. No real email, inference, installation, provider delivery, hosted scheduled recovery, settings, deployment, regular browser or production account effect. Actual v1 cleanup is Root-owned evidence, not replayed here."
+}
