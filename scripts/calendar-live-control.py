@@ -242,7 +242,10 @@ def main():
             return {'deploys':[{'id':r.get('id'),'state':r.get('state'),'commit':r.get('commit_ref')} for r in v]}
         if args.command in ['remote','push']:
             if args.command=='push' and not s.get('stagedVerified'): fail('Read back exact staged environment before publication')
-            if args.command=='push': current_site(s,append)
+            if args.command=='push':
+                current_site(s,append)
+                actual=request(s,append,'inspect-before:push','mc',env_path('mc'))
+                if projection(actual)!=projection(read(cache('mc'))): fail('Actual environment changed before publication; do not build cached settings')
             return git(s,append,'mc',push=args.command=='push')
         if args.command=='apply-key':
             if args.input not in MC_KEYS: fail('One of four exact Calendar keys required')
@@ -265,6 +268,8 @@ def main():
             observed=read(PRIVATE/'current-mc-site.json');deployment=observed.get('published_deploy') or {}
             if deployment.get('commit_ref')!=SITES['mc']['candidate'] or deployment.get('state')!='ready' or (now()-dt.datetime.fromisoformat(observed.get('_observedAt','2000-01-01T00:00:00+00:00').replace('Z','+00:00'))).total_seconds()>90: fail('Fresh exact current production candidate required for cleanup build')
             if s.get('remote',{}).get('mc')!=SITES['mc']['candidate'] or (now()-dt.datetime.fromisoformat(s.get('remoteAt',{}).get('mc','2000-01-01T00:00:00+00:00').replace('Z','+00:00'))).total_seconds()>90: fail('Fresh exact candidate remote required')
+            actual=request(s,append,'inspect-before:cleanup-build','mc',env_path('mc'),cleanup=True)
+            if projection(actual)!=projection(read(PRIVATE/'original-mc-env.json')): fail('Actual environment changed before cleanup build; do not build cached settings')
             v=request(s,append,'build:mc:cleanup','mc','/sites/'+SITES['mc']['id']+'/builds','POST',{'branch':'main'},build=True,cleanup=True);return {'cleanupBuildReserved':True,'buildId':v.get('id'),'deployId':v.get('deploy_id')}
     fail('Unsupported command')
 if __name__=='__main__':
