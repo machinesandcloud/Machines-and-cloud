@@ -1,0 +1,311 @@
+{
+  "at": "2026-10-24T16:54:27.744Z",
+  "before": {
+    "netlify/functions/lib/workspace-billing.mjs": "4224f0b4b637c6bb5c62d9e76dce65ec4a2b7827bfb18d22b9183f5dd55af323",
+    "netlify/functions/workspace-billing.mjs": "dbc0fe9719dc2dd04c8d247692a8b033d68ea42090f4eb38d1d2f1fbacb8671d",
+    "netlify/functions/workspace-billing-webhook.mjs": "ca50629c531727dbed0d09c405b8cdb4180a36b614679364a725080e1e7f1c70",
+    "netlify/functions/workspace-billing-background.mjs": "6299c996522ff02d000cbe12c9b0d9418b7ff60c95021dc38eed77af1ee01bdd",
+    "netlify/functions/stripe-webhook.mjs": "924bbbf2add7ab19ce0625d51b6c456c292f2fee9482bd07b716e7b821bb1b81",
+    "netlify/functions/lib/billing.mjs": "81d9e14a67fbe883325e28d268463e8e4e39df89b78d0f150306afe7b770610e",
+    "scripts/workspace-billing-public-proof-check.mjs": "4e78a8571be282a05108914da99a51af659ee3f9fe4d519e1145b1f3afc60371",
+    "scripts/lib/stripe-public-proof.mjs": "5929dd2e977661b45d055bb948deea3a1190d53369708cefb4989a79b75676d6",
+    "scripts/lib/stripe-public-execution.mjs": "1d5bbb04c62aa8c5993828b22ac08bee5494760ed16aff565bffca16fcb73aae",
+    "desk-billing.js": "e729e169b1d878c74359087652c900ee6e5923ff8d0c8cddf945aa1c843f53f1",
+    "desk.html": "0183b6dfa9204e8844342f28e941b9dd0fec84a9dac36a1f320a2b9ad1d3a327",
+    "desk.js": "4f8daf5ed178d49883ce84165e832f44b90924ecfe4b8586a6e879cc5906fbff",
+    "scratchpad/stripe-public-po-third-observe.mjs": "3b3751fea8d27c682e383eb80c09022eec6911ba9ecaca4b3137b55b3bdb2093"
+  },
+  "checks": [
+    {
+      "name": "1440px TEST phase owner completes one checkout, ends renewal, returns from uncertainty and sees truthful ended history",
+      "pass": false,
+      "error": "The input did not match the regular expression /ended|cancelled|canceled|no active subscription/i. Input:\n\n'No subscription started'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ended|cancelled|canceled|no active subscription/i. Input:\n\n'No subscription started'\n\n    at file:///private/tmp/mc-billing-public-d252/scratchpad/stripe-public-po-third-observe.mjs:58:558\n    at async check (file:///private/tmp/mc-billing-public-d252/scratchpad/stripe-public-po-third-observe.mjs:46:86)\n    at async file:///private/tmp/mc-billing-public-d252/scratchpad/stripe-public-po-third-observe.mjs:52:35"
+    },
+    {
+      "name": "390px TEST phase owner completes one checkout, ends renewal, returns from uncertainty and sees truthful ended history",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n2 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n2 !== 1\n\n    at file:///private/tmp/mc-billing-public-d252/scratchpad/stripe-public-po-third-observe.mjs:57:991\n    at async check (file:///private/tmp/mc-billing-public-d252/scratchpad/stripe-public-po-third-observe.mjs:46:86)\n    at async file:///private/tmp/mc-billing-public-d252/scratchpad/stripe-public-po-third-observe.mjs:52:35"
+    }
+  ],
+  "requests": [
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-9327a6e3dafb93ffe3402594f6c5d812"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-renewal-c25cf802ff62276b352b681a3c76e02d"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "DELETE",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-proof-cleanup-dddddddddddddddddddddddddddddddd"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-12066c3985eb62e8c717278d9e2c831e"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-renewal-b158c08a3f80793fe18ef582ab2c7ac8"
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "privateCredentialFilesRead": 0,
+  "browserErrors": [],
+  "screenshots": [
+    "scratchpad/stripe-public-po-third-1440-pending-after-return.png",
+    "scratchpad/stripe-public-po-third-1440-renewal-confirmed.png",
+    "scratchpad/stripe-public-po-third-1440-cleaned-up.png"
+  ],
+  "stages": [
+    {
+      "width": 1440,
+      "stage": "one_bound_synthetic_checkout_and_signed_receipt",
+      "subscription": "sub_offline_owned",
+      "phase": "public_phase_1"
+    },
+    {
+      "width": 1440,
+      "stage": "intentional_renewal_end_same_subscription_and_lost_response_readback_no_repeat"
+    },
+    {
+      "width": 1440,
+      "stage": "exact_phase_financial_cleanup",
+      "uiStatus": "No subscription started",
+      "billingStatus": "canceled"
+    },
+    {
+      "width": 390,
+      "stage": "one_bound_synthetic_checkout_and_signed_receipt",
+      "subscription": "sub_offline_owned",
+      "phase": "public_phase_2"
+    }
+  ],
+  "after": {
+    "netlify/functions/lib/workspace-billing.mjs": "4224f0b4b637c6bb5c62d9e76dce65ec4a2b7827bfb18d22b9183f5dd55af323",
+    "netlify/functions/workspace-billing.mjs": "dbc0fe9719dc2dd04c8d247692a8b033d68ea42090f4eb38d1d2f1fbacb8671d",
+    "netlify/functions/workspace-billing-webhook.mjs": "ca50629c531727dbed0d09c405b8cdb4180a36b614679364a725080e1e7f1c70",
+    "netlify/functions/workspace-billing-background.mjs": "6299c996522ff02d000cbe12c9b0d9418b7ff60c95021dc38eed77af1ee01bdd",
+    "netlify/functions/stripe-webhook.mjs": "924bbbf2add7ab19ce0625d51b6c456c292f2fee9482bd07b716e7b821bb1b81",
+    "netlify/functions/lib/billing.mjs": "81d9e14a67fbe883325e28d268463e8e4e39df89b78d0f150306afe7b770610e",
+    "scripts/workspace-billing-public-proof-check.mjs": "4e78a8571be282a05108914da99a51af659ee3f9fe4d519e1145b1f3afc60371",
+    "scripts/lib/stripe-public-proof.mjs": "5929dd2e977661b45d055bb948deea3a1190d53369708cefb4989a79b75676d6",
+    "scripts/lib/stripe-public-execution.mjs": "1d5bbb04c62aa8c5993828b22ac08bee5494760ed16aff565bffca16fcb73aae",
+    "desk-billing.js": "e729e169b1d878c74359087652c900ee6e5923ff8d0c8cddf945aa1c843f53f1",
+    "desk.html": "0183b6dfa9204e8844342f28e941b9dd0fec84a9dac36a1f320a2b9ad1d3a327",
+    "desk.js": "4f8daf5ed178d49883ce84165e832f44b90924ecfe4b8586a6e879cc5906fbff",
+    "scratchpad/stripe-public-po-third-observe.mjs": "3b3751fea8d27c682e383eb80c09022eec6911ba9ecaca4b3137b55b3bdb2093"
+  },
+  "sourceStable": true,
+  "ok": false
+}

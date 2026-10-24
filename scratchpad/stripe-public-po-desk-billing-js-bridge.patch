@@ -1,0 +1,14 @@
+--- d29611b/desk-billing.js
+
++++ root-repaired/desk-billing.js
+
+@@ -15,6 +15,6 @@
+
+     if(!state)return;
+     var subscribed=state.status!=='none'&&!['canceled','incomplete_expired'].includes(state.status),renewalWaiting=cancelUncertain||['pending','uncertain'].includes(state.cancellationState),waiting=checkoutUncertain||state.checkout&&['pending','uncertain'].includes(state.checkout.state);
+-    $('billingStatus').textContent=subscribed?state.cancelAtPeriodEnd?'Renewal ends '+date(state.currentPeriodEnd):renewalWaiting?'Renewal cancellation pending':state.status==='active'?'Subscription active':state.status==='past_due'||state.status==='unpaid'?'Payment needs attention':state.status.replace(/_/g,' '):'No subscription started';
+-    $('billingSummary').textContent=subscribed?(state.name||'Your subscription')+(state.currentPeriodEnd?' · Current period ends '+date(state.currentPeriodEnd):'')+'.':waiting?'Your checkout request is saved. Check payment status before starting another.':'Your workspace is free to prepare. You review the full paid offer before entering payment details.';
++    $('billingStatus').textContent=subscribed?state.cancelAtPeriodEnd?'Renewal ends '+date(state.currentPeriodEnd):renewalWaiting?'Renewal cancellation pending':state.status==='active'?'Subscription active':state.status==='past_due'||state.status==='unpaid'?'Payment needs attention':state.status.replace(/_/g,' '):state.status==='canceled'?'Subscription ended':state.status==='incomplete_expired'?'Checkout expired':'No subscription started';
++    $('billingSummary').textContent=subscribed?(state.name||'Your subscription')+(state.currentPeriodEnd?' · Current period ends '+date(state.currentPeriodEnd):'')+'.':waiting?'Your checkout request is saved. Check payment status before starting another.':state.status==='canceled'?'This subscription has ended.':state.status==='incomplete_expired'?'Checkout expired before the subscription started.':'Your workspace is free to prepare. You review the full paid offer before entering payment details.';
+     if(state.cancellationState&&state.cancellationState!=='complete')$('billingSummary').textContent+=' Your request to end renewal is saved; confirmation is being checked.';
+     $('billingOfferForm').hidden=subscribed||!state.offerAvailable||waiting||state.checkout?.state==='open';

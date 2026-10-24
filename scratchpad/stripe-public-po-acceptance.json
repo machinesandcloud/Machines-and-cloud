@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-24T17:01:21.184096+00:00",
+  "role": "product_owner_v2 and UI/UX",
+  "status": "accepted_local_owner_billing_test_phase_and_recovery_feedback",
+  "base": "d29611bd46996acb08e55af9f7cd87e9f980ceaa",
+  "current_source_sha256": {
+    "desk-billing.js": "174d6d0d4b34bf0a64583b82e81a439a5cb0511fe85560ccb5b78b75da5928a9",
+    "desk.js": "b23c35b20b7f7b345e781b5e4906278d3abd5a8981e2db6f32b2014d9c26a0dc",
+    "desk.html": "d3c9862cea6873c0fcd6c72e2b50c5f648b4c7d65a4f77a40e3a2cf28f96a73e",
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "netlify/functions/workspace-billing.mjs": "6ec41e6b90a83764284490b73552258aa1631bf008bc4daa59ed2a844432ca36",
+    "netlify/functions/workspace-billing-webhook.mjs": "fb0e59807f192d3ab8afdf4e91ad941e015c4a783524943f68b537820e3f0f7b",
+    "netlify/functions/lib/workspace-billing.mjs": "154fa1671aa84cb8f6a2b925cf542dbf82a0eeeb3baf5dff27891a0f10cf6532",
+    "netlify/functions/lib/billing-test-admission.mjs": "4e7fc3ff2bb3d8ea5b8039d51cda8f9de97e67b1e2de3b6ee51b38a9c0ab5307",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "scripts/stripe-test-proof-fixture.mjs": "c2ab2c0ce4322086c7b57a285b34583ef95a1aec8e42950396a5f7df2fe0c183",
+    "scratchpad/stripe-public-po-accepted-observe.mjs": "087fd2fa2b35cca1319d51ab6026dab6d6fc9e3185c7dbdb03b809cc5feed5a0"
+  },
+  "runtime_changes": {
+    "desk-billing.js": {
+      "before": "eecf22dfb205c068cde5383741791612ebf6235db83acfb094bb0ce07a799e7d",
+      "after": "174d6d0d4b34bf0a64583b82e81a439a5cb0511fe85560ccb5b78b75da5928a9",
+      "diff": "scratchpad/stripe-public-po-desk-billing-js-bridge.patch",
+      "diff_sha256": "f95ae11f8a27ada6020984475dc7cbb8de9281d37024871dff75ce1cf8edcedb"
+    },
+    "netlify/functions/lib/workspace-billing.mjs": {
+      "before": "18cec2942d86974bd2a95bf56c9ab2661325428c0db76e872b540c4711de67bf",
+      "after": "154fa1671aa84cb8f6a2b925cf542dbf82a0eeeb3baf5dff27891a0f10cf6532",
+      "diff": "scratchpad/stripe-public-po-workspace-billing-mjs-bridge.patch",
+      "diff_sha256": "d1bfd89eb5975ff2b712cbedeb0b4ce4aa2a975fbafba9e18dcf9ad0ffdde0fb"
+    }
+  },
+  "runtime_change_authority": "Root authored exact two repaired files and explicitly instructed copying them into isolated billing checkout for final PO. No PO index or own runtime implementation changes.",
+  "scope": "Actual workspace/owner/billing/webhook handlers, synthetic Stripe TEST objects and public-signature fixture in network-blocked headless browser1440/390. The Checkout destination is explicitly intercepted; no actual Stripe account/payment page was opened.",
+  "evidence": {
+    "ordinary_jobs": "scratchpad/stripe-public-po-accepted.json:2/2 source-stable,0physical,0browser errors",
+    "handler_regression": "scratchpad/stripe-public-po-root-bridge-handler.json:23/23 existing actual-handler harness, source-stable,0physical; reused author harness, not new independent QA claim",
+    "copy_receipt": "scratchpad/stripe-public-po-root-source-copy.json"
+  },
+  "observed_outcomes": [
+    "Initial none state remains No subscription started, with TEST review and unchecked agreement.",
+    "One ordinary reviewed synthetic checkout and matching signed exact-object receipt bind current owner/phase/customer/subscription/invoice.",
+    "Keep subscription causes no renewal mutation and restores focus.",
+    "Deliberate End monthly renewal with a lost provider ACK retains pending status across reload, hides a fresh End action and exposes Check payment status.",
+    "Canonical status readback confirms same subscription cancel_at_period_end without repeating applied mutation.",
+    "Explicit exact phase cleanup/close ends the same subscription; Account now says Subscription ended with truthful summary.",
+    "Closed TEST phase no longer offers a new monthly review; no general LIVE resubscription restriction was added.",
+    "Focused actual-handler projection fixture for incomplete_expired displays Checkout expired and distinguishes it from never-started; this seeded status fixture is not an actual Stripe financial transition proof."
+  ],
+  "genuine_returns_repaired": [
+    "Ended subscription displayed No subscription started.",
+    "Closed internal TEST phase still offered a monthly review that backend would reject."
+  ],
+  "preserved_failures": {
+    "first": "scratchpad/stripe-public-po-first.json:0/2 own null-versus-undefined cancellation assertion; no product defect.",
+    "second": "scratchpad/stripe-public-po-second.json:0/2 own expected transport-error copy where backend correctly returned saved/pending after provider uncertainty.",
+    "third": "scratchpad/stripe-public-po-third.json:1440 genuine ended-status failure, screenshot also retains closed-phase offer;390 cumulative counter reused synthetic subscription ID. Final counter uses per-job delta."
+  },
+  "visual_review": [
+    "scratchpad/stripe-public-po-accepted-390-pending-after-return.png",
+    "scratchpad/stripe-public-po-accepted-1440-cleaned-up.png"
+  ],
+  "remaining_actual_acceptance": [
+    "Published current-source setup, actual Stripe TEST hosted completion and endpoint-specific real signed delivery, verified through the dedicated destination/receipt.",
+    "Real Portal customer/invoice interaction, ordinary hosted scheduled recovery, cleanup settings/deployment and live charging/commercial offer acceptance."
+  ],
+  "worktree": "/tmp/mc-billing-public-d252"
+}
