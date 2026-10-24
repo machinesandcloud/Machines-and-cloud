@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-24T15:56:03.610326+00:00",
+  "phase": "core-calendar-20261024-launch-v4",
+  "candidateCommit": "a0bd1488a087945f9fc3636b0101ef0e7d474f0f",
+  "status": "CLOSED; real callback compatibility defect found, Calendar delivery not accepted",
+  "initialReadyDeployId": "6adcd09eea7d4cc6396ad3a4",
+  "distinctCleanupReadyDeployId": "6adcd42095b9331520277607",
+  "native": {
+    "windowId": 1802420174,
+    "tabId": 1802420175,
+    "frontGoogleOriginVerified": true,
+    "returnedCallbackObserved": true,
+    "observedCallbackKeys": [
+      "state",
+      "iss",
+      "code",
+      "scope"
+    ],
+    "codeValueRead": false,
+    "callback400": "invalid_callback",
+    "startedAt": "2026-10-24T15:39:40.844Z",
+    "closedAt": "2026-10-24T15:49:06.950Z",
+    "lifetimeSeconds": 566.106,
+    "closedWithin600Seconds": true,
+    "closureConfirmedByGuard": true
+  },
+  "cause": "google.mjs rejected legitimate Google RFC9207 iss before state consumption or token exchange. No callback normalization/bypass/reload performed.",
+  "lastObservedRuntimeBudget": {
+    "oauthStart": 1,
+    "tokenExchange": 0,
+    "tokenRefresh": 0,
+    "calendarRead": 0,
+    "eventCreate": 0,
+    "eventUpdate": 0,
+    "eventDelete": 0,
+    "workerDispatch": 1,
+    "totalRequests": 1
+  },
+  "lastBudgetLimit": "Final scheduler bookkeeping may differ; closed allowance is not reopened for another read. No Google data operation was admitted because connection never completed and was disconnected/cancelled.",
+  "cleanup": {
+    "workspaceCancelled": "m-c-internal-calendar-launch-v4--59ae",
+    "sessionsRevoked": 2,
+    "ownedGmailClosed": true,
+    "exactAliasMessagesRead": 2,
+    "originalFullFunctionalEnvironmentRestored": true,
+    "distinctCleanupReadyConfirmedByGuard": true,
+    "otherCredentialsServiceGatesPreserved": true
+  },
+  "guardCounters": {
+    "site": 14,
+    "writes": 10,
+    "email": 2,
+    "metadata": 5,
+    "blobs": 30,
+    "builds": 2,
+    "pushes": 1,
+    "environmentWrites": 8,
+    "control": 35,
+    "nativeHandoffs": 1
+  },
+  "supplementalControl": {
+    "requests": 45,
+    "mutations": 10,
+    "builds": 2,
+    "unknown": []
+  },
+  "aggregateControlReservations": 80,
+  "buildCreditsAt15Each": 30,
+  "next": "Fresh exact-source v5 with secure issuer repair; prior counters stay closed."
+}

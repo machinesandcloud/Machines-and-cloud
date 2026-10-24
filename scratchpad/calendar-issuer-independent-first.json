@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-24T15:52:39.850Z",
+  "sourceBefore": {
+    "netlify/functions/google.mjs": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "scratchpad/calendar-issuer-independent-check.mjs": "29dfa8ca66f640bacf5966b751db12c4ef0cc1dd606eb2edf81da56bcf5cdecf"
+  },
+  "checks": [
+    {
+      "name": "Actual observed Google query keys state/iss/code/scope reach fixed workspace handoff without consuming or dispatching",
+      "pass": true
+    },
+    {
+      "name": "Legacy callback with no issuer remains compatible and retains the same grant",
+      "pass": true
+    },
+    {
+      "name": "Issuer comparison rejects normalization/confusable/userinfo/encoded-extra mismatches before state lookup",
+      "pass": true
+    },
+    {
+      "name": "Duplicate issuers including percent-encoded key aliases fail closed; a single encoded exact issuer is accepted",
+      "pass": true
+    },
+    {
+      "name": "Existing core duplicate, mixed code/denial and unknown query rejections survive issuer support",
+      "pass": true
+    },
+    {
+      "name": "Issuer is enforced even with unknown/missing state; valid issuer never substitutes for pending state",
+      "pass": true
+    },
+    {
+      "name": "Same owner mailbox in a different session still cannot complete an issuer-bearing grant",
+      "pass": true
+    },
+    {
+      "name": "Original signed-in owner completes callback once through actual client handler and PKCE-bound synthetic exchange",
+      "pass": true
+    },
+    {
+      "name": "Completed issuer callback and owner completion replay cannot exchange or dispatch a second time",
+      "pass": true
+    },
+    {
+      "name": "Issuer-bearing access denial uses fixed denial fragment and consumes only original owner grant without token exchange",
+      "pass": true
+    },
+    {
+      "name": "Callback issuer does not accept foreign tenant identity or an expired authorization",
+      "pass": true
+    },
+    {
+      "name": "Mutation method and retired permanent-owner-key entry remain rejected without effects",
+      "pass": true
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "credentialFilesRead": 0,
+  "sourceAfter": {
+    "netlify/functions/google.mjs": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "scratchpad/calendar-issuer-independent-check.mjs": "29dfa8ca66f640bacf5966b751db12c4ef0cc1dd606eb2edf81da56bcf5cdecf"
+  },
+  "sourceStable": true,
+  "syntheticProviderRequests": 4,
+  "syntheticTokenExchanges": 1,
+  "syntheticWorkerDispatches": 2,
+  "callbackQueries": 49,
+  "passed": 12,
+  "total": 12,
+  "ok": true
+}

@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 export const SCOPE='owned_calendar_busy_lifecycle_v2';
-export const TARGET=Object.freeze({origin:'https://machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',baselineCommit:'7b69b031a1411aa35fbb144acb5fbe1e78a5f068',baselineDeployId:'6adcc77eb4139bf562741641',ownerEmail:'ngoumnaisteve+mc-calendar-launch-v4-20261024@gmail.com',calendarAccount:'ngoumnaisteve@gmail.com'});
+export const TARGET=Object.freeze({origin:'https://machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',baselineCommit:'a0bd1488a087945f9fc3636b0101ef0e7d474f0f',baselineDeployId:'6adcd42095b9331520277607',ownerEmail:'ngoumnaisteve+mc-calendar-launch-v5-20261024@gmail.com',calendarAccount:'ngoumnaisteve@gmail.com'});
 export const LIMITS=Object.freeze({site:240,writes:40,hostedChecks:25,email:3,metadata:12,blobs:84,workerPosts:0,builds:2,pushes:1,environmentWrites:8,control:144,controlWrites:16,nativeHandoffs:1});
 export const RUNTIME_LIMITS=Object.freeze({oauthStart:1,tokenExchange:1,tokenRefresh:16,calendarRead:28,eventCreate:1,eventUpdate:1,eventDelete:2,workerDispatch:8,totalRequests:57});
 const PHASES=['signup','census','publish','calendar','cleanup','closed'];

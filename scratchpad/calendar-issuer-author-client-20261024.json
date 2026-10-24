@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-24T15:50:35.282Z",
+  "passed": 9,
+  "failed": 0,
+  "checks": [
+    "Actual owner Bearer starts Calendar through strict first-party client action",
+    "Google callback returns fixed fragment and does not exchange before owner completion",
+    "Same-mailbox different Bearer cannot consume original session's Calendar grant",
+    "Actual client completion forwards only state/code/error and dispatches saved work",
+    "Actual handler rejects completed grant replay and caller-supplied actor",
+    "Calendar mutations reject foreign Origin and missing first-party Origin",
+    "Owner GET exposes connected status without private Calendar credential row",
+    "Actual owner disconnect stops Calendar and retains private job history",
+    "Revoked owner session and unsupported tenant version cannot mutate Calendar"
+  ],
+  "sourceBefore": {
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "netlify/functions/google.mjs": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290"
+  },
+  "sourceAfter": {
+    "netlify/functions/client.mjs": "53fd63060a22616e38fae2bf7d04ee408ad03176001c0baecc8e138e08d2c607",
+    "netlify/functions/google.mjs": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290"
+  },
+  "sourceStable": true,
+  "physicalExternalRequests": 0
+}

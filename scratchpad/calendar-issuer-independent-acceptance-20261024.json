@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T15:52:39.850Z",
+  "reviewer": "lead_independent_qa",
+  "decision": "accepted_local_callback_repair",
+  "sourceCommit": "da361eafd1292ed6645c619b647c620e5c560243",
+  "baseCommit": "a0bd1488a087945f9fc3636b0101ef0e7d474f0f",
+  "changedTrackedFiles": [
+    "netlify/functions/google.mjs",
+    "scripts/calendar-connection-check.mjs"
+  ],
+  "runtimeSHA256": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+  "authorSuiteSHA256": "8f36e1a7967067b9fd09c959a77657b15b8405e2f58ec3228876aadfa39e073e",
+  "independentReceipt": {
+    "path": "scratchpad/calendar-issuer-independent-first.json",
+    "sha256": "0d5292c5543bfbbda0b660fa1d3572097e27f2f43be017efd7fc9b47fa9e67d4",
+    "groupsPassed": 12,
+    "groupsTotal": 12,
+    "callbackQueries": 49,
+    "sourceStable": true,
+    "physicalNetworkAttempts": 0,
+    "credentialFilesRead": 0,
+    "syntheticTokenExchanges": 1,
+    "syntheticWorkerDispatches": 2
+  },
+  "observedBehavior": [
+    "Official exact decoded issuer accepted alongside observed state/code/scope query keys; optional omission retains prior no-issuer behavior.",
+    "Wrong, empty, normalized-but-not-exact or repeated issuer rejected before state lookup/provider dispatch. Unknown keys, duplicate core fields and code/error ambiguity stay rejected.",
+    "Actual owner start and fixed callback preserve pending original grant/session/workspace identity; only original-session completion exchanges synthetic code once.",
+    "Same-mailbox foreign session, consumed replay, foreign workspace completion and expiry cannot consume/exchange grant.",
+    "Issuer-bearing denial uses fixed denial handoff and no token exchange; retired permanent-key auth entry remains closed."
+  ],
+  "limits": {
+    "publicationAccepted": false,
+    "actualGooglePermissionAccepted": false,
+    "actualGoogleTokenOrCalendarAccepted": false,
+    "calendarLifecycleAccepted": false,
+    "fullLaunchAccepted": false,
+    "note": "All handler execution uses existing local memory fixture and synthetic provider transport. The failed live v4 callback remains a separate failed observation. This receipt does not reuse or extend its phase allowance."
+  }
+}
