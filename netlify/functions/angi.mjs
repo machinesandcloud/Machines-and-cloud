@@ -4,6 +4,8 @@
 import { getClient } from "./lib/store.mjs";
 import { json } from "./lib/agent.mjs";
 import { receivePlatformLead } from "./lib/desk.mjs";
+import { supportedWorkspace } from './lib/workspace-identity.mjs';
+import { receiveManagedAngi, LeadConnectionError } from './lib/lead-connections.mjs';
 
 export const config = { path: "/api/angi" };
 
@@ -12,6 +14,11 @@ export default async (req) => {
   const url = new URL(req.url);
   const c = await getClient(url.searchParams.get("c") || "");
   if (!c) return json({ error: "not_found" }, 404);
+  if (Object.hasOwn(c, 'onboarding')) {
+    if (!supportedWorkspace(c)) return json({error:'unsupported_workspace'},409);
+    try { return json(await receiveManagedAngi(req,c),200,{'Cache-Control':'no-store'}); }
+    catch(error) { return json({error:error instanceof LeadConnectionError?error.code:'lead_save_unconfirmed',message:error instanceof LeadConnectionError?error.message:'Lead receipt could not be confirmed. Retry the same delivery.'},error instanceof LeadConnectionError?error.status:503,{'Cache-Control':'no-store'}); }
+  }
   const key = req.headers.get("x-api-key") || url.searchParams.get("key") || "";
   if (!c.leads?.angiKey || key !== c.leads.angiKey) return json({ error: "forbidden" }, 403);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }

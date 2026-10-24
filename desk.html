@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="desk-connections.css">
   <link rel="stylesheet" href="desk-billing.css">
+  <link rel="stylesheet" href="desk-lead-sources.css">
 
 <link rel="stylesheet" href="product-ui.css"><link rel="stylesheet" href="desk.css"></head>
 <body class="theme-light product-app desk-app" data-no-widget="" data-workspace-state="loading"><a class="ui-skip" href="#workspaceMain">Skip to workspace</a>
@@ -98,7 +99,13 @@
         <p class="muted" id="connectionsMessage" role="status" aria-live="polite"></p>
       </form>
       </section>
+      <section id="leadSources" class="lead-sources" aria-labelledby="leadSourcesTitle" hidden>
+        <div class="desk-section-heading"><div><p class="ui-eyebrow">LEAD PLATFORMS</p><h3 id="leadSourcesTitle">Keep every inquiry moving.</h3><p class="muted">Bring the leads you paid for into your Inbox, with the job details and a clear next step.</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="leadSourcesRefresh">Check saved status</button></div>
+        <p id="leadSourcesMessage" class="muted" role="status" aria-live="polite" tabindex="-1"></p>
+        <div id="leadSourceCards" class="lead-source-grid"></div>
+      </section>
       <div id="connectionJourney"></div>
+
       <details class="desk-details desk-service-controls" id="connectionServiceDetails" hidden><summary>Connection details &amp; controls</summary><div id="serviceConnections"></div></details>
       <p id="serviceConnectionMessage" class="muted" role="status" aria-live="polite"></p>
     </div>
@@ -199,6 +206,14 @@
   <div id="requestContent" hidden><dl class="request-facts" id="requestFacts"></dl><details class="request-more"><summary>Address and request source</summary><dl class="request-facts" id="requestOtherFacts"></dl></details>
     <div class="request-review" id="requestSourceNotice" hidden><p>The customer request changed since the last recorded action. Earlier work stays in the history below. Review the new details before continuing.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestReview">Review updated request</button></div>
     <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestConversation" hidden>Read saved conversation</button>
+    <section id="requestPlatform" class="request-platform" aria-labelledby="requestPlatformTitle" hidden>
+      <p class="ui-eyebrow" id="requestPlatformSource"></p><h3 id="requestPlatformTitle">Lead conversation</h3>
+      <dl class="request-facts" id="requestPlatformFacts"></dl><p class="muted" id="requestPlatformInstructions"></p>
+      <details id="requestPlatformContext"><summary>Original job details</summary><div id="requestPlatformContextBody"></div></details>
+      <section id="requestPlatformConversation" hidden><h4>Saved platform conversation</h4><div id="requestPlatformMessages"></div><p class="muted" id="requestPlatformHistoryNote"></p></section>
+      <form id="requestReplyForm" novalidate><label class="form-label" for="requestReplyText">Your reply</label><textarea class="form-input" id="requestReplyText" maxlength="2000" rows="4" placeholder="Write a personal reply about this job…"></textarea><p class="muted" id="requestReplySaved"></p><div class="lead-source-actions"><button type="submit" class="btn-pill btn-pill-dark btn-sm" id="requestReplySave">Save reply draft</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestReplyCopy">Copy reply</button><a class="btn-pill btn-pill-blue btn-sm" id="requestPlatformOpen" target="_blank" rel="noopener noreferrer" hidden>Open platform</a></div><div id="requestNativeReply" hidden><label class="lead-source-confirm"><input type="checkbox" id="requestReplyConfirm">Send this reply to the customer in the original Thumbtack conversation.</label><button type="button" class="btn-pill btn-pill-blue btn-sm" id="requestReplySend">Send in Thumbtack</button></div></form>
+      <p id="requestPlatformReplyStatus" class="muted" role="status" aria-live="polite"></p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestPlatformRefresh">Check saved reply status</button>
+    </section>
     <section class="request-progress" aria-labelledby="requestProgressTitle"><h3 id="requestProgressTitle">Your follow-up</h3><dl id="requestProgress"></dl></section>
     <details class="request-visits" id="requestVisitsSection" hidden><summary>Saved visits for this phone number</summary><div id="requestVisits"></div><p class="muted">Visit status stays separate from request follow-up.</p></details>
     <form id="requestForm" novalidate><div class="form-group"><label class="form-label" for="requestAction">Record an action</label><select class="form-input" id="requestAction"></select><p class="muted" id="requestActionHelp"></p></div>
@@ -272,6 +287,7 @@
 <script src="desk-requests.js" defer=""></script>
 <script src="desk-activity.js" defer=""></script>
 <script src="desk-conversations.js" defer=""></script>
+<script src="desk-lead-sources.js" defer=""></script>
 <dialog class="walkthrough desk-account-confirm" id="billingCancel" aria-labelledby="billingCancelTitle"><h2 id="billingCancelTitle">End monthly renewal?</h2><p class="muted" id="billingCancelDetail"></p><div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingEndConfirm">End renewal</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="billingKeep">Keep subscription</button></div></dialog>
 
 

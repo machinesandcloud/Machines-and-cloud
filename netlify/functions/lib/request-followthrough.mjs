@@ -12,7 +12,7 @@ export class RequestFollowthroughError extends Error {
   constructor(code, message, status = 409, field = null) { super(message); Object.assign(this, { code, status, field }); }
 }
 const fail = (code, message, status = 409, field = null) => { throw new RequestFollowthroughError(code, message, status, field); };
-const initial = () => ({ seenAt: null, owner: null, nextAction: null, dueAt: null, contact: 'not_recorded', completedAt: null, resolution: null });
+const initial = () => ({ seenAt: null, owner: null, nextAction: null, dueAt: null, contact: 'not_recorded', completedAt: null, resolution: null, replyDraft: null });
 function contactIdentity(lead) {
   const digits = String(lead.phone || '').replace(/\D/g, '');
   if (digits) return 'phone:' + (digits.length === 10 ? '1' + digits : digits);
@@ -28,7 +28,11 @@ function currentState(lead, row) {
 }
 // Meaningful customer facts, not updatedAt/ackedAt or delivery housekeeping.
 export function requestSourceRevision(lead) {
-  return digest(['id','slug','tenantIdentity','customer_name','phone','address','issue','reason','urgency','wanted','outcome','status','channel','contact','websiteSetupCheck'].map(key => [key, lead[key] ?? null]).concat([['deliveryTenant', lead.delivery?.tenantIdentity ?? null]]));
+  const existing=['id','slug','tenantIdentity','customer_name','phone','address','issue','reason','urgency','wanted','outcome','status','channel','contact','websiteSetupCheck'].map(key => [key, lead[key] ?? null]).concat([['deliveryTenant', lead.delivery?.tenantIdentity ?? null]]);
+  // Existing website and managed-message operations retain their exact source digest.
+  // Only a real platform request adds its imported contact and conversation context.
+  if(lead.platform&&['angi','thumbtack'].includes(lead.platform.source))existing.push(['platform',lead.platform],['email',lead.email??null]);
+  return digest(existing);
 }
 export const requestJournalKey = (client, id) => `${client.slug}/${workspaceTenant(client)}/${id}`;
 function journal(client, id, saved) {
@@ -58,8 +62,8 @@ function view(client, lead, row, operationId = null) {
   const receipt = operationId && row.history.find(entry => entry.id === operationId);
   return { sourceRevision, revision: digest(row), reviewRequired, state, due, needsFollowup,
     canChange: !excluded && ['testing','live','paused'].includes(client.status) && row.history.length < LIMIT,
-    historyFull: row.history.length >= LIMIT, readOnlyReason: excluded ? 'Setup checks and filtered requests are read-only.' : !['testing','live','paused'].includes(client.status) ? 'This workspace is closed. Its request history remains available.' : row.history.length >= LIMIT ? 'This retained history is full. Contact support before recording more work.' : null, source: Object.fromEntries(['id','customer_name','phone','address','issue','reason','urgency','wanted','outcome','status','channel','contact','createdAt'].map(key => [key, lead[key] ?? null])),
-    history: structuredClone(row.history), conversation: lead.channel === 'web' && /^[a-zA-Z0-9_-]{1,60}$/.test(lead.contact || '') ? {reference:conversationReference(client,'web',lead.contact),contact:lead.contact} : null, receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
+    historyFull: row.history.length >= LIMIT, readOnlyReason: excluded ? 'Setup checks and filtered requests are read-only.' : !['testing','live','paused'].includes(client.status) ? 'This workspace is closed. Its request history remains available.' : row.history.length >= LIMIT ? 'This retained history is full. Contact support before recording more work.' : null, source: Object.fromEntries(['id','customer_name','phone','email','address','issue','reason','urgency','wanted','outcome','status','channel','contact','createdAt'].map(key => [key, lead[key] ?? null])),
+    history: structuredClone(row.history), ...(lead.platform ? {platform:structuredClone(lead.platform)} : {}), conversation: lead.channel === 'web' && /^[a-zA-Z0-9_-]{1,60}$/.test(lead.contact || '') ? {reference:conversationReference(client,'web',lead.contact),contact:lead.contact} : null, receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
 }
 export async function requestFollowthroughSummaries(client, leads) {
   if (!isSupportedSelfServiceClient(client)) return leads;
@@ -76,17 +80,25 @@ export async function readRequestFollowthrough(client, session, id, operationId 
   const latest = await source(client, id), result = view(client, latest, row, operationId);
   await authority(client, session); await assertCurrentWorkspace(client);
   const {readRequestAutomation}=await import('./request-followup.mjs');const automation=await readRequestAutomation(client,id);if(automation)result.automaticFollowup=automation;
+  if(latest.platform?.source==='thumbtack'){
+    const {thumbtackReplyView}=await import('./thumbtack-connection.mjs');const replies=await thumbtackReplyView(client,id),nativeReply=operationId?replies.find(reply=>reply.id===operationId):replies.at(-1);
+    const connection=(await import('./lead-connections.mjs')).leadConnectionsView;const native=(await connection(client)).thumbtack;
+    result.platformConversation={messages:(latest.platform.context?.messages||[]).map(message=>({id:message.messageID,from:message.from,text:message.text,sentAt:message.sentAt,hasAttachments:message.hasAttachments})),complete:latest.platform.context?.historyComplete===true,unavailableReason:latest.platform.context?.historyComplete===true?null:'Recent messages are shown. Earlier history and attachments may need to be opened in Thumbtack.'};
+    result.nativeReply=nativeReply?{operationId:nativeReply.id,state:nativeReply.state,receiptId:nativeReply.providerMessageID,at:nativeReply.at,text:nativeReply.text,reason:nativeReply.error}:null;
+    result.platformCapabilities={canSendNative:native.capabilities.sendNativeReplies&&!replies.some(reply=>['reserved','sending','unknown'].includes(reply.state)),expectedGeneration:native.generation};
+  }
   await authority(client,session);await assertCurrentWorkspace(client);
   return { ok: true, request: result };
 }
 function parse(body) {
-  const fields = { seen: [], assign: [], plan: ['nextAction','dueAt'], attempt: ['channel','result'], reached: ['channel'], complete: ['resolution'], reopen: [], review: [] };
+  const fields = { seen: [], assign: [], plan: ['nextAction','dueAt'], attempt: ['channel','result'], reached: ['channel'], complete: ['resolution'], reopen: [], review: [], draft_reply: ['text'] };
   if (!plain(body) || body.action !== 'request_followthrough' || !Object.hasOwn(fields, body.type || '') || JSON.stringify(body).length > 4000) fail('invalid_request', 'Choose an available request action.', 400);
   const allowed = ['action','requestId','sourceRevision','expectedRevision','operationId','type','note', ...fields[body.type]];
   if (Object.keys(body).some(key => !allowed.includes(key))) fail('invalid_request', 'This request action has an unsupported field.', 400);
   if (typeof body.requestId!=='string' || typeof body.sourceRevision!=='string' || typeof body.expectedRevision!=='string' || typeof body.operationId!=='string' || !identifier.test(body.requestId) || !revision.test(body.sourceRevision) || !revision.test(body.expectedRevision) || !/^[a-f0-9]{32}$/.test(body.operationId)) fail('invalid_request', 'Reload this request before saving.', 400);
   if (typeof body.note !== 'string' || body.note.length > 1000) fail('invalid_note', 'Keep your note to 1,000 characters.', 400, 'requestNote');
   if (['complete','reopen','review'].includes(body.type) && !body.note.trim()) fail('invalid_note', 'Add a reason or result before saving.', 400, 'requestNote');
+  if(body.type==='draft_reply'&&(typeof body.text!=='string'||!body.text.trim()||body.text.length>2000))fail('invalid_reply_draft','Write a reply of 2,000 characters or fewer.',400,'requestReplyText');
   if (body.type === 'plan') {
     if (typeof body.nextAction !== 'string' || !body.nextAction.trim() || body.nextAction.length > 200) fail('invalid_next_action', 'Describe the next action in 200 characters or fewer.', 400, 'requestNextAction');
     if (typeof body.dueAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(body.dueAt) || !Number.isFinite(Date.parse(body.dueAt)) || new Date(body.dueAt).toISOString() !== body.dueAt) fail('invalid_due', 'Choose a valid due date and time.', 400, 'requestDue');
@@ -116,6 +128,10 @@ export async function updateRequestFollowthrough(client, session, body) {
     if (input.type === 'seen') next.seenAt = next.seenAt || at;
     if (input.type === 'assign') next.owner = { name: current.owner.name || '', email: actor };
     if (input.type === 'plan') { next.nextAction = input.nextAction.trim(); next.dueAt = input.dueAt; next.owner = { name: current.owner.name || '', email: actor }; }
+    if(input.type==='draft_reply'){
+      if(!lead.platform||!['angi','thumbtack'].includes(lead.platform.source))fail('invalid_transition','Choose a lead-platform request to prepare a reply.');
+      next.replyDraft={text:input.text.trim(),sourceRevision:currentView.sourceRevision,at};
+    }
     if (input.type === 'attempt' && next.contact !== 'reached') next.contact = 'attempted';
     if (input.type === 'reached') next.contact = 'reached';
     if (input.type === 'complete') { next.completedAt = at; next.resolution = input.resolution; next.nextAction = null; next.dueAt = null; }

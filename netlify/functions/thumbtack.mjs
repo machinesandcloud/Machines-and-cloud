@@ -4,6 +4,9 @@
 import { getClient } from "./lib/store.mjs";
 import { json } from "./lib/agent.mjs";
 import { receivePlatformLead } from "./lib/desk.mjs";
+import { supportedWorkspace } from './lib/workspace-identity.mjs';
+import { receiveManagedThumbtack } from './lib/thumbtack-connection.mjs';
+import { LeadConnectionError } from './lib/lead-connections.mjs';
 
 export const config = { path: "/api/thumbtack" };
 
@@ -19,6 +22,13 @@ export default async (req) => {
   const url = new URL(req.url);
   const c = await getClient(url.searchParams.get("c") || "");
   if (!c) return json({ error: "not_found" }, 404);
+  // The legacy receiver assumes undocumented auth aliases and sends automatic texts.
+  // Managed workspaces use only their separately verified partner protocol.
+  if (Object.hasOwn(c,'onboarding')) {
+    if(!supportedWorkspace(c))return json({error:'unsupported_workspace'},409,{'Cache-Control':'no-store'});
+    try{return json(await receiveManagedThumbtack(req,c),200,{'Cache-Control':'no-store'});}
+    catch(error){return json({error:error instanceof LeadConnectionError?error.code:'lead_receipt_unconfirmed',message:error instanceof LeadConnectionError?error.message:'This delivery could not be confirmed. Retry the same event.'},error instanceof LeadConnectionError?error.status:503,{'Cache-Control':'no-store'});}
+  }
   if (!c.leads?.thumbtackSecret || presented(req, url) !== c.leads.thumbtackSecret) return json({ error: "forbidden" }, 403);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
   // NegotiationCreatedV4 (current): { negotiationID, customer: { customerID, displayName, location: { city, state, zipCode } }, request: { category, title, description, location? } }.

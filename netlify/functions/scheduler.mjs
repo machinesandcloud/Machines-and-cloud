@@ -13,6 +13,7 @@ import { isSelfServiceClient } from "./lib/setup.mjs";
 import { phoneRecoveryHealth } from "./lib/phone-activation.mjs";
 import { serviceDeliveryHealth } from "./lib/service-health.mjs";
 import { recoverWorkspaceOperations } from "./lib/platform-operations.mjs";
+import { recoverLeadConnections } from './lib/lead-connections.mjs';
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -191,6 +192,7 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
   // Due tasks retain priority. Safe local recovery still runs every invocation,
   // independently of the usage brake or an initial browser dispatch.
   await block(record, "setupRecovery", async () => recoverWorkspaceOperations());
+  await block(record, "leadIntakeRecovery", async () => recoverLeadConnections());
   // Provider work has its own scheduled function and 15-second aggregate budget.
   // The main scheduler only reads its durable receipt and pending-work counters.
   await block(record, "phoneSetupRecovery", async () => phoneRecoveryHealth());

@@ -43,6 +43,8 @@ import { ownerConversationPage } from './lib/conversation-reader.mjs';
 
 import { readRequestFollowthrough, updateRequestFollowthrough, requestFollowthroughSummaries, RequestFollowthroughError } from './lib/request-followthrough.mjs';
 import { workspaceActivity } from './lib/workspace-activity.mjs';
+import { leadConnectionsView, changeLeadConnection, LeadConnectionError } from './lib/lead-connections.mjs';
+import { startThumbtackConnection, continueOwnerThumbtack, selectThumbtackBusiness, sendPlatformReply } from './lib/thumbtack-connection.mjs';
 
 export const config = { path: "/api/client" };
 
@@ -80,7 +82,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
 
 export default async (req) => {
   let out;
-  try { out = await handle(req); } catch(error) { if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req); } catch(error) { if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -156,7 +158,7 @@ async function handle(req) {
     const serviceOnboarding=selfService?await serviceOnboardingStatus(c):null;
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, leadConnections: await leadConnectionsView(c), serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
       conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, ...(selfService && v.channel === 'web' ? { reference: conversationReference(c,v.channel,v.contact), retainedMessages: v.history?.total ?? v.messages.length, historyComplete: v.history?.complete === true } : {}), messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
@@ -221,6 +223,13 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await changeLeadConnection(c,session,b),200,{'Cache-Control':'no-store'});}
+    if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business','send_platform_reply'].includes(b?.action)){
+      if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);
+      const result=b.action==='start_thumbtack_connection'?await startThumbtackConnection(c,session,b):b.action==='continue_thumbtack_connection'?await continueOwnerThumbtack(c,session,b):b.action==='select_thumbtack_business'?await selectThumbtackBusiness(c,session,b):await sendPlatformReply(c,session,b);
+      if(b.action==='send_platform_reply')return json({...result,...await readRequestFollowthrough(c,session,b.requestId,b.operationId)},200,{'Cache-Control':'no-store'});
+      return json({...result,leadConnections:await leadConnectionsView(c)},200,{'Cache-Control':'no-store'});
+    }
     if(b?.action==='request_followup'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const {updateRequestAutomation}=await import('./lib/request-followup.mjs');return json(await updateRequestAutomation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='request_followthrough'){
       if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
