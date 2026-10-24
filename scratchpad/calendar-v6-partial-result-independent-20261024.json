@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "scope": "Independent audit of closed actual Calendar v6 partial delivery, bounded effects, exact executed source and cleanup",
+  "status": "accepted_actual_connection_create_delete_and_cleanup_only",
+  "candidateCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "artifacts": {
+    "product/CALENDAR-LAUNCH-V6-RESULT-2026-10-24.json": {
+      "sha256": "6027e03498825edf3393099afb1da5ccdf0f00e5bd401e2356c1b07b84278493",
+      "bytes": 4825
+    },
+    "product/CALENDAR-LAUNCH-V6-SCOPE-2026-10-24.json": {
+      "sha256": "1ac3629507d5a37cd52dbffd94f3ea7faa04c00a000a613fc05ec5c62f86e6a6",
+      "bytes": 4616
+    },
+    "scratchpad/calendar-launch-v6-executed-source-manifest.json": {
+      "sha256": "33c1f0ecc17299f709a2bc06464215cc213ab86f071bf7cf1ebcb52b8fdfe40d",
+      "bytes": 78306
+    },
+    "scratchpad/core-calendar-20261024-launch-v6-ledger.jsonl": {
+      "sha256": "45c66796a49261dcffc72476118070cfc67aaffcb30fd6819c4d2f8297e3d16c",
+      "bytes": 279316
+    },
+    "scratchpad/core-calendar-20261024-launch-v6-control.jsonl": {
+      "sha256": "9042ff32129a217e96ba569cde43f2c553c7408ce4eac867e02f5376f00eb954",
+      "bytes": 516613
+    },
+    "scratchpad/calendar-v6-public-readback-ledger-20261024.jsonl": {
+      "sha256": "d0392b1801cfaf4046c1c119f6f67ec81512356d67bc23afb3a503dde2639e07",
+      "bytes": 1710
+    }
+  },
+  "executedSourceAudit": {
+    "manifestSHA256": "33c1f0ecc17299f709a2bc06464215cc213ab86f071bf7cf1ebcb52b8fdfe40d",
+    "files": 531,
+    "completeExactCandidateInventory": true,
+    "allGitBytesMatched": true,
+    "basis": "Executed d06 Git tree, independent of any later candidate/source changes."
+  },
+  "guardLedgerAudit": {
+    "reservedRequests": 91,
+    "completedRequests": 90,
+    "preservedFailedPreview": 1,
+    "unmatchedReservations": 0,
+    "closed": true,
+    "halted": true,
+    "receiptStages": [
+      "create",
+      "delete"
+    ],
+    "sameEventAndVisitAcrossReceipts": true,
+    "bothReceiptsScheduledDispatchAndCompletedWave": true,
+    "createVisits": 1,
+    "reschedulePosts": 0,
+    "cancelVisits": 1,
+    "negativeProbes": 0,
+    "emailRequests": 2,
+    "sessionsRevoked": 2
+  },
+  "native": {
+    "elapsedSeconds": 509.12,
+    "within600Seconds": true,
+    "nativeClosed": true,
+    "gmailException": "Root reports first close postcondition ambiguous, exact target independently absent and no repeated close. This audit reads no browser/native session or message content."
+  },
+  "boundAudit": {
+    "directCounters": {
+      "site": 22,
+      "writes": 14,
+      "hostedChecks": 0,
+      "email": 2,
+      "metadata": 5,
+      "blobs": 64,
+      "workerPosts": 0,
+      "builds": 2,
+      "pushes": 1,
+      "environmentWrites": 8,
+      "control": 69,
+      "controlWrites": 0,
+      "nativeHandoffs": 1
+    },
+    "supplementalControlReservations": 45,
+    "supplementalMutationReservations": 10,
+    "helperRowsAllObserved": true,
+    "aggregateControlReservations": 114,
+    "aggregateCap": 144,
+    "publicGETs": 5,
+    "publicGETCap": 8,
+    "sourceMatchedAssets": 4,
+    "builds": 2,
+    "creditsAt15Each": 30,
+    "buildAccounting": "Guard and helper reserve the same two builds; they are not four builds. Git network operations use finite conservative reservation units, so control114 is a reservation total rather than an assertion of114 individual HTTP requests.",
+    "runtime": "Source guard validates exact immutable57Google/worker limits, monotonic action counters and total. Budget inspections completed before final receipt; exact used values were not retained in sanitized CLI ledger and are not inferred.",
+    "separateDiagnosis": "Fresh closed7/8 GET diagnosis is separately authorized/countable; not borrowed from halted v6 or merged to refill it."
+  },
+  "cleanupAudit": {
+    "workspaceCancelAndTwoSignoutsObserved": true,
+    "disconnectObserved": true,
+    "sameEventDeleteReceiptObserved": true,
+    "fullEnvironmentRestoredGateObserved": true,
+    "environmentAttemptAndRestoreCounts": [
+      4,
+      4
+    ],
+    "distinctCleanupREADYGateObserved": true,
+    "cleanupDeployId": "6adceebd5a1144301760ab09",
+    "sameExecutedSource": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+    "basis": "Retained sanitized controller/control readback gates and exact source; private raw settings/provider captures were not reread."
+  },
+  "failureDisposition": {
+    "code": "bound_move_no_longer_free",
+    "httpStatus": 200,
+    "rescheduleSent": false,
+    "cacheDiagnosisIndependentReceipt": "scratchpad/calendar-v6-cache-diagnosis-independent-20261024.json",
+    "cacheDiagnosisSHA256": "7b14abd6ef93419f89945ab086e8eec39a11b52d39abbd583e265e1be74235e5",
+    "meaning": "The original afternoon was absent from the fresh reported projection due to another overlapping interval. Own morning interval/tag was correct. Why data changed remains unknown; no speculative product defect/repair is claimed."
+  },
+  "evidenceLimits": [
+    "Provider confirmedAt timestamps17:30:29 and17:40:25 are Root sanitized-result values; ledger independently records their later guarded receipt observation/provenance. Private provider records were not reopened.",
+    "Public health response predates cleanup and proves neither provider service nor post-cleanup health.",
+    "Successful move, update receipt and both intended conflict probes remain unaccepted. Full lifecycle, Google review, other actual providers, operations/commercial launch remain open."
+  ],
+  "reviewEffects": {
+    "externalRequests": 0,
+    "browserOrProviderReads": 0,
+    "privateCredentialReads": 0,
+    "rootMutations": 0,
+    "sharedIndexOrCommits": 0
+  }
+}

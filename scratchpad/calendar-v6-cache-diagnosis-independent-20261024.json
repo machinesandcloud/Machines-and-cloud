@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "scope": "Independent read-only audit of fresh closed stored-cache diagnosis for actual Calendar v6 target availability",
+  "status": "bounded_diagnosis_accepted_stop_supported_no_successful_move",
+  "executedSource": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "inputArtifacts": {
+    "product/CALENDAR-V6-CACHE-READONLY-DIAGNOSIS-2026-10-24.json": {
+      "sha256": "ead632cd5a0509e3a69ce97eb5a1911267b63ab982f41818f075af0ea376ee1c",
+      "bytes": 1600
+    },
+    "scratchpad/calendar-v6-cache-readonly-diagnosis-result-20261024.json": {
+      "sha256": "bed8afacac64787ea2c7108cbab664d18c038117c0582731b6a41587aea6e7f8",
+      "bytes": 1279
+    },
+    "scratchpad/calendar-v6-cache-readonly-diagnosis-ledger-20261024.jsonl": {
+      "sha256": "642123a8a055d0a7b4e3e14e27699371443e8ba75f446dab6e0c7445fbcd8b4c",
+      "bytes": 2319
+    }
+  },
+  "requestAudit": {
+    "phase": "calendar-v6-cache-readonly-20261024-r1",
+    "separateFreshAuthority": true,
+    "reserved": 7,
+    "observed": 7,
+    "unresolved": 0,
+    "statuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "kinds": {
+      "cache-prefix-list": 1,
+      "signed-lookup:calendar_busy": 2,
+      "exact-record:calendar_busy": 2,
+      "signed-lookup:index": 1,
+      "exact-record:index": 1
+    },
+    "limit": 8,
+    "writes": 0,
+    "appRequests": 0,
+    "GoogleRequests": 0,
+    "closed": true
+  },
+  "source": {
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0"
+  },
+  "findings": [
+    {
+      "fact": "Failed range projection",
+      "checkedAtUTC": "2026-10-24T17:31:51.567000+00:00",
+      "totalIntervals": 4,
+      "ownMorningLocalStart": "2026-10-26T08:00:00-05:00",
+      "ownMorningLocalEnd": "2026-10-26T12:00:00-05:00",
+      "ownTagMatches": true,
+      "afternoonOwnOverlapCount": 0,
+      "afternoonOtherOverlapCount": 1,
+      "meaning": "The retained projection used by the failed preview contains another interval overlapping the originally selected afternoon. With default capacity1, absence of that slot is consistent with the actual application/guard contract. The own morning event is not responsible for an afternoon overlap."
+    },
+    {
+      "fact": "Earlier worker one-day projection",
+      "checkedAtUTC": "2026-10-24T17:30:26.755000+00:00",
+      "totalIntervals": 0,
+      "meaning": "This earlier different-range snapshot is not evidence that the later target remained free. Why the observed data differed has not been established."
+    },
+    {
+      "fact": "Post-cancel local capacity",
+      "reservationCount": 0,
+      "blockCount": 0,
+      "meaning": "This record was read after cancellation. It supports cleanup state only and cannot establish the exact pre-move local reservation state."
+    }
+  ],
+  "relationToLocalReproduction": {
+    "path": "scratchpad/calendar-v6-same-day-independent-triage-20261024.json",
+    "sha256": "388a9a935dc560f295589431db75eb6198ea724fb31ac76e3c1e75dacc4a204a",
+    "passed": 9,
+    "meaning": "Actual-handler synthetic default-capacity/self-copy scenarios pass. Stored derived evidence now supports a real unavailable target rather than that unreproduced hypothesis."
+  },
+  "privacyAndEvidenceLimit": "Audit uses Root sanitized derived cache results and ledger hashes only. It independently checks record arithmetic, exact source semantics and timestamp/boundary interpretation, without reading private raw bodies or recomputing private event overlap counts. No event titles, attendees, contact data, other event IDs or personal interval details were accessed. The other interval source/timing/cause is unresolved.",
+  "claimLimits": [
+    "The guard correctly stopped on the retained reported unavailable original target; no reschedule POST or successful move is claimed.",
+    "No runtime repair is justified by this evidence. Full same-event lifecycle and both intended conflict-probe acceptance remain open.",
+    "Root reported natural deletion17:40:25; full provider/cleanup acceptance requires the later closed result and matching ledgers, outside this diagnosis audit."
+  ],
+  "reviewEffects": {
+    "externalRequests": 0,
+    "browserOrPrivateCredentialReads": 0,
+    "rootMutations": 0,
+    "runtimeOrIndexChanges": 0,
+    "commits": 0
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "scope": "Independent exact-source local triage of actual v6 move-preview stop",
+  "status": "same_day_capacity_self_exclusion_hypothesis_not_reproduced_actual_cause_unresolved",
+  "sourceCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "source": {
+    "netlify/functions/lib/owner-visits.mjs": "8da6a95538873ad2c42591b1c20dbc20d1ee3096ebaea7cc9d93aabd8d7f4cc0",
+    "netlify/functions/lib/store.mjs": "4c04af6d99150ffefc0d905aeb5a225e4ba2229b097c3438cafc246773fd911e",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-delivery.mjs": "ccab60b8af46e239119494badef0963169629442565498db756f2751355fb98c",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/client.mjs": "c51916ba7f869285ed02db4c74167141e9c4da1daea15eb7f52fc69e20af5dc6",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "scratchpad/calendar-v6-same-day-actual-repro.mjs": "57e4cb66f06042e444d2d37a3d86aeebce6a6034797346a9349cc27442cf1859"
+  },
+  "actualReportedFacts": {
+    "provenance": "Root actual executor report; reviewer performed no production/provider reads.",
+    "initialSelection": "Monday2026-10-26,8to12 and12to5 both selected free",
+    "create": "Original visit/event accepted by ordinary scheduled delivery",
+    "move": "Owned-visit re-preview raised bound_move_no_longer_free before any reschedule POST; phase cleanup underway. No successful move claim."
+  },
+  "staticFindings": [
+    "There is no daily booking capacity limit in the inspected availability path. The default windowCapacity1 controls simultaneous occupied intervals per listed window.",
+    "The authenticated owner preview passes the current owned visit ID to getAvailability. calendarOccupiedCount excludes its local reservation and only its exact deterministic remote event/private owner tag.",
+    "Morning8to12 and afternoon12to5 are half-open intervals that meet at noon without overlap. Missing/wrong own tags cannot independently block the separate afternoon interval if the remote event really ends at noon."
+  ],
+  "syntheticEvidence": {
+    "path": "scratchpad/calendar-v6-same-day-actual-normalized.json",
+    "sha256": "da1a44883493378f7e4d3fa4330ff0f7ffd430e5a3eb5b9fd2d246df414d77f0",
+    "passed": 9,
+    "total": 9,
+    "sourceStable": true,
+    "originalSixCaseReceipt": {
+      "path": "scratchpad/calendar-v6-same-day-actual-first.json",
+      "sha256": "d75fc3416af04f8a4c428524f0f23d4cea77b85fc3b2d9347d33c53c8d4f032f",
+      "passed": 6
+    },
+    "job": "Actual onboard using public v6 signup facts, default capacity1/testing state, actual owner/API create and preview, actual retained Calendar delivery wave and Google protocol double; same-day afternoon reschedule accepted200 and same remote event PATCHed.",
+    "extraShapes": [
+      "Google local-offset -05:00 timestamps",
+      "Google UTC timestamps",
+      "Deliberately untrusted private owner tag: morning retained occupied, afternoon still free"
+    ],
+    "protocolRequestCount": 24,
+    "limits": "Synthetic memory CAS/provider-only data; intentionally generous offline policy. The worker function was invoked locally, so this does not prove hosted schedule/provider service, actual busy state or runtime budget acceptance."
+  },
+  "nextUsefulDiagnosis": {
+    "authority": "Root must prepare a fresh exact read-only scope if the earlier phase is closed; no old allowance reused. Reviewer does not execute it.",
+    "records": "The exact retained failed seven-day calendar_busy projection and matching capacity row, using already-known scope identities or a narrowly reviewed lookup.",
+    "localSanitization": "Before presenting results, compute only target-slot overlap counts, exact-own-event/tag match, local reservation identity/count and blocked-window flags. Retain private raw data outside the repo; do not print event IDs/titles/attendees/other customer records. No Google requests or writes required.",
+    "purpose": "Determine whether the missing afternoon was actually occupied by an external/other local interval or arose from a concrete source/projection mismatch. Do not call it a product bug or legitimate external busy without matching evidence."
+  },
+  "effects": {
+    "physicalNetwork": 0,
+    "modelRequests": 0,
+    "credentialOrAccountReads": 0,
+    "browserWindows": 0,
+    "rootCheckoutEdits": 0,
+    "runtimeEdits": 0,
+    "sharedIndexOrCommits": 0
+  },
+  "claimLimit": "The actual v6 move remains unaccepted and its failure is retained. This local passing reproduction disproves only the tested default-capacity/self-copy scenarios, not every possible production state."
+}
