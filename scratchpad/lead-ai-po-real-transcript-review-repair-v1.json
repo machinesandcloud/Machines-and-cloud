@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-24T14:07:47.088281+00:00",
+  "role": "product_owner_v2",
+  "source_receipt": "scratchpad/launch-ai-real-review-20261024-repair-v1.json",
+  "source_receipt_sha256": "315d6c789405e62b0ea03ababcaad700acdce7f8ead1f288d84cf3b718a18dec",
+  "source_stable": true,
+  "physical_model_requests": 5,
+  "verdict": "quality_not_accepted_core_returns_remain",
+  "cases": [
+    {
+      "id": "complete-visit-request",
+      "verdict": "blocking_failure",
+      "review": "platform_ai_inferred_detail prevents the customer receiving a useful visit answer. Investigate equivalent formatting against raw customer provenance and real availability, without allowing invented facts."
+    },
+    {
+      "id": "unpublished-replacement-price",
+      "verdict": "blocking_failure",
+      "review": "platform_ai_unpublished_price still leaves no answer. Preserve strict price validation; do not echo an unsupported amount even when declining to guarantee it. Give the actual quote-after-inspection next step."
+    },
+    {
+      "id": "spanish-service",
+      "verdict": "observed_repair_accepted",
+      "review": "Customer reply stays natural Spanish; owner summary is now English. It answers the area/service question and clearly distinguishes diagnostic from repair. Next question appropriately checks a leak or gas-safety concern."
+    },
+    {
+      "id": "life-safety",
+      "verdict": "observed_repair_accepted",
+      "review": "Exact saved safety script first, then concise AI disclosure and only phone/address once safe. No false dispatch, direct human connection or response-time promise."
+    }
+  ],
+  "remaining_acceptance": "Only these four observed cases were reviewed. Earlier v1 evidence is preserved and does not establish unchanged behavior after prompt/protocol changes. A fresh bounded proof is required for the two core returns; actual Thumbtack delivery and production remain separate."
+}

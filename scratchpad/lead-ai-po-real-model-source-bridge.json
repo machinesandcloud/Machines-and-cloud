@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-24T14:21:20.549979+00:00",
+  "observed_repair_receipt": "scratchpad/launch-ai-real-review-20261024-repair-v1.json",
+  "observed_repair_sha256": "315d6c789405e62b0ea03ababcaad700acdce7f8ead1f288d84cf3b718a18dec",
+  "observed_repair_cases_retained": [
+    "spanish-service",
+    "life-safety"
+  ],
+  "verified_preimage": "scratchpad/lead-ai-po-proposal-2df-preimage.txt",
+  "verified_preimage_sha256": "2df6ca92b490ed78cf397282a8840698c70e96c4742e6ede33aecdc68c46fe35",
+  "current_proposal_sha256": "92e80e0b3447cc7ab690e387ca531a4b142208f37a8c52d556fb086201c493c6",
+  "diff": "scratchpad/lead-ai-po-proposal-repair-to-final.patch",
+  "unchanged_model_dependencies": {
+    "netlify/functions/lib/agent.mjs": "3a0f4760c8526ea53b3c403543993dd91c416f408a28e61b0b83d65a4ac9bd8c",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea"
+  },
+  "exact_unchanged_protected_sections": {
+    "safety_system": "1ba66f132a5df3c62044ea39461d663d25a5ddc9dd7318fc5fe4b8cfad3a3018",
+    "english_owner_summary": "174777f857e72323c500b3285f571d7fcd549b595c3ebc401c52655946b4a517",
+    "life_safety_detection": "ce6053208a39cde0002c1d601247904a40cd412cc82b3407bfc3b6677b194071",
+    "model_history": "e4dbd82beaa8291fd0a205decaefffe3b991118fcbc729246da20750f1d8fd83"
+  },
+  "reviewed_delta": [
+    "Adds grounded phone/address/date/window normalization, with later explicit corrections authoritative.",
+    "Adds actual availability validation for completed visit requests.",
+    "Keeps numeric unpublished-price validation strict; prompts useful decline without repeating unsupported amount.",
+    "Names validation fields for safe repair diagnosis; same model protocol and English-summary/safety clauses."
+  ],
+  "current_actual_model_proof": {
+    "path": "scratchpad/launch-ai-real-review-20261024-final-regression-v1.json",
+    "sha256": "38dfefe21b8949ce0eec89a02bc97775172eda24e31ecf4affca47a467e6b220",
+    "source_stable": true,
+    "cases": [
+      "complete-visit-request",
+      "unpublished-replacement-price"
+    ],
+    "passed": 2,
+    "total": 2,
+    "physical_requests": 3
+  },
+  "retained_baseline": "The original12-case review and its failures remain historical evidence at their recorded source. It was not re-executed on current source. Spanish owner summary and safety are retained observed repair evidence across exact unchanged protected clauses/dependencies, with an explicit reviewed diff; they are not a new real-model run.",
+  "verdict": "Accepted for bounded sampled customer-reply review with retained safety/Spanish repair evidence. This does not claim12/12 real-model cases reran at current source, exhaustive intelligence, actual native delivery or production launch readiness."
+}

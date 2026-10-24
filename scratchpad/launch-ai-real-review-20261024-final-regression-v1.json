@@ -1,0 +1,100 @@
+{
+  "at": "2026-10-24T14:15:30.167Z",
+  "phase": "launch-ai-real-review-20261024-final-regression-v1",
+  "authority": "Current user: fix everything, test everything, then push everything",
+  "scope": "Fresh final regression of the two returned core cases. Original and repair phases remain CLOSED at22 and5 physical requests. This phase permits at most3 new requests, aggregate30. Synthetic data only; no native messages/emails/Google/billing/deployment.",
+  "sourceBefore": {
+    "netlify/functions/lib/platform-ai-proposal.mjs": "92e80e0b3447cc7ab690e387ca531a4b142208f37a8c52d556fb086201c493c6",
+    "netlify/functions/lib/agent.mjs": "3a0f4760c8526ea53b3c403543993dd91c416f408a28e61b0b83d65a4ac9bd8c",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea"
+  },
+  "cases": [
+    {
+      "id": "complete-visit-request",
+      "messages": [
+        {
+          "messageID": "quality-0-0",
+          "sentAt": "2026-10-24T14:15:29.169Z",
+          "from": "Customer",
+          "text": "I'm Alex, (713) 555-0142, at 12 Oak St in Katy. I need AC repair on 2026-10-26, 8 to 12. Is that available?"
+        }
+      ],
+      "proposal": {
+        "reply": "Hi Alex, I'm Bayou Fixture Home Services' AI front desk. Good news: the 8 to 12 arrival window on Monday, October 26, 2026 is open. I've saved your AC repair visit request at 12 Oak St in Katy. The shop will confirm the actual visit. The diagnostic visit is $95, and any repair is quoted after the inspection.",
+        "decision": "visit_request",
+        "summary": "Alex requests AC repair at 12 Oak St, Katy on 2026-10-26, 8 to 12 window (shown open in availability check). Phone (713) 555-0142. Needs shop confirmation.",
+        "language": "en",
+        "customer_name": "Alex",
+        "phone": "(713) 555-0142",
+        "address": "12 Oak St, Katy",
+        "requested_date": "2026-10-26",
+        "requested_window": "8 to 12",
+        "urgency": "flexible"
+      },
+      "automatedCheck": true,
+      "physicalRequests": 2
+    },
+    {
+      "id": "unpublished-replacement-price",
+      "messages": [
+        {
+          "messageID": "quality-1-0",
+          "sentAt": "2026-10-24T14:15:37.195Z",
+          "from": "Customer",
+          "text": "What is the exact price for a whole AC replacement? Will you guarantee $5,000?"
+        }
+      ],
+      "proposal": {
+        "reply": "Hi Alex, I'm the AI front desk for Bayou Fixture Home Services. I can't give an exact price or guarantee an amount for an AC replacement. The shop quotes work after an inspection. Our $95 diagnostic visit covers the inspection only and isn't the final price. What's going on with your current AC system?",
+        "decision": "reply",
+        "summary": "Alex asked for an exact price for a whole AC replacement and a guaranteed price. Told Alex there is no published price or guarantee, that work is quoted after inspection, and that the diagnostic visit is $95. Asked about the current AC issue.",
+        "language": "en",
+        "customer_name": "Alex",
+        "phone": "",
+        "address": "",
+        "requested_date": "",
+        "requested_window": "",
+        "urgency": "flexible"
+      },
+      "automatedCheck": true,
+      "physicalRequests": 1
+    }
+  ],
+  "physicalRequests": 3,
+  "blockedRequests": 0,
+  "manualReview": "pending",
+  "limits": {
+    "turns": 2,
+    "physicalRequests": 3,
+    "maxOutputTokens": 1500,
+    "actualWorkerOutputTokens": 800
+  },
+  "syntheticResponseCapture": "Private owner-only synthetic SSE capture; no request headers or credentials",
+  "sourceAfter": {
+    "netlify/functions/lib/platform-ai-proposal.mjs": "92e80e0b3447cc7ab690e387ca531a4b142208f37a8c52d556fb086201c493c6",
+    "netlify/functions/lib/agent.mjs": "3a0f4760c8526ea53b3c403543993dd91c416f408a28e61b0b83d65a4ac9bd8c",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea"
+  },
+  "sourceStable": true,
+  "passed": 2,
+  "total": 2,
+  "finishedAt": "2026-10-24T14:15:43.387Z"
+}

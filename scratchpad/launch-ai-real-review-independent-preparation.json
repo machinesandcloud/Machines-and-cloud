@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-24T13:54:09.087025+00:00",
+  "scope": "Offline manual guard and fixture review plus inert invocation, no real-model execution by QA",
+  "runnerPath": "scratchpad/launch-ai-real-review.mjs",
+  "runnerSHA256": "021cb3aeecfdcac3619e073c0bac3d1cf721f2406b5d07f294abaf6107647538",
+  "pureProposalSHA256": "5e4c7757031b4c7f38329b070d9aade4b2862f94182b2e34b3003edb204562ea",
+  "checks": {
+    "privatePacketOwner0600NoSymlink": true,
+    "exactRunnerAndSources": true,
+    "freshLedgerExclusive": true,
+    "transportCounterReservedBeforeCall": true,
+    "transportFailureStopsLaterCases": true,
+    "correctStoreExport": true,
+    "manualReviewExplicit": true
+  },
+  "limits": {
+    "logicalTurns": 12,
+    "physicalAnthropicRequests": 30,
+    "maxApprovedOutputTokens": 1500,
+    "actualConfiguredOutputTokens": 800
+  },
+  "outcome": "No further blocking issue found after actual saveClient export correction, private packet checks and stop-on-transport-failure repair. Root executes; output quality still requires observed responses and manual review.",
+  "physicalRequests": 0,
+  "credentialReads": 0,
+  "realModelCalls": 0,
+  "originalReturn": "Static first review found nonexistent store.putClient before Root executed or opened a phase; corrected to saveClient(client).",
+  "evidenceBoundary": "This is a guard/source review, not simulated execution of the real-effect runner. The actual pure proposal/SSE contract is separately exercised by the45-case independent suite."
+}

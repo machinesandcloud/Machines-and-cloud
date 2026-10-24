@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-24T13:31:33.833688+00:00",
+  "scope": "Fresh bounded Calendar launch proof preparation, offline only",
+  "sourceBefore": {
+    "scripts/calendar-live-guard.mjs": "be05b1432b6d9c86084b09bef86000624ce6ba1629c504f2d1731bb6aac7b1e0",
+    "scripts/calendar-live-control.py": "4a2c4942efee709275a3f253e0642dab542ba43936b8ea73d2d9a434069c2a44",
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+    "scripts/calendar-mail-link.mjs": "1f5832f26008727c6af1b4147bb4e83905ab6afe50e6c5f88812b0e8de431eb2",
+    "scripts/calendar-mail-link-check.mjs": "29a3e3e02b0bc328de7a37820a84cf3482cbe3631f546e90e4d3d0cbb5a37061",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "fda06e2beb30dacda3a52db27f2586cbc528ccfb294f308bdb786e66c1c2f61f",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.md": "143625efce64a034d27916ee9c6011fa986d2b3b43045ed964a15eb1439cec49"
+  },
+  "sourceAfter": {
+    "scripts/calendar-live-guard.mjs": "be05b1432b6d9c86084b09bef86000624ce6ba1629c504f2d1731bb6aac7b1e0",
+    "scripts/calendar-live-control.py": "4a2c4942efee709275a3f253e0642dab542ba43936b8ea73d2d9a434069c2a44",
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+    "scripts/calendar-mail-link.mjs": "1f5832f26008727c6af1b4147bb4e83905ab6afe50e6c5f88812b0e8de431eb2",
+    "scripts/calendar-mail-link-check.mjs": "29a3e3e02b0bc328de7a37820a84cf3482cbe3631f546e90e4d3d0cbb5a37061",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.json": "fda06e2beb30dacda3a52db27f2586cbc528ccfb294f308bdb786e66c1c2f61f",
+    "product/CALENDAR-CURRENT-LIVE-PROOF-2026-10-24.md": "143625efce64a034d27916ee9c6011fa986d2b3b43045ed964a15eb1439cec49"
+  },
+  "sourceStable": true,
+  "candidateBound": false,
+  "templateApproved": false,
+  "phaseId": "core-calendar-20261024-launch-v1",
+  "policyVersion": "owned_calendar_launch_20261024_v1",
+  "freshBaselineMatchesRootPreflight": true,
+  "authorChecks": [
+    {
+      "path": "scratchpad/calendar-launch-guard-20261024.json",
+      "passed": 26,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-launch-control-20261024.json",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-launch-actor-20261024.json",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-launch-mail-20261024.json",
+      "passed": 20,
+      "failed": 0
+    }
+  ],
+  "independentChecks": [
+    {
+      "path": "scratchpad/calendar-launch-independent-seams-20261024.json",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-launch-independent-provenance-20261024.json",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-launch-independent-control-20261024.json",
+      "passed": 5,
+      "failed": 0
+    }
+  ],
+  "mailPrecision": "Second precision stays strict; explicitly marked minute boundaries use interval overlap. Executor must select exact newest post-request message; same-minute ambiguity remains an attended boundary.",
+  "retainedTransportPrerequisite": "scratchpad/calendar-budget-readonly-live-independent.json",
+  "requiredExecutorBinding": [
+    "Final clean candidate commit",
+    "Complete tracked non-document source manifest and its SHA256",
+    "Existing Google client hash verified by actor",
+    "Private0600 expiring approval packet bound to current user instruction",
+    "Exact already-created dedicated Gmail window IDs; separate normal consent tab",
+    "Future fixture date/windows, complete census and remaining cleanup budget"
+  ],
+  "limits": {
+    "site": 240,
+    "writes": 40,
+    "hostedChecks": 25,
+    "email": 3,
+    "metadata": 12,
+    "blobs": 60,
+    "workerPosts": 0,
+    "builds": 2,
+    "pushes": 1,
+    "environmentWrites": 8,
+    "control": 120,
+    "controlWrites": 16,
+    "nativeHandoffs": 1
+  },
+  "runtimeLimits": {
+    "oauthStart": 1,
+    "tokenExchange": 1,
+    "tokenRefresh": 16,
+    "calendarRead": 28,
+    "eventCreate": 1,
+    "eventUpdate": 1,
+    "eventDelete": 2,
+    "workerDispatch": 8,
+    "totalRequests": 57
+  },
+  "physicalNetworkRequests": 0,
+  "liveEffects": 0,
+  "limitations": [
+    "No production publication, Gmail read, Google consent or event operation was performed by QA.",
+    "Root preflight and Gmail window preparation are separately recorded procedural effects, not fresh QA effects.",
+    "Earlier Calendar proof and diagnostic ledgers remain closed.",
+    "Preparation success is not Calendar provider acceptance or launch readiness."
+  ]
+}

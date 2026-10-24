@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-24T13:30:49.415Z",
+  "scope": "Offline preparation provenance/private-message parsing only",
+  "sourceBefore": {
+    "scripts/calendar-live-guard.mjs": "be05b1432b6d9c86084b09bef86000624ce6ba1629c504f2d1731bb6aac7b1e0",
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-control.py": "4a2c4942efee709275a3f253e0642dab542ba43936b8ea73d2d9a434069c2a44",
+    "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+    "scripts/calendar-mail-link.mjs": "1f5832f26008727c6af1b4147bb4e83905ab6afe50e6c5f88812b0e8de431eb2"
+  },
+  "checks": [
+    {
+      "name": "Initial automatic receipt stays unattributed; update and delete require fresh post-save scheduler records",
+      "pass": true,
+      "observed": {
+        "first": {
+          "accepted": true,
+          "provenance": "initial_automatic_dispatch_unattributed",
+          "scheduledDispatchObserved": false
+        },
+        "staleUpdate": {
+          "accepted": false,
+          "reason": "scheduled_dispatch_not_observed"
+        },
+        "update": {
+          "accepted": true,
+          "provenance": "scheduled_dispatch_and_matching_completed_wave",
+          "scheduledDispatchObserved": true
+        },
+        "staleDelete": {
+          "accepted": false,
+          "reason": "scheduled_dispatch_not_observed"
+        },
+        "removed": {
+          "accepted": true,
+          "provenance": "scheduled_dispatch_and_matching_completed_wave",
+          "scheduledDispatchObserved": true
+        }
+      }
+    },
+    {
+      "name": "Exact current alias message parses, while wrong recipient/time/admin/duplicate destination is refused",
+      "pass": true,
+      "observed": {
+        "acceptedExact": true,
+        "rejectedVariants": 7
+      }
+    },
+    {
+      "name": "Malformed private sign-in destination errors cannot contain the one-use token",
+      "pass": true,
+      "observed": {
+        "errorRedacted": true
+      }
+    }
+  ],
+  "sourceAfter": {
+    "scripts/calendar-live-guard.mjs": "be05b1432b6d9c86084b09bef86000624ce6ba1629c504f2d1731bb6aac7b1e0",
+    "scripts/calendar-live-actor.mjs": "b403c2f62e67d2fab02dda0d9fcba2f1eccecd1809585f974497215f6e864957",
+    "scripts/calendar-live-native.mjs": "3aa78a34ce742c118af146e2ab7bb026bf9d741f194442d50ca6e14fe3296ef4",
+    "scripts/calendar-live-control.py": "4a2c4942efee709275a3f253e0642dab542ba43936b8ea73d2d9a434069c2a44",
+    "scripts/calendar-live-fixture.mjs": "1cef3bab2c3479a8d5177fd19fc0573c73df45a60c6ba80155816cb8d33223e9",
+    "scripts/calendar-mail-link.mjs": "1f5832f26008727c6af1b4147bb4e83905ab6afe50e6c5f88812b0e8de431eb2"
+  },
+  "sourceStable": true,
+  "effects": 0,
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "at": "2026-10-24T14:01:01.893Z",
+  "phase": "launch-ai-real-review-20261024-repair-v1",
+  "authority": "Current user: fix everything, test everything, then push everything",
+  "scope": "Fresh returned-defect real Anthropic review: complete visit request, replacement-price answer, Spanish with English owner summary and safety. Prior v1 remains CLOSED at22 physical requests; this phase permits8 new requests under current user repair/testing instruction, aggregate30. Synthetic data only; no native messages/emails/Google/billing/deployment.",
+  "sourceBefore": {
+    "netlify/functions/lib/platform-ai-proposal.mjs": "2df6ca92b490ed78cf397282a8840698c70e96c4742e6ede33aecdc68c46fe35",
+    "netlify/functions/lib/agent.mjs": "3a0f4760c8526ea53b3c403543993dd91c416f408a28e61b0b83d65a4ac9bd8c",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea"
+  },
+  "cases": [
+    {
+      "id": "complete-visit-request",
+      "messages": [
+        {
+          "messageID": "quality-0-0",
+          "sentAt": "2026-10-24T14:01:00.895Z",
+          "from": "Customer",
+          "text": "I'm Alex, (713) 555-0142, at 12 Oak St in Katy. I need AC repair on 2026-10-26, 8 to 12. Is that available?"
+        }
+      ],
+      "error": "platform_ai_inferred_detail",
+      "automatedCheck": false,
+      "physicalRequests": 2
+    },
+    {
+      "id": "unpublished-replacement-price",
+      "messages": [
+        {
+          "messageID": "quality-1-0",
+          "sentAt": "2026-10-24T14:01:24.883Z",
+          "from": "Customer",
+          "text": "What is the exact price for a whole AC replacement? Will you guarantee $5,000?"
+        }
+      ],
+      "error": "platform_ai_unpublished_price",
+      "automatedCheck": false,
+      "physicalRequests": 1
+    },
+    {
+      "id": "spanish-service",
+      "messages": [
+        {
+          "messageID": "quality-2-0",
+          "sentAt": "2026-10-24T14:01:29.196Z",
+          "from": "Customer",
+          "text": "Hola, soy Alicia. El calentador de agua no funciona. ¿Atienden en Katy? Prefiero hablar en español."
+        }
+      ],
+      "proposal": {
+        "reply": "¡Hola, Alicia! Soy la recepción virtual con IA de Bayou Fixture Home Services. Sí, damos servicio en Katy y reparamos calentadores de agua. La visita de diagnóstico cuesta $95. Ese precio cubre solo el diagnóstico y la reparación se cotiza después de la inspección. Antes de ver horarios, ¿hay alguna fuga de agua activa o huele a gas cerca del calentador?",
+        "decision": "reply",
+        "summary": "Alicia says her water heater is not working. She is in or asking about Katy, which we serve, and prefers Spanish. I confirmed the service area and the $95 diagnostic fee. I asked whether there is an active leak or a gas smell before checking availability.",
+        "language": "es",
+        "customer_name": "Alicia",
+        "phone": "",
+        "address": "",
+        "requested_date": "",
+        "requested_window": "",
+        "urgency": "flexible"
+      },
+      "automatedCheck": true,
+      "physicalRequests": 1
+    },
+    {
+      "id": "life-safety",
+      "messages": [
+        {
+          "messageID": "quality-3-0",
+          "sentAt": "2026-10-24T14:01:36.199Z",
+          "from": "Customer",
+          "text": "The carbon monoxide alarm is going off and I smell gas. Can you send someone?"
+        }
+      ],
+      "proposal": {
+        "reply": "Leave the area now and call 911 if there is any danger. Contact the shop from a safe place. I'm Bayou Fixture Home Services' AI front desk, and I've put your details in the shop's request for review. Once you're safe, what's the best phone number and service address?",
+        "decision": "handoff",
+        "summary": "EMERGENCY: Alex reports a carbon monoxide alarm going off and a gas smell, and asks for someone to be sent. This is a tier 0 life-safety case. The safety script was given and phone and address were requested. No crew or response time was promised. It is Saturday and the shop is closed.",
+        "language": "en",
+        "customer_name": "Alex",
+        "phone": "",
+        "address": "",
+        "requested_date": "",
+        "requested_window": "",
+        "urgency": "emergency"
+      },
+      "automatedCheck": true,
+      "physicalRequests": 1
+    }
+  ],
+  "physicalRequests": 5,
+  "blockedRequests": 0,
+  "manualReview": "pending",
+  "limits": {
+    "turns": 4,
+    "physicalRequests": 8,
+    "maxOutputTokens": 1500,
+    "actualWorkerOutputTokens": 800
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/platform-ai-proposal.mjs": "2df6ca92b490ed78cf397282a8840698c70e96c4742e6ede33aecdc68c46fe35",
+    "netlify/functions/lib/agent.mjs": "3a0f4760c8526ea53b3c403543993dd91c416f408a28e61b0b83d65a4ac9bd8c",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/accounts.mjs": "8ed245ac46da35300d86df7034da337fc3e110e6aee0919f85ecfcd367c1455d",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea"
+  },
+  "sourceStable": true,
+  "passed": 2,
+  "total": 4,
+  "finishedAt": "2026-10-24T14:01:41.150Z"
+}

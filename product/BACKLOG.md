@@ -1,3 +1,5 @@
+> **Active delivery, October24:** Finish the authorized grouped release and observe the current owned-Calendar lifecycle. The accepted local lead-AI slice is in `26139e9`; [local evidence and returned-defect dispositions](LAUNCH-FINISH-LOCAL-ACCEPTANCE-2026-10-24.json). Thumbtack partner keys/native delivery, Angi native messaging contract, phone/text delivery, Stripe public TEST-webhook lifecycle, commercial capacity and operations remain owned launch work. Previous closed allowances stay closed.
+
 ## Lead-source implementation and Calendar diagnosis — October24
 
 User-directed lead communications now have an independently accepted **local owner-reviewed** path: Angi intake and Thumbtack OAuth/business/webhook/thread/reply, source-aware existing Inbox and uncertainty recovery. Candidate `69451a8`; [scope and acceptance](LEAD-SOURCES-LOCAL-ACCEPTANCE-2026-10-24.json). Publication, actual vendor enablement/delivery and autonomous AI conversation remain open. This is not a completed AI auto-responder.
