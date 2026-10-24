@@ -1,0 +1,32 @@
+{
+  "reason": "Full unchanged flow used96 of100assets; fresh unapproved v2 proposal adds read-only redirect/favicon headroom. No expansion of closed v1 authority.",
+  "runtimeGuardDeltaOnly": {
+    "total": [
+      218,
+      240
+    ],
+    "platform": [
+      200,
+      220
+    ],
+    "asset": [
+      100,
+      120
+    ]
+  },
+  "sourceBridge": {
+    "scripts/hosted-onboarding-guard.mjs": {
+      "before": "44a633b80570392048c3ceed73287be330177e92a0fb0d7a0ba4d5ac7ea2e998",
+      "after": "573da0ebc16a7704ef83be9364b5f92f42b09df28a0b601974ec21a50f6d5546",
+      "diff": "--- accepted-full-browser\n+++ unapproved-v2-read-headroom\n@@ -6,7 +6,7 @@\n \n export const HOSTED_ONBOARDING_SCOPE = 'hosted_onboarding_zaricoach_v1';\n // Proposed ceilings only. No manifest in this repository grants live authority.\n-export const HOSTED_ONBOARDING_LIMITS = Object.freeze({total:218,platform:200,api:100,mutation:45,draft:14,asset:100,external:12,email:4,ownerEmail:3,operatorEmail:1,metadata:6,logical:10,bytes:35000000});\n+export const HOSTED_ONBOARDING_LIMITS = Object.freeze({total:240,platform:220,api:100,mutation:45,draft:14,asset:120,external:12,email:4,ownerEmail:3,operatorEmail:1,metadata:6,logical:10,bytes:35000000});\n export const HOSTED_ONBOARDING_TARGET = Object.freeze({\n   origin:'https://machinesandcloud.com',canonicalOrigin:'https://www.machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',accountSlug:'docteureminem',\n   commit:'47e3c64163d20166970b6d309fbf6045a9de33b2',deployId:'6adbc34931bb7268db6db4f7',\n"
+    },
+    "scripts/hosted-onboarding-guard-check.mjs": {
+      "before": "8f75a6c2563d3b5895323223056254340ec59398e35613d63539ae5d668a27d2",
+      "after": "4148421ec7b993f8c356f001becd300bb50367bdb644fe239337ea7cdf98b7a8",
+      "diff": "--- accepted-full-browser\n+++ unapproved-v2-read-headroom\n@@ -160,9 +160,14 @@\n   assert(!text.includes('authorization'));assert(!text.includes('body'));assert(!text.includes('token'));\n });\n await check('all platform, external, metadata and byte attempts share irreversible ceilings and cleanup reserve',async()=>{\n- const assets=await fresh();for(let n=0;n<100;n++)await send(assets.guard,'anonymous','/styles.css');await deny(()=>send(assets.guard,'anonymous','/styles.css'),'budget_asset');\n+ const assets=await fresh();for(let n=0;n<L.asset;n++)await send(assets.guard,'anonymous','/styles.css');assert.equal(assets.guard.snapshot().counters.asset,120);await deny(()=>send(assets.guard,'anonymous','/styles.css'),'budget_asset');\n  const {guard}=await fresh();for(let n=0;n<92;n++)await send(guard,'anonymous','/api/manage',{status:401});await deny(()=>send(guard,'anonymous','/api/manage',{status:401}),'cleanup_reserve');await guard.beginCleanup();for(let n=0;n<8;n++)await send(guard,'anonymous','/api/manage',{status:401});assert.equal(guard.snapshot().counters.api,100);await deny(()=>send(guard,'anonymous','/api/manage',{status:401}),'budget_api');\n  const m=await fresh();await metadata(m.guard);assert.equal(m.guard.snapshot().counters.total,2);assert.equal(m.guard.snapshot().counters.metadata,2);\n+});\n+await check('unapproved v2 adds only reviewed read headroom and rejects the prior limit contract',async()=>{\n+ assert.deepEqual(L,{total:240,platform:220,api:100,mutation:45,draft:14,asset:120,external:12,email:4,ownerEmail:3,operatorEmail:1,metadata:6,logical:10,bytes:35000000});\n+ const old=manifest();Object.assign(old.limits,{total:218,platform:200,asset:100});await deny(()=>fresh({manifest:old}),'manifest_target_or_limits');\n+ const f=await fresh();for(let n=0;n<L.asset;n++)await send(f.guard,'anonymous','/styles.css');await f.guard.beginCleanup();for(let n=0;n<L.api;n++)await send(f.guard,'anonymous','/api/manage',{status:401});assert.equal(f.guard.snapshot().counters.platform,220);await deny(()=>send(f.guard,'anonymous','/api/manage',{status:401}),'budget_platform');assert.equal(manifest().approved,false);\n });\n await check('concurrent mail attempts reserve once and no reset methods exist',async()=>{\n   const {guard,persistence}=await fresh();await metadata(guard);let sends=0;const req=()=>send(guard,'operator','/api/manage',{method:'POST',body:{action:'request_link',email:T.operatorEmail},transport:fixture(async()=>{sends++;await new Promise(r=>setTimeout(r,5));return j({delivery:'email'},202);})});\n"
+    }
+  },
+  "fullBrowserEvidence": "scratchpad/zaricoach-guard-v2-integrated-r3.json",
+  "fullBrowserSourceReusedOnlyForUnchangedBehavior": true,
+  "liveApproved": false
+}

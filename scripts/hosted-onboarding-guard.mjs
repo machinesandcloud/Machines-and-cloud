@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 export const HOSTED_ONBOARDING_SCOPE = 'hosted_onboarding_zaricoach_v1';
 // Proposed ceilings only. No manifest in this repository grants live authority.
-export const HOSTED_ONBOARDING_LIMITS = Object.freeze({total:218,platform:200,api:100,mutation:45,draft:14,asset:100,external:12,email:4,ownerEmail:3,operatorEmail:1,metadata:6,logical:10,bytes:35000000});
+export const HOSTED_ONBOARDING_LIMITS = Object.freeze({total:240,platform:220,api:100,mutation:45,draft:14,asset:120,external:12,email:4,ownerEmail:3,operatorEmail:1,metadata:6,logical:10,bytes:35000000});
 export const HOSTED_ONBOARDING_TARGET = Object.freeze({
   origin:'https://machinesandcloud.com',canonicalOrigin:'https://www.machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',accountSlug:'docteureminem',
   commit:'47e3c64163d20166970b6d309fbf6045a9de33b2',deployId:'6adbc34931bb7268db6db4f7',

@@ -1,0 +1,180 @@
+{
+  "at": "2026-10-24T03:37:17.750379+00:00",
+  "decision": "Independent local guard/UI repair accepted; successor v2 is prepared and UNAPPROVED. Closed halted live v1 is never reopened.",
+  "runtimeSource": {
+    "base": "7d0e2430ed2063f50eaad927ff051b6e36faf4de",
+    "deskSHA256": "fd86bb2a4e1407466b9741a5438fdeb054e4daef92df02038395671925b03f58",
+    "sourceFiles": 474,
+    "deltaFromOriginal474": [
+      "desk.js",
+      "scripts/hosted-onboarding-guard-check.mjs",
+      "scripts/hosted-onboarding-guard.mjs"
+    ],
+    "guardSHA256": "573da0ebc16a7704ef83be9364b5f92f42b09df28a0b601974ec21a50f6d5546",
+    "checkSHA256": "4148421ec7b993f8c356f001becd300bb50367bdb644fe239337ea7cdf98b7a8",
+    "wholeManifest": "scratchpad/zaricoach-v2-read-headroom-protocol.json#sourceAfter",
+    "authorFocusedScriptNotImported": {
+      "path": "scripts/website-concurrency-ui-check.mjs",
+      "sha256": "ae4d1411250318d2e41806c281f8842623bcdedd04a265565d1d3571b369f216",
+      "qualification": "Additional QA script exists in shared candidate; its13 author groups reviewed, not counted as independent."
+    }
+  },
+  "confirmedDefects": [
+    {
+      "component": "guard",
+      "finding": "Authoritative successful PUT revisions were ignored and completed GETs could rewind state. Actual handler current-B review200 was falsely guard-denied.",
+      "firstReceipt": "scratchpad/zaricoach-revision-race-original.json",
+      "repair": "Validated PUT immediately updates revision pair; request-order and mutation epochs prevent older/overlapping GET rewind."
+    },
+    {
+      "component": "UI",
+      "finding": "On0500 an obsolete401 GET during a newer held businessPUT expired access without a newer GET. Author previous test was masked by automatic loadSequence.",
+      "firstReceipt": "scratchpad/zaricoach-ui-fence-independent-first.json",
+      "repair": "Onfd86 load.catch compares cfgFence before401/403 handling; ordinary review also waits website/latest read, remains single-flight and preserves newer drafts."
+    }
+  ],
+  "independentEvidence": {
+    "auth": {
+      "receipt": "scratchpad/zaricoach-ui-fence-independent-final.json",
+      "sha256": "8ecb67b1c789fced21553b7f4da9bbd971260aa2b74c89ce1887f31913f49a31",
+      "passed": 2,
+      "total": 2,
+      "sourceStable": true,
+      "physicalNetwork": 0,
+      "actualRevocationControl": true
+    },
+    "fullGuardedBrowser": {
+      "receipt": "scratchpad/zaricoach-guard-v2-integrated-r3.json",
+      "sha256": "9d497daa0489fb2703eb2fd7d11d4d62400b4cbafefcb6f16c038237fb8a6819",
+      "passed": 38,
+      "total": 38,
+      "sourceStable": true,
+      "physicalAttempts": 0,
+      "counts": {
+        "total": 174,
+        "platform": 165,
+        "api": 69,
+        "mutation": 35,
+        "draft": 7,
+        "asset": 96,
+        "external": 3,
+        "email": 4,
+        "ownerEmail": 3,
+        "operatorEmail": 1,
+        "metadata": 6,
+        "logical": 3,
+        "bytes": 4455715
+      },
+      "syntheticCleanup": {
+        "platformComplete": true,
+        "deploymentVerified": true,
+        "configurationClosed": true,
+        "workspaceCancelled": true,
+        "activeSessions": 0,
+        "unconfirmedMutations": [],
+        "externalSiteRollback": "outside this platform guard; requires separate exact route removal/readback"
+      },
+      "browserCurrentReviewAndDrafts": [
+        {
+          "width": 390,
+          "heldRefreshes": 5,
+          "putRevision": "c4fc8f55ae77539d0d707c2ea05f6fc80e070dad176d366cb35b38f0fa83d154",
+          "reviewRevision": "c4fc8f55ae77539d0d707c2ea05f6fc80e070dad176d366cb35b38f0fa83d154",
+          "reviewStatus": 200,
+          "pageErrors": [],
+          "guardHalted": false,
+          "disabledDuringRefresh": true,
+          "laterDraftPreserved": true,
+          "noReviewWhileDirty": true
+        },
+        {
+          "width": 1440,
+          "heldRefreshes": 5,
+          "putRevision": "c4fc8f55ae77539d0d707c2ea05f6fc80e070dad176d366cb35b38f0fa83d154",
+          "reviewRevision": "c4fc8f55ae77539d0d707c2ea05f6fc80e070dad176d366cb35b38f0fa83d154",
+          "reviewStatus": 200,
+          "pageErrors": [],
+          "guardHalted": false,
+          "disabledDuringRefresh": true,
+          "laterDraftPreserved": true,
+          "noReviewWhileDirty": true
+        }
+      ],
+      "screenshots": [
+        "scratchpad/zaricoach-guard-v2-integrated-r3-review-current-390.png",
+        "scratchpad/zaricoach-guard-v2-integrated-r3-review-current-1440.png",
+        "scratchpad/zaricoach-guard-v2-integrated-r3-created-390.png",
+        "scratchpad/zaricoach-guard-v2-integrated-r3-ordinary-widget-390.png",
+        "scratchpad/zaricoach-guard-v2-integrated-r3-owner-request-390.png",
+        "scratchpad/zaricoach-guard-v2-integrated-r3-owner-request-1440.png"
+      ],
+      "visualReview": "Focused390 current review and1440 retained request reviewed. Full-page open-dialog screenshots can repeat compositor content below the viewport; they are not evidence of a runtime duplicate dialog."
+    },
+    "finalHeadroomProtocol": {
+      "receipt": "scratchpad/zaricoach-v2-read-headroom-protocol.json",
+      "sha256": "80d7dd2f797454f1c85ed7a228c86d785279d0c9f32378189352853ae4044846",
+      "passed": 36,
+      "total": 36,
+      "sourceStable": true,
+      "physicalAttempts": 0,
+      "bridge": "scratchpad/zaricoach-v2-read-headroom-source-bridge.json",
+      "qualification": "Full browser reused by exact guard three-limit-only bridge; current36 protocol/actual-handler groups retest caps, scope and revisions."
+    }
+  },
+  "successor": {
+    "phaseId": "hosted-onboarding-zaricoach-20261024-v2",
+    "ownerAlias": "ngoumnaisteve+mc-zaricoach-20261024@gmail.com",
+    "approved": false,
+    "proposedLimits": {
+      "total": 240,
+      "platform": 220,
+      "asset": 120,
+      "api": 100,
+      "mutation": 45,
+      "draft": 14,
+      "verificationMail": 4,
+      "logicalModel": 10,
+      "physicalModel": 30,
+      "maxOutputTokens": 1500
+    },
+    "reason": "Old100 asset cap left only4after96-request exact rehearsal; reviewed new proposal adds hosting redirect/favicon read headroom. Root must request new240 driver/80 control scope; no current live authority or old-phase allowance expansion.",
+    "oldV1AndAliasRejected": true,
+    "keptNavigation": "Returning link request uses ordinary /onboard.html?plan=starter&signin=1; no guard relaxation or hidden body rewrite.",
+    "freshPublishedUI": "Full rehearsal explicitly reloads desk after release/proof fixture binding before private AI.",
+    "remainingInputs": "Fresh approval, exact candidate/source/served-asset manifest, deploy-stage bindings and exact environment proof remain Root-owned prerequisites."
+  },
+  "preservedAdditionalFirstFailures": [
+    {
+      "receipt": "scratchpad/zaricoach-ui-fence-independent-first.json",
+      "disposition": "Real UI obsolete-auth defect; fixed and independently2/2 accepted."
+    },
+    {
+      "receipt": "scratchpad/zaricoach-guard-v2-integrated-final.json",
+      "disposition": "Harness-only import order captured missing dummy email marker in send.mjs before later setup; markers now initialized before first handler import."
+    },
+    {
+      "receipt": "scratchpad/zaricoach-guard-v2-integrated-r2.json",
+      "disposition": "No-goto driver optimization exposed signout form.reset default growth hint; strict starter-only guard correctly denied. Root required original returning navigation; no runtime/guard scope widened."
+    }
+  ],
+  "closedActualV1": {
+    "ledger": "/tmp/mc-production-readiness-47e/scratchpad/hosted-onboarding-zaricoach-20261023-v1-ledger.jsonl",
+    "observedOffline": {
+      "closed": true,
+      "halted": true,
+      "total": 131,
+      "api": 44,
+      "mutation": 25,
+      "assets": 85,
+      "verificationMail": 4,
+      "external": 0,
+      "logical": 0,
+      "workspaceCancelled": true,
+      "activeSessions": 0,
+      "unconfirmedMutations": []
+    },
+    "guardPlatformComplete": false,
+    "qualification": "No proof/cleanup deploy stage occurred. Root separately captured unchanged M&C47e/Zari421 baselines. Partial signup/access/draft evidence does not establish installation, inference, owner delivery or full cleanup-release proof."
+  },
+  "limitations": "All new tests used memory store, actual local handlers/assets, synthetic intercepted model/email/site/metadata protocols and isolated headless browser contexts. No external requests, regular browser inspection, provider delivery, settings, build, deployment, purchase or production mutation. Full synthetic cleanup is not actual live runtime cleanup."
+}
