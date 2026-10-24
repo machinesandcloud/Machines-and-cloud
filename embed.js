@@ -26,7 +26,7 @@
   try { var saved = JSON.parse(sessionStorage.getItem(STORE) || 'null'); if (saved && saved.contact) state = saved; } catch (e) { /* ignore */ }
   if(setupCheck)state.contact=setupCheck.contact;
   if (!state.contact) state.contact = 'w' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-  function persist() { try { sessionStorage.setItem(STORE, JSON.stringify({ contact: state.contact, transcript: state.transcript.slice(-20) })); } catch (e) { /* ignore */ } }
+  function persist() { try { sessionStorage.setItem(STORE, JSON.stringify({ contact: state.contact, transcript: state.transcript.slice(-20), pendingTurn:state.pendingTurn||null })); } catch (e) { /* ignore */ } }
 
   var css = '#mcDesk{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;font-size:14px;line-height:1.45}' +
     '#mcDesk *{box-sizing:border-box}' +
@@ -48,6 +48,7 @@
     '#mcDesk textarea{flex:1;resize:none;min-height:40px;max-height:110px;padding:10px;border:1px solid #d1d5db;border-radius:10px;font:inherit}' +
     '#mcDesk button.s{padding:0 16px;border:0;border-radius:10px;background:#2563EB;color:#fff;font-weight:600;cursor:pointer}' +
     '#mcDesk button.s:disabled{background:#dbe2ee;color:#69788e;cursor:not-allowed;box-shadow:none}' +
+    '#mcDesk .recovery{padding:8px 12px;background:#edf4ff}#mcDesk .recover-reply{padding:8px 12px;border:1px solid #c9d7eb;border-radius:8px;background:white;color:#214ca8;cursor:pointer}'+
     '#mcDesk .f{margin:0;padding:0 12px 8px;font-size:10px;color:#6b7280;background:#fff}' +
     '#mcDesk .check{padding:12px 14px;background:#edf4ff;border-bottom:1px solid #d8e4f5;color:#233f65;font-size:12px}#mcDesk .check b{display:block;margin-bottom:5px}#mcDesk .check p{margin:5px 0;line-height:1.5}#mcDesk .check button,#mcDesk .check a{font:inherit;min-height:32px;padding:6px 9px;margin:5px 6px 0 0;border:1px solid #c9d7eb;border-radius:8px;background:#fff;color:#214ca8;cursor:pointer}#mcDesk .check button:disabled{opacity:.6;cursor:wait}' +
     '@media(max-width:480px){#mcDesk .p{position:fixed;left:8px;right:8px;bottom:70px;width:auto;height:min(76vh,600px)}}';
@@ -57,9 +58,10 @@
   root.innerHTML = '<button type="button" class="l" aria-expanded="false"><i></i><span>Chat with us</span></button>' +
     '<section class="p" role="dialog" aria-label="Chat"><header class="h"><div><b>Front desk</b><small>Automated front desk</small></div><button type="button" class="x" aria-label="Close">&times;</button></header>' +
     '<div class="m"></div><form><textarea rows="1" maxlength="1500" placeholder="Type your message" aria-label="Your message" required disabled></textarea><button type="submit" class="s" disabled>Send</button></form>' +
-    '<p class="f">For urgent help, use the shop’s contact details on this website.</p></section>';
+    '<div class="recovery" hidden><p class="f" role="status">The previous reply is unconfirmed. Check its saved answer before sending the request again.</p><button type="button" class="recover-reply">Check previous reply</button></div><p class="f">For urgent help, use the shop’s contact details on this website.</p></section>';
   document.body.appendChild(root);
   var launcher = root.querySelector('.l'), panel = root.querySelector('.p'), list = root.querySelector('.m'), form = root.querySelector('form'), input = root.querySelector('textarea'), sendBtn = root.querySelector('.s');
+  var recovery=root.querySelector('.recovery'),recoverButton=root.querySelector('.recover-reply');
   var checkBanner=null,checkMessage=null,checkStatusButton=null,checkAckButton=null,sampleButton=null,sampleDetails={service:'',area:''};
   var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?', available: false };
   var busy = false, rendered = false;
@@ -82,9 +84,9 @@
   }
   function render() { list.innerHTML = ''; add('a', cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); if(m.role==='assistant')appointmentTexts(m.appointmentTexts); }); rendered = true; }
 
-  function unavailable(message) { configReady=false;cfg.available = false; cfg.greeting = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true; if (rendered) render(); }
+  function unavailable(message) { configReady=false;cfg.available = false; cfg.greeting = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true;recovery.hidden=!!setupCheck||!state.pendingTurn; if (rendered) render(); }
   function checkNote(text){if(checkMessage)checkMessage.textContent=text;}
-  function checkControls(){var available=configReady&&(!setupCheck&&!setupInvalid||checkReady&&!setupCheck.pending);cfg.available=!!available;input.disabled=!available;sendBtn.disabled=busy||!available;if(sampleButton)sampleButton.disabled=!available;}
+  function checkControls(){var available=configReady&&(!setupCheck&&!setupInvalid||checkReady&&!setupCheck.pending);recovery.hidden=!!setupCheck||!state.pendingTurn;recoverButton.disabled=busy;if(!setupCheck&&state.pendingTurn)available=false;cfg.available=!!available;input.disabled=!available;sendBtn.disabled=busy||!available;if(sampleButton)sampleButton.disabled=!available;}
   function checkPayload(action,extra){return Object.assign({action:action,client:slug,checkId:setupCheck.id,challenge:setupCheck.challenge},extra||{});}
   async function checkRequest(action,extra){var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);try{var response=await fetch(BASE+'/api/website-installation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(checkPayload(action,extra)),signal:controller.signal}),result=await response.json();if(!response.ok||result.error){var error=new Error(result.message||'The website check could not be confirmed. Return to your workspace.');error.status=response.status;throw error;}return result;}finally{clearTimeout(timeout);}}
   async function acknowledgeCheck(){var focused=document.activeElement===checkAckButton,pending=setupCheck&&setupCheck.pending;if(!pending||!pending.completionRef)return;checkAckButton.disabled=true;try{await checkRequest('acknowledge',{turnId:pending.id,completionRef:pending.completionRef});if(setupCheck.pending!==pending)return;setupCheck.pending=null;persistCheck();checkAckButton.hidden=true;checkNote(pending.record?'Your sample request is saved. Open your workspace to review it.':'Answer confirmed. Continue the sample conversation until a callback request is saved.');}catch(error){checkNote('The answer arrived, but its check receipt is not confirmed. Retry the receipt without sending the message again.');checkAckButton.hidden=false;}finally{checkAckButton.disabled=false;checkControls();if(focused&&document.activeElement===document.body&&root.classList.contains('open')){if(!checkAckButton.hidden)checkAckButton.focus();else if(!input.disabled)input.focus();else checkStatusButton.focus();}}}
@@ -112,12 +114,11 @@
   launcher.addEventListener('click', function () { root.classList.contains('open') ? close() : open(); });
   root.querySelector('.x').addEventListener('click', close);
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var text = input.value.trim(); if (!text || busy || !cfg.available || input.disabled) return;
+  function sendMessage(recover) {
+    var text = input.value.trim(); if (busy || (!recover && (!text || !cfg.available || input.disabled)) || (recover && (!state.pendingTurn?.request || setupCheck))) return;
     if(setupCheck){var bytes=new Uint8Array(16);crypto.getRandomValues(bytes);setupCheck.pending={id:Array.from(bytes).map(function(value){return value.toString(16).padStart(2,'0');}).join(''),completionRef:null,record:null};persistCheck();}
     busy = true; sendBtn.disabled = true; input.value = '';
-    state.transcript.push({ role: 'user', content: text }); persist(); add('user', text);
+    if(!recover){state.transcript.push({ role: 'user', content: text });persist();add('user',text);}
     var tp = typing(), bubble = null, full = '', done = false, reader = null;
     var interrupted = 'The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again.';
     var abort = typeof AbortController === 'function' ? new AbortController() : null, timer;
@@ -130,7 +131,7 @@
     });
     function bounded(promise) { return Promise.race([promise, deadline]); }
     function delta(t) { if (!bubble) { tp.remove(); bubble = add('a', ''); } full += t; bubble.textContent = full; list.scrollTop = list.scrollHeight; }
-    function finish(reply,events) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; var invitation=Array.isArray(events)&&events.find(function(event){return event.type==='booking'&&event.appointmentTexts;});state.transcript.push({ role: 'assistant', content: reply, ...(invitation?{appointmentTexts:invitation.appointmentTexts}:{}) });if(invitation)appointmentTexts(invitation.appointmentTexts);persist();if(setupCheck){var receipt=Array.isArray(events)&&events.find(function(event){return event.type==='website_check'&&event.checkId===setupCheck.id&&event.turnId===setupCheck.pending?.id&&/^[a-f0-9]{64}$/.test(event.completionRef||'');});if(receipt){setupCheck.pending.completionRef=receipt.completionRef;setupCheck.pending.record=receipt.record||null;persistCheck();acknowledgeCheck();}else checkNote('The answer arrived, but this check has no matching receipt. Check the saved outcome in your workspace.');} }
+    function finish(reply,events) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true;state.pendingTurn=null; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; var invitation=Array.isArray(events)&&events.find(function(event){return event.type==='booking'&&event.appointmentTexts;});state.transcript.push({ role: 'assistant', content: reply, ...(invitation?{appointmentTexts:invitation.appointmentTexts}:{}) });if(invitation)appointmentTexts(invitation.appointmentTexts);persist();if(setupCheck){var receipt=Array.isArray(events)&&events.find(function(event){return event.type==='website_check'&&event.checkId===setupCheck.id&&event.turnId===setupCheck.pending?.id&&/^[a-f0-9]{64}$/.test(event.completionRef||'');});if(receipt){setupCheck.pending.completionRef=receipt.completionRef;setupCheck.pending.record=receipt.record||null;persistCheck();acknowledgeCheck();}else checkNote('The answer arrived, but this check has no matching receipt. Check the saved outcome in your workspace.');} }
     function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status');if(setupCheck)checkNote('The reply was interrupted. Your request may already be saved; check its status before sending it again.'); }
     function release() {
       clearTimeout(timer);
@@ -138,13 +139,15 @@
       if (reader) { try { var cancelled = reader.cancel(); if (cancelled && cancelled.catch) cancelled.catch(function () {}); } catch (e) { /* already closed */ } }
       busy = false;checkControls();if(root.classList.contains('open')){if(!input.disabled)input.focus();else if(setupCheck&&checkStatusButton&&!checkStatusButton.disabled)checkStatusButton.focus();else if(bubble){bubble.tabIndex=-1;bubble.focus();}}
     }
-    var body={client:slug,contact:state.contact,messages:state.transcript.slice(-20),page:location.pathname,stream:true};if(setupCheck)body.websiteCheck={checkId:setupCheck.id,challenge:setupCheck.challenge,turnId:setupCheck.pending.id};
+    var body;
+    if(recover)body=Object.assign({},state.pendingTurn.request,{recoverTurn:true});
+    else{var turnBytes=new Uint8Array(16);crypto.getRandomValues(turnBytes);var turnId=Array.from(turnBytes).map(function(value){return value.toString(16).padStart(2,'0');}).join('');var requestMessages=state.transcript.slice(-19);if(requestMessages[0]?.role==='assistant')requestMessages.shift();body={client:slug,contact:state.contact,turnId:turnId,messages:requestMessages,page:location.pathname,stream:true};if(setupCheck)body.websiteCheck={checkId:setupCheck.id,challenge:setupCheck.challenge,turnId:setupCheck.pending.id};else{state.pendingTurn={id:turnId,at:new Date().toISOString(),request:body};persist();}}
     var request = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
     if (abort) request.signal = abort.signal;
     bounded(fetch(ENDPOINT, request))
       .then(function (res) {
         var type = res.headers.get('content-type') || '';
-        if (!res.ok) { if (res.status === 429) { configReady=false;cfg.available = false; input.disabled = true; } fail(res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : undefined); return; }
+        if (!res.ok) { if (res.status === 429) { configReady=false;cfg.available = false; input.disabled = true; } return bounded(res.json()).then(function(error){if(!setupCheck&&error.turnNotProcessed===true){state.pendingTurn=null;persist();}fail(error.message || (res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : interrupted));},function(){fail(interrupted);}); }
         if (type.indexOf('ndjson') !== -1 && res.body && res.body.getReader) {
           reader = res.body.getReader(); var dec = new TextDecoder(), buf = '';
           function packet(line) {
@@ -167,5 +170,6 @@
       })
       .catch(function () { fail(interrupted); })
       .then(release, release);
-  });
+  }
+  form.addEventListener('submit',function(event){event.preventDefault();sendMessage(false);});recoverButton.addEventListener('click',function(){sendMessage(true);});
 })();

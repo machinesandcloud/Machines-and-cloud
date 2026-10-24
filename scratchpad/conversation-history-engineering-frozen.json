@@ -1,0 +1,143 @@
+{
+  "checks": [
+    {
+      "name": "New complete website history retains 70 messages while model context stays40 and owner pages20",
+      "pass": true
+    },
+    {
+      "name": "Equal text has distinct durable turn identities and corrections remain readable before the40-message tail",
+      "pass": true
+    },
+    {
+      "name": "Concurrent writers from the same base merge their full deltas without overwriting the tail",
+      "pass": true
+    },
+    {
+      "name": "Lost head response after commit recovers via fresh read and original turn ID with one cached tool receipt",
+      "pass": true
+    },
+    {
+      "name": "Completion saved before refused head commit is reconciled by a fresh worker, not model/tool replay",
+      "pass": true
+    },
+    {
+      "name": "Lost immutable completion response before head append reconciles one batch after restart",
+      "pass": true
+    },
+    {
+      "name": "Unwritten completion remains uncertain; user input retained and no blind replay is admitted",
+      "pass": true
+    },
+    {
+      "name": "Recovery-only read cannot create a model intent or input when the turn is absent",
+      "pass": true
+    },
+    {
+      "name": "Reusing a completed ID with changed facts is rejected while exact replay is stable",
+      "pass": true
+    },
+    {
+      "name": "Editing an earlier stored message never silently duplicates it as an appended correction",
+      "pass": true
+    },
+    {
+      "name": "Two metadata flag saves do not overwrite a concurrent new reply",
+      "pass": true
+    },
+    {
+      "name": "Existing truncated prefix is truthfully incomplete and complete CSV export fails instead of fabricating history",
+      "pass": true
+    },
+    {
+      "name": "Unmarked legacy conversations and managed SMS/call persistence retain their existing behavior",
+      "pass": true
+    },
+    {
+      "name": "Owner reader rejects anonymous, permanent keys, another session and raw path contacts",
+      "pass": true
+    },
+    {
+      "name": "Cursor is bound to one snapshot, conversation and tenant and cannot be tampered with",
+      "pass": true
+    },
+    {
+      "name": "Revoking the session during a page read prevents the private response",
+      "pass": true
+    },
+    {
+      "name": "Replacing the workspace incarnation during a page read prevents stale owner exposure",
+      "pass": true
+    },
+    {
+      "name": "Cancelled workspace keeps owner history readable and refuses writes",
+      "pass": true
+    },
+    {
+      "name": "Missing immutable page produces explicit failure without returning a partial page as complete",
+      "pass": true
+    },
+    {
+      "name": "CSV contains the beginning and corrected facts for complete new website history, not just40 or12",
+      "pass": true
+    },
+    {
+      "name": "History hard limit refuses another turn before writing input and never evicts retained messages",
+      "pass": true
+    },
+    {
+      "name": "An unresolved turn blocks a fresh reworded turn before any second model/tool admission",
+      "pass": true
+    },
+    {
+      "name": "Actual chat handler quota denial for random public contacts writes no archive/input/head and attests unattempted",
+      "pass": true
+    },
+    {
+      "name": "Actual chat completed recovery returns cached reply without another allowance or SDK attempt",
+      "pass": true
+    },
+    {
+      "name": "Actual book_visit committed then completion-storage loss blocks reworded newturn at capacity3",
+      "pass": true
+    },
+    {
+      "name": "Actual chat model context never expands beyond40 retained messages and keeps saved tool markers",
+      "pass": true
+    },
+    {
+      "name": "No physical, model, voice, text or email transport was admitted",
+      "pass": true
+    }
+  ],
+  "sourceBefore": {
+    "desk.html": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "bac50be67c2fbece8f8e70895036fab8f67a7c04f1154bf20597fd7e06e3dadd",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "desk-conversations.js": "03625ee214654269851946a40a868a37fe48a25e8150eaf2a9d9e1d0ea41f4bd",
+    "embed.js": "4d422bcb08a5630fcb1fb7f619bccc46faa38aab6d7ec80547cb6caec66db56d",
+    "netlify/functions/client.mjs": "a16417664d1e716493a7844db675ccb86264b12218d405439a3c7849b6750bd0",
+    "netlify/functions/chat.mjs": "aecd85ddb0d08923568343f94f4b0132721037999a8a7cbe0fcc39fdaa990eee",
+    "netlify/functions/lib/store.mjs": "85b58eb82a50ff073e1dfe5ec2cfd03f622fd154c35a544a255a53d553ef0d72",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/conversation-history-check.mjs": "309bac4796fcb1fbc5eb85eb807ddcab6d00c0ba4cd2272e9e83951e38bca7bb"
+  },
+  "sourceAfter": {
+    "desk.html": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "bac50be67c2fbece8f8e70895036fab8f67a7c04f1154bf20597fd7e06e3dadd",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "desk-conversations.js": "03625ee214654269851946a40a868a37fe48a25e8150eaf2a9d9e1d0ea41f4bd",
+    "embed.js": "4d422bcb08a5630fcb1fb7f619bccc46faa38aab6d7ec80547cb6caec66db56d",
+    "netlify/functions/client.mjs": "a16417664d1e716493a7844db675ccb86264b12218d405439a3c7849b6750bd0",
+    "netlify/functions/chat.mjs": "aecd85ddb0d08923568343f94f4b0132721037999a8a7cbe0fcc39fdaa990eee",
+    "netlify/functions/lib/store.mjs": "85b58eb82a50ff073e1dfe5ec2cfd03f622fd154c35a544a255a53d553ef0d72",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/conversation-history-check.mjs": "309bac4796fcb1fbc5eb85eb807ddcab6d00c0ba4cd2272e9e83951e38bca7bb"
+  },
+  "externalRequests": 0,
+  "requests": 4464,
+  "mode": "Actual store/owner handler with conditional installed SDK protocol double; no physical/model/provider requests"
+}

@@ -1,7 +1,7 @@
 // Storage on Netlify Blobs. One store per kind; keys are "<slug>/<id>" so a client's
 // records list by prefix. All reads/writes are JSON.
 import { getStore } from "@netlify/blobs";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createHash } from "node:crypto";
 import { normalizeDate } from "./calendar.mjs";
 import { canonicalWindow, listedWindows, listedWindow, requestedDate, addDays, isoDateValid, isElapsedWindow, AvailabilityInputError } from "./availability.mjs";
 import { workspaceTenant, supportedWorkspace, belongsToWorkspace, WorkspaceIdentityError } from './workspace-identity.mjs';
@@ -111,17 +111,182 @@ export async function getConversation(target, channel, contact) {
   const scoped = supportedWorkspace(client), path = convKey(target, channel, contact);
   const previous = scoped ? await atomicUpdate('conversations', path, row => ({ result: row })) : await get('conversations', path);
   if (previous && scoped && (!belongsToWorkspace(client, previous) || previous.slug !== slug || previous.channel !== channel || previous.contact !== contact)) throw new WorkspaceIdentityError();
-  return previous || { slug, channel, contact, messages: [], createdAt: now(), ...(scoped ? { tenantIdentity: workspaceTenant(client) } : {}) };
+  const conv = previous || { slug, channel, contact, messages: [], createdAt: now(), ...(scoped ? { tenantIdentity: workspaceTenant(client) } : {}) };
+  if (archivedWeb(conv) && conv.history) validateConversationHistory(conv);
+  if (archivedWeb(conv)) conversationReads.set(conv, { base: structuredClone(conv.messages), total: conv.history?.total || 0, flag: JSON.stringify(conv.flag ?? null), operation: null });
+  return conv;
 }
-export async function saveConversation(conv) {
+export async function saveConversation(conv, options = {}) {
   if (conv.tenantIdentity !== undefined) {
     const current = await atomicUpdate('clients', conv.slug, row => ({ result: row }));
     if (!supportedWorkspace(current) || workspaceTenant(current) !== conv.tenantIdentity || !belongsToWorkspace(current, conv)) throw new WorkspaceIdentityError();
+  }
+  if (archivedWeb(conv)) {
+    const workspace=await currentConversationWorkspace(conv);
+    if(!['testing','live','paused'].includes(workspace.status))historyError('conversation_closed','This conversation is read-only. Its saved history is kept.');
+    const read = conversationReads.get(conv);
+    if (!read || conv.messages.length < read.base.length || JSON.stringify(conv.messages.slice(0, read.base.length)) !== JSON.stringify(read.base)) historyError('conversation_changed', 'Saved messages cannot be replaced. Reload the conversation before adding another reply.');
+    let delta = conv.messages.slice(read.base.length);
+    if (read.operation?.inputMessage) {
+      if (delta[0]?.role !== 'user' || delta[0]?.content !== read.operation.inputMessage.content) historyError('conversation_turn_conflict','The saved turn belongs to a different message.');
+      delta = delta.slice(1);
+    }
+    await ensureConversationHistory(conv);
+    let saved;
+    if (delta.length) {
+      const operation = read.operation || { batchId: digestConversation(['append-v1', read.total, read.base, delta]), inputHash: null };
+      if (read.pendingDigest && read.pendingDigest !== digestConversation(delta)) historyError('conversation_turn_conflict','A reply is awaiting confirmation. Check the original saved turn first.');
+      read.pendingDigest = digestConversation(delta);
+      const entry = await writeBatch(conv, operation.batchId, delta, operation.inputHash, options.output || null);
+      saved = await appendArchivedBatch(conv, entry, conv.websiteSetupCheck ? { websiteSetupCheck: conv.websiteSetupCheck } : {});
+    }
+    if (JSON.stringify(conv.flag ?? null) !== read.flag) saved = await atomicUpdate('conversations', conversationPath(conv), async current => {
+      const workspace=await currentConversationWorkspace(conv); validateConversationHistory(current);
+      if(!['testing','live','paused'].includes(workspace.status))historyError('conversation_closed','This conversation is read-only. Its saved history is kept.');
+      return { value: { ...current, flag: conv.flag ?? null, updatedAt: now() }, result: current };
+    });
+    if (saved) { conv.messages = structuredClone(saved.messages); conv.history = structuredClone(saved.history); }
+    conversationReads.set(conv, { base: structuredClone(conv.messages), total: conv.history?.total || 0, flag: JSON.stringify(conv.flag ?? null), operation: null });
+    return conv;
   }
   conv.updatedAt = now();
   conv.messages = conv.messages.slice(-40);
   const path = conv.tenantIdentity === undefined ? convKey(conv.slug, conv.channel, conv.contact) : `${conv.slug}/${conv.tenantIdentity}/${conv.channel}/${conv.contact}`;
   return put("conversations", path, conv);
+}
+
+// Website history is separate from the model's bounded context. Immutable batches are
+// written before their CAS locator; a durable turn identity reconciles a lost head response.
+const CONVERSATION_BATCH_LIMIT = 2000, CONVERSATION_PENDING_LIMIT = 20;
+const conversationReads = new WeakMap();
+const digestConversation = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+export class ConversationHistoryError extends Error {
+  constructor(code, message, status = 409) { super(message); Object.assign(this, { code, status }); }
+}
+const historyError = (code, message, status = 409) => { throw new ConversationHistoryError(code, message, status); };
+const archivedWeb = conv => conv?.channel === 'web' && /^[a-f0-9]{64}$/.test(conv?.tenantIdentity || '');
+export const conversationReference = (client, channel, contact) => digestConversation([workspaceTenant(client), channel, contact]);
+const conversationPath = conv => `${conv.slug}/${conv.tenantIdentity}/${conv.channel}/${conv.contact}`;
+const batchPath = (conv, batchId) => `${conv.slug}/${conv.tenantIdentity}/${digestConversation([conv.channel, conv.contact])}/${batchId}`;
+function validateConversationHistory(conv) {
+  const h = conv.history;
+  if (!h || h.version !== 1 || !Array.isArray(h.entries) || h.entries.length > CONVERSATION_BATCH_LIMIT || !Array.isArray(h.pending) || h.pending.length > CONVERSATION_PENDING_LIMIT || typeof h.complete !== 'boolean' || !Number.isInteger(h.total) || h.total < 0 || h.entries.some(row => !/^[a-f0-9]{64}$/.test(row.id || '') || !/^[a-f0-9]{64}$/.test(row.digest || '') || !Number.isInteger(row.count) || row.count < 1 || row.count > 40) || h.entries.reduce((n, row) => n + row.count, 0) !== h.total || new Set(h.entries.map(row => row.id)).size !== h.entries.length || h.pending.some(row => !/^[a-f0-9]{64}$/.test(row.id || '') || !/^[a-f0-9]{64}$/.test(row.inputHash || ''))) historyError('conversation_history_unavailable', 'This saved conversation needs checking. Please contact support.', 503);
+  return h;
+}
+async function currentConversationWorkspace(conv) {
+  const current = await atomicUpdate('clients', conv.slug, row => ({ result: row }));
+  if (!supportedWorkspace(current) || workspaceTenant(current) !== conv.tenantIdentity || !belongsToWorkspace(current, conv)) throw new WorkspaceIdentityError();
+  return current;
+}
+function validBatch(conv, entry, row) {
+  if (!row || row.version !== 1 || row.tenantIdentity !== conv.tenantIdentity || row.slug !== conv.slug || row.channel !== conv.channel || row.contact !== conv.contact || row.id !== entry.id || !Array.isArray(row.messages) || row.messages.length !== entry.count || digestConversation({ messages: row.messages, inputHash: row.inputHash || null, output: row.output || null }) !== entry.digest) historyError('conversation_history_unavailable', 'Part of this saved conversation could not be read. Try again; its saved history is kept.', 503);
+  return row;
+}
+async function writeBatch(conv, batchId, messages, inputHash = null, output = null) {
+  if (!Array.isArray(messages) || !messages.length || messages.length > 40 || messages.some(row => !['user', 'assistant'].includes(row?.role) || typeof row.content !== 'string') || Buffer.byteLength(JSON.stringify({messages, output})) > 65536) historyError('conversation_turn_too_large', 'This conversation turn is too large to save safely. Please contact the shop directly.', 413);
+  const batch = { version: 1, slug: conv.slug, tenantIdentity: conv.tenantIdentity, channel: conv.channel, contact: conv.contact, id: batchId, messages, inputHash, output };
+  const entry = { id: batchId, count: messages.length, digest: digestConversation({ messages, inputHash, output }) };
+  await atomicUpdate('conversation_history', batchPath(conv, batchId), previous => {
+    if (previous) { validBatch(conv, entry, previous); return {}; }
+    return { value: batch };
+  });
+  return entry;
+}
+async function ensureConversationHistory(conv) {
+  await currentConversationWorkspace(conv);
+  return atomicUpdate('conversations', conversationPath(conv), async saved => {
+    if (saved && (!belongsToWorkspace(await currentConversationWorkspace(conv), saved) || saved.channel !== conv.channel || saved.contact !== conv.contact)) throw new WorkspaceIdentityError();
+    if (saved?.history) { validateConversationHistory(saved); return { result: saved }; }
+    const messages = saved?.messages || [], entries = [];
+    if (messages.length) entries.push(await writeBatch(conv, digestConversation(['retained-prefix', messages]), messages));
+    const value = { ...(saved || { slug: conv.slug, tenantIdentity: conv.tenantIdentity, channel: conv.channel, contact: conv.contact, createdAt: conv.createdAt || now(), messages: [] }), history: { version: 1, complete: !saved, entries, total: messages.length, pending: [] } };
+    return { value, result: value };
+  });
+}
+async function appendArchivedBatch(conv, entry, metadata = {}) {
+  await currentConversationWorkspace(conv);
+  const batch = validBatch(conv, entry, await atomicUpdate('conversation_history', batchPath(conv, entry.id), row => ({ result: row })));
+  return atomicUpdate('conversations', conversationPath(conv), async saved => {
+    const current = await currentConversationWorkspace(conv);
+    if (!saved || !belongsToWorkspace(current, saved)) throw new WorkspaceIdentityError();
+    const h = validateConversationHistory(saved), found = h.entries.find(row => row.id === entry.id);
+    if (found) { if (found.digest !== entry.digest) historyError('conversation_turn_conflict', 'This saved turn has different content. Check its saved result before continuing.'); return { result: saved }; }
+    if (!['testing', 'live'].includes(current.status)) historyError('conversation_closed', 'This conversation is read-only. Its saved history is kept.');
+    if (h.entries.length >= CONVERSATION_BATCH_LIMIT) historyError('conversation_history_full', 'This conversation has reached its saved history limit. Please start a new conversation or contact the shop directly.');
+    const value = { ...saved, ...metadata, updatedAt: now(), messages: [...saved.messages, ...batch.messages].slice(-40), history: { ...h, total: h.total + entry.count, entries: [...h.entries, entry], pending: h.pending.filter(row => row.id !== entry.id) } };
+    return { value, result: value };
+  });
+}
+// The caller supplies the same random turnId on recovery, never a hash of the customer's
+// text: two legitimate identical questions remain two separate occurrences.
+export async function beginConversationTurn(conv, turnId, input, {recoverOnly = false} = {}) {
+  if (!archivedWeb(conv) || !/^[a-f0-9]{32}$/.test(turnId || '')) historyError('invalid_conversation_turn', 'Refresh the website chat before sending another message.', 400);
+  const batchId = digestConversation(['website-turn-v1', turnId]), inputHash = digestConversation(input);
+  const workspace=await currentConversationWorkspace(conv);
+  if(!recoverOnly&&!['testing','live'].includes(workspace.status))historyError('conversation_closed','This conversation is read-only. Its saved history is kept.');
+  const head=recoverOnly?await atomicUpdate('conversations',conversationPath(conv),row=>({result:row})):await ensureConversationHistory(conv);
+  if(recoverOnly&&!head?.history)historyError('conversation_turn_not_found','No completed reply is saved for this message. Contact the shop before sending it again.');
+  const h = validateConversationHistory(head);
+  const entry = h.entries.find(row => row.id === batchId), pending = h.pending.find(row => row.id === batchId);
+  if (entry) {
+    const batch = validBatch(conv, entry, await atomicUpdate('conversation_history', batchPath(conv, batchId), row => ({ result: row })));
+    if (batch.inputHash !== inputHash || !batch.output) historyError('conversation_turn_conflict', 'That turn identifier belongs to a different message. Check the saved conversation.');
+    return { completed: true, output: batch.output };
+  }
+  if (pending) {
+    if (pending.inputHash !== inputHash) historyError('conversation_turn_conflict', 'That turn identifier belongs to a different message. Check the saved conversation.');
+    const batch = await atomicUpdate('conversation_history', batchPath(conv, batchId), row => ({ result: row }));
+    if (batch) {
+      const recoveredEntry = { id: batchId, count: batch.messages?.length, digest: digestConversation({messages: batch.messages, inputHash: batch.inputHash || null, output: batch.output || null}) };
+      validBatch(conv, recoveredEntry, batch);
+      if (batch.inputHash !== inputHash || !batch.output) historyError('conversation_turn_conflict', 'The saved reply needs checking before this message can continue.');
+      await appendArchivedBatch(conv, recoveredEntry);
+      return { completed: true, output: batch.output };
+    }
+    historyError('conversation_turn_uncertain', 'The earlier reply may still be processing. Do not send the same request again; contact the shop if you need help.');
+  }
+  if(h.pending.length)historyError('conversation_previous_unconfirmed','A previous reply is unconfirmed. Check its saved answer before sending another request.');
+  if(recoverOnly)historyError('conversation_turn_not_found','This message was not admitted. No reply or request was submitted by this turn.');
+  const inputId=digestConversation(['website-input-v1',turnId]);
+  if(h.entries.some(row=>row.id===inputId))historyError('conversation_turn_uncertain','The earlier message was received, but its reply could not be confirmed. Contact the shop before sending the same request again.');
+  if(h.entries.length+h.pending.length+2>CONVERSATION_BATCH_LIMIT||h.pending.length>=CONVERSATION_PENDING_LIMIT)historyError('conversation_history_full','This conversation needs checking before another message can be sent. Please contact the shop directly.');
+  const priorInput=await atomicUpdate('conversation_history',batchPath(conv,inputId),row=>({result:row}));
+  if(priorInput&&(priorInput.inputHash!==inputHash||priorInput.messages?.length!==1||priorInput.messages[0].content!==input.content))historyError('conversation_turn_conflict','This turn identifier belongs to a different message.');
+  const inputMessage=priorInput?priorInput.messages[0]:{role:'user',content:input.content,at:now()},inputEntry={...await writeBatch(conv,inputId,[inputMessage],inputHash),completionId:batchId};
+  await atomicUpdate('conversations', conversationPath(conv), async saved => {
+    const current = await currentConversationWorkspace(conv), history = validateConversationHistory(saved);
+    if (!['testing','live'].includes(current.status)) historyError('conversation_closed', 'This conversation is read-only. Its saved history is kept.');
+    if (history.entries.some(row => row.id === batchId || row.id === inputId) || history.pending.some(row => row.id === batchId)) historyError('conversation_turn_uncertain', 'This message is already processing. Check its saved result before continuing.');
+    if(history.pending.length)historyError('conversation_previous_unconfirmed','A previous reply is unconfirmed. Check its saved answer before sending another request.');
+    if (history.entries.length + history.pending.length + 2 > CONVERSATION_BATCH_LIMIT || history.pending.length >= CONVERSATION_PENDING_LIMIT) historyError('conversation_history_full', 'This conversation needs checking before another message can be sent. Please contact the shop directly.');
+    return { value: { ...saved, updatedAt:now(), messages:[...saved.messages,inputMessage].slice(-40), history: { ...history,total:history.total+1,entries:[...history.entries,inputEntry],pending: [...history.pending, {id: batchId, inputHash, at: now()}] } } };
+  });
+  const read = conversationReads.get(conv); if(!read)historyError('conversation_changed','Reload the saved conversation before continuing.');read.operation = { batchId, inputHash, inputMessage };
+  return { completed: false };
+}
+export async function readConversationArchive(client, channel, contact) {
+  if (!supportedWorkspace(client) || channel !== 'web' || !/^[a-zA-Z0-9_-]{1,60}$/.test(contact || '')) historyError('invalid_conversation', 'Choose a saved website conversation.', 400);
+  await assertCurrentWorkspace(client);
+  const conv = await atomicUpdate('conversations', convKey(client, channel, contact), row => ({ result: row }));
+  if (!conv || !belongsToWorkspace(client, conv) || conv.channel !== channel || conv.contact !== contact) historyError('conversation_not_found', 'This saved conversation is not available.', 404);
+  if (conv.history) validateConversationHistory(conv);
+  return conv;
+}
+export async function readArchivedMessages(conv, start, end) {
+  if (!conv.history) return (conv.messages || []).slice(start, end);
+  const h = validateConversationHistory(conv);
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > h.total || end - start > 2000) historyError('invalid_conversation_page', 'Reload this conversation before continuing.', 400);
+  let offset = 0; const rows = [];
+  for (const entry of h.entries) {
+    const next = offset + entry.count;
+    if (next > start && offset < end) {
+      const batch = validBatch(conv, entry, await atomicUpdate('conversation_history', batchPath(conv, entry.id), row => ({ result: row })));
+      rows.push(...batch.messages.slice(Math.max(0, start - offset), Math.min(entry.count, end - offset)).map(message=>entry.completionId&&!h.entries.some(row=>row.id===entry.completionId)?{...message,processing:'reply_unconfirmed'}:message));
+    }
+    offset = next;
+    if (offset >= end) break;
+  }
+  return rows;
 }
 
 // ---- Leads, bookings, tasks, events ----
@@ -155,6 +320,19 @@ async function boundedRecordKeys(kind, prefix, limit) {
   const firstKeys = first.value.blobs.map(row => unsafe(row.key)).sort();
   const next = await iterator.next();
   return { keys: firstKeys.slice(0, limit), incomplete: firstKeys.length > limit || !next.done };
+}
+// Complete conversation downloads must not inherit listJSON's truncating preview
+// semantics. The bounded metadata scan refuses an incomplete head census before
+// reading bodies; every head must still match its exact current tenant path.
+export async function conversationHeadsForExport(client) {
+  await assertCurrentWorkspace(client);
+  if(!supportedWorkspace(client))historyError('invalid_conversation','Use the supported owner export.',400);
+  const prefix=`${client.slug}/${workspaceTenant(client)}/`,scan=await boundedRecordKeys('conversations',prefix,2000);
+  if(scan.incomplete)historyError('history_incomplete','A complete conversation download cannot be confirmed within this export limit. Read saved conversations in Inbox or contact support.',503);
+  const rows=await Promise.all(scan.keys.map(path=>atomicUpdate('conversations',path,row=>({result:row}))));
+  if(rows.some((row,i)=>!row||!belongsToWorkspace(client,row)||typeof row.channel!=='string'||typeof row.contact!=='string'||convKey(client,row.channel,row.contact)!==scan.keys[i]))historyError('history_incomplete','Some saved conversation records need checking. Read the available history in Inbox or contact support before exporting.',503);
+  await assertCurrentWorkspace(client);
+  return rows;
 }
 export async function listWorkspaceRecords(client, kind, limit = 100) {
   if (Object.hasOwn(client || {}, 'onboarding') && !supportedWorkspace(client)) throw new WorkspaceIdentityError();

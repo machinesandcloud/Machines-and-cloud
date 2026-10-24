@@ -3,7 +3,7 @@
 // "client" runs a customer's front desk from their stored config (website chat, owner test line);
 // the named personas are the homepage example companies.
 import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
-import { getConversation, saveConversation, get, put, assertCurrentWorkspace } from "./lib/store.mjs";
+import { getConversation, saveConversation, id, get, put, assertCurrentWorkspace, beginConversationTurn, ConversationHistoryError } from "./lib/store.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
 import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
@@ -121,12 +121,25 @@ export default async (req, context) => {
     let websiteContext = null;
     try { websiteContext = await claimWebsiteTurn(c, body.websiteCheck, contact, origin); }
     catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message }, error.status, cors(origin)); return json({ error: 'website_check_unavailable' }, 503, cors(origin)); }
+    let conv, ordinaryTurnId=null;
+    if (channel !== 'test') {
+      try {
+        conv = await getConversation(c, channel, contact);
+        if (isSelfServiceClient(c) && !websiteContext) {
+          ordinaryTurnId=body.turnId===undefined?id(16):body.turnId;
+          try {
+            const resumed = await beginConversationTurn(conv,ordinaryTurnId,{content:incoming.at(-1).content,origin},{recoverOnly:true});
+            if(resumed.completed){await fence();return wantStream?ndjsonResponse(async()=>resumed.output,cors(origin)):json(resumed.output,200,cors(origin));}
+          } catch(error) { if(error.code!=='conversation_turn_not_found'||body.recoverTurn===true)throw error; }
+        }
+      } catch(error) { try { await failWebsiteTurn(websiteContext); } catch {} return json({error:error.code||'client_unavailable',message:error instanceof ConversationHistoryError?error.message:undefined,turnNotProcessed:error.code==='conversation_turn_not_found'},error.status||503,cors(origin)); }
+    }
     let aiProof;
     if (isSelfServiceClient(c)) {
       let budget;
       try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web"); }
-      catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable", message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
-      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit", message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin)); }
+      catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable",turnNotProcessed:!!ordinaryTurnId, message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
+      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit",turnNotProcessed:!!ordinaryTurnId, message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin)); }
       aiProof = budget.proof;
     }
     if (channel === "test") {
@@ -135,14 +148,17 @@ export default async (req, context) => {
       try { return json(await runTest(), 200, cors(origin)); }
       catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
     }
+    // Recovery probes never spend another allowance; new durable input follows the
+    // existing shared logical admission so public contacts cannot bypass its write cap.
+    if(ordinaryTurnId){
+      try{const resumed=await beginConversationTurn(conv,ordinaryTurnId,{content:incoming.at(-1).content,origin});if(resumed.completed){await fence();return wantStream?ndjsonResponse(async()=>resumed.output,cors(origin)):json(resumed.output,200,cors(origin));}}
+      catch(error){return json({error:error.code||'client_unavailable',message:error instanceof ConversationHistoryError?error.message:undefined},error.status||503,cors(origin));}
+    }
     // Persist the conversation so the owner can read it and the desk keeps context across reloads.
-    let conv;
-    try { conv = await getConversation(c, channel, contact); }
-    catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: error.code || 'client_unavailable' }, error.status || 503, cors(origin)); }
     if (websiteContext) conv.websiteSetupCheck = { checkId: websiteContext.checkId, origin };
     const last = incoming[incoming.length - 1];
     conv.messages.push({ role: "user", content: last.content, at: new Date().toISOString() });
-    const history = toApiMessages(conv.messages);
+    const history = toApiMessages(conv.messages.slice(-40));
     const system = buildSystemPrompt(c, channel);
     const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY].map(tool => !isSelfServiceClient(c) ? tool : {
       ...tool, description: tool.name === "book_visit" ? "Save a visit in the shop portal after the customer accepts a real available window. Connected services may process it separately; this result does not confirm text, calendar or owner-contact delivery." : tool.name === "notify_owner" ? "Save a callback, handoff or emergency request in the shop portal. Separate contact delivery and human response or timing are not confirmed by this result." : tool.description,
@@ -163,7 +179,7 @@ export default async (req, context) => {
       // Record what the tools did inside the stored turn, so later turns know it already happened.
       const done = (out.events || []).map((e) => e.type === "booking" ? `[Done: ${isSelfServiceClient(c) ? "visit saved in portal" : "visit booked"}, ref ${e.id}]` : e.type === "lead" ? `[Done: ${isSelfServiceClient(c) ? "request saved in portal, human contact unconfirmed" : "owner notified"}, ref ${e.id}]` : "").filter(Boolean).join(" ");
       conv.messages.push({ role: "assistant", content: done ? out.reply + "\n" + done : out.reply, at: new Date().toISOString() });
-      await saveConversation(conv);
+      await saveConversation(conv, { output: { reply: out.reply, events: out.events || [] } });
       await fence();
       return finishWebsiteTurn(websiteContext, out);
     };

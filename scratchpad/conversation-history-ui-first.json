@@ -1,0 +1,789 @@
+{
+  "at": "2026-10-24T05:43:00.201Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "desk-conversations.js": "9e8db795749c107f723caa9bf30ae8c18a6bf10d94766bc31441d98aaa2e7d4a",
+    "embed.js": "4d422bcb08a5630fcb1fb7f619bccc46faa38aab6d7ec80547cb6caec66db56d",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/build-site.mjs": "736fcc22b055a992c108313e2906977926805871b120fb258d22829ecdcc1b00",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "desk.html": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "73980a4e6d2d9d430ba407946a7c7c330649d9c0890fddcc235b1d3a8d9872ff",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "a16417664d1e716493a7844db675ccb86264b12218d405439a3c7849b6750bd0",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "7cb572ba4eaeaeba1834d89cbdaa9632c4b4c7836f9c25102c56b5608f9edac4",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "Saved website history ordinary Inbox paging and exact request link at 320px",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:106:197\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:106:35",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-1@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Saved website history ordinary Inbox paging and exact request link at 390px",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:106:197\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:106:35",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-2@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Saved website history ordinary Inbox paging and exact request link at 1440px",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:106:197\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:106:35",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nYOUR WORKSPACE\nFixture Availability Shop\nCustomer workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nContact support\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-3@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Read failure retains the previous page and retries the same bounded cursor",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:107:151\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:107:1",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-4@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Late response after closing cannot reopen or repopulate a private conversation",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:108:155\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:108:1",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-5@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Revoked reader session clears dialog and private data instead of keeping stale messages",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:109:164\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:109:1",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-6@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Corrected request contact opens its exact current conversation, not the earlier one",
+      "pass": true
+    },
+    {
+      "name": "Retained legacy boundary and unresolved reply are visibly distinguished",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:111:368\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:111:1",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-8@example.test\nContact cell\n+17135550198\nEdit contact details\nYour front desk\nSetup in progress\n\nYour workspace is saved. Continue setup to prepare the services you want to use.\n\nWebsite chat\nSetup needed\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContinue setup\n\nYour saved service choices do not activate a connection. Continue setup to review what each service needs.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms\n\nAdvanced workspace options\nRefresh your workspace from saved business answers\nStop service\n\nStop automated service and scheduled tasks. Your account and saved records are kept.\n\nStop service"
+      }
+    },
+    {
+      "name": "Cancelled owner keeps paged website history readable",
+      "pass": false,
+      "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.tabs [data-t=\"convs\"]')\u001b[22m\n\n    at openConversation (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:104:83)\n    at /private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:112:201\n    at async check (/private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:90:125)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-ui-check.mjs:112:1",
+      "pageState": {
+        "route": "account",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nService cancelled\nSign out\n\nYOUR WORKSPACE\n\nAccount\n\nManage your contact details, front desk status and saved records.\n\nAccount details\nBusiness\nFixture Availability Shop\nOwner\nAlex Fixture\nSign-in email\naccount-ui-9@example.test\nContact cell\n+17135550198\nYour front desk\nService stopped\n\nYour front desk is stopped. Saved customer records are still available to download.\n\nWebsite chat\nStopped\nPhone answering\nNot selected\nText messaging\nNot selected\nGoogle Calendar\nNot selected\nContact support\n\nStopping service does not delete your account or revoke saved provider permissions.\n\nPlan & billing\nNo subscription started\n\nYour workspace is free to prepare. You review the full paid offer before entering payment details.\n\nDownload your records\n\nSave a CSV copy to open in Excel or Sheets.\n\nBookings\n\nSaved visits, customer details and visit status.\n\nDownload bookings CSV\nRequests\n\nCustomer requests, callback details and outcomes.\n\nDownload requests CSV\nRecent conversations\n\nAvailable conversation history. History limits apply.\n\nDownload recent conversations CSV\nCustomers\n\nCustomer contacts for a manual handoff. Check the receiving software’s import requirements.\n\nDownload customers CSV\n\nYou can download your records and contact support to request deletion.\n\nPrivacy policy\nContact support\n\nCustomer texting terms"
+      }
+    },
+    {
+      "name": "No physical/provider/model requests, forbidden browser destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1c42e9c78556f061ee7a715adb0e796aefdddcbbb8aa4a3d8f00a980d5704ee3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1a7b147e2896ba081d0904b0d5b739128c1a83272b6761198a3d08e94a16c76a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "752027559cd21b25e89b41d85bba326bae5bf76dd4a839af1203238e2c7d6ac0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f9ba64a9926c1727dbd1c2e0cced8fff330c1f3dfc291ed5ade4d8a296d88439",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b9f433443e79be6ebb70531ab4a7704c958fbf28c9002a5b88e947c06d3d8248",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6af68bff20771c31384bd487b7460bdd1aca0471cb5b08d6be03a87c8556ade2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a4d92c941fd0907f6919c5c452e82d3fcd63d68b624affe36eb777b96726a968",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "99d6188d840087528820edde7d18c77a89507e96f2a40b7d0d1df258ca27ca18",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5a9a016191c868ed0d1ef5374fa89631bd3711cce2e822644500fe7b0e1fa1a1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b26bcd3e846cb1a5b43d5177df6a6afc19984a20d70974a30d0c94439cc0d82b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2c1c50a1ee14096d97c8c5910bcb742bc87a4db29fc66e10df24d7e8dcd0e0ab",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "44f176cad24bb06907cb422fdf1291f835a5b502285f8ac59d3b61f226caba2a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "10efef4509b80c0495bde6801363d8f97ca956bdb34cbcd92f879872e1883f6d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1dfc3e7167e7f3b1731b54ca6d447336dc01662d409dd7105b4e000cd6dc8914",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "96c8d2aee46c7aa8970e2c990bae81e4868454441e0226157a8a0fbd51376de0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&requestId=5eb599ba62",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3b613f1925d4855fbc0b5d519aada7dc6545ba45d72f3fc70a9fe0d70154c6d3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&conversation=6fcecba7ddea668c3bfc880d761d8df49077484e03a60d44ddd50a1e88749eb7&conversationContact=corrected",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7f10c77b50929a0dd89cc93b6c0c3f3919798a8e6a095a4add1fe0738723f4ec",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "aedc037fa7ff013a8f4dc2e9dc0540df627f79bebfb318beb6190a19353ce606",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a6da3d2e26294a9367986233b12986acd0ca6212fad0cb8d564e4cc4df30e207",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "09bc598841fbe997a2db269d9cb5d1816f9c86fbd9e5464bcc6ceaaef837b1e0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f7d2897abd37002759b76623cb0908faf426438ff2cb8ba3999faf309053dffb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "349fc87e7ae3e4df5bed10880173ad9fdba6b927af1d7b752a2affac515b981d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/conversation-history-ui-first-failure-1.png",
+    "scratchpad/conversation-history-ui-first-failure-2.png",
+    "scratchpad/conversation-history-ui-first-failure-3.png",
+    "scratchpad/conversation-history-ui-first-failure-4.png",
+    "scratchpad/conversation-history-ui-first-failure-5.png",
+    "scratchpad/conversation-history-ui-first-failure-6.png",
+    "scratchpad/conversation-history-ui-first-failure-8.png",
+    "scratchpad/conversation-history-ui-first-failure-9.png"
+  ],
+  "sourceAfter": {
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "desk-conversations.js": "9e8db795749c107f723caa9bf30ae8c18a6bf10d94766bc31441d98aaa2e7d4a",
+    "embed.js": "4d422bcb08a5630fcb1fb7f619bccc46faa38aab6d7ec80547cb6caec66db56d",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/build-site.mjs": "736fcc22b055a992c108313e2906977926805871b120fb258d22829ecdcc1b00",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "desk.html": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "73980a4e6d2d9d430ba407946a7c7c330649d9c0890fddcc235b1d3a8d9872ff",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "a16417664d1e716493a7844db675ccb86264b12218d405439a3c7849b6750bd0",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "7cb572ba4eaeaeba1834d89cbdaa9632c4b4c7836f9c25102c56b5608f9edac4",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 2,
+    "failed": 8,
+    "total": 10,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

@@ -76,7 +76,7 @@
     </div>
   </section>
 
-  <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><details class="desk-details desk-record-note"><summary>About conversation history</summary><p class="muted">Recent conversation previews show up to 12 messages. Managed texting includes the latest 60 contacts; its CSV includes up to 40 messages for each of the latest 100 contacts. Pending replies are labelled separately from delivered messages.</p></details><div id="convs"></div></div></section>
+  <section class="pane" id="p-convs"><div class="card2"><h3>Conversations</h3><details class="desk-details desk-record-note"><summary>About conversation history</summary><p class="muted">Website previews show the latest 12 messages; open a saved conversation to read earlier pages. Older conversations may have a retained-history boundary. Managed texting includes the latest 60 contacts; its CSV includes up to 40 messages for each of the latest 100 contacts. Pending replies are labelled separately from delivered messages.</p></details><div id="convs"></div></div></section>
 
   <section class="pane" id="p-know">
     <div class="review-card" id="reviewCard" hidden=""><h3>Check the answers your front desk uses</h3><p>Open a section to check or edit it. Save your changes, then confirm these are the answers your front desk should use.</p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="reviewRules">Confirm business details</button> <span id="reviewMessage" class="muted" role="status"></span></div>
@@ -198,6 +198,7 @@
   <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestRetry" hidden>Retry same action</button>
   <div id="requestContent" hidden><dl class="request-facts" id="requestFacts"></dl><details class="request-more"><summary>Address and request source</summary><dl class="request-facts" id="requestOtherFacts"></dl></details>
     <div class="request-review" id="requestSourceNotice" hidden><p>The customer request changed since the last recorded action. Earlier work stays in the history below. Review the new details before continuing.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestReview">Review updated request</button></div>
+    <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestConversation" hidden>Read saved conversation</button>
     <section class="request-progress" aria-labelledby="requestProgressTitle"><h3 id="requestProgressTitle">Your follow-up</h3><dl id="requestProgress"></dl></section>
     <details class="request-visits" id="requestVisitsSection" hidden><summary>Saved visits for this phone number</summary><div id="requestVisits"></div><p class="muted">Visit status stays separate from request follow-up.</p></details>
     <form id="requestForm" novalidate><div class="form-group"><label class="form-label" for="requestAction">Record an action</label><select class="form-input" id="requestAction"></select><p class="muted" id="requestActionHelp"></p></div>
@@ -209,6 +210,12 @@
       <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestSave">Save action</button><p class="muted request-save-scope">This records work you have done or plan to do. It does not send a message, place a call or change a visit.</p>
     </form><h3 class="request-history-title">Action history</h3><ol id="requestHistory" class="request-history"></ol>
   </div>
+</dialog>
+<dialog class="walkthrough conversation-dialog" id="conversationDialog" aria-labelledby="conversationTitle">
+  <div class="request-dialog-heading"><div><p class="ui-eyebrow">SAVED WEBSITE CONVERSATION</p><h2 id="conversationTitle" tabindex="-1">Customer conversation</h2></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="conversationClose">Close</button></div>
+  <p id="conversationMessage" role="status" aria-live="polite"></p>
+  <p class="muted" id="conversationBoundary"></p><div class="conv-thread" id="conversationMessages"></div>
+  <div class="conversation-pages"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="conversationEarlier" hidden>Earlier messages</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="conversationNewer" hidden>Newer messages</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="conversationRetry" hidden>Try reading again</button></div>
 </dialog>
 <dialog class="walkthrough" id="guideDialog" aria-labelledby="tourTitle" aria-describedby="tourBody">
   <div class="tour-mask" id="tourMaskTop" aria-hidden="true"></div><div class="tour-mask" id="tourMaskBottom" aria-hidden="true"></div><div class="tour-mask" id="tourMaskLeft" aria-hidden="true"></div><div class="tour-mask" id="tourMaskRight" aria-hidden="true"></div>
@@ -247,6 +254,7 @@
 <script src="desk.js" defer=""></script>
 <script src="desk-requests.js" defer=""></script>
 <script src="desk-activity.js" defer=""></script>
+<script src="desk-conversations.js" defer=""></script>
 <dialog class="walkthrough desk-account-confirm" id="billingCancel" aria-labelledby="billingCancelTitle"><h2 id="billingCancelTitle">End monthly renewal?</h2><p class="muted" id="billingCancelDetail"></p><div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingEndConfirm">End renewal</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="billingKeep">Keep subscription</button></div></dialog>
 
 

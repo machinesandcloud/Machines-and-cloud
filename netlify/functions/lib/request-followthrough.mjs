@@ -1,6 +1,6 @@
 // Owner-recorded follow-through. This journal never sends a message or changes a visit.
 import { createHash } from 'node:crypto';
-import { atomicUpdate, assertCurrentWorkspace } from './store.mjs';
+import { atomicUpdate, assertCurrentWorkspace, conversationReference } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { workspaceTenant, belongsToWorkspace } from './workspace-identity.mjs';
 import { isSupportedSelfServiceClient } from './setup.mjs';
@@ -59,7 +59,7 @@ function view(client, lead, row, operationId = null) {
   return { sourceRevision, revision: digest(row), reviewRequired, state, due, needsFollowup,
     canChange: !excluded && ['testing','live','paused'].includes(client.status) && row.history.length < LIMIT,
     historyFull: row.history.length >= LIMIT, readOnlyReason: excluded ? 'Setup checks and filtered requests are read-only.' : !['testing','live','paused'].includes(client.status) ? 'This workspace is closed. Its request history remains available.' : row.history.length >= LIMIT ? 'This retained history is full. Contact support before recording more work.' : null, source: Object.fromEntries(['id','customer_name','phone','address','issue','reason','urgency','wanted','outcome','status','channel','contact','createdAt'].map(key => [key, lead[key] ?? null])),
-    history: structuredClone(row.history), receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
+    history: structuredClone(row.history), conversation: lead.channel === 'web' && /^[a-zA-Z0-9_-]{1,60}$/.test(lead.contact || '') ? {reference:conversationReference(client,'web',lead.contact),contact:lead.contact} : null, receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
 }
 export async function requestFollowthroughSummaries(client, leads) {
   if (!isSupportedSelfServiceClient(client)) return leads;

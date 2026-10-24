@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-24",
+  "stage": "Local implementation and author verification complete; independent QA and PO acceptance pending. Unpublished.",
+  "customerJob": "Open the saved website conversation beside a customer request and read earlier facts and corrections without losing them after40 messages.",
+  "baseCommit": "577961c6a406be22a7fb479db055145881776729",
+  "scope": [
+    "Tenant-scoped self-service website history only; existing managed SMS and voice persistence are unchanged.",
+    "Inbox conversation previews link to the protected paged reader; exact current request source links to the same reader.",
+    "Model context remains bounded to the last40 messages. Owner pages show20 saved messages with Earlier/Newer navigation."
+  ],
+  "storageContract": [
+    "Immutable input batch is saved before model execution, after existing logical AI admission. Completion batch is saved before its CAS head locator.",
+    "Head stores at most2000 batch locators; reaching the limit refuses further input instead of evicting earlier history. Each batch is at most40 messages/65536 encoded bytes.",
+    "Random stable turnId distinguishes repeated identical questions. Same-intent recovery verifies input hash, tenant and immutable batch; saved completion replay never repeats model/tool actions.",
+    "Any unresolved admitted turn blocks a new/reworded turn. An unknown model/tool result remains unconfirmed; it is not retried blindly.",
+    "Both pre-quota recovery probe and post-quota admission honor an already-completed result. Concurrent already-spent quota is conservatively retained, not refunded.",
+    "Definite quota/admission refusal precedes new conversation writes and is marked not processed; the browser can safely clear its pending receipt.",
+    "Existing legacy heads migrate only their retained messages with complete=false. Already-discarded prefixes are not recoverable."
+  ],
+  "ownerReadContract": [
+    "Current revocable owner session and exact workspace incarnation required before and after page reads. Cancellation preserves read-only access.",
+    "HMAC cursor binds tenant, exact conversation and immutable upper snapshot. No arbitrary storage paths are accepted.",
+    "Paged content uses text nodes; customer HTML remains literal text. Unconfirmed replies are labelled separately.",
+    "Complete conversation download refuses old missing prefixes, incomplete bounded head census, missing/fenced heads, missing batches or an oversized archive. It never calls a partial export complete."
+  ],
+  "publicPayloadDelta": {
+    "turnId": "32 lowercase hexadecimal characters persisted with the exact pending request before send. Old clients without it receive a server-generated intent for compatible normal operation.",
+    "recoverTurn": "true performs only existing-result lookup/reconciliation; it cannot start an absent model intent.",
+    "compatibilityLimit": "An old open widget without the persisted turn identifier cannot use the new explicit saved-reply recovery. Unknown work still blocks further admission."
+  },
+  "retentionAndOperations": [
+    "New Blob store conversation_history must be included in the still-open scoped processor/deletion-support workflow. Customer cancellation retains audit history; this slice adds no destructive admin bypass.",
+    "No live hosting/provider/model/email/phone/text/calendar/payment effects were performed. Storage SDK/model wire responses are local protocol fixtures.",
+    "This local acceptance does not establish production storage concurrency, representative real-AI quality, managed SMS/voice archiving, full paid-service readiness or launch readiness."
+  ],
+  "evidence": {
+    "handlerAndCAS": "scratchpad/conversation-history-engineering-freeze-v2-first.json",
+    "actualBrowser": "scratchpad/conversation-history-ui-freeze-v3.json",
+    "sourceFreeze": "scratchpad/conversation-history-source-freeze-v3.json",
+    "regressions": [
+      "scratchpad/conversation-history-website-regression.txt",
+      "scratchpad/conversation-history-ai-regression.txt",
+      "scratchpad/conversation-history-request-regression.txt",
+      "scratchpad/conversation-history-package-v2.txt"
+    ],
+    "independentReturnedFailure": "scratchpad/conversation-independent-auth-first.json"
+  },
+  "retainedFailures": [
+    "Initial protocol harness did not normalize SDK site: store prefixes; corrected in the test adapter, no production storage semantics bypassed.",
+    "Initial browser harness used obsolete Conversations tab selector; replaced with the current Inbox\u2192Conversations navigation.",
+    "Actual visual inspection found retained scroll position hiding the top of earlier pages; scroll resets and bounded inner conversation panel were implemented and rechecked.",
+    "Independent QA reproduced an obsolete held401 expiring a newer valid reader. Generation/current/dialog fences now precede auth handling and parsed-body rendering; author actual browser regression is green. Independent recapture remains required."
+  ],
+  "authorChecks": {
+    "handlerCASAndActualChatGroups": 30,
+    "actualBrowserGroups": 12,
+    "browserWidths": [
+      320,
+      390,
+      1440
+    ],
+    "tenantIsolationGroups": 19,
+    "ownerTestGroups": 44,
+    "websiteInstallationGroups": 17,
+    "requestFollowthroughGroups": 15,
+    "selfServiceAI": "existing focused suite passed; see retained output",
+    "package": {
+      "html": 182,
+      "files": 232
+    },
+    "actualExternalRequests": 0,
+    "actualInference": 0
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "checks": [
+    {
+      "name": "New complete website history retains 70 messages while model context stays40 and owner pages20",
+      "pass": true
+    },
+    {
+      "name": "Equal text has distinct durable turn identities and corrections remain readable before the40-message tail",
+      "pass": true
+    },
+    {
+      "name": "Concurrent writers from the same base merge their full deltas without overwriting the tail",
+      "pass": true
+    },
+    {
+      "name": "Lost head response after commit recovers via fresh read and original turn ID with one cached tool receipt",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Missing expected rejection.\n    at async lostCompletion (file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-check.mjs:49:535)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-check.mjs:50:139\n    at async check (file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-check.mjs:40:36)\n    at async file:///private/tmp/mc-conversation-history-577/scripts/conversation-history-check.mjs:50:1"
+    }
+  ],
+  "sourceBefore": {
+    "desk.html": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "73980a4e6d2d9d430ba407946a7c7c330649d9c0890fddcc235b1d3a8d9872ff",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "desk-conversations.js": "c6f0e4d77d85eeaa4e4b41d5f75d7ad8829bfd79424bedd50bce661987fbdcb1",
+    "embed.js": "81230feb1730047c3134b2e8dc8a00a80e56ad4ac69a46076e471548bef4ddf5",
+    "netlify/functions/client.mjs": "a16417664d1e716493a7844db675ccb86264b12218d405439a3c7849b6750bd0",
+    "netlify/functions/chat.mjs": "d6c9f02bf8371f85addbf2e6de49dfb7555bf486209f46856ea066ef020b6d28",
+    "netlify/functions/lib/store.mjs": "ee6b30a51d80e9001d5498afb00edbc4c713310fdde274ce3c341f274eb7825f",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/conversation-history-check.mjs": "3adfcaaff7bded2277f5e9f6e96b99b864aabb4b70052083ee0ce51fc068f02f"
+  },
+  "sourceAfter": {
+    "desk.html": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "73980a4e6d2d9d430ba407946a7c7c330649d9c0890fddcc235b1d3a8d9872ff",
+    "desk-requests.js": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6",
+    "desk-conversations.js": "c6f0e4d77d85eeaa4e4b41d5f75d7ad8829bfd79424bedd50bce661987fbdcb1",
+    "embed.js": "81230feb1730047c3134b2e8dc8a00a80e56ad4ac69a46076e471548bef4ddf5",
+    "netlify/functions/client.mjs": "a16417664d1e716493a7844db675ccb86264b12218d405439a3c7849b6750bd0",
+    "netlify/functions/chat.mjs": "d6c9f02bf8371f85addbf2e6de49dfb7555bf486209f46856ea066ef020b6d28",
+    "netlify/functions/lib/store.mjs": "ee6b30a51d80e9001d5498afb00edbc4c713310fdde274ce3c341f274eb7825f",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577",
+    "scripts/conversation-history-check.mjs": "3adfcaaff7bded2277f5e9f6e96b99b864aabb4b70052083ee0ce51fc068f02f"
+  },
+  "externalRequests": 0,
+  "requests": 1566,
+  "mode": "Actual store/owner handler with conditional installed SDK protocol double; no physical/model/provider requests"
+}

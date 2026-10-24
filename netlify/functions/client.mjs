@@ -2,7 +2,7 @@
 // records, health, and forwarding instructions. PUT with the key updates the editable config (loop-checked).
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
-import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock, atomicUpdate, assertCurrentWorkspace, listWorkspaceRecords } from "./lib/store.mjs";
+import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock, atomicUpdate, assertCurrentWorkspace, listWorkspaceRecords, conversationHeadsForExport, conversationReference, readConversationArchive, readArchivedMessages, ConversationHistoryError } from "./lib/store.mjs";
 import { getAIAllowance } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
@@ -38,6 +38,8 @@ import { websiteInstallationView, startWebsiteCheck, WebsiteInstallationError } 
 
 import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
 import { queueWorkspaceStopBilling } from './lib/workspace-billing.mjs';
+
+import { ownerConversationPage } from './lib/conversation-reader.mjs';
 
 import { readRequestFollowthrough, updateRequestFollowthrough, requestFollowthroughSummaries, RequestFollowthroughError } from './lib/request-followthrough.mjs';
 import { workspaceActivity } from './lib/workspace-activity.mjs';
@@ -78,7 +80,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
 
 export default async (req) => {
   let out;
-  try { out = await handle(req); } catch(error) { if(error instanceof RequestFollowthroughError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req); } catch(error) { if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -116,6 +118,10 @@ async function handle(req) {
     return json({ ok: true, report }, 200, { 'Cache-Control': 'no-store', 'Netlify-CDN-Cache-Control': 'no-store' });
   }
 
+  if (req.method === 'GET' && url.searchParams.has('conversation')) {
+    if (!selfService || !isOwner) return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    return json(await ownerConversationPage(c,session,{reference:url.searchParams.get('conversation'),contact:url.searchParams.get('conversationContact'),page:url.searchParams.get('before')}),200,{'Cache-Control':'no-store'});
+  }
   if (req.method === 'GET' && url.searchParams.has('requestId')) {
     if(!selfService || !isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
     return json(await readRequestFollowthrough(c,session,url.searchParams.get('requestId'),url.searchParams.get('operationId')),200,{'Cache-Control':'no-store'});
@@ -151,7 +157,7 @@ async function handle(req) {
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
     const ownerResponse={
       client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation), connections, serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id) })),
-      conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, messages: v.messages.slice(-12) })),
+      conversations: convs.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((v) => ({ channel: v.channel, contact: v.contact, updatedAt: v.updatedAt, flag: v.flag || null, ...(selfService && v.channel === 'web' ? { reference: conversationReference(c,v.channel,v.contact), retainedMessages: v.history?.total ?? v.messages.length, historyComplete: v.history?.complete === true } : {}), messages: v.messages.slice(-12) })),
       events: events.reverse().slice(0, 80),
       today: todayStrip(c, ownerBookings, leads, events),
       health: lineHealth(c, events, await lastInbound(c)),
@@ -482,8 +488,19 @@ async function exportCSV(c, what, session) {
   } else if (what === "conversations") {
     header = ["channel", "contact", "at", "role", "content", "flag_note", "processing"];
     rows = [];
-    const conversations=(await listJSON("conversations", isSelfServiceClient(c)?`${c.slug}/${workspaceTenant(c)}/`:c.slug+"/", 2000)).filter(row=>belongsToWorkspace(c,row)),sms=isSelfServiceClient(c)?await managedSMSConversations(c,{limit:100}):[];
-    for(const v of conversations.filter(v=>!sms.some(managed=>v.channel==="sms"&&managed.contact===v.contact)).concat(sms))for(const m of v.messages || [])rows.push([v.channel,v.contact,m.at,m.role,m.content,v.flag?.note || "",m.processing || ""]);
+    const conversations=(isSupportedSelfServiceClient(c)?await conversationHeadsForExport(c):await listJSON("conversations",c.slug+"/",2000)).filter(row=>belongsToWorkspace(c,row)),sms=isSelfServiceClient(c)?await managedSMSConversations(c,{limit:100}):[];
+    let archiveBytes=0;
+    for(const v of conversations.filter(v=>!sms.some(managed=>v.channel==="sms"&&managed.contact===v.contact)).concat(sms)) {
+      let messages=v.messages||[];
+      if(isSupportedSelfServiceClient(c)&&v.channel==='web') {
+        const conv=await readConversationArchive(c,'web',v.contact);
+        if(!conv.history?.complete)throw new ConversationHistoryError('history_incomplete','Earlier website messages may not have been retained. Read the saved history in Inbox; contact support before requesting a complete export.',503);
+        if(conv.history.total>2000||rows.length+conv.history.total>4000)throw new ConversationHistoryError('history_export_too_large','This history is too large for one download. Read it in Inbox or contact support for an export.',413);
+        messages=await readArchivedMessages(conv,0,conv.history.total);archiveBytes+=Buffer.byteLength(JSON.stringify(messages));
+        if(archiveBytes>4*1024*1024)throw new ConversationHistoryError('history_export_too_large','This history is too large for one download. Read it in Inbox or contact support for an export.',413);
+      }
+      for(const m of messages)rows.push([v.channel,v.contact,m.at,m.role,m.content,v.flag?.note||'',m.processing||'']);
+    }
   } else if (what === "customers") {
     // Jobber's supported import headers; Housecall Pro's wizard maps the same names.
     header = ["First name", "Last name", "Mobile Phone", "Email", "Street", "City", "State", "Zip Code", "Note", "Lead Source", "Tags"];

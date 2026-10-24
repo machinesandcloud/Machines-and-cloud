@@ -1,0 +1,82 @@
+{
+  "baseCommit": "577961c6a406be22a7fb479db055145881776729",
+  "sourceFiles": [
+    {
+      "path": "desk.html",
+      "sha256": "cada8e41472bd5f9cf2da73db37249123d483bad3dff5187c15abcfc88efadaa"
+    },
+    {
+      "path": "desk.js",
+      "sha256": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176"
+    },
+    {
+      "path": "desk.css",
+      "sha256": "bac50be67c2fbece8f8e70895036fab8f67a7c04f1154bf20597fd7e06e3dadd"
+    },
+    {
+      "path": "desk-requests.js",
+      "sha256": "6056e34dc797ba9981c04a9b989e40c71b26e8afb086f5fdf7327fd63c3682a6"
+    },
+    {
+      "path": "desk-conversations.js",
+      "sha256": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012"
+    },
+    {
+      "path": "embed.js",
+      "sha256": "4d422bcb08a5630fcb1fb7f619bccc46faa38aab6d7ec80547cb6caec66db56d"
+    },
+    {
+      "path": "netlify/functions/chat.mjs",
+      "sha256": "08eb9b45fc691ffa338195bde43d0a8d2003f4de23c58150bcb7b03a7912c0cc"
+    },
+    {
+      "path": "netlify/functions/client.mjs",
+      "sha256": "7e55af164ef90753732513523af92aa4d38042165546fccf30c2c7de345b76c9"
+    },
+    {
+      "path": "netlify/functions/lib/store.mjs",
+      "sha256": "6d919ab1606ce61f260f072741237fe033c34d16fe31fd1863c9eb3a329074e6"
+    },
+    {
+      "path": "netlify/functions/lib/conversation-reader.mjs",
+      "sha256": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674"
+    },
+    {
+      "path": "netlify/functions/lib/request-followthrough.mjs",
+      "sha256": "a029a396cf5b4ef1a9906da81157cc69c379b5a935b378dc887d81a7ec53e577"
+    },
+    {
+      "path": "scripts/build-site.mjs",
+      "sha256": "736fcc22b055a992c108313e2906977926805871b120fb258d22829ecdcc1b00"
+    },
+    {
+      "path": "scripts/conversation-history-check.mjs",
+      "sha256": "a20f9ed3a998ae6d3ac417264c80de8bd37cc3b61cfdd303ff23574931bbb1c6"
+    },
+    {
+      "path": "scripts/conversation-history-ui-check.mjs",
+      "sha256": "4bd7ddf367e015ec4c102e2d2509f03e91cd43d509ed67a20528f5d39d9830a2"
+    }
+  ],
+  "aggregateSha256": "0ed842cd08b7fe06308f0fabb58538c22583fb38aae2406b1fffd010398d2b1c",
+  "implementation": "new tenant-scoped website conversation archive, recovery and owner reader only",
+  "externalEffects": 0,
+  "publication": "local unpublished; no provider or production acceptance",
+  "acceptance": [
+    "scratchpad/conversation-history-engineering-freeze-v2-first.json",
+    "scratchpad/conversation-history-ui-freeze-v3.json"
+  ],
+  "limits": [
+    "Legacy lost prefixes cannot be recovered and complete export refuses them.",
+    "Model context remains last40; website owner pages20; archive max2000 immutable batches then visible hard stop.",
+    "Managed SMS/voice archiving is unchanged.",
+    "Unknown model/tool result holds further turns; reconciliation of a saved completion does not rerun model/tools.",
+    "New logical AI admission precedes durable input/storage; completed recovery does not spend another allowance.",
+    "Public request payload adds turnId; recoverTurn true performs only saved-result read/reconciliation."
+  ],
+  "amendments": [
+    "Complete conversation CSV uses bounded head census and refuses truncated, missing or differently fenced heads.",
+    "Second post-quota admission honors a concurrently completed turn and returns its cached output; conservative already-spent quota is not refunded.",
+    "Independent actual browser reproduced an obsolete held401 expiring a newer valid reader; generation/current/dialog fences now precede auth handling as well as parsed-body rendering."
+  ]
+}
