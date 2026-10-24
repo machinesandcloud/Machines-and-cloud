@@ -4,6 +4,7 @@
   var meta = document.querySelector('meta[name="mc-api-base"]'), base = meta && meta.content ? meta.content.replace(/\/$/, '') : '';
   var storageKey = 'mc-operator-session-v1', session = null, generation = 0, data = null, selected = null, selectedRecord = null, detailVersion = 0, view = 'overview', action = null, busy = false, toastTimer;
   var controllers = new Set();
+  var loginPending = false, loginRecipient = '', loginRetryAt = 0, loginRetryTimer = null;
   var verifyToken = new URLSearchParams(location.hash.slice(1)).get('verify');
   if (location.hash || location.search) history.replaceState(null, '', location.pathname);
   if (!/^[a-f0-9]{64}$/.test(verifyToken || '')) verifyToken = null;
@@ -26,6 +27,7 @@
     $('scopeNotice').hidden = true; $('scopeNotice').textContent = ''; $('issueNavCount').hidden = true; $('issueNavCount').textContent = ''; $('currentLocation').textContent = 'Overview';
     $('operator').textContent = ''; $('lastUpdated').textContent = ''; $('prospectsStatus').textContent = ''; $('platformSMSStatus').textContent = ''; $('customerSearch').value = ''; $('customerStatus').value = 'all';
     ['actionNote', 'actionReason', 'ruleServices', 'ruleServiceArea', 'ruleNotServed', 'ruleSummary'].forEach(function (id) { $(id).value = ''; }); ['actionStatus', 'actionTitle', 'actionDescription', 'appStatus', 'customerCount', 'toast'].forEach(function (id) { $(id).textContent = ''; }); $('toast').hidden = true; clearTimeout(toastTimer);
+    resetLoginEmail();
     $('app').hidden = true; $('login').hidden = false; $('loginStatus').textContent = message || ''; $('verifyPanel').hidden = !verifyToken; $('loginForm').hidden = !!verifyToken;
   }
   function toast(message) { clearTimeout(toastTimer); $('toast').textContent = message; $('toast').hidden = false; toastTimer = setTimeout(function () { $('toast').hidden = true; }, 4500); }
@@ -163,7 +165,7 @@
     }).catch(function (error) {
       if (current !== generation || error.stale) return;
       if (data) { $('appStatus').textContent = 'Could not refresh. The information below may be out of date. ' + error.message; $('appStatus').className = 'notice error'; $('appStatus').hidden = false; }
-      else { $('login').hidden = false; $('loginStatus').textContent = error.message; }
+      else { $('login').hidden = false; showOperatorRecovery(error); }
       throw error;
     }).finally(function () { if (current === generation) { $('refreshAll').disabled = false; $('refreshProspects').disabled = false; } if (loading === pending) loading = null; });
     loading = pending; return pending;
@@ -233,22 +235,93 @@
       if (current === generation && $('actionDialog').open) $('actionStatus').textContent = error.status === 409 ? error.message + ' Close this dialog, review the latest account details, then start the action again.' : error.message;
     } finally { if (current === generation) { busy = false; $('actionSubmit').disabled = !!(action && action.stale); $('actionCancel').disabled = false; } }
   });
-  $('loginForm').addEventListener('submit', async function (event) {
-    event.preventDefault(); if (!$('loginForm').reportValidity() || $('requestLink').disabled) return;
-    var current = generation; $('requestLink').disabled = true; $('loginStatus').textContent = 'Requesting your sign-in link…';
-    try { var result = await request('POST', { action: 'request_link', email: $('adminEmail').value.trim() }); if (current === generation) $('loginStatus').textContent = result.message || 'Check your email for the sign-in link.'; }
-    catch (error) { if (current === generation && !error.stale) $('loginStatus').textContent = error.message; }
-    finally { if (current === generation) $('requestLink').disabled = false; }
+  function updateLoginControls() {
+    var seconds = Math.max(0, Math.ceil((loginRetryAt - Date.now()) / 1000));
+    $('requestLink').disabled = loginPending || seconds > 0;
+    $('requestLink').textContent = loginPending ? 'Sending link…' : seconds ? 'Try again in ' + seconds + 's' : 'Email me a sign-in link';
+    $('resendLink').disabled = loginPending || seconds > 0;
+    $('resendLink').textContent = loginPending ? 'Sending link…' : seconds ? 'Resend in ' + seconds + 's' : 'Resend sign-in link';
+    $('changeEmail').disabled = loginPending; $('adminEmail').disabled = loginPending;
+    if (loginPending) $('login').setAttribute('aria-busy', 'true'); else $('login').removeAttribute('aria-busy');
+    if (!seconds && loginRetryTimer) { clearInterval(loginRetryTimer); loginRetryTimer = null; }
+  }
+  function startLoginCooldown() {
+    loginRetryAt = Date.now() + 30000;
+    if (loginRetryTimer) clearInterval(loginRetryTimer);
+    loginRetryTimer = setInterval(updateLoginControls, 250); updateLoginControls();
+  }
+  function resetLoginEmail() {
+    if (loginRetryTimer) clearInterval(loginRetryTimer);
+    loginRetryTimer = null; loginPending = false; loginRetryAt = 0; loginRecipient = '';
+    $('loginConfirmation').hidden = true; $('loginRecipient').textContent = ''; $('loginDeliveryHelp').textContent = '';
+    $('loginTitle').textContent = 'Welcome back.';
+    $('loginIntro').textContent = 'Sign in to manage customers, follow their setup and resolve issues.';
+    $('loginStatus').classList.remove('login-announcement');
+    updateLoginControls();
+  }
+  function showOperatorRecovery(error) {
+    resetLoginEmail();
+    if (session) {
+      $('loginForm').hidden = true; $('verifyPanel').hidden = false;
+      $('loginTitle').textContent = 'Let’s open your operations portal';
+      $('loginIntro').textContent = 'You’re signed in. Try opening the portal again without requesting another email.';
+      $('verifyIntro').textContent = 'Your verified sign-in is kept in this browser.';
+      $('verifyLink').textContent = 'Try opening the portal again';
+    } else {
+      verifyToken = null; $('verifyPanel').hidden = true; $('loginForm').hidden = false;
+      $('loginTitle').textContent = error.status === 410 ? 'Request a fresh sign-in link' : 'Let’s get you signed in';
+      $('loginIntro').textContent = 'Request a new email below to continue to your operations portal.';
+      $('verifyIntro').textContent = 'Your sign-in link is ready. Continue to confirm access to this browser.';
+      $('verifyLink').textContent = 'Continue securely';
+    }
+    $('loginStatus').textContent = error.message || 'We couldn’t confirm access. Please try again.';
+    $('loginTitle').focus();
+  }
+  function showLoginEmail(email, kind, message) {
+    loginRecipient = email; $('loginForm').hidden = true; $('verifyPanel').hidden = true; $('loginConfirmation').hidden = false;
+    $('loginTitle').textContent = kind === 'test_outbox' ? 'Your test link is ready' : kind === 'unknown' ? 'Check your inbox first' : 'Check your email';
+    $('loginIntro').textContent = kind === 'email' ? 'Your secure sign-in link is on its way to' : kind === 'test_outbox' ? 'A sign-in link was saved in the local test inbox for' : kind === 'unknown' ? 'We couldn’t confirm the email request for' : 'If this address has operator access, a sign-in link will arrive shortly.';
+    $('loginRecipient').textContent = email;
+    $('loginDeliveryHelp').textContent = kind === 'test_outbox' ? 'No email was sent. Use the local test inbox to continue.' : kind === 'unknown' ? 'An email may still arrive. Check your inbox and spam folder before requesting another link.' : 'Open the email from Machines & Cloud to continue. The link expires in 20 minutes. Check your spam folder if you don’t see it.';
+    $('loginStatus').textContent = message || '';
+    $('loginStatus').classList.toggle('login-announcement', kind !== 'unknown');
+    $('loginTitle').focus();
+  }
+  async function sendLoginEmail(email) {
+    if (loginPending || Date.now() < loginRetryAt) return;
+    var current = generation; loginPending = true; updateLoginControls(); $('loginStatus').classList.remove('login-announcement'); $('loginStatus').textContent = 'Preparing your sign-in email…';
+    try {
+      var result = await request('POST', { action: 'request_link', email: email });
+      if (current !== generation) return;
+      var deliveryKnown = ['email', 'test_outbox'].includes(result.delivery), conditional = result.delivery === undefined && typeof result.message === 'string' && !!result.message.trim();
+      if (result.ok !== true || !deliveryKnown && !conditional) throw new Error('The email response could not be confirmed.');
+      startLoginCooldown(); showLoginEmail(email, result.delivery || 'conditional', result.message);
+    } catch (error) {
+      if (current !== generation || error.stale) return;
+      if (!error.status) { startLoginCooldown(); showLoginEmail(email, 'unknown', 'We couldn’t confirm whether the link was sent. Check your inbox first, then try again if needed.'); }
+      else { $('loginStatus').textContent = error.message; $('loginStatus').focus(); }
+    } finally { if (current === generation) { loginPending = false; updateLoginControls(); } }
+  }
+  $('loginStatus').setAttribute('tabindex', '-1');
+  $('loginForm').addEventListener('submit', function (event) {
+    event.preventDefault(); if (!$('loginForm').reportValidity() || $('requestLink').disabled || $('loginForm').hidden) return;
+    sendLoginEmail($('adminEmail').value.trim());
+  });
+  $('resendLink').addEventListener('click', function () { if (!$('loginConfirmation').hidden && loginRecipient) sendLoginEmail(loginRecipient); });
+  $('changeEmail').addEventListener('click', function () {
+    if (loginPending) return;
+    resetLoginEmail(); $('loginForm').hidden = false; $('loginStatus').textContent = ''; $('adminEmail').focus(); $('adminEmail').select();
   });
   $('verifyLink').addEventListener('click', async function () {
-    if (!verifyToken || $('verifyLink').disabled) return;
-    var current = generation; $('verifyLink').disabled = true; $('loginStatus').textContent = 'Confirming operator access…';
+    if ((!verifyToken && !session) || $('verifyLink').disabled) return;
+    var current = generation; $('verifyLink').disabled = true; $('login').setAttribute('aria-busy', 'true'); $('loginStatus').textContent = session ? 'Opening your operations portal…' : 'Confirming operator access…';
     try {
+      if (session) { await loadData(); return; }
       var result = await request('POST', { action: 'exchange', token: verifyToken }); if (current !== generation) return;
       if (!/^[a-f0-9]{64}$/.test(result.session || '')) throw new Error('Access could not be confirmed. Request a new sign-in link.');
       verifyToken = null; generation++; abortRequests(); setSession(result.session); $('verifyPanel').hidden = true; $('loginForm').hidden = false; await loadData();
-    } catch (error) { if (!error.stale && $('login').hidden === false) $('loginStatus').textContent = error.message; }
-    finally { $('verifyLink').disabled = false; }
+    } catch (error) { if (!error.stale && $('login').hidden === false) showOperatorRecovery(error); }
+    finally { $('verifyLink').disabled = false; $('login').removeAttribute('aria-busy'); }
   });
   $('signOut').addEventListener('click', async function () {
     if ($('signOut').disabled) return;

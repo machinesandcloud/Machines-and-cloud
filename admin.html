@@ -13,13 +13,18 @@
   <div class="login-card">
   <a class="login-logo ui-brand" href="index.html"><img src="assets/logo-dark.png" alt="Machines &amp; Cloud" width="174"></a>
   <p class="eyebrow">Operations portal</p>
-  <h1 id="loginTitle">Welcome back.</h1>
-  <p class="muted">Sign in to manage customers, follow their setup and resolve issues.</p>
+  <h1 id="loginTitle" tabindex="-1">Welcome back.</h1>
+  <p id="loginIntro" class="muted">Sign in to manage customers, follow their setup and resolve issues.</p>
   <form id="loginForm">
     <div class="field"><label for="adminEmail">Your work email</label><input id="adminEmail" type="email" autocomplete="email" required maxlength="254" placeholder="you@company.com"></div>
     <button class="btn primary" id="requestLink" type="submit">Email me a sign-in link</button>
   </form>
-  <div id="verifyPanel" class="notice" hidden><p>Your sign-in link is ready. Continue to confirm access to this browser.</p><button class="btn primary" type="button" id="verifyLink">Continue securely</button></div>
+  <div id="loginConfirmation" hidden>
+    <p id="loginRecipient" class="login-recipient"></p>
+    <p id="loginDeliveryHelp" class="muted"></p>
+    <div class="login-email-actions"><button class="btn primary" id="resendLink" type="button">Resend sign-in link</button><button class="btn" id="changeEmail" type="button">Use a different email</button></div>
+  </div>
+  <div id="verifyPanel" class="notice" hidden><p id="verifyIntro">Your sign-in link is ready. Continue to confirm access to this browser.</p><button class="btn primary" type="button" id="verifyLink">Continue securely</button></div>
   <p id="loginStatus" class="page-status" role="status" aria-live="polite"></p>
   <p class="login-access muted"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></svg> Access is limited to authorized operators. Customer sign-in does not grant access to this portal.</p>
   </div>
