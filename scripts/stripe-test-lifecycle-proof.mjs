@@ -12,7 +12,7 @@ const sha=value=>createHash('sha256').update(value).digest('hex');
 const id=(value,prefix)=>typeof value==='string'&&new RegExp('^'+prefix+'[A-Za-z0-9_]{3,160}$').test(value);
 const redact=value=>String(value).replace(/(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9_]+/g,'[key redacted]').replace(/whsec_[A-Za-z0-9_]+/g,'[signing secret redacted]').replace(/https:\/\/(?:checkout|billing)\.stripe\.com\/\S+/g,'[hosted capability redacted]').replace(/\b\w+_secret_[A-Za-z0-9_]+/g,'[client secret redacted]');
 const DEFAULT_KEY_FILE='/tmp/mc-stripe-test-private.env',FIXTURES='/tmp/mc-stripe-test-fixtures.json';
-const MANIFEST_SHA='1926b07b6dd8ef05474fb2845d3075d3f9b52c5f6d374cba2b816268e2a22e5a',manifestBytes=readFileSync(new URL('../product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json',import.meta.url));
+const MANIFEST_SHA='38a60ace715fab948d19958cb9614ea65d8eafa71b5da80bb5153fecf2a0cb84',manifestBytes=readFileSync(new URL('../product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json',import.meta.url));
 assert.equal(sha(manifestBytes),MANIFEST_SHA,'Prepared source manifest changed');const manifest=JSON.parse(manifestBytes);assert.equal(manifest.baseCommit,BASE);assert.ok(Object.keys(manifest.hashes||{}).length>=475,'Complete prepared inventory is required');const RUNTIME_HASHES=manifest.hashes,SOURCE=manifest.sourceId;
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 function claimPhase(path,value){writeFileSync(path,JSON.stringify(value,null,2)+'\n',{flag:'wx',mode:0o600});}

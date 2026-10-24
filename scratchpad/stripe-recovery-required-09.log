@@ -1,0 +1,122 @@
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+{
+  "before": {
+    "netlify/functions/lib/support-reports.mjs": "a81f55d749ab1e1e974afd97b9f4026365c4959fc39cb1042fca85415b1fb3c6",
+    "netlify/functions/lib/operator.mjs": "faac3b2594dfdc45295935499c6430cdad75e0e80eef23217be11ea36d4ca6fe",
+    "netlify/functions/client.mjs": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07",
+    "netlify/functions/lib/store.mjs": "94fccece31d8d59cd9e96987ca1090aad580de7b53bbc41a6cc6f1704c58fe34",
+    "netlify/functions/scheduler.mjs": "77be2c15cc60edaa7007a767867d7fde9c7041084ce6eae8d4a6d952162c44e9",
+    "scripts/support-report-fixtures.mjs": "043fbbb8660fc7e99d9a60a9e473146545afa52e29bb6022478eedf2c564ab5f",
+    "scripts/support-report-check.mjs": "3806fe96042dfacb5ee35108697b7dcb3d168b95d7b915a7f1df8063b7322c67"
+  },
+  "checks": [
+    {
+      "name": "Owner report is immediately in operator Issues; acknowledgement and public resolution return to the same conversation",
+      "pass": true
+    },
+    {
+      "name": "Useful bounded note, strict fields and an actual current owned conversation are required before any report save",
+      "pass": true
+    },
+    {
+      "name": "Same owner operation replays once and a changed note or conversation cannot reuse its receipt",
+      "pass": true
+    },
+    {
+      "name": "Semantically identical owner and operator JSON with reordered keys replays the same operation",
+      "pass": true
+    },
+    {
+      "name": "Another active report is rejected with safe existing progress rather than silently discarding a new note",
+      "pass": true
+    },
+    {
+      "name": "Concurrent same-body submissions save one report and one operator audit event",
+      "pass": true
+    },
+    {
+      "name": "Concurrent distinct submissions cannot create two active cases for the same conversation",
+      "pass": true
+    },
+    {
+      "name": "Resolution requires an acknowledged report, a separate public outcome and current report revision",
+      "pass": true
+    },
+    {
+      "name": "Operator internal notes and action reasons never become owner-visible resolution or acknowledgement text",
+      "pass": true
+    },
+    {
+      "name": "Operator same-body acknowledgement replay survives a later resolution; payload reuse conflicts",
+      "pass": true
+    },
+    {
+      "name": "Lost owner response can be reconciled by immutable reportOperationId even after operator resolution",
+      "pass": true
+    },
+    {
+      "name": "A retained same-operation receipt does not depend on a subsequently missing conversation head",
+      "pass": true
+    },
+    {
+      "name": "A new post-resolution problem needs the exact resolved revision and keeps the old report closed",
+      "pass": true
+    },
+    {
+      "name": "Owner and operator revoked sessions cannot create, acknowledge or resolve a report",
+      "pass": true
+    },
+    {
+      "name": "Current-tenant checks prevent another owner or a recreated workspace from reading/adopting old reports",
+      "pass": true
+    },
+    {
+      "name": "Retained100 capacity blocks only new reports; replay, acknowledgement and resolution still complete",
+      "pass": true
+    },
+    {
+      "name": "New messages and business edits preserve report snapshots without overwriting the actual conversation",
+      "pass": true
+    },
+    {
+      "name": "Closed service status does not prevent review/resolution and never resumes or changes the service",
+      "pass": true
+    },
+    {
+      "name": "Ordinary scheduler adopts an owned earlier flag once; blank Cancel artifacts and foreign tenant flags are not invented reports",
+      "pass": true
+    },
+    {
+      "name": "Legacy support discovery leaves customer records unchanged when no owned conversations exist",
+      "pass": true
+    },
+    {
+      "name": "A resolved canonical report is not resurrected by its retained older conversation flag",
+      "pass": true
+    },
+    {
+      "name": "Bounded fair scheduler discovery reaches reports after the first client/first eight conversations without founder edits",
+      "pass": true
+    },
+    {
+      "name": "Old self-service flag/unflag bypasses cannot create an empty report or remove operator attention",
+      "pass": true
+    }
+  ],
+  "after": {
+    "netlify/functions/lib/support-reports.mjs": "a81f55d749ab1e1e974afd97b9f4026365c4959fc39cb1042fca85415b1fb3c6",
+    "netlify/functions/lib/operator.mjs": "faac3b2594dfdc45295935499c6430cdad75e0e80eef23217be11ea36d4ca6fe",
+    "netlify/functions/client.mjs": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07",
+    "netlify/functions/lib/store.mjs": "94fccece31d8d59cd9e96987ca1090aad580de7b53bbc41a6cc6f1704c58fe34",
+    "netlify/functions/scheduler.mjs": "77be2c15cc60edaa7007a767867d7fde9c7041084ce6eae8d4a6d952162c44e9",
+    "scripts/support-report-fixtures.mjs": "043fbbb8660fc7e99d9a60a9e473146545afa52e29bb6022478eedf2c564ab5f",
+    "scripts/support-report-check.mjs": "3806fe96042dfacb5ee35108697b7dcb3d168b95d7b915a7f1df8063b7322c67"
+  },
+  "sourceStable": true,
+  "physicalRequests": 0,
+  "passed": 23,
+  "total": 23,
+  "ok": true
+}
