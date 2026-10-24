@@ -84,7 +84,7 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
       job=await blob('calendar_deliveries',`${slug}/${binding.policy.tenant.identity}/${binding.visitId}`);
       if(!['synced','cancelled'].includes(job.state))return {state:job.state,reasonCode:job.reasonCode,nextAttemptAt:job.nextAttemptAt,observed:false};
       await blob('health','calendarDelivery:lastDispatch');await blob('health','calendarDelivery:lastRun');await budget();
-      await c.observeReceipt({stage:input.stage,visitId:binding.visitId,eventId:binding.eventId,targetHash:binding.policy.targetIdHash,sourceRevision:job.sourceRevision,confirmed:true,ownedRemoteConfirmed:true});return {stage:input.stage,state:job.state,eventId:job.eventId,confirmedAt:job.receipt.confirmedAt,ordinaryScheduled:true};
+      const observed=await c.observeReceipt({stage:input.stage,visitId:binding.visitId,eventId:binding.eventId,targetHash:binding.policy.targetIdHash,sourceRevision:job.sourceRevision,confirmed:true,ownedRemoteConfirmed:true});return {stage:input.stage,state:job.state,eventId:job.eventId,confirmedAt:job.receipt.confirmedAt,...observed,ordinaryScheduled:observed.accepted===true&&observed.scheduledDispatchObserved===true};
     }
     if(action==='cleanup'){await c.next('cleanup');return {cleanupOnly:true};}
     if(action==='disconnect')return app({action:'disconnect_calendar'});
