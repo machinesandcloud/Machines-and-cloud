@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T16:11:03.141817+00:00",
+  "reviewer": "lead_independent_qa",
+  "decision": "accepted_local_public_stripe_test_prerequisites",
+  "baseCommit": "d252791243199836d38a3e23300de5a7a38a8f02",
+  "sourceFilesSHA256": {
+    "netlify/functions/lib/workspace-billing.mjs": "18cec2942d86974bd2a95bf56c9ab2661325428c0db76e872b540c4711de67bf",
+    "netlify/functions/workspace-billing.mjs": "6ec41e6b90a83764284490b73552258aa1631bf008bc4daa59ed2a844432ca36",
+    "netlify/functions/workspace-billing-webhook.mjs": "fb0e59807f192d3ab8afdf4e91ad941e015c4a783524943f68b537820e3f0f7b",
+    "netlify/functions/workspace-billing-background.mjs": "ccc1b6a391bfe74c4ed9564b7880188bd045221429450599c9fb05a0b1b38117",
+    "netlify/functions/workspace-billing-scheduler.mjs": "f70a46b0ba9e7249346eaf62e765ff10c606d1e0adec4a927ebbd50e9a726380",
+    "netlify/functions/stripe-webhook.mjs": "0051e44599a1c508eebb9ad6b5bad56c3623af5f4cfd5fccf7ac4b6fc3651839",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "scripts/lib/stripe-public-proof.mjs": "b4fe9e42ed8fedccb1d465e29a4c8c5bbc378baa8d8a2aa4810c8c6c2eec051f",
+    "scripts/lib/stripe-public-execution.mjs": "5dad1d647d745a8c7d9aa9c18ddfc9c5801547ecb7d43e13eca1f8321b365d88",
+    "scripts/stripe-test-lifecycle-proof.mjs": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
+    "scratchpad/billing-public-independent-check.mjs": "73b60670202c3feaec76026bc0c7916f4ff805d64889502b69453bdd4a7132bb"
+  },
+  "runtimeAndGuardSourceStableDuringFinalRun": true,
+  "independentRun": {
+    "path": "scratchpad/billing-public-independent-final.json",
+    "sha256": "0d1bb98419a7c67b250a5ce498f842650995f63b2eccfadd3bdd25d18488d4b5",
+    "passed": 24,
+    "total": 24,
+    "physicalNetworkAttempts": 0,
+    "privateCredentialFilesRead": 0,
+    "syntheticTransportAttempts": 159
+  },
+  "preservedFailure": {
+    "path": "scratchpad/billing-public-independent-first.json",
+    "sha256": "62d0c15899573f4f69bc03a989041cd6a17f4f70d19cb0e9db29972dd3cf13ff",
+    "passed": 15,
+    "total": 16,
+    "sourceStable": true,
+    "finding": "Revoking the original owner session after durable TEST Checkout admission still allowed financial POST dispatch.",
+    "resolution": "Checkout/Portal-specific authorization is repeated after admission awaits immediately before physical transport. Both independent post-admission revocation cases pass on the new source."
+  },
+  "method": "Reuses only existing author synthetic fixture/bootstrap. Independent assertions execute real owner/webhook/recovery handlers. A test-only Node module loader adds one optional post-successful-conditional-write callback to the real store implementation, preserving actual memory CAS; no runtime source file is edited. All provider sockets are blocked. The public execution path is inspected locally and its packet/allowlist functions exercised without executing public mode.",
+  "acceptedLocalBehavior": [
+    "Original unmarked LIVE workspace financial records retain legacy credential for canonical refresh and renewal; missing original key never falls back to dedicated TEST.",
+    "Admission capacity is immutable, CAS-shared and reserved before physical transport. Lost committed admission ACK remains charged and dispatches no request; subsequent action gets a fresh reservation.",
+    "Phase withdrawal/expiry, credential removal and tenant replacement between admission and dispatch stop transport. Normal renewal cannot use explicit same-resource cleanup reserve.",
+    "Original owner revocation suppresses new Checkout and Portal capabilities. Retained same-operation cleanup remains recoverable after browser revocation and phase/cohort expiry/removal.",
+    "Dedicated signed receipt is separate from legacy forwarding, binds exact Checkout/subscription/customer/invoice resource and deduplicates concurrent/replayed deliveries.",
+    "Lost applied cancellation ACK is reconciled by ordinary recovery without another DELETE; lost-before-apply follows the same operation/idempotency identity. Open Checkout expiry cleanup cannot create a subscription or replacement Checkout. Closed TEST phase cannot reset/reopen.",
+    "Operator configuration projection fails closed without required physical TEST phase.",
+    "Public runner packet rejects extra signing-secret/fake-receipt fields and changed owner/source/account. Public transport guard refuses second unknown Checkout, foreign owner export, Node financial creation, shared webhook changes or new paid action after expiry.",
+    "Public mode imports no memory owner or local HMAC event path and requires server signed receipt plus actual Event and canonical paid Invoice retrieval. This is code/guard acceptance only, not evidence of actual delivery."
+  ],
+  "limits": {
+    "actualStripeRequests": 0,
+    "actualBrowserOrProviderExecution": false,
+    "publicHostedCheckoutAccepted": false,
+    "dedicatedProviderWebhookDeliveryAccepted": false,
+    "workbenchDestinationReceiptAccepted": false,
+    "deploymentSettingsAndFinancialCleanupAccepted": false,
+    "liveChargingAccepted": false,
+    "fullPaidLaunchAccepted": false,
+    "furtherRequiredEvidence": "Root-owned fresh bounded hosted execution with real controlled ready tenant, exact current publication, genuine public provider delivery and destination-specific Workbench receipt, ordinary recovery and complete financial/settings/session/workspace cleanup. Earlier phases and current Calendar counters are not reused."
+  },
+  "inventoryOnlySourceBridge": {
+    "change": "Only runner MANIFEST_SHA literal changed after its reviewed freeze; strict reverse substitution reproduces prior reviewed runner bytes. The final acceptance record already observed the refreshed literal.",
+    "runnerSHA256Before": "884cb60a6304fd216446ece2b0422e6e70bd68654cf5676025be644e3edcfbee",
+    "runnerSHA256After": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
+    "manifestPath": "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json",
+    "manifestSHA256": "c51593b784817f29c4a34c23027a741ee06dcca6542dd87ffa2a69cab102fd17",
+    "manifestSourceId": "sha256:ec45ac3f76230d4996b81a20067928f92affc777debbe58a88a5395cd7240678",
+    "manifestFiles": 525,
+    "allManifestBytesMatch": true,
+    "runtimeAndTransportHelpersUnchanged": true
+  },
+  "frozenIndependentEvidencePaths": [
+    "scratchpad/billing-public-independent-check.mjs",
+    "scratchpad/billing-public-independent-first.json",
+    "scratchpad/billing-public-independent-second.json",
+    "scratchpad/billing-public-independent-final.json",
+    "scratchpad/billing-public-independent-acceptance-20261024.json"
+  ]
+}

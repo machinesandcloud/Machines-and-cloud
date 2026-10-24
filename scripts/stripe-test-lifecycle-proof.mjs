@@ -1,17 +1,18 @@
 // PREPARED ONLY. --self-check never reads a key or uses a browser/network.
-// --execute is a new, separately authorized actual Stripe TEST provider phase.
+// --execute is the retained local-memory TEST protocol proof. It cannot prove
+// public delivery. --execute-public requires a fresh published-source packet.
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, existsSync, statSync, mkdtempSync, chmodSync, rmSync } from 'node:fs';
 import { resolve, extname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
-const ACCOUNT='acct_1NK0c6JW47xiUUpY',BASE='7b69b031a1411aa35fbb144acb5fbe1e78a5f068';
+const ACCOUNT='acct_1NK0c6JW47xiUUpY',BASE='d252791243199836d38a3e23300de5a7a38a8f02';
 const sha=value=>createHash('sha256').update(value).digest('hex');
 const id=(value,prefix)=>typeof value==='string'&&new RegExp('^'+prefix+'[A-Za-z0-9_]{3,160}$').test(value);
 const redact=value=>String(value).replace(/(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9_]+/g,'[key redacted]').replace(/whsec_[A-Za-z0-9_]+/g,'[signing secret redacted]').replace(/https:\/\/(?:checkout|billing)\.stripe\.com\/\S+/g,'[hosted capability redacted]').replace(/\b\w+_secret_[A-Za-z0-9_]+/g,'[client secret redacted]');
 const DEFAULT_KEY_FILE='/tmp/mc-stripe-test-private.env',FIXTURES='/tmp/mc-stripe-test-fixtures.json';
-const MANIFEST_SHA='ad64d4f40c090c03c0982823266e78dfde786ece0b5bacbbc9a8657a918f3660',manifestBytes=readFileSync(new URL('../product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json',import.meta.url));
+const MANIFEST_SHA='c51593b784817f29c4a34c23027a741ee06dcca6542dd87ffa2a69cab102fd17',manifestBytes=readFileSync(new URL('../product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json',import.meta.url));
 assert.equal(sha(manifestBytes),MANIFEST_SHA,'Prepared source manifest changed');const manifest=JSON.parse(manifestBytes);assert.equal(manifest.baseCommit,BASE);assert.ok(Object.keys(manifest.hashes||{}).length>=475,'Complete prepared inventory is required');const RUNTIME_HASHES=manifest.hashes,SOURCE=manifest.sourceId;
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 function claimPhase(path,value){writeFileSync(path,JSON.stringify(value,null,2)+'\n',{flag:'wx',mode:0o600});}
@@ -119,4 +120,4 @@ async function execute({offline=false}={}){
     report.sourceAfter=Object.fromEntries(Object.keys(RUNTIME_HASHES).map(file=>[file,sha(readFileSync(file))]));report.sourceStable=JSON.stringify(report.sourceBefore)===JSON.stringify(report.sourceAfter);report.phase='closed';report.ok=!report.error&&!report.browserFailure&&!report.unknown.length&&(offline?report.completedSyntheticCheckouts:report.completedTestCheckouts)===1&&report.sourceStable&&report.requests.length<=40&&report.requests.every(entry=>entry.state==='confirmed')&&report.staticRequests.length<=200&&report.staticBytes<=35*1024*1024&&report.cleanup.some(x=>x.kind==='TEST subscription'&&x.state==='canceled_without_extra_invoice_or_proration')&&report.cleanup.filter(x=>x.state==='archived').length===2;save();globalThis.fetch=originalFetch;console.log(JSON.stringify({ok:report.ok,completedTestCheckouts:report.completedTestCheckouts,completedSyntheticCheckouts:report.completedSyntheticCheckouts,operationalAttempts:report.requests.length,physicalStripeTestRequests:report.actualProviderRequests,realMoneyCharges:0,sourceStable:report.sourceStable,unknown:report.unknown,error:report.error,output}));if(!report.ok)process.exitCode=1;
   }
 }
-if(process.argv.includes('--self-check'))await selfCheck();else if(process.argv.includes('--offline-rehearsal'))await execute({offline:true});else if(process.argv.includes('--execute'))await execute();else console.log('Prepared only. Run --self-check offline. --execute requires a separately approved TEST provider phase; see product/STRIPE-TEST-LIFECYCLE-PROOF-SCOPE-2026-10-24.json.');
+if(process.argv.includes('--self-check'))await selfCheck();else if(process.argv.includes('--offline-rehearsal'))await execute({offline:true});else if(process.argv.includes('--execute-public')){const {executePublicProof}=await import('./lib/stripe-public-execution.mjs');await executePublicProof({SOURCE,MANIFEST_SHA,BASE,RUNTIME_HASHES,frozenSource,parseCredential,claimPhase,Budget,verifyPrice,verifyInvoice,hostedRequestKind,validAssetMime,redact,sha});}else if(process.argv.includes('--execute'))await execute();else console.log('Prepared only. --self-check and --offline-rehearsal are offline. --execute-public requires the fresh source/owner/destination packet described in product/STRIPE-PUBLIC-TEST-PREPARATION-2026-10-24.md. The retained --execute local-memory mode does not establish public webhook delivery.');

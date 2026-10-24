@@ -1,0 +1,133 @@
+{
+  "at": "2026-10-24T15:36:57.528Z",
+  "before": {
+    "netlify/functions/lib/workspace-billing.mjs": "0e16188571bd0e8f49a2434dea945ee9825d6630d361e43346863f206eec1014",
+    "netlify/functions/workspace-billing.mjs": "dbc0fe9719dc2dd04c8d247692a8b033d68ea42090f4eb38d1d2f1fbacb8671d",
+    "netlify/functions/workspace-billing-webhook.mjs": "ca50629c531727dbed0d09c405b8cdb4180a36b614679364a725080e1e7f1c70",
+    "netlify/functions/workspace-billing-background.mjs": "6299c996522ff02d000cbe12c9b0d9418b7ff60c95021dc38eed77af1ee01bdd",
+    "netlify/functions/stripe-webhook.mjs": "924bbbf2add7ab19ce0625d51b6c456c292f2fee9482bd07b716e7b821bb1b81",
+    "netlify/functions/lib/billing.mjs": "81d9e14a67fbe883325e28d268463e8e4e39df89b78d0f150306afe7b770610e",
+    "scripts/workspace-billing-public-proof-check.mjs": "c88aed156a867640acff2e8c07a5ed15ba66c51be9012bee315a587fc57e17e6"
+  },
+  "checks": [
+    {
+      "name": "legacy Checkout retains original LIVE credential and7day contract when workspace TEST is configured",
+      "pass": true,
+      "requests": 1
+    },
+    {
+      "name": "dedicated TEST phase verifies actual-handler account/Price and every provider attempt is durably counted",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async paid (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:43:24)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:47:201\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:47:1"
+    },
+    {
+      "name": "missing or wrong TEST phase hides new capabilities and dispatches no provider request",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "ordinary TEST attempt ceiling is shared across concurrent owner requests and never consumes cleanup reserve",
+      "pass": false,
+      "error": "The expression evaluated to a falsy value:\n\n  assert.ok(results.some(x=>x.status===503))\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(results.some(x=>x.status===503))\n\n    at file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:49:349\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:49:1"
+    },
+    {
+      "name": "changing a phase version or attempt ceiling cannot reset spent capacity",
+      "pass": true,
+      "requests": 2
+    },
+    {
+      "name": "dedicated signed receipt is distinct from legacy forwarding, and exact dedicated replay adds no provider attempt",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:51:162\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:51:1"
+    },
+    {
+      "name": "wrong snapshot API version cannot certify the internal dedicated webhook proof",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:52:128\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:52:1"
+    },
+    {
+      "name": "exact TEST cleanup cancels only its retained subscription without proration/invoice and closes warm execution",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async paid (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:43:24)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:53:163\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:53:1"
+    },
+    {
+      "name": "lost applied cleanup DELETE is reconciled by ordinary recovery without a second DELETE",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async paid (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:43:24)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:54:136\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:54:1"
+    },
+    {
+      "name": "expired or withdrawn new-offer policy automatically cleans only the same TEST resources using retained finite authority",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async paid (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:43:24)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:55:169\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:55:1"
+    },
+    {
+      "name": "removing dedicated key never falls back to legacy LIVE for an existing TEST financial record",
+      "pass": false,
+      "error": "{\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"error\":\"service_not_ready\",\"message\":\"Finish connecting and checking the services in this offer before starting paid service.\"}\n\n409 !== 200\n\n    at checkout (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:41:139)\n    at async paid (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:43:24)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:56:142\n    at async check (file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:45:86)\n    at async file:///private/tmp/mc-billing-public-d252/scripts/workspace-billing-public-proof-check.mjs:56:1"
+    },
+    {
+      "name": "a replaced workspace incarnation during the first provider read stops all follow-on transport",
+      "pass": true,
+      "requests": 1
+    }
+  ],
+  "requests": [
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "privateCredentialFilesRead": 0,
+  "after": {
+    "netlify/functions/lib/workspace-billing.mjs": "0e16188571bd0e8f49a2434dea945ee9825d6630d361e43346863f206eec1014",
+    "netlify/functions/workspace-billing.mjs": "dbc0fe9719dc2dd04c8d247692a8b033d68ea42090f4eb38d1d2f1fbacb8671d",
+    "netlify/functions/workspace-billing-webhook.mjs": "ca50629c531727dbed0d09c405b8cdb4180a36b614679364a725080e1e7f1c70",
+    "netlify/functions/workspace-billing-background.mjs": "6299c996522ff02d000cbe12c9b0d9418b7ff60c95021dc38eed77af1ee01bdd",
+    "netlify/functions/stripe-webhook.mjs": "924bbbf2add7ab19ce0625d51b6c456c292f2fee9482bd07b716e7b821bb1b81",
+    "netlify/functions/lib/billing.mjs": "81d9e14a67fbe883325e28d268463e8e4e39df89b78d0f150306afe7b770610e",
+    "scripts/workspace-billing-public-proof-check.mjs": "c88aed156a867640acff2e8c07a5ed15ba66c51be9012bee315a587fc57e17e6"
+  },
+  "sourceStable": true,
+  "ok": false
+}

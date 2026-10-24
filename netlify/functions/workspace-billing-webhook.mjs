@@ -13,7 +13,7 @@ export default async req => {
   try {
     // Unrelated shared-account deliveries are acknowledged without a legacy
     // client lookup, storage mutation, notification or financial dispatch.
-    await handleWorkspaceBillingEvent(event,payload);
+    await handleWorkspaceBillingEvent(event,payload,{verifiedDestination:'workspace'});
     return new Response('ok');
   } catch { return new Response('billing event unconfirmed', { status:503 }); }
 };

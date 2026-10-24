@@ -1,13 +1,13 @@
 {
   "date": "2026-10-24",
-  "stage": "Refreshed exact-source local TEST preparation after bounded billing recovery; own current offline acceptance and independent recovery acceptance remain separate. No new provider/public webhook phase authorized or executed.",
-  "baseCommit": "7b69b031a1411aa35fbb144acb5fbe1e78a5f068",
-  "sourceId": "sha256:a11f7c7115ab8db84ac4ad198f9d5bf762fe812fe01f8d01c74f625fc32d7e29",
+  "stage": "Current-source offline implementation with independently accepted public prerequisites and new inert hosted public mode. No public/provider execution or release authority is granted.",
+  "baseCommit": "d252791243199836d38a3e23300de5a7a38a8f02",
+  "sourceId": "sha256:ec45ac3f76230d4996b81a20067928f92affc777debbe58a88a5395cd7240678",
   "sourceManifest": "product/STRIPE-TEST-LIFECYCLE-SOURCE-2026-10-24.json",
-  "sourceManifestSha256": "ad64d4f40c090c03c0982823266e78dfde786ece0b5bacbbc9a8657a918f3660",
-  "sourceFiles": 520,
+  "sourceManifestSha256": "c51593b784817f29c4a34c23027a741ee06dcca6542dd87ffa2a69cab102fd17",
+  "sourceFiles": 525,
   "script": "scripts/stripe-test-lifecycle-proof.mjs",
-  "scriptSha256": "f326af32fd4d09d11c2c37fb0c2e1eb31d81cd598675669594ab04f65ed60672",
+  "scriptSha256": "2c4d1d6e99af4dfd191306ee8f21f86b1ba756f35511bcbc7a2504b9ba414333",
   "provenance": "The manifest freezes runtime, assets, build configuration, dependency locks and check sources. It excludes this scope, itself and the runner to avoid a hash cycle. The runner pins the manifest SHA; this scope separately pins the runner SHA. A future exact-source approval must bind all three and a fresh exclusive phase output. This is a proposal separate from the accepted 7033364 runtime batch.",
   "account": {
     "merchant": "Existing Zari Marketing, as selected by Steve",
@@ -23,11 +23,12 @@
     "closedPriorPhase": "product/STRIPE-TEST-LIFECYCLE-PROOF-SCOPE-2026-10-23.json is historical and unchanged. Its source961 phase a closed after 7 actual requests, 0 Checkout sessions and 0 subscriptions; the exact owned fixture was rearchived. Its allowance cannot be reused."
   },
   "invocation": {
-    "cwd": "/tmp/mc-billing-recovery-7b, or the separately verified frozen-source checkout",
+    "cwd": "/tmp/mc-billing-public-d252 or a separately verified frozen-source checkout",
     "guards": "node scripts/stripe-test-lifecycle-proof.mjs --self-check",
     "fullyOffline": "node scripts/stripe-test-lifecycle-proof.mjs --offline-rehearsal --output /tmp/mc-stripe-test-lifecycle-OFFLINE-NEW.json",
     "futureActualTestOnlyAfterFreshApproval": "node scripts/stripe-test-lifecycle-proof.mjs --execute --output /tmp/mc-stripe-test-lifecycle-AUTHORIZED-NEW.json",
-    "noDefaultExecution": "Without an execution flag the script prints preparation guidance. Existing public/private phase outputs cannot be reopened or overwritten. Source drift stops before private inputs or transport."
+    "noDefaultExecution": "Without an execution flag the script prints preparation guidance. Existing public/private phase outputs cannot be reopened or overwritten. Source drift stops before private inputs or transport.",
+    "futureActualHostedTestOnlyAfterFreshScope": "node scripts/stripe-test-lifecycle-proof.mjs --execute-public --packet /tmp/mc-stripe-public-proof-packet.json --output /tmp/mc-stripe-public-AUTHORIZED-NEW.json"
   },
   "fixedBounds": {
     "operationalAttempts": 40,
@@ -94,7 +95,7 @@
       "invoice.payment_failed"
     ],
     "environment": "Dedicated WORKSPACE_BILLING_WEBHOOK_SECRET distinct from STRIPE_WEBHOOK_SECRET; existing TEST credential, exact approved TEST offer/version and the one-tenant expiring policy. Functions-only secret scope, explicit deployment snapshot/rollback, no LIVE gates, no global customer offer. Any Portal enable needs a separately verified dedicated restricted configuration and additional scope; this runner omits it.",
-    "missingBoundedTransport": "The local 40-attempt wrapper does not intercept deployed webhook or scheduled-worker Stripe calls. Before public TEST enable, prepare an exact tenant/merchant/mode/expiry provider-attempt fence with cleanup reserve for those transports, check for existing TEST billing resources that would use the shared credential, and preserve their known-resource cancellation/reconciliation. No generic queue or broad new activation is implied. Until these boundaries and their independent tests exist, this public phase is not runnable.",
+    "missingBoundedTransport": "Implemented locally in the existing billing row: dedicated credential slot, immutable tenant/offer/merchant phase with80attempt ceiling and20cleanup reserve in the proposed public packet. Current independent validation and actual hosted execution remain unaccepted; this document grants no effects.",
     "acceptance": "Capture actual Stripe destination/event/delivery IDs, exact-source endpoint status and successful 2xx delivery; verify signed raw body, dedicated secret, canonical own subscription/invoice, duplicate delivery isolation and renewal/cleanup. A dashboard save, CLI event, local signed POST, redirect or scheduler health result does not establish public delivery.",
     "cleanup": "Stop new TEST admission; disable only the new owned TEST destination; reconcile and cancel/expire only exact owned test resources; restore exact prior Functions settings and hosted source conditionally if still current. Retain event/financial audit IDs. Automatic retries and warm Functions must remain fenced after stopping."
   },
@@ -102,7 +103,13 @@
     "actualProviderRequests": 0,
     "privateInputsRead": 0,
     "releaseOrSettingsChanges": 0,
-    "independentQA": "Pending; no commit until Root assigns and accepts it.",
+    "independentQA": {
+      "path": "scratchpad/billing-public-independent-acceptance-20261024.json",
+      "passed": 24,
+      "total": 24,
+      "actualProviderRequests": 0,
+      "boundary": "Independent actual-handler/admission/cleanup acceptance; hosted mode reviewed statically, not executed against actual Stripe."
+    },
     "handlersAndBrowser": {
       "receipt": "scratchpad/billing-test-admission-current-browser-v2.json",
       "passed": 63,
@@ -239,5 +246,7 @@
     "sourceManifestSha256": "f93e023e6fe04495cd4cc5bb52b28a21a14246051b53e593ef9998973aa4bb80",
     "sourceFiles": 485,
     "scriptSha256": "f75dca39b5a8539a99d47a11fd2a4cb998986ea5b672f1bbbb971061f2394fa8"
-  }
+  },
+  "retainedLocalMemoryModeBoundary": "All retained flow/40request/local HMAC descriptions in this older scope describe --execute/--offline-rehearsal only. New public mode is defined in product/STRIPE-PUBLIC-TEST-PREPARATION-2026-10-24.md; it requires actual hosted owner and receipt, a separate immutable80attempt deployed counter plus40runner, and fresh deployment/endpoint/control scope.",
+  "publicPrerequisiteImplementation": "product/STRIPE-PUBLIC-TEST-IMPLEMENTATION-2026-10-24.json"
 }
