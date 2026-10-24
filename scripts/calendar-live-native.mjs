@@ -25,6 +25,7 @@ export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now()
   const inWindow=command=>`tell application "Google Chrome"\nif not (exists window id ${windowId}) then error "Dedicated window missing"\nif not (exists tab id ${tabId} of window id ${windowId}) then error "Dedicated tab missing"\ntell tab id ${tabId} of window id ${windowId}\n${command}\nend tell\nend tell`;
   return {
     async open({slug,token,authorizationUrl,state,expiresAt}) {
+      try {
       if(attempted||closed)fail('one_window_only');
       if(!/^[a-z0-9][a-z0-9-]{0,39}$/.test(slug||'')||!/[a-f0-9]{64}/.test(token||'')||token.length!==64||!/[a-f0-9]{64}/.test(state||'')||state.length!==64)fail('binding');
       if(!Number.isFinite(Date.parse(expiresAt))||Date.parse(expiresAt)<=now()||Date.parse(expiresAt)>now()+11*60000)fail('pending_expiry');
@@ -51,6 +52,7 @@ export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now()
       seeded=true;
       await execute(inWindow('set URL to '+quote(destination.href))); navigated=true;
       return {windowId,tabId,seeded:true,navigated:true,expiresAt,nativePhysicalRequestsCounted:false};
+      } catch(error) { if(Number.isInteger(windowId)&&Number.isInteger(tabId))Object.defineProperty(error,"ownedNativeTab",{value:{windowId,tabId},enumerable:false});throw error; }
     },
     async close() {
       if(windowId===null)fail('no_owned_window');

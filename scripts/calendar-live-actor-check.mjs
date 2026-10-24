@@ -48,12 +48,12 @@ await check('Fixed actor completes signup, native handshake, scheduled lifecycle
     if(command==='apply-key')return {siteId:TARGET.siteId,key:input,valueSHA256:hash(({CALENDAR_CONNECTION_ENABLED:'true',CALENDAR_DELIVERY_ENABLED:'true',CALENDAR_EXECUTION_POLICY_JSON:JSON.stringify(privateFiles.get('calendar-binding.json').policy),CALENDAR_EXECUTION_APPROVED_VERSION:f.p.policyVersion})[input]),context:'production',scopes:['functions']};
     if(command==='push'){f.setPublished();return {pushed:f.p.candidateCommit};}
     if(command==='restore-key')return {key:input,restoredOriginalSetting:true};
-    if(command==='cleanup-build'){f.cleanupBuild();return {cleanupBuildReserved:true,buildId:'fixture-cleanup-build'};}
+    if(command==='cleanup-build'){f.cleanupBuild();return {cleanupBuildReserved:true,buildId:'fixture-cleanup-build',deployId:'b'.repeat(24)};}
     if(command==='status')return {requests:28,mutations:10,builds:2,unknown:[]};
     return {fixture:true};
   };
   const native={open:async input=>{assert.equal(input.token,token);f.nativeAccept();return {windowId:4021,tabId:9021,seeded:true,navigated:true,nativePhysicalRequestsCounted:false};},close:async()=>({windowId:4021,tabId:9021,closed:true})};
-  const actor=createActor({controller:f.c,packet:f.p,helper,native,privateRead,privateWrite:async(name,value)=>{privateFiles.set(name,value);f.setBinding(value);},netlifyToken:'SYNTHETIC-METADATA',now:()=>NOW});
+  const actor=createActor({controller:f.c,packet:f.p,helper,native,privateRead,privateWrite:async(name,value)=>{privateFiles.set(name,value);if(name==='calendar-binding.json')f.setBinding(value);},netlifyToken:'SYNTHETIC-METADATA',now:()=>NOW});
   const run=(action,rest={})=>actor.command({action,...rest});
   await run('baseline');await run('request-link');await run('exchange',{file:'signup-mail.json'});await run('create-workspace');await run('request-link');await run('exchange',{file:'return-mail.json'});await run('owner');
   await run('census-bind',{file:'primary.json'});await run('stage');await run('publish');await run('ready');await run('start');await run('native-open');await run('native-confirm');await run('create');

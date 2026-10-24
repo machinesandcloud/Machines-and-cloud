@@ -66,11 +66,11 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
       return {staged:true,settings:4};
     }
     if(action==='publish'){await helper('remote');return c.publish(async()=>{const receipt=await helper('push');return {pushedCommit:receipt.pushed,buildsTriggered:1};});}
-    if(action==='ready'){const result=await metadata();if(result.data.published_deploy?.state==='ready'&&result.data.published_deploy?.commit_ref===p.candidateCommit)await c.next('calendar');return {commit:result.data.published_deploy?.commit_ref,state:result.data.published_deploy?.state};}
+    if(action==='ready'){const result=await metadata();if(result.data.published_deploy?.state==='ready'&&result.data.published_deploy?.commit_ref===p.candidateCommit){await privateWrite('initial-ready-deployment.json',{siteId:TARGET.siteId,commit:p.candidateCommit,deployId:result.data.published_deploy.id});await c.next('calendar');}return {commit:result.data.published_deploy?.commit_ref,state:result.data.published_deploy?.state};}
     if(action==='start'){await app();await budget();await app({action:'start_calendar_connection',availabilityConsentVersion:'2026-10-24-busy-v1',expectedRevision:current.configurationRevision});return {started:true,ownerMustReviewGoogle:true};}
     if(action==='native-open'){await budget();return c.beginNativeHandoff(input=>native.open(input));}
-    if(action==='native-confirm'){await blob('calendar_connections',slug);await app();await budget();return c.confirmNativeCompletion();}
-    if(action==='native-close')return c.closeNativeHandoff(()=>native.close());
+    if(action==='native-confirm'){const connection=await blob('calendar_connections',slug);await app();const used=await budget();if(connection.status!=='connected'||current.connections?.calendar?.connected!==true||used.used?.tokenExchange!==1||used.used?.calendarRead<1)return {connected:false,pending:true};return c.confirmNativeCompletion();}
+    if(action==='native-close'){if(c.state().nativeClosed)return {alreadyClosed:true};return c.closeNativeHandoff(()=>native.close());}
     if(action==='budget'){const row=await budget();return {used:row.used,policyDigest:row.policyDigest};}
     if(action==='create'){await app();await budget();const result=await app(visit());return {visit:result.visit,localSaved:result.localSaved};}
     if(action==='move'){await app();await budget();const own=(current.bookings||[]).find(row=>row.id===binding.visitId)?.ownerVisit;return app({action:'reschedule_visit',expectedRevision:current.configurationRevision,expectedVisitRevision:own?.revision,submissionId:p.fixture.moveSubmissionId,visitId:binding.visitId,date:p.fixture.moveDate,window:p.fixture.moveWindow});}
@@ -90,9 +90,9 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
     if(action==='disconnect')return app({action:'disconnect_calendar'});
     if(action==='cancel-workspace')return app({action:'cancel',reason:'Internal Calendar verification complete; retain audit records'});
     if(action==='signout-all'){for(const session of sessions){token=session;await app({action:'sign_out'},'/api/access');}token=null;return {sessionsRevoked:sessions.length};}
-    if(action==='restore'){for(const key of envKeys)await c.restoreEnvironment(key,()=>helper('restore-key',key));const result=await helper('env');await c.confirmEnvironmentRestored(result);return {restored:true,snapshotSHA256:result.snapshotSHA256};}
-    if(action==='cleanup-build'){await helper('remote');await c.cleanupPublish(()=>helper('cleanup-build'));return {cleanupBuildRequested:true};}
-    if(action==='closed'){await metadata();await c.next('closed');await c.closePersistence();return {closed:true,guard:c.state(),control:await helper('status')};}
+    if(action==='restore'){if(!c.state().environmentAttempted.length)return {settingsUntouched:true,restorationNotNeeded:true};await helper('cleanup-env');for(const key of c.state().environmentAttempted)await c.restoreEnvironment(key,()=>helper('restore-key',key));const result=await helper('env');await c.confirmEnvironmentRestored(result);return {restored:true,snapshotSHA256:result.snapshotSHA256};}
+    if(action==='cleanup-build'){await helper('site');await helper('remote');await c.cleanupPublish(()=>helper('cleanup-build'));return {cleanupBuildRequested:true};}
+    if(action==='closed'){await metadata();if(c.state().counters.builds>0&&!c.state().cleanupPublished)return {closed:false,cleanupDeploymentPending:true,guard:c.state()};if(c.state().environmentAttempted.length){const readback=await helper('env');if(readback.originalEnvironmentRestored!==true)throw Error('Final cleanup environment readback not confirmed');}await c.next('closed');await c.closePersistence();return {closed:true,guard:c.state(),control:await helper('status')};}
   }};
 }
 

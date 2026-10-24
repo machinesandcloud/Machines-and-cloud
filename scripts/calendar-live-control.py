@@ -4,7 +4,7 @@ import argparse, contextlib, datetime as dt, fcntl, hashlib, json, os, pathlib, 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None
 ACCOUNT='69797d78f01c70674ffef858'
-SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'e8fac43d98f9cbd95ab29378c5506393ea7fad18','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
+SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'e8fac43d98f9cbd95ab29378c5506393ea7fad18','baselineDeployId':'6adc34dad03fcbe43f7416db','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
 MC_KEYS=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_APPROVED_VERSION','CALENDAR_EXECUTION_POLICY_JSON']
 def fail(s): raise RuntimeError(s)
 def now(): return dt.datetime.now(dt.timezone.utc)
@@ -126,6 +126,16 @@ def projection(rows):
                     'values':sorted([{key:value[key] for key in ['context','context_parameter','value'] if key in value}
                                      for value in row.get('values',[])],key=lambda value:json.dumps(value,sort_keys=True))}
                    for row in rows],key=lambda row:row['key'])
+def current_site(s,append,cleanup=False):
+    value=request(s,append,'site:mc','mc','/sites/'+SITES['mc']['id'],cleanup=cleanup)
+    deployment=value.get('published_deploy') or {}
+    expected=SITES['mc']['candidate'] if s['builds'] else SITES['mc']['base']
+    if value.get('id')!=SITES['mc']['id'] or value.get('account_id')!=ACCOUNT or value.get('disabled') is True or deployment.get('state')!='ready' or deployment.get('commit_ref') not in ([SITES['mc']['base'],SITES['mc']['candidate']] if cleanup and s['builds'] else [expected]): fail('Current production revision changed or is not READY; do not overwrite environment')
+    if deployment.get('commit_ref')==SITES['mc']['base'] and deployment.get('id')!=SITES['mc']['baselineDeployId']: fail('Baseline deployment identity changed')
+    selected=PRIVATE/'initial-ready-deployment.json'
+    if selected.exists() and deployment.get('commit_ref')==SITES['mc']['candidate'] and deployment.get('id')!=read(selected).get('deployId'): fail('A different candidate deployment is published; do not overwrite environment')
+    value['_observedAt']=iso();private_write(PRIVATE/'current-mc-site.json',value)
+    return value
 def prepare(binding_path):
     b=read(binding_path);m=fresh();policy=b.get('policy')
     if not isinstance(policy,dict) or policy.get('version')!=m['policyVersion'] or policy.get('limits')!=m['runtimeLimits'] or not re.fullmatch('[a-z0-9][a-z0-9-]{0,39}',policy.get('tenant',{}).get('slug','')) or not re.fullmatch('[a-f0-9]{64}',policy['tenant'].get('identity','')): fail('Unbound policy')
@@ -183,7 +193,7 @@ def git(s,append,site,push=False):
         raise
 def main():
     global PRIVATE,PHASE,LEDGER,MANIFEST,APPROVAL_SHA
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--packet',required=True);parser.add_argument('--sha256',required=True);parser.add_argument('command',choices=['init','status','site','env','remote','push','prepare','apply-key','restore-key','cleanup-build','deploys']);parser.add_argument('input',nargs='?');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--packet',required=True);parser.add_argument('--sha256',required=True);parser.add_argument('command',choices=['init','status','site','env','cleanup-env','remote','push','prepare','apply-key','restore-key','cleanup-build','deploys']);parser.add_argument('input',nargs='?');args=parser.parse_args()
     MANIFEST=pathlib.Path(args.packet).resolve();APPROVAL_SHA=args.sha256
     st=MANIFEST.lstat()
     if not MANIFEST.is_file() or MANIFEST.is_symlink() or st.st_mode&0o777!=0o600 or st.st_uid!=os.getuid() or not re.fullmatch('[a-f0-9]{64}',APPROVAL_SHA): fail('Private approved packet0600 required')
@@ -199,6 +209,19 @@ def main():
     if args.command=='prepare': return prepare(args.input)
     with locked() as (s,append):
         if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']]}
+        if args.command=='cleanup-env':
+            # A lost mutation can have applied. Inspect actual current values,
+            # without retrying the original mutation or trusting cached absence.
+            s['cleanup']=True;append();current_site(s,append,cleanup=True)
+            summary=env_get(s,append,'mc',cleanup=True)
+            original=read(PRIVATE/'original-mc-env.json');current=read(cache('mc'));prepared=read(PRIVATE/'prepared-mc-env.json')
+            if projection([row for row in current if row['key'] not in MC_KEYS])!=projection([row for row in original if row['key'] not in MC_KEYS]): fail('Unrelated environment changed; preserve it and stop')
+            for key in MC_KEYS:
+                seen=[row for row in current if row['key']==key]
+                before=[row for row in original if row['key']==key]
+                staged=[row for row in prepared if row['key']==key]
+                if projection(seen) not in [projection(before),projection(staged)]: fail('Calendar setting has another owner/revision; do not overwrite')
+            summary['cleanupInspected']=True;return summary
         if args.command=='env':
             summary=env_get(s,append,'mc',cleanup=s.get('cleanup',False))
             original=read(PRIVATE/'original-mc-env.json');current=read(cache('mc'))
@@ -212,18 +235,20 @@ def main():
                 s['stagedVerified']=True;append()
             summary['originalEnvironmentRestored']=bool(s.get('restored'));summary['stagedVerified']=bool(s.get('stagedVerified'));return summary
         if args.command=='site':
-            v=request(s,append,'site:mc','mc','/sites/'+SITES['mc']['id'],cleanup=s.get('cleanup',False))
-            if v.get('id')!=SITES['mc']['id'] or v.get('account_id')!=ACCOUNT: fail('Wrong site/account')
-            d=v.get('published_deploy') or {};private_write(PRIVATE/'current-mc-site.json',v)
+            v=current_site(s,append,cleanup=s.get('cleanup',False));d=v.get('published_deploy') or {}
             return {'disabled':v.get('disabled'),'deployId':d.get('id'),'state':d.get('state'),'commit':d.get('commit_ref')}
         if args.command=='deploys':
             v=request(s,append,'deploys:mc','mc','/sites/'+SITES['mc']['id']+'/deploys?per_page=5',cleanup=True)
             return {'deploys':[{'id':r.get('id'),'state':r.get('state'),'commit':r.get('commit_ref')} for r in v]}
         if args.command in ['remote','push']:
             if args.command=='push' and not s.get('stagedVerified'): fail('Read back exact staged environment before publication')
+            if args.command=='push': current_site(s,append)
             return git(s,append,'mc',push=args.command=='push')
         if args.command=='apply-key':
             if args.input not in MC_KEYS: fail('One of four exact Calendar keys required')
+            current_site(s,append)
+            cached=read(cache('mc'));actual=request(s,append,'inspect-before:'+args.input,'mc',env_path('mc'))
+            if projection(actual)!=projection(cached): fail('Environment changed before key write')
             wanted=[row for row in read(PRIVATE/'prepared-mc-env.json') if row['key']==args.input]
             if len(wanted)!=1: fail('Missing prepared key')
             put_rows(s,append,'mc',wanted,'calendar-proof');return {'siteId':SITES['mc']['id'],'key':args.input,'valueSHA256':digest(effective(wanted,args.input)),'context':'production','scopes':wanted[0]['scopes']}
@@ -237,6 +262,8 @@ def main():
             return {'key':key,'restoredOriginalSetting':True,'readbackAndDeployRequired':s['builds']>0}
         if args.command=='cleanup-build':
             if not s.get('restored') or projection(read(cache('mc')))!=projection(read(PRIVATE/'original-mc-env.json')): fail('Read back restored original environment first')
+            observed=read(PRIVATE/'current-mc-site.json');deployment=observed.get('published_deploy') or {}
+            if deployment.get('commit_ref')!=SITES['mc']['candidate'] or deployment.get('state')!='ready' or (now()-dt.datetime.fromisoformat(observed.get('_observedAt','2000-01-01T00:00:00+00:00').replace('Z','+00:00'))).total_seconds()>90: fail('Fresh exact current production candidate required for cleanup build')
             if s.get('remote',{}).get('mc')!=SITES['mc']['candidate'] or (now()-dt.datetime.fromisoformat(s.get('remoteAt',{}).get('mc','2000-01-01T00:00:00+00:00').replace('Z','+00:00'))).total_seconds()>90: fail('Fresh exact candidate remote required')
             v=request(s,append,'build:mc:cleanup','mc','/sites/'+SITES['mc']['id']+'/builds','POST',{'branch':'main'},build=True,cleanup=True);return {'cleanupBuildReserved':True,'buildId':v.get('id'),'deployId':v.get('deploy_id')}
     fail('Unsupported command')
