@@ -1,0 +1,203 @@
+{
+  "at": "2026-10-24T04:41:33.499741+00:00",
+  "role": "Independent QA; offline post-phase audit only",
+  "phaseId": "hosted-onboarding-zaricoach-20261024-v2",
+  "approvalId": "approval-910ae4eb3a784b31a1237a786c8cfde1",
+  "accepted": true,
+  "decision": "Accept one controlled live synthetic website callback journey and its recorded cleanup. Full-service launch remains NO-GO.",
+  "method": "Read existing sanitized receipts and all append-only ledger snapshots; recompute475 source hashes; compare retained identities and baseline CSP; inspect captured390/1440 screenshots. No test, browser session, network/provider call or production action performed. Only this QA receipt written.",
+  "source": {
+    "head": "e8fac43d98f9cbd95ab29378c5506393ea7fad18",
+    "count": 475,
+    "sha256": "a101d53c2d3de37c6fe91fa72090b979b0bc77a76533c4943545e4149716acb4",
+    "matchesApproved": true,
+    "changed": [],
+    "guardSHA256": "573da0ebc16a7704ef83be9364b5f92f42b09df28a0b601974ec21a50f6d5546",
+    "deskSHA256": "fd86bb2a4e1407466b9741a5438fdeb054e4daef92df02038395671925b03f58",
+    "stagedObservation": "Signup/intake/draft/return used published47e baseline; installed AI/customer request used published e8fac43; distinct cleanup deployment publishes e8fac43. Do not describe every earlier acquisition observation as e8 code."
+  },
+  "invariants": {
+    "issues": [],
+    "guardSnapshotsAudited": 564,
+    "countersMonotonicWithinEveryCap": true,
+    "controlCountersMonotonic": true,
+    "finalGuardMatchesClosedReceipt": true,
+    "unknownPlatformMutations": [],
+    "unknownControlEffects": [],
+    "optionalFontsBlocked": 8,
+    "unexpectedGuardDenials": []
+  },
+  "customerResult": {
+    "retainedRequestID": "cb80d2e55942fbc82079317e871ea605",
+    "setupRecordID": "be93d3a839033793e86e023aa1624239",
+    "ordinaryRequestHasNoSetupMarker": true,
+    "separateSetupAndOrdinaryRecords": true,
+    "setupAcknowledgedBeforeExpiry": true,
+    "retainedRequestMatchesWebsiteReceiptAndInboxBody": true,
+    "ordinaryOrigin": "https://zaricoach.com",
+    "ownerNotification": {
+      "deliveredJobs": 1,
+      "channel": "email",
+      "purpose": "owner_lead"
+    },
+    "inboxEvidence": "Root-captured controlled Gmail message body contains the same ordinary record ID, customer, callback and request. No independent mailbox request made.",
+    "inboxAddressQualification": "inboxReceipt.to includes the platform sender and controlled owner alias as displayed addresses; it is not interpreted as proof of two delivery recipients. The exact alias is present and the body/record match.",
+    "screenshots": {
+      "paths": [
+        "scratchpad/zaricoach-live-v2-ordinary-request-loaded-1440.png",
+        "scratchpad/zaricoach-live-v2-ordinary-request-loaded-390.png"
+      ],
+      "inspectedWidths": [
+        390,
+        1440
+      ],
+      "materialIssueFound": false,
+      "observed": "Matching customer name, callback, requested time and request details readable; Close visible; follow-up remains Unassigned/Open and customer contact Not recorded, with no false contact completion. Captures are full-page images; below-viewport background is not evidence of interactive content outside the modal."
+    }
+  },
+  "budgets": {
+    "guard": {
+      "total": 185,
+      "platform": 176,
+      "api": 77,
+      "mutation": 37,
+      "draft": 10,
+      "asset": 99,
+      "external": 3,
+      "email": 4,
+      "ownerEmail": 3,
+      "operatorEmail": 1,
+      "metadata": 6,
+      "logical": 3,
+      "bytes": 5016887
+    },
+    "additionalCleanupGETs": 2,
+    "siteAggregate": 187,
+    "siteLimit": 240,
+    "externalAggregate": 5,
+    "externalLimit": 12,
+    "controlAggregate": 63,
+    "controlLimit": 80,
+    "controlMutations": 15,
+    "controlMutationLimit": 40,
+    "buildReservations": 3,
+    "successfulBuildsReported": 3,
+    "creditScopeAt15PerBuild": 45,
+    "billingReceiptChecked": false,
+    "overlapQualification": "The2 cleanup GETs are already charged in control63 and also conservatively included in site187/external5; those aggregates overlap and must not be added as disjoint totals. Git six-request reservations retain unused slots.",
+    "directSDKPhysicalCount": "Not exposed by owner evidence. Only the source-enforced30-attempt ceiling including SDK retries and1500 output-token cap are credited; three logical turns are observed, not three physical calls.",
+    "mailboxReadsReported": 6,
+    "verificationEmailAttempts": 4,
+    "deliveredManagedOwnerAlerts": 1
+  },
+  "cleanup": {
+    "guardClosed": true,
+    "guardHalted": false,
+    "platformComplete": true,
+    "deploymentVerified": true,
+    "configurationClosed": true,
+    "workspaceCancelled": true,
+    "activeSessions": 0,
+    "unconfirmedMutations": [],
+    "externalSiteRollback": "outside this platform guard; requires separate exact route removal/readback",
+    "proofDeploy": {
+      "deployId": "6adc30ae625e2ae3f0bb7661",
+      "commit": "e8fac43d98f9cbd95ab29378c5506393ea7fad18",
+      "sourceManifestSHA256": "a101d53c2d3de37c6fe91fa72090b979b0bc77a76533c4943545e4149716acb4"
+    },
+    "cleanupDeploy": {
+      "deployId": "6adc34dad03fcbe43f7416db",
+      "commit": "e8fac43d98f9cbd95ab29378c5506393ea7fad18",
+      "sourceManifestSHA256": "a101d53c2d3de37c6fe91fa72090b979b0bc77a76533c4943545e4149716acb4"
+    },
+    "cleanupPublication": {
+      "id": "6adc34dad03fcbe43f7416db",
+      "commit_ref": "e8fac43d98f9cbd95ab29378c5506393ea7fad18",
+      "state": "ready",
+      "created_at": "2026-10-24T04:32:26.727Z",
+      "published_at": "2026-10-24T04:33:23.733Z",
+      "updated_at": "2026-10-24T04:33:29.213Z"
+    },
+    "distinctSameSourceDeploys": true,
+    "zariProofReadyRootObserved": "6adc3241ec183b0f279f282a at exact f18f96b796f831015b0ef3bfff942ade39113d81",
+    "zariRestoredDeployId": "6a71d1070df5fa00089f99f8",
+    "zariRestoredCommit": "421f1c28f239ce24f22dcee5b8953cee04ecf66a",
+    "rollbackStatusAndCapturedHeadersMatchBaseline": true,
+    "rollbackRoute404Homepage200": true,
+    "configurationRestoration": {
+      "mc": {
+        "allOriginalSettingsRestored": true,
+        "originalCount": 27,
+        "restoredCount": 27
+      },
+      "zari": {
+        "allOriginalSettingsRestored": true,
+        "originalCount": 42,
+        "restoredCount": 42
+      }
+    },
+    "configurationEvidenceQualification": "Credit Root canonical value/context/scope restoration assertions for27MC/42Zari records plus recorded env readbacks. No private environment values were read by QA.",
+    "temporaryZariSource": "The f18 proof source remains in Git while immutable421 is published; remove temporary proof code in the next normal approved source release. No forced reset inferred from stale pre-push remote observations."
+  },
+  "limits": [
+    "No scheduled failure/retry/recovery case was exercised; immediate observed delivery does not close that operational gate.",
+    "This is one synthetic callback job. No real callback, customer contact, appointment, paid outcome, general installer or full-platform readiness is established.",
+    "Calendar consent/lifecycle/conflict protection, dedicated phone/text/consent/reminders, full billing/cost entitlement and actual support/incident/hosting continuity remain open.",
+    "Recorded effects/SDK and billing limits are qualified above. All unused phase allowances are closed; no restart or follow-on authority."
+  ],
+  "evidence": [
+    {
+      "path": "product/ZARICOACH-LIVE-RESULT-V2-2026-10-24.json",
+      "sha256": "2efbf7c156c0e4f50b0f00e9c431108c991f37b812f046f15dbc78c7df3b9fbf"
+    },
+    {
+      "path": "scratchpad/zaricoach-v2-live-closed-receipt.json",
+      "sha256": "579e4454d16ce203b27a9ec48aa4bdb3ac4ca265cea2852c670974432595ce6e"
+    },
+    {
+      "path": "scratchpad/zaricoach-v2-retained-result.json",
+      "sha256": "e73745699bc53cd67c70675ef449ee50a0d1574180e3594e79e5b74fac7cbe9b"
+    },
+    {
+      "path": "scratchpad/zaricoach-v2-rollback-readback.json",
+      "sha256": "1e36307451369122990613a95a860185f20b6f897c3cf8186d7db21a9265d6ac"
+    },
+    {
+      "path": "scratchpad/zaricoach-v2-full-source-manifest.json",
+      "sha256": "5e89b418bac6cf99f7e33a23ff36aec2a70ba4789fba8e055e9fbb1caa1d762b"
+    },
+    {
+      "path": "scratchpad/zaricoach-v2-approved-manifest.json",
+      "sha256": "2b92ef40ec3c624b6837f0fa839e8cf999da2744dc47523f1dda1828ea5ba66a"
+    },
+    {
+      "path": "scratchpad/hosted-onboarding-zaricoach-20261024-v2-ledger.jsonl",
+      "sha256": "8a652cd82c0019e59f0ab3b82af9c9e9443f2887386fdfadfc3d4a229aa509cd"
+    },
+    {
+      "path": "scratchpad/hosted-onboarding-zaricoach-20261024-v2-control.jsonl",
+      "sha256": "ef2da94296e9dd80bfed5ab3590b9871230da19b40427e2f1cb34fe0ffb3647a"
+    },
+    {
+      "path": "scratchpad/hosted-onboarding-zaricoach-20261024-v2-supplemental-control.jsonl",
+      "sha256": "82f2baf5af90ba56d4f7c425d54a1348bcff4cbe11a42be08abb9bf59acb8a95"
+    },
+    {
+      "path": "scratchpad/zaricoach-live-v2-ordinary-request-loaded-1440.png",
+      "sha256": "bd1584521a9f86efe39ab7a87d9d79abd588fa1262ffbbdb1683b9f500e8c840"
+    },
+    {
+      "path": "scratchpad/zaricoach-live-v2-ordinary-request-loaded-390.png",
+      "sha256": "177bbd72062fad3c0870a89a67908854193df718303b2d33d6f34b3f9b33fdaf"
+    }
+  ],
+  "documentationFinalization": {
+    "at": "2026-10-24T04:45:27.134933+00:00",
+    "scope": "Document-only finalization after PO acceptance. Root finalized the result decision and independent-acceptance references; only that result document evidence hash is refreshed here.",
+    "resultPath": "product/ZARICOACH-LIVE-RESULT-V2-2026-10-24.json",
+    "previousResultSHA256": "a247ef984a26bf86c0e76629db733fe27f1c78e9d5f0103640f5e714e13c2fda",
+    "currentResultSHA256": "2efbf7c156c0e4f50b0f00e9c431108c991f37b812f046f15dbc78c7df3b9fbf",
+    "poAcceptancePath": "product/ZARICOACH-LIVE-PO-ACCEPTANCE-2026-10-24.json",
+    "actualReceiptsSourceAndLedgers": "Unchanged; original observed evidence and scoped acceptance remain in force. No tests rerun, external requests or runtime edits."
+  }
+}
