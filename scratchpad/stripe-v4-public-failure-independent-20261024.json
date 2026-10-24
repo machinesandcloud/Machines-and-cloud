@@ -1,0 +1,111 @@
+{
+  "at": "2026-10-24T21:49:41.867499+00:00",
+  "decision": "ACCEPTED_FAILED_PUBLIC_PROOF_FINANCIAL_CLEANUP_ONLY; payment and full delivery unaccepted",
+  "phaseId": "hosted-onboarding-stripe-20261024-v4",
+  "source": {
+    "publishedCommit": "0e762f9f28fe9a30b7368db659123667051871e9",
+    "publishedDeploy": "6add1f7fea7d4cc63977fa4e",
+    "sourceId": "sha256:013019391417aebc89d5ae07dcf24b5c2bd0fbf1a4e8142ab00d2d75b971d826",
+    "matchedRuntimeAndToolInventory": 537,
+    "sourceBeforeAfterStable": true
+  },
+  "observed": {
+    "actualCurrentWebWorkspacePreflightPassed": true,
+    "testCheckoutCreated": true,
+    "checkoutExpiredSameIdentity": true,
+    "subscriptionId": null,
+    "customerId": null,
+    "invoiceId": null,
+    "paidCheckoutAccepted": false,
+    "realMoneyCharges": 0,
+    "retainedDedicatedSignedEvent": {
+      "id": "evt_1UUCj0JW47xiUUpYqE6KOoEr",
+      "type": "checkout.session.expired",
+      "exactCheckoutMatched": true,
+      "verifiedDestination": "workspace",
+      "receivedAt": "2026-10-24T21:43:40.281Z"
+    },
+    "narrowEventClaim": "Actual signed expired-Checkout receipt is retained in the bound owner DTO. This does not prove paid Checkout, subscription/invoice, Workbench2xx/time or full financial lifecycle."
+  },
+  "failure": {
+    "testBannerWaitTimeout": "15seconds before dummy-card payment",
+    "blockedResource": "Only Stripe-owned hosted resources are allowed; original host/path was not recorded, so exact blocked destination remains unknown.",
+    "preservedError": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText(/test mode/i).first() to be visible\u001b[22m\n",
+    "newDiagnosisRequestsByQA": 0
+  },
+  "cleanup": {
+    "financialState": "complete",
+    "financialPhaseState": "closed",
+    "expiredCheckoutUrlNull": true,
+    "ownedPriceAndProductArchived": true,
+    "exactEndpointDisabledReadbackAndDeleted": true,
+    "oneDeleteConfirmed": true,
+    "endpointPrepLedgerReferenceMatchesClosedReport": true,
+    "WorkbenchEvidence": "Not ready; no verified paid event/delivery attempt/time acceptance.",
+    "mainWebController": "Still active per Root; whole phase/session/workspace/settings cleanup is not claimed here."
+  },
+  "counts": {
+    "runnerStripeAttempts": 32,
+    "retainedServerAttempts": 13,
+    "endpointPreparationAttempts": 6,
+    "aggregateDirectStripeAttempts": 51,
+    "declaredAggregateCap": 136,
+    "siteRequests": 31,
+    "hostedStaticRequests": 35,
+    "blockedTelemetry": 39,
+    "chargedAttemptsNeverRefunded": true,
+    "closedUnusedAttemptFigures": "DTO ordinary47/total67 are arithmetic only; closed proof has no remaining transport authority."
+  },
+  "native": {
+    "earlierUnknownActorAttempts": 2,
+    "separateDiagnostics": 3,
+    "borrowedActions": 9,
+    "combinedUsed": 14,
+    "ceiling": 24,
+    "borrowedRestoreDispatchedAndTerminal": true,
+    "originalArrivalSeparatelyVerified": false,
+    "originalNewTabCreationCleanupUnknownRetained": true,
+    "rootReadOnlySourceAmendmentsOutsideOriginalAdapterCommandSet": [
+      {
+        "id": 9,
+        "op": "documented_readonly_webhooks_navigation",
+        "sourceSHA256": "b07dd75668ec3177c0ced4e971491ba80c3af92e872c28d0025acfc7f6cca4c1"
+      },
+      {
+        "id": 12,
+        "op": "owned_endpoint_readonly_navigation",
+        "sourceSHA256": "3ba3582051d0d1639622ee7f56f05b746d54446d21ae4461e1dc1a61e84ede80"
+      }
+    ]
+  },
+  "replacementConstraints": [
+    "A fresh output/runner ledger, fresh source pins and explicit finite remaining clocks/budgets are necessary; old phase remains closed.",
+    "The genuine ready web workspace may be retained, but current backend rejects replacing a saved phaseId/policyDigest and rejects all admissions from a closed testProof. Removing only the runner initial-row assertion cannot admit a fresh phase.",
+    "Same-tenant reuse therefore requires a separately reviewed TEST-only predecessor rollover preserving old closed history/attempts/receipts and exact expired checkout/no financial resources; no delete/reset/reopen of existing proof, no tenant identity or readiness reset.",
+    "Alternatively a new genuinely ready controlled workspace must be prepared under fresh explicit scopes; direct synthetic payment flow is not replacement app acceptance.",
+    "Authoritative current Stripe hosted-resource domains must be verified, logged host/path diagnostics must exclude queries/body/credentials, and only exact approved resources admitted.",
+    "Never retry unknown Checkout/payment/provider creates. Current known expired Checkout identity is closed evidence, not a resource to reopen."
+  ],
+  "evidence": [
+    {
+      "path": "/tmp/mc-stripe-public-v4-20261024.json",
+      "sha256": "d2c5e37d3b2cd1edf8809ad36e987b147854e8becffe0bac39b58ee1c9cb789e"
+    },
+    {
+      "path": "/tmp/mc-zari-stripe-v4-prep-20261024/endpoint-ledger.json",
+      "sha256": "45d0fd25d4eebdf00c1384a6e7815be47abbf01a9042f6a20fbbcec69a80fe52"
+    },
+    {
+      "path": "/tmp/mc-stripe-v4-workbench-20261024/borrowed-private/ledger.jsonl",
+      "sha256": "61764382b560904b730f16c46b5f00c1b1a8179837479784c2a0a3d451bde000"
+    }
+  ],
+  "privateOwnerDTO": "Read locally for selected billing state/identity only; no bearer, checkout capability or credential output.",
+  "qaEffects": {
+    "network": 0,
+    "browser": 0,
+    "nativeHelper": 0,
+    "provider": 0,
+    "RootSourceEdits": 0
+  }
+}
