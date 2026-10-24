@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED ONLY; fresh explicit owner approval required",
+  "closedPhase": "core-calendar-20261024-busy-v1",
+  "closedPhaseAllowancesReused": false,
+  "purpose": "Determine whether the exact retained Calendar budget record can be read using the installed Netlify SDK's raw-colon path. Local path mismatch is reproduced; the actual hosted failure cause remains unconfirmed.",
+  "source": {
+    "runner": "scripts/calendar-budget-readonly-diagnostic.mjs",
+    "runnerSHA256": "a0dabff380a78905b76d26c52258cea35360a22a22e9a99e3e030acf2581ed1e",
+    "offlineCheck": "scripts/calendar-budget-readonly-diagnostic-check.mjs",
+    "offlineCheckSHA256": "730dc5570b1343f3923eac2ac63032b73ceced2416bc7c12a52a22f1e7c3f76a",
+    "provider": "Installed @netlify/blobs 11.1.4",
+    "providerSource": "node_modules/@netlify/blobs/dist/chunk-SQCJ2S3G.js",
+    "providerSourceSHA256": "94fe879676f6f9c22290bd63739a61a4e0748a67e8c5505dc41e845ba86497f1",
+    "providerBehavior": "getFinalRequest concatenates the site/store/raw key into a URL; it requests one signed URL from api.netlify.com with native authorization, then reads that returned URL without the API bearer token. This standalone runner reproduces that path and removes SDK retries."
+  },
+  "effects": {
+    "maxPhysicalHTTPSAttempts": 2,
+    "method": "GET only",
+    "first": "https://api.netlify.com/api/v1/blobs/f87916f1-bcc4-4171-a96f-2900cbf0b6dc/site:calendar_execution_budgets/calendar-v1:owned_calendar_busy_20261024_v1",
+    "second": "Only the exact URL returned by that lookup, after HTTPS/trusted-host/signature-expiry validation; no authorization, cookies or credentials forwarded.",
+    "authentication": "Read the existing current user's native Netlify token once, in memory only, after fresh exact approval and exclusive durable ledger creation. Never print or persist the token.",
+    "redirects": false,
+    "retries": false,
+    "otherObjectsOrLists": false,
+    "applicationRequests": 0,
+    "builds": 0,
+    "emails": 0,
+    "googleOrWorkerRequests": 0,
+    "providerMutations": 0,
+    "browserActions": 0,
+    "rawResponsePersistence": false,
+    "output": "Sanitized result/error code, physical attempt count and, only for an exact matching record, policyDigest and used action counts. No record census, body, signed URL, credential or owner identity in result/ledger."
+  },
+  "execution": {
+    "default": "Plan only; import/default invocation performs no network, native credential read or file write.",
+    "freshApproval": "Explicit owner approval; a private 0600 packet binds the exact runner SHA, immutable target, two attempts, fixed fresh ledger and at most one-hour approval window.",
+    "ledger": "/tmp/mc-calendar-budget-readonly-20261024-v1/attempts.jsonl",
+    "ledgerRules": "Owner-only 0700 directory, exclusive 0600 file creation, directory fsync and fsynced pre-effect reservation. Any prior complete/partial ledger refuses execution. No reset, resume, reopening or continuation of the old phase.",
+    "failure": "Stop on any non-200 response, unsafe/expired URL, invalid record, lost response, changed/expired authority or persistence failure. Do not retry or sign in automatically.",
+    "cleanup": "No external state changes to undo. Retain the sanitized closed diagnostic ledger; original Calendar proof remains closed regardless of result."
+  },
+  "approvalPacketTemplate": {
+    "version": 1,
+    "scope": "closed_calendar_budget_readonly_20261024_v1",
+    "phaseId": "calendar-budget-diagnosis-20261024-v1",
+    "approved": false,
+    "approvalId": null,
+    "approvedAt": null,
+    "approvalExpiresAt": null,
+    "scriptSHA256": "a0dabff380a78905b76d26c52258cea35360a22a22e9a99e3e030acf2581ed1e",
+    "target": {
+      "siteId": "f87916f1-bcc4-4171-a96f-2900cbf0b6dc",
+      "store": "calendar_execution_budgets",
+      "key": "calendar-v1:owned_calendar_busy_20261024_v1",
+      "policyDigest": "b331bc40a5f4613b7fe172385b6e298cf1b031566783ba76e7b8a81b04e81c58"
+    },
+    "maxPhysicalGETs": 2,
+    "ledger": "/tmp/mc-calendar-budget-readonly-20261024-v1/attempts.jsonl"
+  },
+  "localVerification": {
+    "authorChecksPassed": 26,
+    "authorChecksFailed": 0,
+    "physicalNetworkRequests": 0,
+    "nativeCredentialReads": 0,
+    "liveExecutionPerformed": false,
+    "independentAcceptance": {
+      "reviewer": "Root, separate from diagnostic author",
+      "evidence": "scratchpad/calendar-budget-diagnostic-root-acceptance.json",
+      "sha256": "9a7857c03a99283a29d4ab26207b28f2db40405fa47cd894c70245a65757def0",
+      "groups": 5,
+      "physicalNetworkRequests": 0,
+      "nativeCredentialReads": 0,
+      "scope": "Separate signed-read failure/expiry/identity/projection scenarios plus complete static runner review. Does not establish actual Netlify transport success."
+    }
+  },
+  "suggestedOwnerQuestion": "Run the prepared read-only Calendar diagnosis: at most two HTTPS GETs to the single retained budget record, using existing Netlify authentication on the first request only? It makes no builds, emails, browser actions, Google/worker calls or configuration changes. The earlier test remains closed; this is fresh authority for that one read."
+}
