@@ -1,0 +1,81 @@
+// Pure offline selfcheck. Fake transport only; all physical socket APIs are denied.
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdtemp,readFile,stat,rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import net from 'node:net';import http from 'node:http';import https from 'node:https';import {syncBuiltinESMExports} from 'node:module';
+
+const {createController,fileLedger,TARGET,LIMITS,RUNTIME_LIMITS,SCOPE}=await import('./calendar-live-guard.mjs');
+const hash=x=>createHash('sha256').update(x).digest('hex'),canon=x=>Array.isArray(x)?x.map(canon):x&&typeof x==='object'?Object.fromEntries(Object.keys(x).sort().map(k=>[k,canon(x[k])])):x,digest=x=>hash(JSON.stringify(canon(x)));
+const NOW=Date.parse('2026-10-24T22:00:00.000Z'),site=TARGET.origin,slug='internal-calendar-1234',ownerKey='offline-permanent-owner-key',identity=hash(JSON.stringify([slug,ownerKey,TARGET.ownerEmail])),token=hash('offline-owner-session'),state=hash('offline-oauth-state'),revision=hash('offline-rules');
+let serial=0;
+function packet(){const signupFields={name:'Internal Owner',email:TARGET.ownerEmail,business:'M&C Internal Calendar Verification',phone:'+17135550142',plan:'starter',desiredChannels:['calendar'],botfield:'',windows:'8 to 12\n12 to 5'};return {version:1,scope:SCOPE,phaseId:'core-calendar-fixture-'+(++serial),approved:false,approvalId:null,approvedAt:new Date(NOW).toISOString(),approvalExpiresAt:new Date(NOW+120*60000).toISOString(),candidateCommit:'c'.repeat(40),target:structuredClone(TARGET),limits:structuredClone(LIMITS),runtimeLimits:structuredClone(RUNTIME_LIMITS),policyVersion:'fixture_core_calendar_v1',googleClientIdHash:hash('offline-google-client'),sourceManifestSHA256:hash('offline-source'),fixture:{name:signupFields.name,business:signupFields.business,ownerPhone:signupFields.phone,signupFields,intakeSubmissionId:'1'.repeat(32),visitSubmissionId:'2'.repeat(32),moveSubmissionId:'3'.repeat(32),cancelSubmissionId:'4'.repeat(32),oldWindowProbeSubmissionId:'5'.repeat(32),cancelledWindowProbeSubmissionId:'6'.repeat(32),date:'2031-11-04',window:'8 to 12',moveDate:'2031-11-05',moveWindow:'12 to 5'},blobRoutes:['calendar_connections','calendar_deliveries','calendar_oauth','clients','health','calendar_execution_budgets'].map(store=>({store,origin:'https://api.netlify.com',prefix:`/api/v1/blobs/${TARGET.siteId}/site:${store}/`}))};}
+async function fixture({p=packet(),clock=()=>NOW,persistence,signed=false,signedOverride=null,wrongSignedRecord=false}={}){
+ const signedRecords=new Map();let lastSigned=null;const rows=[],calls=[],used=Object.fromEntries(Object.keys(RUNTIME_LIMITS).map(k=>[k,0]));let nativeComplete=false,cCleanup=false,published=false,bound=null,current=null,job=null,failNext=false,redirectNext=false;
+ const owner=()=>({slug,owner:{email:TARGET.ownerEmail},business:{name:p.fixture.business},status:'testing'});
+ const json=(data,status=200)=>Response.json(data,{status});
+ const store=persistence||{async append(row){rows.push(structuredClone(row));}};
+ const transport=async(url,init)=>{
+  assert.equal(init.redirect,new URL(url).pathname==='/api/google/callback'?'manual':'error');assert.equal(rows.at(-1)?.event,'reserved_unknown');calls.push({url,method:init.method});if(failNext){failNext=false;throw Error('Offline ambiguous transport');}if(redirectNext){redirectNext=false;return new Response(null,{status:302,headers:{Location:'https://evil.example.test/'}});}
+  const u=new URL(url),body=init.body?JSON.parse(init.body):null;u.pathname=decodeURIComponent(u.pathname);
+  if(u.origin==='https://fixture-records.s3.amazonaws.com'){
+   assert.equal(new Headers(init.headers).has('authorization'),false);assert.equal(new Headers(init.headers).has('cookie'),false);
+   const record=signedRecords.get(u.href);assert.ok(record,'Only the immediate exact signed result can be used');signedRecords.delete(u.href);
+   return json(wrongSignedRecord?{...record,owner:{email:'other@example.test'}}:record);
+  }
+  if(signed&&u.pathname.includes('/site:')&&u.pathname.split('/site:')[1].includes('/')&&u.pathname.split('/site:')[1].split('/').slice(1).join('/')){
+   assert.equal(new Headers(init.headers).get('accept'),'application/json;type=signed-url');
+   let record;
+   if(u.pathname.includes('/site:clients/'))record={...owner(),owner:{email:TARGET.ownerEmail},ownerKey,onboarding:{version:1}};
+   else if(u.pathname.includes('/site:calendar_execution_budgets/'))record={version:1,policyDigest:bound.digest,used:{...used}};
+   else if(u.pathname.includes('/site:calendar_deliveries/'))record=job;
+   else if(u.pathname.includes('/site:calendar_connections/'))record={slug,tenantIdentity:identity,status:nativeComplete?'connected':'not_connected',googleClientIdHash:p.googleClientIdHash,targetHash:hash(TARGET.calendarAccount),targetId:TARGET.calendarAccount,availabilityConsentVersion:'2026-10-24-busy-v1',refresh:{fixture:true},connectedAt:new Date(NOW).toISOString()};
+   else if(u.pathname.endsWith('/site:health/calendarDelivery:lastDispatch'))record={ok:true,dispatched:true,at:new Date(NOW).toISOString()};
+   else if(u.pathname.endsWith('/site:health/calendarDelivery:lastRun'))record={ok:true,processed:1,at:new Date(NOW).toISOString(),completedAt:new Date(NOW).toISOString()};
+   else throw Error('Unknown signed fixture record');
+   const signedURL=signedOverride||`https://fixture-records.s3.amazonaws.com/private-record-${calls.length}?X-Amz-Date=20261024T220000Z&X-Amz-Expires=600&X-Amz-Signature=${'f'.repeat(64)}&X-Amz-Credential=fixture-secret-never-log`;
+   signedRecords.set(signedURL,record);lastSigned=signedURL;return json({url:signedURL});
+  }
+  if(['/styles.css','/desk-connections.css'].includes(u.pathname))return new Response('offline CSS fixture');
+  if(u.pathname==='/assets/favicon.png')return new Response(Uint8Array.from([137,80,78,71,13,10,26,10,255]),{headers:{'content-type':'image/png'}});
+  if(u.pathname===`/api/v1/sites/${TARGET.siteId}`)return json({id:TARGET.siteId,account_id:TARGET.accountId,published_deploy:{id:(cCleanup?'b':'a').repeat(24),state:'ready',commit_ref:published?p.candidateCommit:TARGET.baselineCommit}});
+  if(u.pathname.includes('/site:calendar_connections/')&&u.pathname.split('/site:calendar_connections/')[1])return json({slug,tenantIdentity:identity,status:nativeComplete?'connected':'not_connected',googleClientIdHash:p.googleClientIdHash,targetHash:hash(TARGET.calendarAccount),targetId:TARGET.calendarAccount,availabilityConsentVersion:'2026-10-24-busy-v1',refresh:{fixture:true},connectedAt:new Date(NOW).toISOString()});
+  if(u.pathname.includes('/site:clients/'))return json({...owner(),owner:{email:TARGET.ownerEmail},ownerKey,onboarding:{version:1}});
+  if(u.pathname.includes('/site:calendar_execution_budgets/'))return json({version:1,policyDigest:bound.digest,used:{...used}});
+  if(u.pathname.includes('/site:calendar_deliveries/')&&u.pathname.split('/site:calendar_deliveries/')[1])return json(job);
+  if(u.pathname.endsWith('/site:health/calendarDelivery:lastDispatch'))return json({ok:true,dispatched:true,at:new Date(NOW).toISOString()});if(u.pathname.endsWith('/site:health/calendarDelivery:lastRun'))return json({ok:true,processed:1,at:new Date(NOW).toISOString(),completedAt:new Date(NOW).toISOString()});if(u.pathname.includes('/site:'))return json({blobs:[],directories:[]});
+  if(u.pathname==='/api/access'){
+   if(body?.action==='request_link')return json({ok:true,delivery:'email'},202);
+   if(body?.action==='exchange')return json({ok:true,email:TARGET.ownerEmail,session:token,expiresAt:new Date(NOW+86400000).toISOString()});
+   if(body?.action==='sign_out')return json({ok:true});
+   return json({ok:true,email:TARGET.ownerEmail});
+  }
+  if(u.pathname==='/api/onboard')return json({ok:true,slug,client:owner(),portal:site+'/desk?c='+slug});
+  if(u.pathname==='/api/google/callback')return new Response(null,{status:303,headers:{Location:site+'/desk?c='+slug+'#calendar_state='+state+'&calendar_code=dummy-code'}});
+  if(u.pathname==='/api/client'){
+   if(init.method==='GET')return json({client:owner(),configurationRevision:revision,connections:{calendar:{connected:nativeComplete}},bookings:current?[{id:current.id,ownerVisit:current}]:[]});
+   if(body.action==='start_calendar_connection'){used.oauthStart++;const u=new URL('https://accounts.google.com/o/oauth2/v2/auth');u.searchParams.set('state',state);u.searchParams.set('redirect_uri',site+'/api/google/callback');for(const [key,value]of Object.entries({client_id:'offline-google-client',scope:'https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly',access_type:'offline',prompt:'consent',code_challenge_method:'S256',code_challenge:'offline-challenge'}))u.searchParams.set(key,value);return json({result:{authorizationUrl:u.href,expiresAt:new Date(NOW+600000).toISOString()}});}
+   if(body.action==='complete_calendar_connection'){used.tokenExchange++;used.calendarRead++;used.workerDispatch++;used.totalRequests+=3;return json({connections:{calendar:{connected:true}}});}
+   if(body.action==='create_visit'&&[p.fixture.oldWindowProbeSubmissionId,p.fixture.cancelledWindowProbeSubmissionId].includes(body.submissionId))return json({error:'calendar_conflict'},409);
+   if(['create_visit','reschedule_visit','cancel_visit'].includes(body.action)){current={id:bound.visitId,revision:hash(body.action),status:body.action==='cancel_visit'?'cancelled':'booked'};return json({localSaved:true,visit:current});}
+   if(body.action==='disconnect_calendar')return json({result:{calendar:{status:'disconnected'}}});
+   if(body.action==='cancel')return json({ok:true,status:'cancelled'});
+  }
+  if(u.pathname==='/api/calendar-delivery-background')return json({ok:true});
+  throw Error('Unexpected offline URL '+u.pathname);
+ };
+ const c=await createController({mode:'offline',packet:p,persistence:store,transport,now:clock});
+ const headers={Origin:site,'Content-Type':'application/json',Authorization:'Bearer '+token};
+ const request=(path,body)=>c.request({url:site+path,method:body?'POST':'GET',headers, ...(body?{body}:{})});
+ const blob=(kind,key='')=>c.request({url:'https://api.netlify.com'+p.blobRoutes.find(r=>r.store===kind).prefix+key});
+ async function signup(){await c.request({url:`https://api.netlify.com/api/v1/sites/${TARGET.siteId}`});for(let n=0;n<2;n++){await request('/api/access',{action:'request_link',email:TARGET.ownerEmail,plan:'starter'});const link=hash('mail-'+n);await c.registerExactMessageToken({recipient:TARGET.ownerEmail,token:link,exactMessageConfirmed:true});await c.request({url:site+'/api/access',method:'POST',headers:{Origin:site,'Content-Type':'application/json'},body:{action:'exchange',token:link}});if(!n)await request('/api/onboard',p.fixture.signupFields);}await request('/api/client?c='+slug);await c.next('census');}
+ async function cohort(){await signup();await blob('clients',slug);for(const kind of ['calendar_connections','calendar_deliveries','calendar_oauth']){await blob(kind);await blob(kind);}const visitId=hash(identity+':'+p.fixture.visitSubmissionId).slice(0,32);const policy={version:p.policyVersion,expiresAt:new Date(NOW+60*60000).toISOString(),tenant:{slug,identity},googleClientIdHash:p.googleClientIdHash,targetIdHash:hash(TARGET.calendarAccount),censusDigest:digest(['calendar_connections','calendar_deliveries','calendar_oauth'].map(kind=>({kind,rows:[]}))),censusMode:'clean_initial',bookingIds:[visitId,...[p.fixture.oldWindowProbeSubmissionId,p.fixture.cancelledWindowProbeSubmissionId].map(id=>hash(identity+':'+id).slice(0,32))],limits:structuredClone(RUNTIME_LIMITS)};bound=await c.bindCohort({primaryAccount:TARGET.calendarAccount,primaryOwnedUIConfirmed:true,primaryCalendarId:TARGET.calendarAccount,primaryUIEvidenceSHA256:hash('fixture-ui'),policy});await c.next('publish');for(const [key,value]of Object.entries({CALENDAR_CONNECTION_ENABLED:'true',CALENDAR_DELIVERY_ENABLED:'true',CALENDAR_EXECUTION_POLICY_JSON:JSON.stringify(policy),CALENDAR_EXECUTION_APPROVED_VERSION:p.policyVersion}))await c.stageEnvironment({key,value,context:'production',scopes:['functions']},async input=>({siteId:TARGET.siteId,...input,valueSHA256:hash(value)}));await c.recordStagedEnvironment({policyDigest:bound.digest,oldDeploymentCommit:TARGET.baselineCommit,oldSnapshotUnchanged:true,newCandidateCommit:p.candidateCommit,calendarConnection:true,calendarDelivery:true,otherServiceGatesOff:true,evidenceSHA256:hash('fixture-staged')});}
+ async function deploy(){await cohort();await c.publish(async()=>{published=true;return {pushedCommit:p.candidateCommit,buildsTriggered:1};});await c.request({url:`https://api.netlify.com/api/v1/sites/${TARGET.siteId}`});await c.next('calendar');}
+ const budget=()=>blob('calendar_execution_budgets','calendar-v1:'+p.policyVersion);
+ async function connect(){await deploy();await budget();await request('/api/client?c='+slug,{action:'start_calendar_connection',availabilityConsentVersion:'2026-10-24-busy-v1',expectedRevision:revision});await c.request({url:site+'/api/google/callback?state='+state+'&code=dummy-code'});await budget();await request('/api/client?c='+slug,{action:'complete_calendar_connection',state,code:'dummy-code'});}
+ async function receipt(stage){const sourceRevision=hash(stage);job={slug,tenantIdentity:identity,bookingId:bound.visitId,eventId:bound.eventId,targetId:TARGET.calendarAccount,targetHash:hash(TARGET.calendarAccount),state:stage==='delete'?'cancelled':'synced',sourceRevision,receipt:{eventId:bound.eventId,sourceRevision,confirmedAt:new Date(NOW).toISOString()}};await blob('calendar_deliveries',`${slug}/${identity}/${bound.visitId}`);await blob('health','calendarDelivery:lastDispatch');await blob('health','calendarDelivery:lastRun');await c.observeReceipt({stage,visitId:bound.visitId,eventId:bound.eventId,targetHash:hash(TARGET.calendarAccount),sourceRevision,confirmed:true,ownedRemoteConfirmed:true});}
+ return {setBinding:value=>{bound=value;},setPublished:()=>{published=true;},setJob:stage=>{const sourceRevision=hash(stage);job={slug,tenantIdentity:identity,bookingId:bound.visitId,eventId:bound.eventId,targetId:TARGET.calendarAccount,targetHash:hash(TARGET.calendarAccount),state:stage==='delete'?'cancelled':'synced',sourceRevision,receipt:{eventId:bound.eventId,sourceRevision,confirmedAt:new Date(NOW).toISOString()}};},nativeAccept:()=>{nativeComplete=true;used.tokenExchange++;used.calendarRead++;used.workerDispatch++;used.totalRequests+=3;},cleanupBuild:()=>{cCleanup=true;},c,p,rows,calls,signup,cohort,deploy,connect,budget,receipt,request,blob,headers,get bound(){return bound;},get current(){return current;},get lastSigned(){return lastSigned;},used,fail:()=>{failNext=true;},redirect:()=>{redirectNext=true;}};
+}
+
+export {fixture,packet,NOW,site,slug,token,state,revision,hash,identity};
