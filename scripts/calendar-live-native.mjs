@@ -22,7 +22,8 @@ export async function runAppleScript(script) {
 }
 export function ownedTabCloseScript(windowId,tabId) {
   if(!Number.isSafeInteger(windowId)||windowId<1||!Number.isSafeInteger(tabId)||tabId<1)fail('close_binding');
-  return `tell application "Google Chrome"
+  return `if application "Google Chrome" is not running then error "Dedicated browser not running"
+tell application "Google Chrome"
 if not (exists window id ${windowId}) then error "Dedicated window missing"
 if not (exists tab id ${tabId} of window id ${windowId}) then error "Dedicated tab missing"
 set controlledTab to tab id ${tabId} of window id ${windowId}
@@ -33,8 +34,20 @@ end if
 return "owned-calendar-target-absent"
 end tell`;
 }
+export function ownedTabPresenceScript(windowId,tabId) {
+  if(!Number.isSafeInteger(windowId)||windowId<1||!Number.isSafeInteger(tabId)||tabId<1)fail('close_binding');
+  // Existence only: never read a URL or inspect any other window/tab. Avoid
+  // launching Chrome merely to determine that its original window is absent.
+  return `if application "Google Chrome" is not running then return "owned-calendar-window-absent"
+tell application "Google Chrome"
+if not (exists window id ${windowId}) then return "owned-calendar-window-absent"
+if not (exists tab id ${tabId} of window id ${windowId}) then return "owned-calendar-tab-absent-in-present-window"
+return "owned-calendar-target-present"
+end tell`;
+}
 export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now() }={}) {
-  let windowId=null, tabId=null, attempted=false, seeded=false, navigated=false, closed=false, closeAttempted=false;
+  let windowId=null, tabId=null, attempted=false, seeded=false, navigated=false, closed=false, closeAttempted=false,absenceReadAttempted=false,closeReceipt=null;
+  const closeFailure=code=>{const error=new Error('Calendar native handoff: '+code);if(closeReceipt)Object.defineProperty(error,'nativeCloseReceipt',{value:structuredClone(closeReceipt),enumerable:false});throw error;};
   const inWindow=command=>`tell application "Google Chrome"\nif not (exists window id ${windowId}) then error "Dedicated window missing"\nif not (exists tab id ${tabId} of window id ${windowId}) then error "Dedicated tab missing"\ntell tab id ${tabId} of window id ${windowId}\n${command}\nend tell\nend tell`;
   return {
     async open({slug,token,authorizationUrl,state,expiresAt}) {
@@ -69,12 +82,28 @@ export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now()
     },
     async close() {
       if(windowId===null)fail('no_owned_window');
-      if(closed)return {windowId,tabId,closed:true};
-      if(closeAttempted)fail('close_outcome_unconfirmed');
+      if(closed)return structuredClone(closeReceipt);
+      if(closeAttempted)closeFailure('close_outcome_unconfirmed');
       closeAttempted=true;
-      if(await execute(ownedTabCloseScript(windowId,tabId))!=='owned-calendar-target-absent')fail('close_unconfirmed');
-      closed=true;return {windowId,tabId,closed:true};
+      closeReceipt={windowId,tabId,closed:false,scope:'original_window',globalTabDestructionConfirmed:false,closeCommandOutcome:'unconfirmed',absenceReadOutcome:'not_needed',provenance:'close_unconfirmed'};
+      let commandConfirmed=false;
+      try {commandConfirmed=await execute(ownedTabCloseScript(windowId,tabId))==='owned-calendar-target-absent';}
+      catch {closeReceipt.closeCommandOutcome='failed';}
+      if(commandConfirmed){closed=true;Object.assign(closeReceipt,{closed:true,closeCommandOutcome:'confirmed',provenance:'close_command_confirmed'});return structuredClone(closeReceipt);}
+      absenceReadAttempted=true;
+      closeReceipt.absenceReadOutcome='unconfirmed';
+      try {
+        const observation=await execute(ownedTabPresenceScript(windowId,tabId));
+        if(observation==='owned-calendar-window-absent'){
+          // This confirms only the saved window's absence. The command's cause
+          // remains unknown; a user could have moved its tab elsewhere.
+          closed=true;Object.assign(closeReceipt,{closed:true,absenceReadOutcome:'window_absent',provenance:'scoped_window_absence_observed'});return structuredClone(closeReceipt);
+        }
+        if(observation==='owned-calendar-tab-absent-in-present-window')closeReceipt.absenceReadOutcome='saved_window_present_tab_absent';
+        if(observation==='owned-calendar-target-present')closeReceipt.absenceReadOutcome='target_present';
+      } catch {closeReceipt.absenceReadOutcome='failed';}
+      closeFailure('close_unconfirmed');
     },
-    state:()=>({windowId,tabId,attempted,seeded,navigated,closed,closeAttempted})
+    state:()=>({windowId,tabId,attempted,seeded,navigated,closed,closeAttempted,absenceReadAttempted,closeReceipt:closeReceipt?structuredClone(closeReceipt):null})
   };
 }

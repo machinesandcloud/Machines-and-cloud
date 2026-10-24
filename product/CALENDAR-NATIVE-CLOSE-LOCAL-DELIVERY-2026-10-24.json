@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "date": "2026-10-24",
+  "baseCommit": "51ee21b73e7c51293029ab3fb0eab466aab4d5ff",
+  "slice": "Calendar native-close exact-window reconciliation",
+  "status": "Locally implemented and independently accepted; no external execution or publication",
+  "source": {
+    "scripts/calendar-live-native.mjs": "6fb2220e5fab349143938aa796888fa0fe17ae120b72d569992c1f04c080d735",
+    "scripts/calendar-live-guard.mjs": "d2de1a1ae0a7986a16288e3b10b630a5809d98e155f0fabc4eb757f080e909e2",
+    "scripts/calendar-native-close-check.mjs": "a142a307393ec7245769e94289a710eb21aa85e0fd0c6236dbfe202443450d8c",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103"
+  },
+  "changes": [
+    "One existing exact-ID close body, with stopped-application precondition before tell.",
+    "At most one separate existence-only original-window/tab query after an unconfirmed command.",
+    "Original-window absence is scoped observation with unknown command cause and no global tab-destruction claim.",
+    "Present original window with missing saved tab stays unconfirmed.",
+    "Guard reserves one close admission before effect; validates/protects safe provenance; uncertain/failed/lost effects do not refill."
+  ],
+  "localChecks": [
+    {
+      "path": "scratchpad/calendar-native-close-author-repaired.json",
+      "sha256": "451924be7bcdeb2181c916c31c61f3b46db60ab1379a67bea55ecccc7727e824",
+      "passed": 18,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-native-close-actor-repaired.json",
+      "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-native-close-guard-repaired.json",
+      "sha256": "22a0ee39882c71c440054d96cb1f11f2febb0315a23e013a2a3b20130df29c17",
+      "passed": 29,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-native-close-late-move-repaired.json",
+      "sha256": "4a11eeb542eb9822f8a2d999946a5919614cd4df862375c7f616e3ef48f6ba0f",
+      "passed": 22,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-native-close-selection-repaired.json",
+      "sha256": "0c944de121f2c6efb5e78de65c1c550619820b1a659449aa39c574bb21af4bbb",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "path": "scratchpad/calendar-native-close-control-repaired.json",
+      "sha256": "b802d0055caf9ff9b09af183f80a677ff70139b5b39e5977b33290df8bd48b8f",
+      "passed": 6,
+      "failed": 0
+    }
+  ],
+  "independentAcceptance": {
+    "path": "product/CALENDAR-NATIVE-CLOSE-INDEPENDENT-ACCEPTANCE-2026-10-24.json",
+    "sha256": "717f5ba40c5f61bbff5c78e90a3dcf17a2c7c9894f077ad5f3250c1a471a605a",
+    "passed": 15,
+    "failed": 0,
+    "physicalEffects": 0
+  },
+  "preservedFindings": [
+    {
+      "path": "scratchpad/calendar-native-close-author-before.json",
+      "disposition": "Old adapter has no existence reconciliation after close throw; injected results only."
+    },
+    {
+      "path": "scratchpad/calendar-native-close-author-first.json",
+      "disposition": "Author setup omitted mandatory post-OAuth budget read; corrected fixture, not product return."
+    },
+    {
+      "path": "scratchpad/calendar-native-close-independent-first.json",
+      "disposition": "Independent14/15 returned missing stopped-application close precondition; repaired with one prefix literal; final15/15."
+    }
+  ],
+  "procedure": {
+    "path": "product/CALENDAR-NATIVE-CLOSE-REPAIR-2026-10-24.md",
+    "sha256": "3123d4e8c27734dca5fe61f527e8194a64f6e92a46cb18480e6d2a7bb605b953",
+    "recommendation": "Diagnose exact consent problem and finish preflight; start a fresh timed connection only when Steve confirms he is present and ready now; reserve cleanup time before deadline."
+  },
+  "boundaries": [
+    "Original v7 source/packet/ledger/nativeClosed:false and timing exception remain unchanged.",
+    "Actual old-script about:blank success was reported by Root; original Google/Gmail close failure cause remains unknown.",
+    "No actual browser/subprocess/provider/credential/network/release effect by this slice.",
+    "No source-pin refresh or new phase authorization is included.",
+    "This is proof-tool acceptance, not actual Google consent or the same-event Calendar lifecycle."
+  ]
+}

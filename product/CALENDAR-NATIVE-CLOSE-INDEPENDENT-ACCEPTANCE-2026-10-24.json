@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T18:49:49.962423+00:00",
+  "role": "Independent QA",
+  "decision": "ACCEPTED_LOCAL_NATIVE_CLOSE_ADAPTER_AND_GUARD_ONLY",
+  "baseCommit": "51ee21b73e7c51293029ab3fb0eab466aab4d5ff",
+  "frozenSources": {
+    "scripts/calendar-live-native.mjs": "6fb2220e5fab349143938aa796888fa0fe17ae120b72d569992c1f04c080d735",
+    "scripts/calendar-live-guard.mjs": "d2de1a1ae0a7986a16288e3b10b630a5809d98e155f0fabc4eb757f080e909e2",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scratchpad/calendar-native-close-independent.mjs": "47ed99b2e9d5d0c15fb3e5990c58c6d1acd45c2deeb420170d62861c2c196256"
+  },
+  "acceptance": {
+    "receipt": "scratchpad/calendar-native-close-independent-repaired.json",
+    "sha256": "0bc75f1f26fd4da0af71370fa487e860df1cf6316e666a9ce98fd5000a9f4185",
+    "passed": 15,
+    "total": 15,
+    "sourceStable": true,
+    "actualNativeWindows": 0,
+    "actualProviderRequests": 0,
+    "deniedEffects": 0,
+    "mechanism": "Injected AppleScript return values, actual native handoff adapter and actual fixed proof controller with all subprocess/network APIs denied"
+  },
+  "acceptedInvariants": [
+    "Cleanup close and absence scripts fence a stopped Chrome application before invoking it; the query is existence-only for exact retained positive IDs. This is a source-level fence test, not a physical stopped-Chrome experiment.",
+    "One close command is admitted. Only a failed/unconfirmed command admits one separate exact saved-window/tab existence query; confirmed command makes no extra query. Cached known receipt cannot repeat effects.",
+    "Original window absent can establish only scoped_window_absence_observed, with unknown command cause and globalTabDestructionConfirmed:false. A missing tab in a present saved window remains uncertain.",
+    "Present target, malformed/failed read and mismatched identities preserve uncertainty without printing command output, URL, content or private stderr.",
+    "Receipt schema rejects unsupported fields, contradictory provenance and global-destruction claims. Bare historical receipt is accepted only when explicitly labelled legacy offline.",
+    "Direct and guard concurrency cannot repeat close/read. Guard durably reserves before effect, refuses malformed/foreign receipts and cannot refill authority after pre-effect journal failure or lost final acknowledgement.",
+    "A lost final acknowledgement leaves the proof poisoned and blocks all further advancement/replay; observed in-memory closure is not relabelled a durable final journal acknowledgement."
+  ],
+  "preservedReturn": {
+    "path": "scratchpad/calendar-native-close-independent-first.json",
+    "sha256": "6c679f88e3eea5ca79ab23408a6cb51ce4cb4658b04541e737cf11b0aad83309",
+    "result": "14/15 source stable",
+    "failure": "Close script invoked tell application without a pre-tell stopped-application fence, although the read script already had that fence.",
+    "repair": "One precondition before the existing close script tell; no changes to open, presence query or application runtime.",
+    "oldNativeSHA256": "0c3a630ca4bfcfb876652bb6f226f4c845d8d32ca650afaad49415242a3f26cb",
+    "newNativeSHA256": "6fb2220e5fab349143938aa796888fa0fe17ae120b72d569992c1f04c080d735",
+    "strictSingleLiteralReverseBridge": true,
+    "postRepairAffected15Passed": true
+  },
+  "sourceScope": {
+    "applicationRuntimeChanged": false,
+    "trackedPathsChangedFromBase": [
+      "scripts/calendar-live-guard.mjs",
+      "scripts/calendar-live-native.mjs"
+    ],
+    "oldV7PhaseUntouched": true,
+    "guardAndAdapterReceiptsExplicitlyScopeOriginalWindow": true
+  },
+  "evidence": [
+    {
+      "path": "scratchpad/calendar-native-close-independent.mjs",
+      "sha256": "47ed99b2e9d5d0c15fb3e5990c58c6d1acd45c2deeb420170d62861c2c196256"
+    },
+    {
+      "path": "scratchpad/calendar-native-close-independent-first.json",
+      "sha256": "6c679f88e3eea5ca79ab23408a6cb51ce4cb4658b04541e737cf11b0aad83309"
+    },
+    {
+      "path": "scratchpad/calendar-native-close-independent-repaired.json",
+      "sha256": "0bc75f1f26fd4da0af71370fa487e860df1cf6316e666a9ce98fd5000a9f4185"
+    }
+  ],
+  "limits": [
+    "Synthetic adapter/controller acceptance only. No real browser/application execution, Google request, consent, event, deployment or actual cleanup effect was performed by independent QA.",
+    "Does not prove agent-caused closure or destruction of a moved tab. It records direct command confirmation or original-window absence with distinct provenance.",
+    "Does not erase the original v7 late close607.421seconds, later absence observation, nativeClosed:false/closed:false guard exception, or failed consent outcome. Closed allowances remain closed.",
+    "The repair does not provide a watchdog or retrospectively satisfy the original600second window. Root owns prompt bounded cleanup and any separately scoped actual blank-window check."
+  ],
+  "scriptsFrozen": true,
+  "runtimeEditsByIndependentQA": false,
+  "indexWritesByIndependentQA": false
+}
