@@ -18,6 +18,8 @@ const id=(v,p)=>typeof v==='string'&&new RegExp('^'+p+'[A-Za-z0-9_]{3,160}$').te
 const digest=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
 const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
 const sha=v=>createHash('sha256').update(typeof v==='string'?v:JSON.stringify(canonical(v))).digest('hex');
+const predecessorFields=['phaseId','policyDigest','checkoutId','requestId','cleanupOperationId','closeOperationId','expirationEventId'];
+function validPredecessor(v){return exact(v,predecessorFields)&&/^[a-z0-9_-]{1,100}$/.test(v.phaseId||'')&&digest(v.policyDigest)&&id(v.checkoutId,'cs_test_')&&/^[a-f0-9]{32}$/.test(v.requestId||'')&&/^[a-f0-9]{32}$/.test(v.cleanupOperationId||'')&&/^[a-f0-9]{32}$/.test(v.closeOperationId||'')&&id(v.expirationEventId,'evt_');}
 export function verifyPublicWorkspace(p,dto,{now=Date.now()}={}){
   const require=(condition,code)=>{if(!condition){const error=new Error('The actual website workspace preflight failed: '+code);error.code=code;throw error;}};
   const c=dto?.client,install=dto?.websiteInstallation,revision=dto?.configurationRevision;
@@ -30,7 +32,7 @@ export function verifyPublicWorkspace(p,dto,{now=Date.now()}={}){
   require(c.setupProof?.reviewedRevision===revision&&c.setupProof.testedRevision===revision&&c.setupProof.testMode==='live'&&validTime(c.createdAt)&&validTime(c.setupProof.reviewedAt)&&validTime(c.setupProof.testedAt)&&Date.parse(c.setupProof.reviewedAt)>=Date.parse(c.createdAt)&&Date.parse(c.setupProof.testedAt)>=Date.parse(c.createdAt),'workspace_review_or_practice_stale');
   require(install?.tenantIdentity===p.owner.tenantIdentity&&install.configurationRevision===revision&&install.editRevision===dto.editRevision,'workspace_installation_identity');
   let website;try{website=new URL(c.business?.website);}catch{}
-  require(website&&website.origin===PUBLIC_WORKSPACE_WEBSITE.origin&&website.pathname===PUBLIC_WORKSPACE_WEBSITE.path&&!website.username&&!website.password&&!website.port&&!website.hash&&website.searchParams.get('client')===p.owner.slug&&website.searchParams.get('phase')===p.phaseId&&[...website.searchParams.keys()].sort().join(',')==='client,phase'&&install.website===c.business.website,'workspace_website_not_bound');
+  require(website&&website.origin===PUBLIC_WORKSPACE_WEBSITE.origin&&website.pathname===PUBLIC_WORKSPACE_WEBSITE.path&&!website.username&&!website.password&&!website.port&&!website.hash&&website.searchParams.get('client')===p.owner.slug&&website.searchParams.get('phase')===(p.carriedWorkspaceAcceptance?.phaseId||p.phaseId)&&[...website.searchParams.keys()].sort().join(',')==='client,phase'&&install.website===c.business.website,'workspace_website_not_bound');
   require(Array.isArray(c.widget?.allowedOrigins)&&c.widget.allowedOrigins.length===1&&c.widget.allowedOrigins[0]===PUBLIC_WORKSPACE_WEBSITE.origin,'workspace_origin_scope');
   require(install.selectedOrigin===website.origin&&install.originAllowed===true&&install.observation?.state==='found'&&install.observation.origin===website.origin&&validTime(install.observation.at)&&install.customerChat?.state==='active'&&install.customerChat.available===true,'workspace_installation_not_current');
   require(install.setupRequest?.state==='complete'&&install.attempt?.state==='complete'&&/^[a-f0-9]{32}$/.test(install.attempt.id||'')&&validTime(install.setupRequest.at),'workspace_setup_request_missing');
@@ -45,17 +47,21 @@ export function verifyPublicWorkspace(p,dto,{now=Date.now()}={}){
   };
   const setupRequest=record(install.setupRequest.record,true),ordinaryRequest=record(install.firstExternalRequest.record,false);
   require(setupRequest.id!==ordinaryRequest.id,'workspace_setup_is_not_ordinary');
-  return {slug:p.owner.slug,tenantIdentity:p.owner.tenantIdentity,configurationRevision:revision,editRevision:dto.editRevision,websiteOrigin:website.origin,websitePath:website.pathname,phaseId:p.phaseId,reviewedAt:c.setupProof.reviewedAt,testedAt:c.setupProof.testedAt,testMode:'live',setupRequest,ordinaryRequest,observedAt:new Date(now).toISOString()};
+  if(p.carriedWorkspaceAcceptance){const carry=p.carriedWorkspaceAcceptance;require(carry.tenantIdentity===p.owner.tenantIdentity&&carry.configurationRevision===revision&&carry.editRevision===dto.editRevision&&sha(carry.setupRequest)===sha(setupRequest)&&sha(carry.ordinaryRequest)===sha(ordinaryRequest)&&Date.parse(c.createdAt)>=Date.parse(carry.issuedAt)-60000&&[c.setupProof.reviewedAt,c.setupProof.testedAt,setupRequest.createdAt,ordinaryRequest.createdAt].every(time=>Date.parse(time)<=Date.parse(carry.acceptedAt)),'workspace_carried_acceptance_changed');}
+  return {slug:p.owner.slug,tenantIdentity:p.owner.tenantIdentity,configurationRevision:revision,editRevision:dto.editRevision,websiteOrigin:website.origin,websitePath:website.pathname,phaseId:p.phaseId,reviewedAt:c.setupProof.reviewedAt,testedAt:c.setupProof.testedAt,testMode:'live',setupRequest,ordinaryRequest,...(p.carriedWorkspaceAcceptance?{carriedWorkspaceAcceptance:p.carriedWorkspaceAcceptance}:{}),observedAt:new Date(now).toISOString()};
 }
 export function validatePublicPacket(p,{sourceId,manifestSHA,now=Date.now()}={}){
-  assert.ok(exact(p,['version','phaseId','origin','sourceId','sourceManifestSHA','publishedCommit','publishedDeployId','issuedAt','expiresAt','owner','phase','fixture','webhook','cleanupOperationId','closeOperationId']),'Exact current public proof packet required');
+  const packetFields=['version','phaseId','origin','sourceId','sourceManifestSHA','publishedCommit','publishedDeployId','issuedAt','expiresAt','owner','phase','fixture','webhook','cleanupOperationId','closeOperationId'];if(p&&Object.hasOwn(p,'carriedWorkspaceAcceptance'))packetFields.push('carriedWorkspaceAcceptance');
+  assert.ok(exact(p,packetFields),'Exact current public proof packet required');
   assert.equal(p.version,1);assert.equal(p.origin,PUBLIC_ORIGIN);assert.equal(p.sourceId,sourceId);assert.equal(p.sourceManifestSHA,manifestSHA);
   assert.match(p.phaseId,/^[a-z0-9_-]{1,100}$/);assert.match(p.publishedCommit,/^[a-f0-9]{40}$/);assert.match(p.publishedDeployId,/^[a-f0-9]{24}$/);
   assert.equal(new Date(p.issuedAt).toISOString(),p.issuedAt);assert.equal(new Date(p.expiresAt).toISOString(),p.expiresAt);
   assert.ok(Date.parse(p.issuedAt)<=now&&Date.parse(p.expiresAt)>now&&Date.parse(p.expiresAt)-Date.parse(p.issuedAt)<=4*3600000,'Public proof packet expired or invalid');
   assert.ok(exact(p.owner,['slug','tenantIdentity','email','bearer']));assert.match(p.owner.slug,/^[a-z0-9][a-z0-9-]{0,39}$/);assert.ok(digest(p.owner.tenantIdentity));
   assert.ok(typeof p.owner.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.owner.email));assert.match(p.owner.bearer,/^[a-f0-9]{64}$/);
-  assert.ok(exact(p.phase,['version','phaseId','issuedAt','expiresAt','stripeAccountId','offerDigest','tenant','maxAttempts','cleanupReserve','cleanupOnExpiry']));
+  const phaseFields=['version','phaseId','issuedAt','expiresAt','stripeAccountId','offerDigest','tenant','maxAttempts','cleanupReserve','cleanupOnExpiry'];if(Object.hasOwn(p.phase,'predecessor'))phaseFields.push('predecessor');assert.ok(exact(p.phase,phaseFields));
+  if(p.phase.predecessor){assert.ok(validPredecessor(p.phase.predecessor));assert.notEqual(p.phase.predecessor.phaseId,p.phaseId);assert.ok(p.carriedWorkspaceAcceptance,'A restart must bind the actual retained website acceptance');}
+  if(p.carriedWorkspaceAcceptance){const v=p.carriedWorkspaceAcceptance;assert.ok(exact(v,['phaseId','issuedAt','acceptedAt','sourceId','publishedCommit','publishedDeployId','tenantIdentity','configurationRevision','editRevision','setupRequest','ordinaryRequest']));assert.match(v.phaseId,/^[a-z0-9_-]{1,100}$/);assert.notEqual(v.phaseId,p.phaseId);assert.equal(v.tenantIdentity,p.owner.tenantIdentity);for(const field of ['configurationRevision','editRevision'])assert.ok(digest(v[field]));assert.match(v.sourceId,/^sha256:[a-f0-9]{64}$/);assert.match(v.publishedCommit,/^[a-f0-9]{40}$/);assert.match(v.publishedDeployId,/^[a-f0-9]{24}$/);for(const time of ['issuedAt','acceptedAt'])assert.equal(new Date(v[time]).toISOString(),v[time]);assert.ok(Date.parse(v.issuedAt)<=Date.parse(v.acceptedAt)&&Date.parse(v.acceptedAt)<=Date.parse(p.issuedAt));for(const ref of [v.setupRequest,v.ordinaryRequest]){assert.ok(exact(ref,['kind','id','createdAt'])&&['leads','bookings'].includes(ref.kind)&&/^[a-f0-9]{10,64}$/.test(ref.id||''));assert.equal(new Date(ref.createdAt).toISOString(),ref.createdAt);assert.ok(Date.parse(ref.createdAt)>=Date.parse(v.issuedAt)-60000&&Date.parse(ref.createdAt)<=Date.parse(v.acceptedAt));}assert.notEqual(v.setupRequest.id,v.ordinaryRequest.id);}
   assert.equal(p.phase.phaseId,p.phaseId);assert.equal(p.phase.stripeAccountId,PUBLIC_STRIPE_ACCOUNT);assert.equal(p.phase.expiresAt,p.expiresAt);assert.ok(digest(p.phase.offerDigest));
   assert.equal(p.phase.issuedAt,p.issuedAt);assert.match(p.phase.version,/^[a-z0-9_-]{1,80}$/);
   assert.equal(p.phase.maxAttempts,80);assert.equal(p.phase.cleanupReserve,20);assert.equal(p.phase.cleanupOnExpiry,true);
@@ -64,6 +70,15 @@ export function validatePublicPacket(p,{sourceId,manifestSHA,now=Date.now()}={})
   assert.ok(exact(p.webhook,['id','phaseMetadata']));assert.ok(id(p.webhook.id,'we_'));assert.equal(p.webhook.phaseMetadata,p.phaseId);
   assert.match(p.cleanupOperationId,/^[a-f0-9]{32}$/);assert.match(p.closeOperationId,/^[a-f0-9]{32}$/);assert.notEqual(p.cleanupOperationId,p.closeOperationId);
   return p;
+}
+export function verifyPublicInitialBilling(p,billing){
+  assert.equal(billing?.status,'none');
+  if(!p.phase.predecessor){assert.equal(billing.checkout,null);assert.ok(!billing.testProof,'A public phase cannot adopt an earlier billing proof');return null;}
+  const expected=p.phase.predecessor,proof=billing.testProof;
+  assert.ok(proof&&proof.mode==='TEST'&&proof.state==='closed'&&proof.phaseId===expected.phaseId&&proof.policyDigest===expected.policyDigest&&proof.tenantIdentity===p.owner.tenantIdentity&&proof.stripeAccountId===PUBLIC_STRIPE_ACCOUNT&&proof.cleanup?.state==='complete'&&proof.cleanup.operationId===expected.cleanupOperationId&&proof.closeOperationId===expected.closeOperationId&&proof.checkoutId===expected.checkoutId&&!proof.subscriptionId&&!proof.customerId&&!proof.invoiceId&&billing.livemode===false);
+  assert.ok(Date.parse(proof.closedAt)<=Date.parse(p.issuedAt));assert.equal(billing.checkout?.state,'expired');assert.equal(billing.checkout.requestId,expected.requestId);assert.equal(billing.checkout.url,null);
+  assert.ok(proof.receipts.some(r=>r.id===expected.expirationEventId&&r.type==='checkout.session.expired'&&r.objectId===expected.checkoutId&&r.checkoutId===expected.checkoutId&&r.verifiedDestination==='workspace'&&!r.subscriptionId&&!r.customerId));
+  return {phaseId:proof.phaseId,policyDigest:proof.policyDigest,state:proof.state,closedAt:proof.closedAt,spent:proof.spent,checkoutId:proof.checkoutId,expirationEventId:expected.expirationEventId};
 }
 export function verifyPublicSnapshot(p,billing,{allowUnstarted=false}={}){
   assert.ok(billing&&typeof billing==='object');
@@ -108,11 +123,15 @@ export function verifyPublicSubscription(p,subscription,owned,attempt){
 }
 
 // This exact allowlist sits before every Node/app/browser transport in the
-// existing runner. Hosted Stripe attempts and this process share its40 cap;
+// existing runner. Public hosted/Node attempts share its80 cap (20 cleanup);
 // deployment Functions have their separate immutable80 cap in the billing row.
 export class PublicProofGuard {
   constructor(packet,{budget,report,save}){this.packet=packet;this.budget=budget;this.report=report;this.save=save;this.accountVerified=false;this.cleanup=false;this.owned={checkout:null,subscription:null,customer:null,invoice:null};this.checkoutDispatched=false;this.cancelDispatched=false;}
   adopt(billing){const proof=verifyPublicSnapshot(this.packet,billing,{allowUnstarted:true});if(!proof)return null;for(const [field,dto] of [['checkout','checkoutId'],['subscription','subscriptionId'],['customer','customerId'],['invoice','invoiceId']])if(proof[dto]){assert.ok(!this.owned[field]||this.owned[field]===proof[dto],'Saved public proof object changed');this.owned[field]=proof[dto];}if(proof.cleanup){assert.match(proof.cleanup.operationId,/^[a-f0-9]{32}$/);assert.ok(!this.cleanupOperationId||this.cleanupOperationId===proof.cleanup.operationId,'Saved cleanup operation changed');this.cleanupOperationId=proof.cleanup.operationId;}return proof;}
+  workspaceSite(url){
+    const p=this.packet;assert.ok(p.carriedWorkspaceAcceptance&&!this.cleanup&&Date.parse(p.expiresAt)>Date.now());assert.equal(url.origin,PUBLIC_WORKSPACE_WEBSITE.origin);assert.equal(url.pathname,PUBLIC_WORKSPACE_WEBSITE.path);assert.ok(!url.username&&!url.password&&!url.port&&!url.hash);assert.deepEqual([...url.searchParams.keys()].sort(),['client','phase']);assert.equal(url.searchParams.get('client'),p.owner.slug);assert.equal(url.searchParams.get('phase'),p.carriedWorkspaceAcceptance.phaseId);assert.ok(this.report.siteRequests.length<160,'Public site request allowance is spent');
+    const entry={method:'GET',hostname:url.hostname,path:url.pathname,state:'reserved_unknown',purpose:'current carried website installation'};this.report.siteRequests.push(entry);this.save();return entry;
+  }
   site(url,method,body='',headers={}){
     assert.equal(url.origin,PUBLIC_ORIGIN);assert.ok(!url.username&&!url.password&&!url.port);assert.ok(['GET','POST'].includes(method));
     assert.ok(this.cleanup||Date.parse(this.packet.expiresAt)>Date.now(),'The public proof phase expired');

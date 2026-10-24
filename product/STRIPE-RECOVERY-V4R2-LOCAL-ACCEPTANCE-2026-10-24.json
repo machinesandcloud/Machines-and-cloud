@@ -1,0 +1,67 @@
+{
+  "state": "LOCAL_AUTHOR_ACCEPTED_INDEPENDENT_QA_PENDING",
+  "baseCommit": "0e762f9f28fe9a30b7368db659123667051871e9",
+  "scope": "Same ready website tenant, explicit expired/closed TEST phase successor, source-bound public runner diagnostics and finite allowance. No legacy/LIVE or readiness reset.",
+  "sourceHashes": {
+    "netlify/functions/lib/workspace-billing.mjs": "08648ccfb9e6092908bbd5bb5b11899b0301d80ad3d9b2e7f39ea68d5c1aafdb",
+    "scripts/lib/stripe-public-proof.mjs": "df7fd7f570cee60eb966143a5f71bace6ffcaaff91b219e47d897ec923fcca85",
+    "scripts/lib/stripe-public-execution.mjs": "30eb419670e89d0ffedd7a3c687049ee86a8cb7bc01ffd890f0f0ece7a2241f0",
+    "scripts/stripe-test-lifecycle-proof.mjs": "e5a063adb5930a081a9a378cd02fa1adccc1f7b2e3af4d569c6ad54ab6d66859",
+    "scripts/stripe-test-proof-fixture.mjs": "5ccbd4558abbe2baf104c6de30a607f0eebc8df0307c8328b0328673069e77c1",
+    "scripts/workspace-billing-public-proof-check.mjs": "d943351e794d0f3b45f12bf720dcdd0cb4dab89c6227fc83d6911e2a316605f4",
+    "scripts/stripe-workspace-preflight-check.mjs": "c42877e261a73c996bc0a7b3d8fbe9ba3b582c4fd03f3b087ff2bd9cd29235c3",
+    "scripts/stripe-restart-tool-check.mjs": "3db6a699b943b7276cb6e43fd71aa42c609e05355967df84fd95dcd6d1a76e99"
+  },
+  "authorEvidence": [
+    {
+      "path": "scratchpad/stripe-restart-boundaries-final.json",
+      "checks": 31,
+      "sha256": "629449eeb817553866d950b81b528160e702120302c945aa80f3a4ade59195e7",
+      "physicalProviderEffects": 0
+    },
+    {
+      "path": "scratchpad/stripe-restart-preflight-final.json",
+      "checks": 38,
+      "sha256": "7491a25c3306d61cbe1fab3c1c0535a385efb6d74b70c95cdefd092128a425ac",
+      "physicalProviderEffects": 0
+    },
+    {
+      "path": "scratchpad/stripe-restart-tools-final.json",
+      "checks": 8,
+      "sha256": "c0d53fc28ed519c1a3748e023811264571c4af7e98067ed8fee5fefb54d4ddb8",
+      "physicalProviderEffects": 0
+    },
+    {
+      "path": "scratchpad/stripe-restart-checkpoint-final.json",
+      "checks": 13,
+      "sha256": "3babcaad9e483c41becc3e61ffaace383d7e6afddc2f1effe515fca919518675",
+      "physicalProviderEffects": 0
+    }
+  ],
+  "preservedFailures": [
+    {
+      "path": "scratchpad/stripe-restart-boundaries-first.json",
+      "passed": 27,
+      "total": 31,
+      "disposition": "Author fixtures retained one global Checkout while looping fresh synthetic tenants; bounded two-Checkout fixture and per-case provider fixed setup. Paused workspace was correctly rejected503, while the first assertion required409. No failed product behavior was hidden."
+    },
+    {
+      "kind": "checkpoint CLI invocation",
+      "disposition": "First invocation passed unsupported --output argument and stopped before checks; positional output replacement passes13. No runtime change."
+    }
+  ],
+  "sourcePins": "Final integration manifest and runner pins intentionally remain Root-owned; no claim that stale manifest self-check passes.",
+  "independentAcceptance": null,
+  "actualProviderAcceptance": false,
+  "actualCardEntry": false,
+  "actualPayment": false,
+  "privateCredentialReads": 0,
+  "rootFilesChanged": false,
+  "existingV4Failure": "Retained closed financial failure; actual signed expiration does not prove payment. Original native-creation uncertainty remains separate.",
+  "contract": "product/STRIPE-RECOVERY-V4R2-CONTRACT-2026-10-24.md",
+  "officialSources": [
+    "https://docs.stripe.com/security/guide",
+    "https://docs.stripe.com/testing",
+    "https://docs.stripe.com/automated-testing"
+  ]
+}
