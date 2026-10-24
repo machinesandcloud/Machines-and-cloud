@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-24T11:13:19.670422+00:00",
+  "reviewer": "signup_feedback_qa; independent from UI implementation",
+  "sourceCommit": "344358db44607a8a6ca92759f9d2053066ea576f",
+  "localAcceptance": "PASS for the bounded customer/operator email-request feedback and observed recovery flows on exact local source. No deployment, provider send, live mailbox delivery, or full-platform launch acceptance.",
+  "boundary": "Actual customer/operator browser assets with local API fixtures and stubbed authenticated destinations. No provider/account/native-browser access, real emails, deployment or external HTTP.",
+  "source": {
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+    "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+    "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "evidence": {
+    "baseline": {
+      "path": "scratchpad/signup-feedback-independent-baseline.json",
+      "sha256": "acfafc06f1cc63101766df805afae49a0d113e9cb6b843301f3b45dcd557b876"
+    },
+    "contractInitial": {
+      "path": "scratchpad/signup-feedback-independent-contract.json",
+      "sha256": "1ae83343f05da240450cf310ba6827398423ad4f82ed765152038efb2da3c279"
+    },
+    "contractAccepted": {
+      "path": "scratchpad/signup-feedback-independent-contract-r2.json",
+      "sha256": "a67a22c1de78130d8719a9a71c5a46f32e9cff14d5aabc303034b095651d2fc2"
+    },
+    "uiInitial": {
+      "path": "scratchpad/signup-feedback-independent-ui-r1.json",
+      "sha256": "c48263e287a1d762dd01f607654129e8bcdaf2fb8092047464741d4ffb49496e"
+    },
+    "uiPreGuard": {
+      "path": "scratchpad/signup-feedback-independent-ui-r2.json",
+      "sha256": "2ebc687bb89556d2153b0d978544e5df0039b13304149b5dd19c2a6746052983"
+    },
+    "uiAccepted": {
+      "path": "scratchpad/signup-feedback-independent-ui-r3.json",
+      "sha256": "47edd44b441ddab0aa984b929e68c6491c5e22e99cdb02ebd31fde2c593a5f82"
+    }
+  },
+  "baseline": {
+    "immutableSourceCommit": "1e73e43db041bacf55246b2d65ce33812be46c9c",
+    "viewports": [
+      320,
+      390,
+      1440
+    ],
+    "reproduced": true,
+    "observation": "Accepted202 left original title, active initial form/button and submit focus; only small status text changed."
+  },
+  "acceptedChecks": {
+    "browserBehaviorGroups": 48,
+    "actualHandlerContractGroups": 9,
+    "notCombined": "Browser API fixtures and actual memory/protocol handler tests establish different claims. Broad journey suite results remain separate."
+  },
+  "browserCoverage": [
+    "Actual frozen onboarding/operator HTML, JavaScript and CSS at320,390,1440; long exact submitted address; visible confirmation and meaningful focus/announcement; no horizontal overflow.",
+    "Pending duplicate/hidden-form submission guards; controlled resend/correct address; known400/429/500/503; rejected resend preserving current recipient; local test outbox distinction.",
+    "Malformed200/202 bodies; uncertain transport/timeout and late result; no automatic resend or false delivered-to-inbox claim; preliminary handoff/plan preserved; automatic customer hash routing and held-state hidden control.",
+    "Operator conditional no-enumeration response, explicit operator verification, expired410 return to a usable request form, exchanged/stored-session503 read-only retry,403 authority clearing."
+  ],
+  "handlerCoverage": [
+    "Actual access/manage handlers using memory storage and loopback-only fake outbox; two fully synthetic Resend protocol fixture responses; zero network attempts.",
+    "Email/test_outbox/conditional202 distinctions; actual400/429 and origin403; purpose-separated one-use exchange; accepted send versus rejected503."
+  ],
+  "preservedFailures": [
+    {
+      "path": "scratchpad/signup-feedback-independent-contract.json",
+      "disposition": "Harness configuration error: synthetic RESEND key was installed after send.mjs import snapshots. No product defect was inferred. Runner corrected to set synthetic non-secret before imports; accepted r2 retains9 meaningfully passing groups."
+    },
+    {
+      "path": "scratchpad/signup-feedback-independent-ui-r1.json",
+      "disposition": "38/41 passed; three harness waits incorrectly required a hidden admin request button to enable during the intentional30second cooldown. Busy-completion predicate replaced that wait. Original failures retained; cases pass in r2/r3."
+    },
+    {
+      "path": "scratchpad/signup-feedback-independent-ui-r2.json",
+      "disposition": "47/47 accepted on its exact earlier source. Engineer then added one-line hidden change-email guard. Current r3 reruns affected UI source and adds the held-verification case,48/48; pre-guard receipt not used as final-source proof."
+    }
+  ],
+  "staleSuiteTriage": {
+    "path": "scripts/customer-onboarding-ui-check.mjs:194",
+    "retainedFailure": "scratchpad/signup-feedback-actual-handler-full.json",
+    "disposition": "The expected zero voice/SMS connection cards contradicts accepted all-four-discoverable design in product/COMPLETE-CONNECTIONS-PO-2026-10-23.json:81. Only card-absence predicate obsolete; actual inactive voice/SMS, unchecked choices and lack of active claim remain essential. Root owns focused replacement replay; original52/53 must remain labeled partial."
+  },
+  "visualReview": {
+    "inspected": [
+      "scratchpad/signup-feedback-independent-r1-customer-confirmed-320.png",
+      "scratchpad/signup-feedback-independent-r1-operator-confirmed-1440.png"
+    ],
+    "finalScreenshots": [
+      "scratchpad/signup-feedback-independent-r3-customer-confirmed-320.png",
+      "scratchpad/signup-feedback-independent-r3-customer-confirmed-390.png",
+      "scratchpad/signup-feedback-independent-r3-customer-confirmed-1440.png",
+      "scratchpad/signup-feedback-independent-r3-customer-unknown-timeout.png",
+      "scratchpad/signup-feedback-independent-r3-operator-confirmed-320.png",
+      "scratchpad/signup-feedback-independent-r3-operator-confirmed-390.png",
+      "scratchpad/signup-feedback-independent-r3-operator-confirmed-1440.png",
+      "scratchpad/signup-feedback-independent-r3-operator-unknown-timeout.png",
+      "scratchpad/signup-feedback-independent-r3-operator-conditional.png"
+    ],
+    "observation": "Prominent separate email confirmation with wrapped exact address, controlled actions and keyboard focus. Final CSS remains source-matched to the inspected images; final r3 captures each viewport too."
+  },
+  "sourceStable": true,
+  "browserPageErrors": [],
+  "nodeHTTPAttempts": 0,
+  "effects": {
+    "realEmails": 0,
+    "providerOrAccountBrowserAccess": 0,
+    "liveProviderRequests": 0,
+    "deployments": 0,
+    "productionChanges": 0
+  },
+  "remaining": "PO observes the bounded customer job separately. Publication and actual email/provider delivery remain unaccepted in this slice. Closed Calendar authority remains closed."
+}

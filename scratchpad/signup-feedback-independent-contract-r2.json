@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-24T11:04:02.077Z",
+  "boundary": "Actual local access/manage handlers; memory storage. Provider credentials removed; synthetic email protocol fixture only. No socket/network or real send.",
+  "before": {
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/operator.mjs": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c",
+    "netlify/functions/lib/send.mjs": "4cab08334554822a8101432949cf1440f729df921123611155968941f7e9be09",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af"
+  },
+  "checks": [
+    {
+      "name": "customer accepted local response explicitly distinguishes no email from provider send",
+      "pass": true
+    },
+    {
+      "name": "operator local response uses explicit operator destination and no-email contract",
+      "pass": true
+    },
+    {
+      "name": "operator unauthorized-address accepted response is conditional, without send or account disclosure",
+      "pass": true
+    },
+    {
+      "name": "actual invalid address returns400, not an accepted-email state",
+      "pass": true
+    },
+    {
+      "name": "server remains the authoritative per-address rate limiter",
+      "pass": true
+    },
+    {
+      "name": "operator proof cannot exchange through customer endpoint and customer proof cannot exchange through operator endpoint",
+      "pass": true
+    },
+    {
+      "name": "cross-origin send is forbidden before sending anything",
+      "pass": true
+    },
+    {
+      "name": "provider-accepted send fixture returns delivery=email, rather than a delivery-to-inbox receipt",
+      "pass": true
+    },
+    {
+      "name": "provider rejection fixture returns503 and no accepted success",
+      "pass": true
+    }
+  ],
+  "protocolFixtureRequests": 2,
+  "nodeHTTPAttempts": 0,
+  "after": {
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/manage.mjs": "697c8e32de8da199884b0bc03a20f57ea9bcee35ca930c6d933881e7e19143d4",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/operator.mjs": "4232ef53230a24591d4b80cfc0b7e4d03eeaa9f4db20be63244476ef8506733c",
+    "netlify/functions/lib/send.mjs": "4cab08334554822a8101432949cf1440f729df921123611155968941f7e9be09",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af"
+  },
+  "sourceStable": true,
+  "pass": true,
+  "scriptSHA256": "2ab92a912c3ecd1c4bedbf731c09701ad57da9009bbecb4eb65a6ecdb32450b3"
+}

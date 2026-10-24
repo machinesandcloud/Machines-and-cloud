@@ -1,0 +1,1367 @@
+{
+  "at": "2026-10-24T11:09:23.902Z",
+  "boundary": "Actual customer/operator browser assets with local API fixtures and stubbed authenticated destinations. No provider/account/native-browser access, real emails, deployment or external HTTP.",
+  "sourceBefore": {
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "9239e4018ffd7d642d3c56d3ac2f082d9d1a21d91a5c9e8d6fc6d47ba03f6713",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+    "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+    "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "checks": [
+    {
+      "name": "customer 320: prominent email confirmation, exact address, focus, responsive layout, resend and correction",
+      "pass": true
+    },
+    {
+      "name": "customer 390: prominent email confirmation, exact address, focus, responsive layout, resend and correction",
+      "pass": true
+    },
+    {
+      "name": "customer 1440: prominent email confirmation, exact address, focus, responsive layout, resend and correction",
+      "pass": true
+    },
+    {
+      "name": "customer: pending send prevents duplicate Enter/programmatic submits and shows busy state",
+      "pass": true
+    },
+    {
+      "name": "customer: invalid and empty addresses do not submit",
+      "pass": true
+    },
+    {
+      "name": "customer: hidden form submit cannot bypass accepted-state resend controls",
+      "pass": true
+    },
+    {
+      "name": "customer: local test inbox never claims a real email was sent",
+      "pass": true
+    },
+    {
+      "name": "customer: known rejection 400 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "customer: known rejection 429 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "customer: known rejection 500 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "customer: known rejection 503 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "customer: rejected resend preserves earlier accepted address and gives focused current failure",
+      "pass": true
+    },
+    {
+      "name": "customer: malformed response ok-false cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "customer: malformed response error-in-200 cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "customer: malformed response unsupported-delivery cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "customer: malformed response broken-json cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "customer: malformed response missing-ok cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "customer: transport failure is uncertain, never auto-resends, requires explicit controlled retry",
+      "pass": true
+    },
+    {
+      "name": "customer: timeout gives unknown result; late fulfillment cannot become false success",
+      "pass": true
+    },
+    {
+      "name": "operator 320: prominent email confirmation, exact address, focus, responsive layout, resend and correction",
+      "pass": true
+    },
+    {
+      "name": "operator 390: prominent email confirmation, exact address, focus, responsive layout, resend and correction",
+      "pass": true
+    },
+    {
+      "name": "operator 1440: prominent email confirmation, exact address, focus, responsive layout, resend and correction",
+      "pass": true
+    },
+    {
+      "name": "operator: pending send prevents duplicate Enter/programmatic submits and shows busy state",
+      "pass": true
+    },
+    {
+      "name": "operator: invalid and empty addresses do not submit",
+      "pass": true
+    },
+    {
+      "name": "operator: hidden form submit cannot bypass accepted-state resend controls",
+      "pass": true
+    },
+    {
+      "name": "operator: local test inbox never claims a real email was sent",
+      "pass": true
+    },
+    {
+      "name": "operator: known rejection 400 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "operator: known rejection 429 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "operator: known rejection 500 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "operator: known rejection 503 is visible, focused, recoverable and never confirmed",
+      "pass": true
+    },
+    {
+      "name": "operator: rejected resend preserves earlier accepted address and gives focused current failure",
+      "pass": true
+    },
+    {
+      "name": "operator: malformed response ok-false cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "operator: malformed response error-in-200 cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "operator: malformed response unsupported-delivery cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "operator: malformed response broken-json cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "operator: malformed response missing-ok cannot imply confirmed send",
+      "pass": true
+    },
+    {
+      "name": "operator: transport failure is uncertain, never auto-resends, requires explicit controlled retry",
+      "pass": true
+    },
+    {
+      "name": "operator: timeout gives unknown result; late fulfillment cannot become false success",
+      "pass": true
+    },
+    {
+      "name": "operator conditional202 retains account privacy and avoids claiming an email was actually sent",
+      "pass": true
+    },
+    {
+      "name": "customer request preserves preliminary handoff and selected plan across resend and address correction",
+      "pass": true
+    },
+    {
+      "name": "customer automatic email-token routing supersedes an older pending email response",
+      "pass": true
+    },
+    {
+      "name": "customer accepted-send state does not prevent automatic initial email link routing to existing workspace",
+      "pass": true
+    },
+    {
+      "name": "operator email proof retains intentional explicit confirmation and separate operator session",
+      "pass": true
+    },
+    {
+      "name": "operator expired proof opens a fresh-email form instead of trapping user behind Continue",
+      "pass": true
+    },
+    {
+      "name": "operator successful exchange then state503 retries only account read with retained session",
+      "pass": true
+    },
+    {
+      "name": "operator returning stored session state503 retries account read without sending/reusing proof",
+      "pass": true
+    },
+    {
+      "name": "operator forbidden stored session clears private access rather than presenting a retry with stale authority",
+      "pass": true
+    }
+  ],
+  "cases": [
+    {
+      "name": "customer-ordinary-320",
+      "kind": "customer",
+      "width": 320,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-ordinary-390",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-ordinary-1440",
+      "kind": "customer",
+      "width": 1440,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-pending",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-invalid",
+      "kind": "customer",
+      "width": 390,
+      "requests": [],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-hidden-submit",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-outbox",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-reject-400",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-reject-429",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-reject-500",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-reject-503",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-resend-rejected",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-malformed-ok-false",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-malformed-error-in-200",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-malformed-unsupported-delivery",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-malformed-broken-json",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-malformed-missing-ok",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-network",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-timeout",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "operator-ordinary-320",
+      "kind": "operator",
+      "width": 320,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-ordinary-390",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-ordinary-1440",
+      "kind": "operator",
+      "width": 1440,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "Firstname.Lastname+updates.from.the.jobsite@subdepartment.example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-pending",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-invalid",
+      "kind": "operator",
+      "width": 390,
+      "requests": [],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-hidden-submit",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-outbox",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-reject-400",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-reject-429",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-reject-500",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-reject-503",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-resend-rejected",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-malformed-ok-false",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-malformed-error-in-200",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-malformed-unsupported-delivery",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-malformed-broken-json",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-malformed-missing-ok",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-network",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-timeout",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-conditional",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "not-authorized@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "customer-intake",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "intake@example.test",
+            "plan": "starter",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "intake@example.test",
+            "plan": "starter",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "corrected-intake@example.test",
+            "plan": "starter",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html?plan=starter"
+    },
+    {
+      "name": "customer-late-generation",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa+access@example.test",
+            "plan": "growth"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/onboard.html"
+    },
+    {
+      "name": "customer-direct-workspace",
+      "kind": "customer",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/access",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/desk.html?c=qa-shop"
+    },
+    {
+      "name": "operator-verify",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-expired-proof",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "qa-operator@example.test"
+          },
+          "authorization": null
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-exchanged-state-retry",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "authorization": null
+        },
+        {
+          "path": "/api/manage",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        {
+          "path": "/api/manage",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-stored-state-retry",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        {
+          "path": "/api/manage",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    },
+    {
+      "name": "operator-forbidden",
+      "kind": "operator",
+      "width": 390,
+      "requests": [
+        {
+          "path": "/api/manage",
+          "method": "GET",
+          "body": null,
+          "authorization": "Bearer cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "finalURL": "http://127.0.0.1:8977/admin.html"
+    }
+  ],
+  "screenshots": [
+    "scratchpad/signup-feedback-independent-r2-customer-confirmed-320.png",
+    "scratchpad/signup-feedback-independent-r2-customer-confirmed-390.png",
+    "scratchpad/signup-feedback-independent-r2-customer-confirmed-1440.png",
+    "scratchpad/signup-feedback-independent-r2-customer-unknown-timeout.png",
+    "scratchpad/signup-feedback-independent-r2-operator-confirmed-320.png",
+    "scratchpad/signup-feedback-independent-r2-operator-confirmed-390.png",
+    "scratchpad/signup-feedback-independent-r2-operator-confirmed-1440.png",
+    "scratchpad/signup-feedback-independent-r2-operator-unknown-timeout.png",
+    "scratchpad/signup-feedback-independent-r2-operator-conditional.png"
+  ],
+  "pageErrors": [],
+  "externalBlocked": [
+    {
+      "name": "customer-ordinary-320",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-ordinary-390",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-ordinary-1440",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-pending",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-invalid",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-hidden-submit",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-outbox",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-reject-400",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-reject-429",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-reject-500",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-reject-503",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-resend-rejected",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-malformed-ok-false",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-malformed-error-in-200",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-malformed-unsupported-delivery",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-malformed-broken-json",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-malformed-missing-ok",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-network",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-timeout",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-intake",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-late-generation",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "name": "customer-direct-workspace",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "nodeHTTPAttempts": 0,
+  "sourceAfter": {
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "9239e4018ffd7d642d3c56d3ac2f082d9d1a21d91a5c9e8d6fc6d47ba03f6713",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "admin.html": "672cbc58724ac6795080489024f27f18a16a11a9d4504cac3cab8bc132d2fcc3",
+    "admin.js": "71f32a8655f546f1514825db51df55fd9864b25b17bf55eafa211897dc63ff93",
+    "admin.css": "a724898923c3a01173c93ef9e7b69184e28cd1d531b815fccb5484a7f1e32a85",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "sourceStable": true,
+  "scriptSHA256": "23c6f0ec2ca799096886e343c8903bef5049869ad1742c7a3ced66ee539d24c2",
+  "pass": true,
+  "passed": 47
+}
