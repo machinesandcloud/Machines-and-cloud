@@ -1,0 +1,87 @@
+{
+  "before": {
+    "scripts/calendar-live-guard.mjs": "a2a47a09b26c297d3e1f118a9d84ef1f2e7b663a3de0d4ad19f821ac369111b2",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120"
+  },
+  "checks": [
+    {
+      "name": "Checked packets preserve46 signed post-census inspection hops; fewer stop before staging",
+      "pass": true
+    },
+    {
+      "name": "Candidate range is exactly seven future dates and fixed weekdays; counters cannot widen",
+      "pass": true
+    },
+    {
+      "name": "Missing checked-window selection blocks a create before transport",
+      "pass": true
+    },
+    {
+      "name": "Empty or only-one free window stops without a visit and leaves ordinary disconnect cleanup available",
+      "pass": true
+    },
+    {
+      "name": "Deterministic selection handles same-day and across-day slots, ordered by declared window order",
+      "pass": true
+    },
+    {
+      "name": "Weekend-only openings do not override the predeclared weekday candidate constraint",
+      "pass": true
+    },
+    {
+      "name": "Private extras, foreign source/revisions, malformed ranges and stale previews cannot bind",
+      "pass": true
+    },
+    {
+      "name": "A bound pair cannot be selected again or replaced by an arbitrary create slot",
+      "pass": true
+    },
+    {
+      "name": "Expired initial results block the physical create without reselection",
+      "pass": true
+    },
+    {
+      "name": "Move requires a fresh owned-visit recheck and preserves the exact originally bound target",
+      "pass": true
+    },
+    {
+      "name": "If the original move is no longer free, other free slots cannot silently replace it; exact visit remains cancellable",
+      "pass": true
+    },
+    {
+      "name": "Changed business rules or current-visit revision block move preview before transport",
+      "pass": true
+    },
+    {
+      "name": "The move snapshot expires independently of the original immutable selection",
+      "pass": true
+    },
+    {
+      "name": "A lost preview response consumes its one attempt and cannot dispatch a create or restart selection",
+      "pass": true
+    },
+    {
+      "name": "Caller mutation cannot rewrite the phase candidate range or bound source after validation",
+      "pass": true
+    },
+    {
+      "name": "Failure to durably persist selected slots poisons the phase before any create",
+      "pass": true
+    }
+  ],
+  "physicalRequests": 0,
+  "after": {
+    "scripts/calendar-live-guard.mjs": "a2a47a09b26c297d3e1f118a9d84ef1f2e7b663a3de0d4ad19f821ac369111b2",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120"
+  },
+  "sourceStable": true,
+  "passed": 16,
+  "total": 16,
+  "ok": true
+}

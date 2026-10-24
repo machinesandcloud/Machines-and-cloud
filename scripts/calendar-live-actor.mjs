@@ -31,7 +31,7 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
   };
   const metadata=()=>c.request({url:'https://api.netlify.com/api/v1/sites/'+TARGET.siteId,headers:{Authorization:'Bearer '+netlifyToken}});
   const budget=()=>blob('calendar_execution_budgets','calendar-v1:'+p.policyVersion);
-  const times=()=>{if(!p.fixture.availabilitySelection)return p.fixture;const s=c.state().selection;if(!s)throw Error('Select checked available times before creating a visit');return {date:s.create.date,window:s.create.window,moveDate:s.move.date,moveWindow:s.move.window};};
+  const times=()=>{if(!p.fixture.availabilitySelection)return p.fixture;const s=c.state().selection;if(!s)throw Error('Select checked available times before creating a visit');return {date:s.create.date,window:s.create.window,moveDate:s.move?.date,moveWindow:s.move?.window};};
   const preview=moving=>({action:'visit_availability',expectedRevision:current.configurationRevision,date:p.fixture.availabilitySelection.from,days:p.fixture.availabilitySelection.days,...(moving?{visitId:binding.visitId,expectedVisitRevision:(current.bookings||[]).find(row=>row.id===binding.visitId)?.ownerVisit?.revision}:{})});
   const visit=()=>({action:'create_visit',expectedRevision:current.configurationRevision,submissionId:p.fixture.visitSubmissionId,customer_name:'Alex Example',phone:'(713) 555-0142',address:'12 Oak St, Katy, TX (synthetic test)',issue:'Internal Calendar lifecycle verification',date:times().date,window:times().window});
   return {async command(input) {

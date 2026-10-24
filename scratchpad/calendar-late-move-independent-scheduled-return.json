@@ -1,0 +1,80 @@
+{
+  "before": {
+    "scripts/calendar-live-guard.mjs": "5656ed65000795edddcd0c6c42809081f180bbb1f5f2b9b9ed1620ea76d33611",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-late-move-check.mjs": "06c9a0526ab13ff20c1d5c28a46a410bed5591922bc1593a07dcd3bf4fe20add",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-guard-check.mjs": "ea2014f80af7dc4b3a9e152f0483cb910a88ad12b349caca21550b9756a08fee",
+    "scripts/calendar-live-control.py": "d1e3dc091f7de499c920a9cc015d07ccc77c95f3fb9029d555af59f0bab374ef",
+    "scratchpad/calendar-late-move-independent-check.mjs": "821e1e90d30a945bd06c3337dabe8f0e763223c497ab31200224bdbbb2df6d3f"
+  },
+  "checks": [
+    {
+      "name": "Census36 preserves54 hops and cannot stage at38 despite being below total cap",
+      "pass": true
+    },
+    {
+      "name": "One initial free afternoon creates only that slot, with no phantom move target or premature reschedule",
+      "pass": true
+    },
+    {
+      "name": "A fresh earlier same-day window is a valid different target and becomes immutable once bound",
+      "pass": true
+    },
+    {
+      "name": "A hypothetical initial afternoon may disappear before any move binding; the fresh deterministic next-day target is then selected once",
+      "pass": true
+    },
+    {
+      "name": "Only the same original slot plus weekend options cannot select a move and exact visit cleanup remains possible",
+      "pass": true
+    },
+    {
+      "name": "Natural scheduled creation provenance is required before admitting the new late move preview",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Missing expected rejection.\n    at async file:///private/tmp/mc-calendar-late-move-d06/scratchpad/calendar-late-move-independent-check.mjs:28:363\n    at async check (file:///private/tmp/mc-calendar-late-move-d06/scratchpad/calendar-late-move-independent-check.mjs:13:36)\n    at async file:///private/tmp/mc-calendar-late-move-d06/scratchpad/calendar-late-move-independent-check.mjs:28:1"
+    },
+    {
+      "name": "Concurrent post-create preview admits exactly one physical request and one durable target",
+      "pass": true
+    },
+    {
+      "name": "A lost move preview response or invalid private projection consumes the only target-selection chance",
+      "pass": true
+    },
+    {
+      "name": "Durable target receipt failure cannot produce a physical move even though the response contained free slots",
+      "pass": true
+    },
+    {
+      "name": "Quota-check delay and latest owner/visit drift fence an already bound move before POST",
+      "pass": true
+    },
+    {
+      "name": "Unknown reschedule result and authoritative conflict retain one target and allow no retry or new binding",
+      "pass": true
+    },
+    {
+      "name": "Legacy offline paired strategy never interprets disappearing fixed target as a new late choice",
+      "pass": true
+    }
+  ],
+  "physicalRequests": 0,
+  "after": {
+    "scripts/calendar-live-guard.mjs": "5656ed65000795edddcd0c6c42809081f180bbb1f5f2b9b9ed1620ea76d33611",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-late-move-check.mjs": "06c9a0526ab13ff20c1d5c28a46a410bed5591922bc1593a07dcd3bf4fe20add",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-guard-check.mjs": "ea2014f80af7dc4b3a9e152f0483cb910a88ad12b349caca21550b9756a08fee",
+    "scripts/calendar-live-control.py": "d1e3dc091f7de499c920a9cc015d07ccc77c95f3fb9029d555af59f0bab374ef",
+    "scratchpad/calendar-late-move-independent-check.mjs": "821e1e90d30a945bd06c3337dabe8f0e763223c497ab31200224bdbbb2df6d3f"
+  },
+  "sourceStable": true,
+  "passed": 11,
+  "total": 12,
+  "ok": false
+}

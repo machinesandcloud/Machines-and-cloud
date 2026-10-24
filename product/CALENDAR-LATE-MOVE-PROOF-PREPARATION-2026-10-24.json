@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "decision": "Accepted locally as proof-tool preparation; not executed or published by this agent",
+  "baseCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "branch": "work/calendar-late-move-d06",
+  "worktree": "/tmp/mc-calendar-late-move-d06",
+  "primaryOutcome": "Actual successful owned Calendar same-event create/move/cancel through ordinary scheduled delivery",
+  "driver": "Root/PM performs final integration/preflight/bounded execution; QA independently accepts exact source and actual results; product_owner_v2 accepts observed customer job; OM owns cleanup",
+  "sourceFiles": [
+    {
+      "path": "scripts/calendar-live-guard.mjs",
+      "sha256": "a2a47a09b26c297d3e1f118a9d84ef1f2e7b663a3de0d4ad19f821ac369111b2"
+    },
+    {
+      "path": "scripts/calendar-live-actor.mjs",
+      "sha256": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de"
+    },
+    {
+      "path": "scripts/calendar-live-fixture.mjs",
+      "sha256": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103"
+    },
+    {
+      "path": "scripts/calendar-live-control.py",
+      "sha256": "d1e3dc091f7de499c920a9cc015d07ccc77c95f3fb9029d555af59f0bab374ef"
+    },
+    {
+      "path": "scripts/calendar-live-late-move-check.mjs",
+      "sha256": "9aa27d7901dd983151aa71726b3a093a350da65af33bbcf9440279e177691574"
+    },
+    {
+      "path": "scripts/calendar-live-actor-check.mjs",
+      "sha256": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120"
+    },
+    {
+      "path": "scripts/calendar-live-selection-check.mjs",
+      "sha256": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9"
+    },
+    {
+      "path": "scripts/calendar-live-guard-check.mjs",
+      "sha256": "ea2014f80af7dc4b3a9e152f0483cb910a88ad12b349caca21550b9756a08fee"
+    },
+    {
+      "path": "scripts/calendar-live-control-check.py",
+      "sha256": "82ac77b29cf3259b5c2d1092feacea31538c92064e2356b862374bb4ed3642cd"
+    }
+  ],
+  "appRuntimeChanged": false,
+  "sourcePinsRefreshed": false,
+  "effectsPerformed": {
+    "physicalNetwork": 0,
+    "browserOrProvider": 0,
+    "credentialReads": 0,
+    "RootCheckoutWrites": 0,
+    "deploymentOrSettings": 0
+  },
+  "procedure": "product/CALENDAR-LATE-MOVE-PROOF-2026-10-24.md",
+  "packetProposal": "product/CALENDAR-LATE-MOVE-PROOF-PROPOSAL-2026-10-24.json",
+  "scope": "product/CALENDAR-LAUNCH-V7-SCOPE-2026-10-24.json",
+  "logic": "Initial fresh preview binds only create. An observed scheduled CREATE receipt gates one fresh exact-owned-visit preview binding earliest currently free different date/window once, followed by immediate same-operation reschedule. Every preview is one attempt; no replacement or retry after missing/stale/unknown/bound/conflicting result. Existing authoritative product Save checks are unchanged.",
+  "compatibility": "Old fixed and first_two_free_windows strategies remain offline only; their original behavior/evidence is retained. Execute requires explicit new first_free_create_then_fresh_different_move strategy.",
+  "envelope": {
+    "censusMaximumBlobHops": 36,
+    "headroomRequired": 54,
+    "fullSignedPostCensusHops": 46,
+    "observationMargin": 8,
+    "modeledPriorRecords": 14,
+    "modeledFullBlobHops": 82,
+    "blobCap": 90,
+    "metadataCap": 12,
+    "supplementalControlCap": 48,
+    "aggregateControlCap": 150,
+    "backendGoogleWorkerCap": 57,
+    "eventCreateCap": 1,
+    "eventUpdateCap": 1,
+    "eventDeleteCap": 2
+  },
+  "evidence": [
+    {
+      "path": "scratchpad/calendar-late-move-author-repaired.json",
+      "sha256": "29696aaf4e98173efcdbc5f59d06e9ce10086ece1347edb6822588232d28a627",
+      "passed": 22,
+      "claim": "Author late strategy adversarial proof checks; source-stable"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-paired-regression-repaired.json",
+      "sha256": "2b97230f66dc353eec399081033875e67e5e9a4fef6a881ddc6575c58dd2c79f",
+      "passed": 16,
+      "claim": "Retained paired-strategy author checks; source-stable"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-guard-repaired.json",
+      "sha256": "22a0ee39882c71c440054d96cb1f11f2febb0315a23e013a2a3b20130df29c17",
+      "passed": 29,
+      "claim": "Existing generic guard offline checks"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-actor-repaired.json",
+      "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795",
+      "passed": 7,
+      "claim": "Coupled fixed/paired/late full actor offline paths"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-control-repaired.json",
+      "sha256": "b802d0055caf9ff9b09af183f80a677ff70139b5b39e5977b33290df8bd48b8f",
+      "passed": 6,
+      "claim": "Fixed supplemental control offline checks"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-independent-repaired-final.json",
+      "sha256": "feaf977a798ca8c8038cbd9dc22eb570dd89ee20f078abb147bcbd5de4f80bc6",
+      "passed": 12,
+      "claim": "Independent actual controller/transport adversarial checks; source-stable"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-actor-independent-repaired.json",
+      "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795",
+      "passed": 7,
+      "claim": "Independent full actor replay"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-po-acceptance-repaired.json",
+      "sha256": "b3e89ed7df2d40b8c060b3459058246bf47030b1f626def7552ec424e0fe4631",
+      "passed": null,
+      "claim": "PO exact repaired source acceptance and own22/7 affected reruns"
+    }
+  ],
+  "preservedReturns": [
+    {
+      "path": "scratchpad/calendar-late-move-independent-scheduled-return.json",
+      "finding": "Real proof authority defect11/12: late preview admitted after narrower unattributed CREATE receipt; repaired with explicit createScheduledReceipt fence and regression."
+    },
+    {
+      "path": "scratchpad/calendar-late-move-author-first.json",
+      "finding": "17/18 author fixture: convenience cohort helper did not read synthetic historical records. Boundary case uses signed inspection padding; full coupled actor separately proves actual14-record36-hop census."
+    },
+    {
+      "path": "scratchpad/calendar-late-move-guard-first.log",
+      "finding": "Inherited generic legacy42-hop boundary used the old84 cap after fresh90 declaration. Test-only padding/count assertions updated."
+    },
+    {
+      "path": "scratchpad/calendar-late-move-guard-second-failure.json",
+      "finding": "Mechanical fixture edit also changed remaining42 expectation to48; corrected only expected remaining value."
+    }
+  ],
+  "nextUnresolvedStep": {
+    "action": "Root integrates accepted proof source with current unpublished Stripe checkpoint, updates complete non-document manifest and binds fresh exact clean final candidate/private packet after read-only baseline/census preflight; then runs finite v7 if admitted.",
+    "driver": "Root/PM",
+    "requiredEvidence": "Exact actual scheduled same-event create/update/delete and both intended conflict rejections, with full provider/tenant/session/environment cleanup; local guard passes do not substitute."
+  },
+  "limits": [
+    "Old v6 phase and allowances stay closed. No actual v7 grant/move/full lifecycle acceptance.",
+    "A new conflict after fresh preview still stops. No product availability or conflict relaxation.",
+    "Google data-access verification, actual Stripe TEST/Portal/recovery, dedicated phone/text/native partner/support and paid launch remain open."
+  ],
+  "independentAcceptance": {
+    "path": "scratchpad/calendar-late-move-independent-acceptance-20261024.json",
+    "sha256": "8194ca65310ff27edec35e16b39142439d11013ce5b833c5c0382305ea02c6f2",
+    "passed": 12,
+    "actorReplayPassed": 7,
+    "sourceStable": true,
+    "physicalRequests": 0
+  }
+}

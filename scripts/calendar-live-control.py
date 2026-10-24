@@ -4,7 +4,7 @@ import argparse, contextlib, datetime as dt, fcntl, hashlib, json, os, pathlib, 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None
 ACCOUNT='69797d78f01c70674ffef858'
-SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'1be5608c23b4f957f656f3a463b4b32831812a7f','baselineDeployId':'6adcdbe2876e0b0a7398da9c','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
+SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'d06e83f30313d09d3ab1ff6f33bda2a3621bec04','baselineDeployId':'6adceebd5a1144301760ab09','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
 MC_KEYS=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_APPROVED_VERSION','CALENDAR_EXECUTION_POLICY_JSON']
 def fail(s): raise RuntimeError(s)
 def now(): return dt.datetime.now(dt.timezone.utc)
@@ -20,7 +20,7 @@ def last(path):
     if not lines: fail('Empty control ledger')
     return json.loads(lines[-1])
 def primary_fixed():
-    # Guard metadata<=12 and Blobs<=84 leave this adapter exactly48 of144.
+    # Guard metadata<=12 and Blobs<=90 leave this adapter exactly48 of150.
     # No shared counter can be reset or borrowed from another phase.
     if LEDGER is None or PHASE is None: fail('Initialize exact approved phase')
 def fresh():
@@ -205,7 +205,7 @@ def main():
     if args.command=='init':
         candidate=SITES['mc']['candidate']
         if subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()!=candidate or subprocess.run(['git','diff','--quiet','HEAD','--'],cwd=ROOT).returncode: fail('Exact clean source required')
-        private_write(LEDGER,{'phase':PHASE,'limits':{'requests':48,'mutations':16,'builds':2},'requests':0,'mutations':0,'builds':0,'rows':[]},exclusive=True);return {'initialized':True,'controlRequests':48,'guardControlRequests':96,'aggregateMaximum':144}
+        private_write(LEDGER,{'phase':PHASE,'limits':{'requests':48,'mutations':16,'builds':2},'requests':0,'mutations':0,'builds':0,'rows':[]},exclusive=True);return {'initialized':True,'controlRequests':48,'guardControlRequests':102,'aggregateMaximum':150}
     if args.command=='prepare': return prepare(args.input)
     with locked() as (s,append):
         if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']]}

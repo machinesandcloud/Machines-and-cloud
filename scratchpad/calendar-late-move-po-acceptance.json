@@ -1,0 +1,101 @@
+{
+  "at": "2026-10-24T17:58:09.783455+00:00",
+  "role": "product_owner_v2",
+  "decision": "ACCEPTED LOCALLY: v7 proof-only customer-job contract; no actual provider lifecycle acceptance.",
+  "sourceBefore": {
+    "scripts/calendar-live-guard.mjs": "5656ed65000795edddcd0c6c42809081f180bbb1f5f2b9b9ed1620ea76d33611",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-control.py": "d1e3dc091f7de499c920a9cc015d07ccc77c95f3fb9029d555af59f0bab374ef",
+    "scripts/calendar-live-late-move-check.mjs": "06c9a0526ab13ff20c1d5c28a46a410bed5591922bc1593a07dcd3bf4fe20add",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-guard-check.mjs": "ea2014f80af7dc4b3a9e152f0483cb910a88ad12b349caca21550b9756a08fee"
+  },
+  "sourceAfter": {
+    "scripts/calendar-live-guard.mjs": "5656ed65000795edddcd0c6c42809081f180bbb1f5f2b9b9ed1620ea76d33611",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-control.py": "d1e3dc091f7de499c920a9cc015d07ccc77c95f3fb9029d555af59f0bab374ef",
+    "scripts/calendar-live-late-move-check.mjs": "06c9a0526ab13ff20c1d5c28a46a410bed5591922bc1593a07dcd3bf4fe20add",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-guard-check.mjs": "ea2014f80af7dc4b3a9e152f0483cb910a88ad12b349caca21550b9756a08fee"
+  },
+  "sourceStable": true,
+  "runtimeChangedByCandidate": false,
+  "ordinaryProtocolObservation": {
+    "path": "scratchpad/calendar-late-move-po-actor.json",
+    "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795",
+    "passed": 7,
+    "failed": 0,
+    "lateMoveSummary": {
+      "mode": "late",
+      "checked": true,
+      "retainedRecords": 14,
+      "censusBlobs": 36,
+      "postCensusBlobs": 46,
+      "counters": {
+        "site": 28,
+        "writes": 16,
+        "hostedChecks": 0,
+        "email": 2,
+        "metadata": 3,
+        "blobs": 82,
+        "workerPosts": 0,
+        "builds": 2,
+        "pushes": 1,
+        "environmentWrites": 8,
+        "control": 85,
+        "controlWrites": 0,
+        "nativeHandoffs": 1
+      },
+      "runtimeUsed": {
+        "oauthStart": 1,
+        "tokenExchange": 1,
+        "tokenRefresh": 0,
+        "calendarRead": 3,
+        "eventCreate": 0,
+        "eventUpdate": 0,
+        "eventDelete": 0,
+        "workerDispatch": 1,
+        "totalRequests": 5
+      }
+    },
+    "evidenceType": "Existing actual proof actor/controller with synthetic app/provider/native/control transports; not actual customer UI/provider effects."
+  },
+  "retainedAuthorChecks": {
+    "path": "scratchpad/calendar-late-move-author-final.json",
+    "sha256": "dbc1b4800cd6b34eecffdf4ca0364bda630b02dc9bb9be782a981e4baaedb50a",
+    "passed": 21,
+    "total": 21,
+    "sourceStable": true,
+    "independentlyReexecutedByPO": false,
+    "sourceMatched": true
+  },
+  "customerJobAccepted": [
+    "Initial authoritative preview selects only the earliest free create slot; it promises no later move target.",
+    "After observed ordinary scheduled create, exactly one fresh preview for the same owned visit and current revision selects the earliest DIFFERENT current free pair from the same declared range and windows.",
+    "Create and move snapshots retain separate source digests, packet/configuration/visit revisions, checked times and expiry.",
+    "Move is one immediate same-operation POST; missing/stale/lost preview, no different slot, lost outcome or conflict cannot trigger a new target or second dispatch.",
+    "Original and moved-window negative probes, natural same-event create/update/delete receipts, owner cancellation, session revocation and environment/cleanup-deployment closure remain required.",
+    "14 retained-record fixture uses36census+46post=82 of90 Blob hops, retaining8 margin; >36census halts before staging."
+  ],
+  "reviewedActualV6Evidence": [
+    "/tmp/mc-launch-finish-7c/product/CALENDAR-LAUNCH-V6-RESULT-2026-10-24.json",
+    "/tmp/mc-qa-calendar-same-day-d06/scratchpad/calendar-v6-cache-diagnosis-independent-20261024.json"
+  ],
+  "limits": [
+    "Actual v6 move stopped on a separate busy interval; why the availability changed is not established.",
+    "No application or UI change is justified by this proof procedure; unchanged app acceptance is retained.",
+    "This receipt authorizes no publication, email, Google consent or provider request. Root must bind the final fresh phase/source/scope before execution.",
+    "Actual v7 lifecycle, Google verification, billing, phone/text, support and full launch remain open."
+  ],
+  "effects": {
+    "externalRequests": 0,
+    "credentialReads": 0,
+    "actualBrowserWindows": 0,
+    "rootEdits": 0,
+    "gitIndexChanges": 0
+  }
+}

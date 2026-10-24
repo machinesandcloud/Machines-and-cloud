@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "scope": "Independent local acceptance of proof-only v7 late target binding after naturally scheduled creation",
+  "status": "accepted_local_preparation_only",
+  "baseCommit": "d06e83f30313d09d3ab1ff6f33bda2a3621bec04",
+  "source": {
+    "scripts/calendar-live-guard.mjs": "a2a47a09b26c297d3e1f118a9d84ef1f2e7b663a3de0d4ad19f821ac369111b2",
+    "scripts/calendar-live-actor.mjs": "18e11653e70dcec5f665727bbeff27d4526cfbfa08868f50f0ae35b247aec6de",
+    "scripts/calendar-live-fixture.mjs": "a5f5098fb5153df11217d3794fd148001067ed12fd69f061bb37c8ad6b63c103",
+    "scripts/calendar-live-late-move-check.mjs": "9aa27d7901dd983151aa71726b3a093a350da65af33bbcf9440279e177691574",
+    "scripts/calendar-live-actor-check.mjs": "f1efc41db1f8368affb9f708bf44b6463d43cf31a8d7bdd7c13d2cb9978bd120",
+    "scripts/calendar-live-selection-check.mjs": "dca15e9cecbb757715dafc6d35d406cd80349a296f1a53df707adbae9688cbe9",
+    "scripts/calendar-live-guard-check.mjs": "ea2014f80af7dc4b3a9e152f0483cb910a88ad12b349caca21550b9756a08fee",
+    "scripts/calendar-live-control.py": "d1e3dc091f7de499c920a9cc015d07ccc77c95f3fb9029d555af59f0bab374ef",
+    "scratchpad/calendar-late-move-independent-check.mjs": "82ce6343c67e6813fb8212a2d7c8c8f5525645500721708da544e5d43ffbd8eb"
+  },
+  "evidence": {
+    "independent": {
+      "path": "scratchpad/calendar-late-move-independent-final.json",
+      "sha256": "f93a24a14fae6ef0a561b965769e8e14438b9c73387caf408fa1b6918ffd398f",
+      "passed": 12,
+      "total": 12,
+      "sourceStable": true,
+      "physicalRequests": 0
+    },
+    "coupledActualActor": {
+      "path": "scratchpad/calendar-late-move-actor-independent-repaired.json",
+      "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795",
+      "passed": 7,
+      "total": 7,
+      "sourceMatched": "Frozen repaired guard/actor/fixture/control and unchanged actor suite captured by independent source hashes.",
+      "fixture": {
+        "mode": "late",
+        "checked": true,
+        "retainedRecords": 14,
+        "censusBlobs": 36,
+        "postCensusBlobs": 46,
+        "counters": {
+          "site": 28,
+          "writes": 16,
+          "hostedChecks": 0,
+          "email": 2,
+          "metadata": 3,
+          "blobs": 82,
+          "workerPosts": 0,
+          "builds": 2,
+          "pushes": 1,
+          "environmentWrites": 8,
+          "control": 85,
+          "controlWrites": 0,
+          "nativeHandoffs": 1
+        },
+        "runtimeUsed": {
+          "oauthStart": 1,
+          "tokenExchange": 1,
+          "tokenRefresh": 0,
+          "calendarRead": 3,
+          "eventCreate": 0,
+          "eventUpdate": 0,
+          "eventDelete": 0,
+          "workerDispatch": 1,
+          "totalRequests": 5
+        }
+      }
+    }
+  },
+  "acceptedInvariants": [
+    "Predeclared future seven-day weekday/window range and runtime caps cannot expand; a single free initial slot binds create only, with null move/moveEvidence.",
+    "One fresh exact-owned-visit preview after a matching naturally scheduled create binds the deterministic earliest DIFFERENT date/window once. A previously hypothetical target may disappear before binding; it was never a promised or retained move choice.",
+    "Only an exact scheduled dispatch after local create and matching completed wave permits late selection. Earlier narrow unattributed creation receipt remains valid only for its narrower evidence/cleanup, and scheduled_create_required rejects late preview before physical transport.",
+    "Same date/different listed window and earlier newly free same-day window satisfy DIFFERENT. The exact original pair is excluded; weekend-only alternatives and no different slot stop without fallback.",
+    "Binding separately retains create/move source/config/packet/time/current-visit provenance. Caller/state mutation cannot rewrite it; concurrent preview admits one transport and one durable target.",
+    "Lost/invalid/private preview consumes the one attempt; lost durable binding, expired snapshot, changed owner rules/visit after quota read, lost mutation result or authoritative Save conflict cannot retry/reselect another target.",
+    "Current canonical application Save and real conflict checks are unchanged. Original create/final bound move pairs and exact submission identities remain the negative-probe targets.",
+    "Census36 leaves54 hops and is accepted;38 is rejected before settings/build. Full14-record signed actor uses36+46=82/90, leaving8 for finite pending observations. Legacy fixed/paired fixtures remain offline only."
+  ],
+  "returnedDefect": {
+    "path": "scratchpad/calendar-late-move-independent-scheduled-return.json",
+    "sha256": "d05da8d0094092aeabf0be553e721abed54690a0d43a1864c630095ef90f3b57",
+    "passed": 11,
+    "total": 12,
+    "sourceStable": true,
+    "code": "Missing scheduled-create authority before late move preview",
+    "observed": "With scheduledDispatchObserved=false creation accepted under earlier narrow provenance and current quota refreshed, late preview nevertheless physically succeeded.",
+    "repair": "Retain createScheduledReceipt from accepted matching create receipt, expose boolean state, and require it before a late move preview. Final12 explicitly checks scheduled_create_required,false retained flag and no preview transport."
+  },
+  "otherPreservedEvidence": [
+    {
+      "path": "scratchpad/calendar-late-move-independent-first.json",
+      "sha256": "d5e3cc504eeadd6ec1dc756a5c15dcfecac4ac43f9aa7fe8c59af0096279d855"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-independent-second.json",
+      "sha256": "f6ab0a42d2548ddcad89815ff2579e885510574ea32877e271a173c042971fe0"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-independent-repaired-final.json",
+      "sha256": "feaf977a798ca8c8038cbd9dc22eb570dd89ee20f078abb147bcbd5de4f80bc6"
+    },
+    {
+      "path": "scratchpad/calendar-late-move-actor-independent-replay.json",
+      "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795"
+    }
+  ],
+  "qaFailureDisposition": "Initial own script failed parsing its output newline before assertions. Initial11/12 then exposed own helper dereferencing a nonexistent pre-create current visit; corrected invalid-action probe was isolated because guard correctly makes that fixture cleanup-only. The natural-provenance probe was corrected to refresh quota so rejection could not pass for an unrelated stale-budget reason. The clean11/12 receipt isolates the real proof defect; no app defect is claimed from those fixture errors.",
+  "freshLimits": {
+    "blobs": 90,
+    "metadata": 12,
+    "supplementalControl": 48,
+    "aggregateControl": 150,
+    "censusMaximum": 36,
+    "requiredAfterCensus": 54,
+    "completePostPath": 46,
+    "observationMargin": 8,
+    "runtimeGoogleWorker": 57,
+    "eventCreate": 1,
+    "eventUpdate": 1,
+    "eventDelete": 2,
+    "privateWorkerPosts": 0,
+    "builds": 2,
+    "creditsMaximum": 30,
+    "site": 240,
+    "writes": 40,
+    "email": 3
+  },
+  "inertPreparation": {
+    "proposal": "product/CALENDAR-LATE-MOVE-PROOF-PROPOSAL-2026-10-24.json",
+    "procedure": "product/CALENDAR-LATE-MOVE-PROOF-2026-10-24.md",
+    "scope": "product/CALENDAR-LAUNCH-V7-SCOPE-2026-10-24.json",
+    "targetAndCapsComparedToImportedConstants": true,
+    "approvalAndFinalSourceStillNull": true,
+    "note": "The inherited v6 paired proposal is historical and unchanged. It is not the v7 execute packet. Root must integrate, inspect current baseline, refresh full source inventory and bind a fresh expiring private packet before any effects."
+  },
+  "testScope": "Blocked physical networking; injected controller/actor transports and fixture receipts. No application runtime changed. Fixture routed hops/provenance checks do not establish actual Google event operations, native account interaction or hosted schedule service.",
+  "effects": {
+    "externalRequests": 0,
+    "actualBrowserOrNativeWindows": 0,
+    "providerOrModelRequests": 0,
+    "credentialReads": 0,
+    "rootCheckoutMutations": 0,
+    "sharedIndexOrCommits": 0
+  },
+  "remainingAcceptance": [
+    "Actual successful same-event move/full scheduled Calendar lifecycle and intended negative probes remain open.",
+    "Prior phases and all exhausted allowances remain closed; this receipt grants no new live/release/provider authority.",
+    "Google review/demo, actual billing/phone/text/partner/support operations and paid launch remain separate."
+  ]
+}
