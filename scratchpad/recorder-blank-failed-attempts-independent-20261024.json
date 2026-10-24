@@ -1,0 +1,105 @@
+{
+  "at": "2026-10-24T19:32:23.422972+00:00",
+  "mode": "Independent local audit of Root recorder blank-window failures; no browser or capture performed by QA",
+  "acceptedClaim": "First attempt cleanup is supported; recorder recording readiness is not accepted. Second attempt native identity/cleanup remains unresolved.",
+  "evidence": {
+    "r1-scope": {
+      "source": "/tmp/mc-recorder-blank-proof-20261024-r1/scope.json",
+      "snapshot": "/tmp/mc-google-recorder-qa-20261024/blank-failed-attempts-evidence/r1-scope.json",
+      "sha256": "44fce41f4a6c6271bbe10e6683f604db5b22cc575520ff3f2a19753da49a1475"
+    },
+    "r1-recovery-scope": {
+      "source": "/tmp/mc-recorder-blank-proof-20261024-r1/recovery-scope.json",
+      "snapshot": "/tmp/mc-google-recorder-qa-20261024/blank-failed-attempts-evidence/r1-recovery-scope.json",
+      "sha256": "c60c0ae48277d3144459bce4ecac088f58946218127a8fe2dee63bcd6c86741b"
+    },
+    "r1-recovery-query": {
+      "source": "/tmp/mc-recorder-blank-proof-20261024-r1/recovery-native-query.json",
+      "snapshot": "/tmp/mc-google-recorder-qa-20261024/blank-failed-attempts-evidence/r1-recovery-query.json",
+      "sha256": "38f85b46d11fab7bb80e0ded35489154b59c6442140afc394926b67dfa291b2a"
+    },
+    "r2-scope": {
+      "source": "/tmp/mc-recorder-blank-proof-20261024-r2/scope.json",
+      "snapshot": "/tmp/mc-google-recorder-qa-20261024/blank-failed-attempts-evidence/r2-scope.json",
+      "sha256": "4549b968285edf60b76596ae33bc519a0a325d12d82cef9e9bc60eb0a1bcc427"
+    },
+    "r2-create": {
+      "source": "/tmp/mc-recorder-blank-proof-20261024-r2/create-result.json",
+      "snapshot": "/tmp/mc-google-recorder-qa-20261024/blank-failed-attempts-evidence/r2-create.json",
+      "sha256": "57fb9f976f509a2e4209e7cd8561cced4754e449739bed692dca3e9c5beb490f"
+    },
+    "r2-tab": {
+      "source": "/tmp/mc-recorder-blank-proof-20261024-r2/tab-result.json",
+      "snapshot": "/tmp/mc-google-recorder-qa-20261024/blank-failed-attempts-evidence/r2-tab.json",
+      "sha256": "2768bf9de48dbf8f7511499846e91b8a329e24b18513e4cb0cee67f8b8a4d882"
+    }
+  },
+  "firstAttempt": {
+    "phase": "recorder-blank-synthetic-20261024-r1",
+    "state": "CLOSED_FAILED_BEFORE_CAPTURE",
+    "rootRecordedNewBlankWindows": 1,
+    "recordings": 0,
+    "failure": "Creation returned nonzero before native IDs and original stderr were persisted. Cause is unknown.",
+    "recovery": {
+      "phase": "recorder-blank-native-recovery-20261024-r1",
+      "state": "CLOSED_original_window_absent",
+      "exactRecoveredWindowID": 1802420272,
+      "exactRecoveredTabID": 1802420273,
+      "matchingDeclaredBounds": true,
+      "closeReturnedSuccess": true,
+      "subsequentOriginalWindowAbsenceRecorded": true,
+      "scope": "Only the recovered original window; no general browser/global-tab claim.",
+      "remainingAllowancesReusable": false
+    }
+  },
+  "secondAttempt": {
+    "phase": "recorder-blank-synthetic-20261024-r2",
+    "scopeStateAtAudit": "ACTIVE",
+    "createCommandReturned": {
+      "exitCode": 0,
+      "identifier": "104165348"
+    },
+    "nextExactSavedIdentifierLookup": {
+      "exitCode": 1,
+      "appleScriptError": -1728,
+      "stdoutEmpty": true
+    },
+    "observedBoundary": "The identifier returned by creation was not addressable by the immediately following exact saved-window lookup.",
+    "rootReportsRecorderInvoked": false,
+    "rootReportsRecordings": 0,
+    "captureInvocationsIndependentlyEnumerated": false,
+    "cleanupStatus": "UNKNOWN_UNRESOLVED",
+    "originalWindowExistence": "UNKNOWN",
+    "globalWindowOrTabExistence": "UNKNOWN",
+    "phaseClosureIndependentlyEstablished": false,
+    "noFurtherCreationCaptureOrGuessApprovedByThisAudit": true
+  },
+  "recorderSource": {
+    "path": "/tmp/mc-google-video-prep-20261024/owned-window-recorder.swift",
+    "sha256": "f721cadf3169a1a1253d55b57e8023dd27acbf4044c8121e4e5426e3877ecac3",
+    "runbookPath": "/tmp/mc-google-video-prep-20261024/BLANK-WINDOW-ROOT-TEST.md",
+    "runbookSHA256": "cc1474095e8b83ef8d7fd9c3ebf35dc6c891139787089f9b7ce5da7f3e490912",
+    "compileOnlyAcceptanceUnchanged": true,
+    "successfulRecordingOrFramingAccepted": false
+  },
+  "procedureReview": {
+    "oldFailureCustody": "Old runbook returned both IDs only after URL, bounds and assertions; a failure before return discarded identity unless diagnostics were independently retained.",
+    "idFirstRevision": "Splitting creation-result persistence from exact saved-ID tab/configuration reads improves error custody. Actual r2 demonstrates this alone does not establish native identity or cleanup.",
+    "recommendedNextStep": "Hold native creation/capture until Root admits a concrete procedure that can establish and clean up the same object; preserve known identifiers and unknown state. Do not guess a replacement, search content, or relabel the failed operation."
+  },
+  "limits": [
+    "No cause inferred for initial stderr loss or r2 native identifier failure.",
+    "Neither blank-window failure diagnoses the owner-reported Google issue.",
+    "R1 scoped absence does not establish r2 cleanup; r2 scope is still ACTIVE in the audited snapshot.",
+    "Published native-close repair and its separate two synthetic Root cases remain distinct; those passes do not establish recorder recording success.",
+    "Recordings zero in r2 is Root execution testimony, not an independent process or filesystem-wide census."
+  ],
+  "qaEffects": {
+    "browserOrNativeQueries": 0,
+    "captures": 0,
+    "binaryInvocations": 0,
+    "network": 0,
+    "rootEdits": 0,
+    "gitIndexWrites": 0
+  }
+}
