@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-24T11:15:29.834418+00:00",
+  "decision": "Accepted locally for customer/operator access feedback and recovery; unpublished",
+  "candidate": {
+    "checkout": "/private/tmp/mc-signin-feedback-1e",
+    "branch": "work/signin-feedback-1e",
+    "sourceCommit": "aee38b47ae1d10f2c1afd66d3d0483050c52d88f",
+    "sourceManifest": "scratchpad/signup-feedback-source-manifest.json",
+    "sourceManifestSHA256": "a40f9f1eba1f243f17e1c728166814fdd795301e2b3500ee949af475500affd0",
+    "sourceFiles": 503,
+    "sourceBridge": "scratchpad/signup-feedback-source-bridge.json"
+  },
+  "customerOutcome": "An owner requests a sign-in email, immediately sees the address and next step, corrects or resends intentionally, then opens saved setup/workspace without another confirmation click. Operators can recover expired links and retry portal loading with a verified session.",
+  "fixed": [
+    "Customer and operator success replace the initial form with a distinct Check your email state and submitted address.",
+    "Pending requests disable duplicate submission; explicit resend has a30-second local cooldown; address correction sends nothing.",
+    "Accepted email, local test inbox, conditional operator access and uncertain/failed outcomes have distinct honest feedback.",
+    "Expired operator link exposes a fresh email form; initial portal-load failure retains the verified session and offers a read-only retry.",
+    "Success instructions appear once visually; live announcements, heading/error focus, responsive address wrapping and reduced-motion behavior are retained."
+  ],
+  "acceptance": {
+    "independentQA": {
+      "evidence": "scratchpad/signup-feedback-independent-acceptance.json",
+      "sha256": "79ffe65513ff3c1c7fb5d0a97bb07f7aec3d33a4edd5f3a0f8175ce3b8799998",
+      "browserGroups": 48,
+      "actualHandlerContractGroups": 9,
+      "scope": "Offline exact assets; API fixtures plus separately exercised real access/manage handlers and synthetic delivery/storage protocols; no real mail."
+    },
+    "productOwner": {
+      "evidence": "scratchpad/signup-feedback-po-acceptance.json",
+      "sha256": "b896aaa257cc82879dbb3f6b4f932f31ee27dee06f2f319d0ae6683148865ea7",
+      "customerChecks": 41,
+      "operatorChecks": 59,
+      "scope": "Actual local desktop/mobile screens at320/390/1440 with mocked effects; separate customer acceptance, overlapping other evidence."
+    },
+    "actualWorkspaceRegression": {
+      "evidence": "scratchpad/signup-feedback-actual-handler-full-r2.json",
+      "sha256": "cca956c14a337f9a254e2d808883a037b1079c493b81a8a70527ba5425d51d7d",
+      "passed": 53,
+      "sourceStable": true,
+      "scope": "Actual access/onboard/client/chat handlers with memory store and fake model; private local mailbox; destination is actual workspace, not provider delivery."
+    },
+    "staticBuild": {
+      "evidence": "scratchpad/signup-feedback-build-site.log",
+      "ok": true,
+      "htmlPages": 182,
+      "publicFiles": 233,
+      "physicalTransportBlocked": true
+    }
+  },
+  "preservedFailures": [
+    {
+      "evidence": "scratchpad/signup-feedback-actual-handler-full.json",
+      "disposition": "52/53 original run; only obsolete assertion requiring unselected service cards absent. QA independently matched accepted all-four discovery contract. Replacement requires all four cards, inactive unchecked phone/text, Not selected badges and Choose actions;53/53 final run."
+    },
+    {
+      "evidence": "scratchpad/signup-feedback-independent-ui-r1.json",
+      "disposition": "Three waits assumed hidden submit re-enabled during cooldown; corrected busy-state waits, prior report retained."
+    },
+    {
+      "evidence": "scratchpad/signup-feedback-po-admin-expired-deadend.json",
+      "disposition": "Real expired-link dead end reproduced and repaired; final QA/PO cover fresh-link recovery."
+    }
+  ],
+  "effects": {
+    "productionBuilds": 0,
+    "liveEmails": 0,
+    "providerRequests": 0,
+    "settingsChanges": 0,
+    "purchases": 0,
+    "mainRuntimeChanges": 0
+  },
+  "remaining": "Full-offer launch remains NO-GO. Calendar diagnostic is prepared but approval pending; closed Calendar allowances remain closed. Phone/text, actual Calendar/Stripe and operational recovery acceptance are separate outstanding outcomes. No release or live-send authority is inferred."
+}
