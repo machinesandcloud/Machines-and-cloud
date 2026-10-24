@@ -62,5 +62,48 @@
       }
     ]
   },
-  "limits": "Read-only preparation metadata, outside any prior or proposed execution phase. Private complete settings retained owner-only outside the repository; values omitted here."
+  "limits": "Read-only preparation metadata, outside any prior or proposed execution phase. Private complete settings retained owner-only outside the repository; values omitted here.",
+  "calendarCensusPreflight": {
+    "at": "2026-10-24T07:08:00.090237+00:00",
+    "scope": "Three preparation-only GET list requests; no records read, writes, builds or provider traffic; separate from any closed/proposed phase",
+    "requests": [
+      {
+        "store": "calendar_connections",
+        "status": 200,
+        "sha256": "86b5bebf6e8e942e6eb29c6fcb8f71454cae5f87aea6ea757f29d3aee9fe7ca6",
+        "listedRecords": 1,
+        "responseFields": [
+          "blobs",
+          "directories"
+        ],
+        "hasCursor": false
+      },
+      {
+        "store": "calendar_deliveries",
+        "status": 200,
+        "sha256": "9a2f7f2fd005e67fde07d0b55bab2ff518fcad26cff2ea19fddc34e8e2d40634",
+        "listedRecords": 0,
+        "responseFields": [
+          "blobs",
+          "directories"
+        ],
+        "hasCursor": false
+      },
+      {
+        "store": "calendar_oauth",
+        "status": 200,
+        "sha256": "76d75f9116ce922c7fbbd3622bd10a96ad5ccf39d1b3f5c12d9274773a024cc8",
+        "listedRecords": 1,
+        "responseFields": [
+          "blobs",
+          "directories"
+        ],
+        "hasCursor": false
+      }
+    ],
+    "directoriesPerStore": 0,
+    "recordsRead": 0
+  },
+  "totalPreparationGETs": 5,
+  "censusFitsProposedBound": "Two currently retained records; no directories or cursor. Future actor must repeat complete fresh census within its independent fixed60-HTTP-attempt budget; these preparation reads grant no allowance credit."
 }
