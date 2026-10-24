@@ -221,6 +221,7 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if(b?.action==='request_followup'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const {updateRequestAutomation}=await import('./lib/request-followup.mjs');return json(await updateRequestAutomation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='request_followthrough'){
       if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
       return json(await updateRequestFollowthrough(c,session,b),200,{'Cache-Control':'no-store'});

@@ -31,6 +31,8 @@ export async function recordManagedInbound(c, { phone, text, messageSid, provide
     if (Object.keys(row.seen || {}).length >= 4096) throw new Error("Consent history needs archival before accepting more messages");
     const keyword = STOP.test(word) || providerOptOutType === "STOP" ? "stop" : START.test(word) || providerOptOutType === "START" ? "start" : HELP.test(word) || providerOptOutType === "HELP" ? "help" : "message";
     const next = { ...row, transactional: currentProof(row), pendingAsk: currentAsk(row.pendingAsk) ? row.pendingAsk : null, seen: { ...row.seen, [messageSid]: { keyword, at: now } }, lastMessageSid: messageSid, lastInboundAt: now, lastKeyword: keyword, updatedAt: now };
+    const serviceControl=/^(?:APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(word)||/^(?:YES\s+)?(?:QUOTE|REQUEST)\s+[a-zA-Z0-9_-]{1,80}$/i.test(word);
+    if(keyword==="message"&&!serviceControl){next.lastServiceReplyAt=now;next.lastServiceReplyMessageSid=messageSid;}
     next.lastAffirmation=!next.suppressed && /^(yes|si|sí)$/i.test(word)?{messageSid,providerDate,at:now}:null;
     if (keyword === "stop") { next.suppressed = true; next.transactional = false; next.pendingAsk = null; next.lastAffirmation=null; next.stoppedAt = now; next.directiveDate = Math.max(Number(row.directiveDate) || 0, Date.parse(providerDate) || Date.now()); }
     if (keyword === "start" && Number.isFinite(Date.parse(providerDate)) && Date.parse(providerDate) > (Number(row.directiveDate) || 0)) { next.suppressed = false; next.startedAt = now; next.directiveDate = Date.parse(providerDate); }
@@ -60,9 +62,10 @@ export async function saveManagedConsentAsk(c, phone, { wording, messageSid, sen
     return { value: { ...row,transactional:currentProof(row),handledAsks,pendingAsk:ask }, result: true };
   });
 }
-export async function mayDeliverManagedSMS(c, phone, purpose) {
+export async function mayDeliverManagedSMS(c, phone, purpose, job = null) {
   const row = await managedSMSConsent(c, phone);
   if (!row || row.suppressed) return false;
+  if (["followup_consent_ask","quote_followup","request_followup"].includes(purpose)) { const {mayDeliverRequestFollowup}=await import("./request-followup.mjs"); return mayDeliverRequestFollowup(c,phone,purpose,job); }
   if (["reply", "consent_ask"].includes(purpose)) return Date.parse(row.lastInboundAt) > Date.now() - 86400000;
   if (["confirmation", "reminder_24h", "reminder_1h", "cancelled"].includes(purpose)) return currentProof(row);
   return false; // Marketing requires a separate reviewed program and express consent.

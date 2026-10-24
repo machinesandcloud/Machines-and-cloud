@@ -75,6 +75,8 @@ export async function readRequestFollowthrough(client, session, id, operationId 
   const lead = await source(client, id), row = journal(client, id, await strictRead(KIND, requestJournalKey(client, id)));
   const latest = await source(client, id), result = view(client, latest, row, operationId);
   await authority(client, session); await assertCurrentWorkspace(client);
+  const {readRequestAutomation}=await import('./request-followup.mjs');const automation=await readRequestAutomation(client,id);if(automation)result.automaticFollowup=automation;
+  await authority(client,session);await assertCurrentWorkspace(client);
   return { ok: true, request: result };
 }
 function parse(body) {
@@ -134,3 +136,5 @@ export function requestFollowthroughMetrics(leads) {
   const rows=leads.filter(lead=>!lead.websiteSetupCheck&&!lead.simulation&&lead.status!=='spam'&&lead.outcome!=='spam'&&lead.followthrough);
   return {needsFollowup:rows.filter(lead=>lead.followthrough.needsFollowup).length,completed:rows.filter(lead=>!lead.followthrough.reviewRequired&&lead.followthrough.state.completedAt).length,reached:rows.filter(lead=>lead.followthrough.state.contact==='reached').length,due:rows.filter(lead=>lead.followthrough.due).length,reviewRequired:rows.filter(lead=>lead.followthrough.reviewRequired).length};
 }
+
+export { authority as requestOwnerAuthority, source as requestSource, journal as requestJournalRow };

@@ -542,6 +542,23 @@ body.desk-app.guide-tour-open { overflow:hidden; }
 .request-history { padding:0; list-style:none; margin:0; }
 .request-history li { padding:14px 0; border-top:1px solid var(--ui-line); font-size:12px; line-height:1.7; overflow-wrap:anywhere; }
 .request-history p { margin:6px 0 0; white-space:pre-wrap; font-size:12px!important; }
+.request-automatic { margin:24px 0; border:1px solid var(--ui-line); border-radius:10px; padding:18px; }
+.request-automatic>summary { cursor:pointer; font-size:15px; font-weight:600; }
+.request-automatic>summary small { display:block; margin:5px 0 0 16px; font-size:12px; font-weight:400; color:var(--ui-muted); }
+.request-automatic[open]>summary { margin-bottom:18px; }
+.request-automatic .muted { font-size:12px; line-height:1.65; }
+.request-auto-status { font-weight:600; margin:14px 0 5px; }
+.request-auto-preview { padding:16px; border-radius:8px; background:#f4f7fc; margin:18px 0; }
+.request-auto-preview h4,.request-auto-invitation h4 { font-size:14px; margin:0 0 12px; }
+.request-auto-preview dl { margin:0 0 12px; }.request-auto-preview dt { font-size:12px; color:var(--ui-muted); }.request-auto-preview dd { margin:4px 0 0; font-size:14px; overflow-wrap:anywhere; }
+.request-auto-body { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; line-height:1.7; }
+.request-auto-program { margin:18px 0; padding:14px; border:1px solid var(--ui-line); border-radius:8px; }
+.request-auto-program>summary { cursor:pointer; font-size:13px; font-weight:600; }
+.request-auto-program p,.request-auto-program li { overflow-wrap:anywhere; font-size:12px; line-height:1.65; }
+.request-auto-check { display:flex; align-items:flex-start; gap:10px; margin:16px 0; font-size:12px; line-height:1.6; }
+.request-auto-check input { flex:0 0 auto; width:18px; height:18px; margin:2px 0 0; }
+.request-auto-invitation { border-top:1px solid var(--ui-line); margin-top:20px; padding-top:18px; }
+.request-auto-invite { margin:12px 0; }.request-auto-invite textarea { width:100%; min-height:110px; font-size:12px; line-height:1.6; }.request-auto-invite button { margin:8px 0; }
 .request-visits button { margin:5px 0; text-align:left; }
 @media(max-width:450px) { .request-dialog .request-facts,.request-progress>dl { gap:14px; }.request-dialog-heading { gap:8px; }.desk-app dialog.request-dialog { padding:20px; } }
 /* Activity stays on Home; the full follow-up list shares the ordinary request dialog. */
@@ -570,3 +587,5 @@ body.desk-app.guide-tour-open { overflow:hidden; }
 .conversation-dialog #conversationMessage { min-height:24px; margin-bottom:6px; }
 .desk-app .conversation-dialog #conversationBoundary { font-size:13px; line-height:1.5; margin-top:6px; }
 @media(max-width:480px) { .desk-app dialog.conversation-dialog { padding:20px; }.conversation-dialog .request-dialog-heading { gap:12px; }.desk-app .conversation-dialog h2 { font-size:23px; } }
+
+.request-auto-program #requestAutoProgramReview details { margin:12px 0; }.request-auto-program #requestAutoProgramReview summary { font-size:12px; font-weight:600; cursor:pointer; }

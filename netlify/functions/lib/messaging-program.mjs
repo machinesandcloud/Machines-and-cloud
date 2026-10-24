@@ -2,6 +2,7 @@
 import { createHash } from "node:crypto";
 import { policyUrls } from "./config.mjs";
 const hash=value=>createHash("sha256").update(value).digest("hex");
+export const SERVICE_FOLLOWUP_PROGRAM_VERSION = "requested_service_followups_v1";
 export function buildMessagingProgram(c) {
   const name = String(c.business?.name || "Your service company").trim().slice(0, 100), urls = policyUrls(c.slug), help = c.phone?.businessNumber || c.owner?.email;
   const program = { version: "customer_care_ongoing_appointments_v3",
@@ -16,5 +17,14 @@ export function buildMessagingProgram(c) {
     optOutMessage: `${name}: you will receive no more service texts. START or EMPEZAR restores a previous opt-out.`,
     helpMessage: `${name}: help with service texts at ${help}. Reply STOP, ALTO or PARAR to end texts. Message and data rates may apply.`,
   };
+  if (c.serviceFollowupProgram?.version === SERVICE_FOLLOWUP_PROGRAM_VERSION) {
+    program.version = SERVICE_FOLLOWUP_PROGRAM_VERSION;
+    program.description += " Separately requested service follow-ups permit one neutral check about the recipient's specific requested quote or service inquiry. No reviews, promotions, referrals, seasonal messages or invoice reminders are sent.";
+    program.messageFlow = `People first text ${name} at its service number; this allows direct replies about their request only. Website or phone bookings can invite APPOINTMENTS/CITAS from the mobile saved for a visit. Opening an invitation sends nothing. When a visit is saved by SMS or the recipient sends that keyword, our fixed question names the business and asks for ongoing appointment confirmations, reminders and cancellations, including future visits. It discloses variable frequency, rates, HELP/STOP and booking without texts. A separate written YES/SÍ after that sent question is required. Old one-visit consent is not widened. For one service follow-up, website chat or an existing service conversation can show an optional invitation to text REQUEST reference, or QUOTE reference after the owner records a quote sent. Only the current request mobile can initiate it. Our fixed SMS question identifies the business, exact request and purpose, one text within 30 days, rates, HELP/STOP, policy links and service without texts. A distinct YES REQUEST reference or YES QUOTE reference after that provider-accepted sent question is required. We retain exact wording/version, recipient, request, tenant, ask/reply SIDs and provider dates; accepted does not mean delivered. There is one outreach total per request across these purposes; no promotions, reviews, referrals or invoices. STOP/ALTO/PARAR ends texts; HELP/AYUDA gives support. START/EMPEZAR removes a block but every purpose needs fresh permission. Signup, phone calls, website chat and providing a number never grant SMS permission. Existing appointment-only registrations stay unchanged. Terms: ${urls.terms}. Privacy: ${urls.privacy}.`;
+    program.optInMessage = `${name}: your texting block is removed. Each text program needs its own new permission. Use the full instruction for your visit or request. HELP for help; STOP/ALTO/PARAR to end.`;
+    program.messageSamples.push(`${name}: any questions about the quote for your requested service? Reply here for help. This is your one requested quote follow-up. Reply STOP to end texts or HELP for help.`, `${name}: checking once about your service request. Reply here if you need help with it. Reply STOP to end texts or HELP for help.`);
+  }
   return { ...program, digest: hash(JSON.stringify(program)) };
 }
+
+export function serviceFollowupProgram(c) { return buildMessagingProgram({...c,serviceFollowupProgram:{version:SERVICE_FOLLOWUP_PROGRAM_VERSION}}); }

@@ -57,7 +57,7 @@ export async function handleManagedSMS(req) {
     const consent = await recordManagedInbound(c,{phone:fields.From,text:fields.Body,messageSid:fields.MessageSid,providerOptOutType:fields.OptOutType,providerDate:verified.date_created});
     if (consent.duplicate && consent.keyword !== "message") return twiml();
     if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(`${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
-    if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
+    if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(c.serviceFollowupProgram?.version==='requested_service_followups_v1'?`${String(c.business.name).trim().slice(0,100)}: your texting block is removed. Each text program needs its own new permission. Use the full instruction for your visit or request. HELP for help; STOP/ALTO/PARAR to end.`:`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
     if (consent.keyword === "help") return consent.suppressed || fields.OptOutType === "HELP" ? twiml() : twiml(`${c.business.name}: for help contact ${c.phone?.businessNumber || c.owner.email}. Reply STOP, ALTO or PARAR to stop texts.`);
     if (consent.suppressed || !managedDeliveryEnabled()) return twiml();
     const probe = await pendingMessagingProbe(c);
@@ -111,7 +111,9 @@ export async function processManagedSMS(id) {
     const messages=(history?.messages || []).slice(-12).concat([{role:"user",content:job.body}]);
     // These recipient-initiated controls are deterministic and do not spend AI
     // allowance. A website/call invitation starts this exchange; only the later
-    // provider-verified YES after the delivered question grants ongoing consent.
+    // provider-verified YES after the sent question grants its stated permission.
+    if(!job.reply&&/^(?:YES\s+)?(?:QUOTE|REQUEST)\b/i.test(job.body.trim())){const {requestFollowupInbound}=await import('./request-followup.mjs'),choice=await requestFollowupInbound(c,job);if(choice){job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply:choice.reply,replyPurpose:choice.purpose,replyFollowup:choice.followup||null}:null);}}
+    if(!job.reply&&/^(YES|SI|SÍ)$/i.test(job.body.trim())){const {requestFollowupAffirmativeInstruction}=await import('./request-followup.mjs'),reply=await requestFollowupAffirmativeInstruction(c,job);if(reply)job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:'reply'}:null);}
     if (!job.reply && /^(APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(job.body.trim())) {
       const asking = /^(APPOINTMENTS|CITAS)$/i.test(job.body.trim()) && !consent.transactional;
       const spanish = /^(CITAS|SI|SÍ)$/i.test(job.body.trim()) || consent.proof?.wording === managedAppointmentConsentQuestion(c, 'es');
@@ -123,7 +125,7 @@ export async function processManagedSMS(id) {
     }
     if (job.reply) {
       if (!await freshAuthority()) return {ok:true,suppressed:true};
-      await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:job.replyPurpose,to:job.from,body:job.reply,consentAsk:job.replyPurpose==="consent_ask"});
+      await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:job.replyPurpose,to:job.from,body:job.reply,consentAsk:job.replyPurpose==="consent_ask",followup:job.replyFollowup||null});
       await appendHistoryOnce(historyKey,job,job.reply);
       try { await dispatchManagedDeliveryWave(); } catch { /* Scheduled recovery retains this reply. */ }
       await updateInbound(id,row=>row.claim?.token===token?{...row,state:"completed",claim:null,completedAt:stamp()}:null);

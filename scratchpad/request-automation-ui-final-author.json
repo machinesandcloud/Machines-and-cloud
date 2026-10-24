@@ -1,0 +1,2167 @@
+{
+  "at": "2026-10-24T08:59:38.564Z",
+  "baseCommit": "5f5327aa9d6577f8e86f1533496035a622987b58",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "scripts/request-automation-ui-check.mjs": "1b0f59b70a8fd0d7784ff0733898514b989ae3b421e1635470ee5c36036093ac",
+    "embed.js": "cb0e9e34abf393d31e65d7fcf541da0ab54269dd61ccb7deec2b384a13861c3f",
+    "netlify/functions/lib/request-followup.mjs": "fa35610ecd72d0c5f2a26eeda7219b946ef7f55d86e8826bc10b0ca188e4e3c2",
+    "netlify/functions/lib/messaging-program.mjs": "2c1b2d05a851f5b36e56731fbb2e70bf6883718a469de575df581e7ba4d40697",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "13147b190bbb50fd2d112418d796823c047ce013fe76cd45169c92bcb1202814",
+    "netlify/functions/lib/request-followthrough.mjs": "e31519db3b48c2138b85a80d0717177079dae4544433319d9e1ef6c97d9e60c1",
+    "scripts/build-site.mjs": "2a99c14eaef0dbc8234908184c566829f5b34ce9b0c6e67dc662d0f5a12ad654",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "desk.html": "2663f6f1d7bf9bd394b34b29d0ae8427a7c075eb1aa4bdf80b38b55d1f8c5341",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "9b8b4dd5ad9a972d75e35f04278178d832af16c8aac1f5ca493f36975bb020ca",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "b6c9da0abb5272895347fc00695eebdb6d2877037b6f5d09e166c56c504d8b14",
+    "netlify/functions/lib/connection-journey.mjs": "ac2d86ad1023744427fbbc4e596d0f2ab1481380468661a2c3c20c453c0b7336",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "8cd74effaa2a6bbeff94d7de362e5ed3963c499b4975bafff402119881b4ddfe",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "320px exact preview, optional program review, keyboard save and returning plan",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- '7fcf52a80b'\n\n    at file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:111:1283\n    at async check (file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:89:125)\n    at async file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:110:37",
+      "pageState": {
+        "route": "leads",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nINBOX\n\nCustomer requests\n\nSee who needs a callback and what they need from your shop.\n\nRequests\nConversations\nCustomer requests 1\nWhen\tCustomer\tIssue\tOutcome\tStatus\tRef\nOct 24, 2026, 3:59 AM CT\nAlex Customer (new)\n+17135550142\nAC not cooling\nwants call\nnot recorded\nNo next action recorded\n7fcf52a80b View request"
+      }
+    },
+    {
+      "name": "390px exact preview, optional program review, keyboard save and returning plan",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- '940ff108e0'\n\n    at file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:111:1283\n    at async check (file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:89:125)\n    at async file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:110:37",
+      "pageState": {
+        "route": "leads",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nINBOX\n\nCustomer requests\n\nSee who needs a callback and what they need from your shop.\n\nRequests\nConversations\nCustomer requests 1\nWhen\tCustomer\tIssue\tOutcome\tStatus\tRef\nOct 24, 2026, 3:59 AM CT\nAlex Customer (new)\n+17135550142\nAC not cooling\nwants call\nnot recorded\nNo next action recorded\n940ff108e0 View request"
+      }
+    },
+    {
+      "name": "1440px exact preview, optional program review, keyboard save and returning plan",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'f1fce09a4f'\n\n    at file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:111:1283\n    at async check (file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:89:125)\n    at async file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:110:37",
+      "pageState": {
+        "route": "leads",
+        "text": "Skip to workspace\nYOUR WORKSPACE\nFixture Availability Shop\nCustomer workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nContact support\nFixture Availability Shop\nSetup in progress\nSign out\n\nINBOX\n\nCustomer requests\n\nSee who needs a callback and what they need from your shop.\n\nRequests\nConversations\nCustomer requests 1\nWhen\tCustomer\tIssue\tOutcome\tStatus\tRef\n\nOct 24, 2026, 3:59 AM CT\n\t\nAlex Customer (new)\n+17135550142\n\t\nAC not cooling\n\t\nwants call\n\t\nnot recorded\nNo next action recorded\n\t\nf1fce09a4f View request"
+      }
+    },
+    {
+      "name": "Quote URL, true sent-quote milestone and owner confirmation are explicit",
+      "pass": true
+    },
+    {
+      "name": "Close and Escape preserve the unsaved automatic draft",
+      "pass": true
+    },
+    {
+      "name": "A response lost after the actual save reconciles the same plan after reload",
+      "pass": true
+    },
+    {
+      "name": "A503 before save retains the exact operation until explicit readback and retry",
+      "pass": true
+    },
+    {
+      "name": "A changed recipient keeps the draft but invalidates its prior owner confirmation",
+      "pass": true
+    },
+    {
+      "name": "Explicit stop is retained and a completed manual request requires Reopen",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Reopen/. Input:\n\n'You stopped this saved text. No new message will be sent from this plan.'\n\n    at file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:129:523\n    at async check (file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:89:125)\n    at async file:///private/tmp/mc-followup-preparation-5f/scripts/request-automation-ui-check.mjs:128:3",
+      "pageState": {
+        "route": "leads",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nINBOX\n\nCustomer requests\n\nSee who needs a callback and what they need from your shop.\n\nRequests\nConversations\nCustomer requests 1\nWhen\tCustomer\tIssue\tOutcome\tStatus\tRef\nOct 24, 2026, 3:59 AM CT\nAlex Customer (new)\n+17135550142\nAC not cooling\nwants call\nFollow-up complete\nNo next action recorded\n959c156d98 View request\n\nCUSTOMER REQUEST\n\nAlex Customer\nClose\n\nAction saved. Customer messages and visits are unchanged.\n\nPhone\n+17135550142\nRequested\nOct 24, 2026, 3:59 AM CDT\nRequest\nAC not cooling\nCustomer wanted\nCall after 3\nAddress and request source\nYour follow-up\nResponsible\nUnassigned\nSeen\nNot recorded\nCustomer contact\nNot recorded\nFollow-up\nCompleted Oct 24, 2026, 3:59 AM CDT\nNext action\nNot planned\nDue\nNot set\nRecord an action\nReopen follow-up\n\nExplain why this request needs more follow-up.\n\nNote (required)\nSave action\n\nThis records work you have done or plan to do. It does not send a message, place a call or change a visit.\n\nOne customer text\nFollow up once about this request\n\nStopped\n\nYou stopped this saved text. No new message will be sent from this plan.\n\nReview texting setup\nSaved mobile\n+17135550142\nNo earlier than\nOct 24, 2026, 4:59 AM CDT\nPurpose\nAwaiting a request reply\nPermission\nNot confirmed for this request\n\nFixture Availability Shop: checking once about your service request (ref 959c156d98). Reply here if you need help with it. Reply STOP to end texts or HELP for help.\n\nOne text total for this request. An attempted text or unknown result is not replaced. This is separate from appointment texts, your own next-action deadline and completion of paid work.\n\nAction history\nFollow-up completed\nOct 24, 2026, 3:59 AM CDT · account-ui-9@example.test\n\nresolved\n\nCallback handled; this is not a paid-job completion\n\nStopped pending customer text\nOct 24, 2026, 3:59 AM CDT · account-ui-9@example.test\nPrepared one customer text\nOct 24, 2026, 3:59 AM CDT · account-ui-9@example.test\n\nAwaiting a request reply · no earlier than Oct 24, 2026, 4:59 AM CDT\n\nFollow up once; owner reviewed exact recipient and message."
+      }
+    },
+    {
+      "name": "Double submit stores one operation and a malformed success stays uncertain until readback",
+      "pass": true
+    },
+    {
+      "name": "A prepared text waiting on service has one useful route to existing texting setup",
+      "pass": true
+    },
+    {
+      "name": "Status display keeps permission, scheduling, acceptance, delivery and unknown outcomes distinct",
+      "pass": true
+    },
+    {
+      "name": "Late permission requests a new future time and never silently reuses the old time",
+      "pass": true
+    },
+    {
+      "name": "An expired owner session clears new private previews and cannot submit another plan",
+      "pass": true
+    },
+    {
+      "name": "320px widget offers exact request SMS without granting consent and keeps chat optional",
+      "pass": true
+    },
+    {
+      "name": "390px widget offers exact request SMS without granting consent and keeps chat optional",
+      "pass": true
+    },
+    {
+      "name": "1440px widget offers exact request SMS without granting consent and keeps chat optional",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a2239668ad9cb4bb4caeec456dcf2b4277d605163a5f3344124bed051632368f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "591b603abb2b15e27af34fc2bd830d48258543c3467ff058b9f4ee91ba025940",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&requestId=7fcf52a80b",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "59b700642779e2189bce06928a5cd4cbefb0676d770b3fa764e96d810688bec0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "7fcf52a80b",
+        "sourceRevision": "f99dcd3f099290fa883909621162b2fbd73e6ded9cf759e7a8b60f93cc81f89b",
+        "expectedRevision": "f61861fdc60dbbf2256e833fddbd754d751e0a0eb3d1efc71dd8e79ebc753d47",
+        "operationId": "b3c2428836cdef0eaee4276186be8978",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "d3a7a5eb95b600b2346f3ba2e36d670ec5adb865a0c28938931cb13288e0ead7",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "edeb0343e1cbb7f456908c85968482b127c101a505391026fea2893bbf20844c",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "330c0a847b9c5b75f7de23a783ac43f277406b47f1ab08df8e069f09a5c64058",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9368f1664f20d0f974983feb2b45735cef9a330851bf8d01a6cbb7034f877b56",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9c44769bc242ec5ccd21d1ade2dbfa7f69f339a8af1a031d4a7acaf7e8520bfe",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&requestId=940ff108e0",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e9cd5f4f6f4b7065aa1deaa4917195211d189354b6fa52245a763e2218d479f5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "940ff108e0",
+        "sourceRevision": "98d12d28f2e1cb19281a572a38e6eceb7dda60aa857b4f1cafbda31c2de79e1c",
+        "expectedRevision": "d74b17bbfa27e7977b0c60318757583da406ecb7e464e24aadda33f99520b090",
+        "operationId": "85b80267053187bfecb4ebc598ac1a80",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "b64d0152eaa768127077563a112fdbad27d49f4c35ee239cdb2f3d6706ddaad4",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "baa33cbc04026f54716a2780ca93a70a1023cee0a38977f02b55beba435a8415",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "dd4eb5c3c0c000ca2bd3d5afbbe6557b92a51b020bcf1d664ee0c38aeb28a132",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9a09cf44e80fc1f10298948dad86bc699a67cc184c862e5950ac27f0f5ac5833",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "80d29d57ddbc68dda73ca219fc448b70c4e8abf225bfcde2a73020ff72835f12",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&requestId=f1fce09a4f",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d5ce1a697b5f34e66349b29692e6af66b6c9ac6915dd1d3bf83b79a6a2e324f0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "f1fce09a4f",
+        "sourceRevision": "91f3226e68e64928988f202f4849200e02d15aca524a2045646992b0b717b727",
+        "expectedRevision": "045c5814370c5206113a253aafdeb5b6db8239fb950626c6621f9c4c112be36f",
+        "operationId": "5392a71ab1ad69d05e580fc96a70ceaa",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "aee9e277d9990982ce4ba7c4a873e9445dedd00a1fab3ebf02fcb59c7e05e0d6",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5297926d57d1ec1b087385acb3fd5b3d95944b1b1dc7c52c81b5f7b63c739b79",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6fe0914e7e12caef40371320e80841c0da675ef70eb088ed7482b0ded688b665",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "cb4189ae55eab6f0321fb3e72c9fc6fa1c56123bd7c359ef015f70a51c382707",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c6df4fe660441eefe4b1bfb85fb96259037d83830990143e0a2b5057fbf22e91",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&requestId=213c87ff99",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a6526fb5bf960581c190a5a550f17df629917a6f4a867f56dece45ccb265ddd5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "213c87ff99",
+        "sourceRevision": "5ee4b221cf36bfe678d0ac477c82bbe29900ebf544d04e9f8a94bef01cf046cb",
+        "expectedRevision": "e0a98734366ca536e72acbc44ccf4bc6f5ed7b0c6d68935a592b55b2d3c3b011",
+        "operationId": "2d8c35c993a82bcf85103b76defbd279",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "quote_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "https://shop.example.test/quotes/123",
+        "programDigest": "13de79642a5c290adc9b24208fa286204b0ee9910a612d2a4e6252286909cfb2",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4228c0f754f5030f10b72b20d517768b0b67f99635d4422283ce44be7f61c01e",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "108a8798b1fcde145c1bfa3ea5aa2121cb539dad945fa49d4b47b516a74f2492",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e20b0a0ee979a6b74dfd22bc92f0d3f049c7f638288785a96e9115369dad66bd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4c644bfaee4924bd30a72413b776952a595e41349eceba13ddcefac13ff183f6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&requestId=ab2799b532",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5ef689e56a2c16fcadd23b03e5333d2f2fe4abd64dd3b4ea41cb9eddcd4839fd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&requestId=ab2799b532",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5ef689e56a2c16fcadd23b03e5333d2f2fe4abd64dd3b4ea41cb9eddcd4839fd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8446c8f0259f9f0e942d39aa08008f08d287aa612e26f882ab5ecce14ddc5915",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c2bec50687302e21514b6e680087820cbb02d9cce5d96ebcf928b65967cb8950",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&requestId=a965eb0203",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1187153b4a113e2272b9f00b80986a08f4df4c2d44802ac5da819a7e4dadd42e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "a965eb0203",
+        "sourceRevision": "372edc9f9a5368e9be0dbd5da94ab2976448e4f2fe8511afc9eef56ae9bce483",
+        "expectedRevision": "81cb7f7e5268814006f1acab3c7dd4a134465614d890e1cf1d50b39f1313e863",
+        "operationId": "146dbb61086012eeae5eafbd4dd97f35",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "36e4c7d88b52bbcf2cbdfae1ab08a8d5800e8c2fccdb6e3cb8cb3924372bf97d",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d69ddaca29c1053a32d0ea7de01be8ffc0ec128dd7877828769b2df441d4971f",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      },
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e197a55525daa467532a05c459fadae89e147a7f62374f354771a86818403bf",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&requestId=a965eb0203&operationId=146dbb61086012eeae5eafbd4dd97f35",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d69ddaca29c1053a32d0ea7de01be8ffc0ec128dd7877828769b2df441d4971f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e197a55525daa467532a05c459fadae89e147a7f62374f354771a86818403bf",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6eecafdc950b65668b64642d9d05f2001a9629a7bf7e551df3f9ac430b68e7c3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4812aa9a3dc5caf9bedddbf1a8095b46e34ee0d3e9ec38d70802cff395c43b88",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&requestId=72cc5ed2f0",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7aed6908673dda2a139beb4958c5cc0ff6051d0ea9531c2fb73027bb84dac4fb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "72cc5ed2f0",
+        "sourceRevision": "b9d33ad044390dd57554739fc4661b3da335e94bb5f6067f4f30a77415013ad0",
+        "expectedRevision": "000e4b81ea373edff70d0ba323a06a1c5d26a74ff1f828f1e8d244ff6e657a11",
+        "operationId": "c03878c26fe60a6235d0dabeaa8c49a1",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "520046a3de122752340be2406fa2d239c682e7d4382caa5dad1225441a70eb56",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "fixture": 503,
+      "status": 503
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&requestId=72cc5ed2f0&operationId=c03878c26fe60a6235d0dabeaa8c49a1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7aed6908673dda2a139beb4958c5cc0ff6051d0ea9531c2fb73027bb84dac4fb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "72cc5ed2f0",
+        "sourceRevision": "b9d33ad044390dd57554739fc4661b3da335e94bb5f6067f4f30a77415013ad0",
+        "expectedRevision": "000e4b81ea373edff70d0ba323a06a1c5d26a74ff1f828f1e8d244ff6e657a11",
+        "operationId": "c03878c26fe60a6235d0dabeaa8c49a1",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "520046a3de122752340be2406fa2d239c682e7d4382caa5dad1225441a70eb56",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "37ba186940e6b9ad9031203f106dc09a25e7ae843523a579fcdc8094df93fbdd",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "36fbde40e932b4ded2111c8dfb47983c88ed19cc7d82d55eb885c04f18e165da",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e7dd46272a42100f6c5977229d60c55d5bb47240d16aa456bfe3d3c13d80752",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "56597fdfd7f3970b5347a8f26602205f4260c6e93d0edd32ee967760622675fc",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&requestId=0874e0e26c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "74d7799a4675be8112ec2d4d7d7774894c789085a51e0ed724688d2bab294d1c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "0874e0e26c",
+        "sourceRevision": "141bac9df45c6eb8093e53d1d24998214925a362d93bd9b2e024c712ac59b26c",
+        "expectedRevision": "872aae92408765281b16a3284b9fb59653c4a68b8a1870ba8e6ef8e039ae146a",
+        "operationId": "fafdf2ad37ee31f05ca34f5dfadfcdb1",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "3123cf17ed2fb431907ecbc32ab57e20a28187eb2fa3b07f89a77a0a7dc85ffd",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 409,
+      "responseByteSha": "c12b4d36c97563c4c567ca8bad440f27f4702216cd07051500eb7586cb4acedc",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&requestId=0874e0e26c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b669136b536b1d73631de71f1dabf5d01200a5f6e5544eef37b079690b1259a5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3e85398aa894bb5397dd06288ad1b8e38d171c2d505fa60cc98daeff23b044b8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3b10516bab42ef836ecea631173372c5f0697b8f91162097f53a2fa9a59cd151",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9&requestId=959c156d98",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "83c375e9f172866cbcac8ffe5552162bf0b34e7448e604303d108a97c647909f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "959c156d98",
+        "sourceRevision": "b4a472ffa46ac2f4485d20bd5f6148eb0ee959a01f5f0b1fcc8427a8eeb0f09f",
+        "expectedRevision": "9c986c4b3440ff96b3092988f0c93a7585664bb3813ae717018fa960a1651315",
+        "operationId": "5c55a580b43212f0ee345ccdd3c5306d",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "7dbcc80532e2fded5604e3de0b90c962b109d78036811439151f096ab38a5e9a",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2e83361233649734567eb7c5b0b77cd06a83a9051a6c089ac5651e865c7ea227",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "070dd9c73575628e6e08e97a2545ca0b1315a91fe56ff3d819e274c49a113013",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "cancel",
+        "requestId": "959c156d98",
+        "sourceRevision": "b4a472ffa46ac2f4485d20bd5f6148eb0ee959a01f5f0b1fcc8427a8eeb0f09f",
+        "expectedRevision": "eed27a47d6a56aac21d8540c39b20f471a6291ff6c2535b64ec588ac6f09e5f8",
+        "operationId": "ebf37881dfd54e2b3f36b74955a15747",
+        "note": ""
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4ac327d946d1854441b25e79d18d8b092838e4a3d8635984f77bfe1a69839741",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "fe9204d8bed0ee8f9813c0337d590bd35265f3b0290fc6f6b4ea7d4419ec6039",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "POST",
+      "action": "request_followthrough",
+      "body": {
+        "action": "request_followthrough",
+        "requestId": "959c156d98",
+        "sourceRevision": "b4a472ffa46ac2f4485d20bd5f6148eb0ee959a01f5f0b1fcc8427a8eeb0f09f",
+        "expectedRevision": "7f8778842295139e82467ec7b02837ab76e17cc567449bccac2919056ab2d450",
+        "operationId": "0fbf8bec8e4d0fc44611e0a8bce0a042",
+        "type": "complete",
+        "note": "Callback handled; this is not a paid-job completion",
+        "resolution": "resolved"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a72fd00b960f121fa3edc175639a2e1f58f99c3d0d5ac34e83fbba036992ac1a",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "629a5a491851aae8c1984e5b31cdda3e157ae9a5fb46af2b224799cd322b1b23",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "69eb00533109bad93211327b8638d00a663c90759ef152eaeb88f4d92d1319cb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a381ff428e9dc1f8b2df28d3a09dc0442c82a3e7c023deb1a89bd2556c95d44e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10&requestId=541cf014d8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "330dd2e422a762267c0f9835940709d4e9b4cac605316905fbb524eb42d29023",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "541cf014d8",
+        "sourceRevision": "887bb8f6452810ec4432e1f27c2a99161d8201b6f7adc36f1d7fa155874142da",
+        "expectedRevision": "79e164b2cf2bd63aa74efa0df8adb4f51d7bdfb109dfde9d2ddd446c2a749114",
+        "operationId": "757ee2b08aa31295cb659e002f559c6f",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "eabe85480e4706202da0a259763b0e0acf185d43cbd2be4c3a313719d74235d5",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "78efbd2d351b6f0a834a1580249548a4a0f7588f24d02f342b66a78aa6181fa3",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10&requestId=541cf014d8&operationId=757ee2b08aa31295cb659e002f559c6f",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "78efbd2d351b6f0a834a1580249548a4a0f7588f24d02f342b66a78aa6181fa3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ad7af3a24364d44df0b895ee2d80243e501cbf657eb284758b7c56ffd3ada6d2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "69831c8849b68618e3144a43f4ca15416840acbd5574c006d9e55a60094142b3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3e61d965cffd298f9ffc6b59fb71f672465c85a0edc45f2395b7177d3ee98491",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11&requestId=a37a7d8eff",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "72afa5000467e37936bb29c4cfcfb363a2145f7aa3fb0bfb14131ee82bea3206",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "a37a7d8eff",
+        "sourceRevision": "4f40cdec985826ff2f00294efae855dc844515ea81584fc26e4803ae6eccbbb9",
+        "expectedRevision": "ccf89c03d343c50a0e4a76a990a112efee4f320b9ca04052ea055ce92ca1b9b7",
+        "operationId": "9b345e03facfb8f602871a774d45b036",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "request_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "cf2a0e7942d68f159977e1ba6e551eb669cd8d3f060a636e743ba53f2da27013",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e1b9a6a4c5ecc672e451e41cca7e97106efb7b35e1198277605028c9289b5d6e",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, PUT, POST, OPTIONS",
+        "access-control-allow-origin": "https://followthrough.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2f6910d8b33291296f9a48e2e4ba4600281bfb6d2ab33ed3f5b53eed2519dbaa",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "377f5ed6f46e4c200673b1bbf7863786393105a226b7f53e137bd8c26278be55",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-12",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ecf1323b2560521d67a74016ebc153a9ec198e065bc2e8917a250e672906f153",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-12",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e16075c378857d1030156fb463d479fa347b888deb750281368efaac137cbe11",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "0cfd77f47b1ee11da445ab717249b268bff78e945c242a63cd0083a64f567786",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "30116b14d51b43b3369871a5a0808130090daf85b834b2419a4ec5126b14ee55",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "8d5270182a7d9bcc11d09159a96ebad97127732cf2af1bea14072ee9b2fe9f60",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "38ead6d27b5dd7e7753a760d6c108521b97cd540ef11b5cd44b44be1f2da84b2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "0e2e0b464ea79af66cc87c3a29accaeaac4972572a5ebc86efd2659a68c0dd0f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "d0fc38f53e7c3802378ee349754de3d262404dffed38a90739010999abf2a658",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-12",
+      "path": "/api/client",
+      "query": "?c=account-ui-12&requestId=dc90ccca89",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "3da2f43002dc754f5c234c14d2c59381f5d223b824c16c794d7d218c90c2557b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "61b10ae9ab7e304d2a1bbdfbf6e7c5f2a24387596ef0d7290264883114839ce1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "17cd5b1761efdcbdfe5cd4d3da2b7b38f529858d117fe1a6d21434a1871a5ec9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13&requestId=435e370132",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3684969b3012dd3b8ca704dc29772b52c0e54195bce0ebac32307581c7fc22f1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-13",
+      "path": "/api/client",
+      "query": "?c=account-ui-13&requestId=435e370132",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "fixture": "Read-only follow-up status display projection after actual owner handler",
+      "responseByteSha": "0c6149f49bd74c7ff40d51c7ab48b77a0dd4c61fd0b706075b874d399fdcc99b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/client",
+      "query": "?c=account-ui-14",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6557baa5af79bf55496bcfe429b4cba67d08db1ea26cf47b547cc10ae0e80334",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-14",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/client",
+      "query": "?c=account-ui-14",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "efb03b2847c1fb8d7df231ca3e894d94cf124c0562cd14ac1564733aad13e2d9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-14",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/client",
+      "query": "?c=account-ui-14&requestId=0315158dcb",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "00a8d66ca4fec02073138750528f185b7f88c6cbdd6641c1a16b1c2854081f67",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-14",
+      "path": "/api/client",
+      "query": "?c=account-ui-14",
+      "method": "POST",
+      "action": "request_followup",
+      "body": {
+        "action": "request_followup",
+        "type": "prepare",
+        "requestId": "0315158dcb",
+        "sourceRevision": "325ed566179a5676a06fc745ebb0b8816d09c06d9b4cb8b97bf99265869bf378",
+        "expectedRevision": "7648d29b7201de3b988ecdfd13523560fb5781f798daf70582e8c7c2fce277db",
+        "operationId": "3cb11d73d723cf11e9c4689a218b0792",
+        "note": "Follow up once; owner reviewed exact recipient and message.",
+        "purpose": "quote_followup",
+        "dueAt": "2026-10-24T09:59:00.000Z",
+        "quoteUrl": "",
+        "programDigest": "1f8a194d85065f2f44a9937334bd90505958ea71f82683d7b20539b66bc8a0f7",
+        "reviewProgram": true
+      },
+      "authPresent": true,
+      "fixture": 401,
+      "status": 401
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/request-automation-ui-final-author-prepared-320.png",
+    "scratchpad/request-automation-ui-final-author-failure-1.png",
+    "scratchpad/request-automation-ui-final-author-prepared-390.png",
+    "scratchpad/request-automation-ui-final-author-failure-2.png",
+    "scratchpad/request-automation-ui-final-author-prepared-1440.png",
+    "scratchpad/request-automation-ui-final-author-failure-3.png",
+    "scratchpad/request-automation-ui-final-author-failure-9.png",
+    "scratchpad/request-automation-ui-final-author-unknown-outcome.png",
+    "scratchpad/request-automation-ui-final-author-widget-request-320.png",
+    "scratchpad/request-automation-ui-final-author-widget-request-390.png",
+    "scratchpad/request-automation-ui-final-author-widget-request-1440.png"
+  ],
+  "statusProjectionFixture": "These status display cases augment the actual owned-detail response with explicit read-only projection fixtures; backend lifecycle/receipts are verified separately by request-automation-check.mjs.",
+  "widgetProtocolFixture": "Only public configuration and final chat lead event are synthetic display contracts; owner tests above use actual handlers. SMS navigation is prevented before external protocol activation; clipboard is an in-page array.",
+  "sourceAfter": {
+    "scripts/request-automation-ui-check.mjs": "1b0f59b70a8fd0d7784ff0733898514b989ae3b421e1635470ee5c36036093ac",
+    "embed.js": "cb0e9e34abf393d31e65d7fcf541da0ab54269dd61ccb7deec2b384a13861c3f",
+    "netlify/functions/lib/request-followup.mjs": "fa35610ecd72d0c5f2a26eeda7219b946ef7f55d86e8826bc10b0ca188e4e3c2",
+    "netlify/functions/lib/messaging-program.mjs": "2c1b2d05a851f5b36e56731fbb2e70bf6883718a469de575df581e7ba4d40697",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "13147b190bbb50fd2d112418d796823c047ce013fe76cd45169c92bcb1202814",
+    "netlify/functions/lib/request-followthrough.mjs": "e31519db3b48c2138b85a80d0717177079dae4544433319d9e1ef6c97d9e60c1",
+    "scripts/build-site.mjs": "2a99c14eaef0dbc8234908184c566829f5b34ce9b0c6e67dc662d0f5a12ad654",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "desk.html": "2663f6f1d7bf9bd394b34b29d0ae8427a7c075eb1aa4bdf80b38b55d1f8c5341",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "9b8b4dd5ad9a972d75e35f04278178d832af16c8aac1f5ca493f36975bb020ca",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "b6c9da0abb5272895347fc00695eebdb6d2877037b6f5d09e166c56c504d8b14",
+    "netlify/functions/lib/connection-journey.mjs": "ac2d86ad1023744427fbbc4e596d0f2ab1481380468661a2c3c20c453c0b7336",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "8cd74effaa2a6bbeff94d7de362e5ed3963c499b4975bafff402119881b4ddfe",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 13,
+    "failed": 4,
+    "total": 17,
+    "physicalNetwork": 0,
+    "pageErrors": 0,
+    "forbidden": 0
+  }
+}

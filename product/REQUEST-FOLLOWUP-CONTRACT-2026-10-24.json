@@ -1,0 +1,75 @@
+{
+  "baseCommit": "5f5327aa9d6577f8e86f1533496035a622987b58",
+  "stage": "Implementation contract approved by Root; PO review and local implementation in progress. No provider effect or publication. Calendar remains primary provider milestone.",
+  "job": "An owner schedules one neutral text about a quote already sent or an unanswered service inquiry, only after that recipient separately asks for that exact follow-up. The owner can see its real outcome from the request.",
+  "ownerScreen": {
+    "location": "Existing Inbox request detail dialog; no new navigation",
+    "section": "One customer follow-up",
+    "purposeChoices": [
+      "A quote I already sent",
+      "An unanswered service request"
+    ],
+    "milestone": "Owner explicitly records quote sent or awaiting customer reply. Completing callback follow-up never implies a paid job was completed. No review/referral/seasonal/invoice automation in this slice.",
+    "preview": "Show exact saved mobile, fixed message, optional same-business quote URL and one-message due time. Schedule may be saved while permission or a matching approved texting program is pending; its concrete blocker remains visible.",
+    "programReview": "For a new texting registration, the owner reviews the expanded service-follow-up program once. Existing appointment-only registrations stay unchanged; they show a specific program mismatch and do not send these purposes. No silent upgrade, new charge or attestation.",
+    "states": [
+      "Saved for preparation",
+      "Waiting for recipient permission",
+      "Waiting for texting setup or program review",
+      "Scheduled for one message",
+      "Provider accepted",
+      "Delivered",
+      "Customer message received afterward",
+      "Stopped",
+      "Failed",
+      "Outcome unconfirmed"
+    ],
+    "latePermission": "If recipient permission arrives after the chosen due time, show Needs new time; no stale outreach is sent immediately.",
+    "closedRequest": "Explicitly reopen/review a closed request through the existing journal actions before preparing a text."
+  },
+  "customerScreen": {
+    "location": "Existing website chat after a real saved request; optional plain invitation, or copyable instructions in an existing conversation",
+    "heading": "Want one text about this request?",
+    "choices": [
+      "One quote follow-up",
+      "One request follow-up"
+    ],
+    "tapToText": "Prefill QUOTE reference or REQUEST reference; opening the SMS app sends nothing. Show the saved mobile and business identity. Copyable short instructions on devices without SMS handling.",
+    "consentQuestion": "Business name: would you like one text within 30 days about the quote for this service request? Reply YES QUOTE reference to agree. No promotions. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end. Service is available without texts. Include current texting terms and privacy links. A corresponding request-only question uses YES REQUEST reference.",
+    "confirmation": "Your choice is saved for one quote/request follow-up for this request. This does not mean a text was scheduled or delivered. HELP for help; STOP/ALTO/PARAR to end.",
+    "quoteEligibility": "Show/accept quote follow-up only after an owner-recorded quote-sent milestone for the current request/source. Otherwise offer request follow-up only."
+  },
+  "permission": "Recipient initiates exact purpose/reference SMS from the current request mobile. Existing signed/account/sender-verified inbound path binds tenant/request/recipient. Only the later distinct exact-purpose affirmative after the provider-accepted sent fixed question (verified SID, exact wording/version and provider date; carrier delivery is not a prerequisite or guarantee) can grant permission. Keep wording/version, ask/reply SIDs and dates. Appointment YES, START, model prose, a phone field or owner checkbox never grants this permission. No unsolicited SMS to ask for consent.",
+  "automation": "Existing request journal retains the immutable plan and operation receipt. Existing managed delivery queue is the only delivery queue; normal bounded discovery repairs save-to-enqueue projection failures with the same identity. Gate/program/recipient permission/source/quiet-hours/budget checks apply again before a physical send. Accepted/delivered/uncertain stay distinct. Never retry an unknown SMS POST as a new send.",
+  "stopRules": [
+    "Recipient STOP suppresses future texts; START alone does not restore this permission.",
+    "New real customer reply or owner-recorded contact/closure after the plan baseline, cancellation, changed recipient/source or superseding unattempted plan prevents pending outreach. Historical contact before the plan and consent controls do not count as a new answer.",
+    "An already attempted or uncertain outreach is retained and reconciled; no replacement send is created to hide it.",
+    "Cancelled workspace retains read-only history. Mixed legacy/non-self-service behavior remains unchanged."
+  ],
+  "files": [
+    "netlify/functions/lib/request-followthrough.mjs",
+    "netlify/functions/lib/request-followup.mjs",
+    "netlify/functions/lib/managed-consent.mjs",
+    "netlify/functions/lib/managed-sms.mjs",
+    "netlify/functions/lib/managed-delivery.mjs",
+    "netlify/functions/lib/messaging-program.mjs",
+    "netlify/functions/client.mjs",
+    "netlify/functions/chat.mjs",
+    "desk-requests.js",
+    "desk.html",
+    "embed.js"
+  ],
+  "primaryReferences": [
+    {
+      "url": "https://www.twilio.com/en-us/legal/messaging-policy",
+      "use": "Sender/subject-specific freely given express consent, retained proof, recipient-initiated exchange does not grant ongoing outreach, straightforward STOP."
+    },
+    {
+      "url": "https://www.twilio.com/docs/messaging/compliance/a2p-10dlc/collect-business-info",
+      "use": "Campaign represents the actual intended message content and opt-in program. New purposes must not inherit the current appointment-only registration."
+    }
+  ],
+  "acceptance": "Actual local owner/client, signed inbound, queue/send/receipt handlers and normal worker recovery with synthetic providers; desktop/mobile retained/error/lost-response/returning flows; independent QA and PO. No actual message or carrier approval is claimed.",
+  "oneMessageAllowance": "ONE outbound follow-up TOTAL per exact request across both purposes. A purpose switch, new plan/operation, close/reopen or repeated permission never refills an attempted/uncertain use."
+}

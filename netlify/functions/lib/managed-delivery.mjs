@@ -6,7 +6,7 @@ import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant, mayDeliverManagedSMS } from "./managed-consent.mjs";
 import { arrivalInstant } from "./service-time.mjs";
-import { reserveManagedSMS, assertManagedSMSReservation, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
+import { reserveManagedSMS, assertManagedSMSReservation, managedSMSBudgetPolicy, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
 import { reserveManagedEmail, assertManagedEmailReservation, assertManagedEmailDispatchPolicy, managedEmailBudgetPolicy, ManagedEmailBudgetError } from './managed-email-budget.mjs';
 import { selfServiceAIProofPolicy } from './self-service-ai.mjs';
 const hash = s => createHash("sha256").update(s).digest("hex");
@@ -62,14 +62,14 @@ async function currentClient(c) {
   if (!current || !isSupportedSelfServiceClient(current) || deliveryTenant(c) !== deliveryTenant(current)) throw new Error("Delivery workspace changed");
   return current;
 }
-export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null }) {
+export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null }) {
   const scope = await managedDeliveryProofScope();
   if (!proofClientAllowed(scope,c) || scope && (channel !== 'email' || to !== scope.email)) return null;
   await currentClient(c);
-  if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
+  if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe", "followup_consent_ask", "quote_followup", "request_followup"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
   if (channel === "email" && !["owner_booking", "owner_lead"].includes(purpose)) throw new Error("Unsupported email purpose");
   const id = `${c.slug}/${hash(`${deliveryTenant(c)}:${channel}:${eventId}`)}`;
-  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe }, digest = hash(JSON.stringify(canonical(payload)));
+  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}) }, digest = hash(JSON.stringify(canonical(payload)));
   const identity = hash(JSON.stringify(canonical({ ...payload, body: null })));
   const previous=await strictRead(STORE,id);
   if(previous && previous.digest!==digest && !(preserveSnapshot && previous.identity===identity))throw new Error("Delivery identity already used");
@@ -119,6 +119,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   }
 }
 async function inspectSource(job, c) {
+  if(job.followup){const {inspectRequestFollowup}=await import("./request-followup.mjs");if(!await inspectRequestFollowup(c,job))return false;}
   if (!job.source) return true;
   const record = await strictRead(job.source.kind, `${c.slug}/${job.source.id}`);
   return !!record && !record.websiteSetupCheck && !record.simulation && record.delivery?.tenantIdentity === job.tenant && belongsToWorkspace(c, record) && revision(record) === job.source.revision;
@@ -179,6 +180,10 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
       const url = new URL("/api/managed-sms/status", process.env.URL); url.searchParams.set("job", job.id);
       await assertManagedSMSReservation(c,job,job.smsBudget);
       if(job.purpose==='activation_probe'&&!await probeFor(c,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
+      if(job.followup){
+        const {reserveRequestFollowup}=await import('./request-followup.mjs');
+        if(!await inspectSource(job,c)||!await mayDeliverManagedSMS(c,job.to,job.purpose,job)||!await reserveRequestFollowup(c,job)||!await inspectSource(job,c)||!await mayDeliverManagedSMS(c,job.to,job.purpose,job)||!managedDeliveryEnabled()||managedSMSBudgetPolicy()?.digest!==job.smsBudget?.policyDigest)throw new ManagedSMSBudgetError('followup_authority_changed','This follow-up changed before sending. Check its saved request.');
+      }
       const { response, data } = await request(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, { method: "POST", headers: { Authorization: "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ To: job.to, From: sender.number, MessagingServiceSid: sender.serviceSid, Body: job.body, StatusCallback: url.href }) });
       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
@@ -217,6 +222,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       assertProofPolicy(proofReceipt?.scope);
       const receipt = await provider.status(job,proofReceipt);
       if (!receipt || receipt.id !== job.providerId) return change(id,row=>terminal(row.state)?null:{...row,receiptCheckFailedAt:row.receiptCheckFailedAt || stamp(),reasonCode:"receipt_status_unavailable"});
+      if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(c,job,{...receipt,from:job.from,serviceSid:job.serviceSid});}
       // A crash can leave the provider receipt saved before the question's
       // consent-ledger projection. Rebuild it from this same verified receipt;
       // never send another question merely to repair that local projection.
@@ -247,9 +253,10 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     }
     if (job.channel === "sms") {
       const binding=await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c));
+      if(job.followup){const {requestFollowupBlocker}=await import('./request-followup.mjs'),block=await requestFollowupBlocker(c,job);if(block)return change(id,row=>({...row,state:'waiting_platform',reasonCode:block.code,detail:block.message}));}
       if (!binding) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: "sms_not_ready" }));
-      if (job.purpose !== "activation_probe" && !await mayDeliverManagedSMS(c, job.to, job.purpose)) return change(id, row => ({ ...row, state: "waiting_consent", reasonCode: "consent_required" }));
-      if (!["reply", "consent_ask"].includes(job.purpose) && inQuietHours()) return change(id, row => ({ ...row, state: "waiting_hours", reasonCode: "quiet_hours" }));
+      if (job.purpose !== "activation_probe" && !await mayDeliverManagedSMS(c, job.to, job.purpose, job)) return change(id, row => ({ ...row, state: "waiting_consent", reasonCode: "consent_required" }));
+      if (!["reply", "consent_ask", "followup_consent_ask"].includes(job.purpose) && inQuietHours()) return change(id, row => ({ ...row, state: "waiting_hours", reasonCode: "quiet_hours" }));
       if (job.source && !await inspectSource(job, c)) return job;
       try { smsBudget=await reserveManagedSMS(c,{...job,from:binding.number,serviceSid:binding.serviceSid}); }
       catch(error) { return change(id,row=>row.attemptStartedAt?null:{...row,state:"waiting_platform",reasonCode:error instanceof ManagedSMSBudgetError?error.code:"sms_budget_storage_unavailable",detail:error instanceof ManagedSMSBudgetError?error.message:"Texting is waiting for its platform sending allowance to be confirmed. Your message remains saved."}); }
@@ -259,7 +266,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     if (job.claim?.token !== token) return job;
     // Reread lifecycle, source and consent after acquiring the exclusive send claim.
     const latest = await strictRead("clients", c.slug);
-    if (!latest || (latest.status !== "live" && !await testingDeliveryAuthorized(latest,job)) || deliveryTenant(latest) !== job.tenant || !gate() || !await inspectSource(job, latest) || (job.channel === "sms" && !(job.purpose === "activation_probe" ? await probeFor(latest,job) : await mayDeliverManagedSMS(latest, job.to, job.purpose)))) return change(id, row => ({ ...row, state: "suppressed", reasonCode: "authority_changed" }));
+    if (!latest || (latest.status !== "live" && !await testingDeliveryAuthorized(latest,job)) || deliveryTenant(latest) !== job.tenant || !gate() || !await inspectSource(job, latest) || (job.channel === "sms" && !(job.purpose === "activation_probe" ? await probeFor(latest,job) : await mayDeliverManagedSMS(latest, job.to, job.purpose, job)))) return change(id, row => ({ ...row, state: "suppressed", reasonCode: "authority_changed" }));
     if(job.channel==="sms") {
       const binding=await (job.purpose==="activation_probe"?jobSender(latest,job):sender(latest));
       if(!binding)return change(id,row=>({...row,state:"suppressed",reasonCode:"sender_changed"}));
@@ -275,9 +282,11 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
         assertProofPolicy(currentScope);
       }
       if(job.purpose==='activation_probe'&&!await probeFor(latest,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
+      if(job.followup){const {reserveRequestFollowup}=await import('./request-followup.mjs');if(!await inspectSource(job,latest)||!await mayDeliverManagedSMS(latest,job.to,job.purpose,job)||!await reserveRequestFollowup(latest,job))throw new ManagedSMSBudgetError('followup_authority_changed','This follow-up changed before sending. Check its saved request.');}
       const receipt = await provider.send(job, latest);
       if (!receipt?.id) throw new Error("Missing receipt");
       const saved = await change(id, row => row.providerId || terminal(row.state) || row.claim?.token !== token ? null : { ...row, state: "accepted", providerId: receipt.id, from: receipt.from || null, serviceSid: receipt.serviceSid || null, acceptedAt: stamp(), claim: null, reasonCode: null });
+      if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(latest,job,receipt);}
       if (job.consentAsk && job.channel === "sms") { const { saveManagedConsentAsk } = await import("./managed-consent.mjs"); await saveManagedConsentAsk(latest, job.to, { wording: job.body, messageSid: receipt.id,sentAt:receipt.sentAt,senderNumber:saved.from,messagingServiceSid:saved.serviceSid }); }
       return saved;
     } catch(error) {
@@ -307,6 +316,7 @@ export async function recordManagedSMSReceipt(id, fields) {
   const receipt = await providerAdapter().status({ ...job, providerId: fields.MessageSid });
   if (!receipt || receipt.id !== fields.MessageSid) return false;
   await change(id, row => terminal(row.state) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+  if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(c,job,{...receipt,from:job.from,serviceSid:job.serviceSid});}
   if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt,senderNumber:job.from,messagingServiceSid:job.serviceSid});}
   return true;
 }
@@ -336,9 +346,9 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
     } catch { errors.push("probe_recovery_failed"); }
   }
   // Backfill from authoritative records also repairs a crash between record save and enqueue.
-  for (const kind of ["bookings", "leads"]) for (const key of await fairPage(kind, cursorKey(`source_${kind}`), Math.min(50,discoveryLimit), prefix)) {
+  for (const kind of ["bookings", "leads", "request_followthrough"]) for (const key of await fairPage(kind, cursorKey(`source_${kind}`), Math.min(50,discoveryLimit), prefix)) {
     if (Date.now() >= deadline) break;
-    try { const record = await strictRead(kind,key), c = record && await strictRead("clients",record.slug); if (c && isSupportedSelfServiceClient(c)) await queueManagedRecord(c,record,kind); } catch { errors.push("source_recovery_failed"); }
+    try { const record = await strictRead(kind,key), c = record && await strictRead("clients",record.slug); if (c && isSupportedSelfServiceClient(c)) {if(kind==='request_followthrough'){if(record.automaticFollowup){const {queueRequestAutomation}=await import('./request-followup.mjs');await queueRequestAutomation(c,record.requestId);}}else await queueManagedRecord(c,record,kind);} } catch { errors.push("source_recovery_failed"); }
   }
   let processed = 0;
   // Rebuild missing index entries after a crash between durable intent and queue projection.

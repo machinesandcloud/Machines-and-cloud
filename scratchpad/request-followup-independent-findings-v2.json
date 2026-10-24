@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-24T09:22:04.181802+00:00",
+  "decision": "Not accepted; returned four reproduced v2 failures after independently confirming terminal-failure repair.",
+  "sourceManifest": "scratchpad/request-automation-combined-freeze-v2.json",
+  "sourceId": "sha256:a1de9ad88d2cb0f141362a48b7d3af196e20671fe947219a1137bcd3bbcc8145",
+  "sourceFiles": 123,
+  "physicalNetwork": 0,
+  "method": "Actual owner/client HTTP and signed managed-SMS inbound/status HTTP; installed Netlify SDK conditional-write memory protocol; fixed synthetic provider responses; normal managed worker. No .env, real credentials, actual model/provider/browser/account effects.",
+  "findings": [
+    {
+      "id": "terminal_failure_resurrection",
+      "stage": "v1 failed; v2 passes independently",
+      "trigger": "Canonical failed disclosure callback arrives while same-SID sent POST response is delayed",
+      "expected": "Terminal failed question cannot grant permission or authorize outreach",
+      "v1Observed": "Callback204, later sent projection replaced failure, retained YES granted permission, worker POSTed outreach",
+      "v2Observed": "Failed receipt retained; no permission; no outreach POST"
+    },
+    {
+      "id": "unknown_disclosure_expiry",
+      "stage": "v2 reproduced failure",
+      "trigger": "Unknown question POST; >24h; current synthetic sender approval; new signed REQUEST exactref",
+      "observed": "Two ask jobs, original uncertain; one new question POST"
+    },
+    {
+      "id": "late_permission_race",
+      "stage": "v2 reproduced failure in isolated handler fixture",
+      "trigger": "Retain late signed YES between worker initial blocker read and later authority checks",
+      "observed": "Proof provider date later than plan.dueAt; ordinary worker still POSTed outreach and projected accepted",
+      "qualifiedReceipt": "scratchpad/request-followup-independent-late-read-4.json",
+      "limitation": "Storage-read ordinal is fixture-specific; other global-job ordering yielded safe earlier interleaves, which do not disprove the isolated failure"
+    },
+    {
+      "id": "raw_quote_link_body",
+      "stage": "v2 reproduced failure",
+      "trigger": "Same-origin HTTPS quoteUrl with raw newline and appended prose",
+      "observed": "HTTP200; raw multiline promotional text retained in SMS and queued"
+    },
+    {
+      "id": "request_close_pending_disclosure",
+      "stage": "v2 reproduced failure",
+      "trigger": "Recipient initiates permission; owner completes request before disclosure worker send",
+      "observed": "OwnerClosed true; question still accepted with one provider POST"
+    }
+  ],
+  "firstRunDispositions": [
+    {
+      "receipt": "scratchpad/request-followup-independent-boundaries-v2-first.json",
+      "limitation": "Aged-unknown case initially retained stale sender approval and did not exercise replacement; late-proof injection initially occurred before initial blocker. Raw-URL failure remains valid."
+    },
+    {
+      "receipt": "scratchpad/request-followup-independent-boundaries-v2-r2.json",
+      "limitation": "Late-proof async-stack targeting did not interleave and is a harness failure. Aged-unknown, raw-URL and closed-question failures are actual."
+    },
+    {
+      "receipt": "scratchpad/request-followup-independent-late-read-3.json",
+      "limitation": "Earlier safe interleave, not coverage of returned late race."
+    }
+  ],
+  "evidence": {
+    "scratchpad/request-followup-independent-terminal-first.json": "0301f3b1ce1dc493d9811e8a28fccec8de7d57b6fdcf6d415e75ebfdc4bed623",
+    "scratchpad/request-followup-independent-boundaries-v2-first.json": "c6e98c67d1a653ab34967b460c76559727cb9ff25404a0319dc72afe4e9a59b3",
+    "scratchpad/request-followup-independent-boundaries-v2-r2.json": "ade1ad3b7218c34fac39f170cbf6e3e17e331f66c300a124393e00b52d36e2ec",
+    "scratchpad/request-followup-independent-late-fixture-diagnostic.json": "4ebf0fbdf0c7c52e22b662fc105716fcbe7d5add639004a0332b93e678323b83",
+    "scratchpad/request-followup-independent-late-race-first.json": "a7f7938f938a04b24220bad50a30a1bd2e19734a742bc8ea6bc6ffafb15570cf",
+    "scratchpad/request-followup-independent-late-read-3.json": "26647ebdfc9287e8e803ef4b3e3f933e7626431a1e206115f1ccded1aeb9b801",
+    "scratchpad/request-followup-independent-late-read-4.json": "b87ba4533d9bd9d105a60835ccf9bc5300562e85617ad4d32c185799dcaaa5b8",
+    "scratchpad/request-followup-independent-boundaries-v2-final-first.json": "4f2a77def79bf4687a4c15fd1edbc16701517aa53d80c903d6a4087a393d5d0a",
+    "scratchpad/request-followup-independent-terminal-v1-check.mjs": "474f5180c5055ddb68b317a070a7e8899d6308af1c1a746f22879920233768fd",
+    "scratchpad/request-followup-independent-boundaries-v2-first-check.mjs": "c613465c657080ba599684b0097af088f069ab0ebe0ff09cbae0415616a65620",
+    "scratchpad/request-followup-independent-boundaries-v2-r2-check.mjs": "676f47b2264d0b7268e66306f039c2d68ffd7ceeb637b123d2da782862cd15d5",
+    "scratchpad/request-followup-independent-late-v2-check.mjs": "db3b53a2b31d5596b89d67e91f0f031b9c7f85232f951124e3127357bb7c4123",
+    "scratchpad/request-followup-independent-boundaries-v2-final-check.mjs": "3936a014ad3f5208be16b7b12d05265dc8bdb7232767036ac54f68231b9ab165"
+  },
+  "ui": "Prepared independent actual-page driver only; not executed during mutable backend repair.",
+  "authority": "Local synthetic verification only. Actual Calendar approved phase observed separately read-only; no reuse of its effects/budgets."
+}
