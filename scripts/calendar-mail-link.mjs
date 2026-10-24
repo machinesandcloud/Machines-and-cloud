@@ -4,9 +4,14 @@ import {readFile,writeFile,lstat,realpath} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';import {fileURLToPath} from 'node:url';
 import {TARGET} from './calendar-live-guard.mjs';
 export function exactCalendarMessage(input,{requestedAt,now=Date.now()}={}) {
-  if(!input||Object.keys(input).sort().join(',')!=='link,receivedAt,recipient,subject'||input.recipient!==TARGET.ownerEmail||input.subject!=='Your Machines & Cloud sign-in link')throw Error('Exact controlled sign-in message required');
+  const keys=input&&Object.keys(input).sort().join(','),minute=input?.receivedPrecision==='minute';
+  if(!input||!['link,receivedAt,recipient,subject','link,receivedAt,receivedPrecision,recipient,subject'].includes(keys)||keys.includes('receivedPrecision')&&!minute||input.recipient!==TARGET.ownerEmail||input.subject!=='Your Machines & Cloud sign-in link')throw Error('Exact controlled sign-in message required');
   const requested=Date.parse(requestedAt),received=Date.parse(input.receivedAt);
-  if(!Number.isFinite(requested)||!Number.isFinite(received)||requested>now||received<requested-5000||received>now+60000||now-requested>20*60000)throw Error('Message is not the newly requested current link');
+  // A minute-only Gmail header describes an interval, not invented seconds.
+  // The executor must still select the exact newest post-request message;
+  // this interval check alone cannot distinguish two messages in one minute.
+  const receivedEnd=received+(minute?60000:0);
+  if(!Number.isFinite(requested)||!Number.isFinite(received)||!Number.isFinite(now)||requested>now||minute&&received%60000!==0||(minute?receivedEnd<=requested-5000:received<requested-5000)||received>now+60000||now-requested>20*60000)throw Error('Message is not the newly requested current link');
   let url;try{url=new URL(input.link);}catch{throw Error('Exact one-use customer sign-in destination required');}
   const fragment=new URLSearchParams(url.hash.slice(1));
   if(url.origin!==TARGET.origin||url.username||url.password||url.pathname!=='/onboard.html'||url.searchParams.get('plan')!=='starter'||[...url.searchParams.keys()].length!==1||[...fragment.keys()].join(',')!=='verify'||!/^[a-f0-9]{64}$/.test(fragment.get('verify')||''))throw Error('Exact one-use customer sign-in destination required');

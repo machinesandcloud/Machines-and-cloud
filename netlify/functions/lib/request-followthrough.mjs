@@ -63,7 +63,7 @@ function view(client, lead, row, operationId = null) {
   return { sourceRevision, revision: digest(row), reviewRequired, state, due, needsFollowup,
     canChange: !excluded && ['testing','live','paused'].includes(client.status) && row.history.length < LIMIT,
     historyFull: row.history.length >= LIMIT, readOnlyReason: excluded ? 'Setup checks and filtered requests are read-only.' : !['testing','live','paused'].includes(client.status) ? 'This workspace is closed. Its request history remains available.' : row.history.length >= LIMIT ? 'This retained history is full. Contact support before recording more work.' : null, source: Object.fromEntries(['id','customer_name','phone','email','address','issue','reason','urgency','wanted','outcome','status','channel','contact','createdAt'].map(key => [key, lead[key] ?? null])),
-    history: structuredClone(row.history), ...(lead.platform ? {platform:structuredClone(lead.platform)} : {}), conversation: lead.channel === 'web' && /^[a-zA-Z0-9_-]{1,60}$/.test(lead.contact || '') ? {reference:conversationReference(client,'web',lead.contact),contact:lead.contact} : null, receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
+    history: structuredClone(row.history), ...(lead.platform ? {platform:structuredClone(lead.platform),customerFacts:lead.platformQualification?structuredClone(lead.platformQualification):null} : {}), conversation: lead.channel === 'web' && /^[a-zA-Z0-9_-]{1,60}$/.test(lead.contact || '') ? {reference:conversationReference(client,'web',lead.contact),contact:lead.contact} : null, receipt: receipt ? { id: receipt.id, at: receipt.at, type: receipt.type } : null };
 }
 export async function requestFollowthroughSummaries(client, leads) {
   if (!isSupportedSelfServiceClient(client)) return leads;
@@ -83,9 +83,10 @@ export async function readRequestFollowthrough(client, session, id, operationId 
   if(latest.platform?.source==='thumbtack'){
     const {thumbtackReplyView}=await import('./thumbtack-connection.mjs');const replies=await thumbtackReplyView(client,id),nativeReply=operationId?replies.find(reply=>reply.id===operationId):replies.at(-1);
     const connection=(await import('./lead-connections.mjs')).leadConnectionsView;const native=(await connection(client)).thumbtack;
-    result.platformConversation={messages:(latest.platform.context?.messages||[]).map(message=>({id:message.messageID,from:message.from,text:message.text,sentAt:message.sentAt,hasAttachments:message.hasAttachments})),complete:latest.platform.context?.historyComplete===true,unavailableReason:latest.platform.context?.historyComplete===true?null:'Recent messages are shown. Earlier history and attachments may need to be opened in Thumbtack.'};
-    result.nativeReply=nativeReply?{operationId:nativeReply.id,state:nativeReply.state,receiptId:nativeReply.providerMessageID,at:nativeReply.at,text:nativeReply.text,reason:nativeReply.error}:null;
+    result.platformConversation={messages:(latest.platform.context?.messages||[]).map(message=>({id:message.messageID,from:message.from,text:message.text,sentAt:message.sentAt,hasAttachments:message.hasAttachments,actor:replies.find(reply=>reply.providerMessageID===message.messageID)?.actor||null})),complete:latest.platform.context?.historyComplete===true,unavailableReason:latest.platform.context?.historyComplete===true?null:'Recent messages are shown. Earlier history and attachments may need to be opened in Thumbtack.'};
+    result.nativeReply=nativeReply?{operationId:nativeReply.id,state:nativeReply.state,receiptId:nativeReply.providerMessageID,actor:nativeReply.actor||'owner',at:nativeReply.at,text:nativeReply.text,reason:nativeReply.error}:null;
     result.platformCapabilities={canSendNative:native.capabilities.sendNativeReplies&&!replies.some(reply=>['reserved','sending','unknown'].includes(reply.state)),expectedGeneration:native.generation};
+    const {platformAIThreadView}=await import('./platform-ai.mjs');const {readNativeConnection}=await import('./thumbtack-connection.mjs');result.platformAutomation=platformAIThreadView(client,await readNativeConnection(client),id);
   }
   await authority(client,session);await assertCurrentWorkspace(client);
   return { ok: true, request: result };

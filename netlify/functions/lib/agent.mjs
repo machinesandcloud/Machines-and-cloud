@@ -67,7 +67,7 @@ export function toApiMessages(stored) {
  * execTool(name, input) -> { content: string, is_error?: boolean, event?: object }
  * Returns { reply, events }.
  */
-export async function runAgent({ system, tools, messages, onText, execTool, maxTokens = 2000, effort = "low", dropToolPreamble = false, adaptiveThinking = false, maxIterations = MAX_ITERATIONS, requireComplete = false, includeUsage = false, maxRetries = 1, exhaustedReply, modelFetch }) {
+export async function runAgent({ system, tools, messages, onText, execTool, maxTokens = 2000, effort = "low", dropToolPreamble = false, adaptiveThinking = false, maxIterations = MAX_ITERATIONS, requireComplete = false, includeUsage = false, maxRetries = 1, exhaustedReply, modelFetch, outputFormat, toolChoice, stopAfterTools, withholdToolText = false }) {
   const client = makeClient({ maxRetries, modelFetch });
   const events = [];
   const usage = { requests: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
@@ -78,7 +78,8 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
       model: MODEL,
       max_tokens: maxTokens,
       ...(!modelFetch ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
-      output_config: { effort },
+      output_config: { effort, ...(outputFormat ? { format: outputFormat } : {}) },
+      ...(toolChoice ? { tool_choice: typeof toolChoice === 'function' ? toolChoice({ iteration: i }) : toolChoice } : {}),
       ...(adaptiveThinking ? { thinking: { type: "adaptive" } } : {}),
       system: [{ type: "text", text: dropToolPreamble ? `${system}\n\n${DELIVERY_CONTRACT}` : system, cache_control: { type: "ephemeral" } }],
       tools,
@@ -91,7 +92,7 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
         const piece = needSep ? " " + ev.delta.text : ev.delta.text;
         needSep = false;
         iterText += piece;
-        if (!dropToolPreamble) { reply += piece; if (onText) onText(piece); }
+        if (!dropToolPreamble && !withholdToolText) { reply += piece; if (onText) onText(piece); }
       }
     }
     const response = await stream.finalMessage();
@@ -101,7 +102,7 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
     usage.cacheReadTokens += response.usage?.cache_read_input_tokens || 0;
     usage.cacheWriteTokens += response.usage?.cache_creation_input_tokens || 0;
     if (requireComplete && !["end_turn", "tool_use", "refusal"].includes(response.stop_reason)) throw new Error("The assistant response did not complete");
-    if (dropToolPreamble) {
+    if (dropToolPreamble || withholdToolText) {
       // The customer sees only the final turn. Tool-use text remains in model history, with an
       // explicit delivery contract so a necessary instruction there is not assumed to be delivered.
       if (response.stop_reason !== "tool_use") { reply += iterText; if (onText) onText(iterText); }
@@ -127,6 +128,7 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
       results.push({ type: "tool_result", tool_use_id: tu.id, content: dropToolPreamble ? `${content}\n\n${TOOL_DELIVERY_REMINDER}` : content, is_error: !!r?.is_error });
     }
     messages.push({ role: "user", content: results });
+    if (stopAfterTools && await stopAfterTools({ toolUses, results })) return result();
   }
   const tail = exhaustedReply || "Let me get the owner to pick this up. What is the best number to reach you?";
   const piece = (reply ? " " : "") + tail; reply += piece; if (onText) onText(piece);

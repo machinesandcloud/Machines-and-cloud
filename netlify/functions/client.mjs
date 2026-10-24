@@ -43,6 +43,7 @@ import { ownerConversationPage } from './lib/conversation-reader.mjs';
 
 import { readRequestFollowthrough, updateRequestFollowthrough, requestFollowthroughSummaries, RequestFollowthroughError } from './lib/request-followthrough.mjs';
 import { workspaceActivity } from './lib/workspace-activity.mjs';
+import { changePlatformAutomation } from './lib/platform-ai.mjs';
 import { leadConnectionsView, changeLeadConnection, LeadConnectionError } from './lib/lead-connections.mjs';
 import { startThumbtackConnection, continueOwnerThumbtack, selectThumbtackBusiness, sendPlatformReply } from './lib/thumbtack-connection.mjs';
 
@@ -223,6 +224,7 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if(b?.action==='platform_automation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const result=await changePlatformAutomation(c,session,b);return json({...result,leadConnections:await leadConnectionsView(c),...(['takeover','resume'].includes(b.operation)?await readRequestFollowthrough(c,session,b.requestId):{})},200,{'Cache-Control':'no-store'});}
     if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await changeLeadConnection(c,session,b),200,{'Cache-Control':'no-store'});}
     if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business','send_platform_reply'].includes(b?.action)){
       if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);
