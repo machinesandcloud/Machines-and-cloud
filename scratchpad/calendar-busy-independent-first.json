@@ -1,0 +1,327 @@
+{
+  "at": "2026-10-24T05:37:08.668Z",
+  "mode": "Independent actual owner/client/booking/availability/worker functions with memory storage and intercepted synthetic Google protocol",
+  "sourceBefore": {
+    "desk-connections.js": "39b78fc5697c721288d82dfd0813add8298bc5d494ea2c17ff27119ca2fb7851",
+    "netlify/functions/client.mjs": "336d5e77ccfbdb54f17c11b0df442b5c858a3ddd060b31d1030d10bc5893bfca",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-delivery.mjs": "ccab60b8af46e239119494badef0963169629442565498db756f2751355fb98c",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/connection-journey.mjs": "ac2d86ad1023744427fbbc4e596d0f2ab1481380468661a2c3c20c453c0b7336",
+    "netlify/functions/lib/owner-visits.mjs": "08a99712afc9ca0f76a394844ac1c5ef2a1eb310b9d1355f135fd95e392266a2",
+    "netlify/functions/lib/store.mjs": "37b3873be3e9c764c0021478612279105fcc4e3dea5400582c6adc25e9288c11",
+    "privacy-policy.html": "e551b23f8b1ea2b6b4c2c79a8ecf8cd302114a8c68e714dbb9b5c7b1da882a6d",
+    "scripts/calendar-auto-connect-check.mjs": "6dd6c44c73da116bc8f0f4f88e4e281b42b9b614ee584e95ee55dd0d3bf97e5e",
+    "scripts/calendar-client-handler-check.mjs": "986bb174e1c550571358558752183733e850b935053d77dcd8769f3e0ccd5a60",
+    "scripts/calendar-connection-check.mjs": "2e7141cfcd2b2040ebc53d71d4397036ffe6d6546f12569fec97f36c1be5b58e",
+    "scripts/calendar-delivery-check.mjs": "bcb421fbd70a17ee5c26df2042c9da6c11b1d64b173608ee86586a05d897f475",
+    "scripts/calendar-disclosure-check.mjs": "4038752bfde9ea5b4ab43c3e6b3cfd57aec052d5ca153ab0a98837df1374403c",
+    "scripts/calendar-execution-check.mjs": "a2b111b27002160c2de16e204f74283cf9c3813ab7232111adaafaa5072a0320",
+    "scripts/calendar-self-service-check.mjs": "820c5b4af793262c4010a4d01b7f0f5ef12b5ba56e70fe586523bd71882ebb96",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "scripts/calendar-busy-check.mjs": "c19f4df1f59e6d525d809fd09cdc599fe4a710c7990cd31746337c9b49ca98e1",
+    "netlify/functions/calendar-delivery-background.mjs": "c9595612b882df7a7398418dee4c3864a7749459e56b405a9a1543d209288417",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "scratchpad/calendar-busy-independent.mjs": "88fa22070187727ec3317b9321c8d70ca8bf4118c0b83247951310a2b6bc0993"
+  },
+  "checks": [
+    {
+      "name": "Actual owner Add visit refreshes a cached free lookup and refuses a new conflict",
+      "pass": false,
+      "error": "{\"status\":401,\"body\":{\"error\":\"verification_required\"}}\n\n401 !== 409\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"status\":401,\"body\":{\"error\":\"verification_required\"}}\n\n401 !== 409\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:34:320\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:34:1"
+    },
+    {
+      "name": "Actual owner move preserves original visit and capacity on conflict; new ordinary submission succeeds after clear",
+      "pass": false,
+      "error": "{\"status\":401,\"body\":{\"error\":\"verification_required\"}}\n\n401 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"status\":401,\"body\":{\"error\":\"verification_required\"}}\n\n401 !== 200\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:35:196\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:35:1"
+    },
+    {
+      "name": "All-day calendar-zone dates and expanded timed instances correctly cross Houston DST boundaries",
+      "pass": true
+    },
+    {
+      "name": "Transparent/cancelled/self-declined events do not block, but a different declined attendee does not free an opaque event",
+      "pass": true
+    },
+    {
+      "name": "Multi-crew capacity counts concurrent opaque intervals rather than summing nonoverlapping appointments",
+      "pass": false,
+      "error": "{\"status\":401,\"body\":{\"error\":\"verification_required\"}}\n\n401 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"status\":401,\"body\":{\"error\":\"verification_required\"}}\n\n401 !== 200\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:38:400\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:38:1"
+    },
+    {
+      "name": "An actual overlapping move excludes only its exact tenant-owned Google event, never a foreign ownership tag",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n401 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n401 !== 200\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:39:237\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:39:1"
+    },
+    {
+      "name": "Concurrent actual Add visit submissions cannot admit overlapping windows above one crew",
+      "pass": false,
+      "error": "[{\"status\":401,\"body\":{\"error\":\"verification_required\"}},{\"status\":401,\"body\":{\"error\":\"verification_required\"}}]\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: [{\"status\":401,\"body\":{\"error\":\"verification_required\"}},{\"status\":401,\"body\":{\"error\":\"verification_required\"}}]\n\n0 !== 1\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:40:262\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:40:1"
+    },
+    {
+      "name": "Policy/connection changes invalidate cache and prior tenant data never authorizes a reused slug",
+      "pass": false,
+      "error": "Calendar setup needs an approved retained-resource inspection.",
+      "stack": "Error: Calendar setup needs an approved retained-resource inspection.\n    at assertCalendarExecution (file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/calendar-execution.mjs:75:97)\n    at async authority (file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/calendar-busy.mjs:49:3)\n    at async calendarBusyProjection (file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/calendar-busy.mjs:67:3)\n    at async Module.getAvailability (file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/store.mjs:295:130)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:41:344\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:41:1"
+    },
+    {
+      "name": "Capacity or policy withdrawal during a real Add visit provider read cannot use a stale authorization",
+      "pass": true
+    },
+    {
+      "name": "Malformed or incomplete Google pages fail closed and never persist personal event contents",
+      "pass": true
+    },
+    {
+      "name": "Old grant and stale start actions never read busy events or exchange tokens; manual-only scheduling remains unchanged",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'verification_required'\n- 'calendar_consent_required'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'verification_required'\n- 'calendar_consent_required'\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:44:370\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:44:1"
+    },
+    {
+      "name": "Unknown committed create reconciles one deterministic event; later conflict queues and clears through actual worker HTTP",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n401 !== 200\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n401 !== 200\n\n    at file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:45:209\n    at async check (file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:33:36)\n    at async file:///private/tmp/mc-calendar-conflicts-577/scratchpad/calendar-busy-independent.mjs:45:1"
+    }
+  ],
+  "sourceAfter": {
+    "desk-connections.js": "39b78fc5697c721288d82dfd0813add8298bc5d494ea2c17ff27119ca2fb7851",
+    "netlify/functions/client.mjs": "336d5e77ccfbdb54f17c11b0df442b5c858a3ddd060b31d1030d10bc5893bfca",
+    "netlify/functions/lib/availability.mjs": "bc9649209599aa3e9992b274d24a455e591766a8a3ff7eb3ccc28492337464bc",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-delivery.mjs": "ccab60b8af46e239119494badef0963169629442565498db756f2751355fb98c",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "netlify/functions/lib/connection-journey.mjs": "ac2d86ad1023744427fbbc4e596d0f2ab1481380468661a2c3c20c453c0b7336",
+    "netlify/functions/lib/owner-visits.mjs": "08a99712afc9ca0f76a394844ac1c5ef2a1eb310b9d1355f135fd95e392266a2",
+    "netlify/functions/lib/store.mjs": "37b3873be3e9c764c0021478612279105fcc4e3dea5400582c6adc25e9288c11",
+    "privacy-policy.html": "e551b23f8b1ea2b6b4c2c79a8ecf8cd302114a8c68e714dbb9b5c7b1da882a6d",
+    "scripts/calendar-auto-connect-check.mjs": "6dd6c44c73da116bc8f0f4f88e4e281b42b9b614ee584e95ee55dd0d3bf97e5e",
+    "scripts/calendar-client-handler-check.mjs": "986bb174e1c550571358558752183733e850b935053d77dcd8769f3e0ccd5a60",
+    "scripts/calendar-connection-check.mjs": "2e7141cfcd2b2040ebc53d71d4397036ffe6d6546f12569fec97f36c1be5b58e",
+    "scripts/calendar-delivery-check.mjs": "bcb421fbd70a17ee5c26df2042c9da6c11b1d64b173608ee86586a05d897f475",
+    "scripts/calendar-disclosure-check.mjs": "4038752bfde9ea5b4ab43c3e6b3cfd57aec052d5ca153ab0a98837df1374403c",
+    "scripts/calendar-execution-check.mjs": "a2b111b27002160c2de16e204f74283cf9c3813ab7232111adaafaa5072a0320",
+    "scripts/calendar-self-service-check.mjs": "820c5b4af793262c4010a4d01b7f0f5ef12b5ba56e70fe586523bd71882ebb96",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "netlify/functions/lib/calendar-busy.mjs": "b9a4045ab0049fea5a6fa9c840e95c915e763a371e253d6ef678d370662fb013",
+    "scripts/calendar-busy-check.mjs": "c19f4df1f59e6d525d809fd09cdc599fe4a710c7990cd31746337c9b49ca98e1",
+    "netlify/functions/calendar-delivery-background.mjs": "c9595612b882df7a7398418dee4c3864a7749459e56b405a9a1543d209288417",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "scratchpad/calendar-busy-independent.mjs": "88fa22070187727ec3317b9321c8d70ca8bf4118c0b83247951310a2b6bc0993"
+  },
+  "sourceStable": true,
+  "physicalAttempts": 0,
+  "protocolRequests": [
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-1%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-5%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-5%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-5%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-6%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-6%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-14%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-19%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-19%40calendar.example.test/events"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-19%40calendar.example.test/events"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-19%40calendar.example.test/events"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-19%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/independent-19%40calendar.example.test/events"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    },
+    {
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar/v3/calendars/primary"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 8,
+    "total": 12
+  }
+}

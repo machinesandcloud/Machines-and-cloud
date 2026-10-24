@@ -132,7 +132,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
       if (operation.state === 'complete') { await releaseLock(lockKey,operationId); const latest=await strictRead('bookings',`${client.slug}/${body.visitId}`); if(!owns(latest,current))throw new OwnerVisitError('visit_not_found','This visit is no longer available.',404);return {...result(operation,latest),superseded:latest.ownerVisitMutation?.id!==operationId}; }
       const cancel = body.action === 'cancel_visit';
       const claim = await reserveBookingWindow(current, body.visitId, cancel ? booking.date : body.date, cancel ? booking.window : body.window, creating ? undefined : { date: operation.source.date, window: operation.source.window }, { requireExisting: cancel, mutationId: operationId });
-      if (claim.full) throw new OwnerVisitError(claim.reason || 'window_full', claim.reason === 'blocked' ? 'That arrival window is blocked. Your original visit is unchanged.' : 'That arrival window is unavailable. Your original visit is unchanged.', 409, 'window');
+      if (claim.full) throw new OwnerVisitError(claim.reason || 'window_full', claim.message || (claim.reason === 'blocked' ? 'That arrival window is blocked. Your original visit is unchanged.' : 'That arrival window is unavailable. Your original visit is unchanged.'), claim.reason==='calendar_unavailable'?503:409, 'window');
       await indexWorkspaceRecord('bookings', { id: body.visitId, slug: current.slug, delivery: { tenantIdentity: tenant } });
       booking = await atomicUpdate('bookings', `${client.slug}/${body.visitId}`, async saved => {
         current = await authority(client, session, body.expectedRevision, { checkRevision:false });

@@ -64,7 +64,7 @@ export function requestedDate(value, { isoOnly = false, allowPast = false } = {}
 }
 export const GET_AVAILABILITY = {
   name: "get_availability",
-  description: "Check actual listed arrival windows with space after owner blocks and existing front-desk reservations. Check before offering ordinary visit dates/windows. This does not inspect an external calendar. For emergencies or a person request, follow safety and handoff rules first even when no window is open.",
+  description: "Check actual listed arrival windows after owner blocks, saved reservations and connected owned Google Calendar busy time. A manual-only shop uses its saved workspace availability. Check before offering ordinary visit dates/windows; booking checks again. A failed calendar check does not mean no openings: offer an owner callback without promising a window. For emergencies or a person request, follow safety and handoff rules first.",
   strict: true,
   input_schema: { type: "object", properties: { date: { type: "string", description: "First Houston date: YYYY-MM-DD, today, tomorrow, or a weekday" }, days: { type: "integer", enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], description: "Number of consecutive dates to check, from 1 to 14" } }, required: ["date", "days"], additionalProperties: false },
 };

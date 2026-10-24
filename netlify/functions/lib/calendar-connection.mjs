@@ -6,6 +6,7 @@ import { accessSite } from "./access.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { calendarExecutionPolicy, calendarExecutionAvailable, assertCalendarExecution, reserveCalendarExecution, guardedCalendarFetch } from "./calendar-execution.mjs";
 
+export const CALENDAR_AVAILABILITY_CONSENT_VERSION = '2026-10-24-busy-v1';
 export class CalendarError extends Error {
   constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; }
 }
@@ -43,18 +44,21 @@ export async function calendarConnectionView(client) {
   const current = await strictRead("clients", client.slug);
   if (!isSupportedSelfServiceClient(current) || current.owner?.email?.toLowerCase() !== client.owner?.email?.toLowerCase() || calendarTenantIdentity(current) !== calendarTenantIdentity(client)) throw new CalendarError("forbidden", "This calendar belongs to another workspace.", 403);
   const row = await strictRead("calendar_connections", client.slug);
-  const status = row?.tenantIdentity === calendarTenantIdentity(client) ? row.status : "not_connected";
+  const retainedStatus = row?.tenantIdentity === calendarTenantIdentity(client) ? row.status : "not_connected";
+  const consentRequired = retainedStatus === "connected" && row.availabilityConsentVersion !== CALENDAR_AVAILABILITY_CONSENT_VERSION;
+  const status = consentRequired ? "reconnect_required" : retainedStatus;
   const available = calendarConnectionEnabled() && await calendarExecutionAvailable(current, status === 'connected' ? { targetId: row.targetId, actions:['tokenRefresh','calendarRead'],anyActions:['eventCreate','eventUpdate','eventDelete'] } : { actions:['oauthStart','tokenExchange','calendarRead'] });
-  return { available, provider: "google", status, connected: status === "connected", connectedAt: (status === "not_connected" ? null : row?.connectedAt) || null, disconnectedAt: (status === "not_connected" ? null : row?.disconnectedAt) || null, label: (status === "not_connected" ? null : row?.label) || null, reconnectRequired: status === "reconnect_required", detail: status === "connected" ? available ? "Your calendar is connected. Check delivery status for each saved visit; existing records stay in your workspace." : "Your Google permission is saved. Calendar delivery is waiting for approved service availability; existing records remain saved." : status === "reconnect_required" ? "Google authorization expired or was revoked. Reconnect to resume saved calendar work." : "Connect your Google calendar to sync saved visits." };
+  return { available, provider: "google", status, connected: status === "connected", connectedAt: (status === "not_connected" ? null : row?.connectedAt) || null, disconnectedAt: (status === "not_connected" ? null : row?.disconnectedAt) || null, label: (status === "not_connected" ? null : row?.label) || null, reconnectRequired: status === "reconnect_required", availabilityConsentRequired:consentRequired, detail: consentRequired ? "Review the updated Calendar access and reconnect to check busy time before offering visits. Your saved visits and existing Google events are retained." : status === "connected" ? available ? "Your calendar is connected. Check delivery status for each saved visit; existing records stay in your workspace." : "Your Google permission is saved. Calendar delivery is waiting for approved service availability; existing records remain saved." : status === "reconnect_required" ? "Google authorization expired or was revoked. Reconnect to resume saved calendar work." : "Connect your Google calendar to sync saved visits." };
 }
-export async function startCalendarConnection(client, session) {
+export async function startCalendarConnection(client, session, input = {}) {
   await owner(client, session); enabled();
+  if(input.availabilityConsentVersion !== CALENDAR_AVAILABILITY_CONSENT_VERSION)throw new CalendarError("calendar_consent_required","Review the current Calendar access details, then choose Continue to Google.",409);
   await execution(() => reserveCalendarExecution(client, 'oauthStart', { authorize: async () => { await owner(client, session); return calendarConnectionEnabled(); } }));
   const state = randomBytes(32).toString("hex"), verifier = randomBytes(48).toString("base64url"), createdAt = at(), expiresAt = new Date(Date.now() + 10 * 60000).toISOString();
   const epoch = await atomicUpdate("calendar_connections", client.slug, row => { const base = row?.tenantIdentity === calendarTenantIdentity(client) ? row : { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), status: "not_connected" }; const next = { ...base, grantEpoch: (base.grantEpoch || 0) + 1, updatedAt: createdAt }; return { value: next, result: next.grantEpoch }; });
   await atomicUpdate("calendar_oauth", hash(state), row => {
     if (row) throw new Error("Calendar state collision");
-    return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, executionPolicyDigest:calendarExecutionPolicy().digest, email: session.email, sessionHash: session.sessionHash, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
+    return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, executionPolicyDigest:calendarExecutionPolicy().digest, email: session.email, sessionHash: session.sessionHash, availabilityConsentVersion:CALENDAR_AVAILABILITY_CONSENT_VERSION, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
   });
   const params = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID, redirect_uri: `${accessSite()}/api/google/callback`, response_type: "code", scope: "https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly", access_type: "offline", prompt: "consent", state, code_challenge: createHash("sha256").update(verifier).digest("base64url"), code_challenge_method: "S256" });
   return { ok: true, authorizationUrl: `https://accounts.google.com/o/oauth2/v2/auth?${params}`, expiresAt };
@@ -83,7 +87,7 @@ export async function completeCalendarConnection(client, session, input) {
   if (!input || Object.keys(input).some(key => !["state", "code", "error"].includes(key)) || !hex(input.state) || (input.error !== undefined && input.error !== "access_denied") || (!input.error && (typeof input.code !== "string" || !input.code || input.code.length > 4096))) throw new CalendarError("invalid_callback", "This calendar authorization is invalid.", 400);
   const key = hash(input.state), current = await strictRead("calendar_connections", client.slug);
   const claim = await atomicUpdate("calendar_oauth", key, row => {
-    if (!row || row.state !== "pending" || Date.parse(row.expiresAt) <= Date.now() || row.slug !== client.slug || row.sessionHash !== session.sessionHash || row.email !== session.email || row.tenantIdentity !== calendarTenantIdentity(client) || row.googleClientIdHash !== calendarExecutionPolicy()?.googleClientIdHash || row.executionPolicyDigest !== calendarExecutionPolicy()?.digest || current?.tenantIdentity !== row.tenantIdentity || row.epoch !== current?.grantEpoch || row.lifecycleVersion !== (client.operationLifecycleVersion || 0)) return { result: null };
+    if (!row || row.state !== "pending" || Date.parse(row.expiresAt) <= Date.now() || row.slug !== client.slug || row.sessionHash !== session.sessionHash || row.email !== session.email || row.tenantIdentity !== calendarTenantIdentity(client) || row.googleClientIdHash !== calendarExecutionPolicy()?.googleClientIdHash || row.executionPolicyDigest !== calendarExecutionPolicy()?.digest || current?.tenantIdentity !== row.tenantIdentity || row.epoch !== current?.grantEpoch || row.lifecycleVersion !== (client.operationLifecycleVersion || 0) || row.availabilityConsentVersion !== CALENDAR_AVAILABILITY_CONSENT_VERSION) return { result: null };
     return { value: { ...row, state: input.error ? "denied" : "consumed", consumedAt: at() }, result: row };
   });
   if (!claim) throw new CalendarError("invalid_state", "This calendar link expired, was already used, or belongs to another sign-in. Connect again.", 410);
@@ -101,7 +105,7 @@ export async function completeCalendarConnection(client, session, input) {
   const connectionId = randomBytes(16).toString("hex"), connectedAt = at();
   await atomicUpdate("calendar_connections", client.slug, row => {
     if (!row || row.tenantIdentity !== claim.tenantIdentity || row.grantEpoch !== claim.epoch) throw new CalendarError("connection_changed", "Calendar setup changed. Connect again.");
-    return { value: { ...row, connectionId, googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, status: "connected", targetId: calendar.data.id, targetHash: hash(calendar.data.id), label: "Google Calendar", connectedAt, disconnectedAt: null, refresh: seal(token.data.refresh_token, `${client.slug}:${connectionId}`), updatedAt: connectedAt } };
+    return { value: { ...row, connectionId, googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, status: "connected", availabilityConsentVersion:claim.availabilityConsentVersion, availabilityConsentedAt:claim.createdAt, targetId: calendar.data.id, targetHash: hash(calendar.data.id), label: "Google Calendar", connectedAt, disconnectedAt: null, refresh: seal(token.data.refresh_token, `${client.slug}:${connectionId}`), updatedAt: connectedAt } };
   });
   return { ok: true, calendar: await calendarConnectionView(client) };
 }

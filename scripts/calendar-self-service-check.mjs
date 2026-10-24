@@ -51,7 +51,7 @@ await check('Website samples never enqueue owner email or SMS, and retained samp
 });
 await check('Normal signout does not revoke a still-connected background grant; explicit disconnect stops delivery',async()=>{
   await f.store.put('access_sessions',two.session.sessionHash,{...two.session,status:'revoked'});
-  await booking(two.client,'after-signout');await all();assert.equal((await f.store.get('calendar_deliveries',f.delivery.calendarDeliveryKey(two.client,'after-signout'))).state,'synced');
+  await booking(two.client,'after-signout',{window:'12 to 5'});await all();assert.equal((await f.store.get('calendar_deliveries',f.delivery.calendarDeliveryKey(two.client,'after-signout'))).state,'synced');
   await f.store.put('access_sessions',two.session.sessionHash,two.session);await f.connection.disconnectCalendar(two.client,two.session);
   const calls=f.requests.length;await f.execution.calendarExecutionAvailable(two.client,{targetId:'calendar-self-two@google.fixture.test'}).then(v=>assert.equal(v,false));assert.equal(f.requests.length,calls);
 });
@@ -70,7 +70,7 @@ await check('Policy version edits cannot replenish daily capacity and stale rece
 });
 await check('Paused or budget-limited owners retain the latest local desired work without transport authority',async()=>{
   const changed={...one.client,status:'paused',operationLifecycleVersion:2};await f.store.saveClient(changed);
-  const row=await booking(changed,'local-only-after-cap');const queued=await f.delivery.queueCalendarBooking(changed,row);assert.ok(queued);assert.equal(queued.state,'queued');
+  const row=await booking(changed,'local-only-after-cap',{date:'2027-02-10'});const queued=await f.delivery.queueCalendarBooking(changed,row);assert.ok(queued);assert.equal(queued.state,'queued');
   const calls=f.requests.length;await assert.rejects(f.execution.reserveCalendarExecution(changed,'tokenExchange',{localOnly:true}),e=>e.code==='calendar_authority_changed');assert.equal(f.requests.length,calls);
   await f.store.saveClient(one.client);
 });
@@ -90,14 +90,14 @@ await check('Cancelled, unselected and replacement owners cannot use retained Ca
 });
 await check('Changing Google client after OAuth start rejects the old grant before token exchange',async()=>{
   const item=await f.seed('changed-google-client');item.client.onboarding.desiredChannels=['calendar'];await f.store.saveClient(item.client);
-  const pending=await f.connection.startCalendarConnection(item.client,item.session),state=new URL(pending.authorizationUrl).searchParams.get('state'),before=f.requests.length;
+  const pending=await f.connection.startCalendarConnection(item.client,item.session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}),state=new URL(pending.authorizationUrl).searchParams.get('state'),before=f.requests.length;
   const previous=process.env.GOOGLE_CLIENT_ID,oldPolicy=policy;process.env.GOOGLE_CLIENT_ID='rotated-fixture-client';policy={...policy,googleClientIdHash:sha(process.env.GOOGLE_CLIENT_ID)};publish();
   await assert.rejects(f.connection.completeCalendarConnection(item.client,item.session,{state,code:'old-client-code'}),e=>e.code==='invalid_state');assert.equal(f.requests.length,before);
   process.env.GOOGLE_CLIENT_ID=previous;policy=oldPolicy;publish();
 });
 await check('Revoked owner sessions cannot finish OAuth even though background grants need no browser session',async()=>{
   const item=await f.seed('revoked-oauth-owner');item.client.onboarding.desiredChannels=['calendar'];await f.store.saveClient(item.client);
-  const pending=await f.connection.startCalendarConnection(item.client,item.session),state=new URL(pending.authorizationUrl).searchParams.get('state'),before=f.requests.length;
+  const pending=await f.connection.startCalendarConnection(item.client,item.session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}),state=new URL(pending.authorizationUrl).searchParams.get('state'),before=f.requests.length;
   await f.store.put('access_sessions',item.session.sessionHash,{...item.session,status:'revoked'});
   await assert.rejects(f.connection.completeCalendarConnection(item.client,item.session,{state,code:'revoked-session-code'}),e=>e.status===403);assert.equal(f.requests.length,before);
 });
@@ -118,7 +118,7 @@ await check('A daily update allowance waits until UTC reset without spending pro
 await check('A create denied before transport remains eligible next day without retaining a false unknown-create marker',async()=>{
   f.advance(86400000);
   policy={...policy,tenantLimits:Object.fromEntries(actions.map(a=>[a,a==='eventCreate'?1:1000]))};publish();
-  const item=await shop('calendar-create-budget');await booking(item.client,'first-create');await all();const row=await booking(item.client,'second-create');await all();
+  const item=await shop('calendar-create-budget');await booking(item.client,'first-create');await all();const row=await booking(item.client,'second-create',{window:'12 to 5'});await all();
   const key=f.delivery.calendarDeliveryKey(item.client,row.id),waiting=await f.store.get('calendar_deliveries',key);
   assert.equal(waiting.state,'queued');assert.equal(waiting.reasonCode,'calendar_budget_exhausted');assert.equal(waiting.attempts,0);assert.equal(waiting.createAttempt,undefined);
   const creates=()=>f.requests.filter(call=>call.method==='POST'&&call.body.includes(waiting.eventId)).length;assert.equal(creates(),0);
@@ -127,7 +127,7 @@ await check('A create denied before transport remains eligible next day without 
 });
 await check('Budget waits retain prior dispatched unknown-create evidence and its failure count',async()=>{
   f.advance(86400000);
-  policy={...policy,tenantLimits:Object.fromEntries(actions.map(a=>[a,a==='calendarRead'?3:1000]))};publish();
+  policy={...policy,tenantLimits:Object.fromEntries(actions.map(a=>[a,a==='calendarRead'?4:1000]))};publish();
   const item=await shop('calendar-unknown-budget'),row=await booking(item.client,'unknown-create');f.setMode('lost_insert');await all();
   const key=f.delivery.calendarDeliveryKey(item.client,row.id),unknown=await f.store.get('calendar_deliveries',key);assert.equal(unknown.state,'retry');assert.equal(unknown.attempts,1);assert.equal(unknown.createAttempt.state,'uncertain');
   await f.execution.reserveCalendarExecution(item.client,'calendarRead',{targetId:'calendar-unknown-budget@google.fixture.test',bookingId:row.id});f.advance(120000);await all();

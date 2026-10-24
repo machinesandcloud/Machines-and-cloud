@@ -1,0 +1,16 @@
+file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/calendar-self-service.mjs:79
+    if (row.used[action] >= limits[action] || physical && row.used.totalRequests >= limits.totalRequests) throw new SelfServiceCalendarError('calendar_budget_exhausted', 'Calendar work is saved. Sync resumes when its daily service allowance is available.');
+                                                                                                                ^
+
+SelfServiceCalendarError: Calendar work is saved. Sync resumes when its daily service allowance is available.
+    at file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/calendar-self-service.mjs:79:113
+    at async atomicUpdate (file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/store.mjs:57:18)
+    at async reserveSelfServiceCalendar (file:///private/tmp/mc-calendar-conflicts-577/netlify/functions/lib/calendar-self-service.mjs:75:44)
+    at async file:///private/tmp/mc-calendar-conflicts-577/scripts/calendar-self-service-check.mjs:133:3
+    at async check (file:///private/tmp/mc-calendar-conflicts-577/scripts/calendar-self-service-check.mjs:13:38)
+    at async file:///private/tmp/mc-calendar-conflicts-577/scripts/calendar-self-service-check.mjs:128:1 {
+  code: 'calendar_budget_exhausted',
+  status: 503
+}
+
+Node.js v24.13.0

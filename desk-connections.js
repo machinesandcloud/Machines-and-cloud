@@ -141,7 +141,7 @@
     if (numberCard && coordinated && (d.serviceOnboarding.requestedChannels || []).length) numberCard.hidden = true;
     if(c.voice.active || c.messaging.active){$('status').textContent='Front desk active';if(!guideShown)html+='<p>'+button('pause_services','Pause front desk')+'</p>';}
     else if(!guideShown&&d.client.status==='paused' && (requested.indexOf('voice')>=0 || requested.indexOf('sms')>=0))html+='<p>'+button('resume_services','Resume connections')+'</p>';
-    if ((!guideShown && requested.indexOf('calendar') >= 0) || c.calendar.connected || calendarReturn) html += '<div class="setup-step" id="calendarConnectionSteps"><div><h4>Keep visits on your calendar</h4><p>' + esc(c.calendar.detail) + '</p><p>Your other Google events do not set availability. Block unavailable time in your workspace.</p>' + (calendarReturn ? button('finish_calendar', 'Finish connecting Google Calendar') : c.calendar.connected ? button('disconnect_calendar', 'Disconnect Calendar') : c.calendar.available ? button('start_calendar', c.calendar.reconnectRequired ? 'Reconnect Google Calendar' : 'Connect Google Calendar') : '<p>Calendar connection is being prepared. Your preference is saved.</p>') + '</div></div>';
+    if ((!guideShown && requested.indexOf('calendar') >= 0) || c.calendar.connected || c.calendar.availabilityConsentRequired || calendarReturn) html += '<div class="setup-step" id="calendarConnectionSteps"><div><h4>Keep visits on your calendar</h4><p>' + esc(c.calendar.detail) + '</p><p>After the current access review, busy time on your connected calendar and saved workspace visits are checked before new reservations. Keep your offered arrival windows and crew capacity up to date.</p>' + (calendarReturn ? button('finish_calendar', 'Finish connecting Google Calendar') : c.calendar.connected ? button('disconnect_calendar', 'Disconnect Calendar') : c.calendar.available ? button('start_calendar', c.calendar.reconnectRequired ? 'Reconnect Google Calendar' : 'Connect Google Calendar') : '<p>Calendar connection is being prepared. Your preference is saved.</p>') + (c.calendar.availabilityConsentRequired ? button('disconnect_calendar','Disconnect retained Calendar access') : '') + '</div></div>';
     if ((!guideShown && !coordinated && requested.indexOf('voice') >= 0) || c.voice.operation) html += '<div class="setup-step" id="phoneConnectionSteps"><div><h4>Answer your calls</h4><p>' + esc(c.voice.operation ? c.voice.operation.detail : 'Your answering service is prepared after a number is reserved and you review the usage terms.') + '</p>' + (!coordinated && c.voice.available && (!c.voice.operation || ['needs_review','suspended','waiting_platform'].includes(c.voice.state)) && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_voice', 'Review phone answering') : '') + (c.voice.operation && c.voice.operation.state !== 'cancelled' ? button('cancel_voice', 'Disconnect phone answering') : '') + '</div></div>';
     if (c.voice.operation?.number && c.voice.forwarding) {
       var forwarding=c.voice.forwarding;
@@ -214,10 +214,10 @@
     finally { clearTimeout(timeout); if(generation===expectedGeneration){busy = false; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = false; });scheduleConnectionRefresh();} }
   }
   function calendarDisclosure() {
-    return '<section id="calendarAccessDisclosure" aria-label="Google Calendar access" data-disclosure-version="2026-10-23-v1"><p>Keep saved visits in your primary Google Calendar. You choose whether to grant access on Google’s next screen.</p><p><strong>Access and use.</strong> Google asks for calendar details and access to events on calendars you own. We use your primary calendar identifier to create, check, update and delete the visit events this workspace manages. We don’t import other appointments or use Google busy time to set availability.</p><p><strong>Storage and sharing.</strong> Google receives the visit details you sync. Netlify stores the calendar identifier, an encrypted refresh token, connection history and sync records, including visit details, with no automatic deletion. Google API responses and tokens aren’t sent to our AI provider; separately supplied customer conversations and visit details may be.</p><p><strong>Your control.</strong> Disconnect removes the stored refresh token and stops new sync; a request already sent may finish. It keeps Google’s permission, existing events, saved visits and history. Remove the app’s access in your Google Account if needed. For retained-record deletion help, email <a href="mailto:ngoumnaisteve@gmail.com">ngoumnaisteve@gmail.com</a>.</p><p><a href="privacy-policy.html#google-calendar" target="_blank" rel="noopener">Google Calendar privacy and data controls</a></p></section>';
+    return '<section id="calendarAccessDisclosure" aria-label="Google Calendar access" data-disclosure-version="2026-10-24-busy-v1"><p>Keep saved visits in your primary Google Calendar. You choose whether to grant access on Google’s next screen.</p><p><strong>Access and use.</strong> Google asks for calendar details and access to events on calendars you own. We use your primary calendar identifier to create, check, update and delete the visit events this workspace manages. We read busy intervals on that calendar to avoid offering a window that conflicts with another appointment. Appointment titles, descriptions and other attendees’ identities are not imported. Saved workspace reservations and their matching Google copies count once.</p><p><strong>Storage and sharing.</strong> Google receives the visit details you sync. Netlify stores the calendar identifier, an encrypted refresh token, connection history and sync records, including visit details, with no automatic deletion. A short-lived availability cache stores event references, start and end times and workspace ownership tags; it is reused for up to 60 seconds. Booking and calendar changes check Google again. Google API responses and tokens aren’t sent to our AI provider; separately supplied customer conversations and visit details may be.</p><p><strong>Your control.</strong> Disconnect removes the stored refresh token and stops new sync; a request already sent may finish. It keeps Google’s permission, existing events, saved visits and history. Remove the app’s access in your Google Account if needed. For retained-record deletion help, email <a href="mailto:ngoumnaisteve@gmail.com">ngoumnaisteve@gmail.com</a>.</p><p><a href="privacy-policy.html#google-calendar" target="_blank" rel="noopener">Google Calendar privacy and data controls</a></p></section>';
   }
   function reviewCalendarConnection(revision) {
-    review('Connect Google Calendar', calendarDisclosure(), 'Continue to Google', function () { request('start_calendar_connection', { expectedRevision:revision }); });
+    review('Connect Google Calendar', calendarDisclosure(), 'Continue to Google', function () { request('start_calendar_connection', { expectedRevision:revision, availabilityConsentVersion:'2026-10-24-busy-v1' }); });
     // Keep the disclosure heading visible rather than autofocus-scrolling to a
     // link near the end of the text on a narrow screen.
     $('connectionTitle').tabIndex=-1;$('connectionTitle').focus({preventScroll:true});dialog.scrollTop=0;
@@ -289,6 +289,21 @@
       request(sms.operation ? 'correct_messaging_activation' : 'request_messaging_activation',body);
     });
   }
+  // Native Tab scrolling may put a connection control behind the fixed mobile
+  // navigation. After that scroll settles, keep the actual focused control clear.
+  function revealFocusedConnection(event) {
+    var target=event.target;
+    requestAnimationFrame(function () {
+      if(!target.isConnected||document.activeElement!==target)return;
+      var nav=document.querySelector('.desk-rail .tabs'),bottom=window.innerHeight-12;
+      if(nav&&getComputedStyle(nav).position==='fixed')bottom=Math.min(bottom,nav.getBoundingClientRect().top-12);
+      var rect=target.getBoundingClientRect();
+      if(rect.bottom>bottom)window.scrollBy({top:rect.bottom-bottom,behavior:'instant'});
+      else if(rect.top<12)window.scrollBy({top:rect.top-12,behavior:'instant'});
+    });
+  }
+  container.addEventListener('focusin',revealFocusedConnection);
+  $('connectionJourney').addEventListener('focusin',revealFocusedConnection);
   container.addEventListener('click',handleConnectionClick);
   $('connectionJourney').addEventListener('click',handleConnectionClick);
   dialog.addEventListener('click',handleConnectionClick);

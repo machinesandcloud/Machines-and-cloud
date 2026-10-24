@@ -281,21 +281,30 @@ function blockCount(state, date, windowKey) {
 function blockViews(state) {
   return (state.blocks || []).map((b) => ({ date: b.date, window: b.window, existingBookings: blockCount(state, b.date, b.windowKey) })).sort((a, b) => a.date.localeCompare(b.date) || a.window.localeCompare(b.window));
 }
-function openingsFromState(c, state, date, days) {
+function openingsFromState(c, state, date, days, calendar = null, occupied = null) {
   const dates = Array.from({ length: days }, (_, n) => addDays(date, n)).filter(isoDateValid);
   return { timezone: "America/Chicago", from: date, days: dates.length, openings: dates.map((day) => {
-    return { date: day, windows: listedWindows(c).filter((window) => !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && reservedCount(state, bookingSlot(day, window)) < capacityLimit(c)) };
-  }) };
+    return { date: day, windows: listedWindows(c).filter((window) => !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && (calendar?occupied(c,state,calendar,day,window):reservedCount(state, bookingSlot(day, window))) < capacityLimit(c)) };
+  }),...(calendar?{calendar:{checkedAt:new Date(calendar.checkedAt).toISOString(),freshForSeconds:60,scope:'Connected owned Google calendar and saved workspace reservations'}}:{}) };
 }
 export async function getAvailability(c, date, days) {
   await assertCurrentWorkspace(c);
   const from = requestedDate(date);
   if (!Number.isInteger(days) || days < 1 || days > 14) throw new AvailabilityInputError("invalid_days", "Check from 1 to 14 consecutive dates.");
   if (!isoDateValid(addDays(from, days - 1))) throw new AvailabilityInputError("invalid_days", "The entire checked range must use real YYYY-MM-DD dates.");
+  const {calendarBusyProjection,assertCalendarBusyProjection,calendarOccupiedCount}=await import('./calendar-busy.mjs'),calendar=await calendarBusyProjection(c,from,days);
   return atomicUpdate("index", capacityKey(c), async (current) => {
     const state = validateCapacity(c, current) || await initialCapacity(c);
-    return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days) };
+    await assertCalendarBusyProjection(c,calendar);
+    return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days,calendar,calendarOccupiedCount) };
   });
+}
+// Used immediately before Calendar create/move, with the same local capacity
+// state as ordinary booking. Excluding this visit never excludes another owner.
+export async function checkCalendarBookingWindow(c,date,window,bookingId,{accessToken,deadline}={}) {
+  await assertCurrentWorkspace(c);
+  const {calendarBusyProjection,assertCalendarBusyProjection,calendarOccupiedCount}=await import('./calendar-busy.mjs'),calendar=await calendarBusyProjection(c,date,1,{fresh:true,accessToken,deadline});
+  return atomicUpdate('index',capacityKey(c),async current=>{const state=validateCapacity(c,current)||await initialCapacity(c);await assertCalendarBusyProjection(c,calendar,{fresh:true});return {...(!current?{value:state}:{}),result:!calendar||calendarOccupiedCount(c,state,calendar,date,window,bookingId)<capacityLimit(c)};});
 }
 export async function getAvailabilityBlocks(c) {
   await assertCurrentWorkspace(c);
@@ -349,6 +358,12 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     if (!targetWindow) return { full: true, reason: "invalid_window", message: "Nothing was booked. That is not a listed arrival window. Check availability for a listed window." };
   }
   const slot = bookingSlot(targetDate, targetWindow), capacity = capacityLimit(c), token = mutationId || id(12);
+  let calendar=null,calendarTools;
+  if(!requireExisting) {
+    calendarTools=await import('./calendar-busy.mjs');
+    try{calendar=await calendarTools.calendarBusyProjection(c,targetDate,1,{fresh:true});}
+    catch(error){if(!String(error.code||'').startsWith('calendar_'))throw error;return {full:true,reason:'calendar_unavailable',message:'Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window.'};}
+  }
   return atomicUpdate("index", capacityKey(c), async (current) => {
     const state = validateCapacity(c, current) || await initialCapacity(c);
     state.mutations ||= {};
@@ -363,10 +378,15 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     if (requireExisting && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
     if (from && (previous.length !== 1 || previous[0] !== bookingSlot(from.date, from.window))) throw new Error("Booking changed during reschedule; reload it and retry");
     if (!from && previous.length && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
-    if (!previous.includes(slot) && isElapsedWindow(targetDate, targetWindow)) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "elapsed", availability: openingsFromState(c, state, targetDate, 7) } };
-    if (!previous.includes(slot) && blockedWindow(state, targetDate, targetWindow)) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "blocked", message: "Nothing was booked. That date or window is unavailable. Check availability for another option.", availability: openingsFromState(c, state, targetDate, 7) } };
+    if(!requireExisting){
+      try{await calendarTools.assertCalendarBusyProjection(c,calendar,{fresh:true});}
+      catch(error){if(!String(error.code||'').startsWith('calendar_'))throw error;return {result:{full:true,reason:'calendar_unavailable',message:'Nothing was booked. Calendar availability changed. Offer an owner callback or check again.'}};}
+      if(calendar&&!previous.includes(slot)&&calendarTools.calendarOccupiedCount(c,state,calendar,targetDate,targetWindow,bookingId)>=capacity)return {...(!current?{value:state}:{}),result:{full:true,reason:'calendar_conflict',message:'Nothing was booked. That arrival window conflicts with the connected calendar or another saved visit. Check another window or offer an owner callback.'}};
+    }
+    if (!previous.includes(slot) && isElapsedWindow(targetDate, targetWindow)) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "elapsed", availability: openingsFromState(c, state, targetDate, calendar?1:7, calendar, calendarTools?.calendarOccupiedCount) } };
+    if (!previous.includes(slot) && blockedWindow(state, targetDate, targetWindow)) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "blocked", message: "Nothing was booked. That date or window is unavailable. Check availability for another option.", availability: openingsFromState(c, state, targetDate, calendar?1:7, calendar, calendarTools?.calendarOccupiedCount) } };
     const count = slot ? Object.entries(state.reservations).filter(([id, slots]) => id !== bookingId && slots.includes(slot)).length : 0;
-    if (slot && !previous.includes(slot) && count >= capacity) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "full", count, capacity, availability: openingsFromState(c, state, targetDate, 7) } };
+    if (slot && !previous.includes(slot) && count >= capacity) return { ...(!current ? { value: state } : {}), result: { full: true, reason: "full", count, capacity, availability: openingsFromState(c, state, targetDate, calendar?1:7, calendar, calendarTools?.calendarOccupiedCount) } };
     // A move holds both windows until its booking write succeeds. A crash therefore blocks spare
     // capacity instead of freeing a slot while an active booking still points at it.
     const next = slot && !previous.includes(slot) ? [...previous, slot] : previous;

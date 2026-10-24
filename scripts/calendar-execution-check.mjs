@@ -7,21 +7,21 @@ const f = await fixture(), checks = [], hash = value => createHash('sha256').upd
 const check = async (name, run) => { await run(); checks.push(name); };
 const publish = p => { process.env.CALENDAR_EXECUTION_POLICY_JSON = JSON.stringify(p); process.env.CALENDAR_EXECUTION_APPROVED_VERSION = p.version; };
 let sequence = 0;
-async function named() { return f.seed('execution-' + ++sequence); }
+async function named() { const slug='execution-' + ++sequence;f.setTarget(slug+'@calendar.example.test');return f.seed(slug); }
 await check('Missing execution approval blocks real OAuth despite ordinary gates and keys', async () => {
   const {client,session} = await named(); delete process.env.CALENDAR_EXECUTION_APPROVED_VERSION;
-  const before = f.requests.length; await assert.rejects(f.connection.startCalendarConnection(client,session), e => e.code === 'calendar_unavailable'); assert.equal(f.requests.length,before);
+  const before = f.requests.length; await assert.rejects(f.connection.startCalendarConnection(client,session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), e => e.code === 'calendar_unavailable'); assert.equal(f.requests.length,before);
 });
 await check('Unlisted tenant and recreated slug cannot use another cohort', async () => {
   const one = await named(), p = structuredClone(f.policies.get(one.client.slug)); const two = await named(); publish(p);
   assert.equal((await f.connection.calendarConnectionView(two.client)).available,false);
-  await assert.rejects(f.connection.startCalendarConnection(two.client,two.session), e => e.code === 'calendar_cohort_unavailable');
+  await assert.rejects(f.connection.startCalendarConnection(two.client,two.session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), e => e.code === 'calendar_cohort_unavailable');
   const replacement = {...one.client,ownerKey:'new-incarnation'}; await f.store.saveClient(replacement);
-  await assert.rejects(f.connection.startCalendarConnection(replacement,one.session), e => e.code === 'calendar_cohort_unavailable');
+  await assert.rejects(f.connection.startCalendarConnection(replacement,one.session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), e => e.code === 'calendar_cohort_unavailable');
 });
 await check('Retained resources require an actual clean census, not a nonempty approval string', async () => {
   const {client,session} = await named(); await f.store.put('calendar_connections',client.slug,{slug:client.slug,status:'disconnected',refresh:null});
-  await assert.rejects(f.connection.startCalendarConnection(client,session),e => e.code === 'calendar_census_unaccepted');
+  await assert.rejects(f.connection.startCalendarConnection(client,session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}),e => e.code === 'calendar_census_unaccepted');
 });
 await check('Changed Google client and declared target deny cohort work', async () => {
   const {client} = await named(), before = process.env.GOOGLE_CLIENT_ID; process.env.GOOGLE_CLIENT_ID = 'other-google-client'; assert.equal(f.execution.calendarExecutionPolicy(),null); process.env.GOOGLE_CLIENT_ID = before;
@@ -92,7 +92,7 @@ async function retainedVisit() {
 await check('Explicit reviewed renewal after expiry cancels the same event without resetting old counters', async()=>{
   const item=await retainedVisit();publish({...item.old,expiresAt:'2000-01-01T00:00:00.000Z'});const oldCalls=f.requests.length;await f.delivery.runCalendarDelivery();assert.equal(f.requests.length,oldCalls);
   publish(item.renewal);const cancelled={...item.booking,status:'cancelled'};await f.store.put('bookings',`${item.client.slug}/visit-1`,cancelled);await f.delivery.queueCalendarBooking(item.client,cancelled);await f.delivery.runCalendarDelivery();
-  const job=await f.store.get('calendar_deliveries',item.key);assert.equal(job.state,'cancelled');assert.equal(f.events.has(`owner@calendar.example.test/${job.eventId}`),false);
+  const job=await f.store.get('calendar_deliveries',item.key);assert.equal(job.state,'cancelled');assert.equal(f.events.has(`${item.client.slug}@calendar.example.test/${job.eventId}`),false);
   assert.deepEqual(await f.store.get('calendar_execution_budgets',f.execution.calendarExecutionBudgetKey(item.old.version)),item.before);
   const budget=await f.store.get('calendar_execution_budgets',f.execution.calendarExecutionBudgetKey(item.renewal.version));assert.equal(budget.used.eventCreate,0);assert.equal(budget.used.eventDelete,1);assert.equal(budget.census.reviewed,true);
 });
@@ -120,7 +120,7 @@ await check('Completed real waves release their marker so the next wave executes
   const item=await retainedVisit();const first=await f.delivery.runCalendarDeliveryWave();assert.equal(first.skipped,undefined);
   const marker=await f.store.get('calendar_scan','wave:v1');assert.equal(marker.state,'complete');assert.equal(marker.until,0);
   const updated={...item.booking,issue:'Second wave changed issue'};await f.store.put('bookings',`${item.client.slug}/visit-1`,updated);
-  const second=await f.delivery.runCalendarDeliveryWave();assert.equal(second.skipped,undefined);assert.ok(second.processed>0);assert.equal(f.events.get(`owner@calendar.example.test/${f.delivery.calendarEventId(item.client,'visit-1')}`).summary,'Second wave changed issue - Alex Fixture');
+  const second=await f.delivery.runCalendarDeliveryWave();assert.equal(second.skipped,undefined);assert.ok(second.processed>0);assert.equal(f.events.get(`${item.client.slug}@calendar.example.test/${f.delivery.calendarEventId(item.client,'visit-1')}`).summary,'Second wave changed issue - Alex Fixture');
 });
 await check('A failed real wave releases its lease and a later wave recovers the retained event',async()=>{
   const item=await retainedVisit();const updated={...item.booking,issue:'Recover after wave failure'};await f.store.put('bookings',`${item.client.slug}/visit-1`,updated);

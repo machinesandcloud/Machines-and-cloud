@@ -48,6 +48,14 @@ export async function fixture() {
     assert.equal(headers.get("Authorization"), "Bearer dummy-access");
     const calendar = decodeURIComponent(match[1]), eventId = match[2] ? decodeURIComponent(match[2]) : null, key = `${calendar}/${eventId}`;
     if (method !== "GET") assert.equal(url.searchParams.get("sendUpdates"), "none");
+    if (method === "GET" && eventId === null) {
+      assert.equal(url.searchParams.get('singleEvents'),'true');
+      assert.equal(url.searchParams.get('maxResults'),'250');
+      const from=Date.parse(url.searchParams.get('timeMin')),to=Date.parse(url.searchParams.get('timeMax'));
+      assert.ok(Number.isFinite(from)&&Number.isFinite(to)&&to>from);
+      const instant=point=>Date.parse(point?.dateTime?( /(?:Z|[+-]\d\d:\d\d)$/.test(point.dateTime)?point.dateTime:point.dateTime+'-06:00'):point?.date+'T00:00:00-06:00');
+      return json(200,{timeZone:'America/Chicago',items:[...events.entries()].filter(([k,e])=>k.startsWith(calendar+'/')&&( !e.start||!e.end||instant(e.end)>from&&instant(e.start)<to )).map(([,e])=>e)});
+    }
     if (method === "GET") return events.has(key) ? json(200, events.get(key)) : json(404, { error: { code: 404 } });
     const data = body ? JSON.parse(body) : null;
     if (method === "POST") {
@@ -71,7 +79,7 @@ export async function fixture() {
     const sessionHash = createHash("sha256").update(`session:${slug}`).digest("hex"), session = { sessionHash, email: client.owner.email, scope: "onboarding", status: "active", expiresAt: new Date(Date.now() + 3600000).toISOString() };
     await store.saveClient(client); await store.put("access_sessions", sessionHash, session); await approve(client); return { client, session };
   }
-  async function connect(client, session) { await approve(client); const start = await connection.startCalendarConnection(client, session), state = new URL(start.authorizationUrl).searchParams.get("state"); await connection.completeCalendarConnection(client, session, { state, code: "dummy-authorization-code" }); return { start, state }; }
+  async function connect(client, session) { await approve(client); const start = await connection.startCalendarConnection(client, session, {availabilityConsentVersion:connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), state = new URL(start.authorizationUrl).searchParams.get("state"); await connection.completeCalendarConnection(client, session, { state, code: "dummy-authorization-code" }); return { start, state }; }
   return { store, connection, delivery, seed, connect, approve, execution, policies, requests, events, scopes, json, advance: ms => { clock += ms; }, setMode: value => { mode = value; }, setTarget: value => { target = value; }, intercept: callback => { onRequest = callback; } };
 }
 export async function report(name, checks) {

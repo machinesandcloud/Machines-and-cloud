@@ -36,7 +36,7 @@ async function ownerData(item) {
   assert.equal(response.status, 200, await response.clone().text()); return response.json();
 }
 async function grant(item) {
-  const response = await post(item, { action: 'start_calendar_connection', expectedRevision: configurationRevision(item.client) });
+  const response = await post(item, { action: 'start_calendar_connection', availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION, expectedRevision: configurationRevision(item.client) });
   assert.equal(response.status, 202, await response.clone().text());
   const { result } = await response.json(), state = new URL(result.authorizationUrl).searchParams.get('state');
   return { state, expiresAt: result.expiresAt, slug: item.client.slug, sessionBinding: hash(item.token) };
