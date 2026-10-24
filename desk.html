@@ -33,6 +33,13 @@
     <div class="card2 desk-today-summary" id="todayTourSummary"><h3 id="todayTourHeading">Your customer activity</h3><div class="grid2" id="today"></div><p id="homeServiceContext" class="muted"></p></div><div class="grid2"><div class="card2"><h3>Needs your attention</h3><div id="needsYou" class="muted"></div></div><div class="card2"><h3>Recent activity</h3><div id="todayEvents" class="muted"></div></div></div>
 
 
+    <section class="card2 desk-activity-report" id="activityReport" hidden aria-labelledby="activityReportTitle">
+      <h3 id="activityReportTitle">Activity report</h3>
+      <p class="muted">See new inquiries, visit requests and the follow-ups that still need you.</p>
+      <div class="activity-report-controls"><label for="activityReportDays">Period <select class="form-input" id="activityReportDays"><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></label><button type="button" class="btn-pill btn-pill-blue btn-sm" id="activityReportLoad">View report</button></div>
+      <p id="activityReportStatus" class="muted" role="status" aria-live="polite"></p>
+      <div id="activityReportResults" hidden><p id="activityReportPeriod" class="muted"></p><dl class="activity-report-metrics" id="activityReportMetrics"></dl><p id="activityReportExplanation" class="muted"></p></div>
+    </section>
   </section>
 
   <section class="pane" id="p-test">
@@ -239,6 +246,7 @@
 <script src="desk-billing.js" defer=""></script>
 <script src="desk.js" defer=""></script>
 <script src="desk-requests.js" defer=""></script>
+<script src="desk-activity.js" defer=""></script>
 <dialog class="walkthrough desk-account-confirm" id="billingCancel" aria-labelledby="billingCancelTitle"><h2 id="billingCancelTitle">End monthly renewal?</h2><p class="muted" id="billingCancelDetail"></p><div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingEndConfirm">End renewal</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="billingKeep">Keep subscription</button></div></dialog>
 
 

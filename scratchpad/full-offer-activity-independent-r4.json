@@ -1,0 +1,895 @@
+{
+  "at": "2026-10-24T05:24:09.502Z",
+  "baseCommit": "577961c6a406be22a7fb479db055145881776729",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "desk-activity.js": "bca7323a719a0db3e3a3624bae448e0594ddd4e626c54eeff18417b9e49e1636",
+    "netlify/functions/lib/workspace-activity.mjs": "11e48787905c3402be19dff109f3c24eb94ad06af59bc66783aae92cae39e243",
+    "scripts/workspace-activity-check.mjs": "da91729faa65300e23f43d1c5bde43c9e1a63af45f723fca489bb353917abf9d",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+    "netlify/functions/lib/request-followthrough.mjs": "d94eaa3cc34c436179a0032292bd92bf86c7e4b5ddd7b01299c8120723967b60",
+    "scripts/build-site.mjs": "5eafefed90804efab65f79c4af53aaa56a04d5d33621e245240ede67bbffc380",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "scratchpad/full-offer-activity-independent.mjs": "9e968a7dcddfee4b99457045545cfa7aab23312136b294352a3dc9effcb07191",
+    "desk.html": "d77dc3b10efcb8f4ec0a04999ed8c29468e9df396db3443c853a50fb57c55cbc",
+    "desk.js": "fd86bb2a4e1407466b9741a5438fdeb054e4daef92df02038395671925b03f58",
+    "desk.css": "fbb6256ea98a0f6c292cb3d5270b0318cd412f10fecf6865420c826afd31312c",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "3efe3a810f411160c38339029d12e8122bfc8875df9decf9c72a1ebfd90cc5e9",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "390px older due action survives100 newer completed requests through ordinary Home button and request dialog",
+      "pass": true
+    },
+    {
+      "name": "1440px older due action survives100 newer completed requests through ordinary Home button and request dialog",
+      "pass": true
+    },
+    {
+      "name": "More than10 pending requests paginate without losing older work; urgency sorts first",
+      "pass": true
+    },
+    {
+      "name": "7/30/90periods affect activity counts while older due actions remain visible",
+      "pass": true
+    },
+    {
+      "name": "Failed and incomplete report reads never claim completeness; ordinary retry recovers",
+      "pass": true
+    },
+    {
+      "name": "Period change fences a late successful response; new period requires a fresh read",
+      "pass": true
+    },
+    {
+      "name": "Obsolete401 after a period change cannot expire valid current access",
+      "pass": true
+    },
+    {
+      "name": "Actual expired owner session clears private activity and offers sign-in recovery",
+      "pass": true
+    },
+    {
+      "name": "Held report after ordinary sign-out cannot reveal private report or resurrect session",
+      "pass": true
+    },
+    {
+      "name": "Report authorization isolates public, foreign owner, foreignorigin and reused-slug records without delivery",
+      "pass": true
+    },
+    {
+      "name": "320px report and due controls fit and retain actual visible keyboard focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: {\"focused\":true,\"top\":905.5,\"bottom\":949.5,\"width\":170,\"left\":34,\"right\":204,\"vw\":320,\"vh\":950,\"hitTag\":\"SPAN\",\"hitText\":\"Inbox\",\"hitIsField\":false}\n\nfalse !== true\n\n    at file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:183:776\n    at async check (file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:182:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nYour customer activity\n1\nNeeds follow-up\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\n\n1 need follow-up · 0 overdue · Checked Oct 24, 12:24 AM CT\n\nMobile request\n\nAC repair enquiry\n\nView request\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nUpdated 12:24 AM CT. Setup checks and spam are excluded.\n\nOct 18, 2026–Oct 24, 2026 · Central time\n\nNew inquiries\n1\nVisit requests\n0\nFollow-ups completed\n0\nNew inquiries marked reached\n0\n\nVisit requests are not confirmed arrivals. Contact and completion reflect actions recorded by your team. Follow-ups needing attention include older requests, outside this period."
+      }
+    },
+    {
+      "name": "No physical transport, forbidden destination or page runtime errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d75ce7670e6ee49218e6d4a370d13378f04f5b6e0161017340d66aad76f4ac08",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6dd902c3cca3fa06f63fcc2de62802d49677fde34d8c0c04096a9eaeffb984e3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "79d5b726e86295f92a229405ba1755c0d139271e0ddb1d234364504ae60c7645",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&requestId=ceb22f2c3a",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d8a01697180eead056262b369fd50947b9599580b7b2522eb4559db6f0e7ee80",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "32189b574182bb4120d4fa8622c6f6d988b8d34b6906f8b94435c46df291eb32",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "50b536a0f1769db47160f32d610c9722c023782b7e4c5bc61744741184c3b40a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5187b4ef752704c3561cf945c8a6ef70c5b98bc37fb0f058c0cf34cd18298882",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&requestId=e84b59d144",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "636b5f3cb93ed166e56904d106d39b08ad887c44d4c559e90e8bcd0e055f0248",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "62a37c2acb399765d5c8f1d1dd0e24febdfabbdcf6d2ab3b4ed72038d48932fc",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4ce72386bde4662d963e3a6fc3bd5e231b8cd8e4303de4f5a77f1a8b4233e2ce",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0884d4b886ffc5d00ca66165de9e1fb3558814645f2607f24e3c2942aa5cb845",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "669928964908faa09a88dc51dade45568bc6cbf7bde7a20bd548231a13361e11",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "3b6f67c96bcd1bb43d238e663c248ef6b4c9feff2d7e4de7d1b4ef6a955c902a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&report=activity&days=30",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2413ac93cb6cd4f2320dad54fc39b0cbe9d730af1576729cfe0358069d676d72",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&report=activity&days=90",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c8dc6aef17dff21f2daca4e5ee7c905416e00a0887abe14420f66434c2e65763",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ee0621c7979f3cee8f10b907c7913e05dfa57078eeadc8b4b4515f105f5c682b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "12ef8edca1c65705c73cc222b8264c7df995453e0ca21ed8408116d0dbb81310",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 503,
+      "fixture": "read-503"
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 503,
+      "responseByteSha": "9a916b1d2e47c89b9a405dbf58f25655db92378ee9b2d65467b76bd84976491e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f95d0e76ed7235946ac2509a67fd8fcb3c576013800f56ac08e3b2debc255956",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e3a8ba52b67b4c5cdd5ce74c1c683fb4e07f5cd8919c3e2d49ed0bcf46b00bc6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "afcb4732e177e5c775bce768027842790f059cc01ed3706ee41e48b2ab032cea",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&report=activity&days=30",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a95e0947691607c0702d05c9fd32a7d62c9ab0cc76b362076fc6fc06602f6eaa",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6a2fbaa4cf8ee9e08b3a8d49e89f9e948e36e51fb7daebf43f270bf9ebbd2854",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "responseByteSha": "9d8788f7e29d479f2b2bd7108bf0424a1abc80fcf4bcdd65dd5f84fdfb213733",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&report=activity&days=30",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "fcb60f2f75cd62702f689ccf79cc2915c681a7f4865944fda45ad7768bd95b10",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d13123f00849c3c56349271de9a1eafa665f4a0216abd2bd0d2d9c2d6910438d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "responseByteSha": "9d8788f7e29d479f2b2bd7108bf0424a1abc80fcf4bcdd65dd5f84fdfb213733",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "574b8bf45df08594e6feaa2bcfaf2e7def727499cdd5afa63227ecf99725a463",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "973a505627a0b74b422f18184c8e5836e8dd2b8b8f1f238c7c861da999034ba2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/access",
+      "query": "",
+      "method": "POST",
+      "action": "sign_out",
+      "body": {
+        "action": "sign_out"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7a7a42232f1ec7f9c068dfcecf6d9361ee316a43c35d5ceab312572e3db16783",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ddcdf7ba37a0b87250739e2ab75915dabbbcb1e464f033a1c0e56dee7cf69fb2",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0b9f46e75cb357c14682eda455db7134eb4718a653505f985aad37f8ffdaa5c7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "priorAttempt": {
+    "path": "scratchpad/full-offer-activity-independent-first.json",
+    "disposition": "11 QA driver failures: used nonexistent home route rather than today, and omitted mandatory milliseconds in two synthetic dueAt values. Runtime unchanged."
+  },
+  "screenshots": [
+    "scratchpad/full-offer-activity-independent-r4-old-request-390.png",
+    "scratchpad/full-offer-activity-independent-r4-complete-history-390.png",
+    "scratchpad/full-offer-activity-independent-r4-old-request-1440.png",
+    "scratchpad/full-offer-activity-independent-r4-complete-history-1440.png",
+    "scratchpad/full-offer-activity-independent-r4-pagination-390.png",
+    "scratchpad/full-offer-activity-independent-r4-report90-1440.png",
+    "scratchpad/full-offer-activity-independent-r4-incomplete-390.png",
+    "scratchpad/full-offer-activity-independent-r4-session-expired-390.png",
+    "scratchpad/full-offer-activity-independent-r4-report320.png",
+    "scratchpad/full-offer-activity-independent-r4-failure-11.png"
+  ],
+  "paginationFocus": {
+    "tag": "BUTTON",
+    "text": "Previous",
+    "withinAttention": true,
+    "enabled": true,
+    "visible": true
+  },
+  "mobileFocus": {
+    "focused": true,
+    "top": 905.5,
+    "bottom": 949.5,
+    "width": 170,
+    "left": 34,
+    "right": 204,
+    "vw": 320,
+    "vh": 950,
+    "hitTag": "SPAN",
+    "hitText": "Inbox",
+    "hitIsField": false
+  },
+  "sourceAfter": {
+    "desk-activity.js": "bca7323a719a0db3e3a3624bae448e0594ddd4e626c54eeff18417b9e49e1636",
+    "netlify/functions/lib/workspace-activity.mjs": "11e48787905c3402be19dff109f3c24eb94ad06af59bc66783aae92cae39e243",
+    "scripts/workspace-activity-check.mjs": "da91729faa65300e23f43d1c5bde43c9e1a63af45f723fca489bb353917abf9d",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+    "netlify/functions/lib/request-followthrough.mjs": "d94eaa3cc34c436179a0032292bd92bf86c7e4b5ddd7b01299c8120723967b60",
+    "scripts/build-site.mjs": "5eafefed90804efab65f79c4af53aaa56a04d5d33621e245240ede67bbffc380",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "scratchpad/full-offer-activity-independent.mjs": "9e968a7dcddfee4b99457045545cfa7aab23312136b294352a3dc9effcb07191",
+    "desk.html": "d77dc3b10efcb8f4ec0a04999ed8c29468e9df396db3443c853a50fb57c55cbc",
+    "desk.js": "fd86bb2a4e1407466b9741a5438fdeb054e4daef92df02038395671925b03f58",
+    "desk.css": "fbb6256ea98a0f6c292cb3d5270b0318cd412f10fecf6865420c826afd31312c",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "3efe3a810f411160c38339029d12e8122bfc8875df9decf9c72a1ebfd90cc5e9",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 11,
+    "failed": 1,
+    "total": 12,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

@@ -1,0 +1,891 @@
+{
+  "at": "2026-10-24T05:21:44.244Z",
+  "baseCommit": "577961c6a406be22a7fb479db055145881776729",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "desk-activity.js": "096a54482e8d17bac51c3f4738ebc9013016fe8cb71e0d7edf7637b51e102055",
+    "netlify/functions/lib/workspace-activity.mjs": "11e48787905c3402be19dff109f3c24eb94ad06af59bc66783aae92cae39e243",
+    "scripts/workspace-activity-check.mjs": "da91729faa65300e23f43d1c5bde43c9e1a63af45f723fca489bb353917abf9d",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+    "netlify/functions/lib/request-followthrough.mjs": "d94eaa3cc34c436179a0032292bd92bf86c7e4b5ddd7b01299c8120723967b60",
+    "scripts/build-site.mjs": "5eafefed90804efab65f79c4af53aaa56a04d5d33621e245240ede67bbffc380",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "scratchpad/full-offer-activity-independent.mjs": "9e968a7dcddfee4b99457045545cfa7aab23312136b294352a3dc9effcb07191",
+    "desk.html": "d77dc3b10efcb8f4ec0a04999ed8c29468e9df396db3443c853a50fb57c55cbc",
+    "desk.js": "fd86bb2a4e1407466b9741a5438fdeb054e4daef92df02038395671925b03f58",
+    "desk.css": "fbb6256ea98a0f6c292cb3d5270b0318cd412f10fecf6865420c826afd31312c",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "3efe3a810f411160c38339029d12e8122bfc8875df9decf9c72a1ebfd90cc5e9",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "390px older due action survives100 newer completed requests through ordinary Home button and request dialog",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:132:99\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:128:31",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nShowing part of your history\nThe requests and counts shown cover only the records loaded here. Some history still needs checking. Contact support if you need an earlier request.\nYour customer activity\n0\nNeeds follow-up · shown\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention in the records shown\n\nSome history still needs checking. Contact support if you are looking for an earlier request.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "1440px older due action survives100 newer completed requests through ordinary Home button and request dialog",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:132:99\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:128:31",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nYOUR WORKSPACE\nFixture Availability Shop\nCustomer workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nContact support\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nShowing part of your history\nThe requests and counts shown cover only the records loaded here. Some history still needs checking. Contact support if you need an earlier request.\nYour customer activity\n0\nNeeds follow-up · shown\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention in the records shown\n\nSome history still needs checking. Contact support if you are looking for an earlier request.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "More than10 pending requests paginate without losing older work; urgency sorts first",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:141:115\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:140:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nShowing part of your history\nThe requests and counts shown cover only the records loaded here. Some history still needs checking. Contact support if you need an earlier request.\nYour customer activity\n12\nNeeds follow-up · shown\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nUrgent new customer (wants call, EMERGENCY) ref 81d98e375b View request\nNew pending 0 (wants call) ref a7d3f0deb9 View request\nNew pending 1 (wants call) ref c48b900d60 View request\nNew pending 2 (wants call) ref ed3264f867 View request\nNew pending 3 (wants call) ref 9288e40b92 View request\nNew pending 4 (wants call) ref 32a36b41d5 View request\nNew pending 5 (wants call) ref 2f826707fc View request\nNew pending 6 (wants call) ref 64f2381663 View request\nNew pending 7 (wants call) ref 1f0e00658c View request\nNew pending 8 (wants call) ref 48371bf70c View request\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "7/30/90periods affect activity counts while older due actions remain visible",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:153:179\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:149:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nYOUR WORKSPACE\nFixture Availability Shop\nCustomer workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nContact support\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nYour customer activity\n0\nNeeds follow-up\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention\n\nRequests that need a callback, an acknowledgment or urgent attention will appear here.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "Failed and incomplete report reads never claim completeness; ordinary retry recovers",
+      "pass": false,
+      "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#activityReportStatus').filter({ hasText: /unavailable/ }) to be visible\u001b[22m\n\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:157:196\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:156:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nShowing part of your history\nThe requests and counts shown cover only the records loaded here. Some history still needs checking. Contact support if you need an earlier request.\nYour customer activity\n0\nNeeds follow-up · shown\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention in the records shown\n\nSome history still needs checking. Contact support if you are looking for an earlier request.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "Period change fences a late successful response; new period requires a fresh read",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:163:460\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:162:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nYour customer activity\n0\nNeeds follow-up\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention\n\nRequests that need a callback, an acknowledgment or urgent attention will appear here.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "Obsolete401 after a period change cannot expire valid current access",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:166:610\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:165:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nYour customer activity\n0\nNeeds follow-up\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention\n\nRequests that need a callback, an acknowledgment or urgent attention will appear here.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "Actual expired owner session clears private activity and offers sign-in recovery",
+      "pass": false,
+      "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#portalRecovery') to be visible\u001b[22m\n\u001b[2m    16 × locator resolved to hidden <div hidden=\"\" class=\"card2\" id=\"portalRecovery\">…</div>\u001b[22m\n\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:169:346\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:168:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nYour customer activity\n0\nNeeds follow-up\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention\n\nRequests that need a callback, an acknowledgment or urgent attention will appear here.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "Held report after ordinary sign-out cannot reveal private report or resurrect session",
+      "pass": true
+    },
+    {
+      "name": "Report authorization isolates public, foreign owner, foreignorigin and reused-slug records without delivery",
+      "pass": true
+    },
+    {
+      "name": "320px report and due controls fit and retain actual visible keyboard focus",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 6000ms exceeded.\n    at loaded (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:118:39)\n    at /private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:183:178\n    at async check (/private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:125)\n    at async file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:182:1",
+      "pageState": {
+        "route": "today",
+        "text": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nFixture Availability Shop\nSetup in progress\nSign out\n\nYOUR WORKSPACE\n\nYour day, at a glance\n\nYour customer requests, visits and the work that needs your attention.\n\nYOUR NEXT STEP\n\nCheck your business details\n\nConfirm your services, hours and the answers your front desk should use.\n\nReview business details\nYour customer activity\n0\nNeeds follow-up\n0\nVisits today\n0\nRecent conversations\n\nWebsite chat is not answering customers yet. Your saved requests stay available.\n\nNeeds your attention\nNo requests need attention\n\nRequests that need a callback, an acknowledgment or urgent attention will appear here.\n\nView customer requests →\nReview all follow-ups\nRecent activity\nNo activity in the last 24 hours\n\nCustomer activity appears here after it happens. Private practice is kept separate.\n\nActivity report\n\nSee new inquiries, visit requests and the follow-ups that still need you.\n\nPeriod\nLast 7 days\nLast 30 days\nLast 90 days\nView report\n\nChecking your saved activity and follow-ups…"
+      }
+    },
+    {
+      "name": "No physical transport, forbidden destination or page runtime errors",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function',\n+   'current is not a function'\n+ ]\n- []\n\n    at file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:185:177\n    at check (file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:90:131)\n    at file:///private/tmp/mc-full-offer-readiness-577/scratchpad/full-offer-activity-independent.mjs:185:7"
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "aa16c9f9c7620512e4c322afbd5cf97f35f77c971b64a890f46ad9d5d37e5679",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e9e0f3e72aaf6bea4ef060269213bfe149f68b18de0b28fded84e0ddf6703d6c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6d68f49b81d1eb78049d25bc341b09e1f670d55cbe7e1cc4fe635fb1a5990d4d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "285cd20c23e5b8971529f0d76b4fe4aa0d3ecd2b3bedb44c014d09f9143429a9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "79939d2c663d515bdf0f0a6c02e6f5c84cdec8123c7b4dfbf171bdb7238a61ec",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4b523f7947b818c9415a27ba088114c191b4900fd7e71a631ed4a14deb44e261",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9fc7736ab11ae89e4efc41687bf5d844f058434f2661c551d81b601a2fbade14",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6dc37cf66088d121dfbdd156f47087b1329ff50050e353c529e39790e03b2fb8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1dca74a0146807b742eadb115d0e97d8899234f9fcf012843b4cfdcc843261d5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c258e35d13805fa477ec4436bb64624268004a3e9d552be5a7d24f879cd2dbf0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "68393d31460cda776627a4113a965735c79570951e93241cb5e960583c7f45a6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4f37f6bbc274fe7db5fdcb7f102e7a6435c81d15297c56b21e6ed8765b1208f0",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0d018c0746357949668ec956d2c94009f206167783b905cccac27f2a4775b704",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 503,
+      "fixture": "read-503"
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8ef242cd2513674cfe244e496f82f44c56c0fe892162a80034a49c90ec00f310",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5799f55b5fe372ab1c03383a24be2dcbe2be46ec7db7cbcb93284da459bf96da",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&report=activity&days=30",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ed7b6e794b62494edde2f2c07a73a6bafca9e148901fda39e335b69db5bfa080",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "77f4b8ab6a096dd33d0e9cb7db93f17a675da69bdd5b4ccdd376b2c2d37b97ad",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "responseByteSha": "9d8788f7e29d479f2b2bd7108bf0424a1abc80fcf4bcdd65dd5f84fdfb213733",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&report=activity&days=30",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "33f236bff1e575123c58355e6aad78820d3b7ee1dbd1ecfc9ca55e820a39bfa7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f14e81f6063002474bcd832f3a29f8cf8220bb8213d8052fc8cc36bc1a6bcfa1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "responseByteSha": "9d8788f7e29d479f2b2bd7108bf0424a1abc80fcf4bcdd65dd5f84fdfb213733",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "465bea9dc29f5cce9b6cd4bec419e42930b3752084d119cbde13aad657fd18eb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7b0029a3a7f26f9fa6169e36f7837fcb664d1209d528f599cda05b6233bbf33a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/access",
+      "query": "",
+      "method": "POST",
+      "action": "sign_out",
+      "body": {
+        "action": "sign_out"
+      },
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4062edaf750fb8074e7e83e0c9028c94e32468a8b6f1614774328ef045150f93",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "c480c94ed92469fc965a955f8665c9bede7cd135f8f062efe4bc67c700cc2629",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "bc6bc8e0f7b5ba1d25c7d57d6ff96800080d1431a185a17bfd24971286779250",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11&report=activity&days=7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "331ca5bacd7d30958d5fb168a97d891a04157fa4c374358bf3bf58ae6d378221",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    }
+  ],
+  "pageErrors": [
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function",
+    "current is not a function"
+  ],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "priorAttempt": {
+    "path": "scratchpad/full-offer-activity-independent-first.json",
+    "disposition": "11 QA driver failures: used nonexistent home route rather than today, and omitted mandatory milliseconds in two synthetic dueAt values. Runtime unchanged."
+  },
+  "pageErrorDetails": [
+    {
+      "slug": "account-ui-1",
+      "stack": "TypeError: current is not a function\n    at load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-2",
+      "stack": "TypeError: current is not a function\n    at load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-3",
+      "stack": "TypeError: current is not a function\n    at load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-4",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-5",
+      "stack": "TypeError: current is not a function\n    at load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-6",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-6",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-7",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-7",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-8",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-9",
+      "stack": "TypeError: current is not a function\n    at HTMLButtonElement.load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    },
+    {
+      "slug": "account-ui-11",
+      "stack": "TypeError: current is not a function\n    at load (https://followthrough.fixture.invalid/desk-activity.js:55:27)"
+    }
+  ],
+  "screenshots": [
+    "scratchpad/full-offer-activity-independent-r3-failure-1.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-2.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-3.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-4.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-5.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-6.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-7.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-8.png",
+    "scratchpad/full-offer-activity-independent-r3-failure-11.png"
+  ],
+  "sourceAfter": {
+    "desk-activity.js": "096a54482e8d17bac51c3f4738ebc9013016fe8cb71e0d7edf7637b51e102055",
+    "netlify/functions/lib/workspace-activity.mjs": "11e48787905c3402be19dff109f3c24eb94ad06af59bc66783aae92cae39e243",
+    "scripts/workspace-activity-check.mjs": "da91729faa65300e23f43d1c5bde43c9e1a63af45f723fca489bb353917abf9d",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "script.js": "8415ed1e0af00e41610743b29ac0111e1f3fb4ca7e6e176c24c58dc1ac5412c5",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "bcb9f554c804ed5ab330cf360275eb220b8d85310cd87ef661aad4349d4f34cf",
+    "netlify/functions/lib/request-followthrough.mjs": "d94eaa3cc34c436179a0032292bd92bf86c7e4b5ddd7b01299c8120723967b60",
+    "scripts/build-site.mjs": "5eafefed90804efab65f79c4af53aaa56a04d5d33621e245240ede67bbffc380",
+    "scripts/request-followthrough-ui-check.mjs": "ad2f8da158f80af021213d282850ff1c7982eb008c5a385b5e6e616f6c22ae9c",
+    "scratchpad/full-offer-activity-independent.mjs": "9e968a7dcddfee4b99457045545cfa7aab23312136b294352a3dc9effcb07191",
+    "desk.html": "d77dc3b10efcb8f4ec0a04999ed8c29468e9df396db3443c853a50fb57c55cbc",
+    "desk.js": "fd86bb2a4e1407466b9741a5438fdeb054e4daef92df02038395671925b03f58",
+    "desk.css": "fbb6256ea98a0f6c292cb3d5270b0318cd412f10fecf6865420c826afd31312c",
+    "onboard.html": "6c85005a806ed0c3cd875c8bae74c90b02e0f0058dcf5b0bfcbace9a35826eb8",
+    "onboard.js": "b64ec4ec2315c3b1fa49512739a69dfa48fcb0b9c1ea3c04bc7d01e150387716",
+    "onboard.css": "871a8a106f1951a48897fc5b7bb9cac57f94cedf1d8fc34a80f3a79741a922ad",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "desk-connections.js": "3b0ae42fba6aafd1daa990f96156dba9f2c6afdcc27f32edba2dea4c2f44fc32",
+    "netlify/functions/lib/connection-journey.mjs": "73c23d978070847ebc04d81b8cd1afe1c493a8b4e88f99f83b35be0ea6de2724",
+    "netlify/functions/lib/service-connections.mjs": "4ee3d3bb5f912619a621fe5615938d88e7327ded735530d93c2dc1c90dc7dd1a",
+    "desk-connections.css": "4c408a14a6348a06c59cd9e3bcce3015ab4a92ea25af3ad7e40cb17f49e88b79",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "netlify/functions/client.mjs": "3efe3a810f411160c38339029d12e8122bfc8875df9decf9c72a1ebfd90cc5e9",
+    "netlify/functions/workspace-billing.mjs": "653840866c5cf6a10021ed8b0d3596d5be93421b3a88c5e314e26c24c5d14d1b",
+    "netlify/functions/lib/workspace-billing.mjs": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+    "netlify/functions/lib/store.mjs": "b6aaba03a4a8a076253ff2d21aef81f77f4d000a65f9163e0a25e400d0bb0a55",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/desk.mjs": "4b7705ea3af0c9034d121629359fd8a20edc89a051dde0bb248e9bb170018171",
+    "netlify/functions/lib/setup.mjs": "67f8179606a1a207aa96c488cf08131940f0e01ae6c22388eaa57de6001162f3",
+    "netlify/functions/lib/config.mjs": "524e773ab1c83f9531bb6cba8e11de5490761324611c2a9e5603a976fcea27d7",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 2,
+    "failed": 10,
+    "total": 12,
+    "physicalNetwork": 0,
+    "pageErrors": 12
+  }
+}

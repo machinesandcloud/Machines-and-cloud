@@ -40,6 +40,7 @@ import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mj
 import { queueWorkspaceStopBilling } from './lib/workspace-billing.mjs';
 
 import { readRequestFollowthrough, updateRequestFollowthrough, requestFollowthroughSummaries, RequestFollowthroughError } from './lib/request-followthrough.mjs';
+import { workspaceActivity } from './lib/workspace-activity.mjs';
 
 export const config = { path: "/api/client" };
 
@@ -104,6 +105,16 @@ async function handle(req) {
   if (selfService && !isOwner && (req.method !== "GET" || url.searchParams.has("export"))) return json({ error: "verification_required" }, 401);
   const ownsCurrent = current => !!current && current.slug === c.slug && current.ownerKey === c.ownerKey && (selfService ? isSelfServiceClient(current) && normalizeAccountEmail(current.owner?.email) === normalizeAccountEmail(session?.email) : current.ownerKey === key);
   const site = process.env.URL || url.origin;
+
+  if (req.method === 'GET' && url.searchParams.has('report')) {
+    if (!selfService || !isOwner) return json({ error: 'verification_required' }, 401, { 'Cache-Control': 'no-store' });
+    if (url.searchParams.get('report') !== 'activity' || !['7','30','90'].includes(url.searchParams.get('days')) || [...url.searchParams.keys()].some(name => !['c','report','days'].includes(name)) || [...url.searchParams.keys()].length !== 3) return json({ error: 'invalid_report', message: 'Choose a report period.' }, 400, { 'Cache-Control': 'no-store' });
+    const report = await workspaceActivity(c, Number(url.searchParams.get('days')));
+    const [current, active] = await Promise.all([strictRead('clients', c.slug), getAccessSession(req)]);
+    if (!active) return json({ error: 'verification_required' }, 401, { 'Cache-Control': 'no-store' });
+    if (!current || workspaceTenant(current) !== workspaceTenant(c) || normalizeAccountEmail(current.owner?.email) !== normalizeAccountEmail(active.email)) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
+    return json({ ok: true, report }, 200, { 'Cache-Control': 'no-store', 'Netlify-CDN-Cache-Control': 'no-store' });
+  }
 
   if (req.method === 'GET' && url.searchParams.has('requestId')) {
     if(!selfService || !isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});

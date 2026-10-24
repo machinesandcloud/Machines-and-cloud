@@ -544,3 +544,17 @@ body.desk-app.guide-tour-open { overflow:hidden; }
 .request-history p { margin:6px 0 0; white-space:pre-wrap; font-size:12px!important; }
 .request-visits button { margin:5px 0; text-align:left; }
 @media(max-width:450px) { .request-dialog .request-facts,.request-progress>dl { gap:14px; }.request-dialog-heading { gap:8px; }.desk-app dialog.request-dialog { padding:20px; } }
+/* Activity stays on Home; the full follow-up list shares the ordinary request dialog. */
+.activity-report-controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin:16px 0}
+.activity-report-controls label{display:grid;gap:6px;font-weight:600}
+.activity-report-controls .form-input{min-width:170px}
+.activity-report-controls :is(select,button){scroll-margin-block:100px}
+.activity-report-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.activity-report-metrics>div{padding:16px;border:1px solid #dce4ef;border-radius:12px;background:#f7f9fd}
+.activity-report-metrics dt{font-size:13px;color:#536580}
+.activity-report-metrics dd{font-size:28px;font-weight:700;color:#172b49;margin:8px 0 0}
+.activity-followup{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #e2e8f0}
+.activity-followup>div{min-width:0;overflow-wrap:anywhere}
+.activity-followup p{margin:5px 0 0;font-size:14px;color:#536580}
+.activity-followup button{flex-shrink:0}
+@media(max-width:650px){.activity-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.activity-followup{align-items:start;flex-direction:column}}
