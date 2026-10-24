@@ -1,0 +1,88 @@
+{
+  "at": "2026-10-24T22:39:35.083558+00:00",
+  "status": "ACCEPTED_LOCAL_NATIVE_HOSTED_CHECKPOINT_ONLY",
+  "candidateCommit": "6ef5a25f28bd1ed1e437e9d7a6b795256c4b671d",
+  "parentCommit": "9b96784a3861fb252209cc45c8c58fca1aa388c4",
+  "sourceHashes": {
+    "scripts/lib/stripe-public-execution.mjs": "0a7826fd499cf8dd461ee78d206afbeacd29dd2a2167b3156f9e3a7fb99192fb",
+    "scripts/stripe-native-hosted-checkpoint-check.mjs": "e312e317439a2fb19c13d876310e1c1910cb067b5e6e8190b6e974676b4b3b83",
+    "scripts/stripe-test-lifecycle-proof.mjs": "693c89dd22e4e810ad9fef25033a10e0b06d6aeb55107923b516f5543bc3a3f0"
+  },
+  "independentPassed": 8,
+  "independentTotal": 8,
+  "sourceStable": true,
+  "actualBranchFaultInjection": true,
+  "applicationFilesByteUnchanged": 366,
+  "automatedRunnerGuardByteUnchanged": true,
+  "returnedDefects": [
+    {
+      "kind": "Source-review return, original b3bc",
+      "receipt": "/tmp/mc-stripe-native-checkpoint-independent-20261024/private-gate-source-return.json",
+      "finding": "Native ready gate lacked shared600s deadline and retirement."
+    },
+    {
+      "kind": "Actual branch fault reproduction, intermediate6d73",
+      "receipt": "/tmp/mc-stripe-native-checkpoint-independent-20261024/ready-fault-first.json",
+      "finding": "Report-save failure after ready publication before try/finally left durable ready gate active.",
+      "finalRepair": "Entire ready publication, phase/log, input/iterator construction and wait covered by retirement finally; one shared bounded deadline; retirement save failure propagates as failure."
+    }
+  ],
+  "acceptedBoundaries": [
+    "First exact private Checkout top-level GET document is intercepted before any isolated third-party request, to explicit local scriptless/CSP handoff content.",
+    "Only canonicalNode verified current cs_test open/unpaid99USD exactprice/tenant exposes private ready state.",
+    "Exact10-field Root observation bound phase/Checkout/time/artifact/actions1..24; cannot set payment or signed receipt success.",
+    "Wait shares private deadline <=600s and phase expiry; EOF/lost input/invalid input/timeouts close reader and retire gate.",
+    "Actual branch tests retire ready on accepted/unconfirmed/await/phase/log/input setup exits before subsequent canonical or owner work.",
+    "Genuine dedicated signed completed receipt and canonical exact paid invoice/subscription remain financial success authority.",
+    "Ordinary isolated M&C Endrenewal and prior exact financial/destination cleanup remain required.",
+    "Native regular-browser network is explicitly outside guarded runner/server160, with separate Root-owned24action scope; automated CAPTCHA guard unchanged."
+  ],
+  "harnessDispositions": [
+    "Initial own harness parse error occurred before module import because fixture lacked final brace; corrected own brace/string assertion only.",
+    "First7/8 positive fixture set clock before checkpoint started, making its acknowledgement correctly stale. Corrected own clock advancement into input callback and tightened negative fixture timing; no candidate changes."
+  ],
+  "effects": {
+    "actualBrowserOrNative": 0,
+    "providerRequests": 0,
+    "privateCapabilityReads": 0,
+    "externalResearch": 0,
+    "rootChanges": 0
+  },
+  "limits": [
+    "No actual native compatibility/card interaction/payment/receipt/Workbench success established.",
+    "No CAPTCHA/authentication control is used or bypassed; separately scoped native helper must stop for visible human verification/OTP.",
+    "Old v4/v4r2 failed financial phases and their spent limits remain closed.",
+    "Root separately binds exact fresh source/private native helper/config/phase; actual cleanup must still be observed."
+  ],
+  "artifacts": {
+    "check.mjs": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/check.mjs",
+      "sha256": "acbdb77d0db598f02696cf60624d77a2a0167c8709545e29085a7c5af12fa848"
+    },
+    "check-startup-error.txt": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/check-startup-error.txt",
+      "sha256": "2a85662d37a8f2d1f97b5e1c0a3d352b2d3c9c2d7e1fb19b92042ac3c490c69a"
+    },
+    "private-gate-source-return.json": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/private-gate-source-return.json",
+      "sha256": "24675ff707e1f4fd5a87e7bd6e2390342b30425ae4c988657e56c762983e2349"
+    },
+    "ready-fault.mjs": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/ready-fault.mjs",
+      "sha256": "65ea6dc9517d0da9171fad49e85253e0ff1a6d95d0de12f24b73b5fe00bdfac5"
+    },
+    "ready-fault-first.json": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/ready-fault-first.json",
+      "sha256": "622f3b03f68fadf55d3216f591421439a70903d3bf2d50b323e558e20ea1ddcc"
+    },
+    "final.json": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/final.json",
+      "sha256": "01d3889837e64f20a7e4e8e5de72fe293f26e4b387d58848f8a5b83e8ec0d610"
+    },
+    "final-repaired.json": {
+      "path": "/tmp/mc-stripe-native-checkpoint-independent-20261024/final-repaired.json",
+      "sha256": "d9af43bdeab487cfa5b8e1d0dd7db6a582489c8d041161abd893d8a1c3b80969"
+    }
+  },
+  "ok": true
+}

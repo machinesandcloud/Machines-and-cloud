@@ -1,0 +1,2858 @@
+{
+  "at": "2026-10-24T22:44:41.829Z",
+  "before": {
+    "netlify/functions/lib/workspace-billing.mjs": "e3dd6fc88e3c4d37ce876b5705e90a0074d8d1014510653a7908d76cddd3bf03",
+    "netlify/functions/workspace-billing.mjs": "dbc0fe9719dc2dd04c8d247692a8b033d68ea42090f4eb38d1d2f1fbacb8671d",
+    "netlify/functions/workspace-billing-webhook.mjs": "ca50629c531727dbed0d09c405b8cdb4180a36b614679364a725080e1e7f1c70",
+    "netlify/functions/workspace-billing-background.mjs": "6299c996522ff02d000cbe12c9b0d9418b7ff60c95021dc38eed77af1ee01bdd",
+    "netlify/functions/stripe-webhook.mjs": "924bbbf2add7ab19ce0625d51b6c456c292f2fee9482bd07b716e7b821bb1b81",
+    "netlify/functions/lib/billing.mjs": "81d9e14a67fbe883325e28d268463e8e4e39df89b78d0f150306afe7b770610e",
+    "scripts/workspace-billing-public-proof-check.mjs": "4837dc0003db13dc05e19b0993baa7445467e5e0f2124976ba84da83a5b443bb",
+    "scripts/lib/stripe-public-proof.mjs": "16e1f913310b5e6a99f7b4f08decf77fc6dc7a3a021130b886ad4a6dc42d1096",
+    "scripts/lib/stripe-public-execution.mjs": "39d7741fb8a94e63eb34528b0bf73918a9534407c6dcc162fcea7cddf2b4a579"
+  },
+  "checks": [
+    {
+      "name": "legacy Checkout retains original LIVE credential and7day contract when workspace TEST is configured",
+      "pass": true,
+      "requests": 1
+    },
+    {
+      "name": "dedicated TEST phase verifies actual-handler account/Price and every provider attempt is durably counted",
+      "pass": true,
+      "requests": 10
+    },
+    {
+      "name": "missing or wrong TEST phase hides new capabilities and dispatches no provider request",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "ordinary TEST attempt ceiling is shared across concurrent owner requests and never consumes cleanup reserve",
+      "pass": true,
+      "requests": 10
+    },
+    {
+      "name": "changing a phase version or attempt ceiling cannot reset spent capacity",
+      "pass": true,
+      "requests": 2
+    },
+    {
+      "name": "dedicated signed receipt is distinct from legacy forwarding, and exact dedicated replay adds no provider attempt",
+      "pass": true,
+      "requests": 8
+    },
+    {
+      "name": "wrong snapshot API version cannot certify the internal dedicated webhook proof",
+      "pass": true,
+      "requests": 5
+    },
+    {
+      "name": "exact TEST cleanup cancels only its retained subscription without proration/invoice and closes warm execution",
+      "pass": true,
+      "requests": 17
+    },
+    {
+      "name": "lost applied cleanup DELETE is reconciled by ordinary recovery without a second DELETE",
+      "pass": true,
+      "requests": 19
+    },
+    {
+      "name": "expired or withdrawn new-offer policy automatically cleans only the same TEST resources using retained finite authority",
+      "pass": true,
+      "requests": 14
+    },
+    {
+      "name": "removing dedicated key never falls back to legacy LIVE for an existing TEST financial record",
+      "pass": true,
+      "requests": 8
+    },
+    {
+      "name": "a replaced workspace incarnation during the first provider read stops all follow-on transport",
+      "pass": true,
+      "requests": 1
+    },
+    {
+      "name": "a signed event with copied metadata but a different resource cannot certify the public payment",
+      "pass": true,
+      "requests": 11
+    },
+    {
+      "name": "an older LIVE workspace financial record retains its legacy key for refresh and renewal while dedicated TEST is configured",
+      "pass": true,
+      "requests": 17
+    },
+    {
+      "name": "cleanup can expire only the retained open Checkout without creating a subscription or new Checkout",
+      "pass": true,
+      "requests": 9
+    },
+    {
+      "name": "lost-before-apply TEST cancellation resumes the exact durable cleanup operation and keeps its dedicated reserve",
+      "pass": true,
+      "requests": 20
+    },
+    {
+      "name": "ordinary End monthly renewal cannot consume the TEST reserve held for explicit phase cleanup",
+      "pass": true,
+      "requests": 14
+    },
+    {
+      "name": "public packet binds fresh exact source, published deployment, current owner, merchant and aggregate cap before credential use",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "public Node allowlist refuses Checkout or subscription mutations and any shared webhook destination",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "public browser/app gate sends only the exact controlled owner session and never re-dispatches an uncertain Checkout",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "public saved snapshot binds receipt resource, current tenant and immutable counters rather than settings save alone",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "public webhook preflight requires exact TEST snapshot destination,9 events, own phase metadata and no Connect application",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "public cleanup follows the same saved expiry operation, forbids new paid work and obeys the160-site ceiling",
+      "pass": true,
+      "requests": 0
+    },
+    {
+      "name": "fresh explicitly bound TEST phase archives closed expired predecessor without changing genuine workspace setup",
+      "pass": true,
+      "requests": 15
+    },
+    {
+      "name": "same fresh TEST begin replay adds counted reads without repeating the rollover or resetting capacity",
+      "pass": true,
+      "requests": 17
+    },
+    {
+      "name": "active, cleanup-pending, uncertain or paid predecessor cannot be rolled into a new allowance",
+      "pass": true,
+      "requests": 91
+    },
+    {
+      "name": "foreign or stale predecessor identities, missing signed expiration and missing fresh approval fail before provider activity",
+      "pass": true,
+      "requests": 91
+    },
+    {
+      "name": "TEST review retained from predecessor cannot create Checkout in the new phase",
+      "pass": true,
+      "requests": 15
+    },
+    {
+      "name": "fresh TEST Checkout uses a new provider identity while prior expiration receipt remains immutable",
+      "pass": true,
+      "requests": 20
+    },
+    {
+      "name": "concurrent explicit TEST rollover retains one audit history and a single shared new request counter",
+      "pass": true,
+      "requests": 17
+    },
+    {
+      "name": "prepared-but-paused workspace and full retained phase history block new TEST rollover",
+      "pass": true,
+      "requests": 13
+    }
+  ],
+  "requests": [
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-c2993b94df12d20d9ed15c47b0d7172d"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-1e6eabd7517bd9865140014389dc80d3"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-3679b5779e6c56ce5f45124519572178"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-c3f621bf2a510587fcb11b04fbec349d"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "DELETE",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-proof-cleanup-dddddddddddddddddddddddddddddddd"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-175910b1db01cef5bb49415e02501c37"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "DELETE",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-proof-cleanup-dddddddddddddddddddddddddddddddd"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-28569f1a519821da8bd4076aaaa0a881"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "DELETE",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-proof-cleanup-35315508920b7c6e62d4576b068c0abe"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-ca3ca00d82fb70b1de8c935fa7ac82eb"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-3b02410d36d7a5cc3b7c4dd2c29c3f8c"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-773b27cd202263c0ed3dcd639b1a93f3"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_live_original",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_live_original",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_live_original",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_live_original",
+      "method": "POST",
+      "credentialSlot": "legacy",
+      "idempotency": "workspace-renewal-a34a2401323205e604e719b988afb8f6"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_live_original",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_live_original",
+      "method": "GET",
+      "credentialSlot": "legacy",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-e86ab8b0b5ba4d7b814c3e0aa8bd3d3f"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-e86ab8b0b5ba4d7b814c3e0aa8bd3d3f"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-80b966c7d12854563c1c0bc763c33f3c"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "DELETE",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-proof-cleanup-dddddddddddddddddddddddddddddddd"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "DELETE",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-proof-cleanup-dddddddddddddddddddddddddddddddd"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-36ca2c0783be5b8144dc3c902ba605dd"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-renewal-7b29f9b9189c965a7ab6cf97f7f3082f"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/subscriptions/sub_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-4b3fc644ce77ef4ed9900680b22da463"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-4b3fc644ce77ef4ed9900680b22da463"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-2c9890e29a9649f77c92d185a578eb8b"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-2c9890e29a9649f77c92d185a578eb8b"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-48e0ffca51ab6c8023b3797257ed7636"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-48e0ffca51ab6c8023b3797257ed7636"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-897a51fba86a01de0ffdf3af45071458"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-897a51fba86a01de0ffdf3af45071458"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-beb869f22bca8d00d03345887999449b"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-beb869f22bca8d00d03345887999449b"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-dd293c8ee523d2770c43daddeee2e77a"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-dd293c8ee523d2770c43daddeee2e77a"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-e682155913a658a0dacccbb059acdbe0"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-e682155913a658a0dacccbb059acdbe0"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-383ad6f4bd5d8dcc2bf290d4943c3cbc"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-383ad6f4bd5d8dcc2bf290d4943c3cbc"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-91085da40bce62da86e4fdd0b2af41ed"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-91085da40bce62da86e4fdd0b2af41ed"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-48b45e494a12f14897a0a23ef6645a16"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-48b45e494a12f14897a0a23ef6645a16"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-77c2852a47b88ca0d7e6a0053b1ab085"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-77c2852a47b88ca0d7e6a0053b1ab085"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-c9307c123c01842f72e67a7edd85e556"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-c9307c123c01842f72e67a7edd85e556"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-2acdae12a7420daaa90590a69c155954"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-2acdae12a7420daaa90590a69c155954"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-42a1bda561b68430f0c338595170c9a0"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-42a1bda561b68430f0c338595170c9a0"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-99e3f34ad5f59ea03763d1a9f37a15db"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-99e3f34ad5f59ea03763d1a9f37a15db"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-541a4488d617ec1c82c1198a226f8b41"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-541a4488d617ec1c82c1198a226f8b41"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-981c000a6c404f345157bb338fecb6ce"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-981c000a6c404f345157bb338fecb6ce"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-32d2de34d0f567df4d534dd9f113f4a0"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-32d2de34d0f567df4d534dd9f113f4a0"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-bf663a1806204533b2b16c2977bde08e"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-667b14fca8ea3bdede2828ca50bdfeed"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-667b14fca8ea3bdede2828ca50bdfeed"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/prices/price_offline_coverage",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-checkout-6c749e54ed2e29fb6c4576ffa93be47d"
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned/expire",
+      "method": "POST",
+      "credentialSlot": "workspace",
+      "idempotency": "workspace-expire-6c749e54ed2e29fb6c4576ffa93be47d"
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/account",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    },
+    {
+      "path": "/v1/checkout/sessions/cs_test_offline_owned",
+      "method": "GET",
+      "credentialSlot": "workspace",
+      "idempotency": null
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "privateCredentialFilesRead": 0,
+  "after": {
+    "netlify/functions/lib/workspace-billing.mjs": "e3dd6fc88e3c4d37ce876b5705e90a0074d8d1014510653a7908d76cddd3bf03",
+    "netlify/functions/workspace-billing.mjs": "dbc0fe9719dc2dd04c8d247692a8b033d68ea42090f4eb38d1d2f1fbacb8671d",
+    "netlify/functions/workspace-billing-webhook.mjs": "ca50629c531727dbed0d09c405b8cdb4180a36b614679364a725080e1e7f1c70",
+    "netlify/functions/workspace-billing-background.mjs": "6299c996522ff02d000cbe12c9b0d9418b7ff60c95021dc38eed77af1ee01bdd",
+    "netlify/functions/stripe-webhook.mjs": "924bbbf2add7ab19ce0625d51b6c456c292f2fee9482bd07b716e7b821bb1b81",
+    "netlify/functions/lib/billing.mjs": "81d9e14a67fbe883325e28d268463e8e4e39df89b78d0f150306afe7b770610e",
+    "scripts/workspace-billing-public-proof-check.mjs": "4837dc0003db13dc05e19b0993baa7445467e5e0f2124976ba84da83a5b443bb",
+    "scripts/lib/stripe-public-proof.mjs": "16e1f913310b5e6a99f7b4f08decf77fc6dc7a3a021130b886ad4a6dc42d1096",
+    "scripts/lib/stripe-public-execution.mjs": "39d7741fb8a94e63eb34528b0bf73918a9534407c6dcc162fcea7cddf2b4a579"
+  },
+  "sourceStable": true,
+  "ok": true
+}

@@ -1,0 +1,71 @@
+{
+  "before": {
+    "scripts/lib/stripe-public-execution.mjs": "0a7826fd499cf8dd461ee78d206afbeacd29dd2a2167b3156f9e3a7fb99192fb",
+    "scripts/stripe-test-lifecycle-proof.mjs": "231f85b149dd0b6e06e59a2505661ec67e5e108a6e62119d463ebfc45663cfff",
+    "scripts/stripe-native-hosted-checkpoint-check.mjs": "e312e317439a2fb19c13d876310e1c1910cb067b5e6e8190b6e974676b4b3b83"
+  },
+  "checks": [
+    {
+      "name": "Exact owned top-level navigation is intercepted with explicit local handoff and no third-party transport",
+      "pass": true
+    },
+    {
+      "name": "Only one exact private Checkout URL, GET document and top-level frame can be handed off",
+      "pass": true
+    },
+    {
+      "name": "Lost handoff save cannot return a page or grant native readiness",
+      "pass": true
+    },
+    {
+      "name": "Root observation matches exact phase/Checkout and permits only subsequent canonical verification",
+      "pass": true
+    },
+    {
+      "name": "Wrong phase, Checkout, incomplete observation, hash-only or action count cannot resume",
+      "pass": true
+    },
+    {
+      "name": "EOF and lost input close the checkpoint without completion",
+      "pass": true
+    },
+    {
+      "name": "Timeout is at most600s and shortened by the immutable financial phase expiry",
+      "pass": true
+    },
+    {
+      "name": "Expiry exactly at returned acknowledgement refuses resume",
+      "pass": true
+    },
+    {
+      "name": "Initial durable checkpoint failure still closes the input reader",
+      "pass": true
+    },
+    {
+      "name": "Existing automatic flow/guard, public financial verification and cleanup remain authoritative",
+      "pass": true
+    },
+    {
+      "name": "Shared private checkpoint deadline cannot drift or extend600s and retirement precedes canonical work",
+      "pass": true
+    },
+    {
+      "name": "Every post-ready phase/log/input/wait failure retires the actual native branch before cleanup",
+      "pass": true
+    }
+  ],
+  "effects": {
+    "providerRequests": 0,
+    "browser": 0,
+    "keys": 0
+  },
+  "after": {
+    "scripts/lib/stripe-public-execution.mjs": "0a7826fd499cf8dd461ee78d206afbeacd29dd2a2167b3156f9e3a7fb99192fb",
+    "scripts/stripe-test-lifecycle-proof.mjs": "231f85b149dd0b6e06e59a2505661ec67e5e108a6e62119d463ebfc45663cfff",
+    "scripts/stripe-native-hosted-checkpoint-check.mjs": "e312e317439a2fb19c13d876310e1c1910cb067b5e6e8190b6e974676b4b3b83"
+  },
+  "sourceStable": true,
+  "passed": 12,
+  "total": 12,
+  "ok": true
+}
