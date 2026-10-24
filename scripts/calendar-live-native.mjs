@@ -46,7 +46,7 @@ export function createNativeHandoff({ execute=runAppleScript, now=()=>Date.now()
       if(destination.origin!=='https://accounts.google.com'||destination.pathname!=='/o/oauth2/v2/auth'||destination.searchParams.get('state')!==state||destination.searchParams.get('redirect_uri')!==TARGET.origin+'/api/google/callback')fail('oauth_target');
       const desk=TARGET.origin+'/desk?c='+slug+'#setup';
       attempted=true;
-      const result=await execute(`tell application "Google Chrome"\nset controlledWindow to make new window with properties {mode:"normal"}\nset controlledTab to active tab of controlledWindow\nset URL of controlledTab to ${quote(desk)}\nreturn (id of controlledWindow as text) & "," & (id of controlledTab as text)\nend tell`);
+      const result=await execute(`tell application "Google Chrome"\nactivate\nset controlledWindow to make new window with properties {mode:"normal"}\nset index of controlledWindow to 1\nset controlledTab to active tab of controlledWindow\nset URL of controlledTab to ${quote(desk)}\nreturn (id of controlledWindow as text) & "," & (id of controlledTab as text)\nend tell`);
       if(!/^\d{1,12},\d{1,12}$/.test(String(result)))fail('new_window_identity');
       [windowId,tabId]=String(result).split(',').map(Number);
       // Polling reads only the exact new window's origin, never a Google URL,

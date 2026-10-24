@@ -4,7 +4,7 @@ import argparse, contextlib, datetime as dt, fcntl, hashlib, json, os, pathlib, 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None
 ACCOUNT='69797d78f01c70674ffef858'
-SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'2d74d78648a056db3f64e587da0f2caf378a1864','baselineDeployId':'6adc7ce255b6e04e6ce40059','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
+SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'7b69b031a1411aa35fbb144acb5fbe1e78a5f068','baselineDeployId':'6adcc77eb4139bf562741641','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
 MC_KEYS=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_APPROVED_VERSION','CALENDAR_EXECUTION_POLICY_JSON']
 def fail(s): raise RuntimeError(s)
 def now(): return dt.datetime.now(dt.timezone.utc)
