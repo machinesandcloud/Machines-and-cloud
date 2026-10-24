@@ -1,0 +1,101 @@
+{
+  "at": "2026-10-24T10:07:40.599350+00:00",
+  "decision": "Accepted narrow integration locally; no runtime repair required. Actual provider/carrier service, publication and full launch acceptance remain separate.",
+  "candidateCommit": "6fef17c1f2141838056bad7cf95cfe6c24a4c257",
+  "sourceBridge": {
+    "originalFeatureManifestSHA256": "9cb53f99e8262be90512a739e5291f3d1c5bef26324bbe2b72784d1cbf91d0ab",
+    "originalManifestUnmodified": true,
+    "exactFeatureFiles": 122,
+    "featureTotalFiles": 123,
+    "oneRetainedPublishedOverride": {
+      "netlify/functions/lib/workspace-billing.mjs": {
+        "old": "e981fd416d2535e86fad980e994b46d75beaeeb2fe38c40ceeecd398433eba06",
+        "new": "e7ac1c52a9095f1097327d792293557121008d9ed96a54a65ee5dc47e9b4d3a1"
+      }
+    },
+    "retainedCommit": "2d74d78648a056db3f64e587da0f2caf378a1864",
+    "bridgedSourceId": "sha256:95fdb6d2133b82171971e18dfcc22789c265d6a382a57a834ad0d9e99a453eca",
+    "expected123CurrentMatch": true,
+    "base497Changes": [
+      "desk-requests.js",
+      "desk.css",
+      "desk.html",
+      "embed.js",
+      "netlify.toml",
+      "netlify/functions/chat.mjs",
+      "netlify/functions/client.mjs",
+      "netlify/functions/lib/managed-consent.mjs",
+      "netlify/functions/lib/managed-delivery.mjs",
+      "netlify/functions/lib/managed-sms.mjs",
+      "netlify/functions/lib/messaging-program.mjs",
+      "netlify/functions/lib/request-followthrough.mjs",
+      "netlify/functions/policy.mjs"
+    ],
+    "baseFeatureChanges": 12,
+    "configChange": "Only add request-automation-check.mjs after request-followthrough-check to Netlify required command.",
+    "extraFeatureSourceFiles": [
+      "netlify/functions/lib/request-followup.mjs",
+      "scripts/request-automation-check.mjs",
+      "scripts/request-automation-ui-check.mjs"
+    ]
+  },
+  "requiredGate": {
+    "path": "scratchpad/full-offer-required-gate-r4.json",
+    "passed": 48,
+    "total": 48,
+    "sourceBeforeAfterEqual": true,
+    "currentSourcePathsChecked": 269,
+    "changedAfterGate": [],
+    "note": "Root executed these48; independent QA verifies saved exits, source equality and current bytes rather than rerunning unchanged gate."
+  },
+  "independentReplay": {
+    "passed": 10,
+    "total": 10,
+    "sourceStable": true,
+    "physicalNetwork": 0,
+    "unexpectedBlocked": 0,
+    "coverage": "Original9 independent actual-handler groups plus merged full owner GET/unconfigured billing GET/follow-up preparation integration case.",
+    "coupledRead": {
+      "fullOwnerGET": 200,
+      "billingGET": 200,
+      "billingConfigured": null,
+      "followupPrepared": true,
+      "noProviderPost": true
+    }
+  },
+  "uiReuse": {
+    "ordinaryActualOwnerGroups": 5,
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "browserAssetsExact": true,
+    "executedInputDeltas": [
+      "netlify/functions/lib/request-followup.mjs",
+      "netlify/functions/lib/workspace-billing.mjs"
+    ],
+    "basis": "Follow-up helper delta already passed final v5 actual-handler9. Billing library is exact previously independently accepted/published2d source, exercised by coupled current owner+billing GET and saved48gate; no broad unchanged UI rerun."
+  },
+  "preservedInitialRefusal": {
+    "path": "scratchpad/request-followup-integration-source-refusal.json",
+    "casesExecuted": 0,
+    "productFailure": false,
+    "disposition": "Original QA correctly refused old123-file snapshot before cases because current library is newer published billing source. New explicit one-file source bridge is separately hashed; old manifests unchanged."
+  },
+  "limits": [
+    "No real model/provider/text/email/registration/fee/account/browser/session/deployment action executed by this integration review.",
+    "New registration selection and one-message permission do not migrate oldv3 registrations or prove carrier delivery/Spanish/paid-job completion.",
+    "Accepted proof/helper commits are not yet added to this integration; subsequent proof-only source differences need a declared bridge, not a claim that this snapshot includes them."
+  ],
+  "evidence": {
+    "scratchpad/full-offer-required-gate-r4.json": "bc4eb281d103d89a76d0237756ceca65f2d62e1e822e7f6ade8d541daae76b0f",
+    "scratchpad/request-automation-combined-freeze-v5.json": "9cb53f99e8262be90512a739e5291f3d1c5bef26324bbe2b72784d1cbf91d0ab",
+    "scratchpad/request-followup-integration-source-bridge.json": "43a4f13d277aea3e96c21a56bb40bd92f1f6ca610cbc82b434040475efb1654f",
+    "scratchpad/request-followup-integration-check.mjs": "dfe850c03d11124c95e289cdbe225d52e915b9c092dadeb078fec32fb99cc846",
+    "scratchpad/request-followup-integration-qa-final.json": "a6892821557307ebd7723f9a002e3727c3c4fa322c22e66feb99e6ebe9fc8d16",
+    "scratchpad/request-followup-integration-source-refusal.json": "942d45b9f875167b8bf68ab5c93e4b9aeff83b05d909e1d2c10310cfc89ee268",
+    "scratchpad/request-followup-independent-acceptance-v5.json": "7014e88b597822ed21ef6c9c0273bc4ca9f734adc2a602c95141108a2a6adfd8",
+    "scratchpad/request-followup-independent-ui-v4-first.json": "2b533dc9a180c518d0c4851b53fca5191fccfa3481589a8a199b0aeeb3d74c54"
+  }
+}
