@@ -1,0 +1,103 @@
+{
+  "recordedAt": "2026-10-24T11:44:05.188650+00:00",
+  "stage": "author_implementation_and_offline_transport_protocol_verification",
+  "primarySources": [
+    {
+      "url": "https://developers.thumbtack.com/docs/getting-started/authentication",
+      "verifiedFacts": [
+        "Authorization and token endpoints on auth.thumbtack.com.",
+        "Authorization audience urn:partner-api and explicitly provisioned scopes.",
+        "Authorization-code grant for owner permission.",
+        "offline_access produces rotating single-use refresh tokens, 180-day validity and documented 60-second grace.",
+        "Provider recommends a supported OAuth library."
+      ],
+      "unverified": [
+        "Provisioned Machines & Cloud client credentials, exact granted supply scopes and token authentication method.",
+        "Actual owner grant and token response."
+      ]
+    },
+    {
+      "url": "https://developers.thumbtack.com/docs/getting-started/environments",
+      "verifiedFacts": [
+        "Production API https://api.thumbtack.com/api/ and production OAuth auth.thumbtack.com."
+      ],
+      "implementationLimit": "Only production endpoints implemented; caller cannot inject an API base."
+    },
+    {
+      "url": "https://developers.thumbtack.com/docs/pro-integrations/businesses",
+      "verifiedFacts": [
+        "Businesses list, business webhook list and exact-ID GET.",
+        "POST webhook fields webhookURL, eventTypes, enabled and auth username/password.",
+        "MessageCreatedV4 and NegotiationCreatedV4 event names.",
+        "PUT existing webhook enabled boolean."
+      ],
+      "implementationLimit": "No event envelope inferred; creation remains disabled until separately enabled and verified."
+    },
+    {
+      "url": "https://developers.thumbtack.com/docs/pro-integrations/negotiations",
+      "verifiedFacts": [
+        "Exact negotiation GET and business negotiation list.",
+        "Business identity, customer location, category, details and createTime fields."
+      ],
+      "implementationLimit": "No imported telephone number confers SMS permission."
+    },
+    {
+      "url": "https://developers.thumbtack.com/docs/pro-integrations/messages",
+      "verifiedFacts": [
+        "Native history GET and native POST /api/v4/negotiations/{negotiationID}/messages.",
+        "Native POST body is {text}.",
+        "History fields messageID, negotiationID, from, text, customer and sentAt."
+      ],
+      "implementationLimit": "Primary POST example does not document its response body. Only an explicit matching messageID and negotiationID can produce accepted:true. Every other 2xx receipt is unknown and must be reconciled without automatic resend."
+    },
+    {
+      "url": "https://github.com/panva/oauth4webapi",
+      "verifiedFacts": [
+        "OAuth library maintained 3.x ESM with customFetch transport support."
+      ],
+      "implementation": "Pinned oauth4webapi 3.8.8 installed by Root; actual authorization-response validation and code/refresh parsing exercised offline."
+    }
+  ],
+  "documentationAccess": "Direct Thumbtack documentation open returned a robot-check page; indexed primary documentation was readable. No robot-check bypass or authenticated provider access occurred.",
+  "transportBounds": {
+    "attemptsPerCall": 1,
+    "deadlineMilliseconds": 5000,
+    "responseBytes": 262144,
+    "requestBytes": 16384,
+    "nativeTextBytes": 8000,
+    "listRows": 100,
+    "redirects": "error",
+    "pagination": "No undocumented pagination URLs followed; list completeness always false."
+  },
+  "callerRequirements": [
+    "Explicit product/provider activation authority and tenant/owner permission.",
+    "Encrypted token storage and durable exact-operation mutation claim before calling.",
+    "Serialized rotating refresh consumption and uncertainty reconciliation.",
+    "Exact partner-provisioned supply scopes, offline_access and explicit token authentication method.",
+    "Separate actual provider acceptance; local fixtures do not establish a working provider integration."
+  ],
+  "authorEvidence": {
+    "final": "scratchpad/thumbtack-api-transport-author-r4.json",
+    "groups": 26,
+    "interceptedHTTPRequests": 52,
+    "liveRequests": 0,
+    "priorFailures": [
+      "scratchpad/thumbtack-api-transport-author-r1.json",
+      "scratchpad/thumbtack-api-transport-author-r2.json"
+    ],
+    "dispositions": [
+      "Real OAuth library rejects malformed token fields before transport projection; normalized consumed-token parse failures to unknown receipt.",
+      "JavaScript RegExp coerced numeric message IDs; native receipt now explicitly requires provider ID strings."
+    ]
+  },
+  "source": [
+    {
+      "path": "netlify/functions/lib/thumbtack-api.mjs",
+      "sha256": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2"
+    },
+    {
+      "path": "scripts/thumbtack-api-transport-check.mjs",
+      "sha256": "07ab70944f2b8399b7a9478d3169033849c5d832dff93ae0ddcf4e64fc09f130"
+    }
+  ]
+}

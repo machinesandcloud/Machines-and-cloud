@@ -1,0 +1,570 @@
+{
+  "at": "2026-10-24T11:44:53.426Z",
+  "boundary": "Independent actual handler/backend logic, memory storage, explicit documented-shape partner response fixtures. All physical network denied. This does not prove provisioned scopes, real OAuth, ordinary webhook envelope, partner configuration, provider sends or publication.",
+  "before": {
+    "netlify/functions/lib/lead-connections.mjs": "c0261c1af94ca1b4fa84bbf0a16a9e8fa96d4a53f6121f91edfb6a86f354dc57",
+    "netlify/functions/lib/thumbtack-connection.mjs": "4d10d6e7f1535800587c322bd7b80ce2f91ae7103399934368cb502dc7395c88",
+    "netlify/functions/lib/thumbtack-api.mjs": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2",
+    "netlify/functions/client.mjs": "b797f2150e5a31519008547efeb5d31913e14133e900f055249fb5074ff263df",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/request-followthrough.mjs": "67bbb5bdba79c2a343c1003f08923db8f720a10ac7c25fbec9d1770de5ddce2c",
+    "package.json": "e31e6e63828de64306a6b520cb97a6f0212861e628d7f9a4a7b08d982c346b65",
+    "package-lock.json": "a6969b0f5c4b3299fb6e005fefbfb212a76bfa275dbddefd0fb8a0369db61114"
+  },
+  "checks": [
+    {
+      "name": "Unprovisioned partner configuration blocks OAuth without making any provider request",
+      "pass": true
+    },
+    {
+      "name": "Normal authorization is session-bound and secrets never appear in owner connection data",
+      "pass": true
+    },
+    {
+      "name": "A revoked owner session stops code exchange before any token request",
+      "pass": true
+    },
+    {
+      "name": "Authorization configures one disabled webhook then verifies the enabled exact receipt",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:79:175\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:79:1"
+    },
+    {
+      "name": "Webhook transport authenticates before reading any provider thread",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:80:124\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:80:1"
+    },
+    {
+      "name": "Verified lead receipt reads canonical provider facts, source and partial message history into Inbox",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:81:157\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:81:1"
+    },
+    {
+      "name": "Spoofed business identity returned by the provider cannot create a cross-business Inbox request",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:82:153\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:82:1"
+    },
+    {
+      "name": "A message from another negotiation is rejected and no body-provided phone grants SMS consent",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:83:150\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:83:1"
+    },
+    {
+      "name": "A reviewed native reply obtains one matching acceptance receipt and exact operation replay does not send twice",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:84:175\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:84:1"
+    },
+    {
+      "name": "New customer context discovered at send time prevents a stale reply from being sent",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:85:148\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:85:1"
+    },
+    {
+      "name": "A lost native send acknowledgment remains unknown and exact replay cannot blindly send again",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:86:157\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:86:1"
+    },
+    {
+      "name": "Unknown webhook creation is reconciled by the same returned endpoint and never created again",
+      "pass": true
+    },
+    {
+      "name": "A missing webhook from an incomplete list cannot be mistaken for confirmed disconnection",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:88:153\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:88:1"
+    },
+    {
+      "name": "A replacement workspace rejects the former native endpoint before partner reads",
+      "pass": false,
+      "error": "Thumbtack request could not be confirmed.",
+      "stack": "ThumbtackAPIError: Thumbtack request could not be confirmed.\n    at fail (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:21:41)\n    at responseFailure (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:101:61)\n    at webhookRow (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:171:486)\n    at Module.thumbtackWebhook (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-api.mjs:180:15)\n    at async continueThumbtackSetup (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:60:19)\n    at async Module.completeThumbtackConnection (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/thumbtack-connection.mjs:47:3)\n    at async connect (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:67:61)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:89:137\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:55:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:89:1"
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "interceptedRequests": [
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks/webhook-1",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks/webhook-1",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks/webhook-2",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks/webhook-2",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks/webhook-3",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks/webhook-3",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks/webhook-4",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks/webhook-4",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks/webhook-5",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks/webhook-5",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks/webhook-6",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks/webhook-6",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300028/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300028/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300028/webhooks/webhook-7",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300028/webhooks/webhook-7",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300031/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300031/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300031/webhooks/webhook-8",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300031/webhooks/webhook-8",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300034/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300034/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks/webhook-1",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks/webhook-2",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks/webhook-3",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks/webhook-4",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks/webhook-5",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks/webhook-6",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300028/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300028/webhooks/webhook-7",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300031/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300031/webhooks/webhook-8",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300034/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300034/webhooks/webhook-9",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300034/webhooks/webhook-9",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300037/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300037/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300037/webhooks/webhook-10",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300037/webhooks/webhook-10",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300040/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300040/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300040/webhooks/webhook-11",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300040/webhooks/webhook-11",
+      "method": "GET"
+    }
+  ],
+  "unexpectedRequests": [],
+  "after": {
+    "netlify/functions/lib/lead-connections.mjs": "c0261c1af94ca1b4fa84bbf0a16a9e8fa96d4a53f6121f91edfb6a86f354dc57",
+    "netlify/functions/lib/thumbtack-connection.mjs": "4d10d6e7f1535800587c322bd7b80ce2f91ae7103399934368cb502dc7395c88",
+    "netlify/functions/lib/thumbtack-api.mjs": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2",
+    "netlify/functions/client.mjs": "b797f2150e5a31519008547efeb5d31913e14133e900f055249fb5074ff263df",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/request-followthrough.mjs": "67bbb5bdba79c2a343c1003f08923db8f720a10ac7c25fbec9d1770de5ddce2c",
+    "package.json": "e31e6e63828de64306a6b520cb97a6f0212861e628d7f9a4a7b08d982c346b65",
+    "package-lock.json": "a6969b0f5c4b3299fb6e005fefbfb212a76bfa275dbddefd0fb8a0369db61114"
+  },
+  "sourceStable": true,
+  "passed": 4,
+  "total": 14,
+  "ok": false
+}

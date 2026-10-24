@@ -1,0 +1,797 @@
+{
+  "at": "2026-10-24T11:48:26.301Z",
+  "boundary": "Independent actual handler/backend logic, memory storage, explicit documented-shape partner response fixtures. All physical network denied. This does not prove provisioned scopes, real OAuth, ordinary webhook envelope, partner configuration, provider sends or publication.",
+  "before": {
+    "netlify/functions/lib/lead-connections.mjs": "c0261c1af94ca1b4fa84bbf0a16a9e8fa96d4a53f6121f91edfb6a86f354dc57",
+    "netlify/functions/lib/thumbtack-connection.mjs": "db7fdd025a898fd52c42bb4255b20e7c3d232a1161ecab2afcd436e0aeb35821",
+    "netlify/functions/lib/thumbtack-api.mjs": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2",
+    "netlify/functions/client.mjs": "7bf3e1975bddbbf8208c39c329c5376964a485e2b3244c5b2880421cc4c2a25d",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/request-followthrough.mjs": "ebe3c3bed3449d1ffe61ebed70400605b4dba04e48210bb252d9e5cea66771ba",
+    "package.json": "e31e6e63828de64306a6b520cb97a6f0212861e628d7f9a4a7b08d982c346b65",
+    "package-lock.json": "a6969b0f5c4b3299fb6e005fefbfb212a76bfa275dbddefd0fb8a0369db61114"
+  },
+  "checks": [
+    {
+      "name": "Unprovisioned partner configuration blocks OAuth without making any provider request",
+      "pass": true
+    },
+    {
+      "name": "Normal authorization is session-bound and secrets never appear in owner connection data",
+      "pass": true
+    },
+    {
+      "name": "A revoked owner session stops code exchange before any token request",
+      "pass": true
+    },
+    {
+      "name": "Authorization configures one disabled webhook then verifies the enabled exact receipt",
+      "pass": true
+    },
+    {
+      "name": "Webhook transport authenticates before reading any provider thread",
+      "pass": true
+    },
+    {
+      "name": "Verified lead receipt reads canonical provider facts, source and partial message history into Inbox",
+      "pass": true
+    },
+    {
+      "name": "Spoofed business identity returned by the provider cannot create a cross-business Inbox request",
+      "pass": true
+    },
+    {
+      "name": "A message from another negotiation is rejected and no body-provided phone grants SMS consent",
+      "pass": true
+    },
+    {
+      "name": "A reviewed native reply obtains one matching acceptance receipt and exact operation replay does not send twice",
+      "pass": true
+    },
+    {
+      "name": "Concurrent exact native reply replays reserve and send only one provider message",
+      "pass": true
+    },
+    {
+      "name": "Competing new reply operations cannot concurrently send two replies about the same saved conversation",
+      "pass": true
+    },
+    {
+      "name": "New customer context discovered at send time prevents a stale reply from being sent",
+      "pass": true
+    },
+    {
+      "name": "A lost native send acknowledgment remains unknown and exact replay cannot blindly send again",
+      "pass": true
+    },
+    {
+      "name": "A successful HTTP response without the exact native message receipt remains unknown",
+      "pass": true
+    },
+    {
+      "name": "Unknown webhook creation is reconciled by the same returned endpoint and never created again",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'webhook-12'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'webhook-12'\n\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:91:602\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:56:88)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-native-check.mjs:91:1"
+    },
+    {
+      "name": "Competing setup continuations create at most the one durably claimed webhook",
+      "pass": true
+    },
+    {
+      "name": "A lost token exchange response is not repeated by replaying the callback code",
+      "pass": true
+    },
+    {
+      "name": "An incomplete webhook list and missing exact receipt cannot be mistaken for confirmed disconnection",
+      "pass": true
+    },
+    {
+      "name": "A replacement workspace rejects the former native endpoint before partner reads",
+      "pass": true
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "interceptedRequests": [
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks/webhook-1",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300010/webhooks/webhook-1",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks/webhook-2",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300013/webhooks/webhook-2",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks/webhook-3",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300016/webhooks/webhook-3",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600016",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600016/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks/webhook-4",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300019/webhooks/webhook-4",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600019",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks/webhook-5",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300022/webhooks/webhook-5",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600022",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600022/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks/webhook-6",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300025/webhooks/webhook-6",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600025",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600025/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600025",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600025/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600025/messages",
+      "method": "POST"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300029/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300029/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300029/webhooks/webhook-7",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300029/webhooks/webhook-7",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600029",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600029/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600029",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600029/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600029/messages",
+      "method": "POST"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300033/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300033/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300033/webhooks/webhook-8",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300033/webhooks/webhook-8",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600033",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600033/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600033",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600033/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600033/messages",
+      "method": "POST"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300038/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300038/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300038/webhooks/webhook-9",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300038/webhooks/webhook-9",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600038",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600038/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600038",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600038/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300042/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300042/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300042/webhooks/webhook-10",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300042/webhooks/webhook-10",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600042",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600042/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600042",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600042/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600042/messages",
+      "method": "POST"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300046/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300046/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300046/webhooks/webhook-11",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300046/webhooks/webhook-11",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600046",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600046/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600046",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600046/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600046/messages",
+      "method": "POST"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300050/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300050/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600019",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks/webhook-13",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks/webhook-13",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks/webhook-13",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300053/webhooks/webhook-13",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300059/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300059/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300059/webhooks/webhook-14",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300059/webhooks/webhook-14",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600022",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/negotiations/600022/messages",
+      "method": "GET"
+    },
+    {
+      "origin": "https://auth.thumbtack.com",
+      "path": "/oauth2/token",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300063/webhooks",
+      "method": "GET"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300063/webhooks",
+      "method": "POST"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300063/webhooks/webhook-15",
+      "method": "PUT"
+    },
+    {
+      "origin": "https://api.thumbtack.com",
+      "path": "/api/v4/businesses/300063/webhooks/webhook-15",
+      "method": "GET"
+    }
+  ],
+  "unexpectedRequests": [],
+  "after": {
+    "netlify/functions/lib/lead-connections.mjs": "c0261c1af94ca1b4fa84bbf0a16a9e8fa96d4a53f6121f91edfb6a86f354dc57",
+    "netlify/functions/lib/thumbtack-connection.mjs": "db7fdd025a898fd52c42bb4255b20e7c3d232a1161ecab2afcd436e0aeb35821",
+    "netlify/functions/lib/thumbtack-api.mjs": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2",
+    "netlify/functions/client.mjs": "7bf3e1975bddbbf8208c39c329c5376964a485e2b3244c5b2880421cc4c2a25d",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/request-followthrough.mjs": "ebe3c3bed3449d1ffe61ebed70400605b4dba04e48210bb252d9e5cea66771ba",
+    "package.json": "e31e6e63828de64306a6b520cb97a6f0212861e628d7f9a4a7b08d982c346b65",
+    "package-lock.json": "a6969b0f5c4b3299fb6e005fefbfb212a76bfa275dbddefd0fb8a0369db61114"
+  },
+  "sourceStable": true,
+  "passed": 18,
+  "total": 19,
+  "ok": false
+}

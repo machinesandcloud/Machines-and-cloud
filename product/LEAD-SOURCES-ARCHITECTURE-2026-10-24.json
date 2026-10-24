@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-24",
+  "stage": "Local implementation; independent QA and PO acceptance are separate. No publication or actual partner traffic is implied.",
+  "customerJob": "Connect an owned lead-platform business, retain the customer's actual request and conversation in the existing Inbox, review a useful reply, and distinguish a saved draft, provider acceptance and uncertain delivery.",
+  "existingPathsReused": [
+    "Authenticated /api/client owner actions and existing verified access sessions",
+    "Tenant/incarnation digest from workspace-identity.mjs",
+    "Strong conditional writes in store.mjs",
+    "Existing leads records, workspace record index, Inbox request details and request_followthrough journal",
+    "Existing Connections page; no second customer queue or navigation area"
+  ],
+  "angi": {
+    "setup": "Owner supplies Angi business ID and integration email. A unique endpoint generation and X-API-KEY are created locally. Angi's integrations team configures an unlisted CRM; preparing the endpoint does not claim that this happened.",
+    "contract": "Published May 2026 leadOid and srOid mapping, optional spEntityId checked when supplied, bounded JSON and complete task/comments/interview context. Only X-API-KEY is accepted for managed customers.",
+    "durability": "The connection CAS reserves bounded pending acceptance before a deterministic leads record is written. The same record identity survives parallel retries and lost acknowledgments. Ordinary scheduler recovery materializes pending records without a provider request.",
+    "reply": "Owner saves a reviewed reply draft and opens the official Angi application. Copying a draft does not mark it sent. Existing follow-through actions record the owner's actual contact outcome.",
+    "limits": "No verified native Angi thread-message API or self-service CRM configuration API was found. No support message or connection request was sent."
+  },
+  "thumbtack": {
+    "platformGate": "THUMBTACK_PARTNER_ENABLED plus provisioned client credentials, exact issued supply scopes, explicit token authentication method and a separate 32-byte token encryption key are required. Settings are absent/disabled by default, and local no-key mode removes all THUMBTACK variables.",
+    "authorization": "OAuth uses oauth4webapi 3.8.8 and the documented production auth/token endpoints and urn:partner-api audience. Consent state is opaque, session/tenant/generation bound and expires after 20 minutes. A code exchange or rotating refresh with an unknown result is not blindly repeated.",
+    "businessChoice": "OAuth can start without an obscure business ID. Returned owned businesses are shown by name; selection is verified again against the provider before a webhook is configured. A partial business list is never called complete.",
+    "tokens": "Access and rotating refresh tokens are AES-256-GCM encrypted with tenant and native connection generation as associated data. Tokens and webhook passwords are not included in owner projections or errors.",
+    "webhookSetup": "A durable one-attempt creation claim and unique endpoint identify a disabled Basic-auth webhook for NegotiationCreatedV4 and MessageCreatedV4. A lost create response is reconciled through the same endpoint; no blind repeat create occurs. Known-ID enable/disable outcomes are verified with the exact webhook GET, including when PUT's response is unconfirmed.",
+    "inbound": "The supported documented full payload must contain top-level negotiationID. Basic authentication and current tenant/generation are checked before provider reads. Canonical negotiation facts and messages are fetched with the owner's grant, and the provider business/thread IDs must match before an existing Inbox request is created or updated. Body-provided contact numbers never grant SMS permission.",
+    "messageHistory": "Immutable provider message IDs are merged so an older fetch cannot erase newer retained messages. Current API list pagination is not sufficiently documented to claim complete history. The UI labels the retained context as recent messages and directs earlier history/attachments to Thumbtack.",
+    "nativeReply": "The owner reviews each reply. One durable operation reserves the current request/source revision. A fresh provider read prevents sending against newly discovered customer context or a closed request. The POST is attempted once. Only an explicit matching provider message identity is accepted as its receipt; missing, malformed or lost receipts remain unknown and block another send in that request. Acceptance never means read by the customer.",
+    "recovery": "A separate scheduled entry examines at most 50 client rows and processes at most one connection in a 15-second wave, with an idle-row fair cursor and per-request deadline checks. The existing SDK metadata listing is reused and is not claimed to have a fixed physical-request bound. It advances the same setup/disconnect/pending-ingress identities. It does not repeat an unknown native send. New native requests are capped at 100 per tenant and 500 across the platform per UTC day.",
+    "disconnect": "The local generation changes immediately and blocks old ingress and replies. The exact saved remote webhook is disabled in scheduled recovery; tokens are retained only until a matching disabled receipt is confirmed.",
+    "remainingProviderEvidence": [
+      "Provisioned supply partner credentials, scopes and token authentication configuration",
+      "Actual owner OAuth consent and returned business selection",
+      "Exact actual partner webhook envelope, acknowledgment and retry behavior; no ordinary self-service envelope is guessed",
+      "Actual native POST response/receipt shape, customer receipt and returning conversation",
+      "Actual natural scheduler recovery, disconnect and operational support proof",
+      "Autonomous AI platform replies are not implemented by the owner-reviewed native reply path"
+    ]
+  },
+  "crossChannelConsent": "An imported phone, Angi compliance flag or TrustedForm URL is retained context only. This feature does not create marketing eligibility, managed SMS consent, legacy text-back jobs, email sends or voice calls.",
+  "localVerification": {
+    "angiAuthor": "scripts/lead-connections-check.mjs: 14 groups",
+    "thumbtackAuthor": "scripts/thumbtack-connection-check.mjs: 15 actual lifecycle groups using explicit synthetic provider responses",
+    "transportAuthor": "scripts/thumbtack-api-transport-check.mjs: 26 protocol groups using the real OAuth library",
+    "limits": "Independent receipts and exact final source hashes are owned by QA/Root. Synthetic network responses establish local logic only, not actual partner service or launch readiness."
+  }
+}

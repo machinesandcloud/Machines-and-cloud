@@ -1,0 +1,170 @@
+{
+  "at": "2026-10-24T11:43:18.323Z",
+  "boundary": "Independent actual frontend and actual access/client/Angi handlers, memory storage, browser requests fulfilled in process, provider/model/email/physical network disabled. Not hosted/provider acceptance.",
+  "before": {
+    "desk.html": "0365f4a5c5239a84c4f239479575a80225c8732da58b77efdf2ddde791fde5c9",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "64ff6f60e433a7c178a1e66b85a30ac3a8002e8ef23d90aa93d34651c58da3c3",
+    "desk-lead-sources.js": "769d01a0775d268a0007cfe5eaf469298c12efd2d3465bab3560d375d1b4f59e",
+    "desk-lead-sources.css": "00458eadbbae46187af192141d8c3d85047518f35f36420e4cdf39d60c5231db",
+    "desk-requests.js": "1d8dda4105fc7fdeac0792ba0f24343eefae9af71d327695d85d4d5cb0fc8fa2",
+    "netlify/functions/client.mjs": "b797f2150e5a31519008547efeb5d31913e14133e900f055249fb5074ff263df",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/lead-connections.mjs": "c0261c1af94ca1b4fa84bbf0a16a9e8fa96d4a53f6121f91edfb6a86f354dc57",
+    "netlify/functions/lib/request-followthrough.mjs": "bc8a1b04a0c8f0c71abd70e05540aa17aa7e71c296319719b983dcdea4b3ce5c"
+  },
+  "checks": [
+    {
+      "name": "Both platforms are discoverable and their real setup state fits 320px",
+      "pass": true
+    },
+    {
+      "name": "Both platforms are discoverable and their real setup state fits 390px",
+      "pass": true
+    },
+    {
+      "name": "Both platforms are discoverable and their real setup state fits 1440px",
+      "pass": true
+    },
+    {
+      "name": "Ordinary empty and invalid submissions show a field error without saving",
+      "pass": true
+    },
+    {
+      "name": "Prepare confirmation exposes retained provider setup rather than falsely marking Angi connected",
+      "pass": true
+    },
+    {
+      "name": "The visible section refresh provides progress and completion feedback outside the dialog",
+      "pass": true
+    },
+    {
+      "name": "Thumbtack saves its business context and explains the actual authorization step without a fake endpoint",
+      "pass": true
+    },
+    {
+      "name": "A lost setup response requires checking the saved result and recovers the original operation",
+      "pass": true
+    },
+    {
+      "name": "A refused setup retains the original input and retries the same operation only after status check",
+      "pass": true
+    },
+    {
+      "name": "Disconnect requires an intentional choice and keeps the earlier imported Inbox request",
+      "pass": true
+    },
+    {
+      "name": "Imported request details explain the source and original-platform reply without saying it was sent",
+      "pass": false,
+      "error": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-request-open]').first()\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" class=\"btn-pill btn-pill-dark btn-sm\" data-request-open=\"bf17bb033ad5a246cf13771fe8100c35e538e0c7\">View request</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    9 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n",
+      "stack": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-request-open]').first()\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" class=\"btn-pill btn-pill-dark btn-sm\" data-request-open=\"bf17bb033ad5a246cf13771fe8100c35e538e0c7\">View request</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    9 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:98:252\n    at async check (/private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:58:41)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:95:3"
+    },
+    {
+      "name": "Revoked sessions clear private connection details and expose sign-in recovery",
+      "pass": true
+    },
+    {
+      "name": "Signing out during a pending setup prevents a late response from restoring private details",
+      "pass": true
+    }
+  ],
+  "outsideRequests": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "pageErrors": [
+    "Cannot read properties of null (reading 'replaceChildren')"
+  ],
+  "physicalNetworkAttempts": 0,
+  "screenshots": [
+    "scratchpad/lead-sources-independent-ui-first-connections-320.png",
+    "scratchpad/lead-sources-independent-ui-first-angi-form-320.png",
+    "scratchpad/lead-sources-independent-ui-first-connections-390.png",
+    "scratchpad/lead-sources-independent-ui-first-angi-form-390.png",
+    "scratchpad/lead-sources-independent-ui-first-connections-1440.png",
+    "scratchpad/lead-sources-independent-ui-first-angi-form-1440.png",
+    "scratchpad/lead-sources-independent-ui-first-prepared-390.png",
+    "scratchpad/lead-sources-independent-ui-first-thumbtack-390.png"
+  ],
+  "actionCounts": {
+    "lead_connection": 11,
+    "sign_out": 1
+  },
+  "after": {
+    "desk.html": "0365f4a5c5239a84c4f239479575a80225c8732da58b77efdf2ddde791fde5c9",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "64ff6f60e433a7c178a1e66b85a30ac3a8002e8ef23d90aa93d34651c58da3c3",
+    "desk-lead-sources.js": "769d01a0775d268a0007cfe5eaf469298c12efd2d3465bab3560d375d1b4f59e",
+    "desk-lead-sources.css": "00458eadbbae46187af192141d8c3d85047518f35f36420e4cdf39d60c5231db",
+    "desk-requests.js": "1d8dda4105fc7fdeac0792ba0f24343eefae9af71d327695d85d4d5cb0fc8fa2",
+    "netlify/functions/client.mjs": "b797f2150e5a31519008547efeb5d31913e14133e900f055249fb5074ff263df",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/lead-connections.mjs": "c0261c1af94ca1b4fa84bbf0a16a9e8fa96d4a53f6121f91edfb6a86f354dc57",
+    "netlify/functions/lib/request-followthrough.mjs": "bc8a1b04a0c8f0c71abd70e05540aa17aa7e71c296319719b983dcdea4b3ce5c"
+  },
+  "sourceStable": true,
+  "passed": 12,
+  "total": 13,
+  "ok": false
+}

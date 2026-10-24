@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-24T12:16:33.607Z",
+  "reviewer": "lead_independent_qa",
+  "mode": "Exact accepted-before to current-byte comparison plus actual leadConnectionsView for disabled and synthetic-ready settings; all physical networking blocked.",
+  "ok": true,
+  "changes": [
+    {
+      "file": "netlify/functions/lib/lead-connections.mjs",
+      "old": "Partner credentials, granted messaging scopes and a verified webhook contract are required before native messages can be connected.",
+      "new": "Save your Thumbtack connection request here. When the connection is enabled, you can sign in and choose your business.",
+      "kind": "One customer-facing reason string.",
+      "beforeSHA256": "bea73bf53a72f13dee20e3075e909df27d76cb6af9a72ef6f369e25ed574b7f5",
+      "afterSHA256": "659b163c51e1de09f57d510bd1aa36b05a8d767b4d70ae461d6bde0cabaf4bfa"
+    },
+    {
+      "file": "netlify/functions/lib/thumbtack-connection.mjs",
+      "old": ":base.reason};}",
+      "new": ":ready?'Sign in to Thumbtack, approve access, and choose your business. We’ll handle the connection setup.':base.reason};}",
+      "kind": "Presentation-only reason fallback selects customer copy using the existing ready value. No capability, action, storage, API, permission or routing expression changed.",
+      "beforeSHA256": "f97c97eca61a9cebb3ac724e1df61cffe54269e3aefc79af1970eaa79c0e4312",
+      "afterSHA256": "2e863e07520170749d4cff4720cbf9f4327e3e0f7c3b10b965b60a5796672253"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Both before files match independently accepted final26 source",
+      "pass": true
+    },
+    {
+      "name": "Current bytes differ only by the two reviewed presentation expressions",
+      "pass": true
+    },
+    {
+      "name": "Unconfigured owner sees clear saved-request/authorization wording without endpoint, grant or send capability",
+      "pass": true
+    },
+    {
+      "name": "Synthetic configured owner sees sign-in/business-choice wording while unprepared capabilities stay off",
+      "pass": true
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "limits": "This is a customer-reason presentation bridge. The second edit adds a conditional presentation fallback and is not described as a literal-only change. Earlier behavior evidence is retained at its original hashes; no real provider proof or publication follows."
+}

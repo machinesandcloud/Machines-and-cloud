@@ -1,0 +1,251 @@
+{
+  "at": "2026-10-24T11:34:09.769Z",
+  "boundary": "Independent QA of actual handlers and a conditional Netlify Blobs protocol double; all physical networking denied. Does not establish vendor setup, delivery, customer communications or publication.",
+  "before": {
+    "netlify/functions/lib/lead-connections.mjs": "9592c9ef274079c80e888115fe1e2dfefda2e7b03b9da48ed442db9bd20e4c1e",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "3e5076f2833479a6a0343088904bee19430102d0331bc54a90628a1829b3d997",
+    "netlify/functions/client.mjs": "48110009e2b2c48fb04dbe62b92c227cff38c4b157dac64b40a322900efa0410",
+    "netlify/functions/lib/request-followthrough.mjs": "9d1421c6c61b9b80cc72730a4ac4b6a04fe9a37886fa1f14abe7ba8c45070f46",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/scheduler.mjs": "db32f1605676cf5b41005a8d280c641e97f6de25f49d3530d818b94617a4c450",
+    "desk.html": "ddadc0e186b7eea7595f3828bd1ff046c9d034548d57b4c2bc9bb6f2c93aed23",
+    "desk-lead-sources.js": "e54a1c7fa168e0822ed4905b6760c630dac43ddf1eef1019ef7b28ce5f225f3f",
+    "desk-lead-sources.css": "8f1d785e46e87c9b758fe9807b92a580da821e90b5d8f13504aa535cf02565e3",
+    "desk-requests.js": "df391377d3a6748c60b63e4c473bad5b3c30b8f77a7b28e3d5a9e0ecae84aedb",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176"
+  },
+  "checks": [
+    {
+      "name": "All authenticated owners can discover both lead platforms without a fabricated connected state",
+      "pass": true
+    },
+    {
+      "name": "Connection changes require the current owner session and same-site origin",
+      "pass": true
+    },
+    {
+      "name": "Unsupported sources and malformed business identities cannot create configuration",
+      "pass": true
+    },
+    {
+      "name": "Preparing Angi retains setup details and exposes an opaque tenant-bound endpoint without claiming vendor setup",
+      "pass": true
+    },
+    {
+      "name": "Anonymous reads never expose the lead-source secret",
+      "pass": true
+    },
+    {
+      "name": "Documented Angi input becomes one durable source-aware Inbox request with complete useful context",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:98:23\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:96:1"
+    },
+    {
+      "name": "Optional Angi pro ID can be absent, but a provided different pro ID is rejected",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:104:189\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:102:1"
+    },
+    {
+      "name": "Concurrent retries and a changed redelivery preserve the same saved request and original facts",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:107:240\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:106:1"
+    },
+    {
+      "name": "Two leads about the same service request remain two distinct requests",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:111:270\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:110:1"
+    },
+    {
+      "name": "A copied secret cannot authenticate another workspace or an altered generation",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:115:201\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:113:1"
+    },
+    {
+      "name": "Only the documented x-api-key header authenticates managed Angi intake",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:119:203\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:117:1"
+    },
+    {
+      "name": "Malformed JSON, nonobjects and invalid identifiers are rejected before durable receipt",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:124:23\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:121:1"
+    },
+    {
+      "name": "Rotation revokes the old endpoint but does not duplicate a previously saved lead",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:127:107\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:126:1"
+    },
+    {
+      "name": "Disconnect stops new receipts while preserving readable saved requests",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:131:365\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:130:1"
+    },
+    {
+      "name": "Generation conflicts preserve the current configuration instead of rotating twice",
+      "pass": true
+    },
+    {
+      "name": "Closed workspaces reject new source configuration and incoming leads without erasing history",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:137:426\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:136:1"
+    },
+    {
+      "name": "A replacement workspace cannot inherit the former endpoint, configuration or lead history",
+      "pass": true
+    },
+    {
+      "name": "A failed conditional configuration write cannot be reported saved",
+      "pass": true
+    },
+    {
+      "name": "A lost configuration acknowledgment is recovered by reading the one saved configuration",
+      "pass": true
+    },
+    {
+      "name": "A failed lead write is never acknowledged without a retained source receipt",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:150:84\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:148:1"
+    },
+    {
+      "name": "A lost lead-write acknowledgment reconciles to one request on vendor retry",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:153:272\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:152:1"
+    },
+    {
+      "name": "A connection read failure returns unavailable rather than inventing a blank setup",
+      "pass": true
+    },
+    {
+      "name": "Thumbtack preserves an honest partner-access request without a fabricated receiving endpoint",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:160:342\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:158:1"
+    },
+    {
+      "name": "Imported numbers and consent-looking fields never create messaging authority, sends or legacy chase jobs",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:165:24\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:162:1"
+    }
+  ],
+  "failures": [
+    {
+      "name": "Documented Angi input becomes one durable source-aware Inbox request with complete useful context",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:98:23\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:96:1"
+    },
+    {
+      "name": "Optional Angi pro ID can be absent, but a provided different pro ID is rejected",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:104:189\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:102:1"
+    },
+    {
+      "name": "Concurrent retries and a changed redelivery preserve the same saved request and original facts",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:107:240\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:106:1"
+    },
+    {
+      "name": "Two leads about the same service request remain two distinct requests",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:111:270\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:110:1"
+    },
+    {
+      "name": "A copied secret cannot authenticate another workspace or an altered generation",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:115:201\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:113:1"
+    },
+    {
+      "name": "Only the documented x-api-key header authenticates managed Angi intake",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:119:203\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:117:1"
+    },
+    {
+      "name": "Malformed JSON, nonobjects and invalid identifiers are rejected before durable receipt",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:124:23\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:121:1"
+    },
+    {
+      "name": "Rotation revokes the old endpoint but does not duplicate a previously saved lead",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:127:107\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:126:1"
+    },
+    {
+      "name": "Disconnect stops new receipts while preserving readable saved requests",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:131:365\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:130:1"
+    },
+    {
+      "name": "Closed workspaces reject new source configuration and incoming leads without erasing history",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:137:426\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:136:1"
+    },
+    {
+      "name": "A failed lead write is never acknowledged without a retained source receipt",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:150:84\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:148:1"
+    },
+    {
+      "name": "A lost lead-write acknowledgment reconciles to one request on vendor retry",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:153:272\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:152:1"
+    },
+    {
+      "name": "Thumbtack preserves an honest partner-access request without a fabricated receiving endpoint",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:160:342\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:158:1"
+    },
+    {
+      "name": "Imported numbers and consent-looking fields never create messaging authority, sends or legacy chase jobs",
+      "pass": false,
+      "error": "The `getStore` method requires the name of the store as a string or as the `name` property of an options object",
+      "stack": "Error: The `getStore` method requires the name of the store as a string or as the `name` property of an options object\n    at getStore (file:///Users/stevengoumnai/Desktop/Repositories/machines-and-cloud/node_modules/@netlify/blobs/dist/main.js:529:9)\n    at store (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:33:10)\n    at list (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:74:27)\n    at listJSON (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:78:23)\n    at listRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:409:51)\n    at Module.listWorkspaceRecords (file:///private/tmp/mc-lead-sources-726/netlify/functions/lib/store.mjs:339:60)\n    at leads (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:68:47)\n    at file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:165:24\n    at async check (file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:45:62)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-check.mjs:162:1"
+    }
+  ],
+  "physicalNetworkAttempts": 0,
+  "unexpectedFetches": [],
+  "protocolRequests": 2491,
+  "after": {
+    "netlify/functions/lib/lead-connections.mjs": "9592c9ef274079c80e888115fe1e2dfefda2e7b03b9da48ed442db9bd20e4c1e",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "3e5076f2833479a6a0343088904bee19430102d0331bc54a90628a1829b3d997",
+    "netlify/functions/client.mjs": "48110009e2b2c48fb04dbe62b92c227cff38c4b157dac64b40a322900efa0410",
+    "netlify/functions/lib/request-followthrough.mjs": "9d1421c6c61b9b80cc72730a4ac4b6a04fe9a37886fa1f14abe7ba8c45070f46",
+    "netlify/functions/lib/store.mjs": "a1bc6137c7e887888c912acb206221d8e90435cf44a60defb47f0d0a5d8a38af",
+    "netlify/functions/scheduler.mjs": "db32f1605676cf5b41005a8d280c641e97f6de25f49d3530d818b94617a4c450",
+    "desk.html": "ddadc0e186b7eea7595f3828bd1ff046c9d034548d57b4c2bc9bb6f2c93aed23",
+    "desk-lead-sources.js": "e54a1c7fa168e0822ed4905b6760c630dac43ddf1eef1019ef7b28ce5f225f3f",
+    "desk-lead-sources.css": "8f1d785e46e87c9b758fe9807b92a580da821e90b5d8f13504aa535cf02565e3",
+    "desk-requests.js": "df391377d3a6748c60b63e4c473bad5b3c30b8f77a7b28e3d5a9e0ecae84aedb",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176"
+  },
+  "sourceStable": true,
+  "passed": 10,
+  "total": 24,
+  "ok": false
+}

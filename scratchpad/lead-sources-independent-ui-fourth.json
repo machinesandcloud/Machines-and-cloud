@@ -1,0 +1,176 @@
+{
+  "at": "2026-10-24T11:54:20.865Z",
+  "boundary": "Independent actual frontend and actual access/client/Angi handlers, memory storage, browser requests fulfilled in process, provider/model/email/physical network disabled. Not hosted/provider acceptance.",
+  "before": {
+    "desk.html": "d3c9862cea6873c0fcd6c72e2b50c5f648b4c7d65a4f77a40e3a2cf28f96a73e",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "64ff6f60e433a7c178a1e66b85a30ac3a8002e8ef23d90aa93d34651c58da3c3",
+    "desk-lead-sources.js": "2b34bf3893ea802359c926a84c7c003c6134dc26c5f3aa379cf682f131ce071d",
+    "desk-lead-sources.css": "00458eadbbae46187af192141d8c3d85047518f35f36420e4cdf39d60c5231db",
+    "desk-requests.js": "0ce6a32a742c65280cfc006d670bbf8bf243b19703871286be3b5fc9ac70bc90",
+    "netlify/functions/client.mjs": "5226a98ab94e4abbb9e13816b31c5d56b71f230e2b2a54019265c78351a375ea",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/lead-connections.mjs": "bea73bf53a72f13dee20e3075e909df27d76cb6af9a72ef6f369e25ed574b7f5",
+    "netlify/functions/lib/request-followthrough.mjs": "0123c17724dc15d3e55e4ae0c3a0236c5e7f01f9e8c1c59577bb0d06c1365dfc"
+  },
+  "checks": [
+    {
+      "name": "Both platforms are discoverable and their real setup state fits 320px",
+      "pass": true
+    },
+    {
+      "name": "Both platforms are discoverable and their real setup state fits 390px",
+      "pass": true
+    },
+    {
+      "name": "Both platforms are discoverable and their real setup state fits 1440px",
+      "pass": true
+    },
+    {
+      "name": "Ordinary empty and invalid submissions show a field error without saving",
+      "pass": true
+    },
+    {
+      "name": "Prepare confirmation exposes retained provider setup rather than falsely marking Angi connected",
+      "pass": true
+    },
+    {
+      "name": "The visible section refresh provides progress and completion feedback outside the dialog",
+      "pass": true
+    },
+    {
+      "name": "Thumbtack saves its business context and explains the actual authorization step without a fake endpoint",
+      "pass": false,
+      "error": "locator.fill: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#leadSourceBusiness')\u001b[22m\n\u001b[2m    - locator resolved to <input maxlength=\"80\" class=\"form-input\" autocomplete=\"off\" id=\"leadSourceBusiness\" aria-describedby=\"leadSourceBusinessHelp leadSourceBusinessError\"/>\u001b[22m\n\u001b[2m    - fill(\"700007\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    10 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "stack": "locator.fill: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#leadSourceBusiness')\u001b[22m\n\u001b[2m    - locator resolved to <input maxlength=\"80\" class=\"form-input\" autocomplete=\"off\" id=\"leadSourceBusiness\" aria-describedby=\"leadSourceBusinessHelp leadSourceBusinessError\"/>\u001b[22m\n\u001b[2m    - fill(\"700007\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    10 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:82:147\n    at async check (/private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:58:41)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:81:3"
+    },
+    {
+      "name": "A lost setup response requires checking the saved result and recovers the original operation",
+      "pass": false,
+      "error": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#leadSourceCheck')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"leadSourceCheck\" class=\"btn-pill btn-pill-dark btn-sm\">Check saved status</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    9 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n",
+      "stack": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#leadSourceCheck')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"leadSourceCheck\" class=\"btn-pill btn-pill-dark btn-sm\">Check saved status</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    9 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:85:463\n    at async check (/private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:58:41)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:84:3"
+    },
+    {
+      "name": "A refused setup retains the original input and retries the same operation only after status check",
+      "pass": false,
+      "error": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#leadSourceCheck')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"leadSourceCheck\" class=\"btn-pill btn-pill-dark btn-sm\">Check saved status</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    9 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n",
+      "stack": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#leadSourceCheck')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"leadSourceCheck\" class=\"btn-pill btn-pill-dark btn-sm\">Check saved status</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    9 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\n    at /private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:88:360\n    at async check (/private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:58:41)\n    at async file:///private/tmp/mc-lead-sources-726/scripts/lead-sources-independent-ui-check.mjs:87:3"
+    },
+    {
+      "name": "Disconnect requires an intentional choice and keeps the earlier imported Inbox request",
+      "pass": true
+    },
+    {
+      "name": "Imported request details explain the source and original-platform reply without saying it was sent",
+      "pass": true
+    },
+    {
+      "name": "Revoked sessions clear private connection details and expose sign-in recovery",
+      "pass": true
+    },
+    {
+      "name": "Signing out during a pending setup prevents a late response from restoring private details",
+      "pass": true
+    }
+  ],
+  "outsideRequests": [
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2"
+    }
+  ],
+  "pageErrors": [],
+  "physicalNetworkAttempts": 0,
+  "screenshots": [
+    "scratchpad/lead-sources-independent-ui-fourth-connections-320.png",
+    "scratchpad/lead-sources-independent-ui-fourth-angi-form-320.png",
+    "scratchpad/lead-sources-independent-ui-fourth-connections-390.png",
+    "scratchpad/lead-sources-independent-ui-fourth-angi-form-390.png",
+    "scratchpad/lead-sources-independent-ui-fourth-connections-1440.png",
+    "scratchpad/lead-sources-independent-ui-fourth-angi-form-1440.png",
+    "scratchpad/lead-sources-independent-ui-fourth-prepared-390.png",
+    "scratchpad/lead-sources-independent-ui-fourth-prepared-390-viewport.png",
+    "scratchpad/lead-sources-independent-ui-fourth-request-1440.png",
+    "scratchpad/lead-sources-independent-ui-fourth-request-390.png",
+    "scratchpad/lead-sources-independent-ui-fourth-request-390-viewport.png"
+  ],
+  "actionCounts": {
+    "lead_connection": 9,
+    "request_followthrough": 1,
+    "sign_out": 1
+  },
+  "after": {
+    "desk.html": "d3c9862cea6873c0fcd6c72e2b50c5f648b4c7d65a4f77a40e3a2cf28f96a73e",
+    "desk.js": "d195bbd3c4cc6f85f44480763d007e6bdfcbbeb68ab59a2d94fea690d7e70176",
+    "desk.css": "64ff6f60e433a7c178a1e66b85a30ac3a8002e8ef23d90aa93d34651c58da3c3",
+    "desk-lead-sources.js": "2b34bf3893ea802359c926a84c7c003c6134dc26c5f3aa379cf682f131ce071d",
+    "desk-lead-sources.css": "00458eadbbae46187af192141d8c3d85047518f35f36420e4cdf39d60c5231db",
+    "desk-requests.js": "0ce6a32a742c65280cfc006d670bbf8bf243b19703871286be3b5fc9ac70bc90",
+    "netlify/functions/client.mjs": "5226a98ab94e4abbb9e13816b31c5d56b71f230e2b2a54019265c78351a375ea",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "netlify/functions/lib/lead-connections.mjs": "bea73bf53a72f13dee20e3075e909df27d76cb6af9a72ef6f369e25ed574b7f5",
+    "netlify/functions/lib/request-followthrough.mjs": "37057101d20521d902204aef99a6b7f28891583ce995b0da6e4c17483be26c92"
+  },
+  "sourceStable": false,
+  "passed": 10,
+  "total": 13,
+  "ok": false
+}

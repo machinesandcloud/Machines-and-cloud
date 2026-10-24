@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-24T11:34:58.243938+00:00",
+  "reviewer": "lead_independent_qa",
+  "mode": "Independent local artifact and runner-byte review only; no network, browser, credential or provider operation.",
+  "checks": [
+    {
+      "name": "Exact approved runner remains byte matched",
+      "pass": true
+    },
+    {
+      "name": "Exact private ledger and proposal paths agree",
+      "pass": true
+    },
+    {
+      "name": "Only open, two reserved GETs, their observations and closure were recorded",
+      "pass": true
+    },
+    {
+      "name": "Both physical attempts reserved before observations",
+      "pass": true
+    },
+    {
+      "name": "Both exact observations returned 200",
+      "pass": true
+    },
+    {
+      "name": "Exclusive ledger closed after two attempts",
+      "pass": true
+    },
+    {
+      "name": "The returned policy matches the one immutable approved record",
+      "pass": true
+    },
+    {
+      "name": "Sanitized retained used counters match the reviewed result",
+      "pass": true
+    },
+    {
+      "name": "No additional effects or closed allowance reuse are claimed",
+      "pass": true
+    },
+    {
+      "name": "Approval packet digest is consistent without reading any credentials",
+      "pass": true
+    }
+  ],
+  "ok": true,
+  "inputs": {
+    "/tmp/mc-calendar-budget-readonly-20261024-v1/attempts.jsonl": "478bb5345bec06384b64e13e563cac034312c871354e704d2d583c61f8527490",
+    "/tmp/mc-calendar-transport-repair-2d/scratchpad/calendar-budget-readonly-live-result-20261024.json": "23e2352614e3f53debd094c6dc4e88d9fbed4c87fd828440af5d90037aa0a770",
+    "/tmp/mc-calendar-transport-repair-2d/product/CALENDAR-BUDGET-READONLY-DIAGNOSIS-2026-10-24.json": "4769fea15f70731ba4cd0a197ff51c0b56d18a5e7ed0066644027da9f9ae08af",
+    "/tmp/mc-calendar-transport-repair-2d/scripts/calendar-budget-readonly-diagnostic.mjs": "a0dabff380a78905b76d26c52258cea35360a22a22e9a99e3e030acf2581ed1e"
+  },
+  "observedResult": "The fresh exact two-GET read returned the expected retained policy and counters and closed.",
+  "limits": "This establishes this read transport result only. It does not prove the historical failed request status or root cause, a Google permission/token/event, scheduled provider delivery, or any full-platform readiness. All original Calendar proof allowances stay closed."
+}

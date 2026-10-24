@@ -1,0 +1,128 @@
+{
+  "checkedAt": "2026-10-24T11:42:38.028Z",
+  "stage": "author_offline_transport_only",
+  "passed": true,
+  "groups": [
+    {
+      "name": "Import is inert and authorization URL has verified endpoints/audience/explicit scopes",
+      "passed": true
+    },
+    {
+      "name": "Missing or guessed wildcard/demand scopes and insecure callback fail before HTTP",
+      "passed": true
+    },
+    {
+      "name": "Code exchange uses actual OAuth library and one form-encoded client-secret-post request",
+      "passed": true
+    },
+    {
+      "name": "State mismatch and missing authentication method fail before token HTTP",
+      "passed": true
+    },
+    {
+      "name": "Client-secret-basic authentication and refresh token rotation use actual library",
+      "passed": true
+    },
+    {
+      "name": "Missing rotating refresh receipt and non-Bearer token remain unknown",
+      "passed": true
+    },
+    {
+      "name": "Rotating refresh transport loss and invalid-grant never retry or leak provider error text",
+      "passed": true
+    },
+    {
+      "name": "Businesses endpoint projects documented data and never implies list completeness",
+      "passed": true
+    },
+    {
+      "name": "Provider IDs, bearer whitespace and missing credentials fail before HTTP",
+      "passed": true
+    },
+    {
+      "name": "Negotiation projection retains business/customer/job context and rejects cross-ID receipts",
+      "passed": true
+    },
+    {
+      "name": "Business negotiation list refuses cross-business records",
+      "passed": true
+    },
+    {
+      "name": "Message history retains exact long text and marks unsupported attachment structure",
+      "passed": true
+    },
+    {
+      "name": "Native reply POST is exactly text-only and requires matching provider message receipt",
+      "passed": true
+    },
+    {
+      "name": "Empty, control-containing and over-bound replies fail before HTTP",
+      "passed": true
+    },
+    {
+      "name": "A 2xx without matching native receipt stays unknown without repeat",
+      "passed": true
+    },
+    {
+      "name": "Native transport errors, server errors, conflict and malformed JSON stay unknown",
+      "passed": true
+    },
+    {
+      "name": "Explicit authorization/rate-limit rejections never trigger automatic sends",
+      "passed": true
+    },
+    {
+      "name": "Redirect response and declared/streamed overflow are refused without follow or retry",
+      "passed": true
+    },
+    {
+      "name": "Wrong media type, primitive JSON and excess rows fail closed",
+      "passed": true
+    },
+    {
+      "name": "Business webhook creation is disabled and includes verified event names and Basic credentials",
+      "passed": true
+    },
+    {
+      "name": "Webhook callbacks reject foreign hosts, credentials, fragments, duplicate and missing query bindings",
+      "passed": true
+    },
+    {
+      "name": "Created webhook mismatches and missing receipt stay unknown",
+      "passed": true
+    },
+    {
+      "name": "Webhook listing retains unrelated events without authorizing them or leaking auth credentials",
+      "passed": true
+    },
+    {
+      "name": "Known webhook GET checks exact business and provider ID rather than claiming absence from incomplete list",
+      "passed": true
+    },
+    {
+      "name": "Enable and disable use only PUT enabled boolean and retain explicit receipt identity",
+      "passed": true
+    },
+    {
+      "name": "Slow response body is bounded by the same five-second deadline and never repeats POST",
+      "passed": true
+    }
+  ],
+  "totals": {
+    "passed": 26,
+    "failed": 0,
+    "interceptedRequests": 52,
+    "liveRequests": 0
+  },
+  "source": {
+    "path": "netlify/functions/lib/thumbtack-api.mjs",
+    "sha256": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2"
+  },
+  "limits": [
+    "Actual Thumbtack account/permission/provider behavior is not tested.",
+    "No production mutation or publication.",
+    "Provisioned scopes and token authentication method remain explicit prerequisites.",
+    "Native POST success requires a matching message receipt; absent receipt stays unknown.",
+    "Indexed primary docs are protocol evidence, not an observed provider response."
+  ]
+}

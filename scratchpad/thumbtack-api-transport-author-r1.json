@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-10-24T11:40:45.012Z",
+  "stage": "author_offline_transport_only",
+  "passed": false,
+  "groups": [
+    {
+      "name": "Import is inert and authorization URL has verified endpoints/audience/explicit scopes",
+      "passed": true
+    },
+    {
+      "name": "Missing or guessed wildcard/demand scopes and insecure callback fail before HTTP",
+      "passed": true
+    },
+    {
+      "name": "Code exchange uses actual OAuth library and one form-encoded client-secret-post request",
+      "passed": true
+    },
+    {
+      "name": "State mismatch and missing authentication method fail before token HTTP",
+      "passed": true
+    },
+    {
+      "name": "Client-secret-basic authentication and refresh token rotation use actual library",
+      "passed": true
+    },
+    {
+      "name": "Missing rotating refresh receipt and non-Bearer token remain unknown",
+      "passed": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'provider_oauth_error'\n- 'provider_invalid_response'\n            ^\n"
+    }
+  ],
+  "totals": {
+    "passed": 5,
+    "failed": 1,
+    "interceptedRequests": 4,
+    "liveRequests": 0
+  },
+  "source": {
+    "path": "netlify/functions/lib/thumbtack-api.mjs",
+    "sha256": "444a464f49a4291a0323bb9e1be560c5ea37d8a7c1876a3e3320f5e478168de2"
+  },
+  "limits": [
+    "Actual Thumbtack account/permission/provider behavior is not tested.",
+    "No production mutation or publication.",
+    "Provisioned scopes and token authentication method remain explicit prerequisites.",
+    "Native POST success requires a matching message receipt; absent receipt stays unknown.",
+    "Indexed primary docs are protocol evidence, not an observed provider response."
+  ]
+}

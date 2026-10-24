@@ -1,0 +1,51 @@
+{
+  "role": "product_owner_v2 and UI/UX",
+  "stage": "Provisional actual customer-job review; returned for focused corrections",
+  "evidence": "scratchpad/lead-sources-po-observation-r3.json",
+  "observedJobs": [
+    "Angi configuration to duplicate-safe Inbox inquiry, original job context, saved draft and original-platform handoff at 390 and 1440 pixels.",
+    "Thumbtack OAuth-first setup through a synthetic grant and the actual callback, friendly owned-business choice, verified mock webhook, duplicate-safe Inbox inquiry, message history and explicit native reply at 390 and 1440 pixels.",
+    "A synthetic native send with a lost acknowledgment remains unknown, with sending blocked and no repeated POST on status check."
+  ],
+  "harnessDisposition": {
+    "customerJobsPassed": 4,
+    "customerJobsTotal": 4,
+    "physicalNetworkAttempts": 0,
+    "overallPass": false,
+    "reason": "Two errors originated in the PO harness's unguarded sessionStorage initialization on a transient chrome-error document. The subsequent harness scopes injection to the app origin. The original result is preserved; no product error is dismissed without evidence.",
+    "sourceLimit": "The r3 source map includes the principal UI and Angi/request modules but not all native modules. Final acceptance requires the extended native source map and stable before/after values."
+  },
+  "returned": [
+    {
+      "id": "native-instructions",
+      "finding": "After successful synthetic OAuth, the owned-business picker still shows old instructions to save a technical business ID and wait for a tested connection.",
+      "requiredOutcome": "Explain the actual current authorization/business-selection/setup state without contradictory instructions.",
+      "image": "scratchpad/lead-sources-po-observation-r3-native-business-390-viewport.png"
+    },
+    {
+      "id": "outgoing-body",
+      "finding": "After a native send, the composer is cleared and an accepted/unknown status appears, but the exact submitted reply is absent from the visible history.",
+      "requiredOutcome": "Show the retained exact reply and its acceptance/uncertainty separately from provider history, without inventing a customer read receipt.",
+      "image": "scratchpad/lead-sources-po-observation-r3-native-reply-result-1440-viewport.png"
+    },
+    {
+      "id": "callback-recovery",
+      "finding": "The callback error's Return to your workspace link omits the required workspace query, causing an unnecessary recovery/sign-in screen even for a retained session.",
+      "requiredOutcome": "Return through a validated workspace target or the existing session resolver, then verify the actual ordinary error recovery."
+    },
+    {
+      "id": "native-progress-badge",
+      "finding": "Thumbtack cards derive their badge from the base intake state and can say Waiting for first lead while a business choice or webhook configuration is incomplete.",
+      "requiredOutcome": "The badge follows the actual native lifecycle and identifies the owner's next action accurately."
+    }
+  ],
+  "earlierReturnsObservedCorrected": [
+    "Lead sources moved before the long core connection guides.",
+    "Initial Angi setup instructions stay hidden until details exist.",
+    "Successful preparation preserves the modal heading and Close control in the focused mobile view.",
+    "The connection key label no longer repeats key twice.",
+    "Inbox records identify Angi/Thumbtack and their external lead reference rather than displaying only an internal digest.",
+    "Thumbtack no longer requires the owner to type an unexplained technical business ID before authorization."
+  ],
+  "acceptanceBoundary": "No real vendor account, granted scopes, webhook or message delivery was exercised. Owner-reviewed native messaging is not autonomous AI conversation acceptance. No publication, email, model call or further Calendar request was performed."
+}
