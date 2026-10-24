@@ -40,9 +40,15 @@
       <div class="workspace-surface">
         <section id="access-gate" class="access-card" aria-labelledby="access-title">
           <div class="access-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <p class="step-kicker">YOUR PRIVATE FRONT DESK</p><h1 id="access-title">Let’s get started.</h1><p id="access-intro">We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.</p>
+          <p class="step-kicker">YOUR PRIVATE FRONT DESK</p><h1 id="access-title" tabindex="-1">Let’s get started.</h1><p id="access-intro">We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.</p>
           <form id="access-form"><label class="form-label" for="access-email">Email address</label><input class="form-input" id="access-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Email me a sign-in link</button></form>
-          <button class="btn-pill btn-pill-blue" id="access-verify" type="button" aria-describedby="access-status" hidden>Try opening my account again</button><p id="access-status" role="status" aria-live="polite"></p>
+          <div id="access-confirmation" hidden>
+            <p class="access-recipient" id="access-recipient"></p>
+            <p class="access-delivery-help" id="access-delivery-help"></p>
+            <div class="access-email-actions"><button class="btn-pill access-resend" id="access-resend" type="button">Resend sign-in link</button><button class="access-change-email" id="access-change-email" type="button">Use a different email</button></div>
+            <p class="access-inbox-tip">Can’t find it? Give it a minute, then check your spam folder.</p>
+          </div>
+          <button class="btn-pill btn-pill-blue" id="access-verify" type="button" aria-describedby="access-status" hidden>Try opening my account again</button><p id="access-status" role="status" aria-live="polite" tabindex="-1"></p>
           <p class="access-footnote">Your setup stays with your account. Leave and pick up where you left off.</p>
         </section>
         <form id="ob" class="onboard-form" novalidate hidden>

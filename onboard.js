@@ -54,6 +54,9 @@
   form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { selectPlan(r.value); }); });
   var accessGeneration = 0, session = null, revision = 0, saving = null, saveAgain = false, dirty = false, restoring = false, saveTimer = null;
   var gate = document.getElementById('access-gate'), gateStatus = document.getElementById('access-status'), accessForm = document.getElementById('access-form');
+  var accessEmail = document.getElementById('access-email'), accessSend = document.getElementById('access-send'), accessConfirmation = document.getElementById('access-confirmation');
+  var accessResend = document.getElementById('access-resend'), accessChangeEmail = document.getElementById('access-change-email');
+  var linkRequestPending = null, requestedEmail = '', emailState = '', resendNotBefore = 0, resendTimer = null;
   var draftStatus = document.getElementById('draft-status'), verifiedToken = new URLSearchParams(location.hash.slice(1)).get('verify');
   var storageKey = 'mc-onboarding-session-v1';
   var intakeStorageKey = 'mc-signup-intake-v1', intakeToken = new URLSearchParams(location.hash.slice(1)).get('intake');
@@ -73,6 +76,7 @@
     if (intakeSaved && typeof intakeSaved.email === 'string') document.getElementById('access-email').value = intakeSaved.email;
     else document.getElementById('access-intro').textContent = 'Enter the same email you used a moment ago. We’ll send a secure link to continue with your saved details.';
   }
+  var initialAccessTitle = document.getElementById('access-title').textContent, initialAccessIntro = document.getElementById('access-intro').textContent;
   if (location.hash || ['email', 'name', 'phone', 'business'].some(function (key) { return q.has(key); })) {
     history.replaceState(null, '', location.pathname + (PLAN_IDS.indexOf(q.get('plan')) >= 0 ? '?plan=' + encodeURIComponent(q.get('plan')) : ''));
   }
@@ -246,21 +250,78 @@
     document.body.dataset.setupState = 'questions';
     draftStatus.textContent = revision ? 'Your saved answers have been restored.' : 'Your answers will save automatically.'; show(state.draft.step || 0, false);
   }
-  accessForm.addEventListener('submit', async function (event) {
-    var generation = accessGeneration;
-    event.preventDefault(); var button = document.getElementById('access-send'); if (!accessForm.reportValidity()) return;
-    button.disabled = true; gateStatus.textContent = 'Preparing your sign-in email…';
+  function accessMessage(message, isError) {
+    gateStatus.classList.remove('sr-only'); gateStatus.textContent = message || ''; if (isError) gateStatus.setAttribute('data-error', 'true'); else gateStatus.removeAttribute('data-error');
+  }
+  function updateEmailActions() {
+    var seconds = Math.max(0, Math.ceil((resendNotBefore - Date.now()) / 1000));
+    accessResend.disabled = !!linkRequestPending || seconds > 0;
+    accessResend.textContent = linkRequestPending ? 'Sending link…' : seconds ? 'Resend in ' + seconds + 's' : 'Resend sign-in link';
+    accessChangeEmail.disabled = !!linkRequestPending;
+    if (!seconds && resendTimer) { clearInterval(resendTimer); resendTimer = null; }
+  }
+  function startResendWait() {
+    clearInterval(resendTimer); resendNotBefore = Date.now() + 30000;
+    resendTimer = setInterval(updateEmailActions, 1000); updateEmailActions();
+  }
+  function resetEmailConfirmation(restoreCopy) {
+    clearInterval(resendTimer); resendTimer = null; resendNotBefore = 0; linkRequestPending = null; requestedEmail = ''; emailState = '';
+    gate.removeAttribute('data-email-state'); gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy');
+    accessConfirmation.hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Email me a sign-in link';
+    document.getElementById('access-recipient').textContent = ''; gateStatus.removeAttribute('data-error'); gateStatus.classList.remove('sr-only'); updateEmailActions();
+    if (restoreCopy) { document.getElementById('access-title').textContent = initialAccessTitle; document.getElementById('access-intro').textContent = initialAccessIntro; }
+  }
+  function showEmailConfirmation(email, state, message) {
+    requestedEmail = email; emailState = state; gate.dataset.emailState = state; accessForm.hidden = true; accessConfirmation.hidden = false; verifyButton.hidden = true;
+    document.getElementById('access-recipient').textContent = email;
+    document.getElementById('access-title').textContent = state === 'email' ? 'Check your email' : state === 'test_outbox' ? 'Your test link is ready' : 'Check your inbox first';
+    document.getElementById('access-intro').textContent = state === 'email' ? 'Your secure sign-in link is on its way to' : state === 'test_outbox' ? 'A local test link is ready for' : 'We couldn’t confirm whether a sign-in email was sent to';
+    document.getElementById('access-delivery-help').textContent = state === 'email' ? 'Open the email from Machines & Cloud to continue. The link expires in 20 minutes.' : state === 'test_outbox' ? 'This preview uses a local test inbox. No email was sent.' : 'Check your inbox before requesting another link. If an email arrives, you can use it to continue.';
+    accessMessage(message, state === 'unknown'); gateStatus.classList.toggle('sr-only', state !== 'unknown'); startResendWait();
+    document.getElementById('access-title').focus();
+  }
+  async function sendAccessLink(email, isResend) {
+    if (linkRequestPending || gate.hidden || (isResend ? accessConfirmation.hidden || Date.now() < resendNotBefore : accessForm.hidden)) return;
+    var attempt = { generation: accessGeneration, email: email }; linkRequestPending = attempt;
+    accessEmail.disabled = true; accessSend.disabled = true; accessSend.textContent = 'Sending link…';
+    gate.setAttribute('aria-busy', 'true'); accessForm.setAttribute('aria-busy', 'true'); updateEmailActions(); accessMessage('Preparing your sign-in email…');
     try {
-      var body = { action: 'request_link', email: document.getElementById('access-email').value, plan: form.elements.plan.value };
+      var body = { action: 'request_link', email: email, plan: form.elements.plan.value };
       if (intakeToken) body.intake = intakeToken;
       var result = await request('/api/access', 'POST', body);
-      if (generation === accessGeneration) gateStatus.textContent = result.message;
+      if (attempt.generation !== accessGeneration || linkRequestPending !== attempt) return;
+      if (!result || result.ok !== true || !['email', 'test_outbox'].includes(result.delivery)) throw new Error('We couldn’t confirm whether your sign-in email was sent.');
+      showEmailConfirmation(email, result.delivery, result.message || (result.delivery === 'test_outbox' ? 'No email was sent.' : 'Your sign-in email is on its way.'));
+    } catch (error) {
+      if (attempt.generation !== accessGeneration || linkRequestPending !== attempt) return;
+      if (!error.status) {
+        var uncertain = 'We couldn’t confirm whether ' + (isResend ? 'another email was' : 'the email was') + ' sent. Check your inbox before requesting another link.';
+        if (emailState === 'email' || emailState === 'test_outbox') { accessMessage(uncertain, true); startResendWait(); gateStatus.focus(); }
+        else showEmailConfirmation(email, 'unknown', uncertain);
+      } else {
+        accessMessage(error.message, true);
+        if (isResend) { startResendWait(); gateStatus.focus(); }
+        else { accessEmail.setAttribute('aria-describedby', 'access-status'); gateStatus.focus(); }
+      }
+    } finally {
+      if (attempt.generation === accessGeneration && linkRequestPending === attempt) {
+        linkRequestPending = null; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Email me a sign-in link';
+        gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy'); updateEmailActions();
+      }
     }
-    catch (error) { if (generation === accessGeneration) gateStatus.textContent = error.name === 'AbortError' ? 'That request timed out. You can request another link.' : error.message; }
-    finally { button.disabled = false; }
+  }
+  accessForm.addEventListener('submit', function (event) {
+    event.preventDefault(); if (linkRequestPending || gate.hidden || accessForm.hidden || !accessForm.reportValidity()) return;
+    sendAccessLink(accessEmail.value.trim(), false);
+  });
+  accessResend.addEventListener('click', function () { if (requestedEmail) sendAccessLink(requestedEmail, true); });
+  accessChangeEmail.addEventListener('click', function () {
+    if (linkRequestPending) return;
+    resetEmailConfirmation(true); verifyButton.hidden = true; accessMessage(''); accessEmail.removeAttribute('aria-describedby'); accessEmail.focus(); accessEmail.select();
   });
   var verifyButton = document.getElementById('access-verify'), verificationAttempt = null;
   function signInFailure(error) {
+    resetEmailConfirmation(false);
     gateOnly(error.name === 'AbortError' ? 'Opening your account timed out. Please try again.' : error.message);
     document.getElementById('access-title').textContent = session ? 'Let’s finish signing you in' : 'Sign in to your workspace';
     document.getElementById('access-intro').textContent = session ? 'Your link was verified. Try opening your account again without requesting another email.' : 'Request a fresh sign-in link below. Your saved business details are kept.';
@@ -302,7 +363,7 @@
     try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
     if (generation !== accessGeneration) return;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); form.reset(); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
   function setErrorSummary(message) {
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
@@ -417,6 +478,7 @@
   function showVerification(token) {
     if (verificationAttempt && verificationAttempt.token === token) return;
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
+    resetEmailConfirmation(false);
     saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); updateTrade(false); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
     updatePhoneSetup();
     setSession(null); gateOnly('Checking your secure sign-in link…');

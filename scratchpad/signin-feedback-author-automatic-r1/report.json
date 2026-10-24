@@ -1,0 +1,821 @@
+{
+  "at": "2026-10-24T11:04:21.384Z",
+  "mode": "intercepted automatic sign-in regression",
+  "boundary": "All API responses and static assets fulfilled from local files. Workspace destination is a stub HTML marker. External requests aborted. No production, provider, email or model requests.",
+  "sources": {
+    "scripts/automatic-signin-ui-check.mjs": "85c5825c370d3676da977c218515650abec67aeea2a874726f121f2aac3210b9",
+    "onboard.js": "3dcfc7cb53fec083bc821921786db0e5e7c89b09544913208e4f9a788ce93207",
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "checks": [
+    {
+      "name": "1440: exchanges automatically with no user action",
+      "pass": true
+    },
+    {
+      "name": "1440: loading does not show misleading email request or confirmation",
+      "pass": true
+    },
+    {
+      "name": "1440: proof scrubbed before first fetch",
+      "pass": true,
+      "detail": [
+        {
+          "url": "/api/access",
+          "hash": "",
+          "search": "",
+          "auth": null
+        }
+      ]
+    },
+    {
+      "name": "1440: new proof is never sent using old owner authorization",
+      "pass": true
+    },
+    {
+      "name": "1440: returning owner navigates directly to existing workspace",
+      "pass": true
+    },
+    {
+      "name": "1440: exactly one POST exchange then one authenticated state GET",
+      "pass": true,
+      "detail": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "returning-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-returning-proof"
+        }
+      ]
+    },
+    {
+      "name": "1440: fresh session survives destination navigation",
+      "pass": true
+    },
+    {
+      "name": "390: exchanges automatically with no user action",
+      "pass": true
+    },
+    {
+      "name": "390: loading does not show misleading email request or confirmation",
+      "pass": true
+    },
+    {
+      "name": "390: proof scrubbed before first fetch",
+      "pass": true,
+      "detail": [
+        {
+          "url": "/api/access",
+          "hash": "",
+          "search": "",
+          "auth": null
+        }
+      ]
+    },
+    {
+      "name": "390: new proof is never sent using old owner authorization",
+      "pass": true
+    },
+    {
+      "name": "390: returning owner navigates directly to existing workspace",
+      "pass": true
+    },
+    {
+      "name": "390: exactly one POST exchange then one authenticated state GET",
+      "pass": true,
+      "detail": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "returning-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-returning-proof"
+        }
+      ]
+    },
+    {
+      "name": "390: fresh session survives destination navigation",
+      "pass": true
+    },
+    {
+      "name": "new owner: valid proof opens saved onboarding step automatically",
+      "pass": true
+    },
+    {
+      "name": "new owner: preserves account identity and saved answers",
+      "pass": true
+    },
+    {
+      "name": "new owner: no email request or unrelated write",
+      "pass": true
+    },
+    {
+      "name": "same tab: hash-only link automatically authenticates and routes to new owner",
+      "pass": true
+    },
+    {
+      "name": "same tab: exchange drops old identity and new GET uses new session",
+      "pass": true,
+      "detail": [
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer old-session"
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "same-tab-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-same-tab-proof"
+        }
+      ]
+    },
+    {
+      "name": "startup race: first old owner state read is genuinely pending",
+      "pass": true
+    },
+    {
+      "name": "startup race: newer proof opens correct saved wizard before old failure",
+      "pass": true
+    },
+    {
+      "name": "startup race: late old GET503 cannot hide new wizard",
+      "pass": true
+    },
+    {
+      "name": "startup race: late old GET503 cannot replace or clear new session",
+      "pass": true
+    },
+    {
+      "name": "intake503: presents service error without claiming wrong account",
+      "pass": true
+    },
+    {
+      "name": "intake503: keeps verified session and explicit retry without automatic email",
+      "pass": true
+    },
+    {
+      "name": "intake503: retries same handoff using saved session without consuming another proof",
+      "pass": true
+    },
+    {
+      "name": "intake503: recovered saved answers and saved step are usable",
+      "pass": true
+    },
+    {
+      "name": "duplicates: same pending proof is exchanged once",
+      "pass": true,
+      "detail": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-a"
+          },
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-b"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-proof-b"
+        }
+      ]
+    },
+    {
+      "name": "races: older exchange response cannot sign in or read state",
+      "pass": true,
+      "detail": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-a"
+          },
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-b"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-proof-b"
+        }
+      ]
+    },
+    {
+      "name": "races: only newest proof session is saved and used",
+      "pass": true
+    },
+    {
+      "name": "400: displays failure and offers explicit replacement link request",
+      "pass": true
+    },
+    {
+      "name": "400: no automatic email and no retry loop",
+      "pass": true
+    },
+    {
+      "name": "400: no stale session or proof remains",
+      "pass": true
+    },
+    {
+      "name": "410: displays failure and offers explicit replacement link request",
+      "pass": true
+    },
+    {
+      "name": "410: no automatic email and no retry loop",
+      "pass": true
+    },
+    {
+      "name": "410: no stale session or proof remains",
+      "pass": true
+    },
+    {
+      "name": "storage blocked: no redirect loop or repeated exchange",
+      "pass": true
+    },
+    {
+      "name": "storage blocked: destination is not opened without transferable session",
+      "pass": true
+    },
+    {
+      "name": "storage blocked: explains recovery instead of blank or misleading email",
+      "pass": true
+    },
+    {
+      "name": "state503: keeps successfully exchanged session",
+      "pass": true
+    },
+    {
+      "name": "state503: does not request another email",
+      "pass": true
+    },
+    {
+      "name": "state503: offers an explicit workspace retry",
+      "pass": true
+    },
+    {
+      "name": "state503: retry uses saved session without reconsuming proof",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination refused: https://attacker.invalid/desk.html?c=bayou-service",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination gives actionable error: https://attacker.invalid/desk.html?c=bayou-service",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination refused: /admin.html",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination gives actionable error: /admin.html",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination refused: /desk.html?c=another-account",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination gives actionable error: /desk.html?c=another-account",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination refused: javascript:alert(1)",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination gives actionable error: javascript:alert(1)",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination refused: http://user:password@127.0.0.1:8963/desk.html?c=bayou-service",
+      "pass": true
+    },
+    {
+      "name": "unsafe destination gives actionable error: http://user:password@127.0.0.1:8963/desk.html?c=bayou-service",
+      "pass": true
+    },
+    {
+      "name": "tested source remains unchanged throughout independent browser run",
+      "pass": true
+    },
+    {
+      "name": "No browser page errors",
+      "pass": true
+    }
+  ],
+  "externalBlocked": [
+    {
+      "case": "automatic-returning-1440",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "automatic-returning-390",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "new-owner-saved-step",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "same-tab-fragment",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "late-old-startup-get-failure",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "transient-intake-attach-retry",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "concurrent-proofs",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "invalid-proof-400",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "invalid-proof-410",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "storage-blocked",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "state-service-retry",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "unsafe-destination-https://attacker.invalid/desk.html?c=bayou-service",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "unsafe-destination-/admin.html",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "unsafe-destination-/desk.html?c=another-account",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "unsafe-destination-javascript:alert(1)",
+      "origin": "https://fonts.googleapis.com"
+    },
+    {
+      "case": "unsafe-destination-http://user:password@127.0.0.1:8963/desk.html?c=bayou-service",
+      "origin": "https://fonts.googleapis.com"
+    }
+  ],
+  "pageErrors": [],
+  "cases": [
+    {
+      "name": "automatic-returning-1440",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "returning-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-returning-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/desk.html?c=bayou-service"
+    },
+    {
+      "name": "automatic-returning-390",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "returning-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-returning-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/desk.html?c=bayou-service"
+    },
+    {
+      "name": "new-owner-saved-step",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "new-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-new-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "same-tab-fragment",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer old-session"
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "same-tab-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-same-tab-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/desk.html?c=new-owner"
+    },
+    {
+      "name": "late-old-startup-get-failure",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer old-startup-session"
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "new-startup-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-new-startup-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "transient-intake-attach-retry",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer intake-session"
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "attach_intake",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "auth": "Bearer intake-session"
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer intake-session"
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "attach_intake",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "auth": "Bearer intake-session"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "concurrent-proofs",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-a"
+          },
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-b"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-proof-b"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/desk.html?c=bayou-service"
+    },
+    {
+      "name": "invalid-proof-400",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "bad"
+          },
+          "auth": null
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "invalid-proof-410",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "bad"
+          },
+          "auth": null
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "storage-blocked",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "storage-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-storage-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "state-service-retry",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "state-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-state-proof"
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-state-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/desk.html?c=bayou-service"
+    },
+    {
+      "name": "unsafe-destination-https://attacker.invalid/desk.html?c=bayou-service",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "unsafe-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-unsafe-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "unsafe-destination-/admin.html",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "unsafe-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-unsafe-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "unsafe-destination-/desk.html?c=another-account",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "unsafe-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-unsafe-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "unsafe-destination-javascript:alert(1)",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "unsafe-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-unsafe-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    },
+    {
+      "name": "unsafe-destination-http://user:password@127.0.0.1:8963/desk.html?c=bayou-service",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "unsafe-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-unsafe-proof"
+        }
+      ],
+      "pageErrors": [],
+      "url": "http://127.0.0.1:8963/onboard.html"
+    }
+  ],
+  "sourcesAfter": {
+    "scripts/automatic-signin-ui-check.mjs": "85c5825c370d3676da977c218515650abec67aeea2a874726f121f2aac3210b9",
+    "onboard.js": "3dcfc7cb53fec083bc821921786db0e5e7c89b09544913208e4f9a788ce93207",
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.css": "9b698d13bd867998c590131473cdad7226e52c2c7e197841ba070eaa2f6f1167",
+    "product-ui.css": "df56b2568e810b832843020197e4f23a03a31a9371b5481564adacc404aeaff3",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a"
+  },
+  "pass": true,
+  "checkCount": 55
+}

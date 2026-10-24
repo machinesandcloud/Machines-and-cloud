@@ -3,6 +3,11 @@ import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
 import { createHash } from 'node:crypto';
 const root = resolve('.'), base = 'http://127.0.0.1:8897';
+const outputIndex = process.argv.indexOf('--output'), output = outputIndex < 0 ? 'scratchpad/signup-intake-ui.json' : process.argv[outputIndex + 1];
+if (!output?.startsWith('scratchpad/') || !output.endsWith('.json')) throw new Error('QA output must be a JSON file under scratchpad/');
+if (outputIndex >= 0 && existsSync(output)) throw new Error('Refusing to overwrite retained QA evidence');
+const imagePrefix = outputIndex < 0 ? 'scratchpad/signup' : output.slice(0, -5);
+async function screenshot(page, suffix) { const path = imagePrefix + '-' + suffix + '.png'; if (outputIndex >= 0 && existsSync(path)) throw new Error('Refusing to overwrite retained screenshot'); await page.screenshot({ path }); }
 const sources = ['index.html', 'site-refresh.css', 'signup-intake.js', 'onboard.html', 'onboard.js'];
 const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 const report = { at: new Date().toISOString(), mode: 'all static files and API responses fulfilled locally; no actual email/model/provider', sourceBefore: hashes(), checks: [], externalBlocked: [], pageErrors: [] };
@@ -30,7 +35,7 @@ async function fixture(name, width = 390, options = {}) {
         return respond(202, { ok: true, handoff: state.invalidHandoff ? 'unsafe' : handoff, expiresAt: new Date(Date.now() + 3600000).toISOString(), next: '/onboard.html#intake=' + handoff });
       }
       if (url.pathname === '/api/access') {
-        if (body?.action === 'request_link') return respond(200, { message: 'If this email can continue, a sign-in link has been prepared.' });
+        if (body?.action === 'request_link') return respond(202, { ok: true, delivery: 'email', message: 'Check your inbox for a link to continue. It expires in 20 minutes.' });
         if (body?.action === 'exchange') return respond(200, { session: 'fixture-session' });
         if (body?.action === 'sign_out') return respond(200, { ok: true });
         if (body?.action === 'attach_intake' && state.attachFails) return respond(409, { error: 'intake_unavailable', message: 'These saved details could not be added to this account.' });
@@ -60,12 +65,12 @@ try {
     await s.fill();
     const geometry = await page.locator('#signup-intake').evaluate(form => ({ left: form.getBoundingClientRect().left, right: form.getBoundingClientRect().right, viewport: innerWidth, document: document.documentElement.scrollWidth }));
     check(`${width}: form fits horizontally`, geometry.left >= 0 && geometry.right <= width + 1 && geometry.document <= width + 1, geometry);
-    await page.locator('#signup-intake').screenshot({ path: `scratchpad/signup-intake-${width}.png` });
+    await screenshot(page.locator('#signup-intake'), `intake-${width}`);
     await page.locator('#intake-submit').click(); await page.waitForURL('**/onboard.html');
     check(`${width}: saves once and handoff URL is scrubbed without personal information`, s.requests.filter(r => r.path === '/api/intake').length === 1 && new URL(page.url()).search === '' && new URL(page.url()).hash === '' && !page.url().includes('Avery'));
     check(`${width}: next page carries email but sends no automatic sign-in email`, await page.locator('#access-email').inputValue() === email && !s.requests.some(r => r.path === '/api/access'));
     await page.locator('#access-send').click();
-    await page.waitForFunction(() => document.querySelector('#access-status').textContent.includes('prepared'));
+    await page.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
     check(`${width}: explicit sign-in request carries opaque handoff and same email`, s.requests.at(-1).body.action === 'request_link' && s.requests.at(-1).body.email === email && s.requests.at(-1).body.intake === handoff);
     await page.goto(base + '/onboard.html#verify=fixture-token'); await page.locator('#ob').waitFor({ state: 'visible' });
     check(`${width}: email-link proof exchanges automatically once without another button`, s.requests.filter(r => r.body?.action === 'exchange').length === 1 && !await page.locator('#access-verify').isVisible() && new URL(page.url()).hash === '');
@@ -74,14 +79,14 @@ try {
     await page.locator('#phone').fill('7135550100'); await page.locator('[name="desiredChannels"][value="voice"]').check(); await page.locator('#businessNumber').fill('7135550120'); await page.locator('#next').click(); await page.waitForFunction(() => document.querySelector('fieldset[data-step="2"]').classList.contains('on'));
     const save = s.requests.filter(r => r.method === 'PUT').at(-1);
     check(`${width}: one setup saves desired connections without confirming untouched marketing`, save.body.fields.desiredChannels.includes('web') && save.body.fields.desiredChannels.includes('voice') && !Object.hasOwn(save.body, 'marketingConsent'));
-    await page.screenshot({ path: `scratchpad/signup-onboard-${width}.png` });
+    await screenshot(page, `onboard-${width}`);
     await s.context.close();
   }
   {
     for (const plan of ['starter', 'growth']) {
       const s = await fixture('plan-intent-' + plan), p = s.page; await p.goto(base + '/?plan=' + plan + '#pilot'); await s.fill(); await p.locator('#intake-submit').click(); await p.waitForURL('**/onboard.html?plan=' + plan);
       check(`${plan}: public plan intent survives capture without personal information in query`, new URL(p.url()).search === '?plan=' + plan && await p.locator('input[name="plan"]:checked').inputValue() === plan);
-      await p.locator('#access-send').click(); await p.waitForFunction(() => document.querySelector('#access-status').textContent.includes('prepared'));
+      await p.locator('#access-send').click(); await p.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
       check(`${plan}: explicit secure-link request carries preserved current plan preference`, s.requests.at(-1).body.plan === plan && s.requests.at(-1).body.intake === handoff); await s.context.close();
     }
   }
@@ -105,7 +110,7 @@ try {
   {
     const s = await fixture('storage-blocked', 390, { denyStorage: true }), p = s.page; await p.goto(base + '/'); await s.fill(); await p.locator('#intake-submit').click(); await p.waitForURL('**/onboard.html');
     check('Storage-blocked handoff retains opaque capability, removes fragment and explains same-email entry', new URL(p.url()).hash === '' && /same email/.test(await p.locator('#access-intro').innerText()) && await p.locator('#access-email').inputValue() === '');
-    await p.locator('#access-email').fill(email); await p.locator('#access-send').click(); await p.waitForFunction(() => document.querySelector('#access-status').textContent.includes('prepared'));
+    await p.locator('#access-email').fill(email); await p.locator('#access-send').click(); await p.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
     check('Storage-blocked sign-in request still carries handoff', s.requests.at(-1).body.intake === handoff); await s.context.close();
   }
   {
@@ -129,7 +134,7 @@ try {
   report.sourceAfter = hashes(); check('Source remained unchanged during browser verification', JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter));
   check('No browser page errors', report.pageErrors.length === 0, report.pageErrors);
   report.passed = report.checks.filter(c => c.pass).length; report.failed = report.checks.filter(c => !c.pass).length;
-  writeFileSync('scratchpad/signup-intake-ui.json', JSON.stringify(report, null, 2) + '\n'); await browser.close();
+  writeFileSync(output, JSON.stringify(report, null, 2) + '\n'); await browser.close();
 }
 console.log(JSON.stringify({ passed: report.passed, failed: report.failed, externalRequests: 0, mode: report.mode }));
 if (report.failed) process.exitCode = 1;
