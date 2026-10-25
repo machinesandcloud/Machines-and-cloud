@@ -4,7 +4,7 @@ import argparse, contextlib, datetime as dt, fcntl, hashlib, json, os, pathlib, 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None
 ACCOUNT='69797d78f01c70674ffef858'
-SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'d06e83f30313d09d3ab1ff6f33bda2a3621bec04','baselineDeployId':'6adceebd5a1144301760ab09','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
+SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'46c0f03b1f4113cbc3da6bd8ddf03455cacc2187','gitBase':'615de409891df9c91ab53569daa462157615722a','baselineDeployId':'6add4c9eb22cf12c47b30691','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
 MC_KEYS=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_APPROVED_VERSION','CALENDAR_EXECUTION_POLICY_JSON']
 def fail(s): raise RuntimeError(s)
 def now(): return dt.datetime.now(dt.timezone.utc)
@@ -158,13 +158,13 @@ def prepare(binding_path):
     private_write(PRIVATE/'prepared-mc-env.json',rows,exclusive=True);private_write(PRIVATE/'binding.json',b,exclusive=True)
     return {'prepared':True,'settings':4,'sha256':digest(rows),'expiry':policy['expiresAt']}
 def git(s,append,site,push=False):
-    c=SITES[site];cwd=c['cwd'];head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=cwd,text=True).strip();remote=subprocess.check_output(['git','remote','get-url','origin'],cwd=cwd,text=True).strip()
+    c=SITES[site];git_base=c.get('gitBase',c['base']);cwd=c['cwd'];head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=cwd,text=True).strip();remote=subprocess.check_output(['git','remote','get-url','origin'],cwd=cwd,text=True).strip()
     if head!=c['candidate'] or remote!=c['remote']: fail('Local source/remote is not exact reviewed candidate')
     if subprocess.run(['git','diff','--quiet','HEAD','--'],cwd=cwd).returncode: fail('Tracked source modified')
     if push:
         observed=s.get('remote',{}).get(site)
-        if observed!=c['base'] or (now()-dt.datetime.fromisoformat(s.get('remoteAt',{}).get(site,'2000-01-01T00:00:00+00:00').replace('Z','+00:00'))).total_seconds()>90: fail('Explicit fresh baseline remote check required before push')
-        subprocess.run(['git','merge-base','--is-ancestor',c['base'],c['candidate']],cwd=cwd,check=True)
+        if observed!=git_base or (now()-dt.datetime.fromisoformat(s.get('remoteAt',{}).get(site,'2000-01-01T00:00:00+00:00').replace('Z','+00:00'))).total_seconds()>90: fail('Explicit fresh baseline remote check required before push')
+        subprocess.run(['git','merge-base','--is-ancestor',git_base,c['candidate']],cwd=cwd,check=True)
     row=reserve(s,append,('push:' if push else 'remote:')+site,'GIT-PUSH' if push else 'GIT-GET',c['remote']+' refs/heads/main',build=push,cleanup=(not push and s.get('cleanup',False)),request_units=6)
     try:
         trace=PRIVATE/f'control-git-{row["id"]:03d}-curl.trace'
@@ -173,7 +173,7 @@ def git(s,append,site,push=False):
         options=['git','-c','http.version=HTTP/1.1','-c','http.followRedirects=false','-c','http.maxRequests=1','-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=25']
         # Candidate ancestry is checked above. This lease is compare-and-swap,
         # not permission for a non-fast-forward history rewrite.
-        args=options+(['push','--porcelain','--force-with-lease=refs/heads/main:'+c['base'],'origin',c['candidate']+':refs/heads/main'] if push else ['ls-remote','--exit-code','origin','refs/heads/main'])
+        args=options+(['push','--porcelain','--force-with-lease=refs/heads/main:'+git_base,'origin',c['candidate']+':refs/heads/main'] if push else ['ls-remote','--exit-code','origin','refs/heads/main'])
         # One native operation, never retried by this helper. Reserve six HTTP
         # starts first, including auth challenges and a possible proxy CONNECT.
         p=subprocess.run(args,cwd=cwd,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=90,text=True)
@@ -185,7 +185,7 @@ def git(s,append,site,push=False):
         if p.returncode: fail('Git operation failed; private result retained, no automatic retry')
         if not push:
             ref=p.stdout.split()[0]
-            if ref not in [c['base'],c['candidate']]: fail('Remote source drift')
+            if ref not in [git_base,c['candidate']]: fail('Remote source drift')
             s.setdefault('remote',{})[site]=ref;s.setdefault('remoteAt',{})[site]=iso();append();return {'site':site,'remoteCommit':ref,'physicalHTTPRequests':physical,'reservedRequests':6}
         return {'site':site,'pushed':c['candidate'],'buildReservationConsumed':True,'physicalHTTPRequests':physical,'reservedRequests':6}
     except Exception:

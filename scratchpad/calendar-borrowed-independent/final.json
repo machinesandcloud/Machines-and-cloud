@@ -1,0 +1,78 @@
+{
+  "kind": "Independent source-derived storage JS and injected borrowed-native controller checks",
+  "sourceBefore": {
+    "scripts/calendar-borrowed-native.mjs": "7c57ce6decbd12cd80d06c08a2ef9277ead45f5d08feaaf8df82fe623dea3eeb",
+    "scripts/calendar-borrowed-native.swift": "49e9398db39e4fd499ecd555ee6c33f37281e4ea92132dc52fe6c06a87fec793",
+    "scripts/calendar-live-guard.mjs": "3bd13a1dd23853dfcf6e866ed8a8cc5b796bc2c2680eb9701c83735eba139549",
+    "scripts/calendar-live-actor.mjs": "68dd064cc044ec3f47f40a2b3962d4fd4f2586c5e80e4bae9030cfdf35d913ae"
+  },
+  "sourceAfter": {
+    "scripts/calendar-borrowed-native.mjs": "7c57ce6decbd12cd80d06c08a2ef9277ead45f5d08feaaf8df82fe623dea3eeb",
+    "scripts/calendar-borrowed-native.swift": "49e9398db39e4fd499ecd555ee6c33f37281e4ea92132dc52fe6c06a87fec793",
+    "scripts/calendar-live-guard.mjs": "3bd13a1dd23853dfcf6e866ed8a8cc5b796bc2c2680eb9701c83735eba139549",
+    "scripts/calendar-live-actor.mjs": "68dd064cc044ec3f47f40a2b3962d4fd4f2586c5e80e4bae9030cfdf35d913ae"
+  },
+  "sourceStable": true,
+  "passed": 12,
+  "total": 12,
+  "tests": [
+    {
+      "name": "either existing owner or pending value stops before any storage write/navigation",
+      "passed": true
+    },
+    {
+      "name": "atomic seed writes exactly two absent keys, preserves unrelated keys and discloses no values",
+      "passed": true
+    },
+    {
+      "name": "all direct storage modes refuse a different origin without reading or writing storage",
+      "passed": true
+    },
+    {
+      "name": "cleanup removes only exactly owned keys or accepts legitimate already-absent pending state",
+      "passed": true
+    },
+    {
+      "name": "failed exact-key removal never claims storage restoration without null readback",
+      "passed": true
+    },
+    {
+      "name": "changed key remains untouched and storage conflict is separate from restoring original inbox",
+      "passed": true
+    },
+    {
+      "name": "ordinary observation never emits callback fragment, owner token or state values",
+      "passed": true
+    },
+    {
+      "name": "expiry crossing durable seed reservation causes zero seed helper dispatch",
+      "passed": true
+    },
+    {
+      "name": "unknown seed result is not repeated and cleanup retains potential-key ownership",
+      "passed": true
+    },
+    {
+      "name": "normal restoration is cached, keeps existing tab open, and cannot claim native window closure",
+      "passed": true
+    },
+    {
+      "name": "reservation failure causes no native mutation and does not permit unjournaled cleanup",
+      "passed": true
+    },
+    {
+      "name": "one handoff admission rejects concurrent open without duplicate borrow",
+      "passed": true
+    }
+  ],
+  "effects": {
+    "actualNative": 0,
+    "actualBrowser": 0,
+    "network": 0,
+    "OAuth": 0
+  },
+  "limits": [
+    "No native helper, Chrome, Google account, owner session or provider call executed.",
+    "Complete actor/guard integration and actual synthetic handoff remain separately required."
+  ]
+}

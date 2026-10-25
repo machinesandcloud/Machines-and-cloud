@@ -78,7 +78,7 @@ with tempfile.TemporaryDirectory(prefix='mc-calendar-control-offline-') as direc
         state=fresh();m.SITES['mc']['candidate']='c'*40;m.now=lambda:dt.datetime(2026,10,24,tzinfo=dt.timezone.utc)
         m.subprocess.check_output=lambda args,**kw: ('c'*40+'\n') if args[1]=='rev-parse' else (m.SITES['mc']['remote']+'\n')
         class Result:
-            returncode=0;stdout=m.SITES['mc']['base']+'\trefs/heads/main\n';stderr=''
+            returncode=0;stdout=m.SITES['mc'].get('gitBase',m.SITES['mc']['base'])+'\trefs/heads/main\n';stderr=''
         def run(args,**kw):
             if args[1] in ['diff','merge-base']:return Result()
             assert state['requests']==6 and state['rows'][-1]['state']=='reserved_unknown'

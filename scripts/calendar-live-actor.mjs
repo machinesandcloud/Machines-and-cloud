@@ -1,6 +1,6 @@
 // Fixed command adapter for calendar-live-guard. No I/O at import or by default.
 import { createHash } from 'node:crypto';
-import { readFile,writeFile,lstat,access } from 'node:fs/promises';
+import { readFile,writeFile,lstat,access,open } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createInterface } from 'node:readline';
@@ -8,6 +8,7 @@ import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createController,TARGET,RUNTIME_LIMITS,plan } from './calendar-live-guard.mjs';
 import { createNativeHandoff } from './calendar-live-native.mjs';
+import {createBorrowedNativeHandoff} from './calendar-borrowed-native.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const canon=value=>Array.isArray(value)?value.map(canon):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canon(value[key])])):value;
 const digest=value=>hash(JSON.stringify(canon(value)));
@@ -35,7 +36,7 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
   const preview=moving=>({action:'visit_availability',expectedRevision:current.configurationRevision,date:p.fixture.availabilitySelection.from,days:p.fixture.availabilitySelection.days,...(moving?{visitId:binding.visitId,expectedVisitRevision:(current.bookings||[]).find(row=>row.id===binding.visitId)?.ownerVisit?.revision}:{})});
   const visit=()=>({action:'create_visit',expectedRevision:current.configurationRevision,submissionId:p.fixture.visitSubmissionId,customer_name:'Alex Example',phone:'(713) 555-0142',address:'12 Oak St, Katy, TX (synthetic test)',issue:'Internal Calendar lifecycle verification',date:times().date,window:times().window});
   return {async command(input) {
-    if(!input||typeof input!=='object'||!['baseline','request-link','exchange','create-workspace','owner','census-bind','stage','publish','ready','start','native-open','native-confirm','native-close','select-times','create','move','probe-old','cancel-visit','probe-cancelled','receipt','budget','cleanup','disconnect','cancel-workspace','signout-all','restore','cleanup-build','closed','status'].includes(input.action))throw Error('Unknown fixed Calendar command');
+    if(!input||typeof input!=='object'||!['baseline','request-link','exchange','create-workspace','owner','census-bind','stage','publish','ready','start','native-open','native-confirm','native-close','native-restore','native-observe','select-times','create','move','probe-old','cancel-visit','probe-cancelled','receipt','budget','cleanup','disconnect','cancel-workspace','signout-all','restore','cleanup-build','closed','status'].includes(input.action))throw Error('Unknown fixed Calendar command');
     const action=input.action;
     if(action==='status')return {guard:c.state(),control:await helper('status')};
     if(action==='baseline'){const site=(await metadata()).data;const env=await helper('env');return {commit:site.published_deploy?.commit_ref,state:site.published_deploy?.state,disabled:site.disabled,environmentSnapshotSHA256:env.snapshotSHA256};}
@@ -74,6 +75,8 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
     if(action==='start'){await app();await budget();await app({action:'start_calendar_connection',availabilityConsentVersion:'2026-10-24-busy-v1',expectedRevision:current.configurationRevision});return {started:true,ownerMustReviewGoogle:true};}
     if(action==='native-open'){await budget();return c.beginNativeHandoff(input=>native.open(input));}
     if(action==='native-confirm'){const connection=await blob('calendar_connections',slug);await app();const used=await budget();if(connection.status!=='connected'||current.connections?.calendar?.connected!==true||used.used?.tokenExchange!==1||used.used?.calendarRead<1)return {connected:false,pending:true};return c.confirmNativeCompletion();}
+    if(action==='native-observe'){if(!p.native||!c.state().nativeStarted)throw Error('Borrowed native handoff not started');return native.observe();}
+    if(action==='native-restore'){if(c.state().nativeRestored)return {alreadyRestored:true};return c.restoreNativeHandoff(()=>native.restore());}
     if(action==='native-close'){if(c.state().nativeClosed)return {alreadyClosed:true};return c.closeNativeHandoff(()=>native.close());}
     if(action==='budget'){const row=await budget();return {used:row.used,policyDigest:row.policyDigest};}
     if(action==='select-times'){if(!p.fixture.availabilitySelection)throw Error('Packet does not declare checked-window selection');await app();await budget();await app(preview(false));return {selected:true,selection:c.state().selection};}
@@ -123,7 +126,9 @@ async function executeCLI(packetPath,approvedSHA) {
     if(!stat.isFile()||stat.isSymbolicLink()||(stat.mode&0o777)!==0o600||stat.uid!==process.getuid())throw Error('Private0600 input required');
     return JSON.parse(await readFile(path,'utf8'));
   }
-  const actor=createActor({controller:c,packet,helper,native:createNativeHandoff(),privateRead,privateWrite:(name,value)=>writeFile(resolve(directory,name),JSON.stringify(value),{mode:0o600,flag:'wx'}),netlifyToken});
+  const privateWrite=async(name,value)=>{const h=await open(resolve(directory,name),'wx',0o600);try{await h.writeFile(JSON.stringify(value));await h.sync();}finally{await h.close();}};
+  const native=packet.native?createBorrowedNativeHandoff({binding:packet.native,directory,phaseId:packet.phaseId,record:privateWrite,authorize:input=>c.assertNativeAuthority(input)}):createNativeHandoff();
+  const actor=createActor({controller:c,packet,helper,native,privateRead,privateWrite,netlifyToken});
   process.stdout.write(JSON.stringify({ready:true,phase:packet.phaseId,nativeBrowserNotOpened:true})+'\n');
   for await(const line of createInterface({input:process.stdin,terminal:false})) {
     try{const result=await actor.command(JSON.parse(line));process.stdout.write(JSON.stringify({ok:true,result})+'\n');}

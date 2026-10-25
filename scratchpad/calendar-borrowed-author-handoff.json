@@ -1,0 +1,83 @@
+{
+  "scope": "Proof-only borrowed existing Chrome Calendar handoff; no app runtime or provider behavior change",
+  "parent": "615de409891df9c91ab53569daa462157615722a",
+  "source": {
+    "scripts/calendar-borrowed-native.mjs": "7c57ce6decbd12cd80d06c08a2ef9277ead45f5d08feaaf8df82fe623dea3eeb",
+    "scripts/calendar-borrowed-native.swift": "49e9398db39e4fd499ecd555ee6c33f37281e4ea92132dc52fe6c06a87fec793",
+    "scripts/calendar-live-guard.mjs": "3bd13a1dd23853dfcf6e866ed8a8cc5b796bc2c2680eb9701c83735eba139549",
+    "scripts/calendar-live-actor.mjs": "68dd064cc044ec3f47f40a2b3962d4fd4f2586c5e80e4bae9030cfdf35d913ae",
+    "scripts/calendar-live-control.py": "c0b0be49143623f8f39ece22137a02563a4ece0aef9622eb390530ee111c8bf7",
+    "scripts/calendar-borrowed-native-fixture.mjs": "c5d7926cd6bbfc3c0cef454757ca40aeee2751a269fdb546f7339eb22e85b071",
+    "scripts/calendar-borrowed-native-check.mjs": "3a297eadca5ee5b30e3e4abdd141b3c15ab96bcfdfeca621a718ba7dfd23eb9e",
+    "scripts/calendar-live-control-check.py": "107bbf14db8592f8b7c499619f83acc0e8ba73c96aa50277dc7f37b5f81d98d5"
+  },
+  "authorEvidence": {
+    "scratchpad/calendar-borrowed-author-foreground.json": {
+      "sha256": "237d8697832698612a72cae3ee60c4fac629e5136773c002b911479e7c5a253b",
+      "passed": 22,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-guard-foreground.json": {
+      "sha256": "22a0ee39882c71c440054d96cb1f11f2febb0315a23e013a2a3b20130df29c17",
+      "passed": 29,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-actor-foreground.json": {
+      "sha256": "5fe40f08ad49651e8de8bde981e052e7d07bffc8df62617e6f2c802cad61c795",
+      "passed": 7,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-late-foreground.json": {
+      "sha256": "0d2374556e8a94ee1486101862aaed822371b124fefbd76ba54d22f99611905b",
+      "passed": 22,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-close-foreground.json": {
+      "sha256": "451924be7bcdeb2181c916c31c61f3b46db60ab1379a67bea55ecccc7727e824",
+      "passed": 18,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-control-foreground.json": {
+      "sha256": "b802d0055caf9ff9b09af183f80a677ff70139b5b39e5977b33290df8bd48b8f",
+      "passed": 6,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-connection-regression.json": {
+      "sha256": "ff4c81bae7579f0852a9a6a64f5c448f40095f3189d63e2515de68eb0e671520",
+      "passed": 23,
+      "failed": 0
+    },
+    "scratchpad/calendar-borrowed-auto-connect-regression.json": {
+      "sha256": "5eec7119f3775fb858c0698f7d0658bde936a565c8c820202c405bd1b5613c1c",
+      "passed": 5,
+      "failed": 13,
+      "sourceStable": true,
+      "physicalRequests": 0,
+      "kind": "Isolated headless browser actual app/Google handlers; memory store and synthetic Google; no regular user Chrome or actual provider"
+    }
+  },
+  "compile": "scratchpad/calendar-borrowed-compile-foreground.json",
+  "authorLimitations": "Engineer-authored protocol/DOM and isolated actual-handler evidence. No actual regular Chrome query/invocation, Google grant, provider event, production setting/build, email or publication. Independent QA is separate.",
+  "sourceMatched": true,
+  "actualNativeActions": 0,
+  "actualProviderRequests": 0,
+  "publication": false,
+  "priorEvidence": "scratchpad/calendar-borrowed-fixture-dispositions.json",
+  "independentAcceptance": {
+    "path": "scratchpad/calendar-borrowed-independent/independent-acceptance.json",
+    "sha256": "425bfad0fb3b7be10b045f444364539181f9c6a16b9fd7df3df2f711738634ae",
+    "passed": 17,
+    "total": 17,
+    "actualProvider": false
+  },
+  "callbackBrowserTriage": {
+    "path": "scratchpad/calendar-borrowed-auto-connect-regression.json",
+    "passed": 5,
+    "failed": 13,
+    "physicalRequests": 0,
+    "sourceStable": true,
+    "status": "Open QA triage: synthetic HTML lacks required current #connectionJourney node; actual app/UI bytes unchanged. Do not claim the callback browser suite green.",
+    "owner": "lead_independent_qa",
+    "next": "Preserve failure and rerun minimal fixture-only correction with assertions intact."
+  }
+}

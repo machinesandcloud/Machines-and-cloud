@@ -1,0 +1,9 @@
+{
+  "result": "failed",
+  "passedBeforeFailure": 5,
+  "command": "python3 scripts/calendar-live-control-check.py",
+  "failure": "RuntimeError: Remote source drift",
+  "cause": "Retained control test mock emits SITES.mc.base as remote main, but current actual published base46c and Git parent615 are different. New gitBase separates authoritative remote parent from actual served source. Mock must return gitBase when present. No runtime relaxation.",
+  "replacement": "Same six existing control checks with one fixture field fallback updated.",
+  "basis": "Five preceding synchronous check calls completed before the sixth Git-trace check raised; initial stdout report was empty. This count is source/trace disposition, not a retained raw green report."
+}

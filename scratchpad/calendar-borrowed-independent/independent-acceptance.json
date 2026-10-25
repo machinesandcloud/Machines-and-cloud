@@ -1,0 +1,67 @@
+{
+  "state": "INDEPENDENT_LOCAL_ACCEPTED_ACTUAL_BORROWED_SYNTHETIC_PENDING",
+  "baseCommit": "615de409891df9c91ab53569daa462157615722a",
+  "sources": {
+    "scripts/calendar-borrowed-native.mjs": "7c57ce6decbd12cd80d06c08a2ef9277ead45f5d08feaaf8df82fe623dea3eeb",
+    "scripts/calendar-borrowed-native.swift": "49e9398db39e4fd499ecd555ee6c33f37281e4ea92132dc52fe6c06a87fec793",
+    "scripts/calendar-live-guard.mjs": "3bd13a1dd23853dfcf6e866ed8a8cc5b796bc2c2680eb9701c83735eba139549",
+    "scripts/calendar-live-actor.mjs": "68dd064cc044ec3f47f40a2b3962d4fd4f2586c5e80e4bae9030cfdf35d913ae",
+    "scripts/calendar-live-control.py": "c0b0be49143623f8f39ece22137a02563a4ece0aef9622eb390530ee111c8bf7"
+  },
+  "independentChecks": {
+    "passed": 17,
+    "total": 17,
+    "sourceStable": true,
+    "adapterAndActualEmbeddedJS": {
+      "path": "/tmp/mc-calendar-borrowed-independent-20261025/final.json",
+      "sha256": "c35cc2d3241f3d08f1ed645124824dc5169d27a2acf7a01e6cceaa6f9aba9ab8",
+      "passed": 12
+    },
+    "guard": {
+      "path": "/tmp/mc-calendar-borrowed-independent-20261025/guard-final.json",
+      "sha256": "e6700c88c1b2b79fcef4af3674d50793eebb6c25a2d089bf642615810d945022",
+      "passed": 5
+    }
+  },
+  "retainedAuthorRerun": {
+    "path": "/tmp/mc-calendar-borrowed-independent-20261025/retained-author-final.json",
+    "sha256": "237d8697832698612a72cae3ee60c4fac629e5136773c002b911479e7c5a253b",
+    "passed": 22,
+    "scope": "Author-created synthetic fixture independently rerun, including whole actor scheduled create/move/delete/cleanup; not live provider evidence."
+  },
+  "swiftTypecheck": {
+    "command": "swiftc -typecheck scripts/calendar-borrowed-native.swift",
+    "exitCode": 0
+  },
+  "trackedDeltaOnlyProofScripts": [
+    "scripts/calendar-live-actor.mjs",
+    "scripts/calendar-live-control-check.py",
+    "scripts/calendar-live-control.py",
+    "scripts/calendar-live-guard.mjs"
+  ],
+  "acceptedBoundaries": [
+    "Exact fixed Inbox tab already active, only its window raised, fixed PID foreground and exact URL rechecked before navigation.",
+    "Both storage keys absent before atomic seed; original session/state callback contract unchanged; no OAuth fragment/code transfer.",
+    "Only exact owned keys removed, both read back null; changed keys preserved and storage conflict separate from tab restoration.",
+    "Native restoration distinct from dedicated window closure; one-shot uncertainty and24 total with7cleanup attempts.",
+    "Durable reservation followed by current expiry/guard authority check before native dispatch."
+  ],
+  "effects": {
+    "actualNative": 0,
+    "actualBrowser": 0,
+    "network": 0,
+    "Google": 0
+  },
+  "actualAcceptance": {
+    "visibility": false,
+    "borrowedStorageAndRestore": false,
+    "ownerGrant": false,
+    "providerLifecycle": false
+  },
+  "next": "Root must observe fresh bounded synthetic borrowed handoff/restore before owner Google grant. Existing failed/closed phase allowances are not reused.",
+  "preservedEarlierSourceEvidence": [
+    "first.json",
+    "guard-first.json",
+    "retained-author-replay.json"
+  ]
+}
