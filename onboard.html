@@ -16,7 +16,7 @@
   <div class="onboard-layout">
     <aside class="onboard-aside" aria-label="Your setup">
       <header class="onboard-header" id="navbar"><a href="index.html" class="onboard-brand"><img src="assets/logo.png" alt="Machines &amp; Cloud"></a><span class="onboard-product-label">FRONT DESK</span></header>
-      <div class="onboard-welcome"><p class="onboard-eyebrow">YOUR FRONT DESK</p><h2>Make a great<br> first impression.</h2><p>Give customers a helpful first answer and your team a clear request to follow up.</p></div>
+      <div class="onboard-welcome"><h2>Make a great<br> first impression.</h2><p>Give customers a helpful first answer and your team a clear request to follow up.</p></div>
       <nav class="ob-steps" aria-label="Setup progress" hidden>
         <span class="on"><b class="step-number" aria-hidden="true">1</b><strong>Your details</strong><small>Who you are and where to help</small></span>
         <span><b class="step-number" aria-hidden="true">2</b><strong>Your business</strong><small>Services, hours and service area</small></span>
@@ -31,7 +31,7 @@
     </aside>
     <div class="onboard-workspace" id="setup-main" tabindex="-1">
       <div class="onboard-topbar"><span><i aria-hidden="true"></i>Getting started</span><a href="index.html">Back to site <span aria-hidden="true">↗</span></a></div>
-      <div class="setup-stage-heading"><p class="onboard-eyebrow" id="onboard-step-label">Step 1 of 4</p><h1 id="setup-context-title">Start with your details.</h1><p id="setup-context-copy">Tell us who will manage customer requests.</p></div>
+      <div class="setup-stage-heading"><h1 id="setup-context-title">Start with your details.</h1><p id="setup-context-copy">Tell us who will manage customer requests.</p><div class="onboard-stage-progress"><span id="onboard-step-label">Step 1 of 4</span><progress id="onboardProgress" value="1" max="4" aria-label="Setup step">1 of 4</progress></div></div>
       <p id="intake-notice" class="intake-notice" role="status" hidden></p>
       <div class="workspace-toolbar">
         <div id="access-signed-in" class="access-signed-in" hidden><span id="access-identity"></span><button type="button" id="access-sign-out">Sign out</button></div>
@@ -40,7 +40,7 @@
       <div class="workspace-surface">
         <section id="access-gate" class="access-card" aria-labelledby="access-title">
           <div class="access-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <p class="step-kicker">YOUR PRIVATE FRONT DESK</p><h1 id="access-title" tabindex="-1">Let’s get started.</h1><p id="access-intro">We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.</p>
+          <h1 id="access-title" tabindex="-1">Let’s get started.</h1><p id="access-intro">We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.</p>
           <form id="access-form"><label class="form-label" for="access-email">Email address</label><input class="form-input" id="access-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Email me a sign-in link</button></form>
           <div id="access-confirmation" hidden>
             <p class="access-recipient" id="access-recipient"></p>
@@ -70,7 +70,7 @@
             <div class="form-section">
               <h3 id="connection-preferences-label">What would you like help with?</h3><p class="section-intro">Choose what matters to your business. We’ll save your preferences; you’ll review connection status and any activation steps in your workspace.</p>
               <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked><strong>Website chat</strong></label><label><input type="checkbox" name="desiredChannels" value="voice"><strong>Phone answering</strong></label><label><input type="checkbox" name="desiredChannels" value="sms"><strong>Text messaging</strong></label><label><input type="checkbox" name="desiredChannels" value="calendar"><strong>Google Calendar</strong></label></div>
-              <section class="connection-preview" aria-labelledby="connection-preview-title"><div class="connection-preview-heading"><h4 id="connection-preview-title">What happens next</h4><p id="connection-preview-count" role="status" aria-live="polite"></p></div><p class="connection-preview-intro">See the setup steps for your choices.</p><div id="selected-connection-plan"></div></section>
+              <details class="connection-preview"><summary id="connection-preview-title">What happens after setup <span id="connection-preview-count" role="status" aria-live="polite"></span></summary><p class="connection-preview-intro">See the setup steps for your choices.</p><div id="selected-connection-plan"></div></details>
               <section id="phone-routing-settings" class="connection-setup" aria-labelledby="phone-routing-title" hidden>
                 <h4 id="phone-routing-title">How would you like calls handled?</h4>
                 <div class="form-group"><label class="form-label" for="phoneSetupMode">Your business number</label><select class="form-input" id="phoneSetupMode" name="phoneSetupMode"><option value="forward_business_line">Keep my existing number</option><option value="use_new_number">Use a new front desk number</option></select><p class="hint">Your current number stays as it is during setup.</p></div>
@@ -120,7 +120,7 @@
         </form>
         <section class="done" id="done">
           <div class="done-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <p class="step-kicker">YOUR NEXT STEP</p><h2>Building your front desk</h2><p class="status" id="buildStatus">Your answers are saved. Preparing your front desk.</p>
+          <h2>Building your front desk</h2><p class="status" id="buildStatus">Your answers are saved. Preparing your front desk.</p>
           <p class="done-next">Your front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.</p>
           <a class="btn-pill btn-pill-blue" id="goPortal" href="#">Open my workspace</a><p class="portal"><a id="portalLink" href="#">Your private workspace</a></p>
         </section>

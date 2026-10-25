@@ -599,3 +599,46 @@ body.desk-app.guide-tour-open { overflow:hidden; }
 .support-state{display:inline-flex;border-radius:999px;padding:4px 10px;font-size:.76rem;font-weight:700;background:#e5ecff;color:#244fa7}.support-state[data-support-status="acknowledged"]{background:#e7f0ff;color:#2255a6}.support-state[data-support-status="resolved"]{background:#e2f3eb;color:#216846}
 .support-dialog{width:min(580px,calc(100% - 28px));max-height:calc(100dvh - 32px);overflow:auto;margin:auto;padding:28px;box-sizing:border-box}.support-dialog h2{margin:20px 0 12px}.support-dialog .form-input{width:100%;box-sizing:border-box;resize:vertical}.support-dialog-actions{display:flex;gap:10px;flex-wrap:wrap}.support-dialog #supportSaved .support-report{margin:18px 0}.support-dialog #supportMessage:empty{display:none}
 @media(max-width:520px){.support-dialog{padding:22px}.support-dialog-actions>.btn-pill{flex:1;justify-content:center}.support-report{margin:0 12px 12px;padding:14px}.desk-app .conv-header{flex-wrap:wrap}.desk-app .conv-header>div{min-width:0;flex-basis:100%;overflow-wrap:anywhere}.desk-app .conv-header .btn-sm{flex:1 1 140px;max-width:100%;white-space:normal;min-height:44px;font-size:12px;justify-content:center}}
+
+/* The customer workspace separates getting ready from the day's work. */
+.desk-page-heading{margin:26px 0 24px}
+.desk-page-heading h2{font-size:28px;line-height:1.25;letter-spacing:-.03em}
+.desk-page-heading p{max-width:66ch}
+.desk-task-context{margin:0 0 7px;color:var(--ui-muted);font-size:12px;font-weight:500}
+.workspace-guide{border:1px solid #c5d5f5;box-shadow:none;align-items:center;padding:24px}
+.workspace-guide .desk-next-icon{display:none}
+.workspace-guide .desk-next-copy{min-width:0}
+.workspace-guide #guideTitle{font-size:21px;line-height:1.35;margin:0 0 8px}
+.workspace-guide #guideIntro{max-width:62ch;margin:0;font-size:14px}
+.workspace-guide #nextSetupAction{min-height:44px;font-size:13px}
+.desk-home-activity{margin:0}
+.desk-home-activity>summary{display:flex;align-items:center;justify-content:space-between;min-height:64px;padding:16px 0;cursor:pointer;list-style:none;border-bottom:1px solid var(--ui-line);margin-bottom:20px;font-size:17px;font-weight:600}
+.desk-home-activity>summary:after{content:'+';font-size:22px;font-weight:400;color:var(--ui-muted)}
+.desk-home-activity[open]>summary:after{content:'−'}
+.desk-home-activity>summary small{display:block;margin-top:4px;font-size:12px;font-weight:400;color:var(--ui-muted);line-height:1.6}
+.desk-home-activity>summary::-webkit-details-marker{display:none}
+body[data-home-mode="work"] .desk-home-activity>summary{padding-top:0}
+#connectionPreferencesDetails{margin:26px 0 0;padding:0;border-top:1px solid var(--ui-line)}
+#connectionPreferencesDetails>summary{display:flex;min-height:74px;align-items:center;justify-content:space-between;padding:16px 0;cursor:pointer;font-weight:600}
+#connectionPreferencesDetails>summary:after{content:'+';font-weight:400;font-size:21px;color:var(--ui-muted)}
+#connectionPreferencesDetails[open]>summary:after{content:'−'}
+#connectionPreferencesDetails>summary small{display:block;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--ui-muted);line-height:1.6}
+.desk-preference-body{padding:0 0 20px}
+.desk-preference-body>p{max-width:66ch}
+#connectionsCard .connection-status-options,#connectionsCard .lead-platform-options{margin:0;padding:0;border-top:1px solid var(--ui-line)}
+.desk-account-identity .desk-account-facts{margin-bottom:20px}
+#ownerReportsSection{margin-top:22px}
+#ownerReportsForm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 20px}
+#ownerReportsForm>.form-group{margin:0}
+#ownerReportsForm>.form-group label{display:flex;align-items:center;gap:10px;min-height:48px;font-size:13px}
+#ownerReportsForm>p,#ownerReportsForm>.desk-account-actions{grid-column:1/-1}
+#ownerReportsForm>p{max-width:70ch;margin:0}
+#ownerReportsHistory{padding-left:20px}
+@media(max-width:700px){.desk-page-heading{margin:22px 0}.desk-page-heading h2{font-size:25px}.workspace-guide{display:block;padding:21px}.workspace-guide #nextSetupAction{margin-top:20px;width:100%}.workspace-guide #guideTitle{font-size:21px}#ownerReportsForm{grid-template-columns:1fr;gap:6px}#ownerReportsForm>p{margin:9px 0}.desk-home-activity>summary{font-size:16px}.desk-home-activity>summary small{max-width:27ch}.desk-account-actions{gap:10px}}
+.desk-secondary-reminder{margin:17px 0 0;padding-top:14px;border-top:1px solid var(--ui-line);font-size:12px;color:var(--ui-muted)}
+.desk-secondary-action{display:inline-flex;align-items:center;min-height:44px;padding:6px 0;border:0;background:transparent;color:#214fb9;text-decoration:underline;text-underline-offset:.18em;font-size:12px;font-weight:600;text-align:left;cursor:pointer}
+body[data-home-mode="work"] .workspace-guide{align-items:start}
+.desk-app #workspaceGuide{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 24px;border:1px solid #c5d5f5;padding:24px;box-shadow:none}
+#homeSetupSecondaryWrap{grid-column:1/-1;border-top:1px solid var(--ui-line);padding-top:12px}
+#homeSetupSecondaryWrap .desk-secondary-reminder{margin:0;padding:0;border:0}
+@media(max-width:700px){.desk-app #workspaceGuide{grid-template-columns:minmax(0,1fr);padding:21px;gap:18px}.desk-app #workspaceGuide #nextSetupAction{margin:0;width:100%}}

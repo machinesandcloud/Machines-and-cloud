@@ -6,3 +6,26 @@
 
 #connectionsCard.has-setup-guide>.desk-connections-heading{display:none}.setup-guide-mobile{display:none}.setup-guide{padding:0;border:0;background:transparent}.setup-guide-current{background:#f5f8ff}.setup-guide-heading h3{font-size:23px!important;margin-top:0!important}.setup-guide-current-heading .setup-guide-icon{display:none}.setup-guide-actions{margin:16px 0}.setup-guide-mobile{font-size:12px;font-weight:600;color:#516684;margin:18px 0}.setup-guide-mobile select{display:block;width:100%;margin-top:7px;min-height:44px;font-size:16px}.setup-guide-current{padding:18px}.setup-guide-current-heading p{line-height:1.6}
 @media(max-width:600px){.setup-guide-mobile{display:block}.setup-guide-services{display:none}.setup-guide-heading .muted{font-size:12px;line-height:1.6}.setup-guide-current{padding:15px}.setup-guide-current-heading h4{font-size:16px}.setup-guide-actions .btn-pill{flex:1 1 100%;min-height:44px}.setup-guide{margin-bottom:22px}}
+
+/* One setup workspace: services are navigation; the chosen task carries the action. */
+.setup-guide-heading{margin-bottom:22px}
+.setup-guide-heading h3{margin:0 0 8px;font-size:23px;line-height:1.3}
+.setup-guide-heading .muted{max-width:68ch}
+.setup-guide-layout{display:grid;grid-template-columns:182px minmax(0,1fr);gap:28px;align-items:start}
+.setup-guide-services{display:grid;gap:4px;margin:0;padding:0 20px 0 0;border-right:1px solid var(--ui-line)}
+.setup-guide-service{display:grid;gap:3px;justify-content:start;align-content:center;min-height:58px;padding:10px 12px;border:0;border-radius:8px;background:transparent;text-align:left;color:var(--ui-ink)}
+.setup-guide-service span{font-size:13px;font-weight:600}
+.setup-guide-service small{font-size:11px;font-weight:400;color:var(--ui-muted)}
+.setup-guide-service[aria-pressed="true"]{background:var(--ui-blue-soft);color:#1947bd;box-shadow:none}
+.setup-guide-service[aria-pressed="true"] small{color:#355ba4}
+.setup-guide-service:hover{background:#f0f4fa}
+.setup-guide-current{min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent}
+.setup-guide-current-heading{margin:0 0 18px}
+.setup-guide-current-heading h4{margin:0 0 9px;font-size:20px;line-height:1.3}
+.setup-guide-current-heading p{max-width:62ch;font-size:14px;line-height:1.65}
+.setup-guide-actions{margin:0 0 20px;gap:10px}
+.setup-guide-actions .btn-pill{min-height:44px;font-size:13px}
+.setup-guide-step-details{margin:0;border-top:1px solid var(--ui-line);padding-top:6px}
+.setup-guide-automation{margin:18px 0 0;padding:0;background:transparent;border-radius:0;color:var(--ui-muted);font-size:12px;max-width:65ch}
+@media(max-width:800px){.setup-guide-layout{display:block}.setup-guide-services{display:none}.setup-guide-mobile{display:grid;margin:0 0 24px;gap:8px;font-size:12px;color:var(--ui-muted)}.setup-guide-current-heading h4{font-size:19px}.setup-guide-actions{align-items:stretch}.setup-guide-heading h3{font-size:21px}.setup-guide-current{padding:0}}
+@media(min-width:801px){.setup-guide-mobile{display:none}}

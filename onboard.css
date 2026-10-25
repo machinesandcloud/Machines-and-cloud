@@ -182,3 +182,16 @@ body:not([data-setup-state="questions"]) .onboard-workspace-note{max-width:500px
 .onboarding-page .connection-preview-card dd { margin:0; color:#344d70; font-size:12px; line-height:1.6; }
 .onboarding-page .connection-preview-note,.onboarding-page .connection-preview-empty { color:#677c99; font-size:11px; line-height:1.6; margin:12px 0 0; }
 @media(max-width:480px) { .onboarding-page .connection-preview { padding:15px; } .onboarding-page .connection-preview-heading { display:block; } .onboarding-page #connection-preview-count { margin-top:5px; } .onboarding-page .connection-preview-card dl>div { grid-template-columns:1fr; gap:3px; } }
+
+/* A saved, four-step form. The progress line describes position, not service activation. */
+.onboard-stage-progress{display:flex;align-items:center;gap:18px;margin-top:20px;color:var(--ob-muted);font-size:12px}
+.onboard-stage-progress>span{flex:none}
+.onboard-stage-progress progress{appearance:none;display:block;width:170px;height:5px;border:0;border-radius:4px;overflow:hidden;background:var(--ob-line);color:var(--ob-blue)}
+.onboard-stage-progress progress::-webkit-progress-bar{background:var(--ob-line)}
+.onboard-stage-progress progress::-webkit-progress-value{background:var(--ob-blue);border-radius:4px}
+.onboard-stage-progress progress::-moz-progress-bar{background:var(--ob-blue)}
+.ob .connection-preview{margin-top:20px;border-top:1px solid var(--ob-line);padding-top:10px;background:transparent;border-radius:0}
+.ob .connection-preview>summary{min-height:44px;cursor:pointer;font-size:13px;font-weight:600;color:#264c99;padding:10px 0}
+.ob .connection-preview>summary span{font-size:11px;font-weight:400;color:var(--ob-muted);margin-left:8px}
+.ob .connection-preview:not([open])>.connection-preview-intro{display:none}
+@media(max-width:700px){.onboard-aside{padding-bottom:16px}.onboard-welcome{display:none}.ob-steps{display:none}.onboard-product-label{display:none}.onboard-workspace .onboard-topbar{min-height:64px}.setup-stage-heading{margin-top:24px}.setup-stage-heading h1{font-size:26px}.onboard-stage-progress{justify-content:space-between}.onboard-stage-progress progress{width:48%}.ob .workspace-surface{padding:24px 20px}}

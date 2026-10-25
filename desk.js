@@ -5,7 +5,7 @@
   var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + (key ? '&k=' + encodeURIComponent(key) : '');
   var portalGeneration = 0, loadSequence = 0, loadPending = null, reviewBusy = false, leaving = false, chatController = null, cfgRevision = null, cfgEditRevision = null, cfgDirty = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
-  var preferenceBaseline=[],preferenceDirty=false,preferenceBusy=false;
+  var preferenceBaseline=[],preferenceDirty=false,preferenceBusy=false,homeActivityChosen=false;
   var $ = function (id) { return document.getElementById(id); };
   function ownerHeaders() { var headers = { 'Content-Type': 'application/json' }; if (ownerSession) headers.Authorization = 'Bearer ' + ownerSession; return headers; }
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
@@ -24,7 +24,7 @@
     if (leaving && !ownerSession && !key) return;
     leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; if (chatController) chatController.abort(); availabilityReset();
     websitePrivateClear();
-    preferenceBaseline=[];preferenceDirty=false;preferenceBusy=false;
+    preferenceBaseline=[];preferenceDirty=false;preferenceBusy=false;homeActivityChosen=false;
     cfgBaseline = null; cfgRevision = null; cfgEditRevision = null; cfgConflict = null; cfgDirty = false; cfgBusy = false; reviewBusy = false; cfgClosed = true;
     acctBaseline = null; acctRevision = null; acctEditRevision = null; acctConflict = null; acctDirty = false; acctBusy = false;
     try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); } catch (error) { /* Private content is still cleared. */ }
@@ -182,6 +182,7 @@
     document.body.dataset.activePage = t;
     $('pageEyebrow').textContent = pageCopy[t][0]; $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; if(data){renderHomeNext(data);if(t==='account')renderAccount(data);}else syncNextActionVisibility();
   }
+  $('homeActivityDetails').querySelector('summary').addEventListener('click',function(){homeActivityChosen=true;});
   function syncNextActionVisibility() { var guide = $('workspaceGuide'); guide.hidden = guide.dataset.needed !== 'true' || document.body.dataset.activePage !== 'today'; }
   if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
   else showTab('today');
@@ -196,7 +197,9 @@
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
     pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
   }
-  $('nextSetupAction').addEventListener('click', function () { routeTo(this.dataset.route || 'know'); var target=this.dataset.anchor&&$(this.dataset.anchor); if(target){var details=target.closest('details');if(details)details.open=true;target.scrollIntoView({block:'nearest'});target.tabIndex=-1;target.focus({preventScroll:true});} });
+  function homeAction(button){routeTo(button.dataset.route||'know');var target=button.dataset.anchor&&$(button.dataset.anchor);if(target){var details=target.closest('details');if(details)details.open=true;target.scrollIntoView({block:'nearest'});target.tabIndex=-1;target.focus({preventScroll:true});}}
+  $('nextSetupAction').addEventListener('click',function(){homeAction(this);});
+  $('homeSetupSecondary').addEventListener('click',function(){homeAction(this);});
   document.addEventListener('click', function (event) { var button = event.target.closest('.desk-empty-action[data-route]'); if (button) routeTo(button.dataset.route); });
   document.querySelectorAll('[data-practice-prompt]').forEach(function (button) { button.addEventListener('click', function () { $('chatIn').value = button.dataset.practicePrompt; $('chatIn').focus(); }); });
   function emptyState(title, detail, actionLabel, tab) {
@@ -473,10 +476,11 @@
   $('websiteInstallPrimary').addEventListener('click',function(){var actionName=this.dataset.action,w=data?.websiteInstallation;if(actionName==='save_website'){websiteEditing=true;renderWebsiteInstallation(data);$('websiteInstallWebsite').focus();}else if(actionName==='copy_code')websiteCopy(false);else if(actionName==='start_check')websiteStart();else if(actionName==='allow_origin'){if(websiteNeedSavedRules())return;websiteChange(async function(generation){var origins=(data.client.widget.allowedOrigins||[]).slice(),origin=websiteChosenOrigin();if(!origins.includes(origin))origins.push(origin);var result=await apiRequest('PUT',{expectedRevision:cfgRevision,expectedEditRevision:cfgEditRevision,widget:{allowedOrigins:origins}});if(generation!==portalGeneration||leaving)return;websiteApplySaved(result);await websiteRead();if(generation===portalGeneration&&!leaving)websiteMessage('Website allowed. Review and try your updated rules before activation.');});}else if(actionName==='check_status')websiteChange(async function(generation){await websiteRead();if(generation===portalGeneration&&!leaving)websiteMessage('Website status updated.');});else if(actionName==='try_sample'){if(websiteCurrentCheck()){var checkURL=websiteCheckLink(websiteCurrentCheck());if(checkURL)window.open(checkURL,'_blank','noopener,noreferrer');websiteMessage('Use the sample request in your website chat. If the new tab was blocked, use Open website check below.');}else websiteStart();}else if(actionName==='view_setup_request')websiteViewRecord(w?.setupRequest?.record);else if(actionName==='view_request')websiteViewRecord(w?.firstExternalRequest?.record);else if(actionName==='open_website'){var site=websiteURL(data.client.business.website);if(site){window.open(site.href,'_blank','noopener,noreferrer');$('websiteInstallOpen').href=site.href;$('websiteInstallOpen').hidden=false;$('websiteInstallOpen').textContent='Open my website';websiteMessage('If the new tab was blocked, use the website link below.');}}else if(actionName==='review_rules'){routeTo('know');$('reviewRules').focus();}else if(actionName==='test_desk'){routeTo('test');$('chatIn').focus();}else if(['activate_web','resume_web'].includes(actionName)){if(websiteNeedSavedRules())return;if(!data.setup?.canActivateWeb){websiteMessage('Complete the current setup requirements before activating customer chat.',true);return;}websiteChange(async function(generation){await action(actionName==='resume_web'?'resume':'go_live');if(generation!==portalGeneration||leaving)return;await websiteRead();if(generation===portalGeneration&&!leaving)websiteMessage('Website chat is active. Continue with your website check.');});}});
   $('websiteInstallAlready').addEventListener('click',websiteStart);$('websiteInstallRefresh').addEventListener('click',function(){websiteChange(async function(generation){await websiteRead();if(generation===portalGeneration&&!leaving)websiteMessage('Website status updated.');});});$('websiteInstallHandoff').addEventListener('click',function(){websiteCopy(true);});
 
+  function homeFollowupRows(d){var selfService=d.client?.onboarding?.version===1;return (d.leads||[]).filter(function(l){return (!selfService||!l.websiteSetupCheck&&!l.simulation)&&(selfService&&l.followthrough?l.followthrough.needsFollowup:l.status==='open'&&(l.alertWaiting||l.overdueAt||l.outcome==='needs_action'||l.outcome==='wants_call'));});}
   function renderHomeNext(d) {
     var guide=$('workspaceGuide'),button=$('nextSetupAction'),setup=d&&d.setup,client=d&&d.client;
-    guide.dataset.needed='false';button.hidden=false;delete button.dataset.anchor;
-    if(!setup||!client||['cancelled','archived'].includes(client.status)){syncNextActionVisibility();return;}
+    guide.dataset.needed='false';button.hidden=false;delete button.dataset.anchor;$('homeSetupSecondaryWrap').hidden=true;$('homeSetupReminder').hidden=true;$('homeSetupSecondary').hidden=true;delete $('homeSetupSecondary').dataset.anchor;
+    if(!setup||!client||['cancelled','archived'].includes(client.status)){document.body.dataset.homeMode='work';if(!homeActivityChosen)$('homeActivityDetails').open=true;if(document.body.dataset.activePage==='today'){$('pageTitle').textContent=pageCopy.today[1];$('pageDescription').textContent=pageCopy.today[2];}syncNextActionVisibility();return;}
     var next,rows=(setup.connectionJourney?.channels||[]).filter(function(row){return row.requested||row.retained;}),blockers=setup.channels?.web?.blockers||[];
     var modelUnavailable=blockers.some(function(row){return row.id==='model';}),practiceAvailable=!modelUnavailable&&(!d.aiAllowance||d.aiAllowance.private.remaining>0);
     if(cfgDirty||cfgConflict||cfgBusy)next={title:cfgConflict?'Review your saved changes':cfgBusy?'Your changes are being saved':'Finish your business edits',detail:cfgConflict?'Your draft is kept. Compare it with the latest saved details before continuing.':cfgBusy?'Any newer typing stays in your draft.':'Save your draft, then review the answers customers should hear.',label:'Open business details',tab:'know'};
@@ -490,7 +494,24 @@
       }
       if(!next){var waiting=rows.find(function(row){return ['platform','carrier'].includes(row.responsibility)&&!row.active;});if(waiting)next={title:waiting.responsibility==='carrier'?'Your registration is being reviewed':'Your setup progress',detail:waiting.nextStep||waiting.detail};}
     }
+    var followup=homeFollowupRows(d),workFirst=followup.length>0&&!cfgDirty&&!cfgConflict&&!cfgBusy&&!preferenceDirty;
+    if(workFirst){
+      var setupNext=next;
+      next={title:followup.length===1?'A customer request needs your attention':followup.length+' customer requests need your attention',detail:'Review the saved details and record what happens next.',label:'Open customer requests',tab:'leads'};
+      if(setupNext){$('homeSetupSecondaryWrap').hidden=false;$('homeSetupReminder').hidden=false;$('homeSetupReminder').textContent='Setup also needs attention: '+setupNext.title+'.';if(setupNext.tab){var secondary=$('homeSetupSecondary');secondary.hidden=false;secondary.textContent=setupNext.label||'Continue setup';secondary.dataset.route=setupNext.tab;if(setupNext.anchor)secondary.dataset.anchor=setupNext.anchor;}}
+    }
     if(next){guide.dataset.needed='true';$('guideTitle').textContent=next.title;$('guideIntro').textContent=next.detail;button.hidden=!next.tab;button.textContent=next.label||'';button.dataset.route=next.tab||'';if(next.anchor)button.dataset.anchor=next.anchor;}
+    var selfService=client.onboarding?.version===1,customerRecord=function(row){return !selfService||!row.websiteSetupCheck&&!row.simulation&&!row.ownerVisitCreationAborted;};
+    var hasWork=(d.leads||[]).some(customerRecord)||(d.bookings||[]).some(customerRecord)||(d.conversations||d.convs||[]).some(customerRecord)||!selfService&&(Number(d.today?.needsYou)>0||Number(d.today?.bookings)>0);
+    var preparing=guide.dataset.needed==='true'&&!hasWork&&!['live','paused'].includes(client.status);
+    document.body.dataset.homeMode=preparing?'setup':'work';
+    if($('homeSetupLabel'))$('homeSetupLabel').textContent=workFirst?'Needs your attention':preparing?'Get ready for your first customer':'Next for your front desk';
+    if(!homeActivityChosen)$('homeActivityDetails').open=!preparing;
+    $('homeActivitySummary').textContent=hasWork?'Requests, visits and conversations saved in your workspace':'No customer activity yet. Saved requests will appear here.';
+    if(document.body.dataset.activePage==='today'){
+      $('pageTitle').textContent=preparing?'Get your front desk ready':'Your day, at a glance';
+      $('pageDescription').textContent=preparing?'Your business answers are saved. Follow the next step, then connect the services you choose.':pageCopy.today[2];
+    }
     syncNextActionVisibility();
   }
   function reviewState(d) {
@@ -557,8 +578,19 @@
   }
   function preferenceValues(){return Array.prototype.map.call($('connectionPreferences').querySelectorAll('input[name="connection"]:checked'),function(field){return field.value;}).sort();}
   function preferenceFill(values){$('connectionPreferences').querySelectorAll('input[name="connection"]').forEach(function(field){field.checked=values.includes(field.value);});}
-  function preferenceState(){var closed=data&&['cancelled','archived'].includes(data.client.status);preferenceDirty=JSON.stringify(preferenceValues())!==JSON.stringify(preferenceBaseline);$('saveConnections').disabled=preferenceBusy||closed||!preferenceDirty;$('connectionPreferences').setAttribute('aria-busy',String(preferenceBusy));$('connectionPreferences').querySelectorAll('input').forEach(function(field){field.disabled=!!closed;});if(closed)$('connectionsMessage').textContent='This workspace is closed. Your saved choices and records are retained.';if($('cancelConnectionPreferences')){$('cancelConnectionPreferences').hidden=!preferenceDirty||closed;$('cancelConnectionPreferences').disabled=preferenceBusy;}}
-  $('connectionPreferences').addEventListener('change',function(){if(leaving)return;preferenceState();$('connectionsMessage').textContent=preferenceBusy?'Saving your submitted choices. Newer changes stay here.':preferenceDirty?'Your connection choices have not been saved.':'Your saved connection choices are shown.';});
+  function preferenceState(){
+    var closed=data&&['cancelled','archived'].includes(data.client.status);
+    preferenceDirty=JSON.stringify(preferenceValues())!==JSON.stringify(preferenceBaseline);
+    var choiceSummary=$('connectionChoiceSummary');
+    if(choiceSummary){var names={web:'Website chat',voice:'Phone answering',sms:'Text messaging',calendar:'Google Calendar'};choiceSummary.textContent=(preferenceBusy?'Saving choices · ':preferenceDirty?'Unsaved choices · ':'')+(preferenceBaseline.map(function(id){return names[id];}).filter(Boolean).join(' · ')||'No services selected');}
+    $('saveConnections').disabled=preferenceBusy||closed||!preferenceDirty;
+    $('connectionPreferences').setAttribute('aria-busy',String(preferenceBusy));
+    $('connectionPreferences').querySelectorAll('input').forEach(function(field){field.disabled=!!closed;});
+    if(closed)$('connectionsMessage').textContent='This workspace is closed. Your saved choices and records are retained.';
+    if($('cancelConnectionPreferences')){$('cancelConnectionPreferences').hidden=!preferenceDirty||closed;$('cancelConnectionPreferences').disabled=preferenceBusy;}
+  }
+
+  $('connectionPreferences').addEventListener('change',function(){if(leaving)return;$('connectionPreferencesDetails').open=true;preferenceState();$('connectionsMessage').textContent=preferenceBusy?'Saving your submitted choices. Newer changes stay here.':preferenceDirty?'Your connection choices have not been saved.':'Your saved connection choices are shown.';});
   if($('cancelConnectionPreferences'))$('cancelConnectionPreferences').addEventListener('click',function(){if(leaving||preferenceBusy)return;preferenceFill(preferenceBaseline);preferenceState();$('connectionsMessage').textContent='Your saved connection choices are shown.';});
   $('connectionPreferences').addEventListener('submit', async function (event) {
     event.preventDefault(); if (!data || !data.setup || preferenceBusy || leaving || ['cancelled','archived'].includes(data.client.status)) return;
@@ -568,7 +600,7 @@
       await action('save_connection_preferences', { desiredChannels: selected });
       if (leaving||generation!==portalGeneration) return;
       preferenceBaseline=selected;preferenceState();await load();if(!leaving&&generation===portalGeneration)$('connectionsMessage').textContent=preferenceDirty?'Submitted choices saved. Your newer choices are still unsaved.':'Preferences saved. Each connection shows its next step below.';
-    } catch (error) { if (!leaving&&generation===portalGeneration){if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}$('connectionsMessage').textContent='Your preferences could not be confirmed. Your choices are kept; check saved status before trying again.';} }
+    } catch (error) { if (!leaving&&generation===portalGeneration){if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}$('connectionPreferencesDetails').open=true;$('connectionsMessage').textContent='Your preferences could not be confirmed. Your choices are kept; check saved status before trying again.';} }
     finally { if (!leaving&&generation===portalGeneration){preferenceBusy=false;preferenceState();} }
   });
   $('reviewRules').addEventListener('click', async function () {
@@ -822,7 +854,7 @@
       var live = c.status === 'live'; $('tabToday').style.display = ''; $('tabTest').style.display = c.status === 'cancelled' ? 'none' : '';
       if (!location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
 
-      var needsFollowup=d.leads.filter(function(l){return (!selfService||!l.websiteSetupCheck&&!l.simulation)&&(selfService&&l.followthrough?l.followthrough.needsFollowup:l.status==='open'&&(l.alertWaiting||l.overdueAt||l.outcome==='needs_action'||l.outcome==='wants_call'));});
+      var needsFollowup=homeFollowupRows(d);
       $('needsYou').innerHTML = (function () { var rows = needsFollowup; return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + (platformLeadLabel(l)?' <span class="tag">'+esc(platformLeadLabel(l))+'</span>':'') + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(leadReference(l)) + humanHandoffStatus(l) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : emptyState(workLimited ? 'No requests need attention in the records shown' : 'No requests need attention', workLimited ? 'Some history still needs checking. Contact support if you are looking for an earlier request.' : 'Requests that need a callback, an acknowledgment or urgent attention will appear here.', 'View customer requests', 'leads'); })();
       $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || emptyState('No activity in the last 24 hours', 'Customer activity appears here after it happens. Private practice is kept separate.');
       if(selfService){

@@ -122,6 +122,7 @@
     if (contextCopy && steps[i].dataset.stepDescription) contextCopy.textContent = steps[i].dataset.stepDescription;
     var stepLabel = document.getElementById('onboard-step-label');
     if (stepLabel) stepLabel.textContent = 'Step ' + (i + 1) + ' of ' + steps.length;
+    var progress=document.getElementById('onboardProgress');if(progress){progress.max=steps.length;progress.value=i+1;progress.textContent=(i+1)+' of '+steps.length;}
     back.style.visibility = i ? 'visible' : 'hidden'; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; setErrorSummary('');
     if (frame) { window.scrollTo({ top: 0, behavior: 'instant' }); steps[i].querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
   }
