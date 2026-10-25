@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="desk-connections.css">
   <link rel="stylesheet" href="desk-billing.css">
   <link rel="stylesheet" href="desk-lead-sources.css">
+  <link rel="stylesheet" href="desk-setup-guide.css">
 
 <link rel="stylesheet" href="product-ui.css"><link rel="stylesheet" href="desk.css"></head>
 <body class="theme-light product-app desk-app" data-no-widget="" data-workspace-state="loading"><a class="ui-skip" href="#workspaceMain">Skip to workspace</a>
@@ -87,6 +88,7 @@
   <section class="pane" id="p-setup"><section class="card2 setup-overview" id="setupOverview"><div class="desk-section-heading"><div><p class="ui-eyebrow">SETUP &amp; DELIVERY</p><h3>Your connection progress</h3></div></div><div class="channel-states" id="channelStates" aria-label="Channel status"></div><p class="muted" id="setupMessage" role="status" aria-live="polite"></p><details class="desk-details"><summary>See all setup steps</summary><div id="setupSteps"></div></details></section>
     <div class="card2" id="connectionsCard" hidden="">
       <div class="desk-connections-heading" id="connectionTourHeading"><div><h3 id="connectionOverviewTitle">Your connections</h3><p class="muted">Phone, texts, Calendar and website chat use the business details you save once.</p></div></div>
+      <section id="setupGuide" class="setup-guide" aria-labelledby="setupGuideTitle" hidden></section>
       <section class="desk-preferences" id="connectionPreferencesDetails" aria-labelledby="connectionChoicesTitle"><h4 id="connectionChoicesTitle">Choose your services</h4><p class="muted">Save what you want to use, then follow each service’s next step. Permissions and any costs are reviewed separately.</p>
       <form id="connectionPreferences">
         <fieldset style="border:0;padding:0;margin:16px 0"><legend class="muted">Connections you want to use</legend><div class="channel-states">
@@ -99,12 +101,15 @@
         <p class="muted" id="connectionsMessage" role="status" aria-live="polite"></p>
       </form>
       </section>
+      <details class="desk-details connection-status-options" id="connectionStatusOptions"><summary><span>All connection statuses<small>Review each service and its saved setup details</small></span></summary><div id="connectionJourney"></div></details>
+      <details class="desk-details lead-platform-options" id="leadPlatformOptions"><summary><span>Lead platforms<small>Connect your accounts or explore more sources</small></span></summary>
       <section id="leadSources" class="lead-sources" aria-labelledby="leadSourcesTitle" hidden>
         <div class="desk-section-heading"><div><p class="ui-eyebrow">LEAD PLATFORMS</p><h3 id="leadSourcesTitle">Keep every inquiry moving.</h3><p class="muted">Bring the leads you paid for into your Inbox, with the job details and a clear next step.</p></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="leadSourcesRefresh">Check saved status</button></div>
         <p id="leadSourcesMessage" class="muted" role="status" aria-live="polite" tabindex="-1"></p>
         <div id="leadSourceCards" class="lead-source-grid"></div>
       </section>
-      <div id="connectionJourney"></div>
+      </details>
+
 
       <details class="desk-details desk-service-controls" id="connectionServiceDetails" hidden><summary>Connection details &amp; controls</summary><div id="serviceConnections"></div></details>
       <p id="serviceConnectionMessage" class="muted" role="status" aria-live="polite"></p>
@@ -297,6 +302,7 @@
 <script src="desk-activity.js" defer=""></script>
 <script src="desk-conversations.js" defer=""></script>
 <script src="desk-lead-sources.js" defer=""></script>
+<script src="desk-setup-guide.js" defer=""></script>
 <dialog class="walkthrough desk-account-confirm" id="billingCancel" aria-labelledby="billingCancelTitle"><h2 id="billingCancelTitle">End monthly renewal?</h2><p class="muted" id="billingCancelDetail"></p><div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="billingEndConfirm">End renewal</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="billingKeep">Keep subscription</button></div></dialog>
 
 

@@ -587,6 +587,7 @@
     { title: 'Put it on your website', body: 'Follow the next step shown here to install and check your website chat. Copying the code alone does not confirm it is installed or answering customers.', action: 'View website setup', tab: 'setup', target: 'websiteInstallStep', compact: 'websiteInstallHeading', tiny: 'websiteInstallHeading', fallback: 'connectionTourHeading' },
     { title: 'Find your customer requests', body: 'Inbox keeps customer requests and conversations together. Review what the customer needs, then confirm the next step directly. Saved visits are in Schedule.', action: 'View Requests', tab: 'leads', target: 'requestTourHeading', compact: 'requestTourHeading', tiny: 'requestTourHeading' }
   ];
+  var defaultTour = tour.slice(), tourRevealedDetails = [];
   var tourIndex = 0, returnFocus = null, tourActive = false, tourEpoch = 0, tourFrame = 0, tourGeneration = 0, tourAnchor = null, tourObserver = null, tourResize = null, tourAnimation = null, tourWebsiteOpen = null;
   var tourMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   function tourCurrent() { return tourActive && !leaving && tourGeneration === portalGeneration && $('guideDialog').open && !$('portalContent').hidden; }
@@ -601,6 +602,7 @@
     if (window.visualViewport) { visualViewport.removeEventListener('resize', scheduleTour); visualViewport.removeEventListener('scroll', scheduleTour); }
     document.body.classList.remove('guide-tour-open'); $('tourSpotlight').hidden = true;
     if(tourWebsiteOpen!==null&&$('websiteSetupDetails'))$('websiteSetupDetails').open=tourWebsiteOpen;tourWebsiteOpen=null;
+    tourRevealedDetails.forEach(function(node){if(node.isConnected)node.open=false;});tourRevealedDetails=[];
     ['tourStep','tourTarget','tourReady','tourPlacement','tourCompact','tourFallback'].forEach(function (name) { delete $('guideDialog').dataset[name]; }); tourAnchor = null;
   }
   function closeTour(remember, restore) {
@@ -655,6 +657,7 @@
     var step = tour[tourIndex], dialog = $('guideDialog'); dialog.dataset.tourReady = 'false'; $('tourSpotlight').hidden = true;
     showTab(step.tab); window.__tabPicked = true; history.replaceState(null, '', location.pathname + location.search + '#' + step.tab);
     if(step.target==='websiteInstallStep'&&$('websiteSetupDetails')&&!$('websiteSetupDetails').hidden){if(tourWebsiteOpen===null)tourWebsiteOpen=$('websiteSetupDetails').open;$('websiteSetupDetails').open=true;}
+    var reveal=$(step.target);while(reveal){if(reveal.tagName==='DETAILS'&&!reveal.open){tourRevealedDetails.push(reveal);reveal.open=true;}reveal=reveal.parentElement;}
     $('tourCount').textContent = 'Getting started · ' + (tourIndex + 1) + ' of ' + tour.length; $('tourTitle').textContent = step.title; $('tourBody').textContent = step.body; $('tourAction').textContent = step.action;
     $('tourBack').disabled = tourIndex === 0; $('tourNext').textContent = tourIndex === tour.length - 1 ? 'Finish' : 'Next'; $('tourProgress').style.transform = 'scaleX(' + ((tourIndex + 1) / tour.length) + ')';
     $('tourContent').scrollTop = 0; positionTour(true); tourFocus($('tourTitle'));
@@ -671,13 +674,23 @@
     if (window.ResizeObserver) { tourResize = new ResizeObserver(scheduleTour); tourResize.observe($('tourCoach')); }
     renderTour();
   }
-  $('openGuide').addEventListener('click', function () { tourIndex = 0; openTour(); });
+  $('openGuide').addEventListener('click', function () { if(tourActive)return; tour = defaultTour.slice(); tourIndex = 0; openTour(); });
+  document.addEventListener('mc:service-guide', function(event) {
+    if(leaving||!data||tourActive||!['web','voice','sms','calendar','thumbtack','angi'].includes(event.detail?.service))return;
+    var id=event.detail.service, journey=data.setup?.connectionJourney;
+    var row=(journey?.channels||[]).concat(journey?.leadSources||[]).find(function(item){return item.id===id;});
+    if(!row?.guide||!Array.isArray(row.guide.steps)||!row.guide.steps.length)return;
+    var anchor=['thumbtack','angi'].includes(id)?'lead-source-'+id:'connection-guide-'+id;
+    var maps={business:{tab:'know',target:'reviewCard',compact:'businessProfileTourHeading',tiny:'businessProfileTourTitle'},selection:{tab:'setup',target:'connectionPreferencesDetails',compact:'connectionChoicesTitle',tiny:'connectionChoicesTitle'},connection:{tab:'setup',target:anchor,compact:anchor,tiny:anchor},practice:{tab:'test',target:'chatForm',compact:'chatForm',tiny:'chatIn'},verification:{tab:'setup',target:id==='web'?'websiteInstallStep':id==='voice'&&$('phoneRoutingSteps')?'phoneRoutingSteps':id==='sms'&&$('textConnectionSteps')?'textConnectionSteps':anchor,compact:anchor,tiny:anchor},inbox:{tab:'leads',target:'requestFilters',compact:'pageTitle',tiny:'pageTitle'},schedule:{tab:'availability',target:'scheduleVisits',compact:'pageTitle',tiny:'pageTitle'}};
+    tour=row.guide.steps.slice(0,8).map(function(step){return Object.assign({title:String(step.label||row.label),body:String(step.detail||row.nextStep||''),action:step.actor==='customer'?'Go to this step':'View setup status',fallback:'setupGuide'},step.id==='practice'?maps.practice:maps[step.focus]||maps.connection);});
+    tourIndex=0;openTour();
+  });
   $('closeGuide').addEventListener('click', function () { closeTour(); }); $('skipGuide').addEventListener('click', function () { closeTour(); });
   $('guideDialog').addEventListener('cancel', function (event) { event.preventDefault(); closeTour(); });
   $('guideDialog').addEventListener('close', function () { if (!$('guideDialog').open) tourCleanup(); });
   $('tourNext').addEventListener('click', function () { if (tourIndex === tour.length - 1) closeTour(); else { tourIndex++; renderTour(); } });
   $('tourBack').addEventListener('click', function () { if (tourIndex > 0) { tourIndex--; renderTour(); } });
-  $('tourAction').addEventListener('click', function () { var anchor = tourAnchor;if(tour[tourIndex].target==='websiteInstallStep')tourWebsiteOpen=null; closeTour(true, false); if (tourVisible(anchor)) { anchor.scrollIntoView({ block: 'nearest', behavior: 'instant' }); tourFocus(anchor.querySelector('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled)') || anchor); } });
+  $('tourAction').addEventListener('click', function () { var anchor = tourAnchor;if(tour[tourIndex].target==='websiteInstallStep')tourWebsiteOpen=null;tourRevealedDetails=tourRevealedDetails.filter(function(node){return !node.contains(anchor);}); closeTour(true, false); if (tourVisible(anchor)) { anchor.scrollIntoView({ block: 'nearest', behavior: 'instant' }); tourFocus(anchor.querySelector('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled)') || anchor); } });
 
   var accountBusy = false, accountUncertain = null, exportBusy = false;
   function accountMessage(message, error) {
