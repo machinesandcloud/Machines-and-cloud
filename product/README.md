@@ -1,16 +1,16 @@
-> **Current financial checkpoint:** R3 is closed after an uncompleted hosted TEST checkout. All financial resources, test workspace/session, original settings and original Zari deployment are restored. Payment is not accepted; fix actual form diagnostics before another attempt. [Observed result](STRIPE-RECOVERY-V4R3-RESULT-2026-10-24.json). Current source/readiness is in [launch control](LAUNCH-CONTROL.json).
+> **Current checkpoint:** Actual R5 browser handoff and target Inbox restoration are independently accepted after owner unlock. Calendar permission and same-event create/move/cancel are next, after the existing native-mail route is bound. Google data-access verification and financial delivery remain open. [Launch control](LAUNCH-CONTROL.json) governs; dated release/local-hold notes below are historical when superseded.
 
 # Product team working files
 
 **Current release instruction, October23:** Steve authorized "push everything". Root is combining all finished accepted candidates into one verified release. Prior local holds below are historical for those candidates. Provider activation, purchases, billing and unfinished/private main runtime remain outside the release. [Grouped release](GROUPED-RELEASE-2026-10-23.json).
 
-## Current Account repair
+## Earlier Account repair — October 23
 
 The Account page has been rebuilt around identity/contact details, actual connection state, record downloads and intentional lifecycle controls. Empty sections, unsupported monthly revenue copy and the privacy wall were removed. Non-web resume and failed sign-out/export recovery were also repaired. Candidate `06c33c4` in `/tmp/mc-account-purpose-22` passes36independent Account groups and38required checks; the replacement PO exercised ordinary desktop/mobile tasks. [Accepted scope and evidence](ACCOUNT-PURPOSE-ACCEPTANCE-2026-10-23.json) · [PO review](ACCOUNT-PURPOSE-PO-2026-10-23.json).
 
 **Kept local.** The Connections and sign-in/HELP parent holds remain intact; marketing and resource admission are separate. Actual production/provider acceptance and the complete launch remain open in [launch control](LAUNCH-CONTROL.json).
 
-## Product Owner and accepted Connections repair
+## Earlier Product Owner and Connections repair — October 23
 
 Steve replaced the previous PO assignment. The fresh **product_owner_v2** owns website chat, phone answering, two-way texting, Calendar scheduling and useful retained customer outcomes across the full supported offer. The former PO agent's acceptance is not reused.
 
@@ -53,7 +53,7 @@ Eight persistent roles work from these files. A role owns its mission and unreso
 
 OM is interpreted as **Operations Manager**. UI/UX and Marketing/Sales were added at Steve's October22 request. These are continuing team missions, not a claim that agents run automatically in the background or that a future schedule has been created.
 
-Shared goal: a small Houston service-shop owner signs up, configures and learns the product, activates eligible services and receives dependable customer service without routine Steve intervention. Get the first paying shop safely live, keep the owner in control, and continuously improve from operator evidence and actual use. Billing stays parked.
+Shared goal: a small Houston service-shop owner signs up, configures and learns the product, activates eligible services and receives dependable customer service without routine Steve intervention. Get the first paying shop safely live, keep the owner in control, and continuously improve from operator evidence and actual use. Billing implementation is published; actual payment and recovery acceptance remain open in launch control.
 
 **Published October 22 at 4:03 p.m. Houston:** `05e8c5c34656f3257af8a8d3d7e8523dcbd542b3`, READY Netlify deploy `6ada79da2125b9c8ebe7ad56`. [Publication receipt](../scratchpad/campaign-correction-publication-result.json). This is the approved `e0a8503` application tree with exactly four account-identifier redactions in three private evidence files; runtime/tests are identical. GitHub blocked the first push before any build; the sanitized release used one successful push and one automatic build, with no bypass or manual trigger.
 
@@ -65,7 +65,7 @@ The campaign still displays the old HELP snapshot. Its relevance to vetting and 
 
 All activation gates and environment/billing settings are unchanged; no call, text, email, model request, purchase or carrier submission occurred in this release phase. **Do not push main wholesale:** older cleanup/access-link runtime remains unpublished. Future release work starts from published `05e8c5c`; this build/read approval is fully spent. Full automatic customer phone/text/Calendar delivery still needs separately scoped actual acceptance.
 
-## Current PO and UI/UX next-work decision
+## Earlier PO and UI/UX next-work decision — October 22
 
 Steve's latest feedback makes **actual automatic service delivery** the primary track, as recorded in the [PO's updated decision](PO-NEXT-WORK-2026-10-22.md#latest-steering-make-core-service-delivery-the-primary-track). [Sprint20](SPRINT20.md) builds on the published coordinator, starting with a useful owner visit workflow and bounded owned-Calendar delivery. Calendar and voice do not depend on approval of the separate M&C company-support campaign. Dedicated shop texting needs its own registration and delivery acceptance. Native Jobber/Housecall Pro connectors, lead-platform replies and dispatch remain separate missing products; billing stays parked.
 

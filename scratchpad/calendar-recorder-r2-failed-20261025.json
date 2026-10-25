@@ -1,0 +1,44 @@
+{
+  "phaseId": "calendar-recorder-synthetic-20261025-r2",
+  "state": "CLOSED_FAILED_BEFORE_PREPARATION",
+  "closedAt": "2026-10-25T02:22:12.338383+00:00",
+  "sourceBindingSHA256": "8831b5663f65881c530880d4becc69e1245e382e5cc4b6c2e84a7f818f96a774",
+  "actualIdentityPreflight": "PASSED, 1 readonly native invocation",
+  "controllerAttempts": [
+    {
+      "command": "inventory",
+      "at": 1792894641555,
+      "outcome": "confirmed"
+    },
+    {
+      "command": "create",
+      "at": 1792894641979,
+      "outcome": "unknown"
+    },
+    {
+      "command": "reconcile",
+      "at": 1792894642232,
+      "outcome": "confirmed"
+    }
+  ],
+  "freshReconciliation": {
+    "phaseId": "calendar-recorder-synthetic-20261025-r2-readonly-create-reconciliation",
+    "state": "CLOSED_READONLY_OBSERVED",
+    "at": "2026-10-25T02:18:55.103828+00:00",
+    "authority": "Standing fix/test; one fresh read-only ID inventory to reconcile possible new window after unknown create. No mutation/creation retry.",
+    "maximumNativeReads": 1,
+    "reads": 1,
+    "sameWindowAndTabIDs": true,
+    "newWindowIDs": [],
+    "receiptSHA256": "71ae1f2d58798cbd03f1ab2f6c769b8dd2f704b812154945e5c41b9adc0943f7"
+  },
+  "totalNativeInvocations": 5,
+  "creationOutcome": "unknown, not retried",
+  "preparation": false,
+  "previews": 0,
+  "captureSeconds": 0,
+  "ownedResource": null,
+  "originalBrowserClosed": false,
+  "unusedAllowances": "Closed; not reusable",
+  "limitation": "Nonzero child stdout was lost by controller; actual create failure reason remains unobserved. No provider operations."
+}

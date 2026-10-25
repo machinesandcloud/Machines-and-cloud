@@ -1,0 +1,80 @@
+{
+  "state": "NARROW_ACTUAL_BORROWED_HANDOFF_CUSTOMER_JOB_ACCEPTED",
+  "phaseId": "core-calendar-borrowed-synthetic-20261025-r5",
+  "acceptedJob": "From a different foreground regular app, bring the exact existing owned Inbox tab visibly forward, load the controlled privacy page, observe both M&C storage keys absent without reading their values, leave storage untouched and restore that exact Inbox.",
+  "observedBy": "Root performed actual native actions. PO independently reviewed retained exact ledger/config/source and closure locally; PO did not inspect or operate a browser.",
+  "sources": {
+    "swiftSHA256": "4e10fdf63f64bcde02369086b606cf8aa522c255e0863fe431e9a53f0a542e87",
+    "binarySHA256": "acf86bbec817e4bf3df878ebaa32d5a99e00d7c1556a1441074c4b002ac95ed1",
+    "wrapperSHA256": "fc68e3abf6c25630ef26fd6acf39f2e71b52341e17d4abf06cab286f36d52c5d",
+    "activeConfigSHA256": "11eab11d14e433d608ba8f7d05937caad06e489b874e365f84f49c32e232265e",
+    "ledgerSHA256": "6308ddd00d221facda40c9ff056664a688e9de0892e8cef8c12025c0fda03441",
+    "closedConfigSHA256": "6ba5afdb07cc42a8ceff6901b0cd27cb6d0d3f3b06461c3f7d0775cf733ab6d1",
+    "closedScopeSHA256": "ae3712405638d20879bf1176c125e8b77557df0d6bfd704d86a7da91f95c5797",
+    "rootActualReceiptSHA256": "5e64092ff470d7f43902bfbddec3e9b25e28e12e802a42e3cb43356877fb9332"
+  },
+  "evidence": {
+    "ledger": "/tmp/mc-calendar-borrowed-synthetic-20261025-r5/ledger.jsonl",
+    "activeConfig": "/tmp/mc-calendar-borrowed-synthetic-20261025-r5/config-active-original.json",
+    "closedConfig": "/tmp/mc-calendar-borrowed-synthetic-20261025-r5/config.json",
+    "scope": "/tmp/mc-calendar-borrowed-synthetic-20261025-r5/root-scope.json",
+    "rootActualReceipt": "/tmp/mc-launch-finish-7c/scratchpad/calendar-borrowed-r5-actual-20261025.json",
+    "independentSourceBridge": "/tmp/mc-borrowed-corroborated-independent-20261025/r5-runloop-bridge.json"
+  },
+  "actualObservations": {
+    "borrow": {
+      "foregroundConfirmed": true,
+      "navigationDispatched": true,
+      "ok": true
+    },
+    "inspect_storage": {
+      "ok": true,
+      "ownerKeyAbsent": true,
+      "pendingKeyAbsent": true
+    },
+    "prepare_restore": {
+      "atPrivacy": true,
+      "ok": true
+    },
+    "clear_restore": {
+      "navigationDispatched": true,
+      "ok": true,
+      "storageOutcome": "untouched",
+      "storageRestored": true
+    },
+    "verify_restore": {
+      "atOriginalInbox": true,
+      "changed": false,
+      "ok": true,
+      "pending": false
+    }
+  },
+  "actualEffects": {
+    "preparatoryActivation": 1,
+    "fixedTargetNativeCalls": 5,
+    "unknowns": 0,
+    "storageWrites": 0,
+    "GoogleNavigation": 0,
+    "providerCalls": 0,
+    "emails": 0,
+    "modelRequests": 0,
+    "builds": 0,
+    "recordings": 0
+  },
+  "closure": {
+    "scopeClosed": true,
+    "configurationApproved": false,
+    "nativeRestored": true,
+    "nativeClosed": false,
+    "oldAllowancesReusable": false
+  },
+  "acceptedPrerequisite": "Visible borrowed-tab foreground/privacy roundtrip and exactInbox restoration; both M&C keys were absent at this observation only. Recheck both atomically before any later seed.",
+  "notAccepted": [
+    "Actual owner permission grant or original-session callback completion",
+    "Actual seeded-key conditional removal",
+    "Google event create/move/cancel or ordinary scheduled recovery",
+    "Google data-access verification/video",
+    "Full-platform readiness",
+    "Any causal diagnosis of earlier closed native failures"
+  ]
+}

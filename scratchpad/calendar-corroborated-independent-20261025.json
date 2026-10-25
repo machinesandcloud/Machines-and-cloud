@@ -1,0 +1,58 @@
+{
+  "state": "LOCAL_CORROBORATED_SESSION_PREDICATE_ACCEPTED_ACTUAL_HANDOFF_PENDING",
+  "sourceSHA256": "6610d5c92c78ca696512128b3cf252eef62595373132412b824516725c6e94b7",
+  "predecessorSHA256": "89840066c55b06fcfc7666358c23f2d3713506d7e06947db8b81a53a7590477d",
+  "strictClassifierOnlyReverse": true,
+  "pureCases": {
+    "cases": [
+      "absent corroborated",
+      "explicit false compatibility",
+      "true lock precedence",
+      "true lock valid session",
+      "missing dictionary",
+      "missing login",
+      "missing console",
+      "login false",
+      "console false",
+      "numeric login",
+      "numeric console",
+      "false lock invalid login",
+      "false lock missing console",
+      "numeric lock zero",
+      "numeric lock one",
+      "string lock",
+      "null lock",
+      "absent no foreground",
+      "absent invalid pid",
+      "absent terminated",
+      "absent accessory",
+      "absent loginwindow",
+      "absent empty bundle",
+      "absent missing bundle"
+    ],
+    "failed": 0,
+    "nativeActions": 0,
+    "passed": 24,
+    "sessionQueries": 0
+  },
+  "sourceExtractionSHA256": "e24405c80e00f04babf48b4e9d194ee4fff25fa1f01c114ec8b9c561288deb95",
+  "typecheckExitCode": 0,
+  "sourceStable": true,
+  "retainedBoundaries": [
+    "Exact owned Inbox tab selected by ID-derived index; immediate active-ID/Inbox verification retained byteexact.",
+    "All before-mutation unlocked/expiry checks and post-focus actual Chrome PID/window/active-ID checks retained byteexact.",
+    "Only CFBoolean loginDone/onConsole true corroborate absence; explicit true lock always blocks; malformed lock stays unknown.",
+    "No app-auth/storage/OAuth/cleanup behavior changed."
+  ],
+  "qaEffects": {
+    "CGSessionQueries": 0,
+    "native": 0,
+    "browser": 0,
+    "network": 0
+  },
+  "notAccepted": [
+    "Actual unlocked foreground/handoff/restoration",
+    "Actual Google grant or lifecycle",
+    "Cause of any prior native failure"
+  ]
+}

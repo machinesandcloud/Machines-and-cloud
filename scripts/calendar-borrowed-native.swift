@@ -80,7 +80,7 @@ if mode=="borrow"{
  requireUnlocked()
  guard running.activate(options:[]) else{fail("fixed_process_activation_failed")}
  let foregroundDeadline=min(Date().addingTimeInterval(2),expiry)
- while Date()<foregroundDeadline&&NSWorkspace.shared.frontmostApplication?.processIdentifier != 691{Thread.sleep(forTimeInterval:0.05)}
+ while Date()<foregroundDeadline&&NSWorkspace.shared.frontmostApplication?.processIdentifier != 691{RunLoop.current.run(until:Date().addingTimeInterval(0.05))}
  guard NSWorkspace.shared.frontmostApplication?.processIdentifier==691,selected[0].value(forKey:"index")as?Int==1,fixedTabIsActive() else{fail("fixed_foreground_unconfirmed")}
  guard Date()<expiry,tab.value(forKey:"URL")as?String==original else{fail("original_inbox_changed_before_navigation")}
  requireUnlocked()
