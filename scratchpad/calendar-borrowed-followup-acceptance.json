@@ -1,0 +1,49 @@
+{
+  "state": "LOCAL_PROOF_REPAIR_ACCEPTED_ACTUAL_UNLOCKED_HANDOFF_PENDING",
+  "parentImplementation": "6317a1004d31f9e3526bbfafe3c51352c0da910f",
+  "sources": {
+    "scripts/calendar-borrowed-native.swift": "89840066c55b06fcfc7666358c23f2d3713506d7e06947db8b81a53a7590477d",
+    "scripts/calendar-auto-connect-check.mjs": "6f2321d999c3be8cee80815a61edd6320f2c548487f359d140b6b75dfe160ab9"
+  },
+  "change": "Select only the ID-matched existing Inbox tab; add explicit-unlocked session/expiry fences before native interactions; repair two stale callback test assumptions. No customer app/runtime change.",
+  "independentSelectionAndSessionGuard": {
+    "path": "scratchpad/calendar-borrowed-session-independent-acceptance.json",
+    "sha256": "7e36c18fa2037e1ad7b1d06ac3056224263e8302343148ea3d122aded3a2281e",
+    "pureCases": 8,
+    "typecheckExit": 0,
+    "actualSessionQueries": 0
+  },
+  "independentCallbackFixture": {
+    "path": "scratchpad/calendar-borrowed-callback-independent/independent-acceptance.json",
+    "sha256": "8ec0ee1c03af70a3cdbad1981958f1672bc2df83ab7d9c9f3438be9fcbc77f06",
+    "passed": 18,
+    "failed": 0,
+    "physicalRequests": 0
+  },
+  "authoredRegression": {
+    "path": "scratchpad/calendar-borrowed-author-session.json",
+    "passed": 22,
+    "failed": 0,
+    "physicalAttempts": 0
+  },
+  "compile": "scratchpad/calendar-borrowed-compile-session.json",
+  "actualRootObservations": [
+    {
+      "path": "scratchpad/calendar-borrowed-synthetic-failed-20261025.json",
+      "sha256": "7d127177361cc47fcee62a8839ebe78cc969f4ba124528750367b6fc56aec456",
+      "custodian": "Root original; no copy or modification by this repair"
+    },
+    {
+      "path": "scratchpad/calendar-borrowed-readonly-20261025.json",
+      "sha256": "36106e4278cc0cf2638c3bf1c140e1debafe531811eb68fdcddb4d5b352b5fef",
+      "custodian": "Root original; no copy or modification by this repair"
+    },
+    {
+      "path": "scratchpad/chrome-focus-locked-desktop-20261025.json",
+      "sha256": "7bcdff3d5229c677265cd872f5c81d48ba7832029d859e2f4683c9ba6b0fcf37",
+      "custodian": "Root original; no copy or modification by this repair"
+    }
+  ],
+  "actualBoundary": "Root observed inactive target and later locked desktop. Index parsers both passed. R1 discarded native reason cannot be reconstructed. Activation API defect is not established. Actual repaired unlocked handoff and Google grant/lifecycle remain open.",
+  "inertPreparation": "Future R3 wrapper/mail/V8 packet outside this commit. No live allowance, provider action, runtime publication, recording or owner permission is established."
+}

@@ -1,0 +1,53 @@
+{
+  "state": "LOCAL_EXACT_TAB_SELECTION_AND_UNLOCKED_GUARD_ACCEPTED_ACTUAL_HANDOFF_PENDING",
+  "sourceSHA256": "89840066c55b06fcfc7666358c23f2d3713506d7e06947db8b81a53a7590477d",
+  "binarySHA256": "c0e8af6cb6c1c0ed540f6d956b7cb2cec7247fdf9043df5a9170b7fa56ad4ac2",
+  "wrapperSHA256": "6384685676c27d80dddf0f4710594b0f608b92e8cd089e2858bdf1de626f82c4",
+  "pureExactExtractedClassifier": {
+    "path": "/tmp/mc-calendar-session-guard-independent-20261025/borrowed-parser.json",
+    "sha256": "7377dc1d6dc68038e1b2c8aebd8367f0bbe156fcd7fc1fdbfa2caf8d59713458",
+    "passed": 8,
+    "CGSessionQueries": 0
+  },
+  "swiftTypecheckExitCode": 0,
+  "strictGuardOnlyReverse": {
+    "preservedSHA256": "761942a447d9170069b9ef53b9638ad0afb4adbf8d1beb30e20206b073095106",
+    "matchesExact": true
+  },
+  "selectionBoundaries": [
+    "Locate exactly one existing window/tab by fixed IDs; derive only that tab index from ID-only enumeration.",
+    "Require exact original Inbox before selecting only the owned known tab; immediately verify active target and unchanged Inbox.",
+    "Raise only known window and activate fixed Chrome PID, then require actual foreground/window-index/active-target and fresh Inbox/expiry checks before navigation.",
+    "No new tab/window, unrelated tab content/URL, OAuth code transfer or auth behavior change."
+  ],
+  "lockBoundaries": [
+    "Only actual CFBoolean false means unlocked; true locked; missing/numeric0or1/string/null/other type unknown and stops.",
+    "Current lock and expiry checks precede browser lookup and every selection/raise/activation/URL setter and JavaScript execution.",
+    "Existing owned-storage cleanup and readback logic unchanged; guard-only reverse reproduces exact preserved selection source."
+  ],
+  "wrapperBridge": {
+    "onlyChange": "Three new closed safe-reason whitelist entries",
+    "strictReverseSHA256": "6e3ae1694096f5c148e99284e046a0f13043428566e109457e6d51e903acc3e0",
+    "retainedAuthorCases": 9,
+    "authorReceiptSHA256": "2f58e6cd2ba34d189922e546c9a6adaa17ff514904925eddcd069e4f064dbbf8",
+    "state": "PREPARING approvedfalse no ledger"
+  },
+  "callbackFixtureSeparateAcceptance": {
+    "path": "/tmp/mc-calendar-auto-connect-independent-20261025/independent-acceptance.json",
+    "sha256": "8ec0ee1c03af70a3cdbad1981958f1672bc2df83ab7d9c9f3438be9fcbc77f06",
+    "passed": 18
+  },
+  "qaEffects": {
+    "CGSessionQuery": 0,
+    "native": 0,
+    "regularBrowser": 0,
+    "network": 0
+  },
+  "notAccepted": [
+    "Actual unlocked foreground",
+    "Actual visible borrowed handoff/restoration",
+    "Actual Google grant/lifecycle",
+    "Activation API failure cause for any prior phase"
+  ],
+  "next": "Root uses a fresh finite synthetic scope only after actual owner unlock/current unlocked observation. No closed phase replay or readiness inferred from local checks."
+}

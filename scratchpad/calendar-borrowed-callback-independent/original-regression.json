@@ -1,0 +1,168 @@
+{
+  "at": "2026-10-25T02:07:26.030Z",
+  "scope": "Local browser + actual client/Google handlers + memory store; Google/provider responses intercepted, zero live calls or emails.",
+  "before": {
+    "desk-connections.js": "b6c9da0abb5272895347fc00695eebdb6d2877037b6f5d09e166c56c504d8b14",
+    "netlify/functions/client.mjs": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07",
+    "netlify/functions/google.mjs": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-delivery.mjs": "ccab60b8af46e239119494badef0963169629442565498db756f2751355fb98c",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "scripts/calendar-auto-connect-check.mjs": "6dd6c44c73da116bc8f0f4f88e4e281b42b9b614ee584e95ee55dd0d3bf97e5e"
+  },
+  "after": {
+    "desk-connections.js": "b6c9da0abb5272895347fc00695eebdb6d2877037b6f5d09e166c56c504d8b14",
+    "netlify/functions/client.mjs": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07",
+    "netlify/functions/google.mjs": "6328926cf21acfa064acf7ec622db4917802768e8fb2435c49ba93e1ce991c93",
+    "netlify/functions/lib/calendar-connection.mjs": "6f1d1f633783b44c0437a701d0ee811f12e97f14faab8b64d3a9b14a1ee3d290",
+    "netlify/functions/lib/calendar-delivery.mjs": "ccab60b8af46e239119494badef0963169629442565498db756f2751355fb98c",
+    "netlify/functions/lib/calendar-execution.mjs": "6043dc6cc042ccb00b49f15b83aa7d45fb2aebd6022fd5b98c0a70f560c9f285",
+    "scripts/calendar-test-fixtures.mjs": "6aa35c36063a4289c4711ed6005ef6963129d9d51093ee80518f2a9730e1a0fe",
+    "scripts/calendar-auto-connect-check.mjs": "6dd6c44c73da116bc8f0f4f88e4e281b42b9b614ee584e95ee55dd0d3bf97e5e"
+  },
+  "sourceStable": true,
+  "checks": [
+    {
+      "name": "Starting Calendar records only a fresh state, slug, expiry and non-secret owner-session binding before the Google redirect",
+      "pass": false,
+      "error": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-connection=\"start_calendar\"]')\u001b[22m\n",
+      "stack": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-connection=\"start_calendar\"]')\u001b[22m\n\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:91:67\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:89:3"
+    },
+    {
+      "name": "A valid same-session Google consent return connects automatically through the real authenticated handler once, with PKCE and encrypted credentials",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:102:30\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:98:3"
+    },
+    {
+      "name": "A saved Google permission with exhausted delivery allowance shows the server waiting detail, not a future-sync promise",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:117:83\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:113:3"
+    },
+    {
+      "name": "Consent denial is completed automatically without token exchange or a false connected success message",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:125:111\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:123:3"
+    },
+    {
+      "name": "A missing browser receipt never submits the Google callback",
+      "pass": false,
+      "error": "The input did not match the regular expression /could not be matched/. Input:\n\n''\n",
+      "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /could not be matched/. Input:\n\n''\n\n    at file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:132:12\n    at async check (file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:129:3"
+    },
+    {
+      "name": "A different valid owner session cannot automatically process the original sign-in callback",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:137:157\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:134:3"
+    },
+    {
+      "name": "different_slug: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "different_state: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "expired_receipt: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "duplicate_state: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "code_and_denial: callback cannot auto-submit or exchange a code",
+      "pass": true
+    },
+    {
+      "name": "Legacy browser receipts retain an explicit completion action, protected by the same real server checks",
+      "pass": false,
+      "error": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-connection=\"finish_calendar\"]')\u001b[22m\n",
+      "stack": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-connection=\"finish_calendar\"]')\u001b[22m\n\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:153:205\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:151:3"
+    },
+    {
+      "name": "An authenticated event for another workspace is not enough to automatically complete this return",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:157:171\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:155:3"
+    },
+    {
+      "name": "Revoking the owner session before callback completion fails closed without token exchange",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:163:21\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:159:3"
+    },
+    {
+      "name": "server_expiry: authoritative state checks override an otherwise matching browser receipt",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:170:57\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:165:56"
+    },
+    {
+      "name": "newer_grant: authoritative state checks override an otherwise matching browser receipt",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at waitForMessage (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:86:62)\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:170:57\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:165:56"
+    },
+    {
+      "name": "A lost browser completion response refreshes status and never automatically replays a one-use grant",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:177:21\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:174:3"
+    },
+    {
+      "name": "Sign out during an in-flight continuation clears private UI and ignores the late response",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 5000ms exceeded.",
+      "stack": "page.waitForFunction: Timeout 5000ms exceeded.\n    at /private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:181:93\n    at async check (/private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:23:44)\n    at async file:///private/tmp/mc-calendar-borrowed-615/scripts/calendar-auto-connect-check.mjs:179:3"
+    }
+  ],
+  "pageErrors": [
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')",
+    "Cannot read properties of null (reading 'addEventListener')",
+    "Cannot read properties of null (reading 'querySelector')"
+  ],
+  "physicalRequests": 0,
+  "passed": 5,
+  "failed": 13,
+  "ok": false
+}

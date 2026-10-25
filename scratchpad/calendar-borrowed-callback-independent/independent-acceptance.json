@@ -1,0 +1,56 @@
+{
+  "state": "STALE_CALLBACK_FIXTURE_REPAIRED_LOCAL18_OF18_ACCEPTED",
+  "baseCommit": "615de409891df9c91ab53569daa462157615722a",
+  "changedFile": "/tmp/mc-calendar-auto-connect-qa-615/scripts/calendar-auto-connect-check.mjs",
+  "changedSHA256": "6f2321d999c3be8cee80815a61edd6320f2c548487f359d140b6b75dfe160ab9",
+  "strictReverseToOriginal": true,
+  "originalFailure": {
+    "path": "/tmp/mc-calendar-auto-connect-independent-20261025/original-regression.json",
+    "sha256": "5eec7119f3775fb858c0698f7d0658bde936a565c8c820202c405bd1b5613c1c",
+    "passed": 5,
+    "failed": 13,
+    "cause": "Synthetic HTML omitted the real required connectionJourney element, causing null listener/render accesses."
+  },
+  "intermediate": {
+    "path": "/tmp/mc-calendar-auto-connect-independent-20261025/fixed-run.log",
+    "sha256": "7ec689c5f133c90662dbfc3ba8867900a7a6c10cf0132a3ecd45f3fb713e40e0",
+    "passed": 17,
+    "failed": 1,
+    "cause": "First test assumed immediate Google navigation and skipped the current mandatory access disclosure."
+  },
+  "replacementCoverage": [
+    "Synthetic page now includes actual required connectionJourney node.",
+    "Ordinary Connect opens current disclosure; exact version and busy-interval explanation verified; zero Calendar request before confirmation; ordinary Continue to Google triggers the real handler.",
+    "All existing continuation/denial/session/state/expiry/duplicate/lost-response/logout assertions retained."
+  ],
+  "final": {
+    "path": "/tmp/mc-calendar-auto-connect-independent-20261025/final-result.json",
+    "sha256": "d36b466eb05fbfc4847a611f84869229bce575bb036f26835667a305e5201186",
+    "passed": 18,
+    "failed": 0,
+    "sourceStable": true,
+    "pageErrors": [],
+    "physicalRequests": 0
+  },
+  "unchangedRuntimeSources": [
+    "desk-connections.js",
+    "netlify/functions/client.mjs",
+    "netlify/functions/google.mjs",
+    "netlify/functions/lib/calendar-connection.mjs",
+    "netlify/functions/lib/calendar-delivery.mjs",
+    "netlify/functions/lib/calendar-execution.mjs",
+    "scripts/calendar-test-fixtures.mjs"
+  ],
+  "effects": {
+    "isolatedHeadlessFixtureBrowser": true,
+    "regularOwnerChromeAccess": false,
+    "physicalHTTP": 0,
+    "GoogleProvider": 0,
+    "email": 0
+  },
+  "limits": [
+    "Headless browser uses synthetic HTML and actual desk-connections/client/Google handlers with memory storage and intercepted provider responses.",
+    "No actual Google consent, real native ABI or production delivery is established.",
+    "This repairs an affected narrow suite; no unrelated full suite is relabeled green."
+  ]
+}

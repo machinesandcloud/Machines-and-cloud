@@ -64,7 +64,7 @@ async function pageFixture(item, { pending, token = item.token, failCompletion =
     if (url.origin === 'https://accounts.google.com') { navigations.push(url.href); return route.fulfill({ contentType: 'text/html', body: '<h1>Simulated Google consent, no provider request.</h1>' }); }
     if (url.origin !== local) { physicalRequests++; return route.abort(); }
     if (url.pathname === '/desk-connections.js') return route.fulfill({ contentType: 'text/javascript', body: source });
-    if (url.pathname === '/desk') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><body><button id="deskSignOut">Sign out</button><h1 id="status">Your front desk</h1><div id="channelStates"></div><div id="serviceConnections"></div><p id="serviceConnectionMessage" role="status"></p><script src="/desk-connections.js"></script></body></html>' });
+    if (url.pathname === '/desk') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><body><button id="deskSignOut">Sign out</button><h1 id="status">Your front desk</h1><div id="channelStates"></div><div id="serviceConnections"></div><div id="connectionJourney"></div><p id="serviceConnectionMessage" role="status"></p><script src="/desk-connections.js"></script></body></html>' });
     if (url.pathname === '/api/client' && req.method() === 'POST') {
       const body = req.postDataJSON(); requests.push(body);
       assert.equal(url.searchParams.get('c'), item.client.slug);
@@ -88,7 +88,12 @@ async function waitForMessage(page, expression) { await page.waitForFunction(pat
 try {
   await check('Starting Calendar records only a fresh state, slug, expiry and non-secret owner-session binding before the Google redirect', async () => {
     const item = await seed(), view = await pageFixture(item); await view.page.goto(local + '/desk?c=' + item.client.slug); await view.emit();
-    await view.page.locator('[data-connection="start_calendar"]').click(); await view.page.waitForURL('https://accounts.google.com/**');
+    await view.page.locator('[data-connection="start_calendar"]').click();
+    const disclosure = view.page.locator('#calendarAccessDisclosure');
+    assert.equal(await disclosure.getAttribute('data-disclosure-version'), '2026-10-24-busy-v1');
+    assert.match(await disclosure.innerText(), /read busy intervals/i);
+    assert.equal(view.requests.length, 0, 'Access disclosure precedes any Calendar request');
+    await Promise.all([view.page.waitForURL('https://accounts.google.com/**'), view.page.getByRole('button', { name: 'Continue to Google', exact: true }).click()]);
     assert.equal(view.requests.length, 1); assert.equal(view.requests[0].action, 'start_calendar_connection');
     await view.page.goto(local + '/desk?c=' + item.client.slug);
     const pending = await view.page.evaluate(() => JSON.parse(sessionStorage.getItem('mc-calendar-pending-v1')));
