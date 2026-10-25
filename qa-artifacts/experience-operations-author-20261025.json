@@ -1,0 +1,121 @@
+{
+  "scope": "Author local operations/setup projection acceptance; not independent QA, deployment, live provider/model or launch acceptance",
+  "baseCommit": "b3437f27387454b39b52592198403ec3ee2db909",
+  "sourceSHA256": {
+    "netlify/functions/health.mjs": "481a96212c5069bc9a7ec16acda7a14f7d4e57d497164e2457205f2a1b4f273f",
+    "netlify/functions/lead-connections-scheduler.mjs": "c3b3fb52de3cc23987ef09a7b525cd735e5b7c7b3ab0e07977df564ecec398fc",
+    "netlify/functions/lib/operator.mjs": "9c31fbe0a2a9c054420e5c1c5857082d3198779d47a2ae08626eeb5cd75a4b57",
+    "netlify/functions/lib/service-health.mjs": "ca7cae071ef24e3ac40fc97ae7b0d496f48c4356e54127e2848761d51a787415",
+    "netlify/functions/lib/thumbtack-connection.mjs": "30e835059bb5eceea42f01f3e4a564f19e35c88904f2f08cc723fc7f2fee94d1",
+    "scripts/operator-management-qa-check.mjs": "3777197ab56223b871ce1ccb9581a184ebfdae1a4242b7d6d6c7eaba52573350",
+    "scripts/thumbtack-connection-check.mjs": "a5de8e843c6ca03018f675a323cdcf167df3236bdff8734513debc18b70f44f1"
+  },
+  "suites": [
+    {
+      "name": "native-health",
+      "passed": 29,
+      "failed": 0,
+      "log": "/tmp/mc-experience-native-health-sealed-20261025.log",
+      "logSHA256": "2e3a911d3c6c3a3fc17a77ae8813e746a11ecd4d8f06cb05434494e5a3ad0ad1"
+    },
+    {
+      "name": "scheduler",
+      "passed": 10,
+      "failed": 0,
+      "log": "/tmp/mc-experience-scheduler-sealed-20261025.log",
+      "logSHA256": "d271b3c935a4649923a17475ba07dae93dc3bba0a645864a88f3cfc7e22176a3"
+    },
+    {
+      "name": "operator",
+      "passed": 60,
+      "failed": 0,
+      "log": "/tmp/mc-experience-operator-sealed-20261025.log",
+      "logSHA256": "d1c3ed16515a229d3b7837b8f49a670e67cfdf9e2c7b303e81a76dac991a86a1"
+    },
+    {
+      "name": "support",
+      "passed": 23,
+      "failed": 0,
+      "log": "/tmp/mc-experience-support-sealed-20261025.log",
+      "logSHA256": "54eba0a4c3578b7f0c9edbb28c4d3554a92b118d3825c92acb2832502c0dda1a"
+    },
+    {
+      "name": "platform-ai",
+      "passed": 10,
+      "failed": 0,
+      "log": "/tmp/mc-experience-platform-ai-sealed-20261025.log",
+      "logSHA256": "4f14d4fce98c46a6a765c6e639ea2431cf5d8928970e9b935cbe184165ca1214"
+    },
+    {
+      "name": "leads",
+      "passed": 14,
+      "failed": 0,
+      "log": "/tmp/mc-experience-leads-sealed-20261025.log",
+      "logSHA256": "7b2481d9e4615a3d8cb5ef620623a7ddd4813f4a06d8a3e27d022163a50884bc"
+    },
+    {
+      "name": "platform-sms",
+      "passed": 18,
+      "failed": 0,
+      "log": "/tmp/mc-experience-platform-sms-sealed-20261025.log",
+      "logSHA256": "2f0cc95550add10f3ad5601d35dcba5a5f0d6e10309019f18baf2ceaf95545a8"
+    },
+    {
+      "name": "reconciliation",
+      "passed": 17,
+      "failed": 0,
+      "log": "/tmp/mc-experience-reconciliation-sealed-20261025.log",
+      "logSHA256": "528bfda0e924c132700b4f87c05a057aec63dcb4604364455eb00f6335417de2"
+    }
+  ],
+  "summary": {
+    "passed": 181,
+    "failed": 0,
+    "suites": 8,
+    "actualExternalRequests": 0,
+    "actualModelRequests": 0,
+    "providerAccountMutations": 0,
+    "broadRequiredGates": 0
+  },
+  "networkGuard": {
+    "path": "scratchpad/tenant-isolation-required-network-guard.mjs",
+    "sha256": "5e5a3e53e0bf93d6fb9386599d8c360dd957870c9b011c5012c49d7f4459a230",
+    "mode": "Preloaded for every listed command; synthetic protocol transports only"
+  },
+  "retainedBaseline": {
+    "source": "b3437f27387454b39b52592198403ec3ee2db909",
+    "finding": "Overdue configured native setup has no native-worker receipt or aggregate health entry yet public health is200",
+    "nativeState": "setup_unconfirmed",
+    "deliveryOK": true,
+    "nativeHealthPresent": false,
+    "publicStatus": 200,
+    "publicBody": {
+      "ok": true,
+      "lastRunAt": "2026-10-25T21:55:42.925Z",
+      "minutesAgo": 0,
+      "failingBlocks": []
+    },
+    "physicalExternalRequests": 0
+  },
+  "operatorBaseline": {
+    "path": "/tmp/experience-operator-parity-before-20261025.json",
+    "sha256": "8d88fc8b00d82c61f6c37c48b98f60394c9e6a88ce4e384ff4407eef12f7a6ee",
+    "summary": {
+      "passed": 58,
+      "failed": 2
+    },
+    "returns": [
+      "memory and installed-SDK actual manageGET disagree with ownerGET on retained native setup detail and guide facts"
+    ]
+  },
+  "finalOperatorEvidence": {
+    "path": "/tmp/experience-operator-parity-sealed-20261025.json",
+    "sha256": "06f5fd12eece56fe9e3d4eda255e2b70236b38c665d8aff31376fc96e8f14068",
+    "summary": {
+      "passed": 60,
+      "failed": 0
+    }
+  },
+  "remainingIndependentAcceptance": "Root actual-handler acceptance and merged admin/customer UI checks pending; no source push/publication authorized by these results",
+  "remainingLiveAcceptance": "Current control provider/model/financial/operations launch outcomes remain open; all earlier allowances closed"
+}

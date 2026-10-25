@@ -7,6 +7,9 @@ import { getAIAllowance } from './self-service-ai.mjs';
 import { listWorkspaceOperations, queueWorkspaceRebuild, retryWorkspaceOperation } from './platform-operations.mjs';
 import { phoneActivationStatus } from './phone-activation.mjs';
 import { serviceConnections, serviceSetupView } from './service-connections.mjs';
+import { serviceOnboardingStatus } from './service-onboarding.mjs';
+import { websiteInstallationView } from './website-installation.mjs';
+import { leadConnectionsView } from './lead-connections.mjs';
 import { deliveryTenant } from './managed-consent.mjs';
 import { managedSMSConversations } from './managed-history.mjs';
 import { queueServiceReconciliation, runServiceReconciliation, serviceReconciliationView } from './service-reconciliation.mjs';
@@ -62,8 +65,8 @@ const closedStatus = status => ['cancelled', 'archived'].includes(status);
 const sanitizedActivity = row => ({ at: row.at || null, type: trim(row.type || row.action, 80), detail: trim(row.reason || '', 300), actor: trim(row.actor, 254) });
 export async function customerView(c, detail = false) {
   const selfService = isSelfServiceClient(c); let setup = selfService ? setupReadiness(c) : null;
-  const [operations, aiAllowance, phoneActivation, services] = await Promise.all([selfService ? listWorkspaceOperations(c) : [], selfService ? getAIAllowance(c) : null, selfService ? phoneActivationStatus(c) : null, selfService ? serviceConnections(c) : null]);
-  if (services) setup=serviceSetupView(c,services);
+  const [operations, aiAllowance, phoneActivation, services, serviceOnboarding, leadConnections] = await Promise.all([selfService ? listWorkspaceOperations(c) : [], selfService ? getAIAllowance(c) : null, selfService ? phoneActivationStatus(c) : null, selfService ? serviceConnections(c) : null, selfService ? serviceOnboardingStatus(c) : null, selfService ? leadConnectionsView(c) : null]);
+  if (services) setup=serviceSetupView(c,services,serviceOnboarding,await websiteInstallationView(c,aiAllowance),leadConnections);
   const issues = [];
   if(selfService)issues.push(...supportReportIssues(c));
   if (c.build?.status === 'failed') issues.push({ id: 'draft', severity: 'high', title: 'Desk draft needs repair', detail: 'Saved customer answers are retained. Queue a workspace rebuild.' });
@@ -79,12 +82,12 @@ export async function customerView(c, detail = false) {
   }
   const serviceChecks = selfService ? await serviceReconciliationView(c) : [];
   if (serviceChecks[0]?.state === 'needs_attention') issues.push({id:'service_checks',severity:'high',title:'Service checks could not be dispatched',detail:serviceChecks[0].detail});
-  const connections = (setup?.connectionJourney?.channels || []).map(row => {
-    if (row.id==='web') return row.status==='active' && (!setup.channels.web.ready || !aiAllowance.available)?{...row,status:'needs_action',detail:'Customer chat is blocked by current setup checks or the daily allowance.'}:row;
-    const service=services && ({voice:services.voice,sms:services.messaging,calendar:services.calendar})[row.id];
-    return service?{...row,status:service.active?'active':service.status || service.state,detail:service.operation?.detail || service.detail || row.detail}:row;
-  });
-  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, issues, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
+  const connections = setup?.connectionJourney?.channels || [],leadSources=setup?.connectionJourney?.leadSources || [];
+  const native=leadConnections?.thumbtack;
+  if(native?.generation&&(native.attention.unconfirmedReplies>0||['setup_unconfirmed','authorization_required'].includes(native.nativeState)))issues.push({id:'lead:thumbtack',severity:'high',title:'Thumbtack connection needs attention',detail:native.attention.unconfirmedReplies>0?'Check the original Thumbtack thread before sending another reply.':native.nativeState==='setup_unconfirmed'?'Check the existing webhook before continuing its saved setup. Do not create another connection.':'The owner must renew Thumbtack permission in the existing connection.'});
+  // Raw lead setup contains a provider endpoint and shared secret. Operators
+  // receive the same allowlisted journey facts as owners, never that setup DTO.
+  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, leadSources, issues, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
   if (detail) {
     for (const operation of operations) {
       const raw = await strictRead('workspace_operations', operation.id);
