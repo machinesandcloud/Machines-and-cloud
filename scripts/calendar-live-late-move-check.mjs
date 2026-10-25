@@ -18,9 +18,9 @@ const move=(f,target=f.c.state().selection?.move)=>({action:'reschedule_visit',e
 async function selected(f,slots=[original,afternoon]){f.setAvailableSlots(slots);await f.request(owner,preview(f));await f.budget();return f.c.state().selection;}
 async function created(f,slots){await selected(f,slots);await f.request(owner,create(f));await f.receipt('create');await f.budget();}
 
-await check('New phase declares90 Blob/150 aggregate hops; census36 retains46 full-path and8 margin,38 stops before staging',async()=>{
- const f=await fixture({p:packet({lateMove:true}),signed:true,inspectionPadding:14});await f.cohort();assert.equal(f.c.state().counters.blobs,36);assert.equal(f.p.limits.blobs-36,54);assert.equal(f.p.limits.control,150);
- const g=await fixture({p:packet({lateMove:true}),signed:true,inspectionPadding:15});await assert.rejects(g.cohort(),e=>e.code==='insufficient_inspection_headroom');assert.equal(g.c.state().counters.environmentWrites,0);assert.equal(g.c.state().counters.builds,0);
+await check('Fresh100 Blob/160 aggregate envelope admits actual40 and maximum46 census hops, reserves54, refuses48 before staging',async()=>{
+ for(const [inspectionPadding,hops]of [[16,40],[19,46]]){const f=await fixture({p:packet({lateMove:true}),signed:true,inspectionPadding});await f.cohort();assert.equal(f.c.state().counters.blobs,hops);assert.equal(f.p.limits.blobs-hops,100-hops);assert.ok(f.p.limits.blobs-hops>=54);assert.equal(f.p.limits.control,160);}
+ const g=await fixture({p:packet({lateMove:true}),signed:true,inspectionPadding:20});await assert.rejects(g.cohort(),e=>e.code==='insufficient_inspection_headroom');assert.equal(g.c.state().counters.environmentWrites,0);assert.equal(g.c.state().counters.builds,0);
 });
 await check('Strategy is explicit and fixed candidate range, weekdays, windows and backend caps cannot widen',async()=>{
  for(const mutate of [p=>p.fixture.availabilitySelection.strategy='owner_choice',p=>p.fixture.availabilitySelection.days=8,p=>p.fixture.availabilitySelection.weekdays=[0,1,2,3,4,5,6],p=>p.fixture.signupFields.windows+='\n5 to 9',p=>p.runtimeLimits.eventUpdate=2,p=>p.limits.blobs=91]){const p=packet({lateMove:true});mutate(p);await assert.rejects(fixture({p}));}

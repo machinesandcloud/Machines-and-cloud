@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createCalendarMail,assertMailPhaseAuthority,MAIL_BINDING_PATH} from './calendar-live-mail.mjs';
 import {createActor} from './calendar-live-actor.mjs';
 import {PHASE,freshNativeMailState} from './calendar-native-mail.mjs';
-const prep='/tmp/mc-calendar-v9-mail-prep-20261025',sha=v=>createHash('sha256').update(v).digest('hex'),factoryPath=fileURLToPath(new URL('./calendar-native-mail.mjs',import.meta.url));
+const prep='/tmp/mc-calendar-v10-mail-prep-20261025',sha=v=>createHash('sha256').update(v).digest('hex'),factoryPath=fileURLToPath(new URL('./calendar-native-mail.mjs',import.meta.url));
 const base=new Map([[factoryPath,await readFile(factoryPath)],[prep+'/native-mail',Buffer.from('synthetic native bytes; never executed')],[prep+'/native-mail.swift',Buffer.from('// synthetic source bytes; never compiled')]]);for(const name of ['account-meta','owner-rows','owner-open','owner-message-meta','owner-extract','owner-return'])base.set(prep+'/mail-js/'+name+'.js',Buffer.from('/* synthetic '+name+' */ (()=>JSON.stringify({accountMatch:true}))()'));
 const path=p=>p instanceof URL?fileURLToPath(p):p,command=(name='account-meta')=>({action:'nativeMail',mode:'read',source:prep+'/mail-js/'+name+'.js'}),restore={action:'nativeMail',mode:'url',url:'https://mail.google.com/mail/u/0/#inbox'};
 export async function fixture(){
@@ -28,7 +28,7 @@ export async function fixture(){
   if(lostChild){native.rows.at(-1).dispatchState='unknown';revision++;throw Error('synthetic native ACK lost')}
   native.rows.at(-1).dispatchState='observed';revision++;return {nativeRevision:revision,stdout:reply??(value.mode==='private'?'{"privateMailDataSaved":true}':value.mode==='url'?'{"targetMailNavigationDispatched":true}':'{"accountMatch":true,"phaseMatch":true}')};
  };
- const options={packet,packetSHA256,bindingSHA256:sha(files.get(MAIL_BINDING_PATH)),helper,authorize:input=>assertMailPhaseAuthority(state,input,{expiresAt:packet.approvalExpiresAt,now:at}),now:()=>at,uid:123,read:async p=>{const name=path(p);await readHook(name);return files.get(name)},stat:async p=>{const name=path(p),dir=name==='/tmp/mc-calendar-v9-private-20261025';return {isFile:()=>files.has(name),isDirectory:()=>dir,isSymbolicLink:()=>false,uid:123,mode:dir?0o700:name===factoryPath?0o644:name===prep+'/native-mail'?0o700:0o600,size:files.get(name)?.length||0}}};
+ const options={packet,packetSHA256,bindingSHA256:sha(files.get(MAIL_BINDING_PATH)),helper,authorize:input=>assertMailPhaseAuthority(state,input,{expiresAt:packet.approvalExpiresAt,now:at}),now:()=>at,uid:123,read:async p=>{const name=path(p);await readHook(name);return files.get(name)},stat:async p=>{const name=path(p),dir=name==='/tmp/mc-calendar-v10-private-20261025';return {isFile:()=>files.has(name),isDirectory:()=>dir,isSymbolicLink:()=>false,uid:123,mode:dir?0o700:name===factoryPath?0o644:name===prep+'/native-mail'?0o700:0o600,size:files.get(name)?.length||0}}};
  const mail=await createCalendarMail(options);
  return {mail,options,files,state,events,packet,setSaveHook:f=>saveHook=f,setReadHook:f=>readHook=f,loseSave:()=>lostSave=true,loseChild:()=>lostChild=true,setReply:v=>reply=v,setClock:v=>at=v,get native(){return native},get execs(){return execs},get revision(){return revision}};
 }
