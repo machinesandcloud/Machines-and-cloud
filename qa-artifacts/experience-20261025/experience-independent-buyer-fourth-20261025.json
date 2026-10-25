@@ -1,0 +1,877 @@
+{
+  "at": "2026-10-25T22:21:27.435Z",
+  "scope": "Independent buyer plan choice, actual saved intake and local test-outbox sign-in, visible setup progress and field validation. No actual email or model/provider service.",
+  "sourceBefore": {
+    "index.html": "e5d0cc40f2c040de93414024cdf09520a2b2be23174bfe974336a1d443461f0d",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "onboard.html": "16af08dda18a0e0ca2960de3a4eb0e4b1f8a02fef2be9ff64b388e18a9b0b353",
+    "onboard.css": "219ae37e671949dc5536997cf854cbbcf55c6571f1358b137c74b47fa93aeb96",
+    "onboard.js": "d5d4304b4b3df41c25ed2fa872c00ed9f53a5db02cde50dbb42aa436b4001458",
+    "product-ui.css": "ef8eca7d9c35bef4d228ff704eaf530e0df592d61061119cefe155dca37a7493",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6"
+  },
+  "harnessSHA256": "960a1fc185ebe7e901790fe480e4d37c3bf86c92993ae042759d80f857c4aca6",
+  "checks": [
+    {
+      "name": "320px buyer reads FAQ, selects existing plan and carries saved facts through actual local sign-in",
+      "pass": true
+    },
+    {
+      "name": "390px buyer reads FAQ, selects existing plan and carries saved facts through actual local sign-in",
+      "pass": true
+    },
+    {
+      "name": "1440px buyer reads FAQ, selects existing plan and carries saved facts through actual local sign-in",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/intake",
+      "method": "POST",
+      "request": {
+        "submissionId": "7730c60a-30f9-4a55-8994-ba064be7bc86",
+        "name": "Morgan Owner",
+        "email": "independent-buyer-320@example.test",
+        "business": "Independent Faucet Service",
+        "trade": "",
+        "goal": "",
+        "marketingConsent": false,
+        "botfield": ""
+      },
+      "status": 202,
+      "response": {
+        "ok": true,
+        "handoff": "096ac550a05026f82925c23f6cc7b25dc3a482f21d493065c142ee7125e47cdd",
+        "expiresAt": "2026-11-01T22:21:28.799Z",
+        "next": "/onboard.html#intake=096ac550a05026f82925c23f6cc7b25dc3a482f21d493065c142ee7125e47cdd"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "request": {
+        "action": "request_link",
+        "email": "independent-buyer-320@example.test",
+        "plan": "starter",
+        "intake": "096ac550a05026f82925c23f6cc7b25dc3a482f21d493065c142ee7125e47cdd"
+      },
+      "status": 202,
+      "response": {
+        "ok": true,
+        "delivery": "test_outbox",
+        "message": "A link was saved in the local test inbox. No email was sent."
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "request": {
+        "action": "exchange",
+        "token": "af86558632ef82a2e1f656ccaad1952393f1f1dffc5fd6ca22c265429993363e"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "session": "8146ae49ef3fe706c94fa8c9e34a188f112cf8f2c90f5cf0e42630120360af71",
+        "email": "independent-buyer-320@example.test",
+        "expiresAt": "2026-10-26T22:21:28.975Z"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "request": null,
+      "status": 200,
+      "response": {
+        "ok": true,
+        "email": "independent-buyer-320@example.test",
+        "expiresAt": "2026-10-26T22:21:28.975Z",
+        "draft": {
+          "step": 0,
+          "fields": {
+            "name": "Morgan Owner",
+            "business": "Independent Faucet Service"
+          },
+          "intakeApplied": [
+            "1ab74d1a55359f74f8d414aec362244ea45909c1128f7f85d6ff4d097b9711de"
+          ],
+          "revision": 1,
+          "updatedAt": "2026-10-25T22:21:28.980Z"
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "request": {
+        "fields": {
+          "primaryGoal": "",
+          "setupVersion": "2",
+          "name": "Morgan Owner",
+          "phone": "7135550173",
+          "website": "",
+          "desiredChannels": [
+            "web"
+          ],
+          "plan": "starter",
+          "business": "Independent Faucet Service",
+          "trade": "",
+          "services": "",
+          "serviceArea": "",
+          "city": "Houston",
+          "spanish": "yes",
+          "hours": "",
+          "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+          "afterHours": "",
+          "notServed": "",
+          "licenses": "",
+          "fees": "",
+          "windows": "",
+          "faq": "",
+          "greeting": "",
+          "notes": "",
+          "handoff": "",
+          "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+          "tier1": "",
+          "emergencies": "",
+          "never": "",
+          "leadSources": []
+        },
+        "step": 0,
+        "revision": 1
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "draft": {
+          "fields": {
+            "primaryGoal": "",
+            "setupVersion": "2",
+            "name": "Morgan Owner",
+            "phone": "7135550173",
+            "website": "",
+            "desiredChannels": [
+              "web"
+            ],
+            "plan": "starter",
+            "business": "Independent Faucet Service",
+            "trade": "",
+            "services": "",
+            "serviceArea": "",
+            "city": "Houston",
+            "spanish": "yes",
+            "hours": "",
+            "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+            "afterHours": "",
+            "notServed": "",
+            "licenses": "",
+            "fees": "",
+            "windows": "",
+            "faq": "",
+            "greeting": "",
+            "notes": "",
+            "handoff": "",
+            "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+            "tier1": "",
+            "emergencies": "",
+            "never": "",
+            "leadSources": []
+          },
+          "step": 0,
+          "revision": 2,
+          "updatedAt": "2026-10-25T22:21:29.063Z",
+          "intakeApplied": [
+            "1ab74d1a55359f74f8d414aec362244ea45909c1128f7f85d6ff4d097b9711de"
+          ]
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "request": {
+        "fields": {
+          "primaryGoal": "",
+          "setupVersion": "2",
+          "name": "Morgan Owner",
+          "phone": "7135550173",
+          "website": "",
+          "desiredChannels": [
+            "web"
+          ],
+          "plan": "starter",
+          "business": "Independent Faucet Service",
+          "trade": "",
+          "services": "",
+          "serviceArea": "",
+          "city": "Houston",
+          "spanish": "yes",
+          "hours": "",
+          "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+          "afterHours": "",
+          "notServed": "",
+          "licenses": "",
+          "fees": "",
+          "windows": "",
+          "faq": "",
+          "greeting": "",
+          "notes": "",
+          "handoff": "",
+          "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+          "tier1": "",
+          "emergencies": "",
+          "never": "",
+          "leadSources": []
+        },
+        "step": 1,
+        "revision": 2
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "draft": {
+          "fields": {
+            "primaryGoal": "",
+            "setupVersion": "2",
+            "name": "Morgan Owner",
+            "phone": "7135550173",
+            "website": "",
+            "desiredChannels": [
+              "web"
+            ],
+            "plan": "starter",
+            "business": "Independent Faucet Service",
+            "trade": "",
+            "services": "",
+            "serviceArea": "",
+            "city": "Houston",
+            "spanish": "yes",
+            "hours": "",
+            "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+            "afterHours": "",
+            "notServed": "",
+            "licenses": "",
+            "fees": "",
+            "windows": "",
+            "faq": "",
+            "greeting": "",
+            "notes": "",
+            "handoff": "",
+            "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+            "tier1": "",
+            "emergencies": "",
+            "never": "",
+            "leadSources": []
+          },
+          "step": 1,
+          "revision": 3,
+          "updatedAt": "2026-10-25T22:21:29.079Z",
+          "intakeApplied": [
+            "1ab74d1a55359f74f8d414aec362244ea45909c1128f7f85d6ff4d097b9711de"
+          ]
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/intake",
+      "method": "POST",
+      "request": {
+        "submissionId": "c025c5d7-fccf-4f59-9069-16eb62092799",
+        "name": "Morgan Owner",
+        "email": "independent-buyer-390@example.test",
+        "business": "Independent Faucet Service",
+        "trade": "",
+        "goal": "",
+        "marketingConsent": false,
+        "botfield": ""
+      },
+      "status": 202,
+      "response": {
+        "ok": true,
+        "handoff": "5475302a1895edc001834393b2097a2831b00132b604dcc60e9c726758e2c39e",
+        "expiresAt": "2026-11-01T22:21:29.601Z",
+        "next": "/onboard.html#intake=5475302a1895edc001834393b2097a2831b00132b604dcc60e9c726758e2c39e"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "request": {
+        "action": "request_link",
+        "email": "independent-buyer-390@example.test",
+        "plan": "starter",
+        "intake": "5475302a1895edc001834393b2097a2831b00132b604dcc60e9c726758e2c39e"
+      },
+      "status": 202,
+      "response": {
+        "ok": true,
+        "delivery": "test_outbox",
+        "message": "A link was saved in the local test inbox. No email was sent."
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "request": {
+        "action": "exchange",
+        "token": "11499744bb6bd9506ae189a660f07dcbe1a79ec989d34689070e4b841d1f0a02"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "session": "f092159aca4d716710a72135d21f18632789dc67e10f7af0d28d5be322bfadc0",
+        "email": "independent-buyer-390@example.test",
+        "expiresAt": "2026-10-26T22:21:29.768Z"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "request": null,
+      "status": 200,
+      "response": {
+        "ok": true,
+        "email": "independent-buyer-390@example.test",
+        "expiresAt": "2026-10-26T22:21:29.768Z",
+        "draft": {
+          "step": 0,
+          "fields": {
+            "name": "Morgan Owner",
+            "business": "Independent Faucet Service"
+          },
+          "intakeApplied": [
+            "697fd3d3fece7449eb42bf8870451820fa207d23cd39b2455ee7e1f3683814bb"
+          ],
+          "revision": 1,
+          "updatedAt": "2026-10-25T22:21:29.769Z"
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "request": {
+        "fields": {
+          "primaryGoal": "",
+          "setupVersion": "2",
+          "name": "Morgan Owner",
+          "phone": "7135550173",
+          "website": "",
+          "desiredChannels": [
+            "web"
+          ],
+          "plan": "starter",
+          "business": "Independent Faucet Service",
+          "trade": "",
+          "services": "",
+          "serviceArea": "",
+          "city": "Houston",
+          "spanish": "yes",
+          "hours": "",
+          "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+          "afterHours": "",
+          "notServed": "",
+          "licenses": "",
+          "fees": "",
+          "windows": "",
+          "faq": "",
+          "greeting": "",
+          "notes": "",
+          "handoff": "",
+          "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+          "tier1": "",
+          "emergencies": "",
+          "never": "",
+          "leadSources": []
+        },
+        "step": 0,
+        "revision": 1
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "draft": {
+          "fields": {
+            "primaryGoal": "",
+            "setupVersion": "2",
+            "name": "Morgan Owner",
+            "phone": "7135550173",
+            "website": "",
+            "desiredChannels": [
+              "web"
+            ],
+            "plan": "starter",
+            "business": "Independent Faucet Service",
+            "trade": "",
+            "services": "",
+            "serviceArea": "",
+            "city": "Houston",
+            "spanish": "yes",
+            "hours": "",
+            "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+            "afterHours": "",
+            "notServed": "",
+            "licenses": "",
+            "fees": "",
+            "windows": "",
+            "faq": "",
+            "greeting": "",
+            "notes": "",
+            "handoff": "",
+            "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+            "tier1": "",
+            "emergencies": "",
+            "never": "",
+            "leadSources": []
+          },
+          "step": 0,
+          "revision": 2,
+          "updatedAt": "2026-10-25T22:21:29.851Z",
+          "intakeApplied": [
+            "697fd3d3fece7449eb42bf8870451820fa207d23cd39b2455ee7e1f3683814bb"
+          ]
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "request": {
+        "fields": {
+          "primaryGoal": "",
+          "setupVersion": "2",
+          "name": "Morgan Owner",
+          "phone": "7135550173",
+          "website": "",
+          "desiredChannels": [
+            "web"
+          ],
+          "plan": "starter",
+          "business": "Independent Faucet Service",
+          "trade": "",
+          "services": "",
+          "serviceArea": "",
+          "city": "Houston",
+          "spanish": "yes",
+          "hours": "",
+          "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+          "afterHours": "",
+          "notServed": "",
+          "licenses": "",
+          "fees": "",
+          "windows": "",
+          "faq": "",
+          "greeting": "",
+          "notes": "",
+          "handoff": "",
+          "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+          "tier1": "",
+          "emergencies": "",
+          "never": "",
+          "leadSources": []
+        },
+        "step": 1,
+        "revision": 2
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "draft": {
+          "fields": {
+            "primaryGoal": "",
+            "setupVersion": "2",
+            "name": "Morgan Owner",
+            "phone": "7135550173",
+            "website": "",
+            "desiredChannels": [
+              "web"
+            ],
+            "plan": "starter",
+            "business": "Independent Faucet Service",
+            "trade": "",
+            "services": "",
+            "serviceArea": "",
+            "city": "Houston",
+            "spanish": "yes",
+            "hours": "",
+            "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+            "afterHours": "",
+            "notServed": "",
+            "licenses": "",
+            "fees": "",
+            "windows": "",
+            "faq": "",
+            "greeting": "",
+            "notes": "",
+            "handoff": "",
+            "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+            "tier1": "",
+            "emergencies": "",
+            "never": "",
+            "leadSources": []
+          },
+          "step": 1,
+          "revision": 3,
+          "updatedAt": "2026-10-25T22:21:29.867Z",
+          "intakeApplied": [
+            "697fd3d3fece7449eb42bf8870451820fa207d23cd39b2455ee7e1f3683814bb"
+          ]
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/intake",
+      "method": "POST",
+      "request": {
+        "submissionId": "95b1ee87-8c00-47e4-ab18-2920ecfb56fc",
+        "name": "Morgan Owner",
+        "email": "independent-buyer-1440@example.test",
+        "business": "Independent Faucet Service",
+        "trade": "",
+        "goal": "",
+        "marketingConsent": false,
+        "botfield": ""
+      },
+      "status": 202,
+      "response": {
+        "ok": true,
+        "handoff": "0a52847e4e88701ed6706e60f30858aa3765b3e1ddd5aef779d4f1331cefb780",
+        "expiresAt": "2026-11-01T22:21:30.406Z",
+        "next": "/onboard.html#intake=0a52847e4e88701ed6706e60f30858aa3765b3e1ddd5aef779d4f1331cefb780"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "request": {
+        "action": "request_link",
+        "email": "independent-buyer-1440@example.test",
+        "plan": "starter",
+        "intake": "0a52847e4e88701ed6706e60f30858aa3765b3e1ddd5aef779d4f1331cefb780"
+      },
+      "status": 202,
+      "response": {
+        "ok": true,
+        "delivery": "test_outbox",
+        "message": "A link was saved in the local test inbox. No email was sent."
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "POST",
+      "request": {
+        "action": "exchange",
+        "token": "0c5d03d7b26e081c46f68af19ad996a1740e5d4950a5f306204b338fdbd4a6b5"
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "session": "41117a3a7214390835aee6e5c923ddf4b3850272a722c0af277026abaa53836c",
+        "email": "independent-buyer-1440@example.test",
+        "expiresAt": "2026-10-26T22:21:30.564Z"
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "GET",
+      "request": null,
+      "status": 200,
+      "response": {
+        "ok": true,
+        "email": "independent-buyer-1440@example.test",
+        "expiresAt": "2026-10-26T22:21:30.564Z",
+        "draft": {
+          "step": 0,
+          "fields": {
+            "name": "Morgan Owner",
+            "business": "Independent Faucet Service"
+          },
+          "intakeApplied": [
+            "cf19378952a3b74ee62269a16bd0864bb54dc75afe343599640c1eabacb996f4"
+          ],
+          "revision": 1,
+          "updatedAt": "2026-10-25T22:21:30.566Z"
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "request": {
+        "fields": {
+          "primaryGoal": "",
+          "setupVersion": "2",
+          "name": "Morgan Owner",
+          "phone": "7135550173",
+          "website": "",
+          "desiredChannels": [
+            "web"
+          ],
+          "plan": "starter",
+          "business": "Independent Faucet Service",
+          "trade": "",
+          "services": "",
+          "serviceArea": "",
+          "city": "Houston",
+          "spanish": "yes",
+          "hours": "",
+          "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+          "afterHours": "",
+          "notServed": "",
+          "licenses": "",
+          "fees": "",
+          "windows": "",
+          "faq": "",
+          "greeting": "",
+          "notes": "",
+          "handoff": "",
+          "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+          "tier1": "",
+          "emergencies": "",
+          "never": "",
+          "leadSources": []
+        },
+        "step": 0,
+        "revision": 1
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "draft": {
+          "fields": {
+            "primaryGoal": "",
+            "setupVersion": "2",
+            "name": "Morgan Owner",
+            "phone": "7135550173",
+            "website": "",
+            "desiredChannels": [
+              "web"
+            ],
+            "plan": "starter",
+            "business": "Independent Faucet Service",
+            "trade": "",
+            "services": "",
+            "serviceArea": "",
+            "city": "Houston",
+            "spanish": "yes",
+            "hours": "",
+            "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+            "afterHours": "",
+            "notServed": "",
+            "licenses": "",
+            "fees": "",
+            "windows": "",
+            "faq": "",
+            "greeting": "",
+            "notes": "",
+            "handoff": "",
+            "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+            "tier1": "",
+            "emergencies": "",
+            "never": "",
+            "leadSources": []
+          },
+          "step": 0,
+          "revision": 2,
+          "updatedAt": "2026-10-25T22:21:30.656Z",
+          "intakeApplied": [
+            "cf19378952a3b74ee62269a16bd0864bb54dc75afe343599640c1eabacb996f4"
+          ]
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    },
+    {
+      "path": "/api/access",
+      "method": "PUT",
+      "request": {
+        "fields": {
+          "primaryGoal": "",
+          "setupVersion": "2",
+          "name": "Morgan Owner",
+          "phone": "7135550173",
+          "website": "",
+          "desiredChannels": [
+            "web"
+          ],
+          "plan": "starter",
+          "business": "Independent Faucet Service",
+          "trade": "",
+          "services": "",
+          "serviceArea": "",
+          "city": "Houston",
+          "spanish": "yes",
+          "hours": "",
+          "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+          "afterHours": "",
+          "notServed": "",
+          "licenses": "",
+          "fees": "",
+          "windows": "",
+          "faq": "",
+          "greeting": "",
+          "notes": "",
+          "handoff": "",
+          "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+          "tier1": "",
+          "emergencies": "",
+          "never": "",
+          "leadSources": []
+        },
+        "step": 1,
+        "revision": 2
+      },
+      "status": 200,
+      "response": {
+        "ok": true,
+        "draft": {
+          "fields": {
+            "primaryGoal": "",
+            "setupVersion": "2",
+            "name": "Morgan Owner",
+            "phone": "7135550173",
+            "website": "",
+            "desiredChannels": [
+              "web"
+            ],
+            "plan": "starter",
+            "business": "Independent Faucet Service",
+            "trade": "",
+            "services": "",
+            "serviceArea": "",
+            "city": "Houston",
+            "spanish": "yes",
+            "hours": "",
+            "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+            "afterHours": "",
+            "notServed": "",
+            "licenses": "",
+            "fees": "",
+            "windows": "",
+            "faq": "",
+            "greeting": "",
+            "notes": "",
+            "handoff": "",
+            "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+            "tier1": "",
+            "emergencies": "",
+            "never": "",
+            "leadSources": []
+          },
+          "step": 1,
+          "revision": 3,
+          "updatedAt": "2026-10-25T22:21:30.673Z",
+          "intakeApplied": [
+            "cf19378952a3b74ee62269a16bd0864bb54dc75afe343599640c1eabacb996f4"
+          ]
+        },
+        "marketing": {
+          "preference": false,
+          "pendingRequest": false,
+          "suppressed": false
+        }
+      }
+    }
+  ],
+  "captures": [
+    "/tmp/experience-independent-buyer-fourth-20261025-sent-320.png",
+    "/tmp/experience-independent-buyer-fourth-20261025-setup-progress-320.png",
+    "/tmp/experience-independent-buyer-fourth-20261025-sent-390.png",
+    "/tmp/experience-independent-buyer-fourth-20261025-setup-progress-390.png",
+    "/tmp/experience-independent-buyer-fourth-20261025-sent-1440.png",
+    "/tmp/experience-independent-buyer-fourth-20261025-setup-progress-1440.png"
+  ],
+  "errors": [],
+  "blocked": [],
+  "physical": 0,
+  "observed": [
+    {
+      "width": 320,
+      "selectedPlan": "starter",
+      "confirmation": "actual local test outbox",
+      "step": "Step 2 of 4",
+      "draft": "Independent Faucet Service"
+    },
+    {
+      "width": 390,
+      "selectedPlan": "starter",
+      "confirmation": "actual local test outbox",
+      "step": "Step 2 of 4",
+      "draft": "Independent Faucet Service"
+    },
+    {
+      "width": 1440,
+      "selectedPlan": "starter",
+      "confirmation": "actual local test outbox",
+      "step": "Step 2 of 4",
+      "draft": "Independent Faucet Service"
+    }
+  ],
+  "sourceAfter": {
+    "index.html": "e5d0cc40f2c040de93414024cdf09520a2b2be23174bfe974336a1d443461f0d",
+    "styles.css": "74b35067b3b8501ac3749e5fee37e5f1b88ed7026bd3a364f61ae60693f9422a",
+    "site-refresh.css": "84846fb53813e820c21e07838f8a38b6b6c4fce4e45be5bebf9c8d659a8482e1",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "onboard.html": "16af08dda18a0e0ca2960de3a4eb0e4b1f8a02fef2be9ff64b388e18a9b0b353",
+    "onboard.css": "219ae37e671949dc5536997cf854cbbcf55c6571f1358b137c74b47fa93aeb96",
+    "onboard.js": "d5d4304b4b3df41c25ed2fa872c00ed9f53a5db02cde50dbb42aa436b4001458",
+    "product-ui.css": "ef8eca7d9c35bef4d228ff704eaf530e0df592d61061119cefe155dca37a7493",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "b6f5ffa75009111b59cfc49c585c5d47dadb8df64846246d68bccb7244709f85",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3
+  }
+}
