@@ -67,7 +67,7 @@
   }
   function submissionId() { var bytes = new Uint8Array(16); crypto.getRandomValues(bytes); return Array.from(bytes).map(function (byte) { return byte.toString(16).padStart(2,'0'); }).join(''); }
   function hasJourney(d) { return Array.isArray(d.setup?.connectionJourney?.channels) && d.setup.connectionJourney.channels.length===4; }
-  var readinessRefreshPending=false;
+  var readinessRefreshPending=false, connectionRefreshFocus=null;
   function journeyRows(d) {
     var rows=d.setup.connectionJourney.channels;
     var detailed=rows.every(function(row){return row.action&&typeof row.automation==='string'&&typeof row.ownerTask==='string'&&typeof row.readyWhen==='string';});
@@ -93,7 +93,7 @@
   }
   function renderJourney(d) {
     if(!hasJourney(d))return false;
-    var node=$('connectionJourney'),focused=node.contains(document.activeElement)?document.activeElement:null,focusData=focused?{connection:focused.dataset.connection,route:focused.dataset.journeyRoute,detail:focused.dataset.journeyDetail}:null,expanded=node.querySelector('[data-journey-detail][aria-expanded="true"]')?.dataset.journeyDetail,seen={};
+    var node=$('connectionJourney'),focused=node.contains(document.activeElement)?document.activeElement:null,focusData=focused?{connection:focused.dataset.connection,route:focused.dataset.journeyRoute,detail:focused.dataset.journeyDetail}:connectionRefreshFocus,expanded=node.querySelector('[data-journey-detail][aria-expanded="true"]')?.dataset.journeyDetail,seen={};
     var rows=journeyRows(d),counts={},closed=['cancelled','archived'].includes(d.client.status);
     function actionKey(row){return row.action.kind+':'+row.action.target;}
     rows.forEach(function(row){var key=actionKey(row);if(row.status!=='not_selected'&&row.action.kind!=='wait')counts[key]=(counts[key]||0)+1;});
@@ -110,7 +110,7 @@
       var phoneDetails=!closed&&row.id==='voice'&&(row.requested||row.retained)?'<button type="button" class="connection-guide-link" data-connection="review_phone_details">Review phone details</button>':'';
       return '<article class="connection-guide-card" id="connection-guide-'+row.id+'" data-channel="'+row.id+'" data-responsibility="'+row.responsibility+'"><header><h4>'+esc(row.id==='sms'?'Two-way texting':row.label)+'</h4><span class="connection-guide-badge">'+esc(badge)+'</span></header><p class="connection-guide-detail">'+esc(detail)+'</p>'+retained+'<div class="connection-guide-actions">'+action+phoneDetails+'<button type="button" class="connection-guide-disclosure" data-journey-detail="'+row.id+'" aria-expanded="'+open+'" aria-controls="connection-guide-flow-'+row.id+'">What happens next <span aria-hidden="true">'+(open?'−':'+')+'</span></button></div><div class="connection-guide-flow" id="connection-guide-flow-'+row.id+'"'+(open?'':' hidden')+'><p>'+esc(row.detail)+'</p><dl><div><dt>We handle</dt><dd>'+esc(row.automation)+'</dd></div><div><dt>Your part</dt><dd>'+esc(row.ownerTask)+'</dd></div><div><dt>Ready when</dt><dd>'+esc(row.readyWhen)+'</dd></div></dl></div></article>';
     }).join('')+'</div><div class="connection-workspace-destination"><div><strong>Customer requests stay together</strong><p>Use Inbox for callback requests and conversations, and Schedule for saved visits. Check delivery status before treating a message as delivered or a visit as synced.</p></div><div><button type="button" class="connection-guide-link" data-journey-route="leads">Open Inbox</button><button type="button" class="connection-guide-link" data-journey-route="availability">Open Schedule</button></div></div><div class="connection-guide-refresh"><p id="connectionRefreshStatus">Check saved setup progress at any time.</p>'+button('check_status','Check saved status')+'</div></section>';
-    if(focusData){var replacement=Array.from(node.querySelectorAll('button')).find(function(button){return focusData.connection&&button.dataset.connection===focusData.connection||focusData.route&&button.dataset.journeyRoute===focusData.route||focusData.detail&&button.dataset.journeyDetail===focusData.detail;});if(replacement)replacement.focus({preventScroll:true});}
+    if(focusData){var replacement=Array.from(node.querySelectorAll('button')).find(function(button){return focusData.connection&&button.dataset.connection===focusData.connection||focusData.route&&button.dataset.journeyRoute===focusData.route||focusData.detail&&button.dataset.journeyDetail===focusData.detail;});if(replacement){replacement.focus({preventScroll:true});connectionRefreshFocus=null;}}
     return true;
   }
   function revealConnectionStep(id) { var target=$(id);if(!target)return;var parent=target.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}target.hidden=false;target.tabIndex=-1;target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});target.focus({preventScroll:true}); }
@@ -241,7 +241,7 @@
     if(target.dataset.connection==='show_text_steps'){revealConnectionStep('textConnectionSteps');return;}
     if(target.dataset.connection==='show_calendar_steps'){revealConnectionStep('calendarConnectionSteps');return;}
     var action = target.dataset.connection, c = data.connections, revision = data.configurationRevision;
-    if(action==='check_status'){if(connectionRefreshInFlight)return;connectionRefreshStop();connectionRefreshInFlight=true;target.disabled=true;message.textContent='Checking saved connection status…';document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
+    if(action==='check_status'){if(connectionRefreshInFlight)return;if(document.activeElement===target)connectionRefreshFocus={connection:'check_status'};connectionRefreshStop();connectionRefreshInFlight=true;target.disabled=true;message.textContent='Checking saved connection status…';document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
     if (action === 'review_business' || action === 'try_frontdesk') return document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: action === 'review_business' ? 'know' : 'test' } }));
     if (action === 'cancel_setup') return review('Cancel connection setup?', '<p>We stop new setup and reconcile any number or services already requested. Your business details and customer records remain saved.</p>', 'Cancel setup', function () { request('cancel_service_onboarding', { expectedRevision: revision, operationId: data.serviceOnboarding.operation.id }); });
     if (action === 'review_setup') {
