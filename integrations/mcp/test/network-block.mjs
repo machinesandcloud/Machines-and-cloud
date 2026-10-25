@@ -1,0 +1,12 @@
+import net from 'node:net';
+import http from 'node:http';
+import https from 'node:https';
+import tls from 'node:tls';
+import { syncBuiltinESMExports } from 'node:module';
+export const physicalAttempts = { count: 0 };
+const denied = () => { physicalAttempts.count++; throw new Error('Physical network is blocked in MCP tests.'); };
+net.connect = net.createConnection = denied;
+net.Socket.prototype.connect = denied;
+http.request = http.get = https.request = https.get = tls.connect = denied;
+globalThis.fetch = denied;
+syncBuiltinESMExports();

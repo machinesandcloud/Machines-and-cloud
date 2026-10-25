@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "observedAt": "2026-10-25T21:24:21.282269+00:00",
+  "scope": "Optional owner-authorized read-only MCP setup adapter; engineering author evidence only",
+  "baseCommit": "b26a13af6e11082018b037e174de0c8bc5b9fb30",
+  "contractReference": {
+    "backendCommit": "87feb7ec956e72b55a28ecc0fc41f662252ce99e",
+    "journeySHA256": "00212b19677bc7506159205a4300e316ae0694175dffe82c226aa5eecff15a7e",
+    "testedVia": "Synthetic owned-session DTO matching the additive setup.connectionJourney contract, not a real account"
+  },
+  "tools": [
+    "mc_get_setup_status",
+    "mc_get_service_guide",
+    "mc_get_workspace_link"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "zod": "4.6.7"
+  },
+  "developmentDependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "typescript": "7.0.2",
+    "@types/node": "26.6.5"
+  },
+  "command": "cd integrations/mcp && npm test",
+  "result": {
+    "buildExit": 0,
+    "tests": 13,
+    "passed": 13,
+    "failed": 0,
+    "actualOwnerSessions": 0,
+    "actualProviderCalls": 0,
+    "actualModelCalls": 0,
+    "publicListeners": 0,
+    "physicalNetwork": "Blocked in the test parent and separate stdio child; injected owner GET only"
+  },
+  "observedJobs": [
+    "Official SDK initialization and tool discovery over in-memory and separate stdio transports",
+    "All three tools return structured content from fresh fixed-path owner GET",
+    "Every service guide and review view is usable; browser links carry no bearer",
+    "Revoked owner access stops reads and links without cached authority",
+    "Malicious host/query/redirect/tenant/arguments are rejected",
+    "Private fixture identities, records, keys, URLs and upstream errors are withheld",
+    "Stream size and request timeout are bounded; old backend guide absence is explicit"
+  ],
+  "architectureReview": {
+    "reviewerRole": "status_check_engineer",
+    "disposition": "No source architecture blocker on final index/server/workspace/lock hashes; not an independent runtime test"
+  },
+  "limits": [
+    "No independent protocol QA credited in this authored receipt",
+    "No real owner session, hosted service, provider setup, message delivery, purchase or full launch acceptance",
+    "No account connection, activation, write operation or browser-opening tool",
+    "Returned guide copy remains data, not follow-on action authority",
+    "New guided backend requires separate integration/publication; old deployments may lack a guide",
+    "No root dependency, website build, global client config or provider credential changes"
+  ],
+  "sources": [
+    {
+      "path": ".gitignore",
+      "sha256": "e8bc935ce727f1809c792f4c5d26c5fc75ba2b7df7fc9390c56c8892f6a6007f"
+    },
+    {
+      "path": "package.json",
+      "sha256": "034dd0bf2d0c52b2ee306044509588480c5a03fd2493980a493c63f786ab1202"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "5cb76ca67eec43af4b474e71112c7540cb693c42ddb88468186bf9ac9ff7da44"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "cf97a0116916c959020b5d43bc2ae8df0cc5ee38e7aed6e1a6a7d9123d9ea24f"
+    },
+    {
+      "path": "README.md",
+      "sha256": "c4651326add6191d0530d58ed105735272e05fd113f1fc7de5d0b37b9a3c70e9"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "fcb8884675053c958f2f7f9e6682769ce81255b0b11c6184c4e91a492f9b6012"
+    },
+    {
+      "path": "src/server.ts",
+      "sha256": "6b875ef4cde38253ea70263d156327cda183fcf5ecbe43020236fb012535669b"
+    },
+    {
+      "path": "src/workspace.ts",
+      "sha256": "35bd8c559e509fdef0503517a0b9cb6a8325fcefbac0bd66b7211831adf0a8fb"
+    },
+    {
+      "path": "test/fixtures.mjs",
+      "sha256": "cf7c973954d60bae7844363776c3d812957daad8e107a68e95de10e122cff4b8"
+    },
+    {
+      "path": "test/mcp.test.mjs",
+      "sha256": "4f103493a2d450e2d31ac0d5235db4131ef80473063bdbeb57af95d680e4b6e1"
+    },
+    {
+      "path": "test/network-block.mjs",
+      "sha256": "2394bf52fba1b2e51f840474e8df7971347afd72ad7e6f8f62194dd9000c9671"
+    },
+    {
+      "path": "test/stdio-network.mjs",
+      "sha256": "b1d3d70492fbed788fed4668d98e4e2a430021fd5f92faf601da57c1def57d19"
+    },
+    {
+      "path": "evidence/author-test.txt",
+      "sha256": "fe5759f1bf3c2aabe009d884917292dac0b873cea930b22e09ca3c982ca37aed"
+    }
+  ]
+}
