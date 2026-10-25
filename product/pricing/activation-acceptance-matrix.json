@@ -1,0 +1,227 @@
+{
+  "state": "PREIMPLEMENTATION_ACCEPTANCE_CRITERIA_NOT_EXECUTED",
+  "baseline": "1b5905bb7f11acd9dc32ed6ad122b33e80b21261",
+  "requiresRootFinalFrozenSourceBeforeAcceptance": true,
+  "items": [
+    {
+      "id": "CAT-01",
+      "priority": "P0",
+      "criterion": "All catalog surfaces show exactly3 standard tiers plus Enterprise; names/monthlyprices/currency/units match one approved catalog.",
+      "sourceScope": "index.html,onboard.html,config.mjs,sales-desk.mjs,llms.txt,llms-full.txt",
+      "meaningfulProbe": "Static visible+JSON-LD+publicDTO comparison; desktop1440/mobile390 ordinary selection."
+    },
+    {
+      "id": "CAT-02",
+      "priority": "P0",
+      "criterion": "Each tier survives CTA navigation, intake handoff, draft/reload, verified signup and returning access with exact selected ID.",
+      "sourceScope": "signup-intake.js,onboard.js,onboard.mjs,intake.mjs",
+      "meaningfulProbe": "Test starter/growth/pro query and saved draft; genuine thirdtier must no longer silently fall back to growth."
+    },
+    {
+      "id": "CAT-03",
+      "priority": "P0",
+      "criterion": "Enterprise remains an explicit requirements CTA, without fabricated price/units/SLA/nativecapability or accidental fixed Checkout.",
+      "sourceScope": "index.html,onboard.js,sales-desk.mjs,workspace-billing.mjs",
+      "meaningfulProbe": "Enterprise and invalid/tampered plan IDs cannot create subscription; no hidden4thstandard plan."
+    },
+    {
+      "id": "CAT-04",
+      "priority": "P1",
+      "criterion": "Free setup/no card/no automatic trial remains true; selecting plan starts no money/provider action.",
+      "sourceScope": "onboard.js,setup.mjs,billing.mjs",
+      "meaningfulProbe": "Count vendor requests across page load/selection/save and legacy URL attempts."
+    },
+    {
+      "id": "PAY-01",
+      "priority": "P0",
+      "criterion": "Server verifies exact current plan amount/Price/currency/monthlyinterval/quantity/account/mode and full selected-service terms before create.",
+      "sourceScope": "workspace-billing.mjs,desk-billing.js",
+      "meaningfulProbe": "Tamper plan/Price/amount/services/terms version; reject wrongmode/merchant/tax/discount/extra line item."
+    },
+    {
+      "id": "PAY-02",
+      "priority": "P0",
+      "criterion": "Old accepted offers remain reconciliable/cancellable after catalog price/name/unit changes.",
+      "sourceScope": "workspace-billing.mjs",
+      "meaningfulProbe": "Seed old99/249 accepted sessions/subscriptions, change current catalog, then refresh/cancel/Portal; exact oldresource unchanged, no repricing or new POST."
+    },
+    {
+      "id": "PAY-03",
+      "priority": "P0",
+      "criterion": "Offer/rules/owner/tenant/review/session withdrawal during await blocks newcreate; retained cleanup still works.",
+      "sourceScope": "workspace-billing.mjs",
+      "meaningfulProbe": "After saved admission, revoke owner/changeoffer/services/phase;0newfinancialwrites, retainedsameoperationcleanup."
+    },
+    {
+      "id": "PAY-04",
+      "priority": "P0",
+      "criterion": "Lost Checkout/cancel ACK and duplicate/reordered signed events retain same operation/provider identity and ordinary scheduled recovery.",
+      "sourceScope": "workspace-billing.mjs,workspace-billing-webhook.mjs,workspace-billing-background.mjs",
+      "meaningfulProbe": "No duplicate subscription/cancel; unknown staysunknown until canonical reconciliation."
+    },
+    {
+      "id": "PAY-05",
+      "priority": "P0",
+      "criterion": "Legacy paid maintenance remains scoped; new selfservice cannot enter legacy7daytrial/missingPricefallback or mutate chosenplan before verified offer.",
+      "sourceScope": "billing.mjs,lib/billing.mjs,stripe-webhook.mjs",
+      "meaningfulProbe": "Legacy/currenttenant and credentialSlot cross-mode tests; only explicitly retained authority allowed."
+    },
+    {
+      "id": "PAY-06",
+      "priority": "P0",
+      "criterion": "Monthly renewal/enddate/refund/tax/overage terms match actual Checkout and returning UI.",
+      "sourceScope": "desk-billing.js,workspace-billing.mjs,versionedofferterms",
+      "meaningfulProbe": "Pending/uncertain cancellation reload hides duplicate End; failed/expired Checkout is not active; no unintended prorations/refund/auto-reload."
+    },
+    {
+      "id": "UNIT-01",
+      "priority": "P0",
+      "criterion": "Sold unit definitions and period are explicit:voice seconds/minrounding, logicalSMS versussegments, webreply versusconversation, lead versusreply.",
+      "sourceScope": "config.mjs,usage.mjs,self-service-ai.mjs,platform-ai.mjs,managedresourcepolicies",
+      "meaningfulProbe": "Exact examples for short/long/Unicode text,1second/61second calls, repeatedcaller/returnturn; no unit conversion hidden incopy."
+    },
+    {
+      "id": "UNIT-02",
+      "priority": "P0",
+      "criterion": "Monthly commercial balance and daily/global safety reservations have separate honest displays and admission.",
+      "sourceScope": "self-service-ai.mjs,usage.mjs,workspace-billing.mjs",
+      "meaningfulProbe": "Busyday/globalexhausted/otherTenant usage cannot be advertised as guaranteed ownpaidremaining; no unlimited claim."
+    },
+    {
+      "id": "UNIT-03",
+      "priority": "P0",
+      "criterion": "Usage dedup/concurrency/unknown results do not refund or doublecharge blindly; simulated/disabled calls/messages cannot create money.",
+      "sourceScope": "usage.mjs,managedvoice/SMSledger,providercallbacks",
+      "meaningfulProbe": "Duplicate provider event, CASconflict, storagefailure, delayedpreviousperiodupdate, failedsend and lateacceptance."
+    },
+    {
+      "id": "UNIT-04",
+      "priority": "P0",
+      "criterion": "Period boundaries and plan upgrades are explicit without resetting retained money/usage identities.",
+      "sourceScope": "usage.mjs,billing.mjs,entitlementmoduleifadded",
+      "meaningfulProbe": "Signup31st/billinganchor/DST/monthend; nextperiod exactonce; downgrade/changeoffer must not resetoldspentbalance or silently prorate."
+    },
+    {
+      "id": "LEAD-01",
+      "priority": "P0",
+      "criterion": "Thirdtier inclusion names connector-specific receive/read/nativewrite/AI capabilities and actual current prerequisites.",
+      "sourceScope": "desk-lead-sources.js,lead-connections.mjs,thumbtack-connection.mjs,platform-ai.mjs",
+      "meaningfulProbe": "Notconnected/partnerpending/importonly/receiving/AIpaused/ownerhandoff allhonest; no price alone flipsproviderready."
+    },
+    {
+      "id": "LEAD-02",
+      "priority": "P0",
+      "criterion": "NativeThumbtack reply uses original tenant/business/negotiation and one durable outbox; pause/correction/newmessage/revoke fences stillhold.",
+      "sourceScope": "thumbtack-connection.mjs,thumbtack-api.mjs,platform-ai.mjs",
+      "meaningfulProbe": "Late/newcustomer message, unknownsend, expiredOAuth, globaloff and saturatedhistory; ordinary scheduler recovers withoutresend."
+    },
+    {
+      "id": "LEAD-03",
+      "priority": "P0",
+      "criterion": "Angi lead import remains distinct from native messaging or separately authorized SMS/email.",
+      "sourceScope": "angi.mjs,lead-connections.mjs,managed-sms.mjs",
+      "meaningfulProbe": "Auth/business mismatch, duplicate/newgeneration, false/missingconsent; nooutboundnotification sideeffect on import."
+    },
+    {
+      "id": "LEAD-04",
+      "priority": "P0",
+      "criterion": "No Yelp/LSA/FSM connector is promised as working until implemented/authorized/source-matched accepted.",
+      "sourceScope": "sales-desk.mjs,allpubliccopy,connectionsDTO",
+      "meaningfulProbe": "Capability matrix rejects unknownsources; GoogleCalendar does not imply GoogleAds/LSA authority; CSV !=liveJobber/HCPsync."
+    },
+    {
+      "id": "ENT-01",
+      "priority": "P0",
+      "criterion": "Tier-specific feature access is enforced server-side or explicitly sold as preparation, never decorative flags.",
+      "sourceScope": "config.mjs,lead-connections.mjs,platform-ai.mjs,request-automation.mjs",
+      "meaningfulProbe": "Lower/free tier forged action, returning planchange, purchasedoffer vs mutablec.plan, queuedjob afterdowngrade; retainedsupport/cleanup remainavailable."
+    },
+    {
+      "id": "UX-01",
+      "priority": "P1",
+      "criterion": "Ordinary desktop/mobile review exposes useful included units, total/month, constraints and nextaction with readable comparison.",
+      "sourceScope": "index.html,onboard.html,desk-billing.js",
+      "meaningfulProbe": "Focused1440/390 andkeyboard; no overflow, hiddenfees, forcedscroll wall or implementation-onlycopy."
+    },
+    {
+      "id": "COPY-01",
+      "priority": "P1",
+      "criterion": "Site/chat/demo/machine summaries/FAQs/SEO pages/receipts share newoffer; oldresearch is labelledhistorical.",
+      "sourceScope": "public-copy-inventory.json,sales-desk.mjs,llms files,productcontrol",
+      "meaningfulProbe": "Search retiredprices/twoplan/Proretired/freeweek/autotrial/unlimited claims; preserverawhistoricalevidence."
+    },
+    {
+      "id": "GATE-01",
+      "priority": "P0",
+      "criterion": "New pricing does not enable executionflags, livebilling, messages/model/providerpurchase or change closedproof ledgers.",
+      "sourceScope": ".env.example,providerpolicyadmission,workspacebillinggate",
+      "meaningfulProbe": "No-key/network-denied localchecks;0unexpectedvendorrequest; external proof/publication separatelysourcebound."
+    },
+    {
+      "id": "GATE-02",
+      "priority": "P0",
+      "criterion": "Test fixture expectations are updated only where intentionallyobsolete, with preserved failures and meaningful3tier replacements.",
+      "sourceScope": "existingpricing/onboarding/billing/leadchecks",
+      "meaningfulProbe": "Oldpro->growth assertions become3tierretention tests; unchangedlegacyproof is not relabelled finalnewprice acceptance."
+    }
+  ],
+  "existingCommands": [
+    {
+      "command": "node scripts/workspace-billing-check.mjs --output scratchpad/pricing-billing-final.json",
+      "scope": "Actual local billinghandlers; frozenfixture amounts/threeplans must follow newcatalog."
+    },
+    {
+      "command": "node scripts/workspace-billing-recovery-check.mjs --output scratchpad/pricing-billing-recovery-final.json",
+      "scope": "Ordinary scheduler/background, capacity/deadline/durablecancel and healthordering."
+    },
+    {
+      "command": "node scripts/workspace-billing-public-proof-check.mjs --output scratchpad/pricing-billing-public-local-final.json",
+      "scope": "Synthetic actualhandler TESTphase/isolation; notactualStripefinancialproof."
+    },
+    {
+      "command": "node scripts/self-service-ai-check.mjs",
+      "scope": "Existingdaily/sharedlogicalturns; add newcommercialunit cases onlyifimplemented."
+    },
+    {
+      "command": "node scripts/lead-connections-check.mjs",
+      "scope": "Tenant/generation-scoped Angi import and noautomaticSMS."
+    },
+    {
+      "command": "node scripts/thumbtack-api-transport-check.mjs",
+      "scope": "NativeOAuth/message singleattempt transport."
+    },
+    {
+      "command": "node scripts/thumbtack-connection-check.mjs",
+      "scope": "Connection/outbox/scheduler/revoke and oneprovideridentity."
+    },
+    {
+      "command": "node scripts/platform-ai-check.mjs",
+      "scope": "NativeAI modes/sharedcapacity/grounding/stop/recovery."
+    },
+    {
+      "command": "node scripts/sales-desk-check.mjs",
+      "scope": "Publiccatalog/provisionalplanningtool/math and currentclaimfacts."
+    },
+    {
+      "command": "node scripts/onboard-validation-qa-check.mjs --phase final",
+      "scope": "Existing actualassets ordinary desktop/mobile/errors/draft; fresh receipt flags per harness."
+    },
+    {
+      "command": "node scripts/service-onboarding-qa-check.mjs --output scratchpad/service-onboarding-qa-pricing-final.json",
+      "scope": "Selectedservice/context continuity and false readiness boundaries."
+    },
+    {
+      "command": "node scripts/build-site.mjs",
+      "scope": "Publicpackage/privatepath exclusion after newcatalog assets; localonly."
+    }
+  ],
+  "runPolicy": "Execute affected source-matched local checks after finalimplementation; eachoutput must be fresh and commands adjusted onlyfor currentverifiedCLI. Browserjobs use localassets/actualhandlers with syntheticvendortransports, notaccountbrowser. Reuse unaffected provider/proof evidence; requiredfullgate remainsRootrelease responsibility. No actualproviderbillingproof or publication is authorized by this checklist.",
+  "openProductInputs": [
+    "Exact3monthlystandard amounts/names/IDs and EnterpriseCTA",
+    "Commercialmonthlyunits and billingperiod, overagehardstop/optin policy",
+    "Tier3 connectorlist and native-versusimport/SMS scope",
+    "Inheritedpaid/legacyrecord compatibility and existingfreecapability policy",
+    "Actualprovideravailability language and launchhold"
+  ],
+  "newImplementationStatus": "Pending Root/Architect/PO proposal; criteria express boundaries, notapprovednewprices."
+}

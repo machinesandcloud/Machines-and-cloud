@@ -55,7 +55,7 @@ The following entries preserve their original evidence and scope. They do not de
 
 **Last verified publication:** exact `36918edc350f8cf2db3e2fe6d8b65668b0e8d89a`, READY deploy `6adaff710fdb34cb48342216`, October23at01:33CDT. That publication’s eight-read allowance and one-build approval are closed. This content phase makes no new hosted status or provider-delivery claim. Main remains a documentation/evidence mirror and must not be pushed wholesale. [Launch readiness](LAUNCH-READINESS.md) governs the standing customer-outcome work and remaining gates.
 
-**Pricing remains under review:** [Fresh market/cost decision](PRICING-DECISION-2026-10-23.json) records seven public providers, four qualified operator threads and independently recomputed cost scenarios. Neither99nor249is validated as an available paid offer; no rates, allowances or billing settings changed. The copy candidate is accepted at `fb838fa` and remains unpublished.
+**Pricing priority, October 25:** [Three-tier package design](PRICING-DECISION-2026-10-25.md) proposes Coverage $149, Follow-through $299 and inclusive Lead desk $499, plus custom Enterprise. [Interactive review](pricing/preview.html) and the exact catalog specify channels, capacity, source-specific lead handling and terms. Current prices, accepted financial offers, free rights and provider gates are unchanged. The cheaper-model economics, funded monthly entitlements and actual service/paid acceptance remain required. The older [October 23 review](PRICING-DECISION-2026-10-23.json) is historical; a new catalog does not establish willingness to pay or live connector delivery.
 
 ## Earlier launch snapshots — superseded by the record above
 

@@ -1,0 +1,238 @@
+{
+  "state": "INDEPENDENT_RESEARCH_AND_ACCEPTANCE_PLAN_IMPLEMENTATION_PENDING",
+  "date": "2026-10-25",
+  "baseline": "1b5905bb7f11acd9dc32ed6ad122b33e80b21261",
+  "worktree": "/tmp/mc-pricing-qa-20261025",
+  "scope": "Current offer/charge/entitlement audit plus public official connector and rival research. No new pricing numbers selected by QA.",
+  "steering": "Explicit current user instruction selects pricing overhaul as primary: three paid standard tiers plus Enterprise, with inclusive lead-platform offering under supported connector boundaries. Closed Calendar remains unaccepted for grant/event lifecycle.",
+  "findings": [
+    {
+      "id": "PQ-01",
+      "priority": "P0 for overhaul acceptance",
+      "finding": "Only two plans are publicly selectable and financially admissible today.",
+      "evidence": [
+        "config.mjs PUBLIC_PLAN_IDS starter/growth and public labels",
+        "workspace-billing.mjs prices99/249 and approvedOffer exact starter/growth plans",
+        "onboard.js PLAN_IDS2 and pro->growth retirement",
+        "signup-intake.js rejects pro"
+      ],
+      "required": "Three standard tiers plus Enterprise must be coherent across public catalog, signup, sales, billing review and server validation. Enterprise remains quoted/non-checkout unless an explicit enterprise billing contract is implemented."
+    },
+    {
+      "id": "PQ-02",
+      "priority": "P0 before amount changes",
+      "finding": "Retained financial verification compares old financial records to mutable current global prices.",
+      "evidence": [
+        "workspace-billing.mjs Portal binding verification around268",
+        "verifySession around295",
+        "acceptSubscription around318"
+      ],
+      "required": "Verify saved sessions/subscriptions against their immutable accepted offer/Price/account/mode. Current catalog governs new admission only. Never implicitly reprice or erase an old record when updating packages.",
+      "classification": "Compatibility hazard triggered by new price changes, not a reproduced current charge."
+    },
+    {
+      "id": "PQ-03",
+      "priority": "P0 before enabling a paid route",
+      "finding": "Legacy billing still carries a7-day trial, missing plan Price->Growth fallback, and saves c.plan before Checkout succeeds.",
+      "evidence": [
+        "netlify/functions/billing.mjs self-service exclusion409, then legacy plan mutation",
+        "lib/billing.mjs priceFor fallback and trial_period_days7"
+      ],
+      "required": "Keep new self-service route isolated; preserve authorized legacy maintenance without allowing new catalog requests to enter fallback/trial behavior. Define any legacy plan migration explicitly."
+    },
+    {
+      "id": "PQ-04",
+      "priority": "P0 for commercial units",
+      "finding": "Usage meter, commercial previews and safety quotas are different systems.",
+      "evidence": [
+        "PLANS monthly150/600/1500minutes and500/1500/5000texts",
+        "usage.mjs informational0.35/min and0.03/text; Houston calendar-month view, no overage invoicing",
+        "self-service-ai.mjs daily20private/50web and default global50 combined logical starts, failed attempts consume allowance",
+        "platform-ai.mjs shares reserveAIRequest"
+      ],
+      "required": "Pick exact sold units, period/reset, included/outbound/inbound/owner/failed/duplicate policies, exhaustion and optional overages. Do not present shared daily safety availability as reserved monthly entitlement or unlimited service. Define billing-cycle versus Houston calendar-month semantics."
+    },
+    {
+      "id": "PQ-05",
+      "priority": "P0 if metered money is claimed",
+      "finding": "Legacy informational meter is not a billable usage ledger.",
+      "evidence": [
+        "legacy vapi end-of-call adds rounded-up minutes per report without call-ID dedup in that branch",
+        "usage.addUsage performs read/change/put",
+        "legacy sendSMS counts logical sends and even disabled simulations; CUSTOMER_TEXT_TYPES subset"
+      ],
+      "required": "Do not invoice this legacy counter or advertise automatic overage charging. Any new monetary usage requires provider-event idempotency, atomic aggregation and explicit failure/rounding/segment treatment.",
+      "scope": "These code observations concern the legacy branch; managed Vapi/SMS use separate guarded paths and must be reviewed under their own identities."
+    },
+    {
+      "id": "PQ-06",
+      "priority": "P0 for tier differentiation",
+      "finding": "leadPlatforms/software flags do not enforce connector entitlements; owner managed lead actions check tenant/session/state, not purchased tier.",
+      "evidence": [
+        "config.mjs legacyPLANS declarations",
+        "no runtime read of .leadPlatforms in functions",
+        "lead-connections.mjs owner/current admission",
+        "followUp is read by selected legacy desk actions; exports/rules are already free workspace capabilities"
+      ],
+      "required": "Either implement explicit entitlement decisions for native lead automation or clearly market preparation/availability as such. Do not newly gate already-free exports/rule editing without an intentional product decision."
+    },
+    {
+      "id": "PQ-07",
+      "priority": "P0 for inclusive third tier claim",
+      "finding": "Lead platforms cannot be truthfully represented as one interchangeable native reply capability.",
+      "evidence": [
+        "Angi capabilitiesreceiveLeads only and no automated SMS",
+        "Thumbtack partnerOAuth/webhook/native outbox/AI implemented behind gates",
+        "no Yelp/LSA connector implementation in this source"
+      ],
+      "required": "List each connector and supported channel/action; partner access, owner consent and actual delivery remain prerequisites. Angi import is not in-Angi AI reply. Notification-to-separate-number texting is not native platform messaging."
+    },
+    {
+      "id": "PQ-08",
+      "priority": "P1 consistency",
+      "finding": "Sales facts and older pricing research retain superseded two-offer/retired-Pro language.",
+      "evidence": [
+        "sales-desk.mjs planScope exactly2public preferences, Pro retired, Thumbtack in-app replies not provided",
+        "llms summaries two public previews and Enterprise",
+        "Oct22 market recommendation withheld thirdtier, superseded by explicit current user steering"
+      ],
+      "required": "Update active source claims, prompt/tool outputs, README/current control and machine-readable summaries. Preserve dated research/raw failures with a current supersession note; do not rewrite old evidence as new package acceptance."
+    },
+    {
+      "id": "PQ-09",
+      "priority": "P0 paid/public readiness",
+      "finding": "A package or configuration save does not prove available provider delivery or successful paid lifecycle.",
+      "evidence": [
+        "launch-control G4/G5/G9 and closedV10 provider limitations",
+        "workspace-billing exactoffer/readiness/owner checks and TEST/LIVE isolation"
+      ],
+      "required": "Package implementation cannot silently enable live debit/provider activation or convert closed TEST/Calendar proofs into success. Expose actual availability and pending prerequisites at the relevant purchase/activation decision."
+    }
+  ],
+  "connectorMatrix": [
+    {
+      "platform": "Thumbtack",
+      "publicAPI": "Partner OAuth read/send messages in original negotiation; self-serve webhooks alone are inbound events.",
+      "ourCurrentSource": "Native read/reply+AI with durable same-message uncertainty/recovery exists behind partner/AI gates.",
+      "actualAvailability": "No actual approved-credential/provider delivery acceptance established by this research.",
+      "soldClaimBoundary": "Can include module/conditional access; cannot promise all shops currently connected or send SMS without independent authority.",
+      "sources": [
+        "TT-MESSAGES",
+        "TT-ACCESS",
+        "TT-WEBHOOK"
+      ]
+    },
+    {
+      "platform": "Angi",
+      "publicAPI": "JSON lead delivery to CRM; documented inbound endpoint and acknowledgement.",
+      "ourCurrentSource": "Tenant-scoped import and durable Inbox recovery; no native chat write or automatic SMS.",
+      "actualAvailability": "Endpoint preparation is distinct from Angi-configured valid lead receipt.",
+      "soldClaimBoundary": "Call it lead import/Inbox; separate approved SMS/email follow-up would be a different implemented service. No documented native write contract found in reviewed official material.",
+      "sources": [
+        "ANGI-SETUP",
+        "ANGI-API",
+        "LEADTRUFFLE-ANGI"
+      ]
+    },
+    {
+      "platform": "Yelp",
+      "publicAPI": "Partner-approved Leads OAuth read/reply and webhook; masked email also routes through Yelp.",
+      "ourCurrentSource": "No Yelp handler/adapter.",
+      "actualAvailability": "Unimplemented; partner approval and account authorization required.",
+      "soldClaimBoundary": "Do not list as an active connector or substitute real-number SMS for Yelp native thread.",
+      "sources": [
+        "YELP"
+      ]
+    },
+    {
+      "platform": "GoogleLSA",
+      "publicAPI": "Lead/conversation read resources and documented append RPC; separate Ads authorization.",
+      "ourCurrentSource": "No LSA connector. Existing Google Calendar connection does not authorize Ads leads.",
+      "actualAvailability": "Unimplemented; end-user message delivery/current API version/account eligibility not established here.",
+      "soldClaimBoundary": "Do not imply Google Calendar integration covers LSA; a future append API method is not an accepted connector.",
+      "sources": [
+        "GOOGLE-LSA",
+        "GOOGLE-LSA-RPC"
+      ]
+    }
+  ],
+  "officialSources": [
+    {
+      "id": "TT-MESSAGES",
+      "url": "https://developers.thumbtack.com/docs/pro-integrations/messages",
+      "claim": "Official V4 negotiation message read/write endpoints support in-thread replies under Bearer authorization.",
+      "retrieval": "Official indexed page text retrieved; direct open presented a JavaScript verification challenge, which was not bypassed."
+    },
+    {
+      "id": "TT-ACCESS",
+      "url": "https://developers.thumbtack.com/request-access",
+      "claim": "Partner access is requested separately; a listed API does not mean our application has credentials or tested delivery."
+    },
+    {
+      "id": "TT-WEBHOOK",
+      "url": "https://developers.thumbtack.com/docs/pro-integrations/self-serve-webhooks",
+      "claim": "Self-serve event webhooks are distinct from the partner OAuth outbound message API.",
+      "retrieval": "Official indexed documentation; direct open challenged."
+    },
+    {
+      "id": "ANGI-SETUP",
+      "url": "https://intercom.help/angi/en/articles/10288125-setting-up-your-crm-integration-with-angi",
+      "claim": "Unlisted CRM onboarding uses business ID, email, webhook and optional key; Angi configures lead delivery."
+    },
+    {
+      "id": "ANGI-API",
+      "url": "https://intercom.help/angi/en/articles/15304819-angi-lead-integration-api",
+      "claim": "Documented contract is inbound JSON lead posts with optional x-api-key and JSON success acknowledgement; it does not document native outbound chat.",
+      "additional": "The schema has automatedContactCompliant and optional consent identity; these fields do not themselves turn on our SMS channel."
+    },
+    {
+      "id": "YELP",
+      "url": "https://docs.developer.yelp.com/docs/partner-integration-guide",
+      "claim": "Yelp Leads supports partner-approved OAuth read/reply, webhooks and masked email. Direct SMS to real numbers is separate from the Yelp thread; phone sharing is conditional."
+    },
+    {
+      "id": "GOOGLE-LSA",
+      "url": "https://developers.google.com/google-ads/api/docs/local-services",
+      "claim": "Google documents lead/conversation resources and an append-conversation method. No M&C LSA adapter or native delivery acceptance exists in this source."
+    },
+    {
+      "id": "GOOGLE-LSA-RPC",
+      "url": "https://developers.google.com/google-ads/api/reference/rpc/v24/LocalServicesLeadService/AppendLeadConversation",
+      "claim": "The documented append RPC requires adwords OAuth. Do not infer consumer-visible delivery, current-version/account eligibility or our support from the method name alone."
+    },
+    {
+      "id": "LEADTRUFFLE-PRICE",
+      "url": "https://www.leadtruffle.co/pricing/",
+      "claim": "Essential/Growth/Scale and Managed are listed, with demo actions and no numeric dollar price in retrieved pricing text; no invented current quote."
+    },
+    {
+      "id": "LEADTRUFFLE-ANGI",
+      "url": "https://www.leadtruffle.co/features/angi/",
+      "claim": "Vendor describes Angi webhook ingestion followed by SMS/email; explicitly distinguishes this from responding inside Angi. This is evidence about its marketed workflow, not proof of our integration."
+    },
+    {
+      "id": "GOODCALL",
+      "url": "https://www.goodcall.com/pricing",
+      "claim": "Current monthly tiers79/129/299 include100/500/2000 unique customers, then0.79/0.26/0.15 each. Unit is a phone number counted once/month, not minutes or call counts; Enterprise is custom."
+    },
+    {
+      "id": "FRONTDESK",
+      "url": "https://www.myaifrontdesk.com/pricing",
+      "claim": "99/month or79/month billed annually;200voice minutes,100chatbot conversations,400SMS and1000shared overage credits. One credit0.01; voice25credits/min, SMS4/message;10-dollar reload1000credits. Annual equivalent is not monthly billing; segmentation not established."
+    }
+  ],
+  "rivalComparisonBoundary": "Goodcall unique customer != M&C rounded call minute. Frontdesk annual equivalent != monthly subscription and shared credits != independent included allowances. LeadTruffle has no numeric current public price in retrieved pricing page, so do not invent savings.",
+  "historicalResearchDisposition": "Oct22 two-tier/withholdPro recommendation is historical and superseded by explicit current steering; its cost/meter caveats remain relevant until addressed.",
+  "effects": {
+    "publicWebResearch": "Official unauthenticated public reads explicitly authorized for this task. Thumbtack direct reader challenge not bypassed.",
+    "accountAccess": 0,
+    "providerAPI": 0,
+    "browserAccount": 0,
+    "email": 0,
+    "modelPaid": 0,
+    "mutationsExternal": 0,
+    "deploy": 0,
+    "RootTrackedEdits": 0
+  },
+  "currentImplementationAcceptance": false
+}

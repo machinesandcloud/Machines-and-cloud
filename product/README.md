@@ -1,4 +1,6 @@
-> **Current checkpoint:** V10 signup/return, publication and browser handoff passed. Google access stayed pending, so event delivery remains unverified. Inbox/owned keys, internal workspace/sessions, all27 settings and a distinct READY cleanup deployment are verified restored; public health200 passed. V10 is closed. [Launch control](LAUNCH-CONTROL.json) and [V10 result](CALENDAR-LAUNCH-V10-RESULT-2026-10-25.json) govern the next fresh owner-permission/lifecycle test; older notes are historical.
+> **Current user priority, October 25:** Redesign packages with an inclusive paid-lead tier. PO/Marketing, Architect and independent QA researched competitor offers, customer needs, costs and actual connectors. [Pricing decision](PRICING-DECISION-2026-10-25.md) · [Interactive internal preview](pricing/preview.html). The proposed $149/$299/$499 offer and custom Enterprise do not change existing prices, customer rights, billing or provider gates. [Launch control](LAUNCH-CONTROL.json) governs the current slice.
+
+> **Retained provider checkpoint:** V10 signup/return, publication and browser handoff passed. Google access stayed pending, so event delivery remains unverified. Inbox/owned keys, internal workspace/sessions, all27 settings and a distinct READY cleanup deployment are verified restored; public health200 passed. [V10](CALENDAR-LAUNCH-V10-RESULT-2026-10-25.json) is closed; its unused allowances cannot be reused. The future permission/lifecycle proof remains open separately.
 
 # Product team working files
 

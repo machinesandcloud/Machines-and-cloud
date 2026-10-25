@@ -1,0 +1,577 @@
+{
+  "version": 2,
+  "reviewedOn": "2026-10-25",
+  "sourceCommit": "1b5905bb7f11acd9dc32ed6ad122b33e80b21261",
+  "status": "DRAFT_PLANNING_ONLY_MODEL_QUALITY_UNVERIFIED_NO_AUTHORITY_OR_RUNTIME_CHANGE",
+  "models": {
+    "haiku55": {
+      "inputPerMillion": 0.1,
+      "outputPerMillion": 0.5
+    },
+    "sonnet55": {
+      "inputPerMillion": 2.0,
+      "outputPerMillion": 10.0
+    },
+    "opus55_current": {
+      "inputPerMillion": 4.0,
+      "outputPerMillion": 20.0
+    }
+  },
+  "tokenEnvelopes": {
+    "base": {
+      "inputTokensPerRequest": 8000,
+      "outputTokensPerRequest": 500,
+      "requestsPerReply": 1.3
+    },
+    "stress": {
+      "inputTokensPerRequest": 12000,
+      "outputTokensPerRequest": 800,
+      "requestsPerReply": 2.0
+    }
+  },
+  "unitCosts": {
+    "haiku55": {
+      "base": 0.001365,
+      "stress": 0.0032
+    },
+    "sonnet55": {
+      "base": 0.0273,
+      "stress": 0.064
+    },
+    "opus55_current": {
+      "base": 0.0546,
+      "stress": 0.128
+    }
+  },
+  "routingHypothesis": {
+    "haikuShare": 0.9,
+    "sonnetShare": 0.1,
+    "maximumSonnetShare": 0.1,
+    "notQualityGuarantee": true,
+    "modelQualityAccepted": false,
+    "basePerReplyUSD": 0.0039585,
+    "stressPerReplyUSD": 0.00928
+  },
+  "fixedAssumptions": {
+    "domesticPaymentsPercent": 2.9,
+    "stripeBillingPercent": 0.7,
+    "paymentFixedUSD": 0.3,
+    "numberMonthlyUSD": 1.15,
+    "outboundSMSFullyFundedUnitCost": {
+      "base": 0.02,
+      "stress": 0.03
+    },
+    "inboundSMSBilling": "Not deducted from outbound allowance; funding assumes0.5inboundsegment/outbound base and1.0stress, separate spam/abuse/provider safety admission",
+    "standardCampaignMonthlyUSD": 10,
+    "infrastructureAndEmailMonthlyUSD": 15,
+    "supportMonthlyUSD": 15,
+    "supportLoadedHourlyUSD": 40,
+    "unquotedPartnerContingencyTopOnlyUSD": 20,
+    "firstPeriodStandardBrandCampaignUSD": 61,
+    "firstPeriodLowVolumeBrandCampaignIfEligibleUSD": 19.5
+  },
+  "results": [
+    {
+      "ladder": [
+        99,
+        249,
+        449
+      ],
+      "tier": 1,
+      "price": 99,
+      "scenario": "base",
+      "allowances": {
+        "writtenReplies": 1500,
+        "voiceMinutes": 100,
+        "outboundSMSPartsIncludingOwnerAlerts": 250
+      },
+      "costs": {
+        "ai": 5.94,
+        "voice": 15.0,
+        "smsIncludingFundedInbound": 5.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 3.86,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 70.95,
+      "nonAICostExact": "65.0140000",
+      "contributionMarginPercent": 28.3,
+      "availablePerReplyAt50PercentMargin": -0.010342666666666667,
+      "availablePerReplyAt60PercentMargin": -0.01694266666666667
+    },
+    {
+      "ladder": [
+        99,
+        249,
+        449
+      ],
+      "tier": 1,
+      "price": 99,
+      "scenario": "stress",
+      "allowances": {
+        "writtenReplies": 1500,
+        "voiceMinutes": 100,
+        "outboundSMSPartsIncludingOwnerAlerts": 250
+      },
+      "costs": {
+        "ai": 13.92,
+        "voice": 25.0,
+        "smsIncludingFundedInbound": 7.5,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 3.86,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 91.43,
+      "nonAICostExact": "77.51400",
+      "contributionMarginPercent": 7.6,
+      "availablePerReplyAt50PercentMargin": -0.018676,
+      "availablePerReplyAt60PercentMargin": -0.025276
+    },
+    {
+      "ladder": [
+        99,
+        249,
+        449
+      ],
+      "tier": 2,
+      "price": 249,
+      "scenario": "base",
+      "allowances": {
+        "writtenReplies": 3000,
+        "voiceMinutes": 250,
+        "outboundSMSPartsIncludingOwnerAlerts": 750
+      },
+      "costs": {
+        "ai": 11.88,
+        "voice": 37.5,
+        "smsIncludingFundedInbound": 15.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 9.26,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 114.79,
+      "nonAICostExact": "102.9140000",
+      "contributionMarginPercent": 53.9,
+      "availablePerReplyAt50PercentMargin": 0.007195333333333333,
+      "availablePerReplyAt60PercentMargin": -0.0011046666666666668
+    },
+    {
+      "ladder": [
+        99,
+        249,
+        449
+      ],
+      "tier": 2,
+      "price": 249,
+      "scenario": "stress",
+      "allowances": {
+        "writtenReplies": 3000,
+        "voiceMinutes": 250,
+        "outboundSMSPartsIncludingOwnerAlerts": 750
+      },
+      "costs": {
+        "ai": 27.84,
+        "voice": 62.5,
+        "smsIncludingFundedInbound": 22.5,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 9.26,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 163.25,
+      "nonAICostExact": "135.41400",
+      "contributionMarginPercent": 34.4,
+      "availablePerReplyAt50PercentMargin": -0.003638,
+      "availablePerReplyAt60PercentMargin": -0.011938
+    },
+    {
+      "ladder": [
+        99,
+        249,
+        449
+      ],
+      "tier": 3,
+      "price": 449,
+      "scenario": "base",
+      "allowances": {
+        "writtenReplies": 6000,
+        "voiceMinutes": 500,
+        "outboundSMSPartsIncludingOwnerAlerts": 1500
+      },
+      "costs": {
+        "ai": 23.75,
+        "voice": 75.0,
+        "smsIncludingFundedInbound": 30.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 16.46,
+        "unquotedPartnerContingency": 20.0
+      },
+      "totalCost": 206.36,
+      "nonAICostExact": "182.6140000",
+      "contributionMarginPercent": 54.0,
+      "availablePerReplyAt50PercentMargin": 0.006981,
+      "availablePerReplyAt60PercentMargin": -0.0005023333333333334
+    },
+    {
+      "ladder": [
+        99,
+        249,
+        449
+      ],
+      "tier": 3,
+      "price": 449,
+      "scenario": "stress",
+      "allowances": {
+        "writtenReplies": 6000,
+        "voiceMinutes": 500,
+        "outboundSMSPartsIncludingOwnerAlerts": 1500
+      },
+      "costs": {
+        "ai": 55.68,
+        "voice": 125.0,
+        "smsIncludingFundedInbound": 45.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 16.46,
+        "unquotedPartnerContingency": 20.0
+      },
+      "totalCost": 303.29,
+      "nonAICostExact": "247.61400",
+      "contributionMarginPercent": 32.5,
+      "availablePerReplyAt50PercentMargin": -0.0038523333333333335,
+      "availablePerReplyAt60PercentMargin": -0.011335666666666668
+    },
+    {
+      "ladder": [
+        149,
+        299,
+        499
+      ],
+      "tier": 1,
+      "price": 149,
+      "scenario": "base",
+      "allowances": {
+        "writtenReplies": 1500,
+        "voiceMinutes": 100,
+        "outboundSMSPartsIncludingOwnerAlerts": 250
+      },
+      "costs": {
+        "ai": 5.94,
+        "voice": 15.0,
+        "smsIncludingFundedInbound": 5.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 5.66,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 72.75,
+      "nonAICostExact": "66.8140000",
+      "contributionMarginPercent": 51.2,
+      "availablePerReplyAt50PercentMargin": 0.005124,
+      "availablePerReplyAt60PercentMargin": -0.004809333333333333
+    },
+    {
+      "ladder": [
+        149,
+        299,
+        499
+      ],
+      "tier": 1,
+      "price": 149,
+      "scenario": "stress",
+      "allowances": {
+        "writtenReplies": 1500,
+        "voiceMinutes": 100,
+        "outboundSMSPartsIncludingOwnerAlerts": 250
+      },
+      "costs": {
+        "ai": 13.92,
+        "voice": 25.0,
+        "smsIncludingFundedInbound": 7.5,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 5.66,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 93.23,
+      "nonAICostExact": "79.31400",
+      "contributionMarginPercent": 37.4,
+      "availablePerReplyAt50PercentMargin": -0.003209333333333333,
+      "availablePerReplyAt60PercentMargin": -0.013142666666666667
+    },
+    {
+      "ladder": [
+        149,
+        299,
+        499
+      ],
+      "tier": 2,
+      "price": 299,
+      "scenario": "base",
+      "allowances": {
+        "writtenReplies": 3000,
+        "voiceMinutes": 250,
+        "outboundSMSPartsIncludingOwnerAlerts": 750
+      },
+      "costs": {
+        "ai": 11.88,
+        "voice": 37.5,
+        "smsIncludingFundedInbound": 15.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 11.06,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 116.59,
+      "nonAICostExact": "104.7140000",
+      "contributionMarginPercent": 61.0,
+      "availablePerReplyAt50PercentMargin": 0.014928666666666666,
+      "availablePerReplyAt60PercentMargin": 0.004962
+    },
+    {
+      "ladder": [
+        149,
+        299,
+        499
+      ],
+      "tier": 2,
+      "price": 299,
+      "scenario": "stress",
+      "allowances": {
+        "writtenReplies": 3000,
+        "voiceMinutes": 250,
+        "outboundSMSPartsIncludingOwnerAlerts": 750
+      },
+      "costs": {
+        "ai": 27.84,
+        "voice": 62.5,
+        "smsIncludingFundedInbound": 22.5,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 11.06,
+        "unquotedPartnerContingency": 0.0
+      },
+      "totalCost": 165.05,
+      "nonAICostExact": "137.21400",
+      "contributionMarginPercent": 44.8,
+      "availablePerReplyAt50PercentMargin": 0.004095333333333334,
+      "availablePerReplyAt60PercentMargin": -0.0058713333333333334
+    },
+    {
+      "ladder": [
+        149,
+        299,
+        499
+      ],
+      "tier": 3,
+      "price": 499,
+      "scenario": "base",
+      "allowances": {
+        "writtenReplies": 6000,
+        "voiceMinutes": 500,
+        "outboundSMSPartsIncludingOwnerAlerts": 1500
+      },
+      "costs": {
+        "ai": 23.75,
+        "voice": 75.0,
+        "smsIncludingFundedInbound": 30.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 18.26,
+        "unquotedPartnerContingency": 20.0
+      },
+      "totalCost": 208.16,
+      "nonAICostExact": "184.4140000",
+      "contributionMarginPercent": 58.3,
+      "availablePerReplyAt50PercentMargin": 0.010847666666666667,
+      "availablePerReplyAt60PercentMargin": 0.002531
+    },
+    {
+      "ladder": [
+        149,
+        299,
+        499
+      ],
+      "tier": 3,
+      "price": 499,
+      "scenario": "stress",
+      "allowances": {
+        "writtenReplies": 6000,
+        "voiceMinutes": 500,
+        "outboundSMSPartsIncludingOwnerAlerts": 1500
+      },
+      "costs": {
+        "ai": 55.68,
+        "voice": 125.0,
+        "smsIncludingFundedInbound": 45.0,
+        "numberAndStandardCampaign": 11.15,
+        "infrastructureEmailAllocation": 15.0,
+        "supportAllocation": 15.0,
+        "paymentAndSubscriptionFees": 18.26,
+        "unquotedPartnerContingency": 20.0
+      },
+      "totalCost": 305.09,
+      "nonAICostExact": "249.41400",
+      "contributionMarginPercent": 38.9,
+      "availablePerReplyAt50PercentMargin": 1.4333333333333334e-05,
+      "availablePerReplyAt60PercentMargin": -0.008302333333333333
+    }
+  ],
+  "allSonnetAndOpusSensitivity": [
+    {
+      "price": 149,
+      "scenario": "base",
+      "allRepliesModel": "sonnet55",
+      "aiCost": 40.95,
+      "totalCost": 107.76,
+      "contributionMarginPercent": 27.7
+    },
+    {
+      "price": 149,
+      "scenario": "base",
+      "allRepliesModel": "opus55_current",
+      "aiCost": 81.9,
+      "totalCost": 148.71,
+      "contributionMarginPercent": 0.2
+    },
+    {
+      "price": 149,
+      "scenario": "stress",
+      "allRepliesModel": "sonnet55",
+      "aiCost": 96.0,
+      "totalCost": 175.31,
+      "contributionMarginPercent": -17.7
+    },
+    {
+      "price": 149,
+      "scenario": "stress",
+      "allRepliesModel": "opus55_current",
+      "aiCost": 192.0,
+      "totalCost": 271.31,
+      "contributionMarginPercent": -82.1
+    },
+    {
+      "price": 299,
+      "scenario": "base",
+      "allRepliesModel": "sonnet55",
+      "aiCost": 81.9,
+      "totalCost": 186.61,
+      "contributionMarginPercent": 37.6
+    },
+    {
+      "price": 299,
+      "scenario": "base",
+      "allRepliesModel": "opus55_current",
+      "aiCost": 163.8,
+      "totalCost": 268.51,
+      "contributionMarginPercent": 10.2
+    },
+    {
+      "price": 299,
+      "scenario": "stress",
+      "allRepliesModel": "sonnet55",
+      "aiCost": 192.0,
+      "totalCost": 329.21,
+      "contributionMarginPercent": -10.1
+    },
+    {
+      "price": 299,
+      "scenario": "stress",
+      "allRepliesModel": "opus55_current",
+      "aiCost": 384.0,
+      "totalCost": 521.21,
+      "contributionMarginPercent": -74.3
+    },
+    {
+      "price": 499,
+      "scenario": "base",
+      "allRepliesModel": "sonnet55",
+      "aiCost": 163.8,
+      "totalCost": 348.21,
+      "contributionMarginPercent": 30.2
+    },
+    {
+      "price": 499,
+      "scenario": "base",
+      "allRepliesModel": "opus55_current",
+      "aiCost": 327.6,
+      "totalCost": 512.01,
+      "contributionMarginPercent": -2.6
+    },
+    {
+      "price": 499,
+      "scenario": "stress",
+      "allRepliesModel": "sonnet55",
+      "aiCost": 384.0,
+      "totalCost": 633.41,
+      "contributionMarginPercent": -26.9
+    },
+    {
+      "price": 499,
+      "scenario": "stress",
+      "allRepliesModel": "opus55_current",
+      "aiCost": 768.0,
+      "totalCost": 1017.41,
+      "contributionMarginPercent": -103.9
+    }
+  ],
+  "sourcePins": {
+    "netlify/functions/lib/config.mjs": "988b3a94dbf4d111e89fb5fa16f3705e98b7f2b3dc4ef26d7dd3e0c92db9ec46",
+    "netlify/functions/lib/usage.mjs": "e5b05c897d2c6899ec51d2756320b225a22cb2a78267793fcb2bc12719d9d0f9",
+    "netlify/functions/lib/workspace-billing.mjs": "08648ccfb9e6092908bbd5bb5b11899b0301d80ad3d9b2e7f39ea68d5c1aafdb",
+    "netlify/functions/lib/billing.mjs": "dfd58fa466cf3fabc9a9b9c78d2f465bf7c235562b40964b7867c73e3333ffd7",
+    "netlify/functions/lib/self-service-ai.mjs": "b1c7f19511948362c55aa2358e1ab1d34481189781e0a5ce11c18b5271b1e222",
+    "netlify/functions/lib/agent.mjs": "3a0f4760c8526ea53b3c403543993dd91c416f408a28e61b0b83d65a4ac9bd8c",
+    "netlify/functions/lib/managed-sms.mjs": "d88840893faf877d583462b9bd87b0352e97f9a9353497812d4051a165864bcc",
+    "netlify/functions/lib/managed-sms-budget.mjs": "2153ed61a34d27ad7cd036b038f830a4281286eb7f562792e97a5eec887abe86",
+    "netlify/functions/lib/managed-email-budget.mjs": "4b2f4b4bef2f38aa7a43e882c3a99fcf5c6b9875906f8fbf996b1cfe0c4202b0",
+    "netlify/functions/lib/voice-provider.mjs": "6dec2c96942c4a9484d775869c1e64f2e7244149e5887db23a7c745c2d58e443",
+    "netlify/functions/lib/voice-activation.mjs": "ddec9851aef50fcd04066eb9d14df73409309a17c2fe524005a92ec57ae9024a",
+    "netlify/functions/lib/lead-connections.mjs": "659b163c51e1de09f57d510bd1aa36b05a8d767b4d70ae461d6bde0cabaf4bfa",
+    "netlify/functions/lib/thumbtack-connection.mjs": "20a15b4e194628604fdc65a1c448ec152db892f6ed1b5689bde5ea0d498803c4",
+    "netlify/functions/lib/thumbtack-api.mjs": "a981718719d6b020e51ca37a615953adba60c78fcf9c6dce803b163752c187e2",
+    "netlify/functions/lib/platform-ai.mjs": "18cd85293e351e8fad9346404e0ffa4cef8e11e1cd64be65a02bf6b3f2dd8bb8",
+    "netlify/functions/lib/platform-ai-proposal.mjs": "92e80e0b3447cc7ab690e387ca531a4b142208f37a8c52d556fb086201c493c6",
+    "netlify/functions/lib/request-followthrough.mjs": "7e2fc1268bce450d5af973fae76ef17ee5189cea5a169ab596f3e4bc1b4b1ba8",
+    "netlify/functions/lib/sales-desk.mjs": "b3cf779c26ab0a614ab9e45d7eab7954807df58aefe145642f8cdf8fe25fcbb1",
+    "netlify/functions/lib/access.mjs": "db7f64b3868820bdc063f9e8223291f414a3499eeff48f1efd60a7331a1d32f6",
+    "netlify/functions/lib/workspace-edit.mjs": "ec3e19c63229c88854ab3375051e8c3d87341350a690e9996e4062f7b141dc83",
+    "netlify/functions/onboard.mjs": "1b440c316d150a19f8aee6aa5ae448b6908a61422e97288cffceee5c89a0087f",
+    "netlify/functions/client.mjs": "72891224c53c7bd40c55f6a8335e74568dd79c764b452a1ddb1e0b1e3bb70a07",
+    "netlify/functions/admin.mjs": "46b52bd4b54d80c94c4f7fc447f51e66ce97b8e7244fc2534376a489ba0109ae",
+    "netlify/functions/angi.mjs": "db5f40608ee1afeacc25b7795ce2d5caa1a38d937d0743e1df343b4a5d35dde6",
+    "netlify/functions/thumbtack.mjs": "d5db05f0592605a4848c78cdec763594f99532ce61bb0d9d44549dddb01e8149",
+    "index.html": "a8acc49a3c7ca5e0fcd5ae231e2f25b4b1e1b77d53a9edd0da271eb6be753a29",
+    "onboard.html": "1a3b1ebe32bb2f8da1b64cc4c59337b538c3dac8eb54e3da73b20288ccaee716",
+    "onboard.js": "8ab02e8e6ba6636ab5186f480cfb0e17d45adc7ce23d16288172d1667107b4a4",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-billing.js": "174d6d0d4b34bf0a64583b82e81a439a5cb0511fe85560ccb5b78b75da5928a9",
+    "admin.js": "48672bf2c5697141896cc4f5cc2cb24247ceed5952773d513aa4d9748a7df883",
+    ".env.example": "69433932a88c76cac1a1f72ab719677fe7bd2a287b0da7ac5ecd7d6813044cb5"
+  },
+  "limits": [
+    "Not supplier invoices or measured support",
+    "Stress is the specified bounded-token scenario, not the current unbounded-token architecture",
+    "Existing shared daily free pool is not paid reserved capacity; new paid monthly entitlement and free fallback are distinct",
+    "One-time onboarding labor/registration, taxes, refunds, CAC and extraordinary incidents excluded",
+    "Voice allowance counts connected hosted call legs, each leg rounded up to60seconds; handoff legs are not free. No unlimited human support, lead purchases or unquoted supplier access included",
+    "Top partner20 is a planning reserve, not a quoted fee or confirmed free API",
+    "Sonnet10percent ceiling and hard2requests/12kinput/800output must be implemented and quality accepted before relying on stress bound",
+    "No cache, Batch, negotiated volume or annual-prepay discounts assumed"
+  ]
+}

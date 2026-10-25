@@ -1,5 +1,7 @@
 # Pricing decision review
 
+> **October 25 package redesign:** The user requested an inclusive third standard tier for paid lead platforms. The current proposal is [Coverage $149, Follow-through $299, Lead desk $499 and custom Enterprise](PRICING-DECISION-2026-10-25.md), with an [interactive internal preview](pricing/preview.html). It supersedes the older two-plan recommendation for new commercial design. Existing public/accepted financial offers are unchanged; neither document activates billing or provider services. The dated implementation and evidence below remain historical.
+
 Reviewed October 21, 2026 Houston / October 22 UTC. **Our paid bundles are not yet validated as competitively positioned and economically safe. Do not approve their activation from this review.** Verified signup offers free workspace setup, no card, no subscription and no timed trial. Phone/SMS delivery and paid billing remain separately gated.
 
 The Product Owner researched the offer and target-customer value; Architect inspected the actual implementation/provider rates and modeled cost; QA independently audited claims, units and arithmetic; root reconciled the decision. The original review created no paid account, outreach, price change, model rehearsal or deployment. The separately authorized sales-model review has since run and returned truth issues; see [its independent results](SALES-DESK-MODEL-REVIEW.md).

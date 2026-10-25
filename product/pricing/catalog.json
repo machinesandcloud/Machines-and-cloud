@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "id": "mc-packages-2026-10-25-proposal-v1",
+  "asOf": "2026-10-25",
+  "status": "COMMERCIAL_DESIGN_ONLY",
+  "purchasable": false,
+  "currency": "USD",
+  "billingInterval": "month",
+  "application": "Reviewable replacement package design. Not imported by checkout, signup, sales chat or provider admission. No existing customer price, entitlement, free access, Stripe Price or activation setting changes.",
+  "headline": "Choose the help your shop needs.",
+  "introduction": "Calls, texts and website inquiries handled around your workday. Start with front-desk coverage, add follow-through, or bring your paid leads into the same workflow.",
+  "scope": {
+    "locations": 1,
+    "workspaces": 1,
+    "businessWebsites": 1,
+    "managedUSLocalNumbers": 1,
+    "ownedGoogleCalendars": 1,
+    "primaryOwnerAccounts": 1,
+    "basis": "Per business location. More locations, numbers, calendars or shared team access require a specific Enterprise scope; no unimplemented seats, consolidated billing or SSO are promised.",
+    "baseChannels": [
+      "website_chat",
+      "phone_answering",
+      "two_way_sms",
+      "google_calendar"
+    ],
+    "baseFeatures": [
+      "business_specific_answers",
+      "english_spanish",
+      "job_contact_capture",
+      "visit_request",
+      "owner_inbox_history",
+      "owner_email_alerts",
+      "request_status",
+      "human_handoff",
+      "pause_controls",
+      "exports",
+      "guided_setup",
+      "support_reporting"
+    ],
+    "automaticSetup": "Business facts supplied once; managed resources prepared in the background after the customer authorizes the service. Customers still grant Google/platform permissions, choose phone routing and approve legal/carrier details and any quoted external charges. Website installation requires authorized access to the customer's website. No collection of customer platform passwords.",
+    "customerOwnerHandoff": "A request and its context are retained for the shop. No guaranteed job, dispatch, emergency response or staffed human answering service."
+  },
+  "packages": [
+    {
+      "id": "coverage_v1",
+      "legacyEquivalent": "starter",
+      "name": "Coverage",
+      "monthlyPriceCents": 14900,
+      "inherits": null,
+      "tagline": "Keep calls and inquiries from slipping past you.",
+      "description": "Answers, job details and visit requests in one workspace, while you get on with the work.",
+      "included": {
+        "voiceMinutes": 100,
+        "outgoingSmsSegments": 250,
+        "writtenAiReplies": 1500
+      },
+      "featuresAdded": [],
+      "cardHighlights": [
+        "AI phone answering and website chat",
+        "Two-way service texting",
+        "Google Calendar appointment handling",
+        "Customer details and owner handoff"
+      ],
+      "paidLeadAutomation": false,
+      "recommended": false
+    },
+    {
+      "id": "follow_through_v1",
+      "legacyEquivalent": "growth",
+      "name": "Follow-through",
+      "monthlyPriceCents": 29900,
+      "inherits": "coverage_v1",
+      "tagline": "Keep open requests and quotes moving.",
+      "description": "Everything in Coverage, with more capacity and customer follow-up you control.",
+      "included": {
+        "voiceMinutes": 250,
+        "outgoingSmsSegments": 750,
+        "writtenAiReplies": 3000
+      },
+      "featuresAdded": [
+        "owner_prepared_request_quote_followup",
+        "consented_appointment_reminders",
+        "followup_delivery_reply_history"
+      ],
+      "cardHighlights": [
+        "Everything in Coverage",
+        "Follow up on open requests and sent quotes",
+        "Appointment reminders",
+        "See sent messages and customer replies"
+      ],
+      "paidLeadAutomation": false,
+      "recommended": true
+    },
+    {
+      "id": "lead_desk_v1",
+      "legacyEquivalent": null,
+      "name": "Lead desk",
+      "monthlyPriceCents": 49900,
+      "inherits": "follow_through_v1",
+      "tagline": "Get more from the leads you already pay for.",
+      "description": "Everything in Follow-through, plus connected paid-lead conversations, qualification and a clear handoff to your shop.",
+      "included": {
+        "voiceMinutes": 500,
+        "outgoingSmsSegments": 1500,
+        "writtenAiReplies": 6000
+      },
+      "featuresAdded": [
+        "paid_lead_orchestration",
+        "thumbtack_native_ai",
+        "angi_intake_context",
+        "source_qualification",
+        "source_status_reporting"
+      ],
+      "cardHighlights": [
+        "Everything in Follow-through",
+        "Reply to leads inside Thumbtack",
+        "Angi leads in your inbox",
+        "Job details ready when you take over"
+      ],
+      "paidLeadAutomation": true,
+      "recommended": false
+    }
+  ],
+  "enterprise": {
+    "name": "Enterprise",
+    "price": "Custom",
+    "description": "More locations, higher volume or a specific integration. A written scope and price for the way your team works.",
+    "scope": [
+      "named_locations_numbers_calendars",
+      "agreed_usage_capacity",
+      "reviewed_custom_integrations",
+      "agreed_support_and_delivery_terms"
+    ],
+    "purchasable": false,
+    "automaticCapabilities": []
+  },
+  "units": {
+    "period": "The customer's monthly subscription period, anchored to the accepted billing contract; not the legacy Houston calendar-month informational counter. No unused-unit rollover.",
+    "voiceMinutes": "Connected time on each hosted phone leg, including a connected handoff leg; round each connected leg up to the next minute. A call and its transfer may use more than one minute at the same time. Unanswered legs and verified duplicate reports consume no customer units. Provider-event identity must prevent double counting. Known pre-answer blocked spam consumes no customer units; no promise that every answered unwanted call is free.",
+    "outgoingSmsSegments": "Carrier segments sent from the service to customers or to an owner receiving SMS alerts. One long message can use several segments. Incoming texts do not reduce this outgoing allowance; their supplier cost is included in the model. Carrier-accepted sends count even if the handset later rejects delivery. Pre-provider failures, simulations, verified duplicates and required STOP/HELP control responses consume no customer units. Unknown sends remain reserved until reconciled; never repeat blindly.",
+    "writtenAiReplies": "One logical completed AI answer delivered to a customer through website chat, service SMS or an included native lead platform. Retries, model/tool calls, classifications, inbound messages, owner-written replies, internal tests and failed deliveries do not each become a customer reply. Provider cost for all physical attempts must still be budgeted. SMS AI replies also consume their outgoing transport segments; voice AI is covered by minutes instead.",
+    "leads": "No charge per purchased lead, job or imported source record. A repeated webhook cannot create another billable reply. This is not an unlimited lead-storage, inbound-abuse or infinite conversation guarantee.",
+    "twoLimitsExample": "Ten AI-written SMS answers delivered in two segments each use 10 written replies and 20 outgoing SMS segments. A customer-typed reply uses neither outgoing segments nor an AI reply."
+  },
+  "connectors": [
+    {
+      "id": "thumbtack",
+      "name": "Thumbtack",
+      "includedIn": [
+        "lead_desk_v1"
+      ],
+      "target": "Read and answer the customer's original Thumbtack conversation, retain scope and source context, ask relevant qualifying questions and allow owner takeover.",
+      "route": "Partner OAuth and native message API, authorized for the shop's Pro account.",
+      "currentState": "Native adapter and guarded AI exist locally/published behind gates; partner application submitted, approved credentials and actual delivery not accepted.",
+      "activationRequires": [
+        "partner_access",
+        "shop_oauth",
+        "source_delivery_receipt",
+        "reply_idempotency_recovery",
+        "paid_entitlement_and_capacity",
+        "quality_acceptance"
+      ],
+      "source": "https://developers.thumbtack.com/docs/pro-integrations/messages"
+    },
+    {
+      "id": "angi",
+      "name": "Angi",
+      "includedIn": [
+        "lead_desk_v1"
+      ],
+      "target": "Import lead details into the shared inbox, qualify the request and help the owner follow up through an eligible, permission-backed channel.",
+      "route": "Angi lead delivery webhook; owner/source contact workflow. No in-Angi chat write contract is established by the reviewed documentation.",
+      "currentState": "Tenant-scoped intake and owner contact workflow implemented. Autonomous Angi SMS/email conversation is not implemented or accepted; any future automated outreach is a distinct delivery requirement, not a native Angi reply.",
+      "activationRequires": [
+        "angi_lead_delivery_configuration",
+        "real_source_receipt",
+        "paid_entitlement_and_capacity",
+        "separate_permission_for_outreach",
+        "implemented_accepted_outreach_before_automation_claim"
+      ],
+      "source": "https://intercom.help/angi/en/articles/15304819-angi-lead-integration-api"
+    }
+  ],
+  "additionalSources": {
+    "notAutomaticallyIncluded": [
+      "Yelp native messaging",
+      "Google Local Services Ads messaging",
+      "Facebook messaging",
+      "Jobber",
+      "Housecall Pro",
+      "ServiceTitan"
+    ],
+    "policy": "Evaluate an integration request and quote only an implemented, authorized and tested scope. A vendor API or Enterprise label alone does not establish our connector. Google Calendar permission does not grant Google Ads/LSA access."
+  },
+  "commercialTerms": {
+    "commitment": "Month to month. Cancellation takes effect at the displayed paid renewal end; immediate service pause is a separate control. Renewal date and paid service start must be shown before acceptance.",
+    "automaticOverageCharges": false,
+    "automaticReload": false,
+    "overagePrices": null,
+    "atCapacity": "Proposed paid behavior: show usage and warn at 80% and 100%; offer an explicitly priced upgrade or capacity quote without auto-charging. Pause only exhausted automation and retain the inquiry for owner action; use the previously authorized call fallback. Never represent an unconfirmed provider action as completed. This is an implementation requirement, not currently enforced monthly entitlement behavior.",
+    "externalCosts": "Thumbtack/Angi subscriptions, purchased leads, advertising, the customer's existing carrier and taxes are separate. Standard recurring managed number and campaign costs are included in the model. One-time carrier brand/vetting fees must be specifically quoted and accepted before texting activation; no unknown fee is silently treated as zero.",
+    "setup": "Guided automated setup is included. No mandatory specialist fee selected. An optional specialist engagement for custom website/CRM work must have a separate scope and fixed quote before work; no invented industry-standard fee.",
+    "trial": "Free workspace preparation and private testing remain separate from the paid offer. No timed trial or paid subscription begins just by choosing a package in setup.",
+    "excluded": [
+      "lead purchases and ad management",
+      "staffed human receptionist labor",
+      "unlimited calls or messages",
+      "mass marketing campaigns",
+      "unaccepted native CRM or dispatch connections",
+      "payment processing for the shop's customers",
+      "guaranteed jobs or revenue",
+      "uncontracted SLAs"
+    ]
+  },
+  "compatibility": {
+    "existingOffers": "Preserve accepted offer version, amount, provider Price ID, currency, interval, account, mode, agreed allowances and customer rights. These new IDs are not aliases that reprice starter/growth/pro.",
+    "freeWorkspace": "Do not reduce existing free workspace capabilities or portray a shared daily best-effort ceiling as reserved paid capacity. New paid monthly capacity must be funded separately.",
+    "billingMaintenance": "Fix retained Checkout, Subscription, Portal and cancellation verification to bind to immutable accepted offer/Price data before modifying any current price map. Keep authorized legacy maintenance isolated from new admissions and its old trial/fallback behavior.",
+    "marketingCutover": "A single future release must align pricing, signup, onboarding, sales chat, workspace quote, checkout validation, ledgers and entitlements. This proposal deliberately changes none of those runtime sources."
+  },
+  "activationGates": [
+    "Current managed phone, texting/carrier, Calendar, billing and operational outcomes accepted independently under launch control",
+    "Native partner/source access and actual same-thread delivery for each advertised connector",
+    "Versioned new admission and immutable existing-offer maintenance, with no implicit repricing",
+    "Atomic per-period monthly entitlements, fair per-tenant capacity, deduplication, failed/uncertain action accounting and visible exhaustion recovery",
+    "Funded measured model routing, bounded context/physical attempts and English/Spanish quality without degraded answers",
+    "Actual cost receipts and partner charges reviewed against the conservative model; real buyer validation of the fixed offer",
+    "Customer-facing copy and ordinary desktop/mobile journey accepted; no live subscription on an unavailable promised channel"
+  ]
+}
