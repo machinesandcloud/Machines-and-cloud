@@ -26,6 +26,7 @@ for (const name of htmlFiles) {
   const mains = [...html.matchAll(/<main\b([^>]*)>/g)];
   check(`${name}: one focusable main destination and a native skip link`, mains.length === 1 && /\bid="main"/.test(mains[0][1]) && /\btabindex="-1"/.test(mains[0][1]) && /<a\b[^>]*class="site-skip"[^>]*href="#main"[^>]*>Skip to content<\/a>/.test(html));
   check(`${name}: repeated site navigation and footer stay outside main`, html.indexOf('id="navbar"') < html.indexOf('<main') && html.indexOf('</main>') < html.indexOf('<footer'));
+  check(`${name}: public entry keeps the established light brand`, /<body\b[^>]*class="[^"]*\btheme-light\b/.test(html));
 }
 
 const base = 'http://127.0.0.1:8899';
@@ -35,7 +36,10 @@ const cases = [
   ['industry-home-services.html', 390, true], ['industry-home-services.html', 1440, false],
   ['privacy-policy.html', 320, true], ['privacy-policy.html', 1440, false],
   ['index.html', 390, true], ['about.html', 1440, true],
-  ['insights.html', 1440, true], ['thank-you.html', 320, true], ['404.html', 390, false]
+  ['insights.html', 1440, true], ['thank-you.html', 320, true], ['404.html', 390, false],
+  ['austin.html', 390, true], ['agentic-ai-vs-rpa.html', 1440, false],
+  ['priority-construction-progress-monitoring-from-site-imagery.html', 390, true],
+  ['ai-agent-development-services.html', 1440, true]
 ];
 try {
   for (const [name, width, javaScriptEnabled] of cases) {
@@ -73,7 +77,7 @@ try {
     check(`${label}: next keyboard action stays in page content`, await page.evaluate(() => document.querySelector('main').contains(document.activeElement)));
     check(`${label}: single main excludes both navigation blocks`, await page.evaluate(() => document.querySelectorAll('main').length === 1 && !document.querySelector('main #navbar') && !document.querySelector('main footer')));
     check(`${label}: viewport has no horizontal overflow`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
-    if (name === 'houston.html' || name === 'industry-home-services.html') {
+    if (['houston.html', 'industry-home-services.html', 'austin.html', 'privacy-policy.html', 'agentic-ai-vs-rpa.html', 'priority-construction-progress-monitoring-from-site-imagery.html', 'ai-agent-development-services.html'].includes(name)) {
       const path = output.replace(/\.json$/, '') + '-' + name.replace('.html', '') + '-' + width + '.png';
       await page.screenshot({ path }); report.screenshots.push(path);
     }
