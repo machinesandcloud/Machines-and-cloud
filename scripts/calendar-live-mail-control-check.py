@@ -143,4 +143,16 @@ with tempfile.TemporaryDirectory(prefix='mc-mail-control-check-')as directory:
                 assert len(calls)==0 and m.last(m.LEDGER)['native']['unknown']
             finally:selected.write_bytes(original)
     check('Binary and selected JS withdrawal after durable dispatch marker stop the child',final_source_fence)
+    def safe_rejection_receipt():
+        reset();reserve();calls=[]
+        class Result:returncode=2;stdout='{"nativeMailRejected":"current_navigation_not_owned"}'
+        m.subprocess.run=lambda*a,**k:(calls.append(True)or Result())
+        with m.locked()as(s,append):rejects(lambda:m.native_dispatch(s,append,dispatch(s)))
+        saved=m.last(m.LEDGER);reason='native_mail_current_navigation_not_owned'
+        assert saved['native']['rows'][-1]['reason']==reason and saved['native']['unknown'] and m.native_summary(saved['native'])['lastReason']==reason
+        with m.locked()as(s,append):rejects(lambda:m.native_dispatch(s,append,dispatch(s)))
+        assert len(calls)==1 and saved['requests']==17
+        for output in ['synthetic private body','{"nativeMailRejected":"unknown_code"}','{"nativeMailRejected":"current_navigation_not_owned","body":"synthetic-secret"}','{"nativeMailRejected":["arguments"]}','x'*1025]:assert m.safe_mail_rejection(output)is None
+        assert 'synthetic-secret'not in json.dumps(saved)
+    check('Exact static Swift rejection is retained without contents, counters or replay changes',safe_rejection_receipt)
 print(json.dumps({'passed':len(checks),'total':len(checks),'checks':checks,'physicalNetworkRequests':0,'nativeChildren':0},indent=2))

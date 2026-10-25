@@ -6,6 +6,7 @@ PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None; MAIL_BI
 MAIL_PHASE='core-calendar-borrowed-launch-v8-20261025'
 MAIL_PREP=pathlib.Path('/tmp/mc-calendar-v8-mail-prep-20261025')
 MAIL_PRIVATE=pathlib.Path('/tmp/mc-calendar-v8-private-20261025')
+MAIL_REJECTIONS=frozenset(['arguments','mode','configuration_missing','configuration_custody','configuration_shape','configuration_unbound_or_expired','navigation_not_approved','interactive_session_locked','interactive_session_unknown','expired_before_native','owned_process_missing','owned_window_missing','owned_mail_target_missing_or_changed','current_navigation_not_owned','restore_not_owned','expired_before_navigation','script_not_approved','script_unavailable','expired_before_javascript','script_result_unconfirmed','private_custody','private_write_unconfirmed'])
 ACCOUNT='69797d78f01c70674ffef858'
 SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'46c0f03b1f4113cbc3da6bd8ddf03455cacc2187','gitBase':'615de409891df9c91ab53569daa462157615722a','baselineDeployId':'6add4c9eb22cf12c47b30691','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
 MC_KEYS=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_APPROVED_VERSION','CALENDAR_EXECUTION_POLICY_JSON']
@@ -70,6 +71,19 @@ def mail_binding():
     if not isinstance(sources,list) or len(sources)!=6 or any(not isinstance(x,dict) or set(x)!={'path','sha256','type'} or not isinstance(x['path'],str) or expected.get(x['path'])!=x['type'] or not isinstance(x['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',x['sha256']) for x in sources) or len({x['path'] for x in sources})!=6: fail('Owner-only mail sources changed')
     return b,cfg
 def fresh_native(): return {'maxInvocations':40,'maxMessageReads':3,'invocations':0,'messageReads':0,'rows':[],'unknown':False,'restoreAttempted':False}
+def safe_mail_rejection(stdout):
+    if not isinstance(stdout,str): return None
+    try:
+        if len(stdout.encode())>1024: return None
+        value=json.loads(stdout)
+    except Exception: return None
+    if isinstance(value,dict) and set(value)=={'nativeMailRejected'} and isinstance(value['nativeMailRejected'],str) and value['nativeMailRejected']in MAIL_REJECTIONS: return value['nativeMailRejected']
+    return None
+def native_summary(n):
+    result={k:n[k]for k in ['invocations','messageReads','unknown','restoreAttempted']}
+    reason=next((r.get('reason')for r in reversed(n['rows'])if isinstance(r.get('reason'),str) and r['reason'].startswith('native_mail_') and r['reason'][12:]in MAIL_REJECTIONS),None)
+    if reason: result['lastReason']=reason
+    return result
 def native_valid(n):
     if not isinstance(n,dict) or set(n)!={'maxInvocations','maxMessageReads','invocations','messageReads','rows','unknown','restoreAttempted'} or n['maxInvocations']!=40 or n['maxMessageReads']!=3 or type(n['invocations'])is not int or not 0<=n['invocations']<=40 or type(n['messageReads'])is not int or not 0<=n['messageReads']<=3 or type(n['unknown'])is not bool or type(n['restoreAttempted'])is not bool or not isinstance(n['rows'],list) or len(n['rows'])!=n['invocations']: fail('Mail state contract changed')
     required={'id','mode','type','sourceSHA256','configurationSHA256','navigationSHA256','restore','state','at'}
@@ -123,6 +137,9 @@ def native_dispatch(s,append,value):
         if digest(mail_file(helper['path'],0o700,10000000))!=helper['sha256'] or digest(mail_file(helper['sourcePath']))!=helper['sourceSHA256'] or digest(mail_file(MAIL_PREP/'mail-navigation.json'))!=cfg['navigation']['sha256'] or r['type']!='navigation' and digest(mail_file(argument))!=r['sourceSHA256']: fail('Mail source changed after dispatch reservation')
         if now()>=dt.datetime.fromisoformat(b['approvalExpiresAt'].replace('Z','+00:00')): fail('Mail expired before dispatch')
         result=subprocess.run([helper['path'],value['mode'],argument],capture_output=True,text=True,timeout=15)
+        if result.returncode==2:
+            rejected=safe_mail_rejection(result.stdout)
+            if rejected: r['reason']='native_mail_'+rejected
         if result.returncode!=0 or not isinstance(result.stdout,str) or len(result.stdout.encode())>65536: fail('Native mail outcome unconfirmed')
         r['dispatchState']='observed';s['nativeRevision']+=1;append();return {'nativeRevision':s['nativeRevision'],'stdout':result.stdout}
     except Exception:
@@ -304,7 +321,7 @@ def main():
             value=json.loads(args.input)
             if args.command=='native-mail-save': return native_save(s,append,value)
             return native_dispatch(s,append,value)
-        if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']],**({'native':{'invocations':s['native']['invocations'],'messageReads':s['native']['messageReads'],'unknown':s['native']['unknown'],'restoreAttempted':s['native']['restoreAttempted']}} if 'native'in s else {})}
+        if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']],**({'native':native_summary(s['native'])} if 'native'in s else {})}
         if args.command=='cleanup-env':
             # A lost mutation can have applied. Inspect actual current values,
             # without retrying the original mutation or trusting cached absence.
