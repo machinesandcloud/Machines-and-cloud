@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "observedAt": "2026-10-25T21:24:21.282269+00:00",
+  "observedAt": "2026-10-25T21:28:14.494722+00:00",
   "scope": "Optional owner-authorized read-only MCP setup adapter; engineering author evidence only",
   "baseCommit": "b26a13af6e11082018b037e174de0c8bc5b9fb30",
   "contractReference": {
@@ -22,30 +22,27 @@
     "typescript": "7.0.2",
     "@types/node": "26.6.5"
   },
-  "command": "cd integrations/mcp && npm test",
+  "command": "cd integrations/mcp && npm run build && node --test --test-name-pattern='live projection|every service guide|SDK service guide routes' test/mcp.test.mjs",
   "result": {
     "buildExit": 0,
-    "tests": 13,
-    "passed": 13,
+    "affectedTests": 3,
+    "passed": 3,
     "failed": 0,
     "actualOwnerSessions": 0,
     "actualProviderCalls": 0,
     "actualModelCalls": 0,
     "publicListeners": 0,
-    "physicalNetwork": "Blocked in the test parent and separate stdio child; injected owner GET only"
+    "physicalNetwork": "Blocked; synthetic owned GET only"
   },
   "observedJobs": [
-    "Official SDK initialization and tool discovery over in-memory and separate stdio transports",
-    "All three tools return structured content from fresh fixed-path owner GET",
-    "Every service guide and review view is usable; browser links carry no bearer",
-    "Revoked owner access stops reads and links without cached authority",
-    "Malicious host/query/redirect/tenant/arguments are rejected",
-    "Private fixture identities, records, keys, URLs and upstream errors are withheld",
-    "Stream size and request timeout are bounded; old backend guide absence is explicit"
+    "Actual SDK service-guide call links practice to #test and other verification to #setup",
+    "Actual SDK service-guide call labels implemented Angi intake as Angi only",
+    "Affected live projection and every-service/every-link authorization checks remain passing"
   ],
   "architectureReview": {
     "reviewerRole": "status_check_engineer",
-    "disposition": "No source architecture blocker on final index/server/workspace/lock hashes; not an independent runtime test"
+    "disposition": "Prior-source no-blocker review only; Root requested the two narrow copy/routing repairs recorded here. No independent current-source runtime acceptance credited.",
+    "sourceCommit": "2076c99ebf8490cd2a2b35d01a1af25d5b8aea00"
   },
   "limits": [
     "No independent protocol QA credited in this authored receipt",
@@ -74,7 +71,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "c4651326add6191d0530d58ed105735272e05fd113f1fc7de5d0b37b9a3c70e9"
+      "sha256": "a91e6e0afeb32086fa069e9143769c7f525b2ba3ddd3e8f03f4c0a4ac459bcfe"
     },
     {
       "path": "src/index.ts",
@@ -86,7 +83,7 @@
     },
     {
       "path": "src/workspace.ts",
-      "sha256": "35bd8c559e509fdef0503517a0b9cb6a8325fcefbac0bd66b7211831adf0a8fb"
+      "sha256": "c2111526a5acb23308206e656688474b7d6c954442f20e6dafa247dccd6892aa"
     },
     {
       "path": "test/fixtures.mjs",
@@ -94,7 +91,7 @@
     },
     {
       "path": "test/mcp.test.mjs",
-      "sha256": "4f103493a2d450e2d31ac0d5235db4131ef80473063bdbeb57af95d680e4b6e1"
+      "sha256": "e44524a8cc1ede856de691cab565d5e54ddbf103fd221511e782a485f3f761c4"
     },
     {
       "path": "test/network-block.mjs",
@@ -107,6 +104,27 @@
     {
       "path": "evidence/author-test.txt",
       "sha256": "fe5759f1bf3c2aabe009d884917292dac0b873cea930b22e09ca3c982ca37aed"
+    },
+    {
+      "path": "evidence/author-routing-affected.txt",
+      "sha256": "4e45cb0b36ff94e76807a2feb36619e2c43d00e067691bdfd3b9e823a51c78fa"
     }
-  ]
+  ],
+  "retainedAuthorEvidence": {
+    "commit": "2076c99ebf8490cd2a2b35d01a1af25d5b8aea00",
+    "receiptSHA256": "07c55efb8e9f2938e218384f8dab65cba307e3a27c562bc8099c34924a58f732",
+    "raw": "evidence/author-test.txt",
+    "tests": 13,
+    "passed": 13,
+    "credit": "Earlier source. Only the three affected protocol groups were rerun for this follow-up."
+  },
+  "sourceBridge": {
+    "priorCommit": "2076c99ebf8490cd2a2b35d01a1af25d5b8aea00",
+    "priorWorkspaceSHA256": "35bd8c559e509fdef0503517a0b9cb6a8325fcefbac0bd66b7211831adf0a8fb",
+    "reverseExactlyMatchesPrior": true,
+    "changes": [
+      "Label Angi intake as Angi; HomeAdvisor family overlap is not a verified connector",
+      "Guide step id practice links to Test answers; other verification steps remain in Connections"
+    ]
+  }
 }

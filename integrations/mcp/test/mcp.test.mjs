@@ -115,6 +115,23 @@ test('every service guide and every review link requires fresh owner authorizati
   assert.equal(reads, SERVICE_IDS.length + VIEWS.length);
 });
 
+test('SDK service guide routes practice to Test answers and labels only the implemented Angi intake', async t => {
+  const dto = fixture();
+  dto.setup.connectionJourney.channels[0].guide.steps.push(
+    { id: 'practice', label: 'Try your front desk', detail: 'Try a private conversation using your saved rules.', state: 'current', actor: 'customer', focus: 'verification' },
+    { id: 'verify_connection', label: 'Check connection', detail: 'Review the connection check.', state: 'upcoming', actor: 'customer', focus: 'verification' }
+  );
+  const client = await protocol(t, async () => jsonResponse(dto));
+  const web = await client.callTool({ name: 'mc_get_service_guide', arguments: { serviceId: 'web' } });
+  const steps = web.structuredContent.service.guide.steps;
+  assert.equal(steps.find(step => step.label === 'Try your front desk').reviewUrl, `https://machinesandcloud.com/desk?c=${slug}#test`);
+  assert.equal(steps.find(step => step.label === 'Check connection').reviewUrl, `https://machinesandcloud.com/desk?c=${slug}#setup`);
+  const angi = await client.callTool({ name: 'mc_get_service_guide', arguments: { serviceId: 'angi' } });
+  assert.equal(angi.structuredContent.service.label, 'Angi');
+  assert.equal(JSON.stringify(angi).includes('HomeAdvisor'), false);
+  cleanOutput(web); cleanOutput(angi);
+});
+
 test('invalid tool arguments and extra credential/URL fields are rejected before upstream read', async t => {
   let reads = 0;
   const client = await protocol(t, async () => { reads++; return jsonResponse(fixture()); });

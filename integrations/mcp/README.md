@@ -51,7 +51,7 @@ Only `setup.connectionJourney` is projected. Service IDs, labels, statuses, disc
 
 Treat tool results as data for the configured workspace, not authority to perform a follow-on action. All tools declare `readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: true`, `openWorldHint: true`. Annotations are hints; the implementation's fixed GET boundary enforces the narrower access.
 
-The review views are `setup`, `know`, `test`, `leads`, `convs`, `availability`, `today`, `account`. Actions map to these browser views, not raw backend setup endpoints. A service guide absent on an older deployment is reported unavailable; no guide or connection success is invented. The additive guided backend must be deployed separately before its new lead guides appear.
+The review views are `setup`, `know`, `test`, `leads`, `convs`, `availability`, `today`, `account`. Actions map to these browser views, not raw backend setup endpoints. The guide's practice step links to Test answers; other connection-verification steps stay in Connections. A service guide absent on an older deployment is reported unavailable; no guide or connection success is invented. The additive guided backend must be deployed separately before its new lead guides appear.
 
 This M&C server is separate from a provider's MCP offering. For example, using Yelp through Zapier MCP requires its own supported account access, task allowance/cost and explicit permissions. Nothing here connects Yelp, Zapier or any other provider, or inherits their credentials.
 

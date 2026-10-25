@@ -6,7 +6,7 @@ type JsonObject = Record<string, unknown>;
 
 const LABELS: Record<ServiceId, string> = {
   web: 'Website chat', voice: 'Phone answering', sms: 'Text messages',
-  calendar: 'Google Calendar', thumbtack: 'Thumbtack', angi: 'Angi / HomeAdvisor'
+  calendar: 'Google Calendar', thumbtack: 'Thumbtack', angi: 'Angi'
 };
 const DISCOVERY = {
   google_local_services_ads: 'Google Local Services Ads', yelp: 'Yelp quote requests',
@@ -137,7 +137,7 @@ function project(dto: JsonObject, config: Configuration): SafeSnapshot {
       return [{
         id: 'step_' + (index + 1), label: clean(step.label, 160), detail: clean(step.detail),
         state: String(step.state), actor: String(step.actor),
-        reviewUrl: workspaceLink(config, FOCUS_VIEWS[String(step.focus)] || 'setup')
+        reviewUrl: workspaceLink(config, step.id === 'practice' ? 'test' : FOCUS_VIEWS[String(step.focus)] || 'setup')
       }];
     });
     return { overview: clean(row.overview), automationSummary: clean(row.automationSummary), steps };
