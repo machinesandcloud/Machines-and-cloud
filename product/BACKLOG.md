@@ -1,3 +1,5 @@
+> **Current financial checkpoint:** R3 is closed after an uncompleted hosted TEST checkout. All financial resources, test workspace/session, original settings and original Zari deployment are restored. Payment is not accepted; fix actual form diagnostics before another attempt. [Observed result](STRIPE-RECOVERY-V4R3-RESULT-2026-10-24.json). Current source/readiness is in [launch control](LAUNCH-CONTROL.json).
+
 > **Active delivery, October24:** Finish the authorized grouped release and observe the current owned-Calendar lifecycle. The accepted local lead-AI slice is in `26139e9`; [local evidence and returned-defect dispositions](LAUNCH-FINISH-LOCAL-ACCEPTANCE-2026-10-24.json). Thumbtack partner keys/native delivery, Angi native messaging contract, phone/text delivery, Stripe public TEST-webhook lifecycle, commercial capacity and operations remain owned launch work. Previous closed allowances stay closed.
 
 ## Lead-source implementation and Calendar diagnosis — October24

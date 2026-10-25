@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "phaseId": "hosted-onboarding-stripe-20261024-v4r3",
+  "state": "CLOSED_FAILED_FINANCIAL_CLEANUP_VERIFIED",
+  "recordedAt": "2026-10-25T01:37:03.520111+00:00",
+  "customerOutcome": "Actual accepted website workspace retained through TEST checkout; paid lifecycle NOT accepted. Test workspace and all temporary resources/settings restored after failure.",
+  "source": {
+    "commit": "46c0f03b1f4113cbc3da6bd8ddf03455cacc2187",
+    "sourceId": "sha256:4bf1e084cb2176085a1b82ce1d3f12bf9d7f95a69fbb15ece17bb1d639394723",
+    "sourceManifestSHA256": "beb19f38d50abe438145762c271b24e0af625bbf2933957766f599ded0ad2f8b",
+    "sourceStable": true
+  },
+  "publication": {
+    "proofDeployId": "6add36c8404bebc124aa7e26",
+    "cleanupDeployId": "6add4c9eb22cf12c47b30691",
+    "mcCommit": "46c0f03b1f4113cbc3da6bd8ddf03455cacc2187",
+    "mcReady": true,
+    "zariOriginalDeployId": "6a71d1070df5fa00089f99f8",
+    "zariOriginalCommit": "421f1c28f239ce24f22dcee5b8953cee04ecf66a",
+    "zariReady": true,
+    "mcBuilds": 2,
+    "zariBuilds": 0,
+    "nominalBuildCredits": 30
+  },
+  "retainedWebChecks": [
+    {
+      "name": "Actual owned website installation, live practice, ordinary request and served source are current before Stripe activity",
+      "pass": true
+    },
+    {
+      "name": "Published owner tenant, TEST merchant, owned Price and dedicated snapshot destination are bound",
+      "pass": true
+    }
+  ],
+  "financial": {
+    "checkoutId": "cs_test_a1A9W45964nLyDmz6ap3xyg2KTyTpXbPmL5cAUm0lzig0THBpfgZtAUBqn",
+    "subscriptionId": null,
+    "customerId": null,
+    "invoiceId": null,
+    "billingState": "none",
+    "financialCleanup": {
+      "operationId": "cbb9177d559c1fc23f8f1e3dc8ee5d19",
+      "state": "complete",
+      "confirmedAt": "2026-10-24T23:10:07.067Z"
+    },
+    "phaseState": "closed",
+    "publicReceipts": [
+      {
+        "id": "evt_1UUE4gJW47xiUUpYGVsfHhuF",
+        "type": "checkout.session.expired",
+        "objectId": "cs_test_a1A9W45964nLyDmz6ap3xyg2KTyTpXbPmL5cAUm0lzig0THBpfgZtAUBqn",
+        "checkoutId": "cs_test_a1A9W45964nLyDmz6ap3xyg2KTyTpXbPmL5cAUm0lzig0THBpfgZtAUBqn",
+        "subscriptionId": null,
+        "customerId": null,
+        "invoiceId": null,
+        "bodyDigest": "4c452bdb1dc22230636a830bf942ef56f4e2cec5722dc1a8317f109333b44f79",
+        "eventCreated": 1792883406,
+        "receivedAt": "2026-10-24T23:10:08.996Z",
+        "verifiedDestination": "workspace"
+      }
+    ],
+    "endpointDeletion": {
+      "phaseId": "hosted-onboarding-stripe-20261024-v4r3",
+      "endpointId": "we_1UUDkFJW47xiUUpYYY25VkcO",
+      "state": "confirmed"
+    },
+    "hostedCanonicalTest": {
+      "checkoutId": "cs_test_a1A9W45964nLyDmz6ap3xyg2KTyTpXbPmL5cAUm0lzig0THBpfgZtAUBqn",
+      "livemode": false,
+      "status": "open"
+    },
+    "nativeHostedReview": {
+      "state": "timed_out",
+      "phaseId": "hosted-onboarding-stripe-20261024-v4r3",
+      "checkoutId": "cs_test_a1A9W45964nLyDmz6ap3xyg2KTyTpXbPmL5cAUm0lzig0THBpfgZtAUBqn",
+      "startedAt": "2026-10-24T22:55:57.495Z",
+      "deadlineAt": "2026-10-24T23:05:57.492Z",
+      "maximumWaitSeconds": 599.997,
+      "rejectedInputs": 0
+    },
+    "error": "Native hosted TEST observation not confirmed",
+    "unknown": [
+      "Exact-endpoint Workbench delivery review not confirmed before bounded cleanup"
+    ]
+  },
+  "native": {
+    "checkoutActions": 9,
+    "oneSubmit": true,
+    "humanPromptObserved": false,
+    "returnedToWorkspace": false,
+    "inboxRestoredObserved": true,
+    "workbenchActions": 0,
+    "supplementalReadAttempts": 1,
+    "supplementalReadResult": "AppleScript numeric window-ID lookup failed before page DOM access; actual validation message remains unobserved.",
+    "supplementalReceiptSHA256": "7ba908c2074692f5c655c9312d79b873123e2808f017bd9c3b67ff7b11700024",
+    "traffic": "Regular-browser HTTP outside guarded API counters; no native HTTP-total claim."
+  },
+  "cleanup": {
+    "financialComplete": true,
+    "endpointDeleted": true,
+    "fixturesArchived": true,
+    "workspaceCancelled": true,
+    "cancellationReadback": true,
+    "ownerSignOut200": true,
+    "ownerRevoked401": true,
+    "mcOriginalEnvironmentRows": 27,
+    "zariOriginalEnvironmentRows": 42,
+    "fullOriginalEnvironmentsRestored": true,
+    "distinctSameSourceMcReady": true,
+    "originalZariReady": true,
+    "originalV4BrowserException": "Earlier unknown native creation/close remains separately unresolved; no global browser-destruction claim."
+  },
+  "counts": {
+    "controlReservations": 62,
+    "observedPhysicalControlHTTPRequests": 51,
+    "controlMutations": 25,
+    "runnerStripe": 14,
+    "platformStripe": 13,
+    "preparationStripe": 6,
+    "guardedStripeTotal": 33,
+    "runnerSiteRequests": 32,
+    "runnerSiteWrites": 5,
+    "runnerStaticRequests": 0,
+    "ownerCleanupRequests": 6,
+    "ownerCleanupWrites": 2,
+    "publicationReads": 3,
+    "newEmails": 0,
+    "modelRequests": 0,
+    "calls": 0,
+    "texts": 0,
+    "calendarOperations": 0,
+    "realMoneyPayments": 0
+  },
+  "publicationChecks": [
+    {
+      "url": "https://machinesandcloud.com/",
+      "method": "GET",
+      "state": "observed",
+      "at": "2026-10-25T01:35:48.618920+00:00",
+      "status": 200,
+      "bytes": 32848,
+      "sha256": "6c76c815917143b4191788c51a1db289f10136921b5f5933403bc385860ef127"
+    },
+    {
+      "url": "https://machinesandcloud.com/api/health",
+      "method": "GET",
+      "state": "observed",
+      "at": "2026-10-25T01:35:49.252346+00:00",
+      "status": 200,
+      "bytes": 84,
+      "sha256": "bb0e5cc1ea3ee9cc47333b3c1f47f5c63aa0f6dafb0294128a8612365e073e2a",
+      "healthStatus": null,
+      "healthOk": true,
+      "healthKeys": [
+        "ok",
+        "lastRunAt",
+        "minutesAgo",
+        "failingBlocks"
+      ]
+    },
+    {
+      "url": "https://zaricoach.com/",
+      "method": "GET",
+      "state": "observed",
+      "at": "2026-10-25T01:35:50.766488+00:00",
+      "status": 200,
+      "bytes": 252689,
+      "sha256": "df299a7b5ec38e416924adc6f58e0c26c3a2398661705fd396edb8b9766db4f9"
+    }
+  ],
+  "boundaryException": {
+    "kind": "Three final public read-only GETs after ordinary phase expiry",
+    "details": "Root failed to recheck the clock before final public-page/health checks. All three were GETs with no account/settings/provider mutations. They are retained as an exception, not described as within the expired read window. Known-owned cleanup was separately permitted after expiry.",
+    "correctiveAction": "Close all remaining phase allowances now; every future non-cleanup transport must enforce its own current clock immediately before dispatch."
+  },
+  "acceptance": {
+    "paid99USDTestInvoice": false,
+    "signedCompletedReceipt": false,
+    "sameSubscriptionRenewalCancellation": false,
+    "exactEndpoint2xxAbsoluteTime": false,
+    "portal": false,
+    "scheduledFinancialFailureRecovery": false,
+    "liveCharging": false,
+    "fullLaunch": "NO-GO"
+  },
+  "next": "Repair actual form observability locally and obtain the real validation/provider result before any fresh payment attempt; do not infer a React/Stripe/customer-product cause or repeat submission. Calendar owner permissions/data-access verification and other whole-offer jobs remain open.",
+  "evidence": {
+    "runnerReportSHA256": "9e06cbab721bfc3967408481476a6d1549312996127aadeabec14a04d054104a",
+    "ownerCleanupSHA256": "185b56bd64a1fce35e322efd736752078acb5386953c78940f38452d2e275fb2",
+    "controlLedgerSHA256": "1e67955b75a60fb3b42931fb32505e3ff2720f7bfda13871513cd01888dc3c50",
+    "nativeLedgerSHA256": "482b9436c03bc2670e0caa92ee29726a19f96cfa95d1ff4584ef9fae220c3a89",
+    "endpointLedgerSHA256": "3612f2585a3a7815531595dcc38cc57d9d67912207342dc4ec9ce5058c977a80"
+  },
+  "independentAcceptance": {
+    "path": "scratchpad/stripe-v4r3-actual-independent-20261024.json",
+    "sha256": "e210c0db7e4ed628dd30db0fd881718d28bd099857953bb55eb337e2f92b9730",
+    "scope": "Actual cleanup and failed-proof accounting accepted, with late-GET exception retained; no paid lifecycle or full-launch acceptance."
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "status": "ACCEPTED_ACTUAL_SCOPED_CLEANUP_WITH_RETAINED_BOUNDARY_EXCEPTION",
+  "phaseId": "hosted-onboarding-stripe-20261024-v4r3",
+  "resultPath": "/tmp/mc-launch-finish-7c/product/STRIPE-RECOVERY-V4R3-RESULT-2026-10-24.json",
+  "resultSHA256": "fde580af1cf04eb184bd95a8143b0c01095e4611e981f52d3dc02853d88dad63",
+  "paidLifecycle": "NOT ACCEPTED; native observation timed out, no confirmed completed payment or signed completed receipt.",
+  "financialCleanupVerified": true,
+  "resourceIdentity": {
+    "checkoutId": "cs_test_a1A9W45964nLyDmz6ap3xyg2KTyTpXbPmL5cAUm0lzig0THBpfgZtAUBqn",
+    "endpointId": "we_1UUDkFJW47xiUUpYYY25VkcO",
+    "signedReceiptType": "checkout.session.expired",
+    "sameRetainedExpirationOperation": "cbb9177d559c1fc23f8f1e3dc8ee5d19"
+  },
+  "ownerWorkspaceAndSessionCleanupVerified": true,
+  "fullEnvironmentSemanticRestore": {
+    "mc": {
+      "originalRows": 27,
+      "observedRows": 27,
+      "fullSemanticIncludingAllValueIDsContextsScopesAndSecretFlagsEqual": true,
+      "originalSHA256": "9b32ed1762bc096b039f5a4c72d0316135443e14442ad22ee0c71d9fafadb09f",
+      "observedSHA256": "8b1267e067d2e3a1bced859a280d8940a41e7fe08dddb783bf466e02ef12374c"
+    },
+    "zari": {
+      "originalRows": 42,
+      "observedRows": 42,
+      "fullSemanticIncludingAllValueIDsContextsScopesAndSecretFlagsEqual": true,
+      "originalSHA256": "7ebb5549563e57e679fdace4c7a075f355d776e1473a9158ca85c870f2ce13d5",
+      "observedSHA256": "19f40a849667b2667f59bb5d817c076b1b20236aa59fa83720c325431b357205"
+    }
+  },
+  "observedReadyDeployments": {
+    "mc": {
+      "deployId": "6add4c9eb22cf12c47b30691",
+      "commit": "46c0f03b1f4113cbc3da6bd8ddf03455cacc2187",
+      "state": "ready",
+      "enabled": true
+    },
+    "zari": {
+      "deployId": "6a71d1070df5fa00089f99f8",
+      "commit": "421f1c28f239ce24f22dcee5b8953cee04ecf66a",
+      "state": "ready",
+      "enabled": true
+    }
+  },
+  "distinctSameSourceMcCleanupReady": true,
+  "recomputedCounts": {
+    "controlReservations": 62,
+    "observedPhysicalControlHTTPRequests": 51,
+    "controlMutations": 25,
+    "runnerStripe": 14,
+    "platformStripe": 13,
+    "preparationStripe": 6,
+    "guardedStripeTotal": 33,
+    "runnerSiteRequests": 32,
+    "runnerSiteWrites": 5,
+    "runnerStaticRequests": 0,
+    "ownerCleanupRequests": 6,
+    "ownerCleanupWrites": 2,
+    "publicationReads": 3
+  },
+  "native": {
+    "checkoutActions": 9,
+    "oneSubmit": true,
+    "returnedToWorkspaceObserved": false,
+    "humanPromptObservedInRetainedProjection": false,
+    "originalInboxReadbackObserved": true,
+    "separateFailedReadAttempts": 1,
+    "separateReadFailedBeforeDOM": true,
+    "workbenchActions": 0,
+    "networkTraffic": "Outside runner/server API counters; no native HTTP total accepted."
+  },
+  "boundaryException": {
+    "kind": "Three final public read-only GETs after ordinary phase expiry",
+    "details": "Root failed to recheck the clock before final public-page/health checks. All three were GETs with no account/settings/provider mutations. They are retained as an exception, not described as within the expired read window. Known-owned cleanup was separately permitted after expiry.",
+    "correctiveAction": "Close all remaining phase allowances now; every future non-cleanup transport must enforce its own current clock immediately before dispatch."
+  },
+  "source": {
+    "executedCommit": "46c0f03b1f4113cbc3da6bd8ddf03455cacc2187",
+    "sourceId": "sha256:4bf1e084cb2176085a1b82ce1d3f12bf9d7f95a69fbb15ece17bb1d639394723",
+    "manifestSHA256": "beb19f38d50abe438145762c271b24e0af625bbf2933957766f599ded0ad2f8b",
+    "retained539SourceBeforeAfterAndCurrentMatch": true,
+    "runnerSeparatePinInheritedFromFinalLocalBridge": true
+  },
+  "closedAllowancesNotReusable": true,
+  "priorBrowserExceptionRetained": true,
+  "privateReadTreatment": "Only exact permitted environment JSONs parsed for in-process semantic equality; values not emitted. No credential file or private owner/root binding read.",
+  "auditEffects": {
+    "newExternalOrBrowserOrProviderRequests": 0,
+    "trackedRootChanges": 0
+  },
+  "limits": [
+    "Cleanup is accepted; this is not a pass for the financial workflow or all phase boundaries.",
+    "Three non-cleanup public GETs after expiry remain an explicit boundary exception; not relabeled within allowance.",
+    "No inference about the actual Checkout validation/provider cause: supplemental read failed before page inspection.",
+    "No paid invoice/completed receipt/renewal/Workbench/Portal/scheduled financial recovery/LIVE charging/full launch accepted.",
+    "Original earlier unknown native creation/close exception is not cleared by restoring this borrowed tab.",
+    "Zero new emails/model/calls/texts/Calendar in result is phase-scoped and not an assertion of global account inactivity."
+  ],
+  "evidenceHashes": {
+    "/tmp/mc-stripe-public-v4r3-20261024.json": "9e06cbab721bfc3967408481476a6d1549312996127aadeabec14a04d054104a",
+    "/tmp/mc-stripe-recovery-v4r3-private/owner-cleanup-ledger.json": "185b56bd64a1fce35e322efd736752078acb5386953c78940f38452d2e275fb2",
+    "/tmp/mc-stripe-recovery-v4r3-control/control-ledger.jsonl": "1e67955b75a60fb3b42931fb32505e3ff2720f7bfda13871513cd01888dc3c50",
+    "/tmp/mc-stripe-native-checkout-v4r3/private/ledger.jsonl": "482b9436c03bc2670e0caa92ee29726a19f96cfa95d1ff4584ef9fae220c3a89",
+    "/tmp/mc-stripe-recovery-v4r3-control/endpoint-ledger.json": "3612f2585a3a7815531595dcc38cc57d9d67912207342dc4ec9ce5058c977a80",
+    "/tmp/mc-stripe-native-checkout-v4r3/private/supplemental-form-diagnosis-result.json": "7ba908c2074692f5c655c9312d79b873123e2808f017bd9c3b67ff7b11700024",
+    "/tmp/mc-stripe-native-checkout-v4r3/private/supplemental-form-diagnosis.json": "3181fb9b366d39f64edd647fc96c8047ba5a38cc6825091efb6935a1e767794b",
+    "/tmp/mc-launch-finish-7c/product/STRIPE-RECOVERY-V4R3-SCOPE-2026-10-24.json": "17fb88e6b18bc069c53fd2f20e79da60fe267475d854ec327d9789479d726bf4"
+  },
+  "ok": true
+}

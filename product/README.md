@@ -1,3 +1,5 @@
+> **Current financial checkpoint:** R3 is closed after an uncompleted hosted TEST checkout. All financial resources, test workspace/session, original settings and original Zari deployment are restored. Payment is not accepted; fix actual form diagnostics before another attempt. [Observed result](STRIPE-RECOVERY-V4R3-RESULT-2026-10-24.json). Current source/readiness is in [launch control](LAUNCH-CONTROL.json).
+
 # Product team working files
 
 **Current release instruction, October23:** Steve authorized "push everything". Root is combining all finished accepted candidates into one verified release. Prior local holds below are historical for those candidates. Provider activation, purchases, billing and unfinished/private main runtime remain outside the release. [Grouped release](GROUPED-RELEASE-2026-10-23.json).
