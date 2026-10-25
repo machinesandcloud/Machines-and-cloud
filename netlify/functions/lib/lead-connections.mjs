@@ -68,14 +68,14 @@ function parseAction(body) {
   }
   return { action: body.action, source: body.source, operation: body.operation, operationId: body.operationId, expectedGeneration: body.expectedGeneration, ...(body.operation === 'disconnect' ? {} : { providerBusinessId: numeric(body.providerBusinessId)||'', integrationEmail: normalizeAccountEmail(body.integrationEmail) }) };
 }
-export async function changeLeadConnection(client, session, body) {
+export async function changeLeadConnection(client, session, body, { authorizationStart = false } = {}) {
   const input = parseAction(body), operationDigest = digest(input), at = stamp();
   await owner(client, session, true);
   const generation = randomBytes(16).toString('hex'), secret = randomBytes(32).toString('hex');
   await atomicUpdate(KIND, keyFor(client, input.source), async saved => {
     await owner(client, session, true); const row = rowFor(client, input.source, saved);
     const receipt = row?.operations.find(entry => entry.id === input.operationId);
-    if (receipt) { if (receipt.digest !== operationDigest) fail('operation_conflict', 'That action identifier belongs to a different connection change.'); return {}; }
+    if (receipt) { if (receipt.digest !== operationDigest) fail('operation_conflict', 'That action identifier belongs to a different connection change.'); if (authorizationStart && (row.authorizationStart?.operationId !== input.operationId || row.authorizationStart?.generation !== row.generation)) fail('lead_connection_changed', 'This authorization belongs to an earlier connection. Refresh before reconnecting.'); return {}; }
     if ((row?.generation || null) !== input.expectedGeneration) fail('lead_connection_changed', 'This connection changed. Check its latest setup before saving.');
     if ((row?.operations.length || 0) >= MAX_OPERATIONS) fail('lead_connection_history_full', 'This connection history needs support review before another change.');
     if(input.source==='thumbtack'&&row?.native?.webhookID&&input.operation!=='disconnect')fail('native_disconnect_required','Disconnect the existing Thumbtack connection before changing its business.');
@@ -84,6 +84,7 @@ export async function changeLeadConnection(client, session, body) {
     if (input.operation === 'rotate' && !row) fail('lead_connection_missing', 'Prepare this connection before rotating its key.');
     const next = input.operation === 'disconnect' ? { ...row, state: 'disconnected', secret: null, generation, ...(row.native?{native:{...row.native,status:row.native.webhookID?'disconnect_pending':'disconnected',disconnectRequestedAt:at}}:{}) } : { version: 1, slug: client.slug, tenantIdentity: workspaceTenant(client), source: input.source, state: input.source === 'angi' ? 'awaiting_provider' : 'partner_access_required', generation, secret: input.source === 'angi' ? secret : null, providerBusinessId: input.providerBusinessId, integrationEmail: input.integrationEmail, pending: row?.pending || [], receipts: row?.receipts || [], operations: row?.operations || [], createdAt: row?.createdAt || at, lastReceivedAt: null };
     next.updatedAt = at; next.lastOperationId = input.operationId;
+    if (authorizationStart) next.authorizationStart = { operationId: input.operationId, generation };
     next.operations = [...next.operations, { id: input.operationId, digest: operationDigest, operation: input.operation, at }];
     return { value: next };
   });
