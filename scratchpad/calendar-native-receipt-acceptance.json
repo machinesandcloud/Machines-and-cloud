@@ -1,0 +1,50 @@
+{
+  "state": "LOCAL_NATIVE_CHILD_CLOSE_AND_SAFE_RECEIPT_REPAIR_ACCEPTED_ACTUAL_REPROOF_PENDING",
+  "baseCommit": "c3b3593",
+  "source": {
+    "path": "scripts/calendar-borrowed-native.mjs",
+    "sha256": "810c31571b816d67f3c37f24ebe32860b720d290423df8e4c7e77ea0a938612a"
+  },
+  "change": "Wait for complete child stdio close, project only exact source-static negative reason/exit/stdout hash, persist safe private failed receipt, retain one-shot/caps and stop later effects if failed receipt persistence is unconfirmed.",
+  "author": {
+    "existingBefore": {
+      "path": "scratchpad/calendar-native-receipt-before.json",
+      "passed": 22,
+      "failed": 0
+    },
+    "focusedBefore": {
+      "path": "scratchpad/calendar-native-receipt-focused-before.json",
+      "passed": 0,
+      "failed": 6
+    },
+    "focusedFinal": {
+      "path": "scratchpad/calendar-native-receipt-focused-final.json",
+      "passed": 6,
+      "failed": 0
+    },
+    "existingFinal": {
+      "path": "scratchpad/calendar-native-receipt-adapter-final.json",
+      "passed": 22,
+      "failed": 0
+    },
+    "effects": "Injected child streams only; zero physical/native/browser/provider requests. An initial test-development mock omitted exit on close and produced no receipt; the mock was corrected before the retained valid before run."
+  },
+  "independent": {
+    "path": "scratchpad/calendar-native-receipt-independent/acceptance.json",
+    "sha256": "edf76008197259ff7d0dd5e371d70640ddf93ef0058573e09fcc0cd1aec924a9",
+    "passed": 5,
+    "failed": 0,
+    "strictPredecessorReverse": true
+  },
+  "unchanged": [
+    "Swift polling/source",
+    "Actor and guard/control contracts",
+    "Customer application/runtime",
+    "All native target/clock/authority/storage/action-cap/cleanup gates"
+  ],
+  "notAccepted": [
+    "Actual new adapter native invocation or provider delivery",
+    "Any reconstruction of prior unknown native output",
+    "New approval or reused closed allowance"
+  ]
+}

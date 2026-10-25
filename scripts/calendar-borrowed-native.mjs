@@ -6,10 +6,34 @@ import {resolve} from 'node:path';
 export const BORROWED_TARGET=Object.freeze({mode:'borrowed_regular_tab_v1',chromePID:691,windowId:1802417929,tabId:1802419976,originalURL:'https://mail.google.com/mail/u/0/#inbox',maxActions:24});
 const sha=x=>createHash('sha256').update(x).digest('hex'),fail=code=>{throw Error('Borrowed Calendar handoff: '+code);};
 export function validateBorrowedBinding(b){if(!b||Object.keys(b).sort().join(',')!==[...Object.keys(BORROWED_TARGET),'helperSHA256'].sort().join(',')||Object.entries(BORROWED_TARGET).some(([k,v])=>b[k]!==v)||!/^[a-f0-9]{64}$/.test(b.helperSHA256||''))fail('binding');return b;}
+// Only source-static Swift failures may leave the private child output boundary.
+const SAFE_NATIVE_REASONS=new Set(['interactive_session_locked','interactive_session_unknown','expired_before_native','input_binding','expired','pending_encoding','parameter_encoding','fixed_process_missing','fixed_window_missing','fixed_tab_missing','native_result_unconfirmed','original_inbox_changed','fixed_tab_selection_unconfirmed','expired_before_foreground','fixed_process_activation_failed','fixed_foreground_unconfirmed','original_inbox_changed_before_navigation','expired_before_seed','encoding','mode']);
+class NativeResultError extends Error{
+ constructor({nativeReason='unavailable',nativeExitCode=null,nativeStdoutSHA256=null}={}){
+  const reason=SAFE_NATIVE_REASONS.has(nativeReason)?nativeReason:'unavailable';super('Borrowed Calendar native result unconfirmed ('+reason+'); no mutation retry');this.code='borrowed_native_'+reason;
+  Object.defineProperty(this,'nativeFailure',{value:Object.freeze({nativeReason:reason,nativeExitCode:Number.isSafeInteger(nativeExitCode)?nativeExitCode:null,nativeStdoutSHA256:/^[a-f0-9]{64}$/.test(nativeStdoutSHA256||'')?nativeStdoutSHA256:null}),enumerable:false});
+ }
+}
 export async function runBorrowedSwift({path,pin,input}){
  const s=await lstat(path);if(!s.isFile()||s.isSymbolicLink()||(s.mode&0o777)!==0o700||s.uid!==process.getuid()||sha(await readFile(path))!==pin)fail('helper_custody');
  if(!['prepare_restore','clear_restore','verify_restore'].includes(input.mode)&&Date.now()>=Date.parse(input.expiresAt))fail('expired_before_dispatch');
- return new Promise((done,reject)=>{const c=spawn(path,[],{stdio:['pipe','pipe','pipe']});let out='',size=0;const timer=setTimeout(()=>c.kill('SIGKILL'),20000);c.stdout.on('data',x=>{size+=x.length;if(size>16384)c.kill('SIGKILL');else out+=x;});c.stderr.on('data',()=>{});c.on('error',()=>{clearTimeout(timer);reject(Error('Borrowed Calendar native result unconfirmed'));});c.on('exit',code=>{clearTimeout(timer);if(code!==0||size>16384){reject(Error('Borrowed Calendar native result unconfirmed'));return;}try{const v=JSON.parse(out);if(!v||typeof v!=='object'||Array.isArray(v))throw Error();done(v);}catch{reject(Error('Borrowed Calendar native result unconfirmed'));}});c.stdin.end(JSON.stringify(input));});
+ return new Promise((done,reject)=>{
+  let c;try{c=spawn(path,[],{stdio:['pipe','pipe','pipe']});}catch{reject(new NativeResultError({nativeStdoutSHA256:sha('')}));return;}
+  let out='',size=0,spawnError=false;const outputHash=createHash('sha256'),timer=setTimeout(()=>c.kill('SIGKILL'),20000);
+  c.stdout.on('data',x=>{outputHash.update(x);size+=x.length;if(size>16384)c.kill('SIGKILL');else out+=x;});c.stderr.on('data',()=>{});c.stdin.on('error',()=>{});
+  c.on('error',()=>{spawnError=true;});
+  // Process exit may precede the last stdout chunk; close is the complete stdio boundary.
+  c.on('close',code=>{
+   clearTimeout(timer);const nativeStdoutSHA256=outputHash.digest('hex');let value=null;
+   if(size<=16384){try{value=JSON.parse(out);}catch{}}
+   if(spawnError||code!==0||size>16384||!value||typeof value!=='object'||Array.isArray(value)){
+    const nativeReason=!spawnError&&size<=16384&&value?.ok===false&&Object.keys(value).sort().join(',')==='ok,reason'&&SAFE_NATIVE_REASONS.has(value.reason)?value.reason:'unavailable';
+    reject(new NativeResultError({nativeReason,nativeExitCode:code,nativeStdoutSHA256}));return;
+   }
+   done(value);
+  });
+  c.stdin.end(JSON.stringify(input));
+ });
 }
 export function createBorrowedNativeHandoff({binding,directory,phaseId,record,execute,authorize=()=>{},now=()=>Date.now(),wait=ms=>new Promise(r=>setTimeout(r,ms))}){
  validateBorrowedBinding(binding);binding=structuredClone(binding);if(!/^core-calendar-[a-z0-9-]{8,80}$/.test(phaseId||'')||typeof record!=='function')fail('phase');
@@ -20,7 +44,11 @@ export function createBorrowedNativeHandoff({binding,directory,phaseId,record,ex
   if(!cleanup&&now()>=Date.parse(context.expiresAt))fail('expired');
   const n=++actions;try{await record(`borrowed-native-${String(n).padStart(2,'0')}-reserved.json`,{phaseId,action:mode,invocation:n,at:new Date(now()).toISOString(),state:'reserved_unknown'});}catch{poisoned=true;fail('reservation_unconfirmed');}
   if(!cleanup&&now()>=Date.parse(context.expiresAt))fail('expired_before_native');await authorize({cleanup});if(!cleanup&&now()>=Date.parse(context.expiresAt))fail('expired_before_native');
-  let v;try{v=await run({...context,mode,phaseId,chromePID:binding.chromePID,windowId:binding.windowId,tabId:binding.tabId,originalURL:binding.originalURL,seedMayExist});}catch{throw Error('Borrowed Calendar native result unconfirmed; no mutation retry');}
+  let v;try{v=await run({...context,mode,phaseId,chromePID:binding.chromePID,windowId:binding.windowId,tabId:binding.tabId,originalURL:binding.originalURL,seedMayExist});}catch(error){
+   const safe=error instanceof NativeResultError?error:new NativeResultError();
+   try{await record(`borrowed-native-${String(n).padStart(2,'0')}-failed.json`,{phaseId,action:mode,invocation:n,at:new Date(now()).toISOString(),state:'failed_or_uncertain',...safe.nativeFailure});}catch{poisoned=true;fail('failure_receipt_unconfirmed');}
+   throw safe;
+  }
   await record(`borrowed-native-${String(n).padStart(2,'0')}-observed.json`,{phaseId,action:mode,invocation:n,result:v});return v;
  }
  const errorWithReceipt=()=>{const e=Error('Borrowed Calendar restoration unconfirmed');Object.defineProperty(e,'nativeRestoreReceipt',{value:structuredClone(receipt),enumerable:false});throw e;};

@@ -1,0 +1,35 @@
+{
+  "passed": 0,
+  "failed": 6,
+  "checks": [],
+  "failures": [
+    {
+      "name": "Positive output waits for close and includes stdout delivered after exit",
+      "error": "Borrowed Calendar native result unconfirmed"
+    },
+    {
+      "name": "Nonzero source-static reason and complete stdout hash survive late output",
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'borrowed_native_fixed_foreground_unconfirmed'\n"
+    },
+    {
+      "name": "Unknown reason, extra properties and private stderr never surface as diagnostics",
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'borrowed_native_unavailable'\n"
+    },
+    {
+      "name": "Oversized stdout stays bounded and hash-only; spawn errors remain static",
+      "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ undefined\n- {\n-   nativeExitCode: 2,\n-   nativeReason: 'unavailable',\n-   nativeStdoutSHA256: '841fb2dbdc6be49db3c9df02b4c04bd5a859c6d36acb9b6fca930c28e6e86748'\n- }\n"
+    },
+    {
+      "name": "One-shot failed native operation retains safe private receipt and never dispatches again",
+      "error": "The validation function is expected to return \"true\". Received false\n\nCaught error:\n\nError: Borrowed Calendar native result unconfirmed; no mutation retry"
+    },
+    {
+      "name": "Lost failed-receipt persistence poisons later actions without exposing private errors",
+      "error": "The input did not match the regular expression /failure_receipt_unconfirmed/. Input:\n\n'Error: Borrowed Calendar native result unconfirmed; no mutation retry'\n"
+    }
+  ],
+  "spawnDoubles": 6,
+  "physicalAttempts": 0,
+  "actualNativeActions": 0,
+  "sourceSHA256": "7c57ce6decbd12cd80d06c08a2ef9277ead45f5d08feaaf8df82fe623dea3eeb"
+}
