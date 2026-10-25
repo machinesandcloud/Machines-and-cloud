@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import {validateBorrowedBinding} from './calendar-borrowed-native.mjs';
 export const SCOPE='owned_calendar_busy_lifecycle_v2';
-export const TARGET=Object.freeze({origin:'https://machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',baselineCommit:'46c0f03b1f4113cbc3da6bd8ddf03455cacc2187',baselineDeployId:'6add4c9eb22cf12c47b30691',ownerEmail:'ngoumnaisteve+mc-calendar-borrowed-v8-20261024@gmail.com',calendarAccount:'ngoumnaisteve@gmail.com'});
+export const TARGET=Object.freeze({origin:'https://machinesandcloud.com',siteId:'f87916f1-bcc4-4171-a96f-2900cbf0b6dc',accountId:'69797d78f01c70674ffef858',baselineCommit:'46c0f03b1f4113cbc3da6bd8ddf03455cacc2187',baselineDeployId:'6add4c9eb22cf12c47b30691',ownerEmail:'ngoumnaisteve+mc-calendar-borrowed-v9-20261024@gmail.com',calendarAccount:'ngoumnaisteve@gmail.com'});
 export const LIMITS=Object.freeze({site:240,writes:40,hostedChecks:25,email:3,metadata:12,blobs:90,workerPosts:0,builds:2,pushes:1,environmentWrites:8,control:150,controlWrites:16,nativeHandoffs:1});
 export const RUNTIME_LIMITS=Object.freeze({oauthStart:1,tokenExchange:1,tokenRefresh:16,calendarRead:28,eventCreate:1,eventUpdate:1,eventDelete:2,workerDispatch:8,totalRequests:57});
 const PHASES=['signup','census','publish','calendar','cleanup','closed'];

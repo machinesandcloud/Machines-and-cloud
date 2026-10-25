@@ -6,8 +6,8 @@ import {createNativeMailCommand,PHASE} from './calendar-native-mail.mjs';
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const hash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value)&&value!=='0'.repeat(64);
 const exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join('|')===[...keys].sort().join('|');
-export const MAIL_BINDING_PATH='/tmp/mc-calendar-v8-private-20261025/mail-execution-binding.json';
-const CONFIG='/tmp/mc-calendar-v8-mail-prep-20261025/mail-sources.json';
+export const MAIL_BINDING_PATH='/tmp/mc-calendar-v9-private-20261025/mail-execution-binding.json';
+const CONFIG='/tmp/mc-calendar-v9-mail-prep-20261025/mail-sources.json';
 const FACTORY=new URL('./calendar-native-mail.mjs',import.meta.url);
 export function assertMailPhaseAuthority(state,input,{expiresAt,now=Date.now()}){
  const restore=input?.mode==='url'&&input.url==='https://mail.google.com/mail/u/0/#inbox';
@@ -23,7 +23,7 @@ export async function createCalendarMail({packet,packetSHA256,bindingSHA256,help
  if(!hash(bindingSHA256))throw Error('Mail execution binding SHA required');
  const bytes=async(path,mode,max=100000)=>{const s=await stat(path);if(!s.isFile()||s.isSymbolicLink()||s.uid!==uid||(s.mode&0o7777)!==mode||s.size<1||s.size>max)throw Error('Mail private/source custody changed');return Buffer.from(await read(path));};
  async function verify(){
-  const directory=await stat('/tmp/mc-calendar-v8-private-20261025');if(!directory.isDirectory()||directory.isSymbolicLink()||directory.uid!==uid||(directory.mode&0o7777)!==0o700)throw Error('Mail private directory custody changed');
+  const directory=await stat('/tmp/mc-calendar-v9-private-20261025');if(!directory.isDirectory()||directory.isSymbolicLink()||directory.uid!==uid||(directory.mode&0o7777)!==0o700)throw Error('Mail private directory custody changed');
   const raw=await bytes(MAIL_BINDING_PATH,0o600);if(sha(raw)!==bindingSHA256)throw Error('Mail execution binding changed');
   const binding=validateMailExecutionBinding(JSON.parse(raw),{packet,packetSHA256,now:now()});
   if(sha(await bytes(CONFIG,0o600))!==binding.configSHA256||sha(await bytes(FACTORY,0o644))!==binding.factorySHA256)throw Error('Mail source/config changed');

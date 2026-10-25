@@ -1,9 +1,9 @@
 import {createHash} from 'node:crypto';
-export const PHASE='core-calendar-borrowed-launch-v8-20261025';
+export const PHASE='core-calendar-borrowed-launch-v9-20261025';
 export const NATIVE_MAIL_SOURCES_SHA256='0000000000000000000000000000000000000000000000000000000000000000';
 // BEGIN_NATIVE_MAIL: same control ledger; injectable effects only for offline checks.
 export function createNativeMailCommand({control,persistControl,readFile,lstat,execFile,now=()=>Date.now(),sourcePin=NATIVE_MAIL_SOURCES_SHA256,uid=process.getuid(),approval}){
- const prep='/tmp/mc-calendar-v8-mail-prep-20261025',configPath=prep+'/mail-sources.json',navigationPath=prep+'/mail-navigation.json',binaryPath=prep+'/native-mail',swiftPath=prep+'/native-mail.swift',zero='0'.repeat(64);
+ const prep='/tmp/mc-calendar-v9-mail-prep-20261025',configPath=prep+'/mail-sources.json',navigationPath=prep+'/mail-navigation.json',binaryPath=prep+'/native-mail',swiftPath=prep+'/native-mail.swift',zero='0'.repeat(64);
  const reject=code=>{const error=Error('Native mail rejected: '+code);error.code='native_mail_'+code;throw error;};
  const hash=bytes=>createHash('sha256').update(bytes).digest('hex'),keys=(o,k)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).sort().join('|')===[...k].sort().join('|'),pin=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v)&&v!==zero;
  const gmail=url=>{try{const u=new URL(url);return u.origin==='https://mail.google.com'&&u.pathname==='/mail/u/0/'&&!u.username&&!u.password&&!u.port&&!u.search;}catch{return false;}};

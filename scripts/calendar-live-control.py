@@ -3,9 +3,9 @@
 import argparse, contextlib, datetime as dt, fcntl, hashlib, json, os, pathlib, re, subprocess, sys, urllib.error, urllib.request
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None; MAIL_BINDING_SHA=None
-MAIL_PHASE='core-calendar-borrowed-launch-v8-20261025'
-MAIL_PREP=pathlib.Path('/tmp/mc-calendar-v8-mail-prep-20261025')
-MAIL_PRIVATE=pathlib.Path('/tmp/mc-calendar-v8-private-20261025')
+MAIL_PHASE='core-calendar-borrowed-launch-v9-20261025'
+MAIL_PREP=pathlib.Path('/tmp/mc-calendar-v9-mail-prep-20261025')
+MAIL_PRIVATE=pathlib.Path('/tmp/mc-calendar-v9-private-20261025')
 MAIL_REJECTIONS=frozenset(['arguments','mode','configuration_missing','configuration_custody','configuration_shape','configuration_unbound_or_expired','navigation_not_approved','interactive_session_locked','interactive_session_unknown','expired_before_native','owned_process_missing','owned_window_missing','owned_mail_target_missing_or_changed','current_navigation_not_owned','restore_not_owned','expired_before_navigation','script_not_approved','script_unavailable','expired_before_javascript','script_result_unconfirmed','private_custody','private_write_unconfirmed'])
 ACCOUNT='69797d78f01c70674ffef858'
 SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'46c0f03b1f4113cbc3da6bd8ddf03455cacc2187','gitBase':'615de409891df9c91ab53569daa462157615722a','baselineDeployId':'6add4c9eb22cf12c47b30691','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
