@@ -1,0 +1,107 @@
+{
+  "state": "V9_CLOSED_AFTER_SIGNUP_RETURN_AND_CENSUS_HEADROOM_STOP_ACCEPTED_CALENDAR_UNPROVED",
+  "executor": "Root; QA local retained source/ledger reads only",
+  "phaseId": "core-calendar-borrowed-launch-v9-20261025",
+  "executionCandidate": "7e24cf77aa9cfd30c686382dace64279926b6825",
+  "acceptedSource": {
+    "manifestSHA256": "14f7aca2885e3baa9df8c610f6e0dfe9fd28332cd9fa2a30fc7073c9f0a1a1be",
+    "files": 549,
+    "priorFullSourceAndCanonicalSeal": "/tmp/mc-calendar-v9-canonical-independent-20261025/acceptance.json",
+    "priorSealSHA256": "53bc2cc2c3983cfc55d4de89793c9f56d6e69bddc5ca6121d153c3d690410d7f",
+    "currentV10BytesNotRelabeledV9": true
+  },
+  "publicResult": {
+    "path": "/tmp/mc-calendar-v10-scope-7e2/product/CALENDAR-LAUNCH-V9-RESULT-2026-10-25.json",
+    "sha256": "86bd77f15f59a3aa4d3a30c108627febbf1ad32636b0979104195d966f3a4fc5"
+  },
+  "evidence": {
+    "/tmp/mc-launch-finish-7c/scratchpad/core-calendar-borrowed-launch-v9-20261025-ledger.jsonl": "8d35753de43cc0c5be3935ef905ee0cc11295deca8f253bcc444a5d229357981",
+    "/tmp/mc-launch-finish-7c/scratchpad/core-calendar-borrowed-launch-v9-20261025-control.jsonl": "c8b0c3a443487c1378b8d67c6d9d1986b899706ed076f3f0ce4c73806afa6ea1"
+  },
+  "observedCounts": {
+    "guardReservations": 52,
+    "guardCompleted": 52,
+    "guardCounters": {
+      "site": 10,
+      "writes": 8,
+      "hostedChecks": 0,
+      "email": 2,
+      "metadata": 2,
+      "blobs": 40,
+      "workerPosts": 0,
+      "builds": 0,
+      "pushes": 0,
+      "environmentWrites": 0,
+      "control": 42,
+      "controlWrites": 0,
+      "nativeHandoffs": 0
+    },
+    "supplementalHTTP": 1,
+    "supplementalMutations": 0,
+    "supplementalBuilds": 0,
+    "nativeMailInvocations": 13,
+    "nativeMailMessageReads": 2,
+    "nativeMailAllObserved": true,
+    "nativeMailUnknown": false,
+    "emails": 2,
+    "authExchanges": 2,
+    "workspaceCreate": 1,
+    "cancelHTTP200": 1,
+    "signOutHTTP200": 2
+  },
+  "ordinaryOutcome": {
+    "signInEmailsSent": 2,
+    "exactBodyReads": 2,
+    "signupExchangeCompleted": true,
+    "returningOwnerExchangeCompleted": true,
+    "workspace": "m-c-internal-calendar-borrowed-v-ee4e",
+    "workspaceCreated": true,
+    "workspaceCancelled": true,
+    "controlledSessionsRevoked": 2
+  },
+  "censusStop": {
+    "reason": "insufficient_inspection_headroom",
+    "actualBlobHops": 40,
+    "phaseBlobCap": 90,
+    "remainingBlobHops": 50,
+    "minimumRemainingRequired": 54,
+    "maximumCensusAtOldCap": 36,
+    "beforeCalendarSettingsAndBuilds": true,
+    "response": "Stopped and cleaned up without resetting the census or borrowing old allowance."
+  },
+  "cleanup": {
+    "guardClosed": true,
+    "guardHalted": true,
+    "closedAt": "2026-10-25T03:45:50.817Z",
+    "workspaceCancellationAndTwoSessionRevocationsAccepted": true,
+    "calendarHandoffNeverStarted": true,
+    "guardNativeRestored": false,
+    "mailExactInboxNavigationDispatchObserved": true,
+    "mailExactInboxArrivalOrReadbackAccepted": false,
+    "noSettingsOrDeploymentEffectsToRestore": true,
+    "oldUnusedAllowancesClosedNotTransferredOrReset": true
+  },
+  "publishedApplicationUnchanged": {
+    "publishedCommit": "46c0f03b1f4113cbc3da6bd8ddf03455cacc2187",
+    "publishedDeployId": "6add4c9eb22cf12c47b30691",
+    "settingsWrites": 0,
+    "builds": 0,
+    "pushes": 0,
+    "googleGrantOrCalendarEvents": 0,
+    "modelPhoneTextStripePurchases": 0
+  },
+  "limits": [
+    "Accepts actual signup and returning owner access plus cancellation/session cleanup.",
+    "Final native row13 confirms successful exact Inbox URL setter dispatch only; arrival/readback was not observed.",
+    "No Calendar grant, exchange, read, scheduled create/move/cancel or recording accepted.",
+    "No application/publication success is inferred from proof-tool source or request totals."
+  ],
+  "preservedQAHarnessExpectation": "First audit incorrectly expected all completed HTTP200; two ordinary request_link responses are202. Exact per-action status assertion corrected; no product/evidence change.",
+  "qaEffects": {
+    "native": 0,
+    "browser": 0,
+    "provider": 0,
+    "network": 0,
+    "privatePacketOrCredentialReads": 0
+  }
+}

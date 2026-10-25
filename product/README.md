@@ -1,4 +1,4 @@
-> **Current checkpoint:** Actual R5 browser handoff and target Inbox restoration are independently accepted after owner unlock. Calendar permission and same-event create/move/cancel are next, after the existing native-mail route is bound. Google data-access verification and financial delivery remain open. [Launch control](LAUNCH-CONTROL.json) governs; dated release/local-hold notes below are historical when superseded.
+> **Current checkpoint:** V10 signup/return, publication and browser handoff passed. Google access stayed pending, so event delivery remains unverified. Inbox/owned keys, internal workspace/sessions, all27 settings and a distinct READY cleanup deployment are verified restored; public health200 passed. V10 is closed. [Launch control](LAUNCH-CONTROL.json) and [V10 result](CALENDAR-LAUNCH-V10-RESULT-2026-10-25.json) govern the next fresh owner-permission/lifecycle test; older notes are historical.
 
 # Product team working files
 
