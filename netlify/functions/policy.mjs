@@ -46,7 +46,7 @@ ${program}
 <li>Your customer information belongs to ${name}. Machines &amp; Cloud processes it on the shop's behalf to run its front desk and does not use it to train or inform another shop's desk. Hosting, messaging and other service providers process it as necessary to provide and protect the service. See also the <a href="https://www.machinesandcloud.com/privacy-policy.html#sms">Machines &amp; Cloud privacy policy</a>.</li>
 <li>You can ask ${name} for an export, correction or deletion using the contact details above. Records needed to honor an opt-out or meet legal, security and service-record obligations may be retained. Our phone and messaging providers retain their own records under their policies. Disconnecting a channel or cancelling service does not, by itself, delete retained records.</li>
 </ul>
-<p class="muted">Machines And Cloud LLC (Machines &amp; Cloud), 5718 Westheimer Rd Suite 1000, Houston, TX 77057, ngoumnaisteve@gmail.com.</p>
+<p class="muted">Machines And Cloud LLC (Machines &amp; Cloud), 5718 Westheimer Rd Suite 1000, Houston, TX 77057, support@machinesandcloud.com.</p>
 </body></html>`;
   return new Response(req.method === "HEAD" ? null : html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" } });
 };

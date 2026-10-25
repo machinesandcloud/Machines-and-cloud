@@ -456,7 +456,7 @@
         .catch(() => {
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;
-          setStatus('We couldn’t confirm your message was sent. Your answers are still here. Please try again, or email ngoumnaisteve@gmail.com for help.', true);
+          setStatus('We couldn’t confirm your message was sent. Your answers are still here. Please try again, or email support@machinesandcloud.com for help.', true);
         });
     });
 

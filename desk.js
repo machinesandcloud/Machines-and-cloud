@@ -713,7 +713,7 @@
       else if (!selfService && !paused && ['testing','draft'].includes(c.status)) buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button>';
       else buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="accountConnections">' + (paused ? 'View resume requirements' : active.length || c.status === 'live' ? 'Manage connections' : 'Continue setup') + '</button>';
       if (!paused && ['live','testing'].includes(c.status) && (c.status === 'live' || active.length || rows.some(function(row){return row.retained;}))) buttons += '<button type="button" class="btn-pill btn-pill-dark btn-sm" id="pause">Pause workspace</button>';
-    } else buttons = '<a class="btn-pill btn-pill-dark btn-sm" href="mailto:ngoumnaisteve@gmail.com">Contact support</a>';
+    } else buttons = '<a class="btn-pill btn-pill-dark btn-sm" href="mailto:support@machinesandcloud.com">Contact support</a>';
     var off = d.forwarding?.off;
     if ((paused || closed) && Array.isArray(off) && off.length) buttons += '<div class="desk-account-forwarding muted">To stop carrier forwarding: ' + off.map(function (code) { return '<a href="tel:' + encodeURIComponent(code) + '">Dial ' + esc(code) + '</a>'; }).join(' · ') + '</div>';
     $('liveBtns').innerHTML = buttons;
