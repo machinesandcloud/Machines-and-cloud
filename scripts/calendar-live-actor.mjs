@@ -9,13 +9,14 @@ import { fileURLToPath } from 'node:url';
 import { createController,TARGET,RUNTIME_LIMITS,plan } from './calendar-live-guard.mjs';
 import { createNativeHandoff } from './calendar-live-native.mjs';
 import {createBorrowedNativeHandoff} from './calendar-borrowed-native.mjs';
+import {createCalendarMail,assertMailPhaseAuthority} from './calendar-live-mail.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const canon=value=>Array.isArray(value)?value.map(canon):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canon(value[key])])):value;
 const digest=value=>hash(JSON.stringify(canon(value)));
 const stores=['calendar_connections','calendar_deliveries','calendar_oauth'];
 const envKeys=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_POLICY_JSON','CALENDAR_EXECUTION_APPROVED_VERSION'];
 const root=fileURLToPath(new URL('../',import.meta.url));
-export function createActor({controller:c,packet:p,helper,native,privateRead,privateWrite,netlifyToken,now=()=>Date.now()}) {
+export function createActor({controller:c,packet:p,helper,native,nativeMail,privateRead,privateWrite,netlifyToken,now=()=>Date.now()}) {
   let token=null,slug=null,current=null,binding=null,job=null;const sessions=[];
   const headers=()=>({'Content-Type':'application/json',Origin:TARGET.origin,...(token?{Authorization:'Bearer '+token}:{})});
   const app=async(body,path=slug?'/api/client?c='+slug:'/api/access')=>{
@@ -36,8 +37,9 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
   const preview=moving=>({action:'visit_availability',expectedRevision:current.configurationRevision,date:p.fixture.availabilitySelection.from,days:p.fixture.availabilitySelection.days,...(moving?{visitId:binding.visitId,expectedVisitRevision:(current.bookings||[]).find(row=>row.id===binding.visitId)?.ownerVisit?.revision}:{})});
   const visit=()=>({action:'create_visit',expectedRevision:current.configurationRevision,submissionId:p.fixture.visitSubmissionId,customer_name:'Alex Example',phone:'(713) 555-0142',address:'12 Oak St, Katy, TX (synthetic test)',issue:'Internal Calendar lifecycle verification',date:times().date,window:times().window});
   return {async command(input) {
-    if(!input||typeof input!=='object'||!['baseline','request-link','exchange','create-workspace','owner','census-bind','stage','publish','ready','start','native-open','native-confirm','native-close','native-restore','native-observe','select-times','create','move','probe-old','cancel-visit','probe-cancelled','receipt','budget','cleanup','disconnect','cancel-workspace','signout-all','restore','cleanup-build','closed','status'].includes(input.action))throw Error('Unknown fixed Calendar command');
+    if(!input||typeof input!=='object'||!['nativeMail','baseline','request-link','exchange','create-workspace','owner','census-bind','stage','publish','ready','start','native-open','native-confirm','native-close','native-restore','native-observe','select-times','create','move','probe-old','cancel-visit','probe-cancelled','receipt','budget','cleanup','disconnect','cancel-workspace','signout-all','restore','cleanup-build','closed','status'].includes(input.action))throw Error('Unknown fixed Calendar command');
     const action=input.action;
+    if(action==='nativeMail'){if(!nativeMail)throw Error('Mail execution binding unavailable');return nativeMail(input);}
     if(action==='status')return {guard:c.state(),control:await helper('status')};
     if(action==='baseline'){const site=(await metadata()).data;const env=await helper('env');return {commit:site.published_deploy?.commit_ref,state:site.published_deploy?.state,disabled:site.disabled,environmentSnapshotSHA256:env.snapshotSHA256};}
     if(action==='request-link'){await app({action:'request_link',email:TARGET.ownerEmail,plan:'starter'},'/api/access');return {requested:true,recipient:TARGET.ownerEmail};}
@@ -104,7 +106,7 @@ export function createActor({controller:c,packet:p,helper,native,privateRead,pri
   }};
 }
 
-async function executeCLI(packetPath,approvedSHA) {
+async function executeCLI(packetPath,approvedSHA,mailBindingSHA) {
   const packet=JSON.parse(await readFile(packetPath,'utf8')),directory=dirname(resolve(packetPath));
   // Neither ledger can be reopened. Validate the app guard before initializing
   // the supplemental fixed48 control adapter. No approval is generated here.
@@ -113,9 +115,10 @@ async function executeCLI(packetPath,approvedSHA) {
   const run=promisify(execFile);
   async function helper(command,input) {
     const value=input==='calendar-binding.json'?resolve(directory,input):input;
-    const args=[resolve(root,'scripts/calendar-live-control.py'),'--packet',resolve(packetPath),'--sha256',approvedSHA,command,...(value?[value]:[])];
+    const args=[resolve(root,'scripts/calendar-live-control.py'),'--packet',resolve(packetPath),'--sha256',approvedSHA,...(mailBindingSHA?['--mail-binding-sha256',mailBindingSHA]:[]),command,...(value?[typeof value==='object'?JSON.stringify(value):value]:[])];
     try{return JSON.parse((await run('python3',args,{cwd:root,maxBuffer:100000,timeout:120000})).stdout);}catch{throw Error('Fixed control adapter failed; inspect private receipt, never retry unknown effects');}
   }
+  const nativeMail=mailBindingSHA?await createCalendarMail({packet,packetSHA256:approvedSHA,bindingSHA256:mailBindingSHA,helper,authorize:input=>assertMailPhaseAuthority(c.state(),input,{expiresAt:packet.approvalExpiresAt})}):undefined;
   await helper('init');
   const config=JSON.parse(await readFile(resolve(process.env.HOME,'Library/Preferences/netlify/config.json'),'utf8')),user=config.users[config.userId],netlifyToken=user.auth?.token||user.token;
   if(!netlifyToken)throw Error('Existing Netlify authentication unavailable');
@@ -128,7 +131,7 @@ async function executeCLI(packetPath,approvedSHA) {
   }
   const privateWrite=async(name,value)=>{const h=await open(resolve(directory,name),'wx',0o600);try{await h.writeFile(JSON.stringify(value));await h.sync();}finally{await h.close();}};
   const native=packet.native?createBorrowedNativeHandoff({binding:packet.native,directory,phaseId:packet.phaseId,record:privateWrite,authorize:input=>c.assertNativeAuthority(input)}):createNativeHandoff();
-  const actor=createActor({controller:c,packet,helper,native,privateRead,privateWrite,netlifyToken});
+  const actor=createActor({controller:c,packet,helper,native,nativeMail,privateRead,privateWrite,netlifyToken});
   process.stdout.write(JSON.stringify({ready:true,phase:packet.phaseId,nativeBrowserNotOpened:true})+'\n');
   for await(const line of createInterface({input:process.stdin,terminal:false})) {
     try{const result=await actor.command(JSON.parse(line));process.stdout.write(JSON.stringify({ok:true,result})+'\n');}
@@ -137,5 +140,5 @@ async function executeCLI(packetPath,approvedSHA) {
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   if(process.argv[2]!=='--execute')process.stdout.write(JSON.stringify({...plan(),adapter:'Fixed JSON-lines commands; --execute requires private approved packet and SHA. Default is inert.'},null,2)+'\n');
-  else await executeCLI(process.argv[3],process.argv[4]);
+  else {if(process.argv.length!==5&&!(process.argv.length===7&&process.argv[5]==='--mail-binding-sha256'))throw Error('Exact optional mail binding SHA argument required');await executeCLI(process.argv[3],process.argv[4],process.argv[6]);}
 }

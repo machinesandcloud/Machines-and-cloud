@@ -1,0 +1,9 @@
+{
+  "scope": "One immediate post-reservation source fence; clock remains the last check before child",
+  "beforeSHA256": "842d5eeb04fa65ed0f9d31f8cd685530454f3be9e186ecf4d8bfda21431416f1",
+  "afterSHA256": "34c3a82a4b67b042b7eded13899e609bde6e52ef533451d07a8ad9f6134ddd26",
+  "removeExactly": "        if digest(mail_file(helper['path'],0o700,10000000))!=helper['sha256'] or digest(mail_file(helper['sourcePath']))!=helper['sourceSHA256'] or digest(mail_file(MAIL_PREP/'mail-navigation.json'))!=cfg['navigation']['sha256'] or r['type']!='navigation' and digest(mail_file(argument))!=r['sourceSHA256']: fail('Mail source changed after dispatch reservation')\n",
+  "exactReverse": true,
+  "failure": "scratchpad/calendar-v8-mail-final-source-first.json",
+  "repaired": "scratchpad/calendar-v8-mail-final-source-repaired.json"
+}

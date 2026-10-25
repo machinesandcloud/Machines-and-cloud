@@ -2,7 +2,10 @@
 """Calendar proof's fixed supplemental48-request control adapter. No effects on import."""
 import argparse, contextlib, datetime as dt, fcntl, hashlib, json, os, pathlib, re, subprocess, sys, urllib.error, urllib.request
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None
+PRIVATE=None; PHASE=None; LEDGER=None; MANIFEST=None; APPROVAL_SHA=None; MAIL_BINDING_SHA=None
+MAIL_PHASE='core-calendar-borrowed-launch-v8-20261025'
+MAIL_PREP=pathlib.Path('/tmp/mc-calendar-v8-mail-prep-20261025')
+MAIL_PRIVATE=pathlib.Path('/tmp/mc-calendar-v8-private-20261025')
 ACCOUNT='69797d78f01c70674ffef858'
 SITES={'mc':{'id':'f87916f1-bcc4-4171-a96f-2900cbf0b6dc','base':'46c0f03b1f4113cbc3da6bd8ddf03455cacc2187','gitBase':'615de409891df9c91ab53569daa462157615722a','baselineDeployId':'6add4c9eb22cf12c47b30691','candidate':None,'cwd':str(ROOT),'remote':'https://github.com/machinesandcloud/Machines-and-cloud.git'}}
 MC_KEYS=['CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_EXECUTION_APPROVED_VERSION','CALENDAR_EXECUTION_POLICY_JSON']
@@ -43,6 +46,87 @@ def locked():
         if s.get('phase')!=PHASE or s.get('limits')!={'requests':48,'mutations':16,'builds':2}: fail('Supplemental ledger contract changed')
         def append(): f.write(json.dumps(s,separators=(',',':'))+'\n');f.flush();os.fsync(f.fileno())
         yield s,append
+def mail_file(path,mode=0o600,maximum=100000):
+    path=pathlib.Path(path);st=path.lstat()
+    if not path.is_file() or path.is_symlink() or st.st_uid!=os.getuid() or st.st_mode&0o7777!=mode or not 0<st.st_size<=maximum: fail('Mail file custody changed')
+    return path.read_bytes()
+def mail_binding():
+    packet=fresh();directory=MAIL_PRIVATE.lstat()
+    if not MAIL_PRIVATE.is_dir() or MAIL_PRIVATE.is_symlink() or directory.st_uid!=os.getuid() or directory.st_mode&0o7777!=0o700: fail('Mail private directory custody changed')
+    raw=mail_file(MAIL_PRIVATE/'mail-execution-binding.json')
+    if not MAIL_BINDING_SHA or digest(raw)!=MAIL_BINDING_SHA: fail('Mail binding digest changed')
+    b=json.loads(raw);keys={'version','state','phaseId','packetSHA256','candidateCommit','approvedAt','approvalExpiresAt','factorySHA256','configSHA256'}
+    if set(b)!=keys or b['version']!=1 or b['state']!='READY' or PHASE!=MAIL_PHASE or b['phaseId']!=PHASE or b['packetSHA256']!=APPROVAL_SHA or b['candidateCommit']!=packet['candidateCommit'] or b['approvedAt']!=packet['approvedAt'] or b['approvalExpiresAt']!=packet['approvalExpiresAt']: fail('Mail binding does not match approved packet')
+    start=dt.datetime.fromisoformat(b['approvedAt'].replace('Z','+00:00'));end=dt.datetime.fromisoformat(b['approvalExpiresAt'].replace('Z','+00:00'))
+    if not start<=now()<end or not 0<(end-start).total_seconds()<=14400: fail('Mail binding expired')
+    if not all(isinstance(b[k],str) and re.fullmatch('[a-f0-9]{64}',b[k]) and b[k]!='0'*64 for k in ['factorySHA256','configSHA256']): fail('Mail source pins missing')
+    if digest(mail_file(ROOT/'scripts/calendar-native-mail.mjs',0o644))!=b['factorySHA256']: fail('Mail factory changed')
+    raw=mail_file(MAIL_PREP/'mail-sources.json')
+    if digest(raw)!=b['configSHA256']: fail('Mail configuration changed')
+    cfg=json.loads(raw)
+    if cfg.get('phaseId')!=PHASE or cfg.get('state')!='READY' or cfg.get('candidateCommit')!=b['candidateCommit'] or cfg.get('expiresAt')!=b['approvalExpiresAt'] or cfg.get('approval')!={'packetSHA256':APPROVAL_SHA,'approvedAt':b['approvedAt'],'approvalExpiresAt':b['approvalExpiresAt']} or cfg.get('limits')!={'invocations':40,'messageReads':3}: fail('Mail configuration not approved')
+    expected={str(MAIL_PREP/'mail-js'/f'{name}.js'):kind for name,kind in [('account-meta','metadata'),('owner-rows','metadata'),('owner-open','action'),('owner-message-meta','metadata'),('owner-extract','message'),('owner-return','action')]}
+    sources=cfg.get('sources')
+    if not isinstance(sources,list) or len(sources)!=6 or any(not isinstance(x,dict) or set(x)!={'path','sha256','type'} or not isinstance(x['path'],str) or expected.get(x['path'])!=x['type'] or not isinstance(x['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',x['sha256']) for x in sources) or len({x['path'] for x in sources})!=6: fail('Owner-only mail sources changed')
+    return b,cfg
+def fresh_native(): return {'maxInvocations':40,'maxMessageReads':3,'invocations':0,'messageReads':0,'rows':[],'unknown':False,'restoreAttempted':False}
+def native_valid(n):
+    if not isinstance(n,dict) or set(n)!={'maxInvocations','maxMessageReads','invocations','messageReads','rows','unknown','restoreAttempted'} or n['maxInvocations']!=40 or n['maxMessageReads']!=3 or type(n['invocations'])is not int or not 0<=n['invocations']<=40 or type(n['messageReads'])is not int or not 0<=n['messageReads']<=3 or type(n['unknown'])is not bool or type(n['restoreAttempted'])is not bool or not isinstance(n['rows'],list) or len(n['rows'])!=n['invocations']: fail('Mail state contract changed')
+    required={'id','mode','type','sourceSHA256','configurationSHA256','navigationSHA256','restore','state','at'}
+    for i,r in enumerate(n['rows']):
+        if not isinstance(r,dict) or not required<=set(r)<=required|{'completedAt','reason','dispatchState'} or type(r['id'])is not int or r['id']!=i+1 or r['mode'] not in ['url','read','private'] or r['type'] not in ['navigation','metadata','action','message'] or type(r['restore'])is not bool or r['state'] not in ['reserved_unknown','observed','unknown'] or r.get('dispatchState') not in [None,'reserved_unknown','observed','unknown']: fail('Mail invocation contract changed')
+        if any(not isinstance(r[k],str) or not re.fullmatch('[a-f0-9]{64}',r[k]) for k in ['configurationSHA256','navigationSHA256']) or (r['sourceSHA256'] is not None and (not isinstance(r['sourceSHA256'],str) or not re.fullmatch('[a-f0-9]{64}',r['sourceSHA256']))): fail('Mail invocation source identity changed')
+        if r['type']=='navigation' and (r['mode']!='url' or r['sourceSHA256']is not None) or r['type']=='message' and r['mode']!='private' or r['type']in ['metadata','action'] and r['mode']!='read' or r['restore'] and r['type']!='navigation': fail('Mail invocation mode changed')
+        for k in ['at','completedAt']:
+            if k in r and (not isinstance(r[k],str) or len(r[k])>40): fail('Mail invocation clock invalid')
+        if 'reason'in r and (not isinstance(r['reason'],str) or not re.fullmatch('native_mail_[a-z_]{1,70}',r['reason'])): fail('Mail invocation error invalid')
+    if n['messageReads']!=sum(r['type']=='message' for r in n['rows']) or n['restoreAttempted']!=any(r['restore'] for r in n['rows']) or sum(r['restore'] for r in n['rows'])>1: fail('Mail counters changed')
+    if any(r['state']!='observed' or r.get('dispatchState')!='observed' for r in n['rows']) and not n['unknown']: fail('Mail uncertainty cannot be cleared')
+def native_save(s,append,value):
+    if not isinstance(value,dict) or set(value)!={'expectedRevision','native'} or type(value['expectedRevision'])is not int or value['expectedRevision']!=s.get('nativeRevision'): fail('Mail revision conflict; do not retry effect')
+    old=s['native'];new=value['native'];native_valid(old);native_valid(new)
+    if s.get('nativeBindingSHA256')!=MAIL_BINDING_SHA: fail('Mail binding changed')
+    b,cfg=mail_binding()
+    count=new['invocations']-old['invocations']
+    if count==1:
+        r=new['rows'][-1]
+        if new['rows'][:-1]!=old['rows'] or r['state']!='reserved_unknown' or 'dispatchState'in r or 'completedAt'in r or 'reason'in r or not new['unknown'] or old['restoreAttempted'] or old['unknown'] and not r['restore'] or old['invocations']>=(40 if r['restore'] else 39) or r['configurationSHA256']!=b['configSHA256'] or r['navigationSHA256']!=cfg['navigation']['sha256'] or s.get('cleanup') and not r['restore']: fail('Mail reservation not admitted')
+        sources=[x for x in cfg['sources'] if x['sha256']==r['sourceSHA256'] and x['type']==r['type']]
+        if r['type']!='navigation' and len(sources)!=1: fail('Mail source is not bound')
+    elif count==0 and new['invocations']>0:
+        before=old['rows'][-1];after=new['rows'][-1]
+        immutable={'id','mode','type','sourceSHA256','configurationSHA256','navigationSHA256','restore','at','dispatchState'}
+        if new['rows'][:-1]!=old['rows'][:-1] or any(before.get(k)!=after.get(k) for k in immutable) or after['state']not in {'reserved_unknown':{'reserved_unknown','unknown','observed'},'unknown':{'unknown'},'observed':{'observed'}}[before['state']] or after['state']=='observed' and after.get('dispatchState')!='observed' or new['messageReads']!=old['messageReads'] or new['restoreAttempted']!=old['restoreAttempted']: fail('Mail completion changed prior identity')
+    else: fail('Mail state cannot reset or skip invocations')
+    s['native']=new;s['nativeRevision']+=1;append();return {'nativeRevision':s['nativeRevision']}
+def native_dispatch(s,append,value):
+    if not isinstance(value,dict) or set(value)!={'expectedRevision','invocationId','mode','argument'} or type(value['expectedRevision'])is not int or value['expectedRevision']!=s.get('nativeRevision'): fail('Mail dispatch revision conflict')
+    n=s['native'];native_valid(n);b,cfg=mail_binding()
+    if not n['rows'] or value['invocationId']!=n['invocations'] or value['mode']!=n['rows'][-1]['mode']: fail('Mail dispatch identity changed')
+    r=n['rows'][-1]
+    if r['state']!='reserved_unknown' or 'dispatchState'in r or s.get('nativeBindingSHA256')!=MAIL_BINDING_SHA or s.get('cleanup') and not r['restore']: fail('Mail dispatch already attempted or withdrawn')
+    nav_raw=mail_file(MAIL_PREP/'mail-navigation.json')
+    if digest(nav_raw)!=cfg['navigation']['sha256'] or r['configurationSHA256']!=b['configSHA256'] or r['navigationSHA256']!=cfg['navigation']['sha256']: fail('Mail navigation changed')
+    nav=json.loads(nav_raw);argument=value['argument']
+    if r['type']=='navigation':
+        if not isinstance(argument,str) or argument not in [nav['originalURL']]+nav['searchURLs'] or r['restore']!=(argument==nav['originalURL']): fail('Mail navigation is not approved')
+    else:
+        sources=[x for x in cfg['sources'] if x['path']==argument and x['sha256']==r['sourceSHA256'] and x['type']==r['type']]
+        if len(sources)!=1 or digest(mail_file(argument))!=r['sourceSHA256']: fail('Mail script changed')
+    helper=cfg['helper']
+    if helper['path']!=str(MAIL_PREP/'native-mail') or helper['sourcePath']!=str(MAIL_PREP/'native-mail.swift') or digest(mail_file(helper['path'],0o700,10000000))!=helper['sha256'] or digest(mail_file(helper['sourcePath']))!=helper['sourceSHA256']: fail('Mail helper changed')
+    r['dispatchState']='reserved_unknown';s['nativeRevision']+=1;append()
+    try:
+        # This existing journal flock remains held across the native child. A
+        # second process cannot consume restore or dispatch the same row.
+        mail_binding()
+        if digest(mail_file(helper['path'],0o700,10000000))!=helper['sha256'] or digest(mail_file(helper['sourcePath']))!=helper['sourceSHA256'] or digest(mail_file(MAIL_PREP/'mail-navigation.json'))!=cfg['navigation']['sha256'] or r['type']!='navigation' and digest(mail_file(argument))!=r['sourceSHA256']: fail('Mail source changed after dispatch reservation')
+        if now()>=dt.datetime.fromisoformat(b['approvalExpiresAt'].replace('Z','+00:00')): fail('Mail expired before dispatch')
+        result=subprocess.run([helper['path'],value['mode'],argument],capture_output=True,text=True,timeout=15)
+        if result.returncode!=0 or not isinstance(result.stdout,str) or len(result.stdout.encode())>65536: fail('Native mail outcome unconfirmed')
+        r['dispatchState']='observed';s['nativeRevision']+=1;append();return {'nativeRevision':s['nativeRevision'],'stdout':result.stdout}
+    except Exception:
+        r['dispatchState']='unknown';s['nativeRevision']+=1;append();raise RuntimeError('Native mail outcome unconfirmed; cleanup only')
 def reserve(s,append,action,method,path,build=False,cleanup=False,request_units=1):
     primary_fixed()
     if not cleanup: fresh()
@@ -192,9 +276,10 @@ def git(s,append,site,push=False):
         if row['state']=='reserved_unknown': row['state']='unknown';append()
         raise
 def main():
-    global PRIVATE,PHASE,LEDGER,MANIFEST,APPROVAL_SHA
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--packet',required=True);parser.add_argument('--sha256',required=True);parser.add_argument('command',choices=['init','status','site','env','cleanup-env','remote','push','prepare','apply-key','restore-key','cleanup-build','deploys']);parser.add_argument('input',nargs='?');args=parser.parse_args()
-    MANIFEST=pathlib.Path(args.packet).resolve();APPROVAL_SHA=args.sha256
+    global PRIVATE,PHASE,LEDGER,MANIFEST,APPROVAL_SHA,MAIL_BINDING_SHA
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--packet',required=True);parser.add_argument('--sha256',required=True);parser.add_argument('--mail-binding-sha256');parser.add_argument('command',choices=['init','status','site','env','cleanup-env','remote','push','prepare','apply-key','restore-key','cleanup-build','deploys','native-mail-snapshot','native-mail-save','native-mail-dispatch']);parser.add_argument('input',nargs='?');args=parser.parse_args()
+    MANIFEST=pathlib.Path(args.packet).resolve();APPROVAL_SHA=args.sha256;MAIL_BINDING_SHA=args.mail_binding_sha256
+    if MAIL_BINDING_SHA and not re.fullmatch('[a-f0-9]{64}',MAIL_BINDING_SHA): fail('Mail binding SHA required')
     st=MANIFEST.lstat()
     if not MANIFEST.is_file() or MANIFEST.is_symlink() or st.st_mode&0o777!=0o600 or st.st_uid!=os.getuid() or not re.fullmatch('[a-f0-9]{64}',APPROVAL_SHA): fail('Private approved packet0600 required')
     packet=read(MANIFEST);PHASE=packet.get('phaseId','')
@@ -202,13 +287,24 @@ def main():
     PRIVATE=MANIFEST.parent;LEDGER=ROOT/'scratchpad'/f'{PHASE}-control.jsonl'
     if PRIVATE==ROOT or ROOT in PRIVATE.parents: fail('Private packet must be outside repository')
     fresh()
+    if MAIL_BINDING_SHA: mail_binding()
     if args.command=='init':
         candidate=SITES['mc']['candidate']
         if subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()!=candidate or subprocess.run(['git','diff','--quiet','HEAD','--'],cwd=ROOT).returncode: fail('Exact clean source required')
-        private_write(LEDGER,{'phase':PHASE,'limits':{'requests':48,'mutations':16,'builds':2},'requests':0,'mutations':0,'builds':0,'rows':[]},exclusive=True);return {'initialized':True,'controlRequests':48,'guardControlRequests':102,'aggregateMaximum':150}
+        state={'phase':PHASE,'limits':{'requests':48,'mutations':16,'builds':2},'requests':0,'mutations':0,'builds':0,'rows':[]}
+        if MAIL_BINDING_SHA: state.update(nativeBindingSHA256=MAIL_BINDING_SHA,nativeRevision=0,native=fresh_native())
+        private_write(LEDGER,state,exclusive=True);return {'initialized':True,'controlRequests':48,'guardControlRequests':102,'aggregateMaximum':150}
     if args.command=='prepare': return prepare(args.input)
     with locked() as (s,append):
-        if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']]}
+        if args.command.startswith('native-mail-'):
+            if not MAIL_BINDING_SHA or s.get('nativeBindingSHA256')!=MAIL_BINDING_SHA or type(s.get('nativeRevision'))is not int: fail('Mail control not bound')
+            native_valid(s.get('native'))
+            if args.command=='native-mail-snapshot': return {'nativeRevision':s['nativeRevision'],'native':s['native']}
+            if not args.input or len(args.input)>65536: fail('Bounded mail input required')
+            value=json.loads(args.input)
+            if args.command=='native-mail-save': return native_save(s,append,value)
+            return native_dispatch(s,append,value)
+        if args.command=='status': return {'requests':s['requests'],'mutations':s['mutations'],'builds':s['builds'],'unknown':[r['id'] for r in s['rows'] if r['state'] in ['unknown','reserved_unknown']],**({'native':{'invocations':s['native']['invocations'],'messageReads':s['native']['messageReads'],'unknown':s['native']['unknown'],'restoreAttempted':s['native']['restoreAttempted']}} if 'native'in s else {})}
         if args.command=='cleanup-env':
             # A lost mutation can have applied. Inspect actual current values,
             # without retrying the original mutation or trusting cached absence.

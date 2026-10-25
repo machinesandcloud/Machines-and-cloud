@@ -1,0 +1,48 @@
+// Affected V8 actor/factory integration only. All native/control effects injected.
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {realpathSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {createCalendarMail,assertMailPhaseAuthority,MAIL_BINDING_PATH} from './calendar-live-mail.mjs';
+import {createActor} from './calendar-live-actor.mjs';
+import {PHASE,freshNativeMailState} from './calendar-native-mail.mjs';
+const prep='/tmp/mc-calendar-v8-mail-prep-20261025',sha=v=>createHash('sha256').update(v).digest('hex'),factoryPath=fileURLToPath(new URL('./calendar-native-mail.mjs',import.meta.url));
+const base=new Map([[factoryPath,await readFile(factoryPath)]]);for(const name of ['native-mail','native-mail.swift',...['account-meta','owner-rows','owner-open','owner-message-meta','owner-extract','owner-return'].map(n=>'mail-js/'+n+'.js')])base.set(prep+'/'+name,await readFile(prep+'/'+name));
+const path=p=>p instanceof URL?fileURLToPath(p):p,command=(name='account-meta')=>({action:'nativeMail',mode:'read',source:prep+'/mail-js/'+name+'.js'}),restore={action:'nativeMail',mode:'url',url:'https://mail.google.com/mail/u/0/#inbox'};
+export async function fixture(){
+ const files=new Map(base),packet={phaseId:PHASE,approved:true,candidateCommit:'a'.repeat(40),approvedAt:'2026-10-25T00:00:00.000Z',approvalExpiresAt:'2026-10-25T02:00:00.000Z'},packetSHA256='b'.repeat(64),types={'account-meta':'metadata','owner-rows':'metadata','owner-open':'action','owner-message-meta':'metadata','owner-extract':'message','owner-return':'action'};
+ const nav={version:1,phaseId:PHASE,windowID:1802417929,tabID:1802419976,chromePID:691,origin:'https://mail.google.com',accountPath:'/mail/u/0/',originalURL:restore.url,searchURLs:['https://mail.google.com/mail/u/0/#search/synthetic-fixture'],issuedAt:packet.approvedAt,expiresAt:packet.approvalExpiresAt,approvalExpiresAt:packet.approvalExpiresAt,state:'READY'};
+ files.set(prep+'/mail-navigation.json',Buffer.from(JSON.stringify(nav)));
+ const cfg={version:1,phaseId:PHASE,state:'READY',issuedAt:packet.approvedAt,expiresAt:packet.approvalExpiresAt,candidateCommit:packet.candidateCommit,approval:{packetSHA256,approvedAt:packet.approvedAt,approvalExpiresAt:packet.approvalExpiresAt},limits:{invocations:40,messageReads:3},helper:{path:prep+'/native-mail',sha256:sha(files.get(prep+'/native-mail')),sourcePath:prep+'/native-mail.swift',sourceSHA256:sha(files.get(prep+'/native-mail.swift'))},navigation:{path:prep+'/mail-navigation.json',sha256:sha(files.get(prep+'/mail-navigation.json'))},sources:Object.entries(types).map(([name,type])=>({path:prep+'/mail-js/'+name+'.js',type,sha256:sha(files.get(prep+'/mail-js/'+name+'.js'))}))};
+ files.set(prep+'/mail-sources.json',Buffer.from(JSON.stringify(cfg)));
+ const binding={version:1,state:'READY',phaseId:PHASE,packetSHA256,candidateCommit:packet.candidateCommit,approvedAt:packet.approvedAt,approvalExpiresAt:packet.approvalExpiresAt,factorySHA256:sha(files.get(factoryPath)),configSHA256:sha(files.get(prep+'/mail-sources.json'))};files.set(MAIL_BINDING_PATH,Buffer.from(JSON.stringify(binding)));
+ let at=Date.parse('2026-10-25T00:01:00.000Z'),revision=0,native=freshNativeMailState(),execs=0,saveHook=()=>{},readHook=()=>{},lostSave=false,lostChild=false,reply=null;
+ const state={phase:'baseline',closed:false,halted:false,nativeStarted:false,nativeRestored:false},events=[];
+ const helper=async(action,value)=>{
+  events.push(action);
+  if(action==='native-mail-snapshot')return {nativeRevision:revision,native:structuredClone(native)};
+  assert.equal(value.expectedRevision,revision,'Actual bridge requires exact journal revision');
+  if(action==='native-mail-save'){native=structuredClone(value.native);revision++;await saveHook(native);if(lostSave){lostSave=false;throw Error('synthetic lost save ACK')}return {nativeRevision:revision};}
+  assert.equal(action,'native-mail-dispatch');assert.equal(native.rows.at(-1).state,'reserved_unknown');assert.equal(native.unknown,true);assert.equal(value.invocationId,native.invocations);assert(!native.rows.at(-1).dispatchState);native.rows.at(-1).dispatchState='reserved_unknown';revision++;execs++;
+  if(lostChild){native.rows.at(-1).dispatchState='unknown';revision++;throw Error('synthetic native ACK lost')}
+  native.rows.at(-1).dispatchState='observed';revision++;return {nativeRevision:revision,stdout:reply??(value.mode==='private'?'{"privateMailDataSaved":true}':value.mode==='url'?'{"targetMailNavigationDispatched":true}':'{"accountMatch":true,"phaseMatch":true}')};
+ };
+ const options={packet,packetSHA256,bindingSHA256:sha(files.get(MAIL_BINDING_PATH)),helper,authorize:input=>assertMailPhaseAuthority(state,input,{expiresAt:packet.approvalExpiresAt,now:at}),now:()=>at,uid:123,read:async p=>{const name=path(p);await readHook(name);return files.get(name)},stat:async p=>{const name=path(p),dir=name==='/tmp/mc-calendar-v8-private-20261025';return {isFile:()=>files.has(name),isDirectory:()=>dir,isSymbolicLink:()=>false,uid:123,mode:dir?0o700:name===factoryPath?0o644:name===prep+'/native-mail'?0o700:0o600,size:files.get(name)?.length||0}}};
+ const mail=await createCalendarMail(options);
+ return {mail,options,files,state,events,packet,setSaveHook:f=>saveHook=f,setReadHook:f=>readHook=f,loseSave:()=>lostSave=true,loseChild:()=>lostChild=true,setReply:v=>reply=v,setClock:v=>at=v,get native(){return native},get execs(){return execs},get revision(){return revision}};
+}
+if(process.argv[1]&&realpathSync(process.argv[1])===fileURLToPath(import.meta.url)){
+const checks=[];async function check(name,fn){await fn();checks.push(name)}
+await check('Actual actor routes only explicitly bound nativeMail and returns safe metadata',async()=>{const f=await fixture();const c={state:()=>f.state};const actor=createActor({controller:c,packet:f.packet,nativeMail:f.mail});assert.deepEqual(await actor.command(command()),{nativeMail:{accountMatch:true,phaseMatch:true}});assert.equal(f.execs,1);await assert.rejects(createActor({controller:c,packet:f.packet}).command(command()),/binding unavailable/)});
+await check('Concurrent actor mail commands serialize through one journal with monotonic reservations',async()=>{const f=await fixture();await Promise.all([f.mail(command()),f.mail(command('owner-rows')),f.mail(command('owner-message-meta'))]);assert.equal(f.native.invocations,3);assert.equal(f.execs,3);assert.equal(f.revision,12);assert.equal(f.native.unknown,false)});
+await check('Private extraction is flag-only and three message reads remain capped',async()=>{const f=await fixture(),input={action:'nativeMail',mode:'private',source:prep+'/mail-js/owner-extract.js'};for(let i=0;i<3;i++)assert.deepEqual(await f.mail(input),{privateMailDataSaved:true});await assert.rejects(f.mail(input),/budget_exhausted/);await assert.rejects(f.mail(command('owner-extract')),/source_not_approved/);assert.equal(f.native.messageReads,3);assert.equal(f.execs,3)});
+await check('Committed reservation ACK loss blocks dispatch/replay and allows only conditional restore',async()=>{const f=await fixture();f.loseSave();await assert.rejects(f.mail(command()),/reservation_unconfirmed/);assert.equal(f.execs,0);assert.equal(f.native.unknown,true);await assert.rejects(f.mail(command()),/unknown_or_cleanup_only/);await f.mail(restore);assert.equal(f.execs,1);assert.equal(f.native.invocations,2);assert.equal(f.native.unknown,true)});
+await check('Unknown child outcome reloads retained journal and never repeats that row',async()=>{const f=await fixture();f.loseChild();await assert.rejects(f.mail(command()));assert.equal(f.execs,1);assert.equal(f.native.rows[0].dispatchState,'unknown');await assert.rejects(f.mail(command()),/unknown_or_cleanup_only/);assert.equal(f.execs,1)});
+await check('Current Calendar halt is rechecked after admitted await before native dispatch',async()=>{const f=await fixture();f.setSaveHook(()=>{f.state.halted=true});await assert.rejects(f.mail(command()),/unconfirmed/);assert.equal(f.execs,0);assert.equal(f.native.invocations,1);assert.equal(f.native.unknown,true);await f.mail(restore);assert.equal(f.execs,1)});
+await check('Closed or active borrowed grant cannot run mail; restored tab can',async()=>{const f=await fixture();f.state.nativeStarted=true;await assert.rejects(f.mail(command()),/authority withdrawn/);assert.equal(f.execs,0);f.state.nativeRestored=true;await f.mail(command());f.state.closed=true;await assert.rejects(f.mail(restore),/authority withdrawn/);assert.equal(f.execs,1)});
+await check('Fresh phase expiry after reservation stops dispatch without native effect',async()=>{const f=await fixture();f.setSaveHook(()=>f.setClock(Date.parse(f.packet.approvalExpiresAt)));await assert.rejects(f.mail(command()));assert.equal(f.execs,0);assert.equal(f.native.invocations,1);assert.equal(f.native.unknown,true)});
+await check('Changed private execution binding/config/source stops before subsequent work',async()=>{for(const target of [MAIL_BINDING_PATH,prep+'/mail-sources.json',factoryPath]){const f=await fixture();f.files.set(target,Buffer.from('changed'));await assert.rejects(f.mail(command()));assert.equal(f.execs,0);assert.equal(f.native.invocations,0)}});
+await check('Unexpected child payload cannot escape public result and leaves uncertainty',async()=>{const f=await fixture();f.setReply('{"body":"synthetic unexpected payload"}');await assert.rejects(f.mail(command()),/output_unconfirmed/);assert.equal(f.native.unknown,true);assert.equal(f.execs,1)});
+console.log(JSON.stringify({passed:checks.length,total:checks.length,checks,physicalNetworkRequests:0,nativeChildren:0},null,2));
+}

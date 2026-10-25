@@ -1,0 +1,8 @@
+{
+  "scope": "Author fixture bytes only; no assertions/runtime/native policy changes. Removes external /tmp preparation dependency.",
+  "beforeSHA256": "ad1a5596795146cb690b49b7209bc2f1839599b0cd0d169aa42eb9c5bd658a2f",
+  "afterSHA256": "3c99fc5ef3135c118b15a602b9eb485cd141f740ee3c13990abc48fa137bf6f5",
+  "beforeLiteral": "const base=new Map([[factoryPath,await readFile(factoryPath)]]);for(const name of ['native-mail','native-mail.swift',...['account-meta','owner-rows','owner-open','owner-message-meta','owner-extract','owner-return'].map(n=>'mail-js/'+n+'.js')])base.set(prep+'/'+name,await readFile(prep+'/'+name));",
+  "afterLiteral": "const base=new Map([[factoryPath,await readFile(factoryPath)],[prep+'/native-mail',Buffer.from('synthetic native bytes; never executed')],[prep+'/native-mail.swift',Buffer.from('// synthetic source bytes; never compiled')]]);for(const name of ['account-meta','owner-rows','owner-open','owner-message-meta','owner-extract','owner-return'])base.set(prep+'/mail-js/'+name+'.js',Buffer.from('/* synthetic '+name+' */ (()=>JSON.stringify({accountMatch:true}))()'));",
+  "exactReverse": true
+}
