@@ -14,12 +14,26 @@ let raw=FileHandle.standardInput.readDataToEndOfFile()
 guard raw.count<=32768,let input=try?JSONSerialization.jsonObject(with:raw)as?[String:Any],let mode=input["mode"]as?String,["preflight","borrow","inspect_storage","seed_navigate","observe","prepare_restore","clear_restore","verify_restore"].contains(mode),input["chromePID"]as?Int==691,input["windowId"]as?Int==1802417929,input["tabId"]as?Int==1802419976,input["originalURL"]as?String=="https://mail.google.com/mail/u/0/#inbox",let phase=input["phaseId"]as?String,phase.hasPrefix("core-calendar-"),let slug=input["slug"]as?String,slug.range(of:"^[a-z0-9][a-z0-9-]{0,39}$",options:.regularExpression) != nil,let token=input["token"]as?String,hex(token,64),let state=input["state"]as?String,hex(state,64),let expiryText=input["expiresAt"]as?String,let expiry=date(expiryText),let authorization=input["authorizationUrl"]as?String,let auth=URLComponents(string:authorization),auth.scheme=="https",auth.host=="accounts.google.com",auth.port==nil,auth.user==nil,auth.password==nil,auth.path=="/o/oauth2/v2/auth",auth.queryItems?.first(where:{$0.name=="state"})?.value==state,auth.queryItems?.first(where:{$0.name=="redirect_uri"})?.value=="https://machinesandcloud.com/api/google/callback"else{fail("input_binding")}
 let cleanup=["prepare_restore","clear_restore","verify_restore"].contains(mode)
 guard cleanup||Date()<expiry else{fail("expired")}
-// Explicit CFBoolean false is the only unlocked authority; absent/other types are unknown.
-func sessionState(_ session:[String:Any]?)->String{
- guard let value=session?["CGSSessionScreenIsLocked"]as?NSNumber,CFGetTypeID(value)==CFBooleanGetTypeID() else{return "unknown"}
- return value.boolValue ? "locked" : "unlocked"
+// Absent lock metadata requires corroborated interactive-session and regular foreground facts.
+struct ForegroundFacts{let pid:Int32;let bundle:String?;let running:Bool;let regular:Bool}
+func strictSessionBoolean(_ value:Any?)->Bool?{guard let n=value as?NSNumber,CFGetTypeID(n)==CFBooleanGetTypeID()else{return nil};return n.boolValue}
+func sessionState(_ session:[String:Any]?,foreground:ForegroundFacts?)->String{
+ guard let session else{return "unknown"}
+ let lockPresent=session.keys.contains("CGSSessionScreenIsLocked")
+ let lock=strictSessionBoolean(session["CGSSessionScreenIsLocked"])
+ if lockPresent{guard let lock else{return "unknown"};if lock{return "locked"}}
+ guard strictSessionBoolean(session["kCGSessionLoginDoneKey"])==true,strictSessionBoolean(session["kCGSSessionOnConsoleKey"])==true else{return "unknown"}
+ if lockPresent{return "unlocked"}
+ guard let foreground,foreground.pid>0,foreground.running,foreground.regular,let bundle=foreground.bundle,!bundle.isEmpty,bundle != "com.apple.loginwindow" else{return "unknown"}
+ return "unlocked"
 }
-func requireUnlocked(){let state=sessionState(CGSessionCopyCurrentDictionary()as?[String:Any]);guard state=="unlocked"else{fail(state=="locked" ? "interactive_session_locked" : "interactive_session_unknown")};guard cleanup||Date()<expiry else{fail("expired_before_native")}}
+func requireUnlocked(){
+ let current=NSWorkspace.shared.frontmostApplication
+ let foreground=current.map{ForegroundFacts(pid:$0.processIdentifier,bundle:$0.bundleIdentifier,running:!$0.isTerminated,regular:$0.activationPolicy == .regular)}
+ let state=sessionState(CGSessionCopyCurrentDictionary()as?[String:Any],foreground:foreground)
+ guard state=="unlocked"else{fail(state=="locked" ? "interactive_session_locked" : "interactive_session_unknown")}
+ guard cleanup||Date()<expiry else{fail("expired_before_native")}
+}
 requireUnlocked()
 let original="https://mail.google.com/mail/u/0/#inbox",bootstrap="https://machinesandcloud.com/privacy-policy"
 let pending:[String:Any]=["slug":slug,"state":state,"expiresAt":expiryText,"sessionBinding":SHA256.hash(data:Data(token.utf8)).map{String(format:"%02x",$0)}.joined()]
