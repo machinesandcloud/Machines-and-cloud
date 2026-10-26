@@ -160,3 +160,5 @@
 
 .connection-verification-result { display:inline-block; font-size:12px; font-weight:600; color:var(--ui-ink,#17263d); margin:0 0 7px; }
 .connection-verification[data-verification-state=verified] .connection-verification-result { color:#21613f; }
+/* Keep the service icon and full name together on narrow phones. */
+@media(max-width:380px) { #setupGuide .setup-guide-services { grid-template-columns:repeat(2,minmax(0,1fr)); } }

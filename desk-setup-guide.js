@@ -154,7 +154,9 @@
     if(step.id==='business'&&step.focus==='business')return 'We’ll take you to your business details. Check or edit them, then confirm the saved answers.';
     if(step.id==='practice')return 'Try a customer question in Test answers. Your saved result updates this guide.';
     if(action(row).kind==='wait')return 'Your saved progress stays here. We’ll show the next action when this check is ready.';
+    if(row.id==='web'&&step.id==='first_request')return action(row).target==='availability'?'Open Schedule to review the saved visit and its customer details.':'Open Inbox to review customer requests, read their conversations and follow up.';
     if(row.id==='web')return 'The installation card shows the code and your next check. We’ll highlight it for you.';
+    if(row.id==='calendar'&&step.id==='delivery')return 'Open Schedule to review a saved visit and check its Google Calendar delivery result.';
     if(row.id==='calendar')return 'Review the connection screen and choose the account you want to use.';
     if(row.id==='angi')return 'Your Angi connection opens here. Confirm your details, then follow the provider handoff.';
     if(row.id==='thumbtack')return 'The connection screen shows the account or business choice needed next.';
