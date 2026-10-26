@@ -22,13 +22,13 @@
   async function rememberApproval() {
     var held = savedSetupReadback, binding = await sessionBinding();
     if (!held || held !== savedSetupReadback || held.generation !== generation || !currentSession()) return false;
-    sessionStorage.setItem(approvalStorageKey, JSON.stringify({ binding: binding, submissionId: held.submissionId, confirmed: held.confirmed === true }));
+    sessionStorage.setItem(approvalStorageKey, JSON.stringify({ binding: binding, submissionId: held.submissionId, confirmed: held.confirmed === true, service: held.service || null }));
     return true;
   }
   function clearApproval() { savedSetupReadback = null; try { sessionStorage.removeItem(approvalStorageKey); } catch (error) { /* A new session cannot use the old binding. */ } }
   function resumeApproval() { if (savedSetupReadback && !savedSetupReadback.resumeAttempted && !busy && data?.client?.slug === slug && currentSession()) { savedSetupReadback.resumeAttempted = true; readSavedSetup(); } }
   var approvalRestore = sessionBinding().then(function (binding) {
-    try { var stored = JSON.parse(sessionStorage.getItem(approvalStorageKey) || 'null'); if (!currentSession() || savedSetupReadback || stored?.binding !== binding || !/^[a-f0-9]{32,64}$/.test(stored.submissionId || '')) return; savedSetupReadback = { generation: generation, submissionId: stored.submissionId, confirmed: stored.confirmed === true, resumeAttempted: false }; resumeApproval(); } catch (error) { /* Corrupt local data grants no approval. */ }
+    try { var stored = JSON.parse(sessionStorage.getItem(approvalStorageKey) || 'null'); if (!currentSession() || savedSetupReadback || stored?.binding !== binding || !/^[a-f0-9]{32,64}$/.test(stored.submissionId || '')) return; savedSetupReadback = { generation: generation, submissionId: stored.submissionId, confirmed: stored.confirmed === true, service: ['voice','sms'].includes(stored.service) ? stored.service : null, restored: true, resumeAttempted: false }; resumeApproval(); } catch (error) { /* Corrupt local data grants no approval. */ }
   });
   function clearCalendarReturn() {
     var previous = calendarReturn; calendarReturn = null;
@@ -246,6 +246,10 @@
       if (held.generation !== generation || !currentSession()) return;
       clearApproval(); if (dialog.open) dialog.close();
       message.textContent = 'Your approval is saved. The current setup step is ready.';
+      if (held.restored) {
+        var accepted = data?.serviceOnboarding?.operation?.acceptedChannels || [], service = accepted.includes(held.service) ? held.service : accepted.find(function (id) { return ['voice','sms'].includes(id); });
+        if (service) document.dispatchEvent(new CustomEvent('mc:service-guide', { detail: { service: service } }));
+      }
     } catch (error) {
       if (held.generation === generation && currentSession()) showSavedSetupReadback(held.confirmed ? 'Your approval is saved, but its latest progress could not be checked. Check saved setup again; your approval will not be submitted again.' : 'We could not confirm whether this request was saved. Keep it on hold and check saved setup again. Another approval will not be submitted.', true);
     } finally {
@@ -262,7 +266,8 @@
         await approvalRestore;
         if (generation !== expectedGeneration || !currentSession()) return;
         if (savedSetupReadback) { clearTimeout(timeout); await readSavedSetup(true); return; }
-        savedSetupReadback = { generation: expectedGeneration, submissionId: fields.submissionId.toLowerCase(), confirmed: false, resumeAttempted: true };
+        var accepted = fields.acceptedChannels || [], selectedService = $('setupGuide')?.dataset.guideSelectedService;
+        savedSetupReadback = { generation: expectedGeneration, submissionId: fields.submissionId.toLowerCase(), confirmed: false, service: accepted.includes(selectedService) ? selectedService : accepted.find(function (id) { return ['voice','sms'].includes(id); }) || null, restored: false, resumeAttempted: true };
         if (!await rememberApproval()) return;
       }
       approvalDispatched = action === 'request_service_onboarding';
