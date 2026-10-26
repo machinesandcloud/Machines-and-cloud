@@ -74,7 +74,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   const policy = validatePolicy(rawPolicy), policyDigest = digest(policy), enabled = () => typeof gate === "function" ? gate() === true : gate === true;
   if (!provider || !["createAssistant", "lookupAssistant", "updateAssistant", "verifyAssistant", "importNumber", "lookupNumber", "readImportedRoute", "configureRouting", "verifyRouting", "detachRouting", "deleteImportedNumber", "deleteAssistant"].every(key => typeof provider[key] === "function")) throw new Error("Complete voice provider adapters required");
   const offer = () => ({ ...structuredClone(policy), digest: policyDigest, available: enabled() });
-  async function request(c, body = {}) {
+  async function request(c, body = {}, options = {}) {
     const current = await ownerCurrent(c, body);
     if (body.acceptedAuthority !== true || body.policyVersion !== policy.version || body.policyDigest !== policyDigest || !["forward_business_line", "use_new_number"].includes(body.forwardingMode)) throw new VoiceActivationError("acceptance_required", "Review phone usage terms and confirm your authority before continuing.", 400);
     if (body.forwardingMode === "forward_business_line" && (!validNumber(current.phone?.businessNumber) || current.phone.businessNumber === current.owner?.phone)) throw new VoiceActivationError("unsafe_forwarding", "Add your business line and a separate owner cell before forwarding calls.", 400);
@@ -89,6 +89,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
     };
     // The recovery index is written before the primary intent. Its id is stable;
     // an orphaned index remains visible as unhealthy instead of being discarded.
+    if(options.beforeAdmission)await options.beforeAdmission(current);
     await enqueue(row);
     const saved = await atomicUpdate(STORE, id, prior => {
       if (prior && existing && prior.generation !== existing.generation) return { result: prior };
@@ -236,7 +237,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   return { offer, request, cancel, run, recover };
 }
 function productionEngine(deadlineAt) { const { policy } = productionPolicy(); if (!policy) throw new VoiceActivationError("policy_unavailable", "Phone usage terms are not available yet."); const frozen = digest(policy), gate = () => { const next = productionPolicy(); return next.enabled && digest(next.policy) === frozen; }; return voiceEngine({ provider: createManagedVoiceProvider({ executionAllowed: gate, deadlineAt }), policy, gate }); }
-export async function requestVoiceActivation(c, body) { return productionEngine().request(c, body); }
+export async function requestVoiceActivation(c, body, options) { return productionEngine().request(c, body, options); }
 export async function cancelVoiceActivation(c, body) { return saveVoiceCancellation(c, body); }
 export async function voiceActivationStatus(c) {
   if (!isSupportedSelfServiceClient(c)) return { available: false, active: false, state: "unavailable", operation: null, offer: null };

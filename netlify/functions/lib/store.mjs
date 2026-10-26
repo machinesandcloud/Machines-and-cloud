@@ -484,6 +484,12 @@ export async function checkCalendarBookingWindow(c,date,window,bookingId,{access
   const {calendarBusyProjection,assertCalendarBusyProjection,calendarOccupiedCount}=await import('./calendar-busy.mjs'),calendar=await calendarBusyProjection(c,date,1,{fresh:true,accessToken,deadline});
   return atomicUpdate('index',capacityKey(c),async current=>{const state=validateCapacity(c,current)||await initialCapacity(c);await assertCalendarBusyProjection(c,calendar,{fresh:true});return {...(!current?{value:state}:{}),result:!calendar||calendarOccupiedCount(c,state,calendar,date,window,bookingId)<capacityLimit(c)};});
 }
+// Browsing a calendar does not initialize capacity or certify free windows.
+// Existing blocks live in this exact tenant state; absent state has no blocks.
+export async function readSavedAvailabilityBlocks(c) {
+  await assertCurrentWorkspace(c);
+  return atomicUpdate('index', capacityKey(c), current => ({ result: current ? blockViews(validateCapacity(c, current)) : [] }));
+}
 export async function getAvailabilityBlocks(c) {
   await assertCurrentWorkspace(c);
   return atomicUpdate("index", capacityKey(c), async (current) => {

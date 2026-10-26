@@ -1,0 +1,73 @@
+.public-reading {--color-neutral-400:#526176;--color-neutral-300:#526176;--color-neutral-200:#344862;--color-primary-400:#2359df;--color-primary-500:#2359df;}
+/* Reading surfaces share the product identity, with room for the actual content. */
+.public-reading .page-hero {text-align:left;padding:148px 0 64px;background:#fff;border-bottom:1px solid var(--mc-line);}
+.public-reading .page-hero::before,.public-reading .hero::before,.public-reading .bg-effects {display:none;}
+.public-reading .page-hero .hero-grid {display:block;}
+.public-reading .hero-content {max-width:900px;margin:0;text-align:left;}
+.public-reading .section-header::after {display:none;}
+.public-reading .hero-title,.public-reading .page-hero h1 {max-width:950px;margin:0 0 24px;color:var(--mc-ink);font:600 clamp(2.4rem,4.6vw,4rem)/1.14 var(--font-display);letter-spacing:-.035em;text-wrap:balance;}
+.public-reading .hero-title-gradient {color:var(--mc-blue);background:none;-webkit-text-fill-color:currentColor;}
+.public-reading .hero-subtitle,.public-reading .hero-description,.public-reading .page-hero .section-description {max-width:740px;margin:0 0 28px;color:var(--mc-muted);font-size:18px;line-height:1.65;}
+.public-reading .hero-actions {display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;}
+.public-reading .section {padding:68px 0;}
+.public-reading .section.bg-dark {background:var(--mc-canvas);color:var(--mc-ink);}
+.public-reading .section-header {max-width:800px;margin:0 0 36px;text-align:left;}
+.public-reading .section-title {margin:0 0 20px;color:var(--mc-ink);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:600;line-height:1.2;letter-spacing:-.03em;}
+.public-reading .section-description {max-width:720px;margin:0;color:var(--mc-muted);font-size:16px;line-height:1.7;}
+.public-reading .grid {gap:28px;}
+.public-reading .card {padding:28px 0;background:transparent;border:0;border-top:1px solid var(--mc-line);border-radius:0;box-shadow:none;backdrop-filter:none;transform:none;}
+.public-reading .card::before,.public-reading .card::after {display:none;}
+.public-reading .card:hover {transform:none;border-color:var(--mc-line);box-shadow:none;background:transparent;}
+.public-reading .card h3,.public-reading .card-title {margin:0 0 12px;color:var(--mc-ink);font:600 21px/1.35 var(--font-display);letter-spacing:-.02em;}
+.public-reading .card p,.public-reading .card-description {color:var(--mc-muted);font-size:15px;line-height:1.7;}
+.public-reading .card-icon {margin-bottom:16px;color:var(--mc-blue);background:transparent;border:0;box-shadow:none;}
+.public-reading .card li,.public-reading .prose p,.public-reading .prose li {color:var(--mc-muted);font-size:16px;line-height:1.75;}
+.public-reading .prose {max-width:800px;margin-inline:auto;}
+.public-reading .prose h2 {margin-top:48px;font-size:28px;}
+.public-reading .prose h3 {margin-top:32px;font-size:21px;}
+.public-reading .btn {min-height:46px;border-radius:6px;box-shadow:none;transform:none;font-size:14px;font-weight:600;}
+.public-reading .btn-primary {background:var(--mc-blue);border-color:var(--mc-blue);color:#fff;}
+.public-reading .btn-secondary {background:#fff;border:1px solid #b8c6d8;color:var(--mc-ink);}
+.public-reading .btn-xl {padding:13px 20px;}
+body.theme-light.public-reading .section.cta-section {background:var(--mc-navy);border:0;}
+.public-reading .cta-section::before,.public-reading .cta-section::after {display:none;}
+.public-reading .cta-content {padding:16px 0;text-align:left;}
+.public-reading .cta-team {justify-content:flex-start;}
+.public-reading .cta-description {margin-left:0;max-width:740px;}
+.public-reading .cta-actions {justify-content:flex-start;}
+.public-reading .cta-section :is(h2,.section-title) {color:#fff;}
+.public-reading .cta-section :is(p,.section-description) {color:#cfdded;}
+.public-reading .cta-section .section-header {margin-bottom:28px;}
+.public-reading .cta-section .container {text-align:left;}
+.public-reading .hero-badge,.public-reading .badge {background:#eef3ff;color:#214fae;border:0;box-shadow:none;}
+.public-reading .faq-item {background:transparent;border:0;border-bottom:1px solid var(--mc-line);border-radius:0;}
+.public-reading .faq-question {padding:20px 0;color:var(--mc-ink);font-size:16px;}
+.public-reading .faq-answer {color:var(--mc-muted);font-size:15px;}
+.public-reading .text-muted {color:var(--mc-muted)!important;}
+.public-reading .text-primary {color:var(--mc-blue)!important;}
+@media(max-width:700px) {
+ .public-reading .page-hero {padding:112px 0 44px;}
+ .public-reading .page-hero h1,.public-reading .hero-title {font-size:36px;}
+ .public-reading .hero-subtitle {font-size:16px;}
+ .public-reading .section {padding:48px 0;}
+ .public-reading .grid {grid-template-columns:1fr;gap:8px;}
+ .public-reading .card {padding:24px 0;}
+ .public-reading .hero-actions .btn {width:auto;}
+ .public-reading .section-header {margin-bottom:28px;}
+}
+
+/* Readable secondary examples on the light article canvas. */
+.public-reading :is(.problem-description,.process-description,.workflow-label,.action-label,.queue-desc,.queue-status,.email-from,.email-subject,.stat-mini-label,.arch-layer-name,.arch-layer-desc,.arch-metric-label,.insight-label,.insight-value,.blueprint-label,.case-study-subtitle) {color:var(--mc-muted);}
+.public-reading :is(.framework-tag,.use-case-tag,.arch-metric-value,.outcome-metric,.insight-pill,.email-tag) {color:#1e53b8;}
+.public-reading .use-case-description {color:var(--mc-muted);}
+.public-reading main a:not(.btn):hover {color:#1746bd;}
+.public-reading .btn-ghost {color:#184fc5;background:#fff;}
+.public-reading .cta-section :is(.cta-note,.text-muted) {color:#cfdded!important;}
+
+.public-reading main a:not(.btn) {color:#2359df;}
+.public-reading :is(.hero-stat-label,.flow-desc,.author-metric) {color:var(--mc-muted);}
+.public-reading .reading-review-topics {display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin:0;padding:0;list-style:none;}
+.public-reading .reading-review-topics li {padding:16px 0;border-bottom:1px solid var(--mc-line);font-size:16px;color:var(--mc-ink);}
+.public-reading pre,.public-reading .code-block {--color-neutral-400:#bacbdd;--color-neutral-300:#cfdded;--color-neutral-200:#e3edf6;}
+
+.public-reading :is(.roi-result-value,.flow-metric-value,.signal-value) {color:#1e53b8;}

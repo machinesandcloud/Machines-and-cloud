@@ -52,10 +52,16 @@ export function operatorEmails() {
   return new Set(values);
 }
 export async function requireOperator(req) {
-  const allowed = operatorEmails(), session = await getAccessSession(req, 'operator');
+  operatorEmails();
+  const session = await getAccessSession(req, 'operator');
   if (!session) throw new OperatorError('sign_in_required', 'Sign in to the admin portal.', 401);
-  if (!allowed.has(session.email)) throw new OperatorError('forbidden', 'This account does not have operator access.', 403);
+  if (!operatorEmails().has(session.email)) throw new OperatorError('forbidden', 'This account does not have operator access.', 403);
   return session;
+}
+export async function requireCurrentOperator(session) {
+  const current = /^[a-f0-9]{64}$/.test(session?.sessionHash || '') ? await strictRead('access_sessions', session.sessionHash) : null;
+  if (!current || current.scope !== 'operator' || current.status !== 'active' || !(Date.parse(current.expiresAt) > Date.now()) || normalizeAccountEmail(current.email) !== normalizeAccountEmail(session?.email)) throw new OperatorError('sign_in_required', 'Sign in to the admin portal again before continuing.', 401);
+  if (!operatorEmails().has(normalizeAccountEmail(current.email))) throw new OperatorError('forbidden', 'This account no longer has operator access.', 403);
 }
 export function managementRevision(c) {
   return createHash('sha256').update(JSON.stringify([c.slug, c.ownerKey, configurationRevision(c), c.owner?.email, c.status, c.operationLifecycleVersion || 0, c.channels, c.onboarding?.desiredChannels, c.build, c.setupProof, c.management?.revision || 0])).digest('hex');
@@ -152,6 +158,7 @@ export async function supportAction(session, body) {
   const reason = body.reason.trim(), actor = { role: 'operator', email: session.email };
   if (body.action === 'rebuild_workspace' || body.action === 'retry_operation') {
     if (body.action === 'retry_operation' && typeof body.operationId !== 'string') throw new OperatorError('invalid_request', 'Choose an operation to retry.');
+    await requireCurrentOperator(session);
     const operation = body.action === 'rebuild_workspace' ? await queueWorkspaceRebuild(c, { actor, reason, expectedRevision: configurationRevision(c) }) : await retryWorkspaceOperation(c, body.operationId, { actor, reason, expectedRevision: configurationRevision(c) });
     return { ok: true, operation, customer: await customerView(await strictRead('clients', c.slug), true) };
   }
@@ -160,6 +167,8 @@ export async function supportAction(session, body) {
   const at = new Date().toISOString(), eventId = randomUUID();
   const updated = await atomicUpdate('clients', c.slug, async current => {
     if (!current || !isSelfServiceClient(current) || current.slug !== c.slug || current.ownerKey !== c.ownerKey || normalizeAccountEmail(current.owner?.email) !== normalizeAccountEmail(c.owner?.email) || managementRevision(current) !== body.expectedRevision || closedStatus(current.status) && !['save_note','reconcile_services'].includes(body.action)) return { result: null };
+    // A refreshed or repeated pause must keep the original resume snapshot.
+    if (body.action === 'pause' && current.status === 'paused') throw new OperatorError('already_paused', 'This front desk is already paused. Its previous service settings are kept for Resume.', 409);
     const value = structuredClone(current);
     if (body.action === 'pause') { value.pausedFrom = current.status; value.pausedChannels = structuredClone(current.channels || {}); value.status = 'paused'; value.pausedAt = at; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
     if (body.action === 'cancel_service') { value.status = 'cancelled'; value.cancelledAt = at; value.cancelReason = reason; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
@@ -178,6 +187,8 @@ export async function supportAction(session, body) {
     value.management = { ...value.management, revision: (value.management?.revision || 0) + 1, audit: [...(value.management?.audit || []), audit].slice(-100), notes: body.action === 'save_note' ? [...(value.management?.notes || []), { tenantIdentity:workspaceTenant(current),id: eventId, at, actor: session.email, text: body.text.trim() }].slice(-100) : value.management?.notes || [] };
     if (body.action === 'reconcile_services') value.management.serviceReconciliations = [...(value.management?.serviceReconciliations || []), { id:eventId,at,actor:session.email,reason,tenant:deliveryTenant(current),sequence:value.management.revision,state:'queued' }].slice(-20);
     value.updatedAt = at;
+    // Read current authority after awaited readiness work on every CAS attempt.
+    await requireCurrentOperator(session);
     return { value, result: value };
   });
   if (!updated) throw new OperatorError('customer_changed', 'Customer details changed. Refresh before trying again.', 409);

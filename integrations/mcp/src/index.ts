@@ -1,9 +1,15 @@
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import { createServer } from './server.js';
-import { readConfiguration, WorkspaceReader } from './workspace.js';
+import { OwnerAccess, readConfiguration, WorkspaceReader } from './workspace.js';
+
+import { SetupPreparer } from './preparation.js';
+import { ServiceInformation } from './service-information.js';
 
 async function main() {
-  const server = createServer(new WorkspaceReader(readConfiguration(process.env)));
+  const config = readConfiguration(process.env);
+  const preparer = process.env.MC_MCP_ALLOW_SETUP_PREPARATION === '1' ? new SetupPreparer(new OwnerAccess(config)) : undefined;
+  const information = process.env.MC_MCP_ALLOW_SERVICE_INFORMATION === '1' ? new ServiceInformation(new OwnerAccess(config)) : undefined;
+  const server = createServer(new WorkspaceReader(config), preparer, information);
   process.once('SIGINT', () => { void server.close(); });
   process.once('SIGTERM', () => { void server.close(); });
   await server.connect(new StdioServerTransport());

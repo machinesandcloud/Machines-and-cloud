@@ -1,0 +1,19 @@
+/* Shared identity and interaction foundation. Self-hosted licensed type. */
+@font-face { font-family: Inter; src: url("assets/fonts/inter-latin.woff2") format("woff2"); font-style: normal; font-weight: 400 700; font-display: swap; }
+@font-face { font-family: Manrope; src: url("assets/fonts/manrope-latin.woff2") format("woff2"); font-style: normal; font-weight: 400 700; font-display: swap; }
+:root {
+ --mc-ink:#17263d; --mc-muted:#526176; --mc-blue:#2359df; --mc-navy:#11283f;
+ --mc-canvas:#f5f6f8; --mc-surface:#fff; --mc-line:#dce2e9; --mc-radius:6px; --mc-panel-radius:12px;
+ --ui-font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ --ui-ink:var(--mc-ink); --ui-muted:var(--mc-muted); --ui-blue:var(--mc-blue); --ui-navy:var(--mc-navy);
+ --ui-line:var(--mc-line); --ui-bg:var(--mc-canvas); --ui-radius:var(--mc-radius);
+ --font-sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ --font-display:Manrope,Inter,sans-serif;
+}
+html { scrollbar-color:#9eaec2 var(--mc-canvas); }
+::selection { color:#fff; background:#2359df; }
+input,textarea { caret-color:var(--mc-blue); }
+button,input,select,textarea { font-family:var(--ui-font); }
+:where(a,button,input,select,textarea,summary):focus-visible { outline:3px solid #4776e4; outline-offset:3px; }
+:where(time,.ui-stat,.ui-table,.schedule-calendar) { font-variant-numeric:tabular-nums; }
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }

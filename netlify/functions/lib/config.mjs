@@ -218,6 +218,7 @@ export function publicView(c) {
 export function ownerView(c) {
   const { calendar, billing, voice, management, operationReceipts, workspaceOperationClaims, ...rest } = c;
   if (Object.hasOwn(c, "onboarding")) delete rest.ownerKey;
+  if(Object.hasOwn(c,'onboarding') && c.business?.legal && Object.hasOwn(c.business.legal,'ein'))rest.business={...c.business,legal:{...c.business.legal,ein:''}};
   rest.rules = { ...(c.rules || {}), emergencies: normalizeEmergencies(c.rules?.emergencies, c.business?.trade) };
   return { ...rest, calendar: { provider: calendar?.provider || "none", connected: !!calendar?.google?.refreshToken }, billing: { status: billing?.status || "none", plan: c.plan, trialEnd: billing?.trialEnd || null }, voice: { provider: voice?.provider || "none", ready: !!voice?.assistantId, detached: !!voice?.detached } };
 }

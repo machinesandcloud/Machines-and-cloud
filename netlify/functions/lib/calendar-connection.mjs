@@ -1,3 +1,4 @@
+import { serviceIntakeCalendarHint } from './service-intake.mjs';
 // Customer-authorized Google Calendar. Secrets never enter a client DTO or redirect.
 import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
 import { atomicUpdate } from "./store.mjs";
@@ -61,6 +62,7 @@ export async function startCalendarConnection(client, session, input = {}) {
     return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, executionPolicyDigest:calendarExecutionPolicy().digest, email: session.email, sessionHash: session.sessionHash, availabilityConsentVersion:CALENDAR_AVAILABILITY_CONSENT_VERSION, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
   });
   const params = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID, redirect_uri: `${accessSite()}/api/google/callback`, response_type: "code", scope: "https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly", access_type: "offline", prompt: "consent", state, code_challenge: createHash("sha256").update(verifier).digest("base64url"), code_challenge_method: "S256" });
+  const hint=await serviceIntakeCalendarHint(client);if(hint)params.set('login_hint',hint);
   return { ok: true, authorizationUrl: `https://accounts.google.com/o/oauth2/v2/auth?${params}`, expiresAt };
 }
 // The unauthenticated Google redirect only selects a fixed same-site landing page.

@@ -137,7 +137,7 @@
     document.getElementById('connection-preview-count').textContent=selected.length+' option'+(selected.length===1?'':'s')+' selected';
     if(changed?.checked)open=changed.value;
     if(!selected.includes(open))open=selected[0];
-    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id];return '<details class="connection-preview-card" data-channel="'+id+'"'+(id===open?' open':'')+'><summary><strong>'+row.label+'</strong><span>'+row.summary+'</span></summary><dl><div><dt>Your connection</dt><dd>'+row.automation+'</dd></div><div><dt>Your part</dt><dd>'+row.owner+'</dd></div><div><dt>Before activation</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose what you’d like help with to see the next steps.</p>';
+    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id];return '<details class="connection-preview-card" data-channel="'+id+'"'+(id===open?' open':'')+'><summary><strong class="brand-lockup">'+(id==='calendar'?'<img class="brand-mark" src="assets/brands/google-calendar.svg" width="24" height="24" alt="" aria-hidden="true">':'')+row.label+'</strong><span>'+row.summary+'</span></summary><dl><div><dt>Your connection</dt><dd>'+row.automation+'</dd></div><div><dt>Your part</dt><dd>'+row.owner+'</dd></div><div><dt>Before activation</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose what you’d like help with to see the next steps.</p>';
   }
   function updatePhoneSetup() {
     var section = document.getElementById('phone-routing-settings'), existing = document.getElementById('existing-phone-fields'), mode = form.elements.phoneSetupMode;
@@ -268,7 +268,7 @@
   function resetEmailConfirmation(restoreCopy) {
     clearInterval(resendTimer); resendTimer = null; resendNotBefore = 0; linkRequestPending = null; requestedEmail = ''; emailState = '';
     gate.removeAttribute('data-email-state'); gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy');
-    accessConfirmation.hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Email me a sign-in link';
+    accessConfirmation.hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Send my sign-in link';
     document.getElementById('access-recipient').textContent = ''; gateStatus.removeAttribute('data-error'); gateStatus.classList.remove('sr-only'); updateEmailActions();
     if (restoreCopy) { document.getElementById('access-title').textContent = initialAccessTitle; document.getElementById('access-intro').textContent = initialAccessIntro; }
   }
@@ -306,7 +306,7 @@
       }
     } finally {
       if (attempt.generation === accessGeneration && linkRequestPending === attempt) {
-        linkRequestPending = null; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Email me a sign-in link';
+        linkRequestPending = null; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Send my sign-in link';
         gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy'); updateEmailActions();
       }
     }

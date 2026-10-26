@@ -1,3 +1,4 @@
+@import url("design-system.css");
 /* ============================================
    MACHINES & CLOUD - Premium Design System
    High-Converting Enterprise AI Website
@@ -56,7 +57,7 @@
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-display: Manrope, Inter, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Font Sizes - More Dramatic Scale */
@@ -9331,3 +9332,51 @@ main[id="main"]:focus { outline:none; }
 .theme-light:not(.product-app):not(.site-refresh) .feature-kpi-item { padding:14px; }
 .theme-light:not(.product-app):not(.site-refresh) .feature-kpi-head { margin:0; }
 .theme-light:not(.product-app):not(.site-refresh) .feature-kpi-bar { display:none; }
+
+/* Official third-party identity stays recognizable beside readable product names. */
+.brand-lockup { display:inline-flex; align-items:center; gap:8px; max-width:100%; vertical-align:middle; }
+img.brand-mark { display:inline-block; width:24px; height:24px; flex:0 0 auto; object-fit:contain; object-position:center; vertical-align:middle; filter:none; }
+img.brand-mark.brand-mark--wide { width:60px; }
+.brand-social { min-height:24px; }
+.integration-logo.brand-lockup { justify-content:flex-start; gap:12px; min-height:56px; padding:12px 16px; font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--mc-ink); }
+.integration-logo img.brand-mark { width:32px; height:32px; }
+.integration-logo img.brand-mark--wide { width:110px; }
+.framework-tag.brand-lockup { gap:8px; }
+.framework-tag img.brand-mark { width:20px; height:20px; }
+.framework-tag img.brand-mark--wide { width:68px; }
+.card-title.brand-lockup { gap:12px; }
+.card-title img.brand-mark { width:28px; height:28px; }
+
+img.brand-mark.brand-mark--dark { background:#16253d; border-radius:4px; padding:4px; box-sizing:content-box; }
+
+.integration-logo { color:var(--mc-ink); }
+.integration-logo > span { min-width:0; }
+.framework-tag { color:#234a88; }
+
+img.brand-mark[hidden] { display:none!important; }
+.brand-lockup--wordmark { position:relative; }
+.integration-logo.brand-lockup--wordmark img.brand-mark--wide { width:160px; height:32px; }
+.brand-lockup--wordmark:has(img.brand-mark[data-brand-loaded="true"]) > span { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+
+/* Preserve readable resource examples within the shared article canvas. */
+.theme-light.public-reading .use-cases-grid { width:100%; min-width:0; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.theme-light.public-reading .use-case-featured { grid-column:1/-1; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); }
+.theme-light.public-reading :is(.use-case-card,.use-case-visual,.use-case-content,.email-flow,.email-stack,.email-preview) { min-width:0; max-width:100%; }
+.theme-light.public-reading :is(.email-from,.email-subject) { min-width:0; }
+.theme-light.public-reading .email-from { flex:0 1 140px; width:auto; white-space:normal; overflow:visible; overflow-wrap:anywhere; }
+.theme-light.public-reading .action-grid { width:100%; min-width:0; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.theme-light.public-reading .action-item { min-width:0; }
+.theme-light.public-reading .action-label { overflow-wrap:anywhere; text-align:center; }
+@media(max-width:1024px) {
+ .theme-light.public-reading .use-case-featured { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:768px) {
+ .theme-light.public-reading .use-cases-grid { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:600px) {
+ .theme-light.public-reading .use-case-featured { padding:20px; }
+ .theme-light.public-reading .use-case-visual { padding:16px; }
+ .theme-light.public-reading .action-item { padding:8px; }
+ .theme-light.public-reading .email-preview { flex-wrap:wrap; align-items:flex-start; gap:8px; }
+ .theme-light.public-reading :is(.email-from,.email-subject) { flex:1 1 100%; width:auto; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; }
+}

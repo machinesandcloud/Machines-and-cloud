@@ -197,7 +197,7 @@ function engine(options = {}) {
     return { available: canReview, legacySetup: existingActions, numberReady:facts.number.operation?.state==='number_acquired'&&!facts.number.operation.cancellationRequested&&!facts.number.operation.releaseConfirmed, requestedChannels: requested, acceptedChannels:[...accepted],authorizableChannels:canReview?[...scope]:[],deferredChannels, offer: standalone || braked || !canReview ? null : offer, reasonCode: standalone ? 'existing_setup' : braked ? 'usage_brake' : !requested.length ? 'no_service_requested' : !offer ? 'service_unavailable' : null,
       operation: row ? { ...operationView(row, state, reason), canReview, nextAction: existingActions ? 'review_existing_connections' : canReview && state === 'needs_review' ? 'review_current_offer' : null } : null };
   }
-  async function request(c, body = {}) {
+  async function request(c, body = {}, options = {}) {
     requireOwner(body.actor);
     const current = await currentClient(c, body.actor, body.expectedRevision), selected = channels(current);
     if (body.acceptedChannels !== undefined && (!Array.isArray(body.acceptedChannels) || !body.acceptedChannels.length || body.acceptedChannels.length > 2 || new Set(body.acceptedChannels).size !== body.acceptedChannels.length || body.acceptedChannels.some(channel => !selected.includes(channel)))) throw new ServiceOnboardingError('invalid_channels','Choose only the connections shown in the reviewed offer.',400);
@@ -234,6 +234,7 @@ function engine(options = {}) {
       admissions:[...(prior?.admissions||[]),admission],steps:adding?prior.steps:{},claim:null,cancelRequestedAt:null,reasonCode:null,
       ...(renewal ? { numberRenewal: renewal } : {}),
       history:[...(prior?.history||[]),...(!adding&&prior?[{generation:prior.generation,inputRevision:prior.inputRevision,offerDigest:prior.offer.digest,acceptedAt:prior.authority.acceptedAt}]:[])].slice(-10)};
+    if(options.beforeAdmission)await options.beforeAdmission(current);
     await atomicUpdate(QUEUE,KEY,async value=>{
       const queue=queueValue(value),old=queue.intents[id];
       if(!renewal&&old?.admission?.tenantIdentity===row.tenantIdentity&&old.admission.requestFingerprint===requestFingerprint)return {result:old};
@@ -447,7 +448,7 @@ export function createServiceOnboardingEngine(options = {}) {
   return engine(options);
 }
 export const serviceOnboardingStatus = c => engine().status(c);
-export const requestServiceOnboarding = (c, body) => engine().request(c, body);
+export const requestServiceOnboarding = (c, body, options) => engine().request(c, body, options);
 export const cancelServiceOnboarding = (c, body) => engine().cancel(c, body);
 export const continueServiceOnboarding = (c, options) => engine().continue(c, options);
 export const recoverServiceOnboardings = options => engine().recover(options);

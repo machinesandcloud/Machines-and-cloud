@@ -84,13 +84,15 @@
     }
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="site-refresh.css">
+<link rel="stylesheet" href="public-reading.css">
 </head>
-<body class="theme-light"><a class="site-skip" href="#main">Skip to content</a>
+<body class="theme-light site-refresh public-reading"><a class="site-skip" href="#main">Skip to content</a>
   <!-- Animated Background -->
   <div class="bg-effects">
     <div class="orb orb-1"></div>
@@ -100,45 +102,23 @@
   </div>
 
   <!-- Navigation -->
-  <nav class="navbar" id="navbar"><div class="container"><div class="navbar-inner"><a href="index.html" class="navbar-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a><button class="navbar-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button><div class="navbar-menu" id="navMenu"><ul class="navbar-links"><li><a href="index.html#plans">Plans</a></li><li><a href="index.html#week">See it work</a></li><li><a href="about.html">About</a></li></ul><div class="navbar-cta"><a href="index.html#pilot" class="btn btn-primary">Get started free<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div></div></div></div></nav><main id="main" tabindex="-1">
+  <nav class="navbar" id="navbar" aria-label="Main navigation"><div class="container"><div class="navbar-inner">
+  <a href="index.html" class="navbar-logo" aria-label="Machines and Cloud home"><img src="assets/logo-dark.png" alt="Machines &amp; Cloud" width="180" height="54"></a>
+  <button class="navbar-toggle" id="navToggle" type="button" aria-label="Open menu" aria-controls="navMenu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="navbar-menu" id="navMenu"><ul class="navbar-links"><li><a href="index.html#week">See it work</a></li><li><a href="index.html#plans">Plans</a></li><li><a href="about.html">About</a></li><li><a href="onboard.html?signin=1">Sign in</a></li></ul><div class="navbar-cta"><a href="index.html#pilot" class="btn btn-primary">Start free setup <span aria-hidden="true">↗</span></a></div></div>
+</div></div></nav><main id="main" tabindex="-1">
 
   <!-- Page Hero -->
   <section class="page-hero">
     <div class="container">
       <div class="hero-grid">
         <div class="page-hero-content reveal">
-          <span class="section-eyebrow">Workflow Library</span>
           <h1 class="page-hero-title">Find the task your team wants to make easier</h1>
           <p class="page-hero-description">Explore planning examples for research, claims, support and shared inboxes. Each brings the useful information, the reviewer and the next decision into view.</p>
         </div>
 
         <!-- Live Results Dashboard -->
-        <div class="hero-demo reveal">
 
-          <div class="hero-insight-panel">
-            <div class="insight-panel-header">
-              <span>Blueprint summary</span>
-              <span class="insight-pill">Library</span>
-            </div>
-            <div class="insight-items">
-              <div class="insight-item">
-                <span class="insight-label">Workflow blueprints</span>
-                <span class="insight-value">10+ scoped</span>
-                <div class="insight-meter" style="--meter: 82%"></div>
-              </div>
-              <div class="insight-item">
-                <span class="insight-label">Evidence artifacts</span>
-                <span class="insight-value">Audit-ready</span>
-                <div class="insight-meter" style="--meter: 90%"></div>
-              </div>
-              <div class="insight-item">
-                <span class="insight-label">Acceptance gates</span>
-                <span class="insight-value">Defined upfront</span>
-                <div class="insight-meter" style="--meter: 75%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -146,7 +126,6 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Supporting Resources</span>
         <h2 class="section-title">Find the guide for your next question</h2>
         <p class="section-description">Use the examples to identify a task, then open the guide that helps you answer the next practical question.</p>
       </div>
@@ -215,9 +194,7 @@
       <div class="case-study-full reveal">
         <div class="case-study-header">
           <div class="case-study-meta">
-            <span class="badge badge-primary">Financial Services</span>
-            <span class="badge badge-secondary">KYC/AML Automation</span>
-          </div>
+            </div>
           <h2 class="case-study-title">KYC Research Workflow</h2>
           <p class="case-study-subtitle">Workflow blueprint showing controls, auditability, and evaluation for compliance workflows</p>
           <p class="blueprint-label">Illustrative example. Define the baseline and useful result with the team that would review the work.</p>
@@ -284,10 +261,10 @@
             <div class="card mt-6">
               <h4 class="card-title">Tools to evaluate</h4>
               <div class="framework-tags">
-                <span class="framework-tag">Claude API</span>
-                <span class="framework-tag">Temporal</span>
-                <span class="framework-tag">PostgreSQL</span>
-                <span class="framework-tag">Azure AD</span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/claude.svg" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>Claude API</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/temporal.png" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>Temporal</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/postgresql.png" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>PostgreSQL</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/entra-id.svg" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>Azure AD</span></span>
               </div>
             </div>
           </div>
@@ -302,9 +279,7 @@
       <div class="case-study-full reveal">
         <div class="case-study-header">
           <div class="case-study-meta">
-            <span class="badge badge-primary">Insurance</span>
-            <span class="badge badge-secondary">Claims Processing</span>
-          </div>
+            </div>
           <h2 class="case-study-title">Claims Intake Workflow</h2>
           <p class="case-study-subtitle">Workflow blueprint of document extraction, triage, and human-in-the-loop review</p>
           <p class="blueprint-label">Illustrative example. Define the baseline and useful result with the team that would review the work.</p>
@@ -372,9 +347,9 @@
               <h4 class="card-title">Tools to evaluate</h4>
               <div class="framework-tags">
                 <span class="framework-tag">GPT-4 Vision</span>
-                <span class="framework-tag">AWS Lambda</span>
-                <span class="framework-tag">Guidewire API</span>
-                <span class="framework-tag">S3</span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/aws-lambda.svg" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>AWS Lambda</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark brand-mark--wide" src="assets/brands/guidewire.svg" width="72" height="24" alt="" aria-hidden="true" loading="lazy"><span>Guidewire API</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/aws-s3.svg" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>S3</span></span>
               </div>
             </div>
           </div>
@@ -389,9 +364,7 @@
       <div class="case-study-full reveal">
         <div class="case-study-header">
           <div class="case-study-meta">
-            <span class="badge badge-success">SaaS / IT Services</span>
-            <span class="badge badge-secondary">IT Helpdesk</span>
-          </div>
+            </div>
           <h2 class="case-study-title">IT Helpdesk Workflow</h2>
           <p class="case-study-subtitle">Workflow blueprint of knowledge-assisted support with escalation and approvals</p>
           <p class="blueprint-label">Illustrative example. Define the baseline and useful result with the team that would review the work.</p>
@@ -458,10 +431,10 @@
             <div class="card mt-6">
               <h4 class="card-title">Tools to evaluate</h4>
               <div class="framework-tags">
-                <span class="framework-tag">Claude API</span>
-                <span class="framework-tag">Pinecone</span>
-                <span class="framework-tag">Okta APIs</span>
-                <span class="framework-tag">Slack Bolt</span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/claude.svg" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>Claude API</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark brand-mark--wide" src="assets/brands/pinecone.png" width="72" height="24" alt="" aria-hidden="true" loading="lazy"><span>Pinecone</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark brand-mark--wide" src="assets/brands/okta.png" width="72" height="24" alt="" aria-hidden="true" loading="lazy"><span>Okta APIs</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark brand-mark--wide" src="assets/brands/slack.svg" width="72" height="24" alt="" aria-hidden="true" loading="lazy"><span>Slack Bolt</span></span>
               </div>
             </div>
           </div>
@@ -476,9 +449,7 @@
       <div class="case-study-full reveal">
         <div class="case-study-header">
           <div class="case-study-meta">
-            <span class="badge badge-primary">B2B Services</span>
-            <span class="badge badge-secondary">Email Triage</span>
-          </div>
+            </div>
           <h2 class="case-study-title">Email Triage Workflow</h2>
           <p class="case-study-subtitle">Workflow blueprint of classification, drafting, and approval for operations teams</p>
           <p class="blueprint-label">Illustrative example. Define the baseline and useful result with the team that would review the work.</p>
@@ -546,9 +517,9 @@
               <h4 class="card-title">Tools to evaluate</h4>
               <div class="framework-tags">
                 <span class="framework-tag">GPT-4</span>
-                <span class="framework-tag">Microsoft Graph</span>
-                <span class="framework-tag">McLeod TMS</span>
-                <span class="framework-tag">Power Automate</span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark brand-mark--wide" src="assets/brands/microsoft-graph.png" width="72" height="24" alt="" aria-hidden="true" loading="lazy"><span>Microsoft Graph</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark brand-mark--wide brand-mark--dark" src="assets/brands/mcleod.png" width="72" height="24" alt="" aria-hidden="true" loading="lazy"><span>McLeod TMS</span></span>
+                <span class="framework-tag brand-lockup"><img class="brand-mark" src="assets/brands/power-automate.svg" width="24" height="24" alt="" aria-hidden="true" loading="lazy"><span>Power Automate</span></span>
               </div>
             </div>
           </div>
@@ -561,7 +532,6 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Questions across every example</span>
         <h2 class="section-title">How to tell whether the work is getting easier</h2>
         <p class="section-description">Compare the proposed workflow with the way your team works today. Look at handling time, answer quality and the effort people need to check and correct the result.</p>
       </div>
@@ -591,7 +561,6 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Workflow Components</span>
         <h2 class="section-title">What a useful workflow needs around the model</h2>
         <p class="section-description">A useful draft is only part of the work. People also need sources they can check, clear permissions and a reliable way to handle mistakes.</p>
       </div>
@@ -647,7 +616,6 @@
   <section class="section bg-dark">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Additional Blueprints</span>
         <h2 class="section-title">Other tasks you may want to investigate</h2>
         <p class="section-description">Start with a task your team knows and ask what information, review and permissions a useful test would require.</p>
       </div>
@@ -709,7 +677,6 @@
   <section class="section">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Workflow Signals</span>
         <h2 class="section-title">Make the result easy to check</h2>
         <p class="section-description">Before testing, decide what to record so a reviewer can see which source was used, what was suggested and what happened next.</p>
       </div>
@@ -804,7 +771,6 @@
   <section class="section bg-dark">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Evidence Pack</span>
         <h2 class="section-title">What your team should be able to review</h2>
         <p class="section-description">Keep the task description, test results and review responsibilities together so the people responsible can decide whether to continue.</p>
       </div>
@@ -884,8 +850,8 @@
 
   <!-- Footer -->
   <form name="agent-lead" netlify netlify-honeypot="bot-field" hidden><input type="hidden" name="form-name" value="agent-lead"><input name="bot-field"><input name="name"><input name="email"><input name="phone"><input name="business"><textarea name="need"></textarea><input name="source"></form>
-</main><footer class="footer footer-simple"><div class="container"><div class="footer-simple-row"><a href="index.html" class="footer-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a><div class="footer-simple-contact"><a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a><a href="tel:+13462488359">(346) 248-8359</a><a href="https://www.linkedin.com/in/steve-j-ngoumnai/" target="_blank" rel="noopener">LinkedIn</a></div></div><div class="footer-simple-bottom"><span>&copy; 2026 Machines &amp; Cloud &middot; Houston, TX</span><nav class="footer-simple-links" aria-label="More"><a href="houston.html">Houston</a><a href="industries.html">Industries</a><a href="locations.html">Locations</a><a href="guides.html">Guides</a><a href="insights.html">Insights</a><a href="privacy-policy.html">Privacy</a><a href="terms-of-service.html">Terms</a></nav></div></div></footer>
+</main><footer class="footer footer-simple"><div class="container"><div class="footer-simple-row"><a href="index.html" class="footer-logo"><img src="assets/logo-dark.png" alt="Machines & Cloud"></a><div class="footer-simple-contact"><a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a><a href="tel:+13462488359">(346) 248-8359</a><a href="https://www.linkedin.com/in/steve-j-ngoumnai/" target="_blank" rel="noopener" class="brand-lockup brand-social"><img class="brand-mark" src="assets/brands/linkedin.png" alt="" aria-hidden="true" width="24" height="24" loading="lazy"><span>LinkedIn</span></a></div></div><div class="footer-simple-bottom"><span>&copy; 2026 Machines &amp; Cloud &middot; Houston, TX</span><nav class="footer-simple-links" aria-label="More"><a href="houston.html">Houston</a><a href="industries.html">Industries</a><a href="locations.html">Locations</a><a href="guides.html">Guides</a><a href="insights.html">Insights</a><a href="sms-terms.html#platform-sms">Customer Care texting</a><a href="privacy-policy.html">Privacy</a><a href="terms-of-service.html">Terms</a></nav></div></div></footer>
 
-<script src="script.js"></script><script src="agent-widget.js"></script>
+<script src="brand-marks.js" defer></script><script src="script.js"></script><script src="agent-widget.js"></script>
 </body>
 </html>

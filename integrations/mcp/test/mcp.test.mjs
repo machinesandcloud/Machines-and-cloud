@@ -73,7 +73,7 @@ test('live projection reads only fixed owner GET and returns service guides with
   assert.deepEqual(JSON.parse(result.content[0].text), data); cleanOutput(result);
   assert.equal(calls.length, 1);
   const { url, init } = calls[0];
-  assert.equal(url, `https://machinesandcloud.com/api/client?c=${slug}`);
+  assert.equal(url, `https://machinesandcloud.com/api/client?c=${slug}&setup_assistance=1`);
   assert.equal(init.method, 'GET'); assert.equal(init.redirect, 'error'); assert.equal(init.credentials, 'omit');
   assert.equal(init.cache, 'no-store'); assert.equal(init.headers.Authorization, 'Bearer ' + bearer);
   assert.equal(init.body, undefined); assert.equal(init.headers.Cookie, undefined);

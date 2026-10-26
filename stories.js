@@ -1079,11 +1079,12 @@
   function liveStart() {
     cancelRequest(); history = []; messages.replaceChildren(); bubble('agent', examples[scenario].greeting);
     input.value = ''; input.disabled = false; el('send').disabled = true; el('error').hidden = true;
-    el('voice-status').textContent = 'Or type a customer request below.';
+    el('voice-status').textContent = '';
     emptySummary(); messages.scrollTop = 0;
   }
   function render(focus) {
     pause(); cancelRequest(); stopVoice(false);
+    el('voice-status').textContent = '';
     var ex = examples[scenario], live = mode === 'live';
     wrap.dataset.mode = mode;
     launcherVisibility();
@@ -1099,7 +1100,7 @@
     el('rule-summary').textContent = ex.ruleSummary; el('rules').textContent = ex.rules;
     el('badge').textContent = live ? 'Live AI' : 'Example';
     messages.lang = ex.lang;
-    el('context').textContent = live ? 'AI practice only. Use made-up details. No real visit, callback, text or email is arranged.' : 'Watch the example, or ask your own question below. Practice only; no real appointment or message is created.';
+    el('context').textContent = '';
     el('owner-foot').textContent = live ? 'See the customer’s details alongside the conversation, ready for your next step.' : 'A clear handoff, with the conversation there when you need it.';
     renderChallenges();
     input.lang = ex.lang; input.placeholder = ex.lang === 'es' ? 'Cuéntenos qué necesita…' : 'Tell the front desk what you need…';

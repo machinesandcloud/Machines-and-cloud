@@ -1,0 +1,44 @@
+/* Local instructional miniatures. Motion explains direction, never service status. */
+.guide-visual{--gvis-blue:var(--ui-blue,#2459df);--gvis-ink:var(--ui-ink,#19283f);--gvis-line:var(--ui-line,#dfe5ee);--gvis-soft:var(--ui-blue-soft,#eaf0ff);width:100%;max-width:460px;min-width:0;margin-inline:auto;color:var(--gvis-ink)}
+.guide-visual-scene{display:block;width:100%;height:auto;max-height:210px;overflow:visible}
+.guide-visual .gvis-panel{fill:#fff;stroke:var(--gvis-line);stroke-width:1.5}
+.guide-visual .gvis-divider,.guide-visual .gvis-calendar-grid{fill:none;stroke:var(--gvis-line);stroke-width:1.3}
+.guide-visual .gvis-calendar-grid{stroke-width:1}
+.guide-visual .gvis-line{fill:#d6dfed}
+.guide-visual .gvis-icon{fill:none;stroke:var(--gvis-blue);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.guide-visual .gvis-icon-bg{fill:var(--gvis-soft)}
+.guide-visual .gvis-browser-dots{fill:#abb9ce}
+.guide-visual .gvis-baseline{fill:none;stroke:#e7edf5;stroke-width:1}
+.guide-visual .gvis-route,.guide-visual .gvis-join{fill:none;stroke:#9db7eb;stroke-width:1.8;stroke-linecap:round}
+.guide-visual .gvis-arrow{fill:none;stroke:var(--gvis-blue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.guide-visual .gvis-travel{fill:var(--gvis-blue);opacity:0;transform:translateX(0)}
+.guide-visual .gvis-confirm>circle{fill:var(--gvis-blue);stroke:#fff;stroke-width:3}
+.guide-visual .gvis-confirm .gvis-icon{stroke:#fff;stroke-width:2.5;transform:scale(.58)}
+.guide-visual .gvis-phone-camera{fill:#c4cfe0}
+.guide-visual .gvis-bubble>path{fill:#eef2f8;stroke:#e5eaf2;stroke-width:1}
+.guide-visual .gvis-bubble.gvis-reply>path,.guide-visual .gvis-result .gvis-bubble>path{fill:var(--gvis-soft);stroke:#ccdaff}
+.guide-visual .gvis-bubble .gvis-line{fill:#bbc9df}
+.guide-visual .gvis-agent-wave{fill:none;stroke:var(--gvis-blue);stroke-width:3;stroke-linecap:round}
+.guide-visual .gvis-website-photo{fill:#e8eef6}
+.guide-visual .gvis-website-button,.guide-visual .gvis-slot{fill:var(--gvis-blue)}
+.guide-visual .gvis-wait-dot{fill:#91a8ce}
+@media(prefers-reduced-motion:no-preference){
+  .guide-visual .gvis-source{animation:gvis-source-in 4s ease-out 1 both}
+  .guide-visual .gvis-reply{animation:gvis-reply-in 4s ease-out 1 both}
+  .guide-visual .gvis-travel{animation:gvis-transfer 4s cubic-bezier(.4,0,.2,1) 1 both}
+  .guide-visual .gvis-result{animation:gvis-result-in 4s ease-out 1 both}
+  .guide-visual .gvis-confirm{animation:gvis-confirm-in 4s ease-out 1 both;transform-box:fill-box;transform-origin:center}
+  .guide-visual .gvis-wait-dot{animation:gvis-wait-once 4s ease-in-out 1 both}
+  .guide-visual .gvis-wait-dot:nth-last-child(2){animation-delay:.12s}
+  .guide-visual .gvis-wait-dot:last-child{animation-delay:.24s}
+}
+.guide-motion-paused .guide-visual *, .guide-visual.guide-motion-paused *{animation-play-state:paused!important}
+@keyframes gvis-source-in{0%{opacity:.25}15%,100%{opacity:1}}
+@keyframes gvis-reply-in{0%,17%{opacity:0}34%,100%{opacity:1}}
+@keyframes gvis-transfer{0%,26%{opacity:0;transform:translateX(0)}33%{opacity:1;transform:translateX(0)}58%{opacity:1;transform:translateX(var(--gvis-travel,70px))}65%,100%{opacity:0;transform:translateX(var(--gvis-travel,70px))}}
+@keyframes gvis-result-in{0%,40%{opacity:.25}65%,100%{opacity:1}}
+@keyframes gvis-confirm-in{0%,57%{opacity:0}75%,100%{opacity:1}}
+@keyframes gvis-wait-once{0%,30%{opacity:.35}45%{opacity:1}65%,100%{opacity:.7}}
+@media(prefers-reduced-motion:reduce){.guide-visual *{animation:none!important;transition:none!important}.guide-visual .gvis-travel{display:none}}
+@media(max-width:520px){.guide-visual{max-width:360px}.guide-visual-scene{max-height:170px}}
+@media(max-height:700px){.guide-visual-scene{max-height:145px}}

@@ -31,7 +31,7 @@ const object = (value: unknown): JsonObject | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? value as JsonObject : null;
 
 export class SafeError extends Error {
-  constructor(readonly code: string, message: string) { super(message); }
+  constructor(readonly code: string, message: string, readonly status?: number) { super(message); }
 }
 const invalidConfig = () => new SafeError('configuration_invalid',
   'Review MC_WORKSPACE_URL and MC_OWNER_BEARER. Use your existing workspace URL and current owner session.');
@@ -114,6 +114,15 @@ export type SafeService = {
   reviewUrl: string; guide?: SafeGuide;
   capabilities?: { receiveLeads: boolean; receiveMessages: boolean; sendNativeReplies: boolean };
   ownerActionNeeded?: boolean;
+  information: SafeInformation;
+};
+export type SafeInformation = {
+  entry: 'assistant' | 'secure_workspace' | 'provider_workspace';
+  canSave: boolean; complete: boolean | null;
+  needsReview: boolean;
+  fields: { id: string; inputKey: string | null; label: string; required: boolean; provided: boolean; options: string[] }[];
+  missingFields: string[];
+  nextActor: 'customer' | 'platform' | 'provider' | 'complete';
 };
 export type SafeSnapshot = {
   observedAt: string; mode: 'read_only'; summary: string;
@@ -143,6 +152,37 @@ function project(dto: JsonObject, config: Configuration): SafeSnapshot {
     return { overview: clean(row.overview), automationSummary: clean(row.automationSummary), steps };
   };
   const rows = [...journey.channels, ...(Array.isArray(journey.leadSources) ? journey.leadSources : [])];
+  const intake = object(dto.serviceIntake);
+  const fieldLabels: Record<string, string> = {
+    'web.preferences.website':'Business website', 'web.preferences.builder':'Website platform', 'web.preferences.installationBy':'Who manages the website',
+    'voice.routing.forwardingMode':'New number or existing business line', 'voice.routing.businessNumber':'Existing business line',
+    'voice.routing.carrier':'Business phone provider', 'voice.routing.forwarding':'When to answer calls', 'voice.routing.ownerPhone':'Contact cell',
+    'calendar.preferences.accountEmail':'Google account preference (optional)',
+    'sms.business.legalName':'Registered business name','sms.business.ein':'Business EIN','sms.business.businessType':'Business type',
+    'sms.business.street':'Business street address','sms.business.city':'Business city','sms.business.state':'Business state',
+    'sms.business.zip':'Business ZIP code','sms.business.website':'Business website',
+    'sms.representative.firstName':'Representative first name','sms.representative.lastName':'Representative last name',
+    'sms.representative.email':'Representative email','sms.representative.phone':'Representative phone',
+    'sms.representative.title':'Representative title','sms.representative.jobPosition':'Representative role'
+  };
+  const information = (id: ServiceId, row: JsonObject): SafeInformation => {
+    const state = object(intake?.[id]), entry = ['web','voice','calendar'].includes(id) ? 'assistant' : id === 'sms' ? 'secure_workspace' : 'provider_workspace';
+    const missing = (Array.isArray(state?.missingFields) ? state.missingFields : []).filter((key): key is string => typeof key === 'string' && key.startsWith(id + '.') && Object.hasOwn(fieldLabels,key));
+    const fields = Object.keys(fieldLabels).filter(key => key.startsWith(id + '.')).map(key => {
+      const [,section,field] = key.split('.'), values = object(state?.[section]);
+      const required = id === 'sms' || id === 'web' && field === 'website' || id === 'voice' &&
+        (['forwardingMode','ownerPhone'].includes(field) || object(state?.routing)?.forwardingMode === 'forward_business_line');
+      const options:Record<string,string[]>={builder:['wordpress','wix','squarespace','webflow','shopify','other'],installationBy:['me','web_person'],forwardingMode:['forward_business_line','use_new_number'],carrier:['att','verizon','tmobile','voip','other'],forwarding:['missed','all','none']};
+      return { id:key, inputKey:entry==='assistant'?field:null, label:fieldLabels[key], required, provided:id === 'sms' ? Array.isArray(state?.missingFields) && (state?.complete === true || !missing.includes(key)) : typeof values?.[field] === 'string' && values[field].trim().length > 0, options:entry==='assistant'?options[field]||[]:[] };
+    });
+    const guideSteps = object(row.guide)?.steps;
+    const pending = Array.isArray(guideSteps) ? guideSteps.map(object).find(step=>step && step.state !== 'complete') : null;
+    const rawActor = row.responsibility || (row.ownerActionNeeded === true ? 'customer' : pending?.actor);
+    const nextActor = rawActor === 'carrier' ? 'provider' : ['customer','platform','provider','complete'].includes(String(rawActor)) ? rawActor as SafeInformation['nextActor'] : 'platform';
+    return { entry, canSave:entry === 'assistant' && intake?.available === true && intake.canSave === true && state?.canSave === true,
+      needsReview:state?.complete === false && missing.length === 0,
+      complete:typeof state?.complete === 'boolean' ? state.complete : null, fields, missingFields:missing, nextActor };
+  };
   const services = SERVICE_IDS.flatMap(id => {
     const row = rows.map(object).find(row => row?.id === id);
     if (!row) return [];
@@ -153,6 +193,7 @@ function project(dto: JsonObject, config: Configuration): SafeSnapshot {
       id, label: LABELS[id], status, requested: row.requested === true, retained: row.retained === true,
       active: row.active === true, detail: clean(row.detail), nextStep: clean(row.nextStep, 300),
       guideAvailable: Boolean(serviceGuide), reviewUrl: workspaceLink(config, 'setup'),
+      information: information(id,row),
       ...(id === 'thumbtack' || id === 'angi' ? {
         ownerActionNeeded: row.ownerActionNeeded === true,
         capabilities: { receiveLeads: capabilities?.receiveLeads === true,
@@ -180,25 +221,29 @@ function project(dto: JsonObject, config: Configuration): SafeSnapshot {
   };
 }
 
-export class WorkspaceReader {
-  constructor(private readonly config: Configuration,
+// Shared fixed owner transport; no caller controls destination, headers or action.
+export class OwnerAccess {
+  constructor(readonly config: Configuration,
     private readonly transport: typeof fetch = globalThis.fetch,
     private readonly timeoutMs = 8000) {}
 
-  link(view: View): string { return workspaceLink(this.config, view); }
-
-  async snapshot(): Promise<SafeSnapshot> {
+  async request(body?: Record<string, unknown>): Promise<JsonObject> {
     const url = new URL('/api/client', this.config.origin);
     url.searchParams.set('c', this.config.slug);
+    if (!body) url.searchParams.set('setup_assistance', '1');
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
       const response = await this.transport(url, {
-        method: 'GET', redirect: 'error', credentials: 'omit', cache: 'no-store',
-        headers: { Authorization: 'Bearer ' + this.config.bearer, Accept: 'application/json', 'Cache-Control': 'no-store' },
+        method: body ? 'POST' : 'GET', redirect: 'error', credentials: 'omit', cache: 'no-store',
+        headers: { Authorization: 'Bearer ' + this.config.bearer, Accept: 'application/json', 'Cache-Control': 'no-store', ...(body ? { 'Content-Type': 'application/json', Origin: this.config.origin } : {}) },
+        ...(body ? { body: JSON.stringify(body) } : {}),
         signal: controller.signal
       });
       if (response.status === 401 || response.status === 403) {
-        throw new SafeError('session_expired', 'Your owner session is unavailable or expired. Sign in to your existing workspace before retrying.');
+        throw new SafeError('session_expired', 'Your owner session is unavailable or expired. Sign in to your existing workspace before retrying.', response.status);
+      }
+      if (body && response.status >= 400 && response.status < 500) {
+        throw new SafeError('write_rejected', 'The workspace did not accept this preparation. Review the latest setup before preparing it again.', response.status);
       }
       if (!response.ok || response.redirected || (response.url && response.url !== url.href)) {
         throw new SafeError('setup_unavailable', 'The setup status could not be read. Review your workspace or retry this read later.');
@@ -223,10 +268,20 @@ export class WorkspaceReader {
       } finally { reader.releaseLock(); }
       const dto = object(JSON.parse(Buffer.concat(parts).toString('utf8')));
       if (!dto || dto.error || dto.ok === false) throw new SafeError('setup_unavailable', 'The setup status could not be confirmed. Open your workspace.');
-      return project(dto, this.config);
+      return dto;
     } catch (error) {
       if (error instanceof SafeError) throw error;
-      throw new SafeError('read_failed', 'The setup read did not complete. Check your sign-in or retry this read; no service change was made.');
+      throw new SafeError('read_failed', body ? 'The preparation result could not be confirmed. Check the workspace before further changes.' : 'The setup read did not complete. Check your sign-in or retry this read; no service change was made.');
     } finally { clearTimeout(timer); }
   }
+}
+
+export class WorkspaceReader {
+  private readonly access: OwnerAccess;
+  constructor(private readonly config: Configuration,
+    transport: typeof fetch = globalThis.fetch, timeoutMs = 8000) {
+    this.access = new OwnerAccess(config, transport, timeoutMs);
+  }
+  link(view: View): string { return workspaceLink(this.config, view); }
+  async snapshot(): Promise<SafeSnapshot> { return project(await this.access.request(), this.config); }
 }

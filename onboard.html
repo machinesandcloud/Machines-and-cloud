@@ -6,8 +6,6 @@
   <meta name="description" content="Build a front desk around your services, prices and working day. Add your business, try a conversation and review your connection checklist.">
   <meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
   <link rel="icon" href="assets/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="product-ui.css"><link rel="stylesheet" href="onboard.css">
 </head>
 <body class="theme-light product-app onboarding-page" data-no-widget>
@@ -15,8 +13,8 @@
 <main class="ob">
   <div class="onboard-layout">
     <aside class="onboard-aside" aria-label="Your setup">
-      <header class="onboard-header" id="navbar"><a href="index.html" class="onboard-brand"><img src="assets/logo.png" alt="Machines &amp; Cloud"></a><span class="onboard-product-label">FRONT DESK</span></header>
-      <div class="onboard-welcome"><h2>Make a great<br> first impression.</h2><p>Give customers a helpful first answer and your team a clear request to follow up.</p></div>
+      <header class="onboard-header" id="navbar"><a href="index.html" class="onboard-brand"><img src="assets/logo.png" alt="Machines &amp; Cloud"></a><span class="onboard-product-label">Your front desk</span></header>
+      <div class="onboard-welcome"><h2>A front desk that<br> knows your business.</h2><p>Your services, your working day, your way of looking after customers.</p></div><ol class="access-path" aria-label="What comes next"><li>Open your secure account</li><li>Add your business details once</li><li>Review and connect your services</li></ol>
       <nav class="ob-steps" aria-label="Setup progress" hidden>
         <span class="on"><b class="step-number" aria-hidden="true">1</b><strong>Your details</strong><small>Who you are and where to help</small></span>
         <span><b class="step-number" aria-hidden="true">2</b><strong>Your business</strong><small>Services, hours and service area</small></span>
@@ -26,11 +24,11 @@
       <div class="onboard-next-card">
         <div class="onboard-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 5h14v11H9l-4 3V5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 9h6m-6 3h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <h3>You stay in control.</h3><p>Review your answers and test your chat before customers use it.</p>
-        <div class="onboard-assurance"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="4" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M6 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Your progress is saved to your account</div>
+        <div class="onboard-assurance"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="4" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M6 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Your answers stay with your account</div>
       </div>
     </aside>
     <div class="onboard-workspace" id="setup-main" tabindex="-1">
-      <div class="onboard-topbar"><span><i aria-hidden="true"></i>Getting started</span><a href="index.html">Back to site <span aria-hidden="true">↗</span></a></div>
+      <div class="onboard-topbar"><span>Set up your front desk</span><a href="index.html">Back to site <span aria-hidden="true">↗</span></a></div>
       <div class="setup-stage-heading"><h1 id="setup-context-title">Start with your details.</h1><p id="setup-context-copy">Tell us who will manage customer requests.</p><div class="onboard-stage-progress"><span id="onboard-step-label">Step 1 of 4</span><progress id="onboardProgress" value="1" max="4" aria-label="Setup step">1 of 4</progress></div></div>
       <p id="intake-notice" class="intake-notice" role="status" hidden></p>
       <div class="workspace-toolbar">
@@ -39,9 +37,8 @@
       </div>
       <div class="workspace-surface">
         <section id="access-gate" class="access-card" aria-labelledby="access-title">
-          <div class="access-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h1 id="access-title" tabindex="-1">Let’s get started.</h1><p id="access-intro">We’ll email you a secure sign-in link so you can save your answers and come back anytime. No password needed.</p>
-          <form id="access-form"><label class="form-label" for="access-email">Email address</label><input class="form-input" id="access-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Email me a sign-in link</button></form>
+          <h1 id="access-title" tabindex="-1">Your business starts here.</h1><p id="access-intro">Enter your email to open your secure setup. No password to remember.</p>
+          <form id="access-form"><label class="form-label" for="access-email">Email address</label><input class="form-input" id="access-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" required><button class="btn-pill btn-pill-blue" id="access-send" type="submit">Send my sign-in link</button></form>
           <div id="access-confirmation" hidden>
             <p class="access-recipient" id="access-recipient"></p>
             <p class="access-delivery-help" id="access-delivery-help"></p>
@@ -59,17 +56,17 @@
             <legend>Your details</legend><p class="step-intro">Tell us who will manage customer requests.</p>
             <div class="form-section">
               <div class="row">
-                <div class="form-group"><label class="form-label" for="name">Your name <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="name" name="name" required autocomplete="name" placeholder="First and last name"></div>
-                <div class="form-group"><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email" readonly></div>
+                <div class="form-group identity-name-field"><label class="form-label" for="name">Your name <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="name" name="name" required autocomplete="name" placeholder="First and last name"></div>
+                <div class="form-group" id="verified-email-field" hidden><label class="form-label" for="email">Email</label><input class="form-input" id="email" name="email" type="email" required autocomplete="email" readonly></div>
               </div>
               <div class="row">
                 <div class="form-group"><label class="form-label" for="phone">Your contact cell <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555-0100" autocomplete="tel" aria-describedby="phone-hint"><p id="phone-hint" class="hint">Your contact details and callback destination.</p></div>
-                <div class="form-group"><label class="form-label" for="website">Business website <small>Optional</small></label><input class="form-input" id="website" name="website" type="url" placeholder="https://yourbusiness.com" aria-describedby="website-hint"><p id="website-hint" class="hint">We’ll use this address for your guided website installation. Your business answers below guide the front desk.</p></div>
+                <div class="form-group"><label class="form-label" for="website">Business website <small>Optional</small></label><input class="form-input" id="website" name="website" type="url" placeholder="https://yourbusiness.com" aria-describedby="website-hint"><p id="website-hint" class="hint">The site where you want customers to find your chat.</p></div>
               </div>
             </div>
             <div class="form-section">
-              <h3 id="connection-preferences-label">What would you like help with?</h3><p class="section-intro">Choose what matters to your business. We’ll save your preferences; you’ll review connection status and any activation steps in your workspace.</p>
-              <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked><strong>Website chat</strong></label><label><input type="checkbox" name="desiredChannels" value="voice"><strong>Phone answering</strong></label><label><input type="checkbox" name="desiredChannels" value="sms"><strong>Text messaging</strong></label><label><input type="checkbox" name="desiredChannels" value="calendar"><strong>Google Calendar</strong></label></div>
+              <h3 id="connection-preferences-label">What would you like help with?</h3><p class="section-intro">Choose your services. We’ll carry these choices into your connection setup.</p>
+              <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked><strong>Website chat</strong></label><label><input type="checkbox" name="desiredChannels" value="voice"><strong>Phone answering</strong></label><label><input type="checkbox" name="desiredChannels" value="sms"><strong>Text messaging</strong></label><label><input type="checkbox" name="desiredChannels" value="calendar"><strong class="brand-lockup"><img class="brand-mark" src="assets/brands/google-calendar.svg" width="24" height="24" alt="" aria-hidden="true"><span>Google Calendar</span></strong></label></div>
               <details class="connection-preview"><summary id="connection-preview-title">What happens after setup <span id="connection-preview-count" role="status" aria-live="polite"></span></summary><p class="connection-preview-intro">See the setup steps for your choices.</p><div id="selected-connection-plan"></div></details>
               <section id="phone-routing-settings" class="connection-setup" aria-labelledby="phone-routing-title" hidden>
                 <h4 id="phone-routing-title">How would you like calls handled?</h4>
@@ -129,6 +126,7 @@
     </div>
   </div>
 </main>
+<script src="brand-marks.js" defer></script>
 <script src="onboard.js" defer></script>
 </body>
 </html>

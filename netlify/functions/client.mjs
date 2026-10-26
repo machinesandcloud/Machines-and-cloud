@@ -47,7 +47,10 @@ import { workspaceActivity } from './lib/workspace-activity.mjs';
 import { changePlatformAutomation } from './lib/platform-ai.mjs';
 import { leadConnectionsView, changeLeadConnection, LeadConnectionError } from './lib/lead-connections.mjs';
 import { startThumbtackConnection, continueOwnerThumbtack, selectThumbtackBusiness, sendPlatformReply } from './lib/thumbtack-connection.mjs';
+import { serviceIntakeView, serviceIntakeRevision, readServiceIntake, changeServiceIntake, fenceServiceIntake, ServiceIntakeError } from './lib/service-intake.mjs';
+import { connectionPreparationView, prepareConnections, fenceConnectionPreparation, ConnectionPreparationError } from './lib/connection-preparation.mjs';
 import {reportConversation,supportReportViews,SupportReportError} from './lib/support-reports.mjs';
+import {readOwnerSchedule,ScheduleReadError} from './lib/owner-schedule.mjs';
 
 export const config = { path: "/api/client" };
 
@@ -85,7 +88,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
 
 export default async (req) => {
   let out;
-  try { out = await handle(req); } catch(error) { if(error instanceof SupportReportError)out=json({error:error.code,message:error.message,field:error.field,...(Object.hasOwn(error,'supportReport')?{supportReport:error.supportReport}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req); } catch(error) { if(error instanceof ServiceIntakeError)out=json({error:error.code,message:error.message,...(error.fieldErrors?{fieldErrors:error.fieldErrors}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConnectionPreparationError)out=json({error:error.code,message:error.message,...(error.field?{field:error.field}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof SupportReportError)out=json({error:error.code,message:error.message,field:error.field,...(Object.hasOwn(error,'supportReport')?{supportReport:error.supportReport}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
@@ -112,6 +115,35 @@ async function handle(req) {
   if (selfService && !isOwner && (req.method !== "GET" || url.searchParams.has("export"))) return json({ error: "verification_required" }, 401);
   const ownsCurrent = current => !!current && current.slug === c.slug && current.ownerKey === c.ownerKey && (selfService ? isSelfServiceClient(current) && normalizeAccountEmail(current.owner?.email) === normalizeAccountEmail(session?.email) : current.ownerKey === key);
   const site = process.env.URL || url.origin;
+
+  if(req.method==='GET'&&url.searchParams.has('schedule')){
+    if(!selfService||!isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    try { return json({ok:true,schedule:await readOwnerSchedule(c,req,url.searchParams)},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'}); }
+    catch(error){if(error instanceof ScheduleReadError)return json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});throw error;}
+  }
+
+  if(req.method==='GET'&&url.searchParams.has('service_intake')){
+    if(!selfService||!isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    if(url.searchParams.get('service_intake')!=='1'||[...url.searchParams.keys()].length!==2||[...url.searchParams.keys()].some(name=>!['c','service_intake'].includes(name)))return json({error:'invalid_intake'},400,{'Cache-Control':'no-store'});
+    const connections=await serviceConnections(c),serviceIntake=await readServiceIntake(c,session,connections);
+    return json({ok:true,serviceIntake,configurationRevision:configurationRevision(c),editRevision:workspaceEditRevision(c)},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
+  }
+
+  // Setup assistants need the same service facts as Connections, without loading
+  // the owner's customer records or the explicit private registration form.
+  if(req.method==='GET'&&url.searchParams.has('setup_assistance')){
+    if(!selfService||!isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    if(url.searchParams.get('setup_assistance')!=='1'||[...url.searchParams.keys()].length!==2||[...url.searchParams.keys()].some(name=>!['c','setup_assistance'].includes(name)))return json({error:'invalid_setup_read'},400,{'Cache-Control':'no-store'});
+    const revision=configurationRevision(c),editRevision=workspaceEditRevision(c),intakeRevision=serviceIntakeRevision(c);
+    const [connections,plan,leads,allowance]=await Promise.all([serviceConnections(c),serviceOnboardingStatus(c),leadConnectionsView(c),getAIAllowance(c)]);
+    const installation=await websiteInstallationView(c,allowance);
+    const serviceIntake=await serviceIntakeView(c,connections),preparation=await connectionPreparationView(c);
+    const [current,active]=await Promise.all([strictRead('clients',c.slug),getAccessSession(req)]);
+    if(!active||normalizeAccountEmail(active.email)!==normalizeAccountEmail(c.owner?.email))return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    if(!current||workspaceTenant(current)!==workspaceTenant(c)||!isSupportedSelfServiceClient(current)||normalizeAccountEmail(current.owner?.email)!==normalizeAccountEmail(active.email))return json({error:'forbidden'},403,{'Cache-Control':'no-store'});
+    if(configurationRevision(current)!==revision||workspaceEditRevision(current)!==editRevision||serviceIntakeRevision(current)!==intakeRevision)return json({error:'setup_changed',message:'Setup changed while it was being read. Read the current setup again.'},409,{'Cache-Control':'no-store'});
+    return json({ok:true,client:{slug:c.slug},setup:{connectionJourney:serviceSetupView(c,connections,plan,installation,leads).connectionJourney,connectionPreparation:preparation},serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
+  }
 
   if (req.method === 'GET' && url.searchParams.has('report')) {
     if (!selfService || !isOwner) return json({ error: 'verification_required' }, 401, { 'Cache-Control': 'no-store' });
@@ -164,7 +196,7 @@ async function handle(req) {
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
     const supportReports=selfService?supportReportViews(c):[];
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections), connections, leadConnections, serviceOnboarding, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake:await serviceIntakeView(c,connections), operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
       conversations: convs.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).map(v=>{
         const supportReport=selfService?supportReports.find(row=>row.channel===v.channel&&row.contact===v.contact)||null:null;
         return {channel:v.channel,contact:v.contact,updatedAt:v.updatedAt,flag:supportReport?(supportReport.status==='resolved'?null:{at:supportReport.reportedAt,note:supportReport.note,by:'owner',supportReportId:supportReport.id}):v.flag||null,...(selfService?{supportReport}:{}),...(selfService&&v.channel==='web'?{reference:conversationReference(c,v.channel,v.contact),retainedMessages:v.history?.total??v.messages.length,historyComplete:v.history?.complete===true}:{}),messages:v.messages.slice(-12)};
@@ -232,11 +264,24 @@ async function handle(req) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if(['save_service_intake','apply_service_intake'].includes(b?.action)) {
+      if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
+      if(JSON.stringify(b).length>12000)return json({error:'invalid_intake'},413);
+      const result=await changeServiceIntake(c,session,b),updated=result.client,connections=await serviceConnections(updated),plan=await serviceOnboardingStatus(updated);
+      return json({ok:true,intake:result.intake,serviceIntake:await serviceIntakeView(updated,connections),client:ownerView(updated),setup:serviceSetupView(updated,connections,plan),connections,serviceOnboarding:plan,configurationRevision:configurationRevision(updated),editRevision:workspaceEditRevision(updated)},200,{'Cache-Control':'no-store'});
+    }
+    if(b?.action==='prepare_connections') {
+      if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
+      if(JSON.stringify(b).length>2048)return json({error:'invalid_preparation'},413);
+      const result=await prepareConnections(c,session,b), updated=result.client;
+      return json({ok:true,preparation:result.preparation,client:ownerView(updated),setup:{...setupReadiness(updated),connectionPreparation:result.connectionPreparation},configurationRevision:configurationRevision(updated),editRevision:workspaceEditRevision(updated)},200,{'Cache-Control':'no-store'});
+    }
     if(b?.action==='report_conversation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await reportConversation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='platform_automation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const result=await changePlatformAutomation(c,session,b);return json({...result,leadConnections:await leadConnectionsView(c),...(['takeover','resume'].includes(b.operation)?await readRequestFollowthrough(c,session,b.requestId):{})},200,{'Cache-Control':'no-store'});}
-    if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await changeLeadConnection(c,session,b),200,{'Cache-Control':'no-store'});}
+    if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);if(['prepare','rotate'].includes(b.operation))await fenceConnectionPreparation(c,session,'lead_platform');return json(await changeLeadConnection(c,session,b),200,{'Cache-Control':'no-store'});}
     if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business','send_platform_reply'].includes(b?.action)){
       if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);
+      if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business'].includes(b.action))await fenceConnectionPreparation(c,session,'lead_platform');
       const result=b.action==='start_thumbtack_connection'?await startThumbtackConnection(c,session,b):b.action==='continue_thumbtack_connection'?await continueOwnerThumbtack(c,session,b):b.action==='select_thumbtack_business'?await selectThumbtackBusiness(c,session,b):await sendPlatformReply(c,session,b);
       if(b.action==='send_platform_reply')return json({...result,...await readRequestFollowthrough(c,session,b.requestId,b.operationId)},200,{'Cache-Control':'no-store'});
       return json({...result,leadConnections:await leadConnectionsView(c)},200,{'Cache-Control':'no-store'});
@@ -292,17 +337,18 @@ async function handle(req) {
           return json({ok:true,client:ownerView(updated),connections:await serviceConnections(updated)},202,{"Cache-Control":"no-store"});
         }
         if (b.action === "request_service_onboarding" || b.action === "cancel_service_onboarding") {
-          result = b.action === "request_service_onboarding" ? await requestServiceOnboarding(c, body) : await cancelServiceOnboarding(c, body);
+          result = b.action === "request_service_onboarding" ? await requestServiceOnboarding(c, body, {beforeAdmission:current=>fenceServiceIntake(current,session,Array.isArray(b.acceptedChannels)?b.acceptedChannels:current.onboarding.desiredChannels||[],b.expectedRevision)}) : await cancelServiceOnboarding(c, body);
           try { await dispatchServiceOnboarding(c); } catch { /* The scheduled coordinator recovers the durable request. */ }
           return json({ ok: true, result, serviceOnboarding: await serviceOnboardingStatus(c), connections: await serviceConnections(c), phoneActivation: await phoneActivationStatus(c) }, 202, { "Cache-Control": "no-store" });
         } else if (b.action === "start_calendar_connection") {
           if (b.expectedRevision !== configurationRevision(c)) return json({ error: "configuration_changed" }, 409);
+          await fenceConnectionPreparation(c,session,'calendar');
           result = await startCalendarConnection(c, session, {availabilityConsentVersion:b.availabilityConsentVersion});
         } else if (b.action === "complete_calendar_connection") result = await completeCalendarConnection(c, session, {state:b.state,...(b.code!==undefined?{code:b.code}:{}),...(b.error!==undefined?{error:b.error}:{})});
         else if (b.action === "disconnect_calendar") result = await disconnectCalendar(c, session);
-        else if (b.action === "request_voice_activation") result = await requestVoiceActivation(c, body);
+        else if (b.action === "request_voice_activation") result = await requestVoiceActivation(c, body, {beforeAdmission:current=>fenceServiceIntake(current,session,["voice"],b.expectedRevision)});
         else if (b.action === "cancel_voice_activation") result = await cancelVoiceActivation(c, body);
-        else if (b.action === "request_messaging_activation") result = await requestMessagingActivation(c, body);
+        else if (b.action === "request_messaging_activation") result = await requestMessagingActivation(c, body, {beforeAdmission:current=>fenceServiceIntake(current,session,["sms"],b.expectedRevision)});
         else if (b.action === "correct_messaging_activation") result = await correctMessagingActivation(c, body);
         else if (b.action === "renew_messaging_probe") result = await renewMessagingProbe(c, body);
         else result = await cancelMessagingActivation(c, b.operationId, body);
@@ -320,7 +366,7 @@ async function handle(req) {
       if (JSON.stringify(b).length > 1500 || Object.keys(b).some(key => !allowed.includes(key))) return json({ error: "invalid_request" }, 400);
       const actor = { role: "owner", email: session.email };
       try {
-        const operation = b.action === "request_phone_activation" ? await requestPhoneActivation(c, { actor, expectedRevision: b.expectedRevision, submissionId: b.submissionId, offerVersion: b.offerVersion, offerDigest: b.offerDigest, acceptedCosts: b.acceptedCosts, authority: b.authority }) : await cancelPhoneActivation(c, b.operationId, { actor, expectedRevision: b.expectedRevision });
+        const operation = b.action === "request_phone_activation" ? await requestPhoneActivation(c, { actor, expectedRevision: b.expectedRevision, submissionId: b.submissionId, offerVersion: b.offerVersion, offerDigest: b.offerDigest, acceptedCosts: b.acceptedCosts, authority: b.authority }, {beforeAdmission:current=>fenceServiceIntake(current,session,["voice"],b.expectedRevision)}) : await cancelPhoneActivation(c, b.operationId, { actor, expectedRevision: b.expectedRevision });
         return json({ ok: true, operation, phoneActivation: await phoneActivationStatus(c) }, 202, { "Cache-Control": "no-store" });
       } catch (error) { if (error instanceof PhoneActivationError) return json({ error: error.code, message: error.message }, error.status); throw error; }
     }

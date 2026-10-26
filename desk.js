@@ -1,4 +1,5 @@
 (function () {
+  var brandMark = typeof window.MCBrandMark === 'function' ? window.MCBrandMark : function () { return ''; };
   var q = new URLSearchParams(location.search), slug = q.get('c'), key = q.get('k');
   var ownerSession = null; try { ownerSession = sessionStorage.getItem('mc-onboarding-session-v1'); } catch (error) { /* Email sign-in is available when storage is disabled. */ }
   if (!slug || (!key && !ownerSession)) { document.body.dataset.workspaceState = 'recovery'; document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
@@ -46,12 +47,48 @@
       return result;
     } finally { clearTimeout(timeout); }
   }
-  var visitPending = null, visitSelected = null, visitBusy = false, visitOpener = null;
+  var visitPending = null, visitSelected = null, visitBusy = false, visitOpener = null, visitCalendarReturn = null;
+  var scheduleRows = [], scheduleRange = null, scheduleController = null, scheduleSequence = 0;
+  function scheduleEmit(name, detail) { document.dispatchEvent(new CustomEvent(name, { detail: detail })); }
+  function scheduleReset() { scheduleSequence++; if(scheduleController)scheduleController.abort(); scheduleController=null; scheduleRows=[];scheduleRange=null; }
+  async function readSchedule(range) {
+    if(leaving||!data||!ownerSession||!range||!/^\d{4}-\d{2}-\d{2}$/.test(range.from)||!/^\d{4}-\d{2}-\d{2}$/.test(range.to))return;
+    if(scheduleController && scheduleRange?.from===range.from && scheduleRange?.to===range.to && !range.force)return;
+    if(scheduleController)scheduleController.abort();
+    var run=++scheduleSequence,generation=portalGeneration,session=ownerSession,controller=new AbortController();
+    scheduleController=controller;scheduleRange={from:range.from,to:range.to};
+    function current(){return !leaving&&run===scheduleSequence&&generation===portalGeneration&&session===ownerSession;}
+    scheduleEmit('mc:schedule-status',{busy:true,from:range.from,to:range.to,message:'Loading saved visits and blocked time…'});
+    var timeout=setTimeout(function(){controller.abort();},20000);
+    try {
+      var response=await fetch(API_BASE+'/api/client?'+new URLSearchParams({c:slug,schedule:'1',from:range.from,to:range.to}),{headers:ownerHeaders(),signal:controller.signal});
+      if(!current())return;
+      if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}
+      var result=await response.json();if(!current())return;
+      if(!response.ok||!result.ok||result.schedule?.from!==range.from||result.schedule?.to!==range.to||result.schedule?.timezone!=='America/Chicago'||!Array.isArray(result.schedule.bookings)||!Array.isArray(result.schedule.undatedBookings)||!Array.isArray(result.schedule.availabilityBlocks))throw new Error(result.message||'Your schedule could not be refreshed. Try again before making changes.');
+      scheduleRows=result.schedule.bookings.concat(result.schedule.undatedBookings);
+      scheduleEmit('mc:schedule-data',result.schedule);
+      scheduleEmit('mc:schedule-status',{busy:false,error:false,from:range.from,to:range.to,message:''});
+    } catch(error) {if(current())scheduleEmit('mc:schedule-status',{busy:false,error:true,from:range.from,to:range.to,message:error.name==='AbortError'?'The schedule took too long to load. Your selected date is still here. Try again.':error.message});}
+    finally {clearTimeout(timeout);if(current())scheduleController=null;}
+  }
+  document.addEventListener('mc:schedule-range',function(event){readSchedule(event.detail);});
+  document.addEventListener('mc:schedule-open-visit',function(event){if(!leaving&&data)openVisit(event.detail?.id||null,event.detail?.date);});
+  document.addEventListener('mc:schedule-block-time',function(event){
+    if(leaving||!data||availabilityBusy)return;var detail=event.detail||{},date=$('availabilityDate');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(detail.date||''))return;
+    date.value=detail.date;$('availabilityWindow').value=detail.window||'';
+    if($('scheduleBlockManager'))$('scheduleBlockManager').open=true;
+    date.focus();date.scrollIntoView({block:'center',behavior:'auto'});
+  });
+  document.addEventListener('mc:schedule-remove-block',function(event){if(!leaving&&data&&event.detail)availabilityChange('availability_unblock',event.detail.date,event.detail.window||'');});
+  document.addEventListener('mc:session-expired',scheduleReset);
   function platformLeadLabel(lead) { return lead.platform && ({angi:'Angi',thumbtack:'Thumbtack'})[lead.platform.source] || ''; }
   function leadReference(lead) { return platformLeadLabel(lead) && lead.platform.externalLeadId ? platformLeadLabel(lead) + ' · ' + String(lead.platform.externalLeadId) : lead.id; }
   function humanHandoffStatus(lead) { var h=lead.humanHandoff;if(!h)return '';var text=({callback_only:'Callback requested; no live transfer',control_uncertain:'Live connection unconfirmed',control_accepted:'Call control accepted; connection unconfirmed',not_attempted:'Live transfer was not started',dial_uncertain:'Live connection unconfirmed',human_accepted:'Person accepted; connection unconfirmed',connected:'Person accepted; provider confirmed connection',not_connected:'Live transfer did not connect',unknown:'Live connection outcome unknown',limit_reached:'Live transfer stopped at usage limit'})[h.state]||'Live connection unconfirmed';return '<br><span class="muted" data-human-handoff>'+esc(text)+'. No callback time confirmed.'+(lead.alertAttentionDue?' Needs acknowledgment.':'')+'</span>'; }
   function customerVisitRequest(visit) { return !!(data && data.client && data.client.onboarding && data.client.onboarding.version === 1 && visit && visit.status === 'booked' && ['web','sms','call','voice'].indexOf(visit.channel) >= 0); }
   function visitStatusLabel(visit) { return customerVisitRequest(visit) ? 'Visit requested' : visit && visit.status || ''; }
+  function visitDetailsText(visit) { return 'Ref '+visit.id+' · '+visitStatusLabel(visit)+' · '+visitDateLabel(visit.date)+' · '+visit.window+'\n'+(visit.issue || '')+' · '+(visit.address || 'Address not saved')+(customerVisitRequest(visit)?'\nContact the customer to confirm the arrival window.':''); }
   function visitFieldsDisabled(disabled) { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitCancelConfirm','saveVisit','cancelVisit'].forEach(function(id){$(id).disabled=disabled;}); }
   function visitErrorsClear() { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow'].forEach(function(id){$(id).removeAttribute('aria-invalid');}); ['visitNameError','visitPhoneError','visitAddressError','visitIssueError','visitDateError','visitWindowError'].forEach(function(id){$(id).textContent='';}); }
   function visitFieldError(field,message) { var id=({date:'visitDate',window:'visitWindow',customer_name:'visitName',phone:'visitPhone',address:'visitAddress',issue:'visitIssue'})[field] || 'visitWindow'; $(id).setAttribute('aria-invalid','true'); $(id+'Error').textContent=message; $(id).focus(); }
@@ -59,18 +96,22 @@
   var visitSessionTag=crypto.subtle.digest('SHA-256',new TextEncoder().encode(ownerSession || key || '')).then(function(bytes){return Array.from(new Uint8Array(bytes)).map(function(value){return value.toString(16).padStart(2,'0');}).join('');});
   async function storedVisitInput(){try{var row=JSON.parse(sessionStorage.getItem(visitStorageKey));return row && row.sessionTag===await visitSessionTag ? row.input:null;}catch(error){return null;}}
   async function storeVisitInput(input){var generation=portalGeneration;try{var sessionTag=await visitSessionTag;if(leaving || generation!==portalGeneration)return false;if(!input){sessionStorage.removeItem(visitStorageKey);return true;}sessionStorage.setItem(visitStorageKey,JSON.stringify({sessionTag:sessionTag,input:input}));return true;}catch(error){return false;}}
-  async function openVisit(id) {
-    var row=(data && data.bookings || []).find(function(item){return item.id===id;});
+  async function openVisit(id, selectedDate) {
+    if(visitBusy||!data||$('visitDialog').open)return;
+    var row=scheduleRows.find(function(item){return item.id===id;})||(data.bookings || []).find(function(item){return item.id===id;});
     if(!id){var creation=(data.pendingVisitCreations || [])[0];row={ownerVisit:{id:null,canChange:true},pendingVisitChange:creation || null};}
     if(!row || !row.ownerVisit)return;
+    var mutable=['testing','live','paused'].includes(data.client.status);
+    if(!id&&!mutable&&!row.pendingVisitChange)return;
     var generation=portalGeneration, stored=await storedVisitInput(); if(leaving || generation!==portalGeneration)return;
-    visitOpener=document.activeElement; visitSelected=row.ownerVisit; visitPending=row.pendingVisitChange ? row.pendingVisitChange.input : stored && (stored.visitId===id || !id && stored.action==='create_visit') ? stored:null; visitBusy=false; $('closeVisit').disabled=false; visitErrorsClear();
+    visitOpener=document.activeElement; visitSelected=Object.assign({},row.ownerVisit,{canChange:row.ownerVisit.canChange&&mutable}); visitPending=row.pendingVisitChange ? row.pendingVisitChange.input : stored && (stored.visitId===id || !id && stored.action==='create_visit') ? stored:null; visitBusy=false; $('closeVisit').disabled=false; visitErrorsClear();
     var creating=!id || !!(visitPending && visitPending.action==='create_visit');
     $('newVisitFields').hidden=!creating; $('saveVisit').textContent=creating?'Save visit':'Save new time'; $('cancelVisit').parentElement.hidden=creating;
     var values=creating && visitPending || {}; [['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']].forEach(function(pair){$(pair[0]).value=values[pair[1]] || '';});
     $('visitTitle').textContent=creating?'Add a customer visit':visitSelected.customer_name || 'Customer visit';
-    $('visitDetails').textContent=creating?'Save the agreed visit details. Availability is checked before the visit is created.':'Ref '+id+' · '+visitStatusLabel(row)+' · '+visitDateLabel(visitSelected.date)+' · '+visitSelected.window+'\n'+(visitSelected.issue || '')+' · '+(visitSelected.address || 'Address not saved')+(customerVisitRequest(row)?'\nContact the customer to confirm the arrival window.':'');
-    var pending=visitPending, date=pending && pending.date || visitSelected.date, windowValue=pending && pending.window || visitSelected.window;
+    $('visitDetails').textContent=creating?'Save the agreed visit details. Availability is checked before the visit is created.':visitDetailsText(Object.assign({},row,visitSelected));
+    var pending=visitPending, date=pending && pending.date || visitSelected.date || (!id&&/^\d{4}-\d{2}-\d{2}$/.test(selectedDate||'')?selectedDate:''), windowValue=pending && pending.window || visitSelected.window;
+    visitCalendarReturn=visitOpener?.closest('#scheduleCalendar')?{calendar:true,id:id||null,date:date||null}:null;
     $('visitDate').value=date || ''; var windows=(data.client.windows || []).slice(); if(windowValue && windows.indexOf(windowValue)<0)windows.push(windowValue);
     $('visitWindow').innerHTML=windows.map(function(window){return '<option value="'+esc(window)+'">'+esc(window)+'</option>';}).join(''); $('visitWindow').value=windowValue;
     $('visitCancelConfirm').checked=!!(pending && pending.action==='cancel_visit'); $('visitChangeForm').hidden=!visitSelected.canChange && !pending;
@@ -79,6 +120,7 @@
   }
   function closeVisit() { if(visitBusy)return; $('visitDialog').close(); if(visitOpener && visitOpener.isConnected)visitOpener.focus(); }
   $('closeVisit').addEventListener('click',closeVisit);
+  $('visitDialog').addEventListener('close',function(){var target=visitCalendarReturn;visitCalendarReturn=null;if(target&&!leaving)scheduleEmit('mc:schedule-visit-closed',target);});
   $('visitDialog').addEventListener('cancel',function(event){if(visitBusy)event.preventDefault();});
   function visitSubmissionId() { var bytes=new Uint8Array(16); crypto.getRandomValues(bytes); return Array.from(bytes).map(function(value){return value.toString(16).padStart(2,'0');}).join(''); }
   async function saveVisitChange(actionName) {
@@ -101,6 +143,9 @@
       var retained=await storeVisitInput(visitPending); if(leaving || generation!==portalGeneration)return;
       if(!retained)$('visitMessage').textContent='Keep this page open while the change is confirmed. Browser recovery storage is unavailable.';
       var result=await apiRequest('POST',visitPending); if(leaving || generation!==portalGeneration)return; visitSelected=result.visit;
+      var source=scheduleRows.find(function(row){return row.id===result.visit.id;})||(data.bookings||[]).find(function(row){return row.id===result.visit.id;})||{};
+      $('visitTitle').textContent=result.visit.customer_name||'Customer visit';
+      $('visitDetails').textContent=visitDetailsText(Object.assign({},source,result.visit));
       $('visitMessage').textContent=result.message+(result.calendar?' Calendar: '+result.calendar.detail:' Calendar delivery is not confirmed.')+' Customer notification delivery is not confirmed.';
       if(result.complete){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return; $('visitChangeForm').hidden=true; $('retryVisit').hidden=true;}else{$('retryVisit').hidden=false; $('visitMessage').textContent+=' Retry the saved change to finish preparing its delivery.';}
       $('visitMessage').focus(); await load();
@@ -127,6 +172,7 @@
   function availabilityControls(disabled) {
     if ($('availabilityForm')) $('availabilityForm').setAttribute('aria-busy', String(disabled));
     document.querySelectorAll('#availabilityForm button, #availabilityBlocks button').forEach(function (button) { button.disabled = disabled; });
+    scheduleEmit('mc:schedule-availability',{busy:disabled});
   }
   function availabilityReset() {
     if (availabilityController) availabilityController.abort();
@@ -134,9 +180,11 @@
   }
   async function availabilityChange(actionName, date, window) {
     if (availabilityBusy || leaving || !data) return;
-    var generation = portalGeneration, session = ownerSession, ownerKey = key, controller = new AbortController();
+    var generation = portalGeneration, session = ownerSession, ownerKey = key, controller = new AbortController(), focusAtStart=document.activeElement;
+    var returnAfterSave=!!$('scheduleBlockManager')?.open&&$('availabilityForm').contains(focusAtStart);
     function current() { return !leaving && generation === portalGeneration && session === ownerSession && ownerKey === key && availabilityController === controller; }
     availabilityBusy = true; availabilityController = controller; availabilityControls(true);
+    $('availabilityBackToCalendar').hidden=true;
     $('availabilityMessage').textContent = 'Saving…';
     var timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
@@ -150,10 +198,17 @@
       }
       if (!Array.isArray(result.availabilityBlocks)) throw Object.assign(new Error('Availability response incomplete'), { availabilityMessage: 'The schedule change could not be confirmed. Reload availability before trying again.' });
       renderAvailability(result.availabilityBlocks);
+      data.availabilityBlocks=result.availabilityBlocks;
+      scheduleEmit('mc:schedule-availability',{blocks:result.availabilityBlocks,busy:true});
+      // Fence an older range response so it cannot erase this confirmed change.
+      if(scheduleRange)readSchedule({from:scheduleRange.from,to:scheduleRange.to,force:true});
       $('availabilityMessage').textContent = (actionName === 'availability_block' ? 'Time blocked.' : 'Block removed.') + ' ' + availabilityDateLabel(date) + ' · ' + (window || 'Whole day') + (result.existingBookings ? '. ' + result.existingBookings + ' existing visit' + (result.existingBookings === 1 ? ' remains' : 's remain') + ' booked.' : '');
+      $('availabilityBackToCalendar').dataset.date=date;$('availabilityBackToCalendar').hidden=false;
+      if(returnAfterSave&&$('availabilityDate').value===date&&$('availabilityWindow').value===(window||'')&&(document.activeElement===focusAtStart||document.activeElement===document.body)){$('availabilityBackToCalendar').focus({preventScroll:true});$('availabilityBackToCalendar').scrollIntoView({block:'center',behavior:'auto'});}
     } catch (error) {
       if (!current()) return;
       $('availabilityMessage').textContent = (error.name === 'AbortError' ? 'The schedule change timed out. Reload availability before trying again.' : error.availabilityMessage || 'The schedule change could not be confirmed. Reload availability before trying again.') + ' Your selected date and window are still here.';
+      scheduleEmit('mc:schedule-availability',{busy:true,error:true,message:$('availabilityMessage').textContent});
     } finally {
       clearTimeout(timeout);
       if (current()) { availabilityController = null; availabilityBusy = false; availabilityControls(false); }
@@ -161,12 +216,13 @@
   }
   $('availabilityForm').addEventListener('submit', function (e) { e.preventDefault(); availabilityChange('availability_block', $('availabilityDate').value, $('availabilityWindow').value); });
   $('availabilityBlocks').addEventListener('click', function (e) { var button = e.target.closest('button.availability-remove'); if (button) availabilityChange('availability_unblock', button.dataset.date, button.dataset.window); });
+  $('availabilityBackToCalendar').addEventListener('click',function(){if($('scheduleBlockManager'))$('scheduleBlockManager').open=false;scheduleEmit('mc:schedule-return',{date:this.dataset.date});});
 
   var pageCopy = {
     today: ['YOUR WORKSPACE', 'Your day, at a glance', 'Your customer requests, visits and the work that needs your attention.'],
-    leads: ['INBOX', 'Customer requests', 'See who needs a callback and what they need from your shop.'],
+    leads: ['INBOX', 'Inbox', 'The job, the conversation and what happens next.'],
     convs: ['DAILY WORK', 'Conversations', 'See what customers asked and how your front desk responded.'],
-    availability: ['YOUR SCHEDULE', 'Schedule', 'Manage saved visits and block time for work booked elsewhere.'],
+    availability: ['YOUR SCHEDULE', 'Schedule', 'Your visits and blocked time, together. Select a day to plan your work.'],
     know: ['YOUR FRONT DESK', 'Business details', 'Your services, hours and the answers your front desk uses.'],
     test: ['YOUR FRONT DESK', 'Test answers', 'Try a private customer conversation before customers do.'],
     setup: ['YOUR FRONT DESK', 'Connections', 'Follow setup progress, connect your channels and prepare for customers.'],
@@ -180,7 +236,8 @@
     if($('inboxNav'))$('inboxNav').hidden=parent!=='leads'; if($('frontDeskNav'))$('frontDeskNav').hidden=parent!=='setup';
     document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); });
     document.body.dataset.activePage = t;
-    $('pageEyebrow').textContent = pageCopy[t][0]; $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; if(data){renderHomeNext(data);if(t==='account')renderAccount(data);}else syncNextActionVisibility();
+    scheduleEmit('mc:schedule-visible',{active:t==='availability'});
+    $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; if(data){renderHomeNext(data);if(t==='account')renderAccount(data);}else syncNextActionVisibility();
   }
   $('homeActivityDetails').querySelector('summary').addEventListener('click',function(){homeActivityChosen=true;});
   function syncNextActionVisibility() { var guide = $('workspaceGuide'); guide.hidden = guide.dataset.needed !== 'true' || document.body.dataset.activePage !== 'today'; }
@@ -197,13 +254,22 @@
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
     pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
   }
-  function homeAction(button){routeTo(button.dataset.route||'know');var target=button.dataset.anchor&&$(button.dataset.anchor);if(target){var details=target.closest('details');if(details)details.open=true;target.scrollIntoView({block:'nearest'});target.tabIndex=-1;target.focus({preventScroll:true});}}
+  function homeAction(button){if(button.dataset.service){document.dispatchEvent(new CustomEvent('mc:service-guide',{detail:{service:button.dataset.service}}));return;}routeTo(button.dataset.route||'know');var target=button.dataset.anchor&&$(button.dataset.anchor);if(target){var details=target.closest('details');if(details)details.open=true;target.scrollIntoView({block:'nearest'});target.tabIndex=-1;target.focus({preventScroll:true});}}
   $('nextSetupAction').addEventListener('click',function(){homeAction(this);});
   $('homeSetupSecondary').addEventListener('click',function(){homeAction(this);});
-  document.addEventListener('click', function (event) { var button = event.target.closest('.desk-empty-action[data-route]'); if (button) routeTo(button.dataset.route); });
+  document.addEventListener('click', function (event) { var button = event.target.closest('.desk-empty-action[data-route]'); if (button) homeAction(button); });
   document.querySelectorAll('[data-practice-prompt]').forEach(function (button) { button.addEventListener('click', function () { $('chatIn').value = button.dataset.practicePrompt; $('chatIn').focus(); }); });
   function emptyState(title, detail, actionLabel, tab) {
     return '<div class="desk-empty"><div class="desk-empty-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 13h4l2 3h4l2-3h4"/></svg></div><div><strong>' + esc(title) + '</strong><p>' + esc(detail) + '</p>' + (actionLabel ? '<button type="button" class="desk-empty-action" data-route="' + esc(tab) + '">' + esc(actionLabel) + ' →</button>' : '') + '</div></div>';
+  }
+  function requestList(rows,selfService) {
+    return '<div class="desk-request-list" role="list" aria-label="Customer requests">'+rows.map(function(l){
+      var follow=selfService&&l.followthrough,state=follow&&follow.state||{},contact=({not_recorded:'Contact not recorded',attempted:'Contact attempted',reached:'Customer reached'})[state.contact]||'Needs follow-up';
+      var status=follow?(follow.reviewRequired?'Review updated request':state.completedAt?'Follow-up complete':follow.due?'Follow-up due':contact):String(l.status||'Saved').replace(/_/g,' ');
+      var source=platformLeadLabel(l),reason=String(l.outcome||l.reason||'').replace(/_/g,' '),phone=/^\+1\d{10}$/.test(l.phone||'')?'<a href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a>':esc(l.phone||'No contact number');
+      var requested=l.wanted?'<span>'+esc(l.wanted)+'</span>':'';
+      return '<article class="desk-request-row" role="listitem" data-record-kind="leads" data-record-id="'+esc(l.id)+'"><div class="desk-request-person"><strong>'+esc(l.customer_name||'Customer request')+'</strong><span class="muted">'+phone+'</span>'+(source?' <span class="tag brand-lockup" data-lead-source-badge>'+brandMark(l.platform&&l.platform.source)+esc(source)+'</span>':'')+(l.websiteSetupCheck?' <span class="tag">Setup check</span>':'')+'<div class="desk-request-ref">Ref '+esc(leadReference(l))+'</div></div><div class="desk-request-job"><p>'+esc(l.issue||'Details in the saved conversation')+'</p><div class="desk-request-context">'+[l.address?'<span>'+esc(l.address)+'</span>':'',requested].filter(Boolean).join('<br>')+'</div>'+(reason?'<p class="muted">'+esc(reason)+'</p>':'')+humanHandoffStatus(l)+(l.unsure?'<p class="muted">Needs checking: '+esc(l.unsure)+'</p>':'')+(l.urgency==='emergency'?'<strong>Emergency request</strong>':'')+(l.overdueAt&&l.status==='open'?'<span class="tag-overdue">Overdue callback</span>':'')+'</div><div class="desk-request-meta"><time>'+esc(recordTimeLabel(l.createdAt))+'</time><span class="desk-request-status">'+esc(status)+'</span>'+(follow?'<button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'')+(l.alertWaiting?'<button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="'+esc(l.id)+'">Acknowledge</button>':'')+(follow&&state.nextAction?'<span class="muted">'+esc(state.nextAction)+'</span>':'')+'</div></article>';
+    }).join('')+'</div>';
   }
   function decorateRecordTables() {
     document.querySelectorAll('#bookings .tbl, #leads .tbl').forEach(function (table) {
@@ -466,7 +532,7 @@
   function websiteApplySaved(result){data.client=result.client;data.setup=result.setup||data.setup;data.configurationRevision=result.configurationRevision;data.editRevision=result.editRevision;if(!cfgChanges(cfgFromClient(result.client),cfgBaseline).length){cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;}acctObserve(result,true);cfgFence++;renderSetup(data);document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));}
   async function websiteStart(){if(websiteConflict||websiteNeedSavedRules())return;await websiteChange(async function(generation){websiteMessage('Preparing your website check…');var result=await action('start_website_check',{expectedRevision:cfgRevision,expectedEditRevision:cfgEditRevision,origin:websiteChosenOrigin()});if(generation!==portalGeneration||leaving)return;if(!result.check||!websiteCheckLink(result.check))throw new Error('A safe website check link could not be prepared.');data.websiteInstallation=result.websiteInstallation;var stored=await websiteStore(result.check);if(generation!==portalGeneration||leaving)return;websiteMessage(stored?'Your check is ready. Open your website, then return here to check its status.':'Your check is ready for this page. Keep it open; this browser could not save the link for a reload.');$('websiteInstallOpen').hidden=false;$('websiteInstallOpen').href=websiteCheckLink(result.check);$('websiteInstallOpen').focus();});}
   async function websiteCopy(handoff){var generation=portalGeneration;try{var text=$('snippet').textContent;if(handoff)text='Please add the Machines & Cloud chat to '+(data.client.business.website||websiteChosenOrigin())+'.\n\n'+text+'\n\nAdd this once in the shared footer before </body>, publish the website, then let me know so I can check it from my workspace.';await navigator.clipboard.writeText(text);if(leaving||generation!==portalGeneration)return;if(!handoff)websiteCopied=true;$('copyMessage').textContent=handoff?'Instructions copied. Send them to your web person.':'Code copied. Publish your website, then check it here.';renderWebsiteInstallation(data);}catch(error){if(!leaving&&generation===portalGeneration){$('websiteInstallHelp').open=true;$('copyMessage').textContent='Select the code and copy it manually.';$('snippet').focus();}}}
-  function websiteViewRecord(record){if(!record||!['leads','bookings'].includes(record.kind)||typeof record.id!=='string')return;routeTo(record.kind==='bookings'?'availability':'leads');var row=Array.from($(record.kind).querySelectorAll('[data-record-id]')).find(function(node){return node.dataset.recordId===record.id;});if(row){document.querySelectorAll('[data-record-focus]').forEach(function(node){delete node.dataset.recordFocus;});row.dataset.recordFocus='true';row.tabIndex=-1;row.focus();row.scrollIntoView({block:'center'});}else websiteMessage('That saved request is not in the recent list. Refresh '+(record.kind==='bookings'?'Schedule':'Requests')+' to check its latest status.',true);}
+  function websiteViewRecord(record){if(!record||!['leads','bookings'].includes(record.kind)||typeof record.id!=='string')return;routeTo(record.kind==='bookings'?'availability':'leads');var row=Array.from($(record.kind).querySelectorAll('[data-record-id]')).find(function(node){return node.dataset.recordId===record.id;});if(row){var recordDetails=row.closest('details');if(recordDetails)recordDetails.open=true;document.querySelectorAll('[data-record-focus]').forEach(function(node){delete node.dataset.recordFocus;});row.dataset.recordFocus='true';row.tabIndex=-1;row.focus();row.scrollIntoView({block:'center'});}else websiteMessage('That saved request is not in the recent list. Refresh '+(record.kind==='bookings'?'Schedule':'Requests')+' to check its latest status.',true);}
   $('websiteInstallReviewLatest').addEventListener('click',function(){websiteChange(async function(generation){await websiteRead();if(generation!==portalGeneration||leaving)return;websiteConflict=false;websiteMessage('Latest saved website: '+(data.client.business.website||'none yet')+'. Your typed address is kept. Review it before saving or checking again.');});});
   $('websiteInstallChange').addEventListener('click',function(){websiteEditing=true;renderWebsiteInstallation(data);$('websiteInstallWebsite').focus();});
   $('websiteInstallEditCancel').addEventListener('click',function(){if(websiteBusy)return;websiteDirty=false;websiteEditing=false;$('websiteInstallWebsiteError').textContent='';$('websiteInstallWebsite').removeAttribute('aria-invalid');renderWebsiteInstallation(data);$(websiteURL(data.client.business.website)?'websiteInstallChange':'websiteInstallPrimary').focus({preventScroll:true});});
@@ -479,18 +545,19 @@
   function homeFollowupRows(d){var selfService=d.client?.onboarding?.version===1;return (d.leads||[]).filter(function(l){return (!selfService||!l.websiteSetupCheck&&!l.simulation)&&(selfService&&l.followthrough?l.followthrough.needsFollowup:l.status==='open'&&(l.alertWaiting||l.overdueAt||l.outcome==='needs_action'||l.outcome==='wants_call'));});}
   function renderHomeNext(d) {
     var guide=$('workspaceGuide'),button=$('nextSetupAction'),setup=d&&d.setup,client=d&&d.client;
-    guide.dataset.needed='false';button.hidden=false;delete button.dataset.anchor;$('homeSetupSecondaryWrap').hidden=true;$('homeSetupReminder').hidden=true;$('homeSetupSecondary').hidden=true;delete $('homeSetupSecondary').dataset.anchor;
+    guide.dataset.needed='false';button.hidden=false;delete button.dataset.anchor;delete button.dataset.service;$('homeSetupSecondaryWrap').hidden=true;$('homeSetupReminder').hidden=true;$('homeSetupSecondary').hidden=true;delete $('homeSetupSecondary').dataset.anchor;delete $('homeSetupSecondary').dataset.service;
     if(!setup||!client||['cancelled','archived'].includes(client.status)){document.body.dataset.homeMode='work';if(!homeActivityChosen)$('homeActivityDetails').open=true;if(document.body.dataset.activePage==='today'){$('pageTitle').textContent=pageCopy.today[1];$('pageDescription').textContent=pageCopy.today[2];}syncNextActionVisibility();return;}
     var next,rows=(setup.connectionJourney?.channels||[]).filter(function(row){return row.requested||row.retained;}),blockers=setup.channels?.web?.blockers||[];
     var modelUnavailable=blockers.some(function(row){return row.id==='model';}),practiceAvailable=!modelUnavailable&&(!d.aiAllowance||d.aiAllowance.private.remaining>0);
     if(cfgDirty||cfgConflict||cfgBusy)next={title:cfgConflict?'Review your saved changes':cfgBusy?'Your changes are being saved':'Finish your business edits',detail:cfgConflict?'Your draft is kept. Compare it with the latest saved details before continuing.':cfgBusy?'Any newer typing stays in your draft.':'Save your draft, then review the answers customers should hear.',label:'Open business details',tab:'know'};
+    else if(setup.connectionPreparation?.eligible===true&&setup.connectionPreparation.prepared!==true)next={title:'Prepare your services',detail:'Choose your services and website once, then review the answers your front desk will use.',label:'Prepare my services',tab:'setup',anchor:'setupGuide'};
     else if(preferenceDirty)next={title:'Finish your connection choices',detail:'Your current choices are kept on this page. Save them or return to your saved choices.',label:'Review connection choices',tab:'setup',anchor:'connectionPreferencesDetails'};
     else {
       var ownerRows=rows.filter(function(row){return row.responsibility==='customer'&&row.action&&row.action.kind!=='wait';});
       var row=ownerRows.find(function(row){return row.action.kind==='route'&&row.action.target==='know';})||ownerRows.find(function(row){return row.action.kind==='route'&&row.action.target==='test'&&practiceAvailable;});
       if(row)next=row.action.target==='know'?{title:'Check your business details',detail:'Confirm your services, hours and the answers your front desk should use.',label:'Review business details',tab:'know'}:{title:'See your front desk in action',detail:'Try a private customer question using your saved details.',label:'Test your answers',tab:'test'};
       if(!next){row=ownerRows.find(function(row){if(row.action.kind==='route'&&row.action.target==='test')return false;if(row.id==='web'){var w=d.websiteInstallation;return !w||w.observation?.state!=='found'||w.setupRequest?.state!=='complete'||w.customerChat?.state!=='active';}return true;});
-        if(row)next={title:row.id==='web'?'Get your website ready for customers':'Continue '+row.label.toLowerCase(),detail:row.nextStep||row.detail,label:row.id==='web'?'Continue website setup':'View next step',tab:'setup',anchor:row.id==='web'?'websiteInstallStep':'connection-guide-'+row.id};
+        if(row)next={title:row.id==='web'?'Get your website ready for customers':'Continue '+row.label.toLowerCase(),detail:row.id==='web'?'Add chat to your website, check the installation and see your first request arrive here.':row.nextStep||row.detail,label:row.id==='web'?'Continue website setup':'View next step',tab:'setup',service:row.id,anchor:'setupGuide'};
       }
       if(!next){var waiting=rows.find(function(row){return ['platform','carrier'].includes(row.responsibility)&&!row.active;});if(waiting)next={title:waiting.responsibility==='carrier'?'Your registration is being reviewed':'Your setup progress',detail:waiting.nextStep||waiting.detail};}
     }
@@ -498,19 +565,22 @@
     if(workFirst){
       var setupNext=next;
       next={title:followup.length===1?'A customer request needs your attention':followup.length+' customer requests need your attention',detail:'Review the saved details and record what happens next.',label:'Open customer requests',tab:'leads'};
-      if(setupNext){$('homeSetupSecondaryWrap').hidden=false;$('homeSetupReminder').hidden=false;$('homeSetupReminder').textContent='Setup also needs attention: '+setupNext.title+'.';if(setupNext.tab){var secondary=$('homeSetupSecondary');secondary.hidden=false;secondary.textContent=setupNext.label||'Continue setup';secondary.dataset.route=setupNext.tab;if(setupNext.anchor)secondary.dataset.anchor=setupNext.anchor;}}
+      if(setupNext){$('homeSetupSecondaryWrap').hidden=false;$('homeSetupReminder').hidden=false;$('homeSetupReminder').textContent='Setup also needs attention: '+setupNext.title+'.';if(setupNext.tab){var secondary=$('homeSetupSecondary');secondary.hidden=false;secondary.textContent=setupNext.label||'Continue setup';secondary.dataset.route=setupNext.tab;if(setupNext.anchor)secondary.dataset.anchor=setupNext.anchor;if(setupNext.service)secondary.dataset.service=setupNext.service;}}
     }
-    if(next){guide.dataset.needed='true';$('guideTitle').textContent=next.title;$('guideIntro').textContent=next.detail;button.hidden=!next.tab;button.textContent=next.label||'';button.dataset.route=next.tab||'';if(next.anchor)button.dataset.anchor=next.anchor;}
+    if(next){guide.dataset.needed='true';$('guideTitle').textContent=next.title;$('guideIntro').textContent=next.detail;button.hidden=!next.tab;button.textContent=next.label||'';button.dataset.route=next.tab||'';if(next.anchor)button.dataset.anchor=next.anchor;if(next.service)button.dataset.service=next.service;}
     var selfService=client.onboarding?.version===1,customerRecord=function(row){return !selfService||!row.websiteSetupCheck&&!row.simulation&&!row.ownerVisitCreationAborted;};
     var hasWork=(d.leads||[]).some(customerRecord)||(d.bookings||[]).some(customerRecord)||(d.conversations||d.convs||[]).some(customerRecord)||!selfService&&(Number(d.today?.needsYou)>0||Number(d.today?.bookings)>0);
     var preparing=guide.dataset.needed==='true'&&!hasWork&&!['live','paused'].includes(client.status);
     document.body.dataset.homeMode=preparing?'setup':'work';
-    if($('homeSetupLabel'))$('homeSetupLabel').textContent=workFirst?'Needs your attention':preparing?'Get ready for your first customer':'Next for your front desk';
     if(!homeActivityChosen)$('homeActivityDetails').open=!preparing;
     $('homeActivitySummary').textContent=hasWork?'Requests, visits and conversations saved in your workspace':'No customer activity yet. Saved requests will appear here.';
     if(document.body.dataset.activePage==='today'){
       $('pageTitle').textContent=preparing?'Get your front desk ready':'Your day, at a glance';
       $('pageDescription').textContent=preparing?'Your business answers are saved. Follow the next step, then connect the services you choose.':pageCopy.today[2];
+    }
+    var inboxEmpty=$('leads').querySelector('.desk-empty');$('inboxSetupAction')?.remove();
+    if(inboxEmpty&&selfService&&!hasWork&&next&&!['live','paused','cancelled','archived'].includes(client.status)&&!historyIncomplete(d.recordListing||{})){
+      var inboxAction=document.createElement('button');inboxAction.id='inboxSetupAction';inboxAction.type='button';inboxAction.className='desk-empty-action';inboxAction.textContent=next.label||'View setup progress';inboxAction.dataset.route=next.tab||'setup';if(next.anchor)inboxAction.dataset.anchor=next.anchor;if(next.service)inboxAction.dataset.service=next.service;inboxEmpty.querySelector('div:last-child').appendChild(inboxAction);
     }
     syncNextActionVisibility();
   }
@@ -615,8 +685,8 @@
     { title: 'Your day, at a glance', body: 'Home shows requests, visits and work that needs your attention. Use Inbox for customer messages, Schedule for visits and Front desk for setup.', action: 'Explore Home', tab: 'today', target: 'todayTourSummary', compact: 'todayTourHeading', tiny: 'todayTourHeading' },
     { title: 'Make it sound like your shop', body: 'Your services, hours, prices and safety instructions guide every answer. Open a section to check or edit it, then review the saved version.', action: 'Review business details', tab: 'know', target: 'reviewCard', compact: 'businessProfileTourHeading', tiny: 'businessProfileTourTitle' },
     { title: 'Try it before customers do', body: 'Test answers with a customer question or visit request. This private conversation previews the details collected without real bookings, messages or calendar changes.', action: 'Open Test answers', tab: 'test', target: 'chatForm', compact: 'chatForm', tiny: 'chatIn' },
-    { title: 'Keep your schedule accurate', body: 'Schedule holds your saved visits and blocked time. Block dates or windows for outside work. Existing visits stay booked; outside calendar busy times are not synced automatically.', action: 'View Schedule', tab: 'availability', target: 'availabilityForm', compact: 'availabilityDateGroup', tiny: 'availabilityTourLabel' },
-    { title: 'Put it on your website', body: 'Follow the next step shown here to install and check your website chat. Copying the code alone does not confirm it is installed or answering customers.', action: 'View website setup', tab: 'setup', target: 'websiteInstallStep', compact: 'websiteInstallHeading', tiny: 'websiteInstallHeading', fallback: 'connectionTourHeading' },
+    { title: 'Plan your work', body: 'See saved visits and blocked time together. Choose a day to add or manage a visit, or block time for other work.', action: 'Explore Schedule', tab: 'availability', target: 'scheduleCalendar', compact: 'calendarRangeTitle', tiny: 'calendarRangeTitle', fallback: 'pageTitle' },
+    { title: 'Connect your services', body: 'Choose the services you want to use. Each guide keeps your saved details and shows the next step, including any permissions or provider checks.', action: 'Explore Connections', tab: 'setup', target: 'setupGuide', compact: 'setupGuideServices', tiny: 'pageTitle', fallback: 'pageTitle' },
     { title: 'Find your customer requests', body: 'Inbox keeps customer requests and conversations together. Review what the customer needs, then confirm the next step directly. Saved visits are in Schedule.', action: 'View Requests', tab: 'leads', target: 'requestTourHeading', compact: 'requestTourHeading', tiny: 'requestTourHeading' }
   ];
   var defaultTour = tour.slice(), tourRevealedDetails = [];
@@ -656,7 +726,7 @@
     var dialog = $('guideDialog'), coach = $('tourCoach'), step = tour[tourIndex], viewport = window.visualViewport, coachScroll = $('tourContent').scrollTop;
     if (document.body.dataset.activePage !== step.tab) { closeTour(false, true); return; }
     var width = viewport ? viewport.width : innerWidth, height = viewport ? viewport.height : innerHeight, vx = viewport ? viewport.offsetLeft : 0, vy = viewport ? viewport.offsetTop : 0, edge = 12, gap = 16;
-    var primary = $(step.target), compact = $(step.compact), missing = !tourVisible(primary) && !tourVisible(compact), anchor = tourVisible(primary) ? primary : tourVisible(compact) ? compact : $(step.fallback) || $('pageTitle');
+    var primary = $(step.target), compact = $(step.compact); if (step.tab === 'setup' && !tourVisible(compact)) compact = $('setupGuideTitle'); var missing = !tourVisible(primary) && !tourVisible(compact), anchor = tourVisible(primary) ? primary : tourVisible(compact) ? compact : $(step.fallback) || $('pageTitle');
     if (!tourVisible(anchor)) { closeTour(false, false); return; }
     coach.style.width = Math.min(344, width - edge * 2) + 'px'; coach.style.maxHeight = Math.max(100, height - edge * 2) + 'px';
     var card = coach.getBoundingClientRect(), rect = anchor.getBoundingClientRect(), horizontal = Math.max(rect.left - vx, vx + width - rect.right) >= card.width + gap + edge;
@@ -665,6 +735,7 @@
     if (scroll) { rect = anchor.getBoundingClientRect(); window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - vy - edge - 8), behavior: 'instant' }); }
     rect = anchor.getBoundingClientRect();
     var left = Math.max(vx + 6, rect.left - 7), top = Math.max(vy + 6, rect.top - 7), right = Math.min(vx + width - 6, rect.right + 7), bottom = Math.min(vy + height - 6, rect.bottom + 7);
+    if (height < 330) bottom = Math.min(bottom, top + 44);
     if (right <= left || bottom <= top) { if (!scroll) positionTour(true); return; }
     var x, y, placement, available, cw = card.width, ch = coach.getBoundingClientRect().height;
     if (vx + width - right >= cw + gap + edge) { x = right + gap; y = Math.max(vy + edge, Math.min(top, vy + height - ch - edge)); placement = 'right'; }
@@ -707,16 +778,6 @@
     renderTour();
   }
   $('openGuide').addEventListener('click', function () { if(tourActive)return; tour = defaultTour.slice(); tourIndex = 0; openTour(); });
-  document.addEventListener('mc:service-guide', function(event) {
-    if(leaving||!data||tourActive||!['web','voice','sms','calendar','thumbtack','angi'].includes(event.detail?.service))return;
-    var id=event.detail.service, journey=data.setup?.connectionJourney;
-    var row=(journey?.channels||[]).concat(journey?.leadSources||[]).find(function(item){return item.id===id;});
-    if(!row?.guide||!Array.isArray(row.guide.steps)||!row.guide.steps.length)return;
-    var anchor=['thumbtack','angi'].includes(id)?'lead-source-'+id:'connection-guide-'+id;
-    var maps={business:{tab:'know',target:'reviewCard',compact:'businessProfileTourHeading',tiny:'businessProfileTourTitle'},selection:{tab:'setup',target:'connectionPreferencesDetails',compact:'connectionChoicesTitle',tiny:'connectionChoicesTitle'},connection:{tab:'setup',target:anchor,compact:anchor,tiny:anchor},practice:{tab:'test',target:'chatForm',compact:'chatForm',tiny:'chatIn'},verification:{tab:'setup',target:id==='web'?'websiteInstallStep':id==='voice'&&$('phoneRoutingSteps')?'phoneRoutingSteps':id==='sms'&&$('textConnectionSteps')?'textConnectionSteps':anchor,compact:anchor,tiny:anchor},inbox:{tab:'leads',target:'requestFilters',compact:'pageTitle',tiny:'pageTitle'},schedule:{tab:'availability',target:'scheduleVisits',compact:'pageTitle',tiny:'pageTitle'}};
-    tour=row.guide.steps.slice(0,8).map(function(step){return Object.assign({title:String(step.label||row.label),body:String(step.detail||row.nextStep||''),action:step.actor==='customer'?'Go to this step':'View setup status',fallback:'setupGuide'},step.id==='practice'?maps.practice:maps[step.focus]||maps.connection);});
-    tourIndex=0;openTour();
-  });
   $('closeGuide').addEventListener('click', function () { closeTour(); }); $('skipGuide').addEventListener('click', function () { closeTour(); });
   $('guideDialog').addEventListener('cancel', function (event) { event.preventDefault(); closeTour(); });
   $('guideDialog').addEventListener('close', function () { if (!$('guideDialog').open) tourCleanup(); });
@@ -855,7 +916,7 @@
       if (!location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
 
       var needsFollowup=homeFollowupRows(d);
-      $('needsYou').innerHTML = (function () { var rows = needsFollowup; return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + (platformLeadLabel(l)?' <span class="tag">'+esc(platformLeadLabel(l))+'</span>':'') + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(leadReference(l)) + humanHandoffStatus(l) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : emptyState(workLimited ? 'No requests need attention in the records shown' : 'No requests need attention', workLimited ? 'Some history still needs checking. Contact support if you are looking for an earlier request.' : 'Requests that need a callback, an acknowledgment or urgent attention will appear here.', 'View customer requests', 'leads'); })();
+      $('needsYou').innerHTML = (function () { var rows = needsFollowup; return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + (platformLeadLabel(l)?' <span class="tag brand-lockup">'+brandMark(l.platform.source)+esc(platformLeadLabel(l))+'</span>':'') + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(leadReference(l)) + humanHandoffStatus(l) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : emptyState(workLimited ? 'No requests need attention in the records shown' : 'No requests need attention', workLimited ? 'Some history still needs checking. Contact support if you are looking for an earlier request.' : 'Requests that need a callback, an acknowledgment or urgent attention will appear here.', 'View customer requests', 'leads'); })();
       $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || emptyState('No activity in the last 24 hours', 'Customer activity appears here after it happens. Private practice is kept separate.');
       if(selfService){
         var visitsToday=d.bookings.filter(function(b){return b.date===houstonToday&&b.status!=='cancelled'&&!b.websiteSetupCheck&&!b.simulation&&!b.ownerVisitCreationAborted;}).length;
@@ -865,9 +926,9 @@
       $('missing').textContent = (c.build && c.build.notes) ? c.build.notes : 'Nothing major.';
       // records
       $('bookings').innerHTML = d.bookings.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Visit</th><th>Status</th><th>Ref</th>' + (selfService ? '<th>Manage</th>' : '') + '</tr>' + d.bookings.map(function (b) { return '<tr data-record-kind="bookings" data-record-id="'+esc(b.id)+'"><td>' + esc(recordTimeLabel(b.createdAt)) + '</td><td>' + esc(b.customer_name) + (b.websiteSetupCheck?' <span class="tag">Setup check</span>':'') + ' <span class="muted">(' + (b.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(b.phone) + '</span>' + (b.unsure ? '<br><span class="muted">Unsure: ' + esc(b.unsure) + '</span>' : '') + '</td><td>' + esc(b.issue) + '<br><span class="muted">' + esc(b.address) + '</span></td><td>' + esc(visitDateLabel(b.date)) + ' ' + esc(b.window) + '</td><td>' + esc(visitStatusLabel(b)) + '</td><td>' + esc(b.id) + '</td>' + (selfService ? '<td><button type="button" class="btn-pill btn-pill-dark btn-sm visit-open" data-visit="' + esc(b.id) + '">' + (b.pendingVisitChange ? 'Resume change' : 'View visit') + '</button></td>' : '') + '</tr>'; }).join('') + '</table></div>' : emptyState(bookingsLimited ? 'No visits in this view' : 'No visits yet', bookingsLimited ? 'Some visit history still needs checking. Contact support if you need an earlier visit.' : 'Saved visits appear here with their arrival window and job details.');
-      $('newVisit').hidden=!selfService; if(selfService)$('newVisit').textContent=(d.pendingVisitCreations || []).length?'Resume new visit':'Add visit';
+      $('newVisit').hidden=!selfService||!['testing','live','paused'].includes(c.status)&&!(d.pendingVisitCreations||[]).length; if(selfService)$('newVisit').textContent=(d.pendingVisitCreations || []).length?'Resume new visit':'Add visit';
       document.querySelectorAll('.visit-open').forEach(function (button) { button.addEventListener('click', function () { openVisit(button.dataset.visit); }); });
-      $('leads').innerHTML = d.leads.length ? '<div class="tblwrap"><table class="tbl"><tr><th>When</th><th>Customer</th><th>Issue</th><th>Outcome</th><th>Status</th><th>Ref</th></tr>' + d.leads.map(function (l) { return '<tr data-record-kind="leads" data-record-id="'+esc(l.id)+'"><td>' + esc(recordTimeLabel(l.createdAt)) + '</td><td>' + esc(l.customer_name || 'no name') + (platformLeadLabel(l)?' <span class="tag" data-lead-source-badge>'+esc(platformLeadLabel(l))+'</span>':'') + (l.websiteSetupCheck?' <span class="tag">Setup check</span>':'') + ' <span class="muted">(' + (l.customerType === 'existing' ? 'existing' : 'new') + ')</span><br><span class="muted">' + esc(l.phone) + '</span></td><td>' + esc(l.issue) + (l.unsure ? '<br><span class="muted">Unsure: ' + esc(l.unsure) + '</span>' : '') + '</td><td>' + esc((l.outcome || l.reason || '').replace('_', ' ')) + humanHandoffStatus(l) + (l.urgency === 'emergency' ? ' <b>EMERGENCY</b>' : '') + (l.overdueAt && l.status === 'open' ? '<span class="tag-overdue">overdue callback</span>' : '') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</td><td>' + (selfService&&l.followthrough?esc(l.followthrough.reviewRequired?'Review updated request':l.followthrough.state.completedAt?'Follow-up complete':l.followthrough.due?'Follow-up due':l.followthrough.state.contact.replace(/_/g,' '))+'<br><span class="muted">'+esc(l.followthrough.state.nextAction||'No next action recorded')+'</span>':esc(l.status)) + '</td><td>' + esc(leadReference(l)) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + '</td></tr>'; }).join('') + '</table></div>' : emptyState(leadsLimited ? 'No customer requests in this view' : 'No customer requests yet', leadsLimited ? 'Some request history still needs checking. Contact support if you need an earlier request.' : 'Customer requests appear here with the details you need to review and follow up.');
+      $('leads').innerHTML = d.leads.length ? requestList(d.leads,selfService) : emptyState(leadsLimited ? 'No customer requests in this view' : 'No customer requests yet', leadsLimited ? 'Some request history still needs checking. Contact support if you need an earlier request.' : 'Customer requests appear here with the details you need to review and follow up.');
       document.querySelectorAll('button.ack').forEach(function (b) { b.addEventListener('click', function () { apiRequest('POST', { action: 'ack', leadId: b.dataset.id }).then(function () { toast('Acknowledged.'); return load(); }).catch(function (error) { toast(error.message); }); }); });
       $('convs').innerHTML = renderConversations(d.conversations); $('bookingCount').textContent = d.bookings.length + (bookingsLimited ? ' shown' : ''); $('leadCount').textContent = d.leads.length + (leadsLimited ? ' shown' : ''); decorateRecordTables();
       supportObserve();
@@ -1044,7 +1105,7 @@
   $('deskSignOut').addEventListener('click', async function () {
     if(accountBusy){accountMessage('A service change is still being checked. You can sign out when that check finishes.');routeTo('account');$('accountServiceMessage').focus({preventScroll:true});return;}
     var button = $('deskSignOut'), interruptedExport = exportBusy; button.disabled = true;
-    leaving = true; portalGeneration++; closeTour(false, false); if (chatController) chatController.abort(); availabilityReset();
+    leaving = true; portalGeneration++; closeTour(false, false); if (chatController) chatController.abort(); availabilityReset(); scheduleReset();
     try {
       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');

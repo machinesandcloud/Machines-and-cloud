@@ -195,7 +195,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
   if (!provider || !["acquire", "lookup", "release"].every(name => typeof provider[name] === "function")) throw new Error("The fixture requires explicit acquire, lookup and release adapters");
   const offer = validateOffer(suppliedOffer,{allowExpired:allowExpiredOffer}), digest = offerDigest(offer), enabled = () => typeof gate === "function" ? gate() === true : gate === true;
   const quote = () => ({ ...structuredClone(offer), digest, available: enabled()&&Date.parse(offer.expiresAt)>Date.now(), fixtureOnly: true });
-  async function request(c, body = {}) {
+  async function request(c, body = {}, options = {}) {
     const current = await authorizeCustomer(c, body.actor, body.expectedRevision);
     if (!enabled()||Date.parse(offer.expiresAt)<=Date.now()) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
     if (!["testing", "live"].includes(current.status)) throw new PhoneActivationError("workspace_inactive", "Phone setup requires an active workspace.");
@@ -213,6 +213,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
       ...(prior?.resourceAccountHash?{resourceAccountHash:prior.resourceAccountHash}:/^AC[a-f0-9]{32}$/i.test(process.env.TWILIO_ACCOUNT_SID||'')?{resourceAccountHash:hash(process.env.TWILIO_ACCOUNT_SID)}:{}),
       ...(body.serviceOnboarding ? { serviceOnboarding: structuredClone(body.serviceOnboarding) } : {}),
       ...(prior ? { renewalSequence: sequence(prior) + 1, renewalFrom: phoneRenewalReference(prior), history: [...(prior.history || []), { ...phoneRenewalReference(prior), acceptedAt: prior.authority.acceptedAt }].slice(-20) } : {}) };
+    if(options.beforeAdmission)await options.beforeAdmission(current);
     const queued = await enqueue(row); return phoneActivationView(await ensure(queued));
   }
   async function recordResource(row, resource) {
@@ -340,9 +341,9 @@ function productionEngine(deadlineAt = null) {
   const gate = () => { const current = productionPolicy(); return current.enabled && offerDigest(current.offer) === offerDigest(policy.offer); };
   return phoneEngine({ provider: createTwilioNumberAdapter({ executionAllowed: gate, deadlineAt }), offer: policy.offer, gate,allowExpiredOffer:true });
 }
-export async function requestPhoneActivation(c, body) {
+export async function requestPhoneActivation(c, body, options) {
   const p=productionPolicy();if (!p.enabled||!p.offerCurrent) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");
-  return productionEngine().request(c, body);
+  return productionEngine().request(c, body, options);
 }
 export async function cancelPhoneActivation(c, id, body) { return saveCancellation(c, id, body); }
 async function pendingPhoneWork({ repair = false } = {}) {
