@@ -994,7 +994,7 @@
   }
 };
   var scenario = 'sms', mode = 'watch', step = 1, playing = false, timer = null;
-  var autoStarted = false, visible = false, generation = 0, controller = null, requestTimer = null;
+  var userPaused = false, pageAway = false, generation = 0, controller = null, requestTimer = null;
   var history = [], pending = false, typing = null;
   var composerVisible = false, voiceActive = false, voiceController = null, voiceEpoch = 0, voiceLoader = null;
   var voicePartial = null, voiceTurns = [], lastVoiceFinal = '';
@@ -1039,20 +1039,32 @@
   }
   function playbackControls() {
     var complete = step === examples[scenario].messages.length;
-    el('play').hidden = complete;
+    el('play').hidden = false;
     el('play').textContent = playing ? 'Pause' : complete ? 'Play again' : 'Play';
     el('play').setAttribute('aria-label', playing ? 'Pause the example' : complete ? 'Play the example again' : 'Play the example');
   }
   function pause() { clearTimeout(timer); timer = null; playing = false; removeTyping(); playbackControls(); }
+  function canPlay() {
+    var rect = messages.getBoundingClientRect();
+    return mode === 'watch' && !userPaused && !pageAway && !motion.matches && !document.hidden && !el('owner-dialog').open && rect.bottom > 0 && rect.top < window.innerHeight;
+  }
+  function resumePlayback() {
+    if (!canPlay()) { if (playing) pause(); return; }
+    if (!playing) { playing = true; playbackControls(); schedule(); }
+  }
   function nextMessage() {
-    if (!playing || mode !== 'watch') return;
-    if (step >= examples[scenario].messages.length) { pause(); return; }
+    timer = null;
+    if (!playing) return;
+    if (!canPlay()) { pause(); return; }
+    if (step >= examples[scenario].messages.length) { watchStart(); resumePlayback(); return; }
     removeTyping(); var m = examples[scenario].messages[step]; bubble(m[0], m[1]); step++; watchSummary(); follow();
     announce(step === examples[scenario].messages.length ? 'Example complete. The owner summary is ready.' : m[0] === 'agent' ? 'Front desk replied. Owner details updated.' : 'Customer details added.');
-    if (step === examples[scenario].messages.length) { pause(); return; }
     schedule();
   }
   function schedule() {
+    clearTimeout(timer);
+    // Keep the complete conversation and owner summary readable before the next loop.
+    if (step === examples[scenario].messages.length) { timer = setTimeout(nextMessage, 6000); return; }
     showTyping(); follow();
     timer = setTimeout(nextMessage, 2300);
   }
@@ -1062,10 +1074,10 @@
     if (step === examples[scenario].messages.length) requestAnimationFrame(follow); else messages.scrollTop = 0; watchSummary(); playbackControls();
   }
   function play() {
-    autoStarted = true;
+    userPaused = false;
     if (motion.matches) { watchStart(); announce('Complete example shown.'); return; }
     if (step === examples[scenario].messages.length) watchStart();
-    playing = true; playbackControls(); schedule();
+    resumePlayback();
   }
   function cancelRequest() {
     generation++; if (controller) controller.abort(); controller = null;
@@ -1270,10 +1282,10 @@
     } catch (error) { if (active()) { el('voice-status').textContent = 'Voice could not load. You can retry or type a request below.'; ended(); } }
   }
   buttons.forEach(function (button) { button.addEventListener('click', function () {
-    scenario = button.dataset.example; autoStarted = true; render(false); frameConversation();
+    scenario = button.dataset.example; render(false); frameConversation();
     if (mode === 'watch') play(); announce(examples[scenario].problem + ' selected.');
   }); });
-  el('mode-watch').addEventListener('click', function () { mode = 'watch'; autoStarted = true; render(false); frameConversation(); play(); });
+  el('mode-watch').addEventListener('click', function () { mode = 'watch'; render(false); frameConversation(); play(); });
   // The explicit example links start the example where the conversation is visible.
   // A section-heading scroll alone can leave playback below a small screen.
   document.querySelectorAll('a[href]').forEach(function (link) {
@@ -1283,29 +1295,31 @@
     link.addEventListener('click', function (event) {
       if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || link.target && link.target !== '_self') return;
       event.preventDefault();
-      mode = 'watch'; autoStarted = true; render(false); frameConversation();
+      mode = 'watch'; render(false); frameConversation();
       el('mode-watch').focus({ preventScroll: true }); play();
     }, true);
   });
-  el('mode-live').addEventListener('click', function () { if (mode === 'live') return; mode = 'live'; autoStarted = true; render(true); announce('Live AI practice ready. Choose a challenge, type or start a voice call.'); });
-  el('play').addEventListener('click', function () { if (playing) { pause(); announce('Example paused.'); } else { frameConversation(); play(); } });
+  el('mode-live').addEventListener('click', function () { if (mode === 'live') return; mode = 'live'; render(true); announce('Live AI practice ready. Choose a challenge, type or start a voice call.'); });
+  el('play').addEventListener('click', function () { if (playing) { userPaused = true; pause(); announce('Example paused.'); } else { frameConversation(); play(); } });
   el('replay').addEventListener('click', function () { watchStart(); frameConversation(); play(); announce('Example restarted.'); });
   el('reset').addEventListener('click', function () { stopVoice(false); liveStart(); input.focus({ preventScroll: true }); announce('New practice conversation started.'); });
   el('form').addEventListener('submit', send);
-  input.addEventListener('focus', function () { if (mode === 'watch') { mode = 'live'; autoStarted = true; render(false); } });
+  input.addEventListener('focus', function () { if (mode === 'watch') { mode = 'live'; render(false); } });
   input.addEventListener('input', function () { el('send').disabled = pending || voiceActive || !input.value.trim(); });
   input.addEventListener('keydown', function (event) { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); el('form').requestSubmit(); } });
   el('voice-start').addEventListener('click', startVoice); el('voice-stop').addEventListener('click', function () { stopVoice(true); });
-  el('summary-link').addEventListener('click', function () { el('owner-dialog').showModal(); });
+  el('summary-link').addEventListener('click', function () { el('owner-dialog').showModal(); resumePlayback(); });
+  el('owner-dialog').addEventListener('close', resumePlayback);
   el('owner-close').addEventListener('click', function () { el('owner-dialog').close(); });
   el('owner-dialog').addEventListener('click', function (event) { if (event.target === el('owner-dialog')) { var r = event.target.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) event.target.close(); } });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (playing) pause(); if (voiceActive) stopVoice(true); } });
-  window.addEventListener('pagehide', function () { pause(); cancelRequest(); stopVoice(false); });
-  motion.addEventListener('change', function () { if (mode === 'watch') { pause(); watchStart(); } });
+  document.addEventListener('visibilitychange', function () { if (document.hidden && voiceActive) stopVoice(true); resumePlayback(); });
+  window.addEventListener('pagehide', function () { pageAway = true; pause(); cancelRequest(); stopVoice(false); });
+  window.addEventListener('pageshow', function () { pageAway = false; resumePlayback(); });
+  motion.addEventListener('change', function () { if (mode === 'watch') { watchStart(); resumePlayback(); } });
   render(false); el('controls').hidden = false; wrap.classList.add('site-demo-ready');
   // A visitor-selected sales action opens the matching illustration, never its microphone.
   function showExample(value, focus) {
-    if (['sms', 'call', 'spanish'].indexOf(value) >= 0) { scenario = value; mode = 'live'; autoStarted = true; render(false); }
+    if (['sms', 'call', 'spanish'].indexOf(value) >= 0) { scenario = value; mode = 'live'; render(false); }
     wrap.scrollIntoView({ block: 'start', behavior: 'instant' });
     if (focus) (scenario === 'call' && mode === 'live' ? el('voice-start') : mode === 'live' ? input : el('mode-live')).focus({ preventScroll: true });
   }
@@ -1317,10 +1331,11 @@
     new IntersectionObserver(function (entries) {
       // A scenario click can scroll to the tabs and back to the conversation in one
       // task. Read current geometry so an older queued entry cannot pause the new play.
-      var rect = messages.getBoundingClientRect();
-      visible = rect.bottom > 0 && rect.top < window.innerHeight;
-      if (!visible && playing) pause();
-      if (visible && !autoStarted && !document.hidden && !motion.matches && mode === 'watch') play();
+      resumePlayback();
     }, { threshold: 0 }).observe(messages);
+  } else {
+    window.addEventListener('scroll', resumePlayback, { passive: true });
+    window.addEventListener('resize', resumePlayback);
+    resumePlayback();
   }
 })();

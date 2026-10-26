@@ -23,22 +23,21 @@
 .guide-visual .gvis-website-button,.guide-visual .gvis-slot{fill:var(--gvis-blue)}
 .guide-visual .gvis-wait-dot{fill:#91a8ce}
 @media(prefers-reduced-motion:no-preference){
-  .guide-visual .gvis-source{animation:gvis-source-in 4s ease-out 1 both}
-  .guide-visual .gvis-reply{animation:gvis-reply-in 4s ease-out 1 both}
-  .guide-visual .gvis-travel{animation:gvis-transfer 4s cubic-bezier(.4,0,.2,1) 1 both}
-  .guide-visual .gvis-result{animation:gvis-result-in 4s ease-out 1 both}
-  .guide-visual .gvis-confirm{animation:gvis-confirm-in 4s ease-out 1 both;transform-box:fill-box;transform-origin:center}
-  .guide-visual .gvis-wait-dot{animation:gvis-wait-once 4s ease-in-out 1 both}
+  .guide-visual .gvis-source{animation:gvis-source-in 4s ease-out infinite both}
+  .guide-visual .gvis-reply{animation:gvis-reply-in 4s ease-out infinite both}
+  .guide-visual .gvis-travel{animation:gvis-transfer 4s cubic-bezier(.4,0,.2,1) infinite both}
+  .guide-visual .gvis-result{animation:gvis-result-in 4s ease-out infinite both}
+  .guide-visual .gvis-confirm{animation:gvis-confirm-in 4s ease-out infinite both;transform-box:fill-box;transform-origin:center}
+  .guide-visual .gvis-wait-dot{animation:gvis-wait 4s ease-in-out infinite both}
   .guide-visual .gvis-wait-dot:nth-last-child(2){animation-delay:.12s}
   .guide-visual .gvis-wait-dot:last-child{animation-delay:.24s}
 }
-.guide-motion-paused .guide-visual *, .guide-visual.guide-motion-paused *{animation-play-state:paused!important}
-@keyframes gvis-source-in{0%{opacity:.25}15%,100%{opacity:1}}
-@keyframes gvis-reply-in{0%,17%{opacity:0}34%,100%{opacity:1}}
+@keyframes gvis-source-in{0%,100%{opacity:.25}15%,82%{opacity:1}}
+@keyframes gvis-reply-in{0%,17%,100%{opacity:0}34%,82%{opacity:1}}
 @keyframes gvis-transfer{0%,26%{opacity:0;transform:translateX(0)}33%{opacity:1;transform:translateX(0)}58%{opacity:1;transform:translateX(var(--gvis-travel,70px))}65%,100%{opacity:0;transform:translateX(var(--gvis-travel,70px))}}
-@keyframes gvis-result-in{0%,40%{opacity:.25}65%,100%{opacity:1}}
-@keyframes gvis-confirm-in{0%,57%{opacity:0}75%,100%{opacity:1}}
-@keyframes gvis-wait-once{0%,30%{opacity:.35}45%{opacity:1}65%,100%{opacity:.7}}
+@keyframes gvis-result-in{0%,40%,100%{opacity:.25}65%,82%{opacity:1}}
+@keyframes gvis-confirm-in{0%,57%,100%{opacity:0}75%,82%{opacity:1}}
+@keyframes gvis-wait{0%,30%,100%{opacity:.35}45%,72%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.guide-visual *{animation:none!important;transition:none!important}.guide-visual .gvis-travel{display:none}}
 @media(max-width:520px){.guide-visual{max-width:360px}.guide-visual-scene{max-height:170px}}
 @media(max-height:700px){.guide-visual-scene{max-height:145px}}
