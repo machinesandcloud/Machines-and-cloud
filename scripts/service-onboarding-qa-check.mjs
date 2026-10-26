@@ -228,6 +228,19 @@ await check('Actual API rejects anonymous/cross-owner requests and body-supplied
   assert.ok(stale.status >= 400 && stale.status < 500, JSON.stringify(stale));
   assert.equal((await children(f)).number, null);
 });
+await check('Actual approval lookup is authenticated, exact-submission bound and read-only', async () => {
+  const f=await fresh('approval-receipt'),other=await fixture('receipt-foreign'),body=await acceptance(f);
+  const read=async(token=f.token,suffix='')=>{const response=await clientHandler(new Request(origin+'/api/client?c='+f.c.slug+'&service_approval='+body.submissionId+suffix,{headers:{origin,authorization:'Bearer '+token}}));return {response,data:await response.json()};};
+  assert.equal((await read('')).response.status,401);assert.equal((await read(other.token)).response.status,403);
+  assert.equal((await read(f.token,'&service_approval='+body.submissionId)).response.status,400);
+  assert.equal((await read(f.token,'&extra=1')).response.status,400);
+  assert.equal((await read()).data.approval.state,'not_requested');
+  const saved=await clientRequest(f,{action:'request_service_onboarding',...body});assert.equal(saved.status,202);
+  const id=saved.data.serviceOnboarding.operation.id,before=JSON.stringify([await store.get('service_onboarding_intents',id),await store.get('service_onboarding_queue','active_v1')]),requests=report.providerRequests.length;
+  const result=await read();assert.equal(result.response.status,200);assert.match(result.response.headers.get('cache-control'),/no-store/);assert.equal(result.data.approval.state,'accepted');assert.equal(result.data.approval.submissionId,body.submissionId);assert.equal(result.data.approval.operationId,id);assert.equal(result.data.approval.generation,saved.data.serviceOnboarding.operation.generation);
+  assert.deepEqual(Object.keys(result.data.approval).sort(),['generation','operationId','state','submissionId']);
+  assert.equal(JSON.stringify([await store.get('service_onboarding_intents',id),await store.get('service_onboarding_queue','active_v1')]),before);assert.equal(report.providerRequests.length,requests);assert.equal((await children(f)).number,null);
+});
 await check('Actual authenticated draft saves and restores the selected phone mode and business-line details', async () => {
   const f = await fresh('draft');
   const fields = { name: f.c.owner.name, phone: f.c.owner.phone, business: f.c.business.name, phoneSetupMode: 'forward_business_line', businessNumber: '+17135550197', carrier: 'att', forwarding: 'missed', desiredChannels: ['voice', 'sms'] };

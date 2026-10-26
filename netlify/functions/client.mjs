@@ -30,7 +30,7 @@ import { dispatchServiceWorker } from "./lib/managed-sms.mjs";
 import { deliveryTenant } from "./lib/managed-consent.mjs";
 import { managedSMSConversations } from "./lib/managed-history.mjs";
 import { dispatchCalendarDeliveryWave } from "./lib/calendar-delivery.mjs";
-import { serviceOnboardingStatus, requestServiceOnboarding, cancelServiceOnboarding, ServiceOnboardingError } from "./lib/service-onboarding.mjs";
+import { serviceOnboardingStatus, serviceApprovalStatus, requestServiceOnboarding, cancelServiceOnboarding, ServiceOnboardingError } from "./lib/service-onboarding.mjs";
 import { dispatchServiceOnboarding } from "./lib/service-onboarding-dispatch.mjs";
 
 import { changeOwnerVisit, previewOwnerVisitAvailability, ownerVisitView, pendingOwnerVisitChange, pendingOwnerVisitCreations, OwnerVisitError } from "./lib/owner-visits.mjs";
@@ -115,6 +115,13 @@ async function handle(req) {
   if (selfService && !isOwner && (req.method !== "GET" || url.searchParams.has("export"))) return json({ error: "verification_required" }, 401);
   const ownsCurrent = current => !!current && current.slug === c.slug && current.ownerKey === c.ownerKey && (selfService ? isSelfServiceClient(current) && normalizeAccountEmail(current.owner?.email) === normalizeAccountEmail(session?.email) : current.ownerKey === key);
   const site = process.env.URL || url.origin;
+
+  if(req.method==='GET'&&url.searchParams.has('service_approval')){
+    if(!selfService||!isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
+    if([...url.searchParams.keys()].length!==2||[...url.searchParams.keys()].some(name=>!['c','service_approval'].includes(name)))return json({error:'invalid_approval'},400,{'Cache-Control':'no-store'});
+    try{return json({ok:true,approval:await serviceApprovalStatus(c,{role:'owner',email:session.email},url.searchParams.get('service_approval'))},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});}
+    catch(error){if(error instanceof ServiceOnboardingError)return json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});throw error;}
+  }
 
   if(req.method==='GET'&&url.searchParams.has('schedule')){
     if(!selfService||!isOwner)return json({error:'verification_required'},401,{'Cache-Control':'no-store'});

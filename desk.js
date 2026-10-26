@@ -32,7 +32,15 @@
     closeTour(false, false);
     recover('Your session expired. Sign in by email to reopen your workspace.'); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
   });
-  document.addEventListener('mc:desk-refresh',function(){if(!leaving)load();});
+  document.addEventListener('mc:desk-refresh',function(event){if(!leaving)load(null,{soft:event.detail?.soft===true});});
+  document.addEventListener('mc:desk-snapshot',function(event){
+    var snapshot=event.detail?.snapshot,session=event.detail?.session,currentSession;
+    try{currentSession=sessionStorage.getItem('mc-onboarding-session-v1');}catch(error){return;}
+    if(leaving||!ownerSession||session!==ownerSession||currentSession!==ownerSession||snapshot?.client?.slug!==slug||!snapshot.client.owner||!/^[a-f0-9]{64}$/.test(snapshot.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(snapshot.editRevision||''))return;
+    // A newer profile save wins over an earlier connection readback.
+    if(data&&(snapshot.configurationRevision!==data.configurationRevision||snapshot.editRevision!==data.editRevision)){load(null,{soft:true});return;}
+    load(snapshot,{soft:true});
+  });
   document.addEventListener('mc:desk-route',function(event){if(!leaving && pageCopy[event.detail?.tab])routeTo(event.detail.tab);});
   async function apiRequest(method, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
@@ -248,12 +256,15 @@
   window.addEventListener('hashchange', function () { if (!leaving && pageCopy[location.hash.slice(1)]) routeTo(location.hash.slice(1)); });
   function routeTo(tab) {
     if (!pageCopy[tab] || leaving) return;
+    var previous=document.body.dataset.activePage;
     window.__tabPicked = true; if (tab === 'test') $('tabTest').style.display = '';
     showTab(tab); var pane = $('p-' + tab); if (!pane) return;
     history.replaceState(null, '', location.pathname + location.search + '#' + tab);
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
     pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
+    if(tab==='leads'&&previous!==tab&&data){var readSequence=loadSequence;queueMicrotask(function(){if(!leaving&&data&&document.body.dataset.activePage==='leads'&&loadSequence===readSequence)load(null,{soft:true});});}
   }
+  $('inboxRefreshRetry').addEventListener('click',function(){if(!leaving&&data)load(null,{soft:true});});
   function homeAction(button){if(button.dataset.service){document.dispatchEvent(new CustomEvent('mc:service-guide',{detail:{service:button.dataset.service}}));return;}routeTo(button.dataset.route||'know');var target=button.dataset.anchor&&$(button.dataset.anchor);if(target){var details=target.closest('details');if(details)details.open=true;target.scrollIntoView({block:'nearest'});target.tabIndex=-1;target.focus({preventScroll:true});}}
   $('nextSetupAction').addEventListener('click',function(){homeAction(this);});
   $('homeSetupSecondary').addEventListener('click',function(){homeAction(this);});
@@ -912,13 +923,15 @@
     finally{if(generation===portalGeneration&&!leaving){accountBusy=false;if(data)renderAccount(data);}}
   });
 
-  function load(snapshot) {
+  function load(snapshot, options) {
+    options=options||{};
     var generation = portalGeneration, fence = cfgFence, sequence = ++loadSequence;
+    if(options.soft&&data){$('inboxRefresh').hidden=false;$('inboxRefreshMessage').textContent='Checking for the latest requests…';$('inboxRefreshRetry').hidden=true;}
     loadPending = (snapshot && snapshot.client ? Promise.resolve(snapshot) : apiRequest()).then(function (d) {
       if (generation !== portalGeneration || fence !== cfgFence || sequence !== loadSequence || leaving) return;
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
       $('portalRecovery').hidden = true; $('portalContent').hidden = false; document.body.dataset.workspaceState = 'ready'; $('deskRail').hidden = false;
-      data = d; var c = d.client;
+      data = d; var c = d.client;$('inboxRefresh').hidden=true;
       queueMicrotask(function () { if (!leaving && data === d) document.dispatchEvent(new CustomEvent('mc:desk', { detail: d })); });
       var windowChoice = $('availabilityWindow').value;
       $('availabilityWindow').innerHTML = '<option value="">Whole day</option>' + (c.windows || []).map(function (w) { return '<option value="' + esc(w) + '">' + esc(w) + '</option>'; }).join('');
@@ -996,6 +1009,7 @@
     }).catch(function (error) {
       if (generation !== portalGeneration || fence !== cfgFence || sequence !== loadSequence || leaving) return;
       if (error.status === 401 || error.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+      if(options.soft&&data){$('inboxRefresh').hidden=false;$('inboxRefreshMessage').textContent='The latest requests could not be checked. Your saved view and edits are kept.';$('inboxRefreshRetry').hidden=false;return;}
       if (fence === cfgFence) recover(error.name === 'AbortError' ? 'Loading timed out. Try again or sign in by email.' : error.message);
     });
     return loadPending;

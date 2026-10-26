@@ -10,7 +10,7 @@
   var calendarAutoAttempted = false, calendarNotice = hasCalendarReturn && !calendarReturn ? 'This calendar return could not be matched to this workspace. Connect Google Calendar again to continue.' : '';
   if (hasCalendarReturn || query.has('calendar')) { query.delete('calendar'); history.replaceState(null, '', location.pathname + '?' + query.toString() + '#setup'); }
   if (!session || !slug) return;
-  var data, busy = false, generation = 0, dialog = document.createElement('dialog'); dialog.id = 'connectionDialog'; dialog.className = 'walkthrough'; dialog.setAttribute('aria-labelledby', 'connectionTitle'); document.body.appendChild(dialog);
+  var data, busy = false, generation = 0, savedSetupReadback = null, dialog = document.createElement('dialog'); dialog.id = 'connectionDialog'; dialog.className = 'walkthrough'; dialog.setAttribute('aria-labelledby', 'connectionTitle'); document.body.appendChild(dialog);
   var $ = function (id) { return document.getElementById(id); }, container = $('serviceConnections'), message = $('serviceConnectionMessage');
   var meta = document.querySelector('meta[name="mc-api-base"]'), base = meta && meta.content ? meta.content.replace(/\/$/, '') : '';
   async function sessionBinding() {
@@ -18,6 +18,18 @@
     return Array.from(new Uint8Array(digest)).map(function (byte) { return byte.toString(16).padStart(2,'0'); }).join('');
   }
   function currentSession() { try { return sessionStorage.getItem('mc-onboarding-session-v1') === session; } catch (error) { return false; } }
+  var approvalStorageKey = 'mc-service-approval-pending-v1:' + slug;
+  async function rememberApproval() {
+    var held = savedSetupReadback, binding = await sessionBinding();
+    if (!held || held !== savedSetupReadback || held.generation !== generation || !currentSession()) return false;
+    sessionStorage.setItem(approvalStorageKey, JSON.stringify({ binding: binding, submissionId: held.submissionId, confirmed: held.confirmed === true }));
+    return true;
+  }
+  function clearApproval() { savedSetupReadback = null; try { sessionStorage.removeItem(approvalStorageKey); } catch (error) { /* A new session cannot use the old binding. */ } }
+  function resumeApproval() { if (savedSetupReadback && !savedSetupReadback.resumeAttempted && !busy && data?.client?.slug === slug && currentSession()) { savedSetupReadback.resumeAttempted = true; readSavedSetup(); } }
+  var approvalRestore = sessionBinding().then(function (binding) {
+    try { var stored = JSON.parse(sessionStorage.getItem(approvalStorageKey) || 'null'); if (!currentSession() || savedSetupReadback || stored?.binding !== binding || !/^[a-f0-9]{32,64}$/.test(stored.submissionId || '')) return; savedSetupReadback = { generation: generation, submissionId: stored.submissionId, confirmed: stored.confirmed === true, resumeAttempted: false }; resumeApproval(); } catch (error) { /* Corrupt local data grants no approval. */ }
+  });
   function clearCalendarReturn() {
     var previous = calendarReturn; calendarReturn = null;
     try {
@@ -119,6 +131,12 @@
     return true;
   }
   function revealConnectionStep(id) { var target=$(id);if(!target)return;var parent=target.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}target.hidden=false;target.tabIndex=-1;target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});target.focus({preventScroll:true}); }
+  function showSetupStep(id) {
+    if (!currentSession()) return;
+    var run = generation;
+    document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: 'setup' } }));
+    requestAnimationFrame(function () { if (currentSession() && run === generation && document.body.dataset.activePage === 'setup') revealConnectionStep(id); });
+  }
 
   function setupPlan(d,guideShown) {
     var plan = d.serviceOnboarding;
@@ -176,21 +194,78 @@
   function scheduleConnectionRefresh(){connectionRefreshStop();var status=$('connectionRefreshStatus');if(status)status.textContent=connectionAutoReads>=6?'Automatic status checks paused. You can check saved status again below.':connectionHasWork()?'Progress updates while setup is running. The background setup continues if you leave this page.':'Check saved setup progress at any time.';if(connectionAutoReads>=6||!connectionCanRefresh())return;var expectedGeneration=generation;connectionRefreshTimer=setTimeout(function(){connectionRefreshTimer=null;if(expectedGeneration!==generation||!connectionCanRefresh())return;connectionAutoReads++;connectionRefreshInFlight=true;document.querySelectorAll('[data-connection="check_status"]').forEach(function(button){button.disabled=true;});document.dispatchEvent(new CustomEvent('mc:desk-refresh'));},connectionRefreshDelays[connectionAutoReads]);}
   document.addEventListener('visibilitychange',scheduleConnectionRefresh);window.addEventListener('hashchange',scheduleConnectionRefresh);document.addEventListener('close',scheduleConnectionRefresh,true);
   new MutationObserver(scheduleConnectionRefresh).observe(document.body,{attributes:true,attributeFilter:['data-active-page','data-workspace-state']});
-  document.addEventListener('mc:desk', function (event) { render(event.detail); if (calendarNotice) { message.textContent = calendarNotice; calendarNotice = ''; } continueCalendarReturn(event.detail); });
-  $('deskSignOut').addEventListener('click', function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; if (dialog.open) dialog.close(); dialog.innerHTML = ''; container.innerHTML = ''; });
-  document.addEventListener('mc:session-expired',function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; if (dialog.open) dialog.close(); dialog.innerHTML = ''; });
+  document.addEventListener('mc:desk', function (event) { render(event.detail); resumeApproval(); if (calendarNotice) { message.textContent = calendarNotice; calendarNotice = ''; } continueCalendarReturn(event.detail); });
+  $('deskSignOut').addEventListener('click', function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; clearApproval(); if (dialog.open) dialog.close(); dialog.innerHTML = ''; container.innerHTML = ''; });
+  document.addEventListener('mc:session-expired',function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; clearApproval(); if (dialog.open) dialog.close(); dialog.innerHTML = ''; });
   function review(title, content, submitLabel, onSubmit) {
+    if (savedSetupReadback) { showSavedSetupReadback(savedSetupReadback.confirmed ? 'Your approval is saved. Check its current progress before making another setup change.' : 'Check whether your earlier request was saved before submitting another approval.'); return; }
     dialog.innerHTML = '<form id="connectionForm"><h2 id="connectionTitle">' + esc(title) + '</h2>' + content + '<p id="connectionDialogMessage" role="status" aria-live="polite"></p><div class="walkthrough-actions"><button type="submit" class="btn-pill btn-pill-blue btn-sm">' + esc(submitLabel) + '</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="connectionBack">Back</button></div></form>';
     $('connectionBack').onclick = function () { if (!busy) dialog.close(); };
     $('connectionForm').onsubmit = function (event) { event.preventDefault(); if (!busy && event.target.reportValidity()) onSubmit(new FormData(event.target)); }; dialog.showModal();
   }
   dialog.addEventListener('cancel', function (event) { if (busy) event.preventDefault(); });
   dialog.addEventListener('close', function () { dialog.innerHTML = ''; });
+  function showSavedSetupReadback(text, failed) {
+    var confirmed = savedSetupReadback?.confirmed === true;
+    dialog.innerHTML = '<section><h2 id="connectionTitle">'+(confirmed?'Your setup request is saved':'Check your setup request')+'</h2><p>'+(confirmed?'We are checking its latest progress so you can continue from the right step.':'We will check whether your last request was saved before another approval.')+'</p><p id="connectionDialogMessage" role="status" aria-live="polite"></p><div class="walkthrough-actions"><button type="button" class="btn-pill btn-pill-blue btn-sm" id="connectionReadbackRetry">Check saved setup</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="connectionBack">Close</button></div></section>';
+    $('connectionDialogMessage').textContent = text || 'Checking your saved setup…'; $('connectionDialogMessage').dataset.error = String(!!failed);
+    $('connectionReadbackRetry').disabled = busy; $('connectionBack').disabled = busy;
+    $('connectionReadbackRetry').onclick = function () { readSavedSetup(); };
+    $('connectionBack').onclick = function () { if (!busy) dialog.close(); };
+    if (!dialog.open) dialog.showModal();
+  }
+  async function readSavedSetup(alreadyBusy) {
+    var held = savedSetupReadback;
+    if (!held || busy && alreadyBusy !== true || !currentSession() || held.generation !== generation) return;
+    busy = true; showSavedSetupReadback('Checking this setup request and its next step…');
+    var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 15000);
+    try {
+      var receiptResponse = await fetch(base + '/api/client?c=' + encodeURIComponent(slug) + '&service_approval=' + encodeURIComponent(held.submissionId), { headers: { Authorization: 'Bearer ' + session }, cache: 'no-store', signal: controller.signal });
+      if (held.generation !== generation || !currentSession()) return;
+      if (receiptResponse.status === 401 || receiptResponse.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+      var receipt = await receiptResponse.json(), approval = receipt.approval;
+      if (held.generation !== generation || !currentSession()) return;
+      if (!receiptResponse.ok || receipt.ok !== true || approval?.submissionId !== held.submissionId || approval.state !== 'accepted' || !approval.operationId || !Number.isSafeInteger(approval.generation)) throw new Error('This setup request is not yet confirmed.');
+      held.confirmed = true; held.operationId = approval.operationId; held.operationGeneration = approval.generation;
+      try { await rememberApproval(); } catch (error) { /* The original submission remains retained in memory and storage. */ }
+      var response = await fetch(base + '/api/client?c=' + encodeURIComponent(slug), { headers: { Authorization: 'Bearer ' + session }, cache: 'no-store', signal: controller.signal });
+      if (held.generation !== generation || !currentSession()) return;
+      if (response.status === 401 || response.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+      var latest = await response.json();
+      if (held.generation !== generation || !currentSession()) return;
+      if (!response.ok || latest.error || latest.ok === false || latest.client?.slug !== slug || !latest.setup?.connectionJourney || latest.serviceOnboarding?.operation?.id !== held.operationId || latest.serviceOnboarding.operation.generation !== held.operationGeneration) throw new Error('The saved approval could not be matched to its current setup.');
+      // The main workspace owns applying a full response and retaining newer
+      // business/account drafts. Wait until that exact canonical state is shown.
+      await new Promise(function (resolve, reject) {
+        var timer = setTimeout(function () { finish(new Error('The latest setup could not be displayed.')); }, 5000);
+        function finish(error) { clearTimeout(timer); document.removeEventListener('mc:desk', observed); error ? reject(error) : resolve(); }
+        function observed(event) { if (!currentSession() || held.generation !== generation) return finish(new Error('This workspace session changed.')); if (event.detail?.client?.slug === slug && event.detail.setup?.connectionJourney && event.detail.serviceOnboarding?.operation?.id === held.operationId && event.detail.serviceOnboarding.operation.generation === held.operationGeneration) finish(); }
+        document.addEventListener('mc:desk', observed);
+        document.dispatchEvent(new CustomEvent('mc:desk-snapshot', { detail: { snapshot: latest, session: session } }));
+      });
+      if (held.generation !== generation || !currentSession()) return;
+      clearApproval(); if (dialog.open) dialog.close();
+      message.textContent = 'Your approval is saved. The current setup step is ready.';
+    } catch (error) {
+      if (held.generation === generation && currentSession()) showSavedSetupReadback(held.confirmed ? 'Your approval is saved, but its latest progress could not be checked. Check saved setup again; your approval will not be submitted again.' : 'We could not confirm whether this request was saved. Keep it on hold and check saved setup again. Another approval will not be submitted.', true);
+    } finally {
+      clearTimeout(timeout);
+      if (held.generation === generation && currentSession()) { busy = false; dialog.querySelectorAll('button').forEach(function (button) { button.disabled = false; }); scheduleConnectionRefresh(); document.dispatchEvent(new CustomEvent('mc:guide-state-change')); }
+    }
+  }
   async function request(action, fields) {
-    if (busy || !data) return; busy = true; var expectedGeneration = generation;
+    if (busy || !data) return; if (savedSetupReadback) { readSavedSetup(); return; } busy = true; var expectedGeneration = generation, approvalDispatched = false;
     var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},20000);
     message.textContent = action === 'complete_calendar_connection' ? (fields.error ? 'Confirming your calendar choice…' : 'Connecting your Google Calendar…') : 'Saving your connection…'; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     try {
+      if (action === 'request_service_onboarding') {
+        await approvalRestore;
+        if (generation !== expectedGeneration || !currentSession()) return;
+        if (savedSetupReadback) { clearTimeout(timeout); await readSavedSetup(true); return; }
+        savedSetupReadback = { generation: expectedGeneration, submissionId: fields.submissionId.toLowerCase(), confirmed: false, resumeAttempted: true };
+        if (!await rememberApproval()) return;
+      }
+      approvalDispatched = action === 'request_service_onboarding';
       var response = await fetch(base + '/api/client?c=' + encodeURIComponent(slug), { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + session }, body:JSON.stringify(Object.assign({ action:action }, fields || {})),signal:controller.signal });
       if (generation !== expectedGeneration) return;
       if (response.status===401 || response.status===403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
@@ -204,6 +279,10 @@
         sessionStorage.setItem('mc-calendar-pending-v1', JSON.stringify({ slug:slug, state:state, expiresAt:expiresAt, sessionBinding:binding })); location.assign(destination.href); return;
       }
       if (action === 'complete_calendar_connection') clearCalendarReturn();
+      if (action === 'request_service_onboarding') {
+        savedSetupReadback.confirmed = true; try { await rememberApproval(); } catch (error) { /* The original submission remains retained. */ }
+        clearTimeout(timeout); await readSavedSetup(true); return;
+      }
       if(!result.connections){document.dispatchEvent(new CustomEvent('mc:desk-refresh'));if(dialog.open)dialog.close();message.textContent='Your change is saved. Refreshing connection status…';return;}
       if(result.client)data.client=result.client;
       if(result.setup)data.setup=result.setup;
@@ -214,6 +293,10 @@
       message.textContent = action === 'complete_calendar_connection' ? result.result?.denied ? 'Calendar access was not granted. Your existing settings are unchanged.' : result.connections.calendar.connected ? 'Google Calendar is connected. ' + (result.connections.calendar.detail || 'Check each visit’s delivery status above.') : 'Your calendar status is saved. Check its next step above.' : 'Your change is saved. Its status above shows what happens next.';
     } catch (error) {
       if (expectedGeneration === generation) {
+        if (action === 'request_service_onboarding' && savedSetupReadback) {
+          if (approvalDispatched && !(response?.status >= 400 && response.status < 500)) { clearTimeout(timeout); await readSavedSetup(true); return; }
+          clearApproval();
+        }
         if (action === 'complete_calendar_connection') { clearCalendarReturn(); if (data) render(data); document.dispatchEvent(new CustomEvent('mc:desk-refresh')); }
         (dialog.open ? $('connectionDialogMessage') : message).textContent = error.name==='AbortError'?'The request timed out. Your change may be saved; refresh its status before retrying.':error.message;
       }
@@ -245,9 +328,9 @@
     if(target.dataset.journeyRoute){var tab=target.dataset.journeyRoute;if(!['know','test','setup','leads','availability'].includes(tab))return;document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:tab}}));if(tab==='setup')requestAnimationFrame(function(){revealConnectionStep('websiteInstallCard');if(!$('websiteInstallEdit').hidden)$('websiteInstallWebsite').focus({preventScroll:true});});return;}
     if(target.dataset.connection==='edit_sms_intake'){if(dialog.open)dialog.close();document.dispatchEvent(new CustomEvent('mc:service-intake-open',{detail:{service:'sms'}}));return;}
     if(target.dataset.connection==='review_phone_details'){if(dialog.open)dialog.close();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'know'}}));requestAnimationFrame(function(){revealConnectionStep('phoneProfileHeading');$('phoneBusinessNumber').focus({preventScroll:true});});return;}
-    if(target.dataset.connection==='show_phone_steps'){revealConnectionStep('phoneRoutingSteps');return;}
-    if(target.dataset.connection==='show_text_steps'){revealConnectionStep('textConnectionSteps');return;}
-    if(target.dataset.connection==='show_calendar_steps'){revealConnectionStep('calendarConnectionSteps');return;}
+    if(target.dataset.connection==='show_phone_steps'){showSetupStep('phoneRoutingSteps');return;}
+    if(target.dataset.connection==='show_text_steps'){showSetupStep('textConnectionSteps');return;}
+    if(target.dataset.connection==='show_calendar_steps'){showSetupStep('calendarConnectionSteps');return;}
     var action = target.dataset.connection, c = data.connections, revision = data.configurationRevision;
     if(['review_setup','review_sms'].includes(action)&&data.serviceIntake?.sms?.complete&&privateReviewAction!==action){loadPrivateReview(action);return;}
     privateReviewAction=null;

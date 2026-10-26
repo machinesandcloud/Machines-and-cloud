@@ -57,7 +57,7 @@ function queueValue(value) {
 }
 function operationView(row, state = row.state, reasonCode = row.reasonCode) {
   return { id: row.id, state, detail: details[state] || details.uncertain, reasonCode: reasonCode || null, requestedChannels: [...row.requestedChannels],
-    desiredChannels:[...desiredChannels(row)],acceptedChannels:[...authorizedChannels(row)],version:row.version,
+    desiredChannels:[...desiredChannels(row)],acceptedChannels:[...authorizedChannels(row)],version:row.version,generation:row.generation,
     createdAt: row.createdAt, updatedAt: row.updatedAt, cancellationRequested: !!row.cancelRequestedAt,
     numberRequested: !!row.steps?.number?.acknowledgedAt, voiceRequested: !!row.steps?.voice?.acknowledgedAt, messagingRequested: !!row.steps?.sms?.acknowledgedAt,
     nextCheckAt: row.nextCheckAt || null };
@@ -108,6 +108,25 @@ const desiredChannels = row => row?.desiredChannels || row?.requestedChannels ||
 const channelSet = values => ['voice','sms'].filter(channel => values.includes(channel));
 function channelReady(kind, status) { return kind === 'voice' ? status.voice.available === true && !!status.voice.offer : status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && !!keyBytes(); }
 function acceptanceReceipt(row, submissionId) { return (row?.admissions || []).find(receipt => receipt.submissionId === submissionId.toLowerCase()); }
+// Read-only recovery for one owner approval whose HTTP response was lost.
+// Queue admission is itself durable; inspecting it must not repair or dispatch it.
+export async function serviceApprovalStatus(c, actor, submissionId) {
+  requireOwner(actor);
+  if (!/^[a-f0-9]{32,64}$/.test(submissionId || '')) throw new ServiceOnboardingError('invalid_approval', 'Check the original saved approval.', 400);
+  const current = await currentClient(c, actor), id = idFor(current);
+  const [primary, queued] = await Promise.all([strictRead(STORE, id), strictRead(QUEUE, KEY)]);
+  const queue = queueValue(queued), entry = queue.intents[id], rows = [primary, entry?.admission].filter(Boolean);
+  const result = { submissionId, state: 'not_requested', operationId: null, generation: null };
+  if (entry && (entry.id !== id || entry.tenantIdentity !== tenant(current))) return { ...result, state: 'uncertain' };
+  if (rows.some(row => row.id !== id || row.tenantIdentity !== tenant(current) || ![1, 2].includes(row.version) || !Array.isArray(row.admissions))) return { ...result, state: 'uncertain' };
+  const matching = rows.filter(row => acceptanceReceipt(row, submissionId));
+  if (matching.length) {
+    if (matching.some(row => !Number.isInteger(row.generation) || row.generation < 1) || new Set(matching.map(row => row.generation)).size !== 1) return { ...result, state: 'uncertain' };
+    return { ...result, state: 'accepted', operationId: id, generation: matching[0].generation };
+  }
+  // Absence is only an observation, not permission to resubmit an in-flight POST.
+  return rows.length || entry ? { ...result, state: 'uncertain' } : result;
+}
 function childPermission(kind, row, facts) {
   if (row.providerBinding.accountSid !== (process.env.TWILIO_ACCOUNT_SID || '')) return 'provider_binding_changed';
   if (kind === 'number') {

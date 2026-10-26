@@ -65,7 +65,7 @@
   var recovery=root.querySelector('.recovery'),recoverButton=root.querySelector('.recover-reply');
   var checkBanner=null,checkMessage=null,checkStatusButton=null,checkAckButton=null,sampleButton=null,sampleDetails={service:'',area:''};
   var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?', available: false };
-  var busy = false, rendered = false;
+  var busy = false, rendered = false, configSequence = 0;
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function add(role, text) { var el = document.createElement('div'); el.className = 'b ' + (role === 'user' ? 'u' : 'a'); el.innerHTML = esc(text).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); list.appendChild(el); list.scrollTop = list.scrollHeight; return el; }
@@ -104,6 +104,9 @@
   async function checkStatus(observe){if(!setupCheck)return;var focused=document.activeElement===checkStatusButton;checkStatusButton.disabled=true;try{var pending=setupCheck.pending,result=await checkRequest(observe&&!pending?'observe':'status',pending?{turnId:pending.id}:{}),check=result.check;if(!check||check.id!==setupCheck.id||check.origin!==location.origin||check.contact!==setupCheck.contact)throw new Error('This check belongs to a different website. Return to your workspace.');sampleDetails={service:typeof check.sample?.service==='string'?check.sample.service.slice(0,160):'',area:typeof check.sample?.area==='string'?check.sample.area.slice(0,160):''};setupCheck.expiresAt=check.expiresAt;checkReady=!!check.observed&&check.chatAvailable===true;persistCheck();
       if(pending){if(check.turn?.answerObserved){setupCheck.pending=null;persistCheck();checkAckButton.hidden=true;checkNote(check.turn.record?'Your sample request is saved. Open your workspace to review it.':'The previous answer is confirmed. You can continue the sample conversation.');}else{checkNote(check.turn?.record?'Your sample request is saved; its answer is not confirmed. Open your workspace before sending it again.':'The previous message may already have been processed. Check its outcome in your workspace before sending it again.');if(pending.completionRef)checkAckButton.hidden=false;}}
       else checkNote(check.chatAvailable?'Widget found. Try the sample request below, then send it when you are ready.':('Widget found. '+(check.reason||'Finish your setup in the workspace before trying a request.')));
+      // The owner may activate chat after this tab first observes the widget.
+      // Re-read its public availability without reloading or repeating a turn.
+      if(check.chatAvailable===true)await refreshConfig();
     }catch(error){checkReady=false;if([401,403,410].includes(error.status)){setupInvalid=true;setupCheck.challenge='';setupCheck.pending=null;try{sessionStorage.setItem(CHECK_STORE,JSON.stringify({ended:true,id:setupCheck.id,origin:location.origin}));}catch(storageError){/* The in-memory challenge is cleared. */}}checkNote(error.message||'The check is unavailable. Return to your workspace to start again.');}finally{checkStatusButton.disabled=setupInvalid;checkControls();if(focused&&document.activeElement===document.body&&root.classList.contains('open')){if(!checkStatusButton.disabled)checkStatusButton.focus();else checkBanner.querySelector('a').focus();}}}
   if(setupCheck||setupInvalid){
     checkBanner=document.createElement('div');checkBanner.className='check';checkBanner.innerHTML='<b>Website setup check</b><p role="status" aria-live="polite"></p><p>Creates a labeled sample request using your customer-chat allowance. Your usual request notifications may run.</p><button type="button" data-check-sample>Use sample details</button><button type="button" data-check-status>Check saved status</button><button type="button" data-check-ack hidden>Retry check receipt</button><a target="_blank" rel="noopener noreferrer">Open my workspace</a>';
@@ -111,13 +114,19 @@
     sampleButton.addEventListener('click',function(){input.value="Hi, I'm Alex Test. I'd like a callback about "+(sampleDetails.service||"one of your services")+(sampleDetails.area?" in "+sampleDetails.area:"")+". My number is (713) 555-0142. This is a setup check.";input.focus();});checkStatusButton.addEventListener('click',function(){checkStatus(false);});checkAckButton.addEventListener('click',acknowledgeCheck);
     if(setupInvalid){checkNote('This setup check is invalid or has ended. Return to your workspace to start again.');sampleButton.disabled=true;checkStatusButton.disabled=true;}else{checkNote('Checking this website…');checkStatus(true);}
   }
-  fetch(BASE + '/api/client?c=' + encodeURIComponent(slug)).then(function (r) { if (!r.ok) throw new Error('unavailable'); return r.json(); }).then(function (d) {
-    if (!d || !d.name) throw new Error('unavailable');
-    if (d && d.name) { cfg.name = d.name; cfg.greeting = d.greeting || cfg.greeting; root.querySelector('.h b').textContent = cfg.name; }
-    if (d.webAvailable === false || d.status === 'paused' || d.status === 'cancelled') { unavailable(); return; }
-    configReady=true;checkControls();
-    if (rendered) render();
-  }).catch(function () { unavailable(); });
+  async function refreshConfig() {
+    var sequence=++configSequence,controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);
+    try {
+      var response=await fetch(BASE+'/api/client?c='+encodeURIComponent(slug),{cache:'no-store',signal:controller.signal});
+      if(!response.ok)throw new Error('unavailable');var d=await response.json();
+      if(!d||!d.name)throw new Error('unavailable');if(sequence!==configSequence)return;
+      cfg.name=d.name;cfg.greeting=d.greeting||cfg.greeting;root.querySelector('.h b').textContent=cfg.name;
+      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){unavailable();return;}
+      configReady=true;checkControls();if(rendered)render();
+    }catch(error){if(sequence===configSequence)unavailable();}
+    finally{clearTimeout(timeout);}
+  }
+  refreshConfig();
 
   function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); if (!rendered) render(); setTimeout(function () { input.focus(); }, 50); }
   function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); launcher.focus(); }
