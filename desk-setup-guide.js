@@ -21,7 +21,7 @@
     return form ? { desiredChannels: Array.from(form.querySelectorAll('[name="preparationChannel"]:checked')).map(function (field) { return field.value; }).sort(), website: $('preparationWebsite').value.trim() } : preparation && preparation.draft;
   }
   function samePreparation(a, b) { return !!a && !!b && a.website === b.website && JSON.stringify(a.desiredChannels.slice().sort()) === JSON.stringify(b.desiredChannels.slice().sort()); }
-  function hasPreparationForm() { var facts=preparationFacts();return !!facts && facts.eligible === true && (!facts.prepared&&!facts.selectionSaved || preparation && (preparation.dirty || preparation.pending || preparation.awaiting || preparation.uncertain)); }
+  function hasPreparationForm() { var facts=preparationFacts();return !!facts && facts.eligible === true && (!facts.prepared&&!facts.selectionSaved&&!(facts.desiredChannels||[]).length || preparation && (preparation.dirty || preparation.pending || preparation.awaiting || preparation.uncertain)); }
   function preparationNotice(text, isError) { if (preparation) { preparation.notice = text; preparation.error = !!isError; } var node=$('preparationStatus');if(node){node.textContent=text;node.dataset.error=String(!!isError);} }
   function preparationRead() {
     if (!current() || !preparation || preparation.pending || preparation.awaiting) return;
@@ -92,6 +92,9 @@
   }
   function action(row) { return row.nextAction || row.action || { kind: 'wait', label: 'Checking setup status' }; }
   function needsServiceInformation(id) {
+    if(id==='calendar')return false; // Google selects the actual account during permission review.
+    var row=rows().find(function(item){return item.id===id;});
+    if(row?.activation?.blockedBy==='machines_and_cloud')return false;
     var intake=data.serviceIntake&&data.serviceIntake[id];
     return !!intake&&!!window.MCServiceIntake&&intake.canSave!==false&&!['cancelled','archived','paused'].includes(data.client.status)&&(['voice','sms'].includes(id)?!intake.complete||id==='voice'&&intake.canApply:id==='web'?!intake.preferences?.builder||!intake.preferences?.installationBy||intake.canApply:!intake.preferences?.accountEmail);
   }
@@ -100,6 +103,7 @@
     if(row.status==='paused')return 'Paused';
     if(row.status==='not_selected'||!row.requested&&!row.retained)return 'Not selected';
     if(row.verification?.working===true)return 'Delivery verified';
+    if(row.activation?.blockedBy==='machines_and_cloud')return 'Needs our attention';
     if(row.verification?.state==='needs_attention')return 'Check needs attention';
     if(needsServiceInformation(row.id))return 'Your next step';
     if(row.responsibility==='carrier'||row.status==='waiting_carrier')return 'Carrier review';
@@ -244,7 +248,8 @@
     var row = manualSelection && items.find(function (item) { return item.id === selected; }) || chooseDefault(items);
     selected = row.id;
     var guide = row.guide || {}, steps = Array.isArray(guide.steps) ? guide.steps.slice(0,8) : [], next = action(row);
-    var intake=data.serviceIntake&&data.serviceIntake[selected],intakeEnabled=!!intake&&!!window.MCServiceIntake&&!['cancelled','archived','paused'].includes(data.client.status),intakeNeeded=needsServiceInformation(selected);
+    var platformBlocked=row.activation?.blockedBy==='machines_and_cloud';
+    var intake=data.serviceIntake&&data.serviceIntake[selected],intakeEnabled=selected!=='calendar'&&!platformBlocked&&!!intake&&!!window.MCServiceIntake&&!['cancelled','archived','paused'].includes(data.client.status),intakeNeeded=needsServiceInformation(selected);
     var nextIndex = currentStep(row, steps), nextId = steps[nextIndex] && steps[nextIndex].id;
     if(guideService!==selected){guideService=selected;guideStep=nextId;guideManual=false;}
     if(!guideManual || !steps.some(function(step){return step.id===guideStep;}))guideStep=nextId;
@@ -253,7 +258,7 @@
     var complete=steps.filter(function(item){return item.state==='complete';}).length, finished=steps.length>0&&complete===steps.length;
     var focused = host.contains(document.activeElement) ? document.activeElement.dataset.guideService || document.activeElement.id : null;
     var existingPath=$('guideSetupPath');if(existingPath)pathExpanded=existingPath.open;
-    var showPath=pathExpanded===null?window.matchMedia('(min-width: 801px)').matches:pathExpanded;
+    var showPath=pathExpanded===true;
     host.hidden=false;host.closest('#connectionsCard').classList.add('has-setup-guide');
     host.dataset.guideCurrentStep=nextId||'';host.dataset.guidePreviewStep=step.id;host.dataset.guideSelectedService=selected;
     var status=step.state==='complete'?'Saved':!isNext?'Looking ahead':finished?'All steps confirmed':next.kind==='wait'?'Setup is continuing':'Your next step';
@@ -265,16 +270,25 @@
       detail={web:'Add your website and choose its builder. We’ll prepare the installation steps for you.',voice:'Choose your business line or a new front desk number, then confirm where owner callbacks should go.',sms:'Confirm your registered business and contact details. We’ll keep them ready for the carrier review.',calendar:'Choose the Google account you use for work, then continue to its permission review.'}[selected];
       kind=selected==='voice'?'phone':selected==='web'?'website':selected;
     }
+    if(platformBlocked&&isNext){status='Needs our attention';title=labels[selected]+' needs Machines & Cloud setup';detail=row.nextStep||'Your service choice is saved. Machines & Cloud must finish enabling this connection before you can activate it.';kind='waiting';}
+    var primary='',secondary='';
+    if(!isNext)primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideCurrent">Return to current task</button>';
+    else if(!closed&&intakeNeeded)primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideDetails">Connect '+esc(labels[selected])+'</button>';
+    else if(!closed&&row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected))primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideChoose">'+(platformBlocked?'Add ':'Connect ')+esc(labels[selected])+'</button>';
+    else if(!closed&&verified&&['voice','sms','thumbtack','angi'].includes(selected))primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideOpenInbox">Open Inbox</button>';
+    else if(!closed&&next.kind!=='wait')primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideContinue">'+esc(next.label||'Connect '+labels[selected])+'</button>';
+    else if(!closed&&!verified)primary='<button type="button" class="btn-pill btn-pill-dark btn-sm" id="setupGuideRefresh">Check setup status</button>';
+    if(intakeEnabled&&!intakeNeeded)secondary='<button type="button" class="connection-guide-link" id="setupGuideDetails" data-edit-intake="'+(intake.canSave!==false)+'">'+(intake.canSave===false?'View connection details':'Edit connection details')+'</button>';
     host.innerHTML=(preparation&&preparation.uncertain&&preparationFacts()?.eligible!==true?'<p id="preparationRecoveryNotice" class="preparation-status" role="status">'+esc(preparation.notice)+'</p>':'')+
-      '<div class="setup-guide-heading"><h3 id="setupGuideTitle">Set up your front desk</h3><p class="muted">Pick a service. We’ll guide you through its next step and keep track of what’s saved.</p></div>'+
+      '<div class="setup-guide-heading"><h3 id="setupGuideTitle">Connect your services</h3><p class="muted">Choose a service to connect or manage. Your saved business details carry across.</p></div>'+
       '<label class="setup-guide-mobile" for="setupGuideSelect">Service<select id="setupGuideSelect" class="form-input">'+items.map(function(item){return '<option value="'+item.id+'"'+(item.id===selected?' selected':'')+'>'+esc(labels[item.id]+' · '+serviceStatus(item))+'</option>';}).join('')+'</select></label>'+
       '<div class="setup-guide-layout"><nav class="setup-guide-services" id="setupGuideServices" aria-label="Choose a service to set up">'+items.map(function(item){return '<button type="button" class="setup-guide-service" data-guide-service="'+item.id+'" aria-pressed="'+(item.id===selected)+'"><span class="brand-lockup">'+brandMark(item.id)+'<span'+(item.id==='angi'?' class="brand-wordmark-label"':'')+'>'+esc(labels[item.id])+'</span></span><small>'+esc(serviceStatus(item))+'</small></button>';}).join('')+'</nav>'+
-      '<section class="setup-guide-current" aria-labelledby="setupGuideStageTitle"><div class="guide-task-meta"><span class="brand-lockup">'+brandMark(row.id)+'<span'+(row.id==='angi'?' class="brand-wordmark-label"':'')+'>'+esc(labels[row.id])+'</span></span><span>'+complete+' of '+steps.length+' steps saved</span></div>'+
-      renderVerification(row)+
+      '<section class="setup-guide-current direct-connection-task" aria-labelledby="setupGuideStageTitle"><div class="guide-task-meta"><span class="brand-lockup">'+brandMark(row.id)+'<span'+(row.id==='angi'?' class="brand-wordmark-label"':'')+'>'+esc(labels[row.id])+'</span></span><span>'+esc(verified?'Connected':row.requested||row.retained?'Selected service':'Add to your front desk')+'</span></div>'+
       '<div class="guide-task-grid"><div class="guide-task-copy"><h4 id="setupGuideStageTitle" tabindex="-1">'+esc(title)+'</h4>'+(status!=='Your next step'?'<p class="guide-task-status muted">'+esc(status)+'</p>':'')+'<p class="guide-task-detail">'+esc(detail)+'</p>'+
-      '<div class="setup-guide-actions">'+(intakeEnabled?'<button type="button" class="btn-pill '+(intakeNeeded?'btn-pill-blue':'btn-pill-dark')+' btn-sm" id="setupGuideDetails">'+(intakeNeeded?'Set up '+esc(labels[selected]):'Review connection details')+'</button>':'')+(!isNext?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideCurrent">Back to my next step</button>':verified||intakeNeeded?'':!closed&&row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected)?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideChoose">Choose '+esc(labels[row.id])+'</button>':!closed&&next.kind!=='wait'?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideContinue">'+esc(next.label||'Continue setup')+'</button>':'<button type="button" class="btn-pill btn-pill-dark btn-sm" id="setupGuideRefresh">Check progress</button>')+'</div>'+
-      '<p class="guide-task-expectation">'+esc(verified?'Your delivery evidence is saved above. You can check this connection again whenever you need.':intakeNeeded&&isNext?'Your saved business details are filled in where they apply. You can save and return anytime.':taskOutcome(row,step,isNext))+'</p></div>'+
-      '<figure class="guide-task-visual"><div id="guideVisualScene">'+(window.MCSetupVisuals?window.MCSetupVisuals.render(kind):'')+'</div><figcaption>How this step works <span>Illustrated example</span></figcaption></figure></div>'+
+      '<div class="setup-guide-actions">'+primary+secondary+'</div>'+
+      '<p class="guide-task-expectation">'+esc(verified?'Your delivery evidence is saved. You can check this connection again whenever you need.':intakeNeeded&&isNext?'Your saved business details are filled in where they apply. You can save and return anytime.':taskOutcome(row,step,isNext))+'</p></div>'+
+      '</div><details class="direct-connection-help"><summary>How this connection works</summary><p>'+esc(guide.overview||row.ownerTask||'')+'</p><figure class="guide-task-visual"><div id="guideVisualScene">'+(window.MCSetupVisuals?window.MCSetupVisuals.render(kind):'')+'</div><figcaption>Illustrated setup example</figcaption></figure></details>'+
+      (row.verification?'<details class="direct-connection-checks"><summary>Connection and delivery checks</summary>'+renderVerification(row)+'</details>':'')+
       '<details class="guide-path-details" id="guideSetupPath"'+(showPath?' open':'')+'><summary>See all '+steps.length+' setup steps</summary><nav class="guide-path" aria-label="'+esc(labels[row.id])+' setup steps"><ol>'+steps.map(function(item,i){return '<li><button type="button" data-guide-step="'+esc(item.id)+'"'+(i===index?' aria-current="step"':'')+' data-step-state="'+esc(item.state)+'"><span class="guide-path-number" aria-hidden="true">'+(item.state==='complete'?'✓':i+1)+'</span><span>'+esc(item.label)+'<small>'+esc(item.state==='complete'?'Saved':i===nextIndex?'Next required step':item.actor==='provider'?'Provider check':item.actor==='platform'?'Handled for you':'Coming up')+'</small></span></button></li>';}).join('')+'</ol></nav></details>'+
       '</section></div>';
     if(intakeSaved[selected]){
@@ -295,10 +309,11 @@
   host.addEventListener('click', function (event) {
     if (!current()) return;
     if(event.target.closest('#setupGuideCheckConnection')){checkConnection();return;}
+    if(event.target.closest('#setupGuideOpenInbox')){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'leads'}}));return;}
     var stepButton=event.target.closest('button[data-guide-step]');
     if(stepButton){guideStep=stepButton.dataset.guideStep;guideManual=true;render();focusStage();return;}
     if(event.target.closest('#setupGuideCurrent')){guideManual=false;render();focusStage();return;}
-    if(event.target.closest('#setupGuideDetails')&&window.MCServiceIntake){endTask();window.MCServiceIntake.open(selected);return;}
+    if(event.target.closest('#setupGuideDetails')&&window.MCServiceIntake){var edit=event.target.closest('#setupGuideDetails').dataset.editIntake==='true';endTask();window.MCServiceIntake.open(selected,false,edit);return;}
     if(event.target.closest('#setupGuideRefresh')){document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
 
     var service = event.target.closest('button[data-guide-service]');
@@ -306,13 +321,14 @@
     if(event.target.closest('#preparationUseSaved')&&preparation&&!preparation.pending&&!preparation.awaiting){var facts=preparationFacts();preparation.draft={desiredChannels:(facts.desiredChannels||[]).slice().sort(),website:facts.website||''};preparation.dirty=false;preparation.uncertain=false;preparation.attempt=null;preparationNotice('Your latest saved choices are shown.',false);render();return;}
     var row = rows().find(function (item) { return item.id === selected; });
     if (!row) return;
-    if(event.target.closest('#setupGuideChoose')&&['web','voice','sms','calendar'].includes(selected)&&!['cancelled','archived','paused'].includes(data.client.status)){var choice=$('connection-guide-'+selected)?.querySelector('[data-journey-choose="'+selected+'"]');if(choice)choice.click();return;}
+    if(event.target.closest('#setupGuideChoose')&&['web','voice','sms','calendar'].includes(selected)&&!['cancelled','archived','paused'].includes(data.client.status)){this.querySelector('#setupGuideChoose').disabled=true;document.dispatchEvent(new CustomEvent('mc:connection-select',{detail:{service:selected}}));return;}
 
     if (!event.target.closest('#setupGuideContinue') || ['cancelled', 'archived', 'paused'].includes(data.client.status)) return;
     executeAction(row);
   });
   document.addEventListener('mc:service-intake-saved',function(event){if(!current()||!labels[event.detail?.service])return;intakeSaved[event.detail.service]=true;render();});
-  document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;render();$('setupGuideContinue')?.click();});
+  document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;render();var row=rows().find(function(item){return item.id===selected;});if(row&&action(row).kind!=='wait')executeAction(row);else focusStage();});
+  document.addEventListener('mc:connection-selected',function(event){if(!current()||!labels[event.detail?.service])return;selected=event.detail.service;manualSelection=true;guideManual=false;render();if(event.detail.confirmed){var row=rows().find(function(item){return item.id===selected;});if(row&&!needsServiceInformation(selected)&&action(row).kind!=='wait')executeAction(row);else if(row&&needsServiceInformation(selected)&&window.MCServiceIntake)window.MCServiceIntake.open(selected);else focusStage();}else{var note=document.createElement('p');note.className='preparation-status';note.setAttribute('role','alert');note.textContent='Your service choice could not be confirmed. Your saved setup is kept. Try connecting again.';host.querySelector('.setup-guide-current')?.prepend(note);}});
   document.addEventListener('mc:guide-select',function(event){if(!labels[event.detail?.service]||!current())return;endTask();selected=event.detail.service;manualSelection=true;render();});
   document.addEventListener('mc:desk', function (event) { data = event.detail; observePreparation();render();assistTask(); });
   function clearConnectionCheck(){connectionCheckGeneration++;if(connectionCheck)connectionCheck.controller.abort();connectionCheck=null;connectionNotices={};}

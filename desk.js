@@ -233,7 +233,7 @@
     availability: ['YOUR SCHEDULE', 'Schedule', 'Your visits and blocked time, together. Select a day to plan your work.'],
     know: ['YOUR FRONT DESK', 'Business details', 'Your services, hours and the answers your front desk uses.'],
     test: ['YOUR FRONT DESK', 'Test answers', 'Try a private customer conversation before customers do.'],
-    setup: ['YOUR FRONT DESK', 'Connections', 'Follow setup progress, connect your channels and prepare for customers.'],
+    setup: ['YOUR FRONT DESK', 'Connections', 'Connect and manage the services for your front desk.'],
     account: ['YOUR WORKSPACE', 'Account', 'Manage your contact details, front desk status and saved records.']
   };
   function showTab(t) {
@@ -702,6 +702,30 @@
       preferenceBaseline=selected;preferenceState();await load();if(!leaving&&generation===portalGeneration)$('connectionsMessage').textContent=preferenceDirty?'Submitted choices saved. Your newer choices are still unsaved.':'Preferences saved. Each connection shows its next step below.';
     } catch (error) { if (!leaving&&generation===portalGeneration){if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}$('connectionPreferencesDetails').open=true;$('connectionsMessage').textContent='Your preferences could not be confirmed. Your choices are kept; check saved status before trying again.';} }
     finally { if (!leaving&&generation===portalGeneration){preferenceBusy=false;preferenceState();} }
+  });
+  document.addEventListener('mc:connection-select',async function(event){
+    var service=event.detail?.service,generation=portalGeneration,confirmed=false;
+    if(!['web','voice','sms','calendar'].includes(service)||!data||leaving||['paused','cancelled','archived'].includes(data.client.status))return;
+    if(preferenceBusy){document.dispatchEvent(new CustomEvent('mc:connection-selected',{detail:{service:service,confirmed:false}}));return;}
+    var selected=Array.from(new Set(preferenceBaseline.concat(service))).sort();
+    preferenceBusy=true;
+    var field=$('connectionPreferences').querySelector('input[value="'+service+'"]');if(field)field.checked=true;
+    preferenceState();
+    try{
+      if(!(data.client.onboarding.desiredChannels||[]).includes(service))await action('save_connection_preferences',{desiredChannels:selected});
+      if(leaving||generation!==portalGeneration)return;
+      var prior=data;await load(null,{soft:true});
+      confirmed=!leaving&&generation===portalGeneration&&data!==prior&&(data.client.onboarding.desiredChannels||[]).includes(service);
+    }catch(error){
+      if(leaving||generation!==portalGeneration)return;
+      if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}
+      // Selecting a service grants no provider authority. Reconcile its saved
+      // preference before allowing this click to open a connection action.
+      var before=data;await load(null,{soft:true});
+      confirmed=!leaving&&generation===portalGeneration&&data!==before&&(data.client.onboarding.desiredChannels||[]).includes(service);
+    }finally{
+      if(!leaving&&generation===portalGeneration){preferenceBusy=false;preferenceState();document.dispatchEvent(new CustomEvent('mc:connection-selected',{detail:{service:service,confirmed:confirmed}}));}
+    }
   });
   $('reviewRules').addEventListener('click', async function () {
     if (!data || !data.setup || leaving || reviewBusy || websiteBusy || cfgDirty || cfgBusy || acctBusy || cfgClosed || ['cancelled','archived'].includes(data.client.status)) return;

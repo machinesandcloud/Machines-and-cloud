@@ -29,6 +29,11 @@ export function businessReviewRequirements(c) {
   if (!/^\+1\d{10}$/.test(c.owner?.phone || "") || unsafeRoute) blockers.push(issue("handoff", "Set a safe callback destination", unsafeRoute?.message || "Add a valid owner callback cell number."));
   return { complete: blockers.length === 0, fieldErrors, blockers };
 }
+// Managed phone/text setup uses the owner's confirmed current business facts.
+// Website rehearsal is a separate web activation check, not channel permission.
+export function managedServiceRulesReviewed(c) {
+  return isSupportedSelfServiceClient(c) && businessReviewRequirements(c).complete && c.setupProof?.reviewedRevision === configurationRevision(c);
+}
 export function setupReadiness(c) {
   const revision = configurationRevision(c), reviewRequirements = businessReviewRequirements(c), blockers = reviewRequirements.blockers.slice();
   const issue = (id, label, detail, tab = "know") => ({ id, label, detail, tab });

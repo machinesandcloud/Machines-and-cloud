@@ -210,13 +210,15 @@ await check('Wrong owner, stale configuration and stale offer cannot authorize s
   await assert.rejects(() => submit(f, { offerDigest: '0'.repeat(64) }), error => error.status >= 400 && error.status < 500);
   assert.equal((await children(f)).number, null);
 });
-await check('Unreviewed or simulated private practice cannot authorize paid connection setup', async () => {
-  const f = await fresh('review'), body = await acceptance(f);
-  for (const proof of [{}, { ...f.c.setupProof, testMode: 'fake' }]) {
-    await store.put('clients', f.c.slug, { ...f.c, setupProof: proof });
-    await assert.rejects(() => onboarding.requestServiceOnboarding(f.c, { ...body, actor: actor(f) }), error => error.status >= 400 && error.status < 500);
-    assert.equal((await children(f)).number, null);
-  }
+await check('Current owner review, not website rehearsal, authorizes managed setup without marking delivery active', async () => {
+  const f=await fresh('review'),body=await acceptance(f);
+  for(const proof of [{},{reviewedRevision:'stale'}]){await store.put('clients',f.c.slug,{...f.c,setupProof:proof});await assert.rejects(()=>onboarding.requestServiceOnboarding(f.c,{...body,actor:actor(f)}),error=>error.code==='setup_incomplete');assert.equal((await children(f)).number,null);}
+  for(const proof of [{reviewedRevision:f.revision},{reviewedRevision:f.revision,testedRevision:'stale',testMode:'fake'}]){await store.put('clients',f.c.slug,{...f.c,setupProof:proof});const request=await onboarding.requestServiceOnboarding(f.c,{...body,actor:actor(f)});assert.equal(request.state,'queued');assert.equal(request.numberRequested,false);assert.equal((await children(f)).number,null);assert.deepEqual((await store.get('clients',f.c.slug)).setupProof,proof);}
+});
+await check('A current review marker cannot authorize managed resources with incomplete business facts',async()=>{
+ for(const field of ['name','services','area','hours','windows','callback']){
+  const f=await fresh('facts-'+field);if(field==='name')f.c.business.name='';if(field==='services')f.c.services=[];if(field==='area')f.c.business.serviceArea=[];if(field==='hours')f.c.rules.hours=null;if(field==='windows')f.c.windows=[];if(field==='callback')f.c.owner.phone='invalid';f.revision=configurationRevision(f.c);f.c.setupProof={reviewedRevision:f.revision};await store.put('clients',f.c.slug,f.c);const body=await acceptance(f);await assert.rejects(()=>onboarding.requestServiceOnboarding(f.c,{...body,actor:actor(f)}),error=>error.code==='setup_incomplete');assert.equal((await children(f)).number,null);
+ }
 });
 await check('Actual API rejects anonymous/cross-owner requests and body-supplied actor authority', async () => {
   const f = await fresh('api-owner'), other = await fixture('foreign'), body = { action: 'request_service_onboarding', ...await acceptance(f) };

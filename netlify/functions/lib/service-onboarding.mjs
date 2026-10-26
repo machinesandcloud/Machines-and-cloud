@@ -3,7 +3,7 @@
 import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 import { atomicUpdate } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
-import { configurationRevision, isSupportedSelfServiceClient } from './setup.mjs';
+import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from './setup.mjs';
 import { loopCheck } from './config.mjs';
 import { phoneActivationStatus, requestPhoneActivation, cancelPhoneActivation, canRenewUnpurchasedPhone, phoneRenewalReference } from './phone-activation.mjs';
 import { voiceActivationStatus, requestVoiceActivation, cancelVoiceActivation } from './voice-activation.mjs';
@@ -22,7 +22,7 @@ const idFor = c => `${c.slug}/${hash('service-onboarding-v1:' + tenant(c))}`;
 const validSlug = value => /^[a-z0-9][a-z0-9-]{0,39}$/.test(value || '');
 const validId = value => /^[a-z0-9][a-z0-9-]{0,39}\/[a-f0-9]{64}$/.test(value || '');
 const channels = c => ['voice', 'sms'].filter(channel => Array.isArray(c.onboarding?.desiredChannels) && c.onboarding.desiredChannels.includes(channel));
-const reviewed = c => c.build?.status === 'built' && c.setupProof?.reviewedRevision === configurationRevision(c) && c.setupProof?.testedRevision === configurationRevision(c) && c.setupProof?.testMode === 'live';
+const reviewed = managedServiceRulesReviewed;
 const details = {
   queued: 'Your setup is saved. We will reserve your number, then prepare the connections you selected automatically.',
   awaiting_number: 'We are waiting for your dedicated number. Phone and texting setup will continue automatically.',
@@ -96,7 +96,7 @@ function requestShape(body, requested) {
 }
 function fingerprint(body) { const { actor, submissionId, ...input } = body; return digest(input); }
 function requirements(c, body, requested) {
-  if (!['testing', 'live'].includes(c.status) || !reviewed(c) || !c.business?.trade || !c.services?.length || !c.business?.serviceArea?.length || !c.rules?.hours || !c.windows?.length || !/^\+1\d{10}$/.test(c.owner?.phone || '') || loopCheck(c)) throw new ServiceOnboardingError('setup_incomplete', 'Complete, review and privately test your current business answers before connecting services.');
+  if (!['testing', 'live'].includes(c.status) || !reviewed(c) || !c.business?.trade || !c.services?.length || !c.business?.serviceArea?.length || !c.rules?.hours || !c.windows?.length || !/^\+1\d{10}$/.test(c.owner?.phone || '') || loopCheck(c)) throw new ServiceOnboardingError('setup_incomplete', 'Complete and review your current business answers before connecting services.');
   if (requested.includes('voice') && body.forwardingMode === 'forward_business_line' && (!/^\+1\d{10}$/.test(c.phone?.businessNumber || '') || c.phone.businessNumber === c.owner.phone)) throw new ServiceOnboardingError('unsafe_forwarding', 'Add your business line and a separate contact cell before forwarding calls.', 400);
 }
 function samePlan(row, c) { return row.tenantIdentity === tenant(c) && row.inputRevision === configurationRevision(c) && row.lifecycle === lifecycle(c) && digest(desiredChannels(row)) === digest(channels(c)); }

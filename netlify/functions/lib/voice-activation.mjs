@@ -3,7 +3,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { atomicUpdate } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
-import { configurationRevision, isSupportedSelfServiceClient } from "./setup.mjs";
+import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from "./setup.mjs";
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle } from "./phone-activation.mjs";
 import { createManagedVoiceProvider, managedAssistantBody } from "./voice-provider.mjs";
 import { requestManagedHuman, handleManagedHumanCallback } from './managed-voice-handoff.mjs';
@@ -52,13 +52,13 @@ export function voiceActivationView(row, c) {
   return { id: row.id, state, active, ready: current && row.state === "ready" && row.routing?.confirmed === true, detail, reasonCode: stageReason(row), number: row.number?.number || null, forwardingMode: row.forwardingMode,
     createdAt: row.createdAt, updatedAt: row.updatedAt, routingCheckedAt: row.routing?.checkedAt || null, resourceRecorded: !!(row.assistant?.id || row.imported?.id), evidence: { inboundAt: evidence.inboundAt || null, forwardedAt: evidence.forwardedAt || null, successfulCallAt: evidence.successfulCallAt || null, fallbackConfigured: row.routing?.fallbackConfigured === true, fallbackObservedAt: evidence.fallbackObservedAt || null, fallbackAnsweredAt: evidence.fallbackAnsweredAt || null, fallbackDialStatus: evidence.fallbackDialStatus || null, fallbackDialAt: evidence.fallbackDialAt || null, lastFailureAt: evidence.lastFailureAt || null } };
 }
-function reviewed(c) { const rev = configurationRevision(c); return c.build?.status === "built" && c.setupProof?.reviewedRevision === rev && c.setupProof?.testedRevision === rev && c.setupProof?.testMode === "live"; }
+const reviewed = managedServiceRulesReviewed;
 async function ownerCurrent(c, body) {
   if (!isSupportedSelfServiceClient(c) || body.actor?.role !== "owner" || normalizeAccountEmail(body.actor.email) !== normalizeAccountEmail(c.owner?.email)) throw new VoiceActivationError("forbidden", "The verified owner must approve phone setup.", 403);
   const current = await strictRead("clients", c.slug);
   if (!current || !isSupportedSelfServiceClient(current) || tenant(current) !== tenant(c)) throw new VoiceActivationError("workspace_unavailable", "This workspace is unavailable.");
   if (body.expectedRevision !== configurationRevision(current)) throw new VoiceActivationError("configuration_changed", "Review your current business rules before connecting phone service.");
-  if (!["testing", "live"].includes(current.status) || !reviewed(current) || !validNumber(current.owner?.phone)) throw new VoiceActivationError("setup_incomplete", "Review and test your business rules and add a valid owner phone first.");
+  if (!["testing", "live"].includes(current.status) || !reviewed(current) || !validNumber(current.owner?.phone)) throw new VoiceActivationError("setup_incomplete", "Review your complete current business details and add a valid owner phone first.");
   return current;
 }
 function fixtureContext() { try { return process.env.NODE_ENV === "test" && process.env.MC_FAKE_MODEL === "1" && ["localhost", "127.0.0.1", "[::1]"].includes(new URL(process.env.URL).hostname); } catch { return false; } }
@@ -247,7 +247,7 @@ export async function voiceActivationStatus(c) {
   else if (operation && (row.cancelRequestedAt || parent?.cancellationRequested)) operation = { ...operation, state: row.state === "cleanup_uncertain" ? row.state : "cleanup_pending", active: false, ready: false, detail: "Phone answering is stopped. Recorded resources are waiting for confirmed cleanup." };
   else if (operation && !enabled) operation = { ...operation, state: "waiting_platform", active: false, ready: false, detail: "Your approval is saved. Phone service is not available yet; calls are not active." };
   else if (operation && (!parent || parent.state !== "number_acquired" || parent.resource?.id !== row.number?.id || !row.routing?.checkedAt || Date.now() - Date.parse(row.routing.checkedAt) > 25 * 60000)) operation = { ...operation, active: false, ready: false, ...(row.state === "ready" ? { state: "needs_review", detail: "Phone routing needs a fresh provider check before calls are answered." } : {}) };
-  return { available: enabled, active: operation?.active === true, state: operation?.state || "unavailable", offer: policy ? { ...policy, digest: digest(policy), available: enabled } : null, operation };
+  return { available: enabled, platformReady:enabled, active: operation?.active === true, state: operation?.state || "unavailable", offer: policy ? { ...policy, digest: digest(policy), available: enabled } : null, operation };
 }
 async function pendingVoiceWork() {
   const queue = queueValue(await strictRead(QUEUE, KEY)), ids = Object.keys(queue.intents).sort(), inspected = Math.min(ids.length, 25);

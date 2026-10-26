@@ -8,7 +8,7 @@
   var base = meta && meta.content ? meta.content.replace(/\/$/, '') : '';
   var slug = new URLSearchParams(location.search).get('c');
   var names = {voice:'Phone answering',sms:'Two-way texting',web:'Website chat',calendar:'Google Calendar'};
-  var phases = {voice:['Call routing','Review details','Next step'],sms:['Registered business','Your representative','Next step'],web:['Website details','Installation instructions','Next step'],calendar:['Your Google account','Access review','Calendar delivery']};
+  var phases = {voice:['Call routing','Connection approval'],sms:['Registered business','Your representative','Connection approval'],web:['Website details','Install and check'],calendar:['Your Google account','Access review','Calendar delivery']};
   function session() { try { return sessionStorage.getItem('mc-onboarding-session-v1'); } catch (_) { return null; } }
   function current() { return data && session() && document.body.dataset.workspaceState === 'ready'; }
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -46,8 +46,8 @@
     if(serviceFacts(selected).canSave===false){var row=(data.setup?.connectionJourney?.channels||[]).find(function(row){return row.id===selected;});return '<h4 id="intakeStepTitle" tabindex="-1">Your connection progress</h4><p>'+esc(row?.detail||'Your existing connection is retained.')+'</p><p>'+esc(row?.nextStep||'Check its current status before making another change.')+'</p>'+actualAction();}
     var lines=selected==='voice'?'<li>We reserve your dedicated number and prepare answering and fallback routing after your approval.</li><li>If you keep your current number, you switch on forwarding once; then a test call confirms answering.</li>':'<li>We prepare your shop’s carrier registration and track its review after your approval.</li><li>When the carrier approves it, reply to your setup text to confirm two-way delivery.</li>';
     var waiting=action?.kind==='wait',currentRow=(data.setup?.connectionJourney?.channels||[]).find(function(row){return row.id===selected;});
-    return '<h4 tabindex="-1" id="intakeStepTitle">Your details are saved.</h4><p>'+(selected==='voice'?'Your call-routing details are ready to use.':'Registration details saved.')+'</p>'+
-      '<div class="intake-next-action"><strong>'+esc(waiting?action.label||'Waiting for service':!pre.reviewed?'Next: check your business answers':!pre.practiced?'Next: try a customer conversation':available?'Next: approve the service review':'Your details are ready for connection review')+'</strong><p>'+esc(waiting?currentRow?.nextStep||'Your saved details are kept while we prepare this service.':!pre.reviewed?'Confirm the services, hours and instructions your front desk will use.':!pre.practiced?'Try your saved answers once before phone or text delivery starts.':'You’ll see the exact services, costs and permissions before anything starts.')+'</p>'+actualAction()+'</div>'+
+    return '<h4 tabindex="-1" id="intakeStepTitle">'+esc(currentRow?.activation?.blockedBy==='machines_and_cloud'?'Setup needs our attention':'Continue connecting '+names[selected].toLowerCase())+'</h4><p>'+(selected==='voice'?'Your call-routing details are saved.':'Your registration details are saved.')+'</p>'+
+      '<div class="intake-next-action"><strong>'+esc(waiting?action.label||'Waiting for service':!pre.reviewed?'Next: check your business answers':available?'Next: approve the service review':'Your details are ready for connection review')+'</strong><p>'+esc(waiting?currentRow?.nextStep||'Your saved details are kept while we prepare this service.':!pre.reviewed?'Confirm the services, hours and instructions your front desk will use.':'Review the services, costs and permissions before setup starts.')+'</p>'+actualAction()+'</div>'+
       '<details><summary>What happens after your approval?</summary><ol class="intake-next-list">'+lines+'</ol></details>'+
       '<button type="button" class="connection-guide-link" id="intakeEdit">Edit saved details</button>';
   }
@@ -95,7 +95,7 @@
     if(focus&&Object.keys(s.fieldErrors||{}).length){document.querySelector('#serviceIntakeForm [aria-invalid="true"]')?.focus();}else if(focus){$('intakeStepTitle')?.focus({preventScroll:true});node.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}else if(focused&&$(focused))$(focused).focus({preventScroll:true});
   }
   function mount(target,id,d) { if(selected!==id)opening++;data=d;host=target;selected=id;if(states[id]?.open)render(false); }
-  async function open(id,reload) {
+  async function open(id,reload,edit) {
     if(!current()||!names[id]||!facts())return;
     var tag=session(),run=epoch,sequence=++opening,full,controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000),trigger=$('setupGuideDetails');if(trigger){trigger.disabled=true;trigger.textContent='Opening your saved details…';}try{var response=await fetch(base+'/api/client?c='+encodeURIComponent(slug)+'&service_intake=1',{headers:{Authorization:'Bearer '+tag},cache:'no-store',signal:controller.signal});if(run!==epoch||sequence!==opening||tag!==session())return;if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}var result=await response.json();if(!response.ok||!result.serviceIntake)throw new Error();full=result.serviceIntake;data.serviceIntake=full;}catch(_){if(run===epoch&&sequence===opening){var notice=document.createElement('p');notice.id='intakeOpeningStatus';notice.setAttribute('role','alert');notice.textContent='Your saved connection details could not be opened. Check your connection status and try again.';$('intakeOpeningStatus')?.remove();host?.prepend(notice);if(trigger?.isConnected){trigger.disabled=false;trigger.textContent='Try opening connection details';}}return;}finally{clearTimeout(timeout);if(trigger?.isConnected){trigger.disabled=false;trigger.textContent='Review connection details';}}
     if(selected!==id){document.dispatchEvent(new CustomEvent('mc:guide-select',{detail:{service:id}}));}
@@ -103,7 +103,8 @@
     selected=id;var saved=serviceFacts(id);
     if(reload||states[id]&&!states[id].dirty&&!states[id].attempt&&states[id].token!==full.token)states[id]=null;
     if(states[id]&&states[id].token!==full.token&&!states[id].attempt){states[id].conflict=true;states[id].notice='Saved details changed. Load the latest saved details before continuing; this replaces the entries currently shown.';}
-    if(!states[id]){var step=['voice','sms'].includes(id)&&saved.canSave===false?2:id==='voice'?(saved.complete?(saved.canApply?1:2):0):id==='sms'?(saved.complete?2:(saved.missingFields||[]).some(function(name){return name.startsWith('sms.business.');})?0:1):id==='calendar'?(saved.preferences?.accountEmail?1:0):saved.canApply!==true&&saved.preferences?.builder&&saved.preferences?.installationBy?1:0;states[id]={draft:defaults(id),step:step,open:true,busy:false,dirty:false,token:full.token,conflict:false};}
+    if(!states[id]){var step=['voice','sms'].includes(id)&&saved.canSave===false?2:id==='voice'?(saved.complete&&!saved.canApply?2:0):id==='sms'?(saved.complete?2:(saved.missingFields||[]).some(function(name){return name.startsWith('sms.business.');})?0:1):id==='calendar'?(saved.preferences?.accountEmail?1:0):saved.canApply!==true&&saved.preferences?.builder&&saved.preferences?.installationBy?1:0;states[id]={draft:defaults(id),step:step,open:true,busy:false,dirty:false,token:full.token,conflict:false};}
+    if(edit&&!states[id].dirty&&!states[id].attempt)states[id].step=0;
     states[id].open=true;render(true);
   }
   function validate() {
@@ -113,21 +114,23 @@
   }
   function applyResponse(result) {
     if(result.serviceIntake)data.serviceIntake=result.serviceIntake;
-    ['client','setup','configurationRevision','editRevision'].forEach(function(key){if(result[key]!=null)data[key]=result[key];});
+    ['client','setup','connections','serviceOnboarding','configurationRevision','editRevision'].forEach(function(key){if(result[key]!=null)data[key]=result[key];});
     document.dispatchEvent(new CustomEvent('mc:desk-refresh'));
   }
   async function save(apply,later) {
     var s=state();if(!current()||s.busy||s.attempt||s.conflict||!later&&!validate())return;
     snapshot();s.fieldErrors={};var fields=selected==='sms'?s.draft[s.step===0?'business':'representative']:s.draft;
     var section=selected==='voice'?'routing':selected==='sms'?(s.step===0?'business':'representative'):'preferences';
-    s.attempt={body:{action:apply?'apply_service_intake':'save_service_intake',expectedIntakeToken:s.token,submissionId:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(n){return n.toString(16).padStart(2,'0');}).join(''),service:selected},next:later?s.step:s.step+1,closeAfter:!!later,followWeb:selected==='web'&&s.step===0&&!later};
+    s.attempt={body:{action:apply?'apply_service_intake':'save_service_intake',expectedIntakeToken:s.token,submissionId:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(n){return n.toString(16).padStart(2,'0');}).join(''),service:selected},next:later?s.step:s.step+1,closeAfter:!!later,followWeb:selected==='web'&&s.step===0&&!later,followVoice:selected==='voice'&&!apply&&!later,continueAfter:!later&&(selected==='voice'&&apply||selected==='sms'&&s.step===1)};
     if(!apply)Object.assign(s.attempt.body,{section:section,fields:JSON.parse(JSON.stringify(fields)),selectService:true});
     await send(selected);
   }
   async function acceptResult(result,attempt,s,id){
     applyResponse(result);s.token=result.serviceIntake.token;
+    if(attempt.followVoice&&result.serviceIntake?.voice?.canApply){s.attempt={body:{action:'apply_service_intake',expectedIntakeToken:result.serviceIntake.token,submissionId:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(n){return n.toString(16).padStart(2,'0');}).join(''),service:'voice'},next:2,continueAfter:true};s.busy=false;await send(id);return;}
+    if(attempt.followVoice&&result.serviceIntake?.voice?.complete){attempt.continueAfter=true;attempt.next=2;}
     if(attempt.followWeb&&result.serviceIntake?.web?.canApply){s.attempt={body:{action:'apply_service_intake',expectedIntakeToken:result.serviceIntake.token,submissionId:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(n){return n.toString(16).padStart(2,'0');}).join(''),service:'web'},next:attempt.next};s.busy=false;await send(id);return;}
-    s.attempt=null;s.step=attempt.next;s.notice='Details saved securely.';s.error=false;s.dirty=false;if(attempt.closeAfter){s.open=false;if(selected===id){host?.classList.remove('has-service-intake');$('serviceIntakeWorkbench')?.remove();}document.dispatchEvent(new CustomEvent('mc:service-intake-saved',{detail:{service:id}}));if(selected===id){$('connectionIntakeSaved')?.scrollIntoView({block:'center',behavior:'instant'});$('connectionIntakeSaved')?.focus({preventScroll:true});}}
+    s.attempt=null;s.step=attempt.next;s.notice='Details saved securely.';s.error=false;s.dirty=false;if(attempt.continueAfter){s.open=false;if(selected===id){host?.classList.remove('has-service-intake');$('serviceIntakeWorkbench')?.remove();document.dispatchEvent(new CustomEvent('mc:guide-do-next',{detail:{service:id}}));}return;}if(attempt.closeAfter){s.open=false;if(selected===id){host?.classList.remove('has-service-intake');$('serviceIntakeWorkbench')?.remove();}document.dispatchEvent(new CustomEvent('mc:service-intake-saved',{detail:{service:id}}));if(selected===id){$('connectionIntakeSaved')?.scrollIntoView({block:'center',behavior:'instant'});$('connectionIntakeSaved')?.focus({preventScroll:true});}}
   }
   async function send(id) {
     var s=states[id], attempt=s?.attempt, tag=session(), version=epoch;if(!attempt||s.busy)return;

@@ -208,7 +208,7 @@ await check("owner resume restores non-web state without AI activation; restorin
     assert.equal((await call({ ...body, acceptedCosts: true })).status, 400);
     assert.equal((await call({ ...body, expectedRevision: "0".repeat(64) })).status, 409);
     // Resuming workspace setup must not depend on website AI proof. The SMS
-    // sender keeps its own current-rule guards and cannot resume delivery here.
+    // sender keeps its current reviewed rules and verified carrier/delivery guards.
     const stale = { ...f.c, setupProof: { ...f.c.setupProof, testedRevision: "stale" } };
     await store.put("clients", f.c.slug, stale);
     assert.equal((await call(body)).status, 202);
@@ -217,7 +217,7 @@ await check("owner resume restores non-web state without AI activation; restorin
     assert.equal(resumed.channels.web.active, false);
     assert.equal(resumed.operationLifecycleVersion, 1);
     assert.deepEqual(resumed.onboarding.desiredChannels, f.c.onboarding.desiredChannels);
-    assert.equal(await sms.messagingSender(resumed), null);
+    assert.equal((await sms.messagingSender(resumed)).serviceSid,f.row.resources.service.sid);
     assert.equal(report.providerSends, beforeSends);
     assert.deepEqual((await strictRead("messaging_activation", f.row.id)).resources, f.row.resources);
     // Restoring a previously active website still requires current review,
