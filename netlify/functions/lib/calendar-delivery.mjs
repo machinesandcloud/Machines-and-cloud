@@ -30,7 +30,7 @@ function bodyFor(job) {
 
   return { summary: `${b.issue} - ${b.customer_name}`.slice(0, 300), description: `Saved by your front desk.\nCustomer: ${b.customer_name}\nPhone: ${b.phone}\nIssue: ${b.issue}\nUrgency: ${b.urgency}\nNotes: ${b.notes || "-"}`.slice(0, 8000), location: b.address.slice(0, 1000), start: { dateTime: dateTime(start), timeZone: "America/Chicago" }, end: { dateTime: dateTime(end), timeZone: "America/Chicago" }, extendedProperties: { private: { mcOwner: ownerTag(job.tenantIdentity, job.bookingId), mcVersion: String(job.version), mcRevision: job.sourceRevision } } };
 }
-const dto = job => ({ bookingId: job.bookingId, state: job.state, action: job.desired.status === "cancelled" ? "cancel" : "sync", updatedAt: job.updatedAt, completedAt: job.completedAt || null, attempts: job.attempts || 0, reasonCode: job.reasonCode || null, detail: job.detail || "Calendar work is saved.", nextAttemptAt: job.nextAttemptAt || null });
+const dto = (job, connection) => ({ bookingId: job.bookingId, state: job.state, action: job.desired.status === "cancelled" ? "cancel" : "sync", updatedAt: job.updatedAt, completedAt: job.completedAt || null, attempts: job.attempts || 0, reasonCode: job.reasonCode || null, detail: job.detail || "Calendar work is saved.", nextAttemptAt: job.nextAttemptAt || null, currentConnection: !!connection && job.connectionId === connection.connectionId && job.targetId === connection.targetId, deliveryConfirmed: !!connection && job.connectionId === connection.connectionId && job.targetId === connection.targetId && job.state === 'synced' && job.desired.status !== 'cancelled' && job.receipt?.version === job.version && job.receipt?.sourceRevision === job.sourceRevision && job.receipt?.eventId === job.eventId && job.receipt?.action === 'sync' && Number.isFinite(Date.parse(job.receipt.confirmedAt)) && Date.parse(job.receipt.confirmedAt) <= Date.now() && Date.parse(job.receipt.confirmedAt) >= Date.parse(connection.connectedAt), verifiedAt: job.receipt?.confirmedAt || null });
 async function supportedClient(client) {
   if (!validSlug(client?.slug)) throw new CalendarError("invalid_workspace", "This workspace is invalid.", 400);
   const saved = await strictRead("clients", client.slug);
@@ -39,11 +39,14 @@ async function supportedClient(client) {
 }
 export async function calendarDeliveryView(client) {
   await supportedClient(client);
+  const connection = await getCalendarConnection(client.slug);
   const keys = await list("calendar_deliveries", `${client.slug}/`);
   const jobs = (await Promise.all(keys.map(key => strictRead("calendar_deliveries", key)))).filter(job => job?.tenantIdentity === calendarTenantIdentity(client));
   const counts = {};
   for (const job of jobs) counts[job.state] = (counts[job.state] || 0) + 1;
-  return { enabled: calendarDeliveryEnabled() && await calendarExecutionAvailable(client, { actions:['tokenRefresh','calendarRead'],anyActions:['eventCreate','eventUpdate','eventDelete'] }), counts, total: jobs.length, jobs: jobs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 30).map(dto), scope: "Latest 30 calendar jobs; counts include all retained jobs. Connected owned-calendar busy time is checked before new visit reservations and calendar creates or moves; saved arrival windows remain yours." };
+  const projected = jobs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map(job => dto(job, connection));
+  const current = projected.filter(job => job.currentConnection), confirmed = current.filter(job => job.deliveryConfirmed).sort((a,b) => b.verifiedAt.localeCompare(a.verifiedAt));
+  return { enabled: calendarDeliveryEnabled() && await calendarExecutionAvailable(client, { actions:['tokenRefresh','calendarRead'],anyActions:['eventCreate','eventUpdate','eventDelete'] }), counts, total: jobs.length, verification: { delivered: confirmed.length > 0, verifiedAt: confirmed[0]?.verifiedAt || null, attention: current.some(job => !['synced','cancelled'].includes(job.state) && !!job.reasonCode), pending: current.some(job => !['synced','cancelled'].includes(job.state)) }, jobs: projected.slice(0, 30), scope: "Latest 30 calendar jobs; counts include all retained jobs. Connected owned-calendar busy time is checked before new visit reservations and calendar creates or moves; saved arrival windows remain yours." };
 }
 export async function queueCalendarBooking(client, booking) {
   await supportedClient(client);

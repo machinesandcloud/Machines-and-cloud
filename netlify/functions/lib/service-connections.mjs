@@ -9,12 +9,12 @@ import { buildConnectionJourney } from "./connection-journey.mjs";
 export function serviceSetupView(c,services,plan=null,websiteInstallation=null,leadConnections={}) {
   const setup=setupReadiness(c),byId={voice:services.voice,sms:services.messaging,calendar:services.calendar};
   const describe=(id,row)=>{
-    const active=row.active===true || id==="calendar" && row.connected && services.calendarDelivery.enabled;
+    const active=id!=="calendar" && row.active===true;
     return {active,ready:active,status:active?"active":row.status || row.state || "pending_activation",detail:row.operation?.detail || row.detail || "Review your connection below."};
   };
   for(const [id,row] of Object.entries(byId)){const facts=describe(id,row);setup.channels[id]={...setup.channels[id],...facts};}
   setup.connectionJourney=buildConnectionJourney(c,services,plan,setup,websiteInstallation,leadConnections);
-  for(const row of setup.connectionJourney.channels){if(byId[row.id])setup.channels[row.id]={...setup.channels[row.id],active:row.active===true,ready:row.active===true,status:row.status,detail:row.detail,nextStep:row.nextStep};}
+  for(const row of setup.connectionJourney.channels){if(byId[row.id])setup.channels[row.id]={...setup.channels[row.id],active:row.active===true&&row.verification.working===true,ready:row.active===true&&row.verification.working===true,status:row.status,detail:row.detail,nextStep:row.nextStep,verification:row.verification};}
   setup.steps=setup.steps.map(step=>byId[step.id]?{...step,status:setup.channels[step.id].active?"done":setup.channels[step.id].status,detail:setup.channels[step.id].detail}:step);
   return setup;
 }

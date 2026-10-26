@@ -11,6 +11,7 @@
   var brandMark = typeof window.MCBrandMark === 'function' ? window.MCBrandMark : function () { return ''; };
   var $ = function (id) { return document.getElementById(id); };
   var preparation = null, preparationGeneration = 0, preparationTimer = null;
+  var connectionCheck = null, connectionNotices = {}, connectionCheckGeneration = 0;
   var channelLabels = { web: 'Website chat', voice: 'Phone answering', sms: 'Two-way texting', calendar: 'Google Calendar' };
   var meta = document.querySelector('meta[name="mc-api-base"]'), apiBase = meta && meta.content ? meta.content.replace(/\/$/, '') : '';
   function preparationFacts() { return data && data.setup && data.setup.connectionPreparation; }
@@ -98,7 +99,8 @@
     if(['closed','cancelled','archived'].includes(row.status))return 'Disconnected';
     if(row.status==='paused')return 'Paused';
     if(row.status==='not_selected'||!row.requested&&!row.retained)return 'Not selected';
-    if(row.active===true)return row.id==='web'?'Chat switched on':row.id==='calendar'?'Calendar connected':['thumbtack','angi'].includes(row.id)?'Receiving leads':'Connection verified';
+    if(row.verification?.working===true)return 'Delivery verified';
+    if(row.verification?.state==='needs_attention')return 'Check needs attention';
     if(needsServiceInformation(row.id))return 'Your next step';
     if(row.responsibility==='carrier'||row.status==='waiting_carrier')return 'Carrier review';
     if(row.status==='checking'||row.status==='uncertain'||row.status==='checking_status')return 'Checking saved result';
@@ -107,6 +109,32 @@
     if(row.id==='calendar'&&data.connections?.calendar?.connected)return 'Google access saved';
     if(row.responsibility==='platform'||['working','waiting_platform'].includes(row.status))return 'Platform check';
     return action(row).kind==='wait'?'Check saved status':'Your next step';
+  }
+  function checkedTime(value) { var date=new Date(value);return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''; }
+  function renderVerification(row) {
+    var facts=row.verification;if(!facts)return '';
+    var notice=connectionNotices[row.id],pending=connectionCheck&&connectionCheck.service===row.id;
+    return '<section class="connection-verification" data-verification-state="'+esc(facts.state)+'" aria-labelledby="connectionVerificationTitle"><div class="connection-verification-heading"><div><h4 id="connectionVerificationTitle">Setup and delivery checks</h4><span class="connection-verification-result">'+esc(facts.label)+'</span><p>'+esc(facts.summary)+'</p></div><button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-dark btn-sm"'+(connectionCheck?' disabled':'')+'>'+(pending?'Checking saved status…':'Check saved status')+'</button></div><ul class="connection-verification-checks">'+facts.checks.map(function(item){var label=item.state==='passed'?'Passed':item.state==='needs_attention'?'Needs attention':'Not confirmed';return '<li data-check-state="'+esc(item.state)+'"><span class="connection-check-indicator" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/>'+(item.state==='passed'?'<path d="m6.5 10 2.3 2.4 4.7-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>':item.state==='needs_attention'?'<path d="M10 6v4.5m0 3v.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>':'<path d="M7 10h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>')+'</svg></span><span>'+esc(item.label)+'</span><small>'+label+'</small></li>';}).join('')+'</ul>'+(facts.evidenceAt?'<p class="connection-verification-evidence">Latest delivery evidence: <time datetime="'+esc(facts.evidenceAt)+'">'+esc(checkedTime(facts.evidenceAt))+'</time></p>':'')+(facts.providerCheckedAt?'<p class="connection-verification-evidence">Provider settings last confirmed: <time datetime="'+esc(facts.providerCheckedAt)+'">'+esc(checkedTime(facts.providerCheckedAt))+'</time></p>':'')+'<p id="connectionVerificationNotice" class="connection-verification-notice" role="status" aria-live="polite"'+(notice&&notice.error?' data-error="true"':'')+'>'+esc(pending?'Reading current setup and delivery records…':notice?notice.text:'Check the saved setup and delivery results here.')+'</p></section>';
+  }
+  async function checkConnection() {
+    if(!current()||connectionCheck)return;
+    var session=preparationSession(),id=selected,slug=data.client.slug;if(!session)return;
+    var generation=connectionCheckGeneration,revision=data.configurationRevision,edit=data.editRevision,controller=new AbortController();connectionCheck={service:id,controller:controller};render();
+    var timeout=setTimeout(function(){controller.abort();},15000);
+    try {
+      var response=await fetch(apiBase+'/api/client?c='+encodeURIComponent(slug)+'&setup_assistance=1',{headers:{Authorization:'Bearer '+session},cache:'no-store',signal:controller.signal});
+      if(generation!==connectionCheckGeneration||!current()||session!==preparationSession())return;
+      if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}
+      var result=await response.json();if(!response.ok||!result.ok)throw new Error('unavailable');
+      if(generation!==connectionCheckGeneration||!current()||data.client.slug!==slug||session!==preparationSession())return;
+      if(result.configurationRevision!==revision||result.editRevision!==edit||data.configurationRevision!==revision||data.editRevision!==edit){document.dispatchEvent(new CustomEvent('mc:desk-refresh'));throw new Error('changed');}
+      var journey=result.setup?.connectionJourney,checked=journey&&(journey.channels||[]).concat(journey.leadSources||[]).find(function(item){return item.id===id;});if(!checked?.verification)throw new Error('unavailable');
+      if(!result.connections||!result.websiteInstallation||!result.setup.channels)throw new Error('unavailable');
+      // Replace server-derived connection facts only. Business fields, private
+      // intake drafts and pending owner edits stay under their existing owners.
+      data.connections=result.connections;data.websiteInstallation=result.websiteInstallation;data.setup.channels=result.setup.channels;data.setup.connectionJourney=journey;connectionNotices[id]={error:false,text:'Saved status checked '+checkedTime(checked.verification.checkedAt)+'. '+(checked.verification.working?'Delivery was verified at the time shown above.':checked.verification.summary)};
+    } catch(error) {if(generation===connectionCheckGeneration&&current())connectionNotices[id]={error:true,text:error.message==='changed'?'Your setup changed while it was checked. Refreshing the latest details; check again before continuing.':'The connection check could not finish. Your setup is kept. Check again to confirm its current status.'};}
+    finally {clearTimeout(timeout);if(generation===connectionCheckGeneration){connectionCheck=null;if(current()){render();if(selected===id)$('setupGuideCheckConnection')?.focus({preventScroll:true});}}}
   }
   function chooseDefault(items) {
     var next = data.setup.connectionJourney.nextAction;
@@ -210,6 +238,7 @@
       '<label class="setup-guide-mobile" for="setupGuideSelect">Service<select id="setupGuideSelect" class="form-input">'+items.map(function(item){return '<option value="'+item.id+'"'+(item.id===selected?' selected':'')+'>'+esc(labels[item.id]+' · '+serviceStatus(item))+'</option>';}).join('')+'</select></label>'+
       '<div class="setup-guide-layout"><nav class="setup-guide-services" id="setupGuideServices" aria-label="Choose a service to set up">'+items.map(function(item){return '<button type="button" class="setup-guide-service" data-guide-service="'+item.id+'" aria-pressed="'+(item.id===selected)+'"><span class="brand-lockup">'+brandMark(item.id)+'<span'+(item.id==='angi'?' class="brand-wordmark-label"':'')+'>'+esc(labels[item.id])+'</span></span><small>'+esc(serviceStatus(item))+'</small></button>';}).join('')+'</nav>'+
       '<section class="setup-guide-current" aria-labelledby="setupGuideStageTitle"><div class="guide-task-meta"><span class="brand-lockup">'+brandMark(row.id)+'<span'+(row.id==='angi'?' class="brand-wordmark-label"':'')+'>'+esc(labels[row.id])+'</span></span><span>'+complete+' of '+steps.length+' steps saved</span></div>'+
+      renderVerification(row)+
       '<div class="guide-task-grid"><div class="guide-task-copy"><h4 id="setupGuideStageTitle" tabindex="-1">'+esc(title)+'</h4>'+(status!=='Your next step'?'<p class="guide-task-status muted">'+esc(status)+'</p>':'')+'<p class="guide-task-detail">'+esc(detail)+'</p>'+
       '<div class="setup-guide-actions">'+(intakeEnabled?'<button type="button" class="btn-pill '+(intakeNeeded?'btn-pill-blue':'btn-pill-dark')+' btn-sm" id="setupGuideDetails">'+(intakeNeeded?'Set up '+esc(labels[selected]):'Review connection details')+'</button>':'')+(!isNext?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideCurrent">Back to my next step</button>':intakeNeeded?'':!closed&&row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected)?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideChoose">Choose '+esc(labels[row.id])+'</button>':!closed&&next.kind!=='wait'?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideContinue">'+esc(next.label||'Continue setup')+'</button>':'<button type="button" class="btn-pill btn-pill-dark btn-sm" id="setupGuideRefresh">Check progress</button>')+'</div>'+
       '<p class="guide-task-expectation">'+esc(intakeNeeded&&isNext?'Your saved business details are filled in where they apply. You can save and return anytime.':taskOutcome(row,step,isNext))+'</p></div>'+
@@ -233,6 +262,7 @@
   host.addEventListener('change',function(event){if(event.target.id==='setupGuideSelect'&&current()&&labels[event.target.value]){endTask();selected=event.target.value;manualSelection=true;render();focusStage();}});
   host.addEventListener('click', function (event) {
     if (!current()) return;
+    if(event.target.closest('#setupGuideCheckConnection')){checkConnection();return;}
     var stepButton=event.target.closest('button[data-guide-step]');
     if(stepButton){guideStep=stepButton.dataset.guideStep;guideManual=true;render();focusStage();return;}
     if(event.target.closest('#setupGuideCurrent')){guideManual=false;render();focusStage();return;}
@@ -264,6 +294,7 @@
   document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;render();$('setupGuideContinue')?.click();});
   document.addEventListener('mc:guide-select',function(event){if(!labels[event.detail?.service]||!current())return;endTask();selected=event.detail.service;manualSelection=true;render();});
   document.addEventListener('mc:desk', function (event) { data = event.detail; observePreparation();render();assistTask(); });
-  document.addEventListener('mc:session-expired', function () { preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true; });
-  if ($('deskSignOut')) $('deskSignOut').addEventListener('click', function () { preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true; });
+  function clearConnectionCheck(){connectionCheckGeneration++;if(connectionCheck)connectionCheck.controller.abort();connectionCheck=null;connectionNotices={};}
+  document.addEventListener('mc:session-expired', function () { clearConnectionCheck();preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true; });
+  if ($('deskSignOut')) $('deskSignOut').addEventListener('click', function () { clearConnectionCheck();preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true; });
 })();

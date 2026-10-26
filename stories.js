@@ -1093,7 +1093,7 @@
 
     });
     el('mode-watch').setAttribute('aria-pressed', String(!live)); el('mode-live').setAttribute('aria-pressed', String(live));
-    el('live').hidden = false; el('playback').hidden = live; el('reset').hidden = !live;
+    el('live').hidden = !live; el('playback').hidden = live; el('reset').hidden = !live;
     el('channel').textContent = live ? ex.liveChannel : ex.channel;
     el('company').textContent = ex.company + ' · AI front desk';
     el('problem').textContent = ex.problem; el('promise').textContent = ex.promise;
@@ -1180,12 +1180,11 @@
     }
   }
   function frameConversation() {
-    // 'auto' inherits the site's smooth scrolling. Finish this user-requested frame
-    // before starting playback so an in-transit offscreen state cannot pause it.
-    var root = document.documentElement, prior = root.style.scrollBehavior;
-    root.style.scrollBehavior = 'auto';
-    wrap.querySelector('.site-conversation').scrollIntoView({ behavior: 'instant', block: 'start' });
-    root.style.scrollBehavior = prior;
+    // Keep the playback controls and conversation together below the sticky header.
+    // Finish this explicit navigation before visibility can pause the new playback.
+    var navbar = document.getElementById('navbar');
+    var top = el('controls').getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: Math.max(0, top - (navbar ? navbar.getBoundingClientRect().height : 0) - 12), behavior: 'instant' });
   }
   function renderChallenges() {
     var target = el('challenges'); target.querySelectorAll('button').forEach(function (button) { button.remove(); });
@@ -1274,7 +1273,20 @@
     scenario = button.dataset.example; autoStarted = true; render(false); frameConversation();
     if (mode === 'watch') play(); announce(examples[scenario].problem + ' selected.');
   }); });
-  el('mode-watch').addEventListener('click', function () { mode = 'watch'; autoStarted = true; render(false); play(); });
+  el('mode-watch').addEventListener('click', function () { mode = 'watch'; autoStarted = true; render(false); frameConversation(); play(); });
+  // The explicit example links start the example where the conversation is visible.
+  // A section-heading scroll alone can leave playback below a small screen.
+  document.querySelectorAll('a[href]').forEach(function (link) {
+    var destination = new URL(link.href, window.location.href);
+    var currentPath = window.location.pathname.replace(/\/index(?:\.html)?$/, '/');
+    if (destination.origin !== window.location.origin || destination.hash !== '#week' || destination.pathname.replace(/\/index(?:\.html)?$/, '/') !== currentPath) return;
+    link.addEventListener('click', function (event) {
+      if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || link.target && link.target !== '_self') return;
+      event.preventDefault();
+      mode = 'watch'; autoStarted = true; render(false); frameConversation();
+      el('mode-watch').focus({ preventScroll: true }); play();
+    }, true);
+  });
   el('mode-live').addEventListener('click', function () { if (mode === 'live') return; mode = 'live'; autoStarted = true; render(true); announce('Live AI practice ready. Choose a challenge, type or start a voice call.'); });
   el('play').addEventListener('click', function () { if (playing) { pause(); announce('Example paused.'); } else { frameConversation(); play(); } });
   el('replay').addEventListener('click', function () { watchStart(); frameConversation(); play(); announce('Example restarted.'); });

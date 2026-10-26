@@ -138,3 +138,25 @@
 .guide-task-meta .brand-lockup { gap:8px; }
 .guide-task-meta img.brand-mark { width:20px; height:20px; }
 .guide-task-meta img.brand-mark--wide { width:44px; height:22px; }
+.setup-guide-service .service-mark { width:20px; height:20px; flex:none; }
+.guide-task-meta .service-mark { width:22px; height:22px; flex:none; }
+.connection-verification { margin:0 0 28px; padding:0 0 24px; border-bottom:1px solid var(--ui-line,#dce2e9); min-width:0; }
+.connection-verification-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+.desk-app .connection-verification h4#connectionVerificationTitle { font-size:17px; line-height:1.4; margin:0 0 5px; letter-spacing:-.02em; }
+.connection-verification-heading p { margin:0; font-size:12px; line-height:1.6; color:var(--ui-muted,#526176); max-width:65ch; }
+.connection-verification-heading .btn-pill { flex:none; min-height:44px; white-space:normal; }
+.connection-verification-checks { margin:16px 0 0; padding:0; list-style:none; display:grid; gap:9px; }
+.connection-verification-checks li { display:flex; align-items:center; gap:9px; min-width:0; font-size:12px; line-height:1.5; color:var(--ui-ink,#17263d); }
+.connection-check-indicator { display:flex; flex:none; width:20px; height:20px; color:#64748b; }
+.connection-check-indicator svg { width:20px; height:20px; }
+.connection-verification-checks [data-check-state=passed] .connection-check-indicator { color:#21613f; }
+.connection-verification-checks [data-check-state=needs_attention] .connection-check-indicator { color:#a43127; }
+.connection-verification-checks li>span:not(.connection-check-indicator) { min-width:0; flex:1; }
+.connection-verification-checks small { flex:none; font-size:11px; color:var(--ui-muted,#526176); }
+.connection-verification-evidence,.connection-verification-notice { font-size:11px; line-height:1.6; margin:12px 0 0; color:var(--ui-muted,#526176); }
+.connection-verification-notice[data-error=true] { color:#a43127; }
+.connection-verification[data-verification-state=verified] #connectionVerificationTitle { color:#21613f; }
+@media(max-width:600px) { .connection-verification-heading { display:block; }.connection-verification-heading .btn-pill { margin-top:12px; }.connection-verification-checks li { align-items:flex-start; }.connection-verification-checks small { max-width:84px; text-align:right; }.connection-verification { margin-bottom:22px; padding-bottom:20px; } }
+
+.connection-verification-result { display:inline-block; font-size:12px; font-weight:600; color:var(--ui-ink,#17263d); margin:0 0 7px; }
+.connection-verification[data-verification-state=verified] .connection-verification-result { color:#21613f; }

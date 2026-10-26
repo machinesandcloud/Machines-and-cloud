@@ -142,7 +142,8 @@ async function handle(req) {
     if(!active||normalizeAccountEmail(active.email)!==normalizeAccountEmail(c.owner?.email))return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
     if(!current||workspaceTenant(current)!==workspaceTenant(c)||!isSupportedSelfServiceClient(current)||normalizeAccountEmail(current.owner?.email)!==normalizeAccountEmail(active.email))return json({error:'forbidden'},403,{'Cache-Control':'no-store'});
     if(configurationRevision(current)!==revision||workspaceEditRevision(current)!==editRevision||serviceIntakeRevision(current)!==intakeRevision)return json({error:'setup_changed',message:'Setup changed while it was being read. Read the current setup again.'},409,{'Cache-Control':'no-store'});
-    return json({ok:true,client:{slug:c.slug},setup:{connectionJourney:serviceSetupView(c,connections,plan,installation,leads).connectionJourney,connectionPreparation:preparation},serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
+    const setup=serviceSetupView(c,connections,plan,installation,leads);
+    return json({ok:true,client:{slug:c.slug},setup:{channels:setup.channels,connectionJourney:setup.connectionJourney,connectionPreparation:preparation},connections,websiteInstallation:installation,serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
   }
 
   if (req.method === 'GET' && url.searchParams.has('report')) {
