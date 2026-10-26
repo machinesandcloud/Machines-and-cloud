@@ -584,10 +584,29 @@
     }
     syncNextActionVisibility();
   }
+  function reviewRequirements(d) {
+    var required=d?.setup?.reviewRequirements;
+    return required||{fieldErrors:{},blockers:(d?.setup?.channels?.web?.blockers||[]).filter(function(row){return ['knowledge','rules','handoff'].includes(row.id);})};
+  }
+  function reviewShowErrors(errors) {
+    // An older unsafe route may live in an otherwise optional, hidden setting.
+    // Expose only the exact fields the server requires the owner to correct.
+    if(!cfgClosed)Object.keys(errors).forEach(function(name){var field=cfgField(name);if(!field)return;field.disabled=false;var parent=field.parentElement;while(parent&&parent!==$('cfg')){if(parent.classList.contains('form-group'))parent.hidden=false;if(parent.id==='transferGroup')parent.style.display='block';if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}});
+    cfgShowErrors(errors);
+  }
   function reviewState(d) {
     if(!d||!d.setup)return;
+    var required=reviewRequirements(d),fields=Object.keys(required.fieldErrors||{}),blocked=!!required.blockers.length,reviewed=d.client.setupProof?.reviewedRevision===d.setup.revision;
     $('reviewRules').disabled=leaving||reviewBusy||websiteBusy||cfgDirty||cfgBusy||acctBusy||cfgClosed||['cancelled','archived'].includes(d.client.status);
-    $('reviewMessage').textContent=reviewBusy?'Saving your review…':websiteBusy?'Wait for your website setup to finish updating.':cfgDirty||cfgBusy||acctBusy?'Save your edits before reviewing this version.':d.client.setupProof?.reviewedRevision===d.setup.revision?'Review saved for the current version.':'';
+    $('reviewRules').dataset.reviewBlocked=String(blocked);
+    $('reviewRules').textContent=fields.length?'Complete business details':blocked?'Check preparation':'Confirm business details';
+    $('reviewCard').dataset.reviewState=blocked?'incomplete':reviewed?'confirmed':'needs_confirmation';
+    $('reviewHeading').textContent=fields.length?'Finish your business details':blocked?'Your business profile is being prepared':reviewed?'Business details confirmed':'Confirm your business details';
+    $('reviewIntro').textContent=fields.length?'Complete the items below and save your changes. Then confirm the answers your front desk should use.':blocked?required.blockers.map(function(row){return row.detail;}).join(' '):reviewed?'Your saved answers are confirmed for this version. You can edit them below.':'Check your services, hours and contact details below, then confirm these are the answers your front desk should use.';
+    $('reviewNeeds').hidden=!fields.length;
+    $('reviewNeeds').innerHTML=fields.map(function(field){return '<li><button type="button" data-review-field="'+esc(field)+'">'+esc(required.fieldErrors[field])+'</button></li>';}).join('');
+    $('reviewMessage').textContent=reviewBusy?(blocked?'Checking preparation…':'Saving your review…'):websiteBusy?'Wait for your website setup to finish updating.':cfgDirty||cfgBusy||acctBusy?'Save your edits before reviewing this version.':blocked?'Your saved draft is kept. Complete the required details before continuing.':reviewed?'Review saved for the current version.':'';
+    document.dispatchEvent(new CustomEvent('mc:guide-state-change'));
   }
   function renderSetup(d) {
     renderWorkspaceOperations(d);
@@ -675,11 +694,14 @@
   });
   $('reviewRules').addEventListener('click', async function () {
     if (!data || !data.setup || leaving || reviewBusy || websiteBusy || cfgDirty || cfgBusy || acctBusy || cfgClosed || ['cancelled','archived'].includes(data.client.status)) return;
-    var generation=portalGeneration,errorMessage=null;reviewBusy=true;cfgFence++;reviewState(data);
-    try{await action('review_rules',{revision:data.setup.revision});if(leaving||generation!==portalGeneration)return;cfgFence++;await latestWorkspaceRead();}
-    catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}errorMessage=error.message;}
-    finally{if(!leaving&&generation===portalGeneration){reviewBusy=false;reviewState(data);if(errorMessage)$('reviewMessage').textContent=errorMessage;}}
+    var required=reviewRequirements(data);
+    if(Object.keys(required.fieldErrors||{}).length){reviewShowErrors(required.fieldErrors);return;}
+    var generation=portalGeneration,errorMessage=null,revision=data.setup.revision,confirmed=false;reviewBusy=true;cfgFence++;reviewState(data);
+    try{if(required.blockers.length){await latestWorkspaceRead();return;}await action('review_rules',{revision:revision});if(leaving||generation!==portalGeneration)return;cfgFence++;await latestWorkspaceRead();confirmed=data?.setup?.revision===revision&&data.client.setupProof?.reviewedRevision===revision&&!reviewRequirements(data).blockers.length;}
+    catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}errorMessage=error.message;if(error.fieldErrors)reviewShowErrors(error.fieldErrors);}
+    finally{if(!leaving&&generation===portalGeneration){reviewBusy=false;reviewState(data);if(errorMessage)$('reviewMessage').textContent=errorMessage;if(confirmed&&!cfgDirty&&!cfgBusy&&!acctBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'business',revision:revision,slug:slug}}));}}
   });
+  $('reviewNeeds').addEventListener('click',function(event){var button=event.target.closest('[data-review-field]');if(!button||leaving)return;var required=reviewRequirements(data),field=button.dataset.reviewField;if(!Object.hasOwn(required.fieldErrors||{},field))return;var errors={};errors[field]=required.fieldErrors[field];reviewShowErrors(errors);});
   $('copySnippet').addEventListener('click', function () { websiteCopy(false); });
   var tour = [
     { title: 'Your day, at a glance', body: 'Home shows requests, visits and work that needs your attention. Use Inbox for customer messages, Schedule for visits and Front desk for setup.', action: 'Explore Home', tab: 'today', target: 'todayTourSummary', compact: 'todayTourHeading', tiny: 'todayTourHeading' },
@@ -1153,7 +1175,8 @@
   var chatBusy = false;
   $('chatForm').addEventListener('submit', async function (event) {
     event.preventDefault(); var text = $('chatIn').value.trim(); if (!text || chatBusy || !data) return;
-    chatBusy = true; $('chatForm').querySelector('button').disabled = true; $('newChat').disabled = true; $('chatIn').value = '';
+    var practiceRevision=data.setup?.revision,practiceGeneration=portalGeneration,proofRecorded=false;
+    chatBusy = true; $('chatForm').setAttribute('aria-busy','true');document.dispatchEvent(new CustomEvent('mc:guide-state-change'));$('chatForm').querySelector('button').disabled = true; $('newChat').disabled = true; $('chatIn').value = '';
     transcript.push({ role: 'user', content: text }); add('user', text); var bubble = null, full = '', finished = false;
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 60000);
     chatController = controller;
@@ -1164,11 +1187,12 @@
       if (out.t === 'delta') { if (!bubble) bubble = add('a', ''); full += out.text; bubble.textContent = full; msgs.scrollTop = msgs.scrollHeight; }
       if (out.t === 'error') throw new Error(out.error === 'offline' ? 'AI service is unavailable. Your setup is saved; retry later.' : 'The practice reply could not be completed. Try a new conversation.');
       if (out.t === 'done') {
+        proofRecorded=out.test?.proofRecorded===true;
         finished = true; if (!bubble) bubble = add('a', out.reply); else bubble.textContent = out.reply;
         transcript.push({ role: 'assistant', content: out.reply });
         var previews = (out.events || []).filter(function (item) { return item.type === 'test_booking' || item.type === 'test_lead'; });
         $('testPreview').textContent = previews.length ? previews.map(function (item) { var values = item.data || {}; return (item.type === 'test_booking' ? 'Practice visit preview' : 'Practice handoff preview') + '\n' + Object.keys(values).map(function (key) { return key.replace(/_/g, ' ') + ': ' + values[key]; }).join('\n'); }).join('\n\n') + '\n\nNo real visit, message or calendar event was created.' : 'Practice reply completed. No real visit, message or calendar event was created.';
-        if (out.test && !out.test.proofRecorded) $('testPreview').textContent += '\nYour rules changed during the test. Try again with the saved version.';
+        if (out.test && !out.test.proofRecorded) $('testPreview').textContent += '\nThis check was not saved. Retry with the current business details before continuing.';
       }
     }
     try {
@@ -1182,9 +1206,9 @@
       for (;;) { var part = await reader.read(); if (part.done) break; buffer += decoder.decode(part.value, { stream: true }); var lines = buffer.split('\n'); buffer = lines.pop(); lines.forEach(receive); }
       buffer += decoder.decode(); if (buffer.trim()) receive(buffer);
       if (!finished) throw new Error('The practice reply was interrupted. Try a new conversation.');
-      if (!leaving) await load(); // Even a question-only completion updates revision-bound test readiness.
+      if (!leaving) await latestWorkspaceRead(); // Use the latest canonical revision before offering a connector continuation.
     } catch (error) { if (!leaving) add('sys', error.name === 'AbortError' ? 'The practice reply timed out. Try a new conversation.' : error.message); }
-    finally { clearTimeout(timeout); if (chatController === controller) chatController = null; chatBusy = false; if ($('chatForm')) { $('chatForm').querySelector('button').disabled = false; $('newChat').disabled = false; if (!leaving) $('chatIn').focus(); } }
+    finally { clearTimeout(timeout); if (chatController === controller) chatController = null; chatBusy = false; if ($('chatForm')) { $('chatForm').setAttribute('aria-busy','false');$('chatForm').querySelector('button').disabled = false; $('newChat').disabled = false; if (!leaving) $('chatIn').focus(); }if(!leaving){document.dispatchEvent(new CustomEvent('mc:guide-state-change'));if(proofRecorded&&practiceGeneration===portalGeneration&&data?.setup?.revision===practiceRevision&&data.client.setupProof?.testedRevision===practiceRevision&&data.client.setupProof?.testMode==='live'&&!cfgDirty&&!cfgBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'practice',revision:practiceRevision,slug:slug}}));} }
   });
   load().then(greet);
 })();

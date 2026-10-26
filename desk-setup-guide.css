@@ -160,3 +160,13 @@
 @media(max-width:380px) { #setupGuide .setup-guide-services { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
 .guide-path button:focus-visible{outline:3px solid #8bacff;outline-offset:2px}
+
+/* The next setup action stays beside the completed task instead of sending the owner back. */
+.setup-guide-target.guide-step-complete{animation:none;outline:none!important}
+#reviewCard.guide-step-complete #reviewRules{display:none}
+.setup-guide-coach[data-guide-complete="true"]{background:#f0f7f3;border-color:#c8dfd2}
+.setup-guide-coach{min-width:0;scroll-margin-top:24px;border-left-width:1px}
+.setup-guide-coach>div:first-child{min-width:0;flex:1}
+.guide-coach-actions{flex-wrap:wrap;justify-content:flex-end}
+.guide-coach-actions .btn-pill{max-width:240px}
+@media(max-width:600px){.guide-coach-actions{justify-content:space-between}.guide-coach-actions .btn-pill{flex:1;max-width:none}.guide-coach-actions .guide-coach-dismiss{flex:none}}

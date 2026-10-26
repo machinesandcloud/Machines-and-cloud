@@ -132,7 +132,7 @@
       if(!result.connections||!result.websiteInstallation||!result.setup.channels)throw new Error('unavailable');
       // Replace server-derived connection facts only. Business fields, private
       // intake drafts and pending owner edits stay under their existing owners.
-      data.connections=result.connections;data.websiteInstallation=result.websiteInstallation;data.setup.channels=result.setup.channels;data.setup.connectionJourney=journey;connectionNotices[id]={error:false,text:'Saved status checked '+checkedTime(checked.verification.checkedAt)+'. '+(checked.verification.working?'Delivery was verified at the time shown above.':checked.verification.summary)};
+      data.connections=result.connections;data.websiteInstallation=result.websiteInstallation;data.setup.channels=result.setup.channels;if(result.setup.reviewRequirements)data.setup.reviewRequirements=result.setup.reviewRequirements;data.setup.connectionJourney=journey;connectionNotices[id]={error:false,text:'Saved status checked '+checkedTime(checked.verification.checkedAt)+'. '+(checked.verification.working?'Delivery was verified at the time shown above.':checked.verification.summary)};
     } catch(error) {if(generation===connectionCheckGeneration&&current())connectionNotices[id]={error:true,text:error.message==='changed'?'Your setup changed while it was checked. Refreshing the latest details; check again before continuing.':'The connection check could not finish. Your setup is kept. Check again to confirm its current status.'};}
     finally {clearTimeout(timeout);if(generation===connectionCheckGeneration){connectionCheck=null;if(current()){render();if(selected===id)$('setupGuideCheckConnection')?.focus({preventScroll:true});}}}
   }
@@ -163,42 +163,69 @@
     return 'The connection screen shows the details to review. You approve any permissions and costs there.';
   }
   function focusStage(){var title=$('setupGuideStageTitle');if(title){var visitReturn=$('visitSetupReturn');((visitReturn&&!visitReturn.hidden?visitReturn:null)||host.querySelector('.guide-task-meta')||title).scrollIntoView({block:'start',behavior:motion.matches?'instant':'smooth'});title.focus({preventScroll:true});}}
-  function beginTask(row){var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];guideManual=false;guideTask={service:row.id,step:step&&step.id,label:step&&step.label||labels[row.id],action:action(row)};}
-  function clearTarget(){document.querySelectorAll('[data-guide-inline-context]').forEach(function(node){node.remove();});if(guideTarget&&guideTarget.isConnected)guideTarget.classList.remove('setup-guide-target');guideTarget=null;}
-  function endTask(){guideTask=null;clearTarget();coach.hidden=true;coach.replaceChildren();delete coach.dataset.contentKey;document.querySelectorAll('[data-setup-guide-context]').forEach(function(node){node.remove();});}
+  function beginTask(row){var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];guideManual=false;guideTask={service:row.id,step:step&&step.id,label:step&&step.label||labels[row.id],action:action(row),slug:data.client.slug,session:preparationSession()};}
+  function clearTarget(){document.querySelectorAll('[data-guide-inline-context]').forEach(function(node){node.remove();});if(guideTarget&&guideTarget.isConnected)guideTarget.classList.remove('setup-guide-target','guide-step-complete');guideTarget=null;}
+  function endTask(){guideTask=null;clearTarget();coach.hidden=true;coach.replaceChildren();delete coach.dataset.contentKey;delete coach.dataset.guideService;delete coach.dataset.guideStep;delete coach.dataset.guideComplete;document.querySelectorAll('[data-setup-guide-context]').forEach(function(node){node.remove();});}
+  function continuation(row){
+    var steps=row.guide?.steps||[],now=steps[currentStep(row,steps)],prior=steps.find(function(item){return item.id===guideTask.step;}),next=action(row);
+    var changed=!!now&&(now.id!==guideTask.step||next.kind!==guideTask.action.kind||next.target!==guideTask.action.target),complete=!!prior&&prior.state==='complete';
+    var review=$('reviewRules'),required=guideTask.step==='business'&&review?.dataset.reviewBlocked==='true',busy=guideTask.step==='business'&&review&&(review.disabled||required)||guideTask.step==='practice'&&$('chatForm')?.getAttribute('aria-busy')==='true';
+    var waiting=next.kind==='wait'||now&&now.state==='waiting'&&now.actor!=='customer';
+    return {now:now,next:next,changed:changed,complete:complete,busy:!!busy,required:required,waiting:!!waiting,canContinue:changed&&!busy&&!['paused','cancelled','archived'].includes(data.client.status)};
+  }
   function assistTask(){
     if(!guideTask||!current()){if(!current())endTask();return;}
+    if(guideTask.slug!==data.client.slug||guideTask.session!==preparationSession()||['paused','cancelled','archived'].includes(data.client.status)){endTask();return;}
     var row=rows().find(function(item){return item.id===guideTask.service;});if(!row){endTask();return;}
-    var steps=row.guide?.steps||[],now=steps[currentStep(row,steps)],changed=now&&now.id!==guideTask.step;
-    var dialog=document.querySelector('dialog[open]:not(#guideDialog)'),target=null,scrollTarget=false;
+    var progress=continuation(row),dialog=document.querySelector('dialog[open]:not(#guideDialog)'),target=null,scrollTarget=false;
     if(dialog){
       coach.hidden=true;clearTarget();
-      if(dialog.id==='connectionDialog'&&!dialog.querySelector('[data-setup-guide-context]')){var note=document.createElement('p');note.className='guide-dialog-context';note.dataset.setupGuideContext='true';note.textContent=labels[row.id]+' · '+guideTask.label;dialog.prepend(note);}
+      if(dialog.id==='connectionDialog'&&!dialog.querySelector('[data-setup-guide-context]')){var note=document.createElement('p');note.className='guide-dialog-context';note.dataset.setupGuideContext='true';note.textContent=labels[row.id]+' setup · '+guideTask.label;dialog.prepend(note);}
       return;
     }
     document.querySelectorAll('[data-setup-guide-context]').forEach(function(node){node.remove();});
-    var tab=document.body.dataset.activePage,taskBar=null;
+    var tab=document.body.dataset.activePage;
     if(tab==='setup')target=guideTask.action.kind==='route'&&guideTask.action.target==='setup'?$('websiteInstallStep'):null;
     else if(tab==='know')target=$('reviewCard');else if(tab==='test')target=$('chatForm');else if(tab==='availability')target=$('scheduleVisits');else if(tab==='leads')target=$('requestTourHeading');
-    if(target&&target.getClientRects().length){if(guideTarget!==target){clearTarget();guideTarget=target;target.classList.add('setup-guide-target');var parent=target.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}scrollTarget=true;}}
     if(target&&target.getClientRects().length){
-      taskBar=document.querySelector('[data-guide-inline-context]');
-      if(!taskBar){taskBar=document.createElement('div');taskBar.className='guide-inline-context';taskBar.dataset.guideInlineContext='true';taskBar.innerHTML='<span></span><button type="button" class="btn-pill btn-pill-dark btn-sm" data-guide-return id="guideTaskReturn"></button>';
-        if(target.id==='chatForm'||target.id==='requestTourHeading')target.before(taskBar);
-        else if(target.id==='websiteInstallStep'&&target.lastElementChild)target.lastElementChild.prepend(taskBar);
-        else target.prepend(taskBar);
-      }
-      taskBar.querySelector('span').textContent=labels[row.id]+' setup';taskBar.querySelector('button').textContent=changed?'Continue setup':'Back to guide';
+      if(guideTarget!==target){clearTarget();guideTarget=target;target.classList.add('setup-guide-target');var parent=target.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}scrollTarget=true;}
+      target.classList.toggle('guide-step-complete',progress.complete&&progress.changed&&!progress.busy);
+      // One service context stays beside the work. Do not repeat return buttons inside it.
+      if(coach.nextElementSibling!==target)target.before(coach);
+    } else {
+      clearTarget();var pageHeading=document.querySelector('#portalContent .desk-page-heading');if(pageHeading&&pageHeading.nextElementSibling!==coach)pageHeading.after(coach);
     }
-    coach.hidden=false;
-    if(scrollTarget){var capturedTask=guideTask,capturedTarget=target,capturedScroll=(target.id==='chatForm'||target.id==='requestTourHeading')&&taskBar?taskBar:target;requestAnimationFrame(function(){requestAnimationFrame(function(){if(current()&&guideTask===capturedTask&&guideTarget===capturedTarget&&capturedTarget.isConnected&&!document.querySelector('dialog[open]'))capturedScroll.scrollIntoView({block:'start',behavior:motion.matches?'instant':'smooth'});});});}
-    var text=changed?'Your saved progress has updated. Continue with the next step.':guideTask.label;
-    var key=guideTask.service+'|'+text+'|'+tab;
-    if(coach.dataset.contentKey!==key){coach.dataset.contentKey=key;coach.innerHTML='<div><span>'+esc(labels[row.id])+' setup</span><strong id="guideCoachTitle">'+esc(text)+'</strong><p>'+esc(changed?'Return to your guide to see what’s next.':target?'Use the highlighted area below. Your guide will keep its place.':'Continue here, or return to your step-by-step guide.')+'</p></div><div class="guide-coach-actions"><button type="button" class="btn-pill btn-pill-blue btn-sm" id="guideReturn">'+(changed?'Continue setup':'Back to guide')+'</button><button type="button" class="guide-coach-dismiss" id="guideDismiss">Close guide</button></div>';}
+    var title=progress.complete&&progress.changed?({business:'Business details confirmed',practice:'Your answers are checked',permission:'Account access saved',delivery:'Delivery confirmed'}[guideTask.step]||guideTask.label+' completed'):progress.changed?'Your next setup step':guideTask.label;
+    var detail=progress.required?(row.nextStep||'Complete the required business details below before continuing.'):progress.busy?'Save your changes and finish the current check before continuing.':progress.changed?'Next: '+(progress.now?.label||progress.next.label||labels[row.id]+' setup')+'. '+(progress.now?.detail||row.nextStep||'Continue with your saved setup.'):(row.nextStep||progress.now?.detail||'Complete the highlighted step below.');
+    if(!progress.changed&&target&&!progress.busy)detail=guideTask.step==='business'?'Check the required business details below, then confirm the saved answers. '+(row.nextStep||''):guideTask.step==='practice'?'Ask a customer question below. When its saved check is confirmed, your next setup step appears here.':detail;
+    var button=progress.changed?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="guideReturn"'+(progress.canContinue?'':' disabled')+'>'+(progress.waiting?'View '+esc(labels[row.id].toLowerCase())+' progress':'Continue '+esc(labels[row.id].toLowerCase())+' setup')+'</button>':'';
+    var key=[guideTask.service,title,detail,tab,progress.canContinue,progress.waiting].join('|'),focused=coach.contains(document.activeElement)?document.activeElement.id:null;
+    coach.hidden=false;coach.dataset.guideService=row.id;coach.dataset.guideStep=guideTask.step;coach.dataset.guideComplete=String(progress.complete&&progress.changed);
+    if(coach.dataset.contentKey!==key){coach.dataset.contentKey=key;coach.innerHTML='<div><span>'+esc(labels[row.id])+' setup</span><strong id="guideCoachTitle">'+esc(title)+'</strong><p id="guideCoachDetail">'+esc(detail)+'</p></div><div class="guide-coach-actions">'+button+'<button type="button" class="guide-coach-dismiss" id="guideDismiss">Close guide</button></div>';if(focused&&$(focused))$(focused).focus({preventScroll:true});}
+    if(scrollTarget){var capturedTask=guideTask,capturedTarget=target;requestAnimationFrame(function(){requestAnimationFrame(function(){if(current()&&guideTask===capturedTask&&guideTarget===capturedTarget&&capturedTarget.isConnected&&!document.querySelector('dialog[open]'))coach.scrollIntoView({block:'start',behavior:motion.matches?'instant':'smooth'});});});}
   }
   function returnToGuide(){if(!guideTask||!current())return;var id=guideTask.service;endTask();selected=id;manualSelection=true;guideManual=false;document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup'}}));render();coach.hidden=true;focusStage();document.dispatchEvent(new CustomEvent('mc:desk-refresh'));}
-  document.addEventListener('click',function(event){if(event.target.closest('[data-guide-return]'))returnToGuide();});
-  coach.addEventListener('click',function(event){if(event.target.closest('#guideDismiss')){var target=guideTarget;endTask();var focus=target&&target.querySelector('button:not(:disabled),input:not(:disabled),textarea:not(:disabled)')||$('pageTitle');if(focus)focus.focus({preventScroll:true});return;}if(event.target.closest('#guideReturn'))returnToGuide();});
+  function executeAction(row){
+    if(!row||['cancelled','archived','paused'].includes(data.client.status))return;var next=action(row);
+    selected=row.id;manualSelection=true;guideManual=false;
+    if(next.kind==='wait'){returnToGuide();return;}
+    if(next.kind==='lead'&&['thumbtack','angi'].includes(next.target)){beginTask(row);document.dispatchEvent(new CustomEvent('mc:lead-source-open',{detail:{source:next.target}}));assistTask();return;}
+    var card=$('connection-guide-'+row.id),existing=card&&Array.from(card.querySelectorAll('button')).find(function(button){return !button.disabled&&(next.kind==='route'?button.dataset.journeyRoute===next.target:next.kind==='connection'&&button.dataset.connection===next.target);});
+    if(!existing&&next.kind==='connection')existing=Array.from(document.querySelectorAll('#connectionJourney [data-connection]')).find(function(button){return button.dataset.connection===next.target&&!button.disabled;});
+    if(existing){beginTask(row);existing.click();assistTask();return;}
+    if(next.kind==='route'&&['know','test','setup','leads','availability'].includes(next.target)){beginTask(row);document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:next.target}}));assistTask();return;}
+    // A missing action must return to the current status, not strand the customer.
+    returnToGuide();
+  }
+  coach.addEventListener('click',function(event){
+    if(event.target.closest('#guideDismiss')){var target=guideTarget;endTask();var focus=target&&target.querySelector('button:not(:disabled),input:not(:disabled),textarea:not(:disabled)')||$('pageTitle');if(focus)focus.focus({preventScroll:true});return;}
+    if(event.target.closest('#guideReturn')&&guideTask&&current()){var row=rows().find(function(item){return item.id===guideTask.service;});if(!row||!continuation(row).canContinue)return;if(continuation(row).waiting)returnToGuide();else executeAction(row);}
+  });
+  document.addEventListener('mc:guide-state-change',assistTask);
+  document.addEventListener('mc:guide-step-complete',function(event){
+    if(!current()||!guideTask||event.detail?.slug!==data.client.slug||event.detail?.revision!==data.configurationRevision||event.detail?.step!==guideTask.step)return;
+    assistTask();var row=rows().find(function(item){return item.id===guideTask.service;}),button=$('guideReturn');if(row&&continuation(row).canContinue&&button&&!button.disabled){button.scrollIntoView({block:'nearest',behavior:motion.matches?'instant':'smooth'});button.focus({preventScroll:true});}
+  });
   document.addEventListener('mc:service-guide',function(event){if(!current()||!labels[event.detail?.service])return;selected=event.detail.service;manualSelection=true;guideManual=false;endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup'}}));render();focusStage();});
   var contextObserver=new MutationObserver(function(){assistTask();});contextObserver.observe(document.body,{attributes:true,attributeFilter:['data-active-page','data-workspace-state']});document.querySelectorAll('dialog').forEach(function(dialog){contextObserver.observe(dialog,{attributes:true,attributeFilter:['open'],childList:true});});
   document.addEventListener('click',function(event){if(event.target.closest('.tabs [data-t=setup]')&&current()&&!hasPreparationForm()){endTask();}});
@@ -249,7 +276,7 @@
       '</section></div>';
     if(intakeSaved[selected]){
       var savedNotice=document.createElement('p');savedNotice.id='connectionIntakeSaved';savedNotice.className='preparation-status';savedNotice.setAttribute('role','status');savedNotice.tabIndex=-1;
-      savedNotice.textContent='Your '+labels[selected].toLowerCase()+' draft is saved. Open connection details whenever you’re ready to continue.';
+      savedNotice.textContent='Your '+labels[selected].toLowerCase()+' details are saved. Continue with the next setup step below.';
       host.querySelector('.setup-guide-current').prepend(savedNotice);
     }
     if(window.MCServiceIntake)window.MCServiceIntake.mount(host.querySelector('.setup-guide-current'),selected,data);
@@ -279,16 +306,7 @@
     if(event.target.closest('#setupGuideChoose')&&['web','voice','sms','calendar'].includes(selected)&&!['cancelled','archived','paused'].includes(data.client.status)){var choice=$('connection-guide-'+selected)?.querySelector('[data-journey-choose="'+selected+'"]');if(choice)choice.click();return;}
 
     if (!event.target.closest('#setupGuideContinue') || ['cancelled', 'archived', 'paused'].includes(data.client.status)) return;
-    var next = action(row);
-    if (next.kind === 'lead' && ['thumbtack', 'angi'].includes(next.target)) {
-      beginTask(row);document.dispatchEvent(new CustomEvent('mc:lead-source-open', { detail: { source: next.target } })); assistTask();return;
-    }
-    var card = $('connection-guide-' + selected), existing = card && Array.from(card.querySelectorAll('button')).find(function (button) {
-      return !button.disabled && (next.kind === 'route' ? button.dataset.journeyRoute === next.target : next.kind === 'connection' && button.dataset.connection === next.target);
-    });
-    if (!existing && next.kind === 'connection') existing = Array.from(document.querySelectorAll('#connectionJourney [data-connection]')).find(function (button) { return button.dataset.connection === next.target && !button.disabled; });
-    if (existing) { beginTask(row); existing.click(); assistTask(); return; }
-    if (next.kind === 'route' && ['know', 'test', 'setup', 'leads', 'availability'].includes(next.target)){beginTask(row);document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: next.target } }));assistTask();}
+    executeAction(row);
   });
   document.addEventListener('mc:service-intake-saved',function(event){if(!current()||!labels[event.detail?.service])return;intakeSaved[event.detail.service]=true;render();});
   document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;render();$('setupGuideContinue')?.click();});

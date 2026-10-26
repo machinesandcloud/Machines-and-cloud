@@ -143,7 +143,7 @@ async function handle(req) {
     if(!current||workspaceTenant(current)!==workspaceTenant(c)||!isSupportedSelfServiceClient(current)||normalizeAccountEmail(current.owner?.email)!==normalizeAccountEmail(active.email))return json({error:'forbidden'},403,{'Cache-Control':'no-store'});
     if(configurationRevision(current)!==revision||workspaceEditRevision(current)!==editRevision||serviceIntakeRevision(current)!==intakeRevision)return json({error:'setup_changed',message:'Setup changed while it was being read. Read the current setup again.'},409,{'Cache-Control':'no-store'});
     const setup=serviceSetupView(c,connections,plan,installation,leads);
-    return json({ok:true,client:{slug:c.slug},setup:{channels:setup.channels,connectionJourney:setup.connectionJourney,connectionPreparation:preparation},connections,websiteInstallation:installation,serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
+    return json({ok:true,client:{slug:c.slug},setup:{channels:setup.channels,reviewRequirements:setup.reviewRequirements,connectionJourney:setup.connectionJourney,connectionPreparation:preparation},connections,websiteInstallation:installation,serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
   }
 
   if (req.method === 'GET' && url.searchParams.has('report')) {
@@ -407,6 +407,10 @@ async function handle(req) {
         const setup = setupReadiness(current), now = new Date().toISOString();
         if (b.action === "review_rules") {
           if (typeof b.revision !== "string" || b.revision !== configurationRevision(current)) return { result: { error: "configuration_changed", status: 409, setup } };
+          const { blockers, fieldErrors } = setup.reviewRequirements;
+          if (blockers.length) {
+            return { result: { error: "business_details_incomplete", status: 409, setup, blockers, fieldErrors, message: Object.keys(fieldErrors).length ? "Complete the highlighted business details before confirming this version." : "Your business details are saved. The front desk build must finish before you can confirm this version." } };
+          }
           const updated = { ...current, setupProof: { ...current.setupProof, reviewedRevision: b.revision, reviewedAt: now }, updatedAt: now };
           return { value: updated, result: { client: updated } };
         }
@@ -421,7 +425,7 @@ async function handle(req) {
           ...(status === "live" ? { liveAt: current.liveAt || now, pausedAt: null } : status === "paused" ? { pausedAt: now, pausedFrom: current.status,pausedChannels:current.channels } : { cancelledAt: current.cancelledAt || now, cancelReason: s(b.reason, 300) }) };
         return { value: updated, result: { client: updated } };
       });
-      if (result.error) return json({ error: result.error, setup: result.setup, ...(result.aiAllowance ? { aiAllowance: result.aiAllowance, message: "Website chat cannot activate while today’s AI allowance is exhausted." } : {}) }, result.status);
+      if (result.error) return json({ error: result.error, setup: result.setup, ...(result.message ? { message: result.message, blockers: result.blockers, fieldErrors: result.fieldErrors } : {}), ...(result.aiAllowance ? { aiAllowance: result.aiAllowance, message: "Website chat cannot activate while today’s AI allowance is exhausted." } : {}) }, result.status);
       if (b.action === "cancel") { await cancelTasks(c.slug, () => true); await queueWorkspaceStopBilling(result.client); }
       const aiAllowance = await getAIAllowance(result.client);
       return json({ ok: true, status: result.client.status, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), aiAllowance, webAvailable: result.client.status === "live" && setupReadiness(result.client).canActivateWeb && aiAllowance.available, activeChannels: result.client.status === "live" && aiAllowance.available ? ["web"] : [] });
