@@ -53,7 +53,7 @@ export async function serviceConnections(c) {
     messaging.detail=detail;
     messaging.operation={...messaging.operation,customerAction:accepted?'reply_to_setup_text':'wait_for_setup_text',detail,probeDelivery:probeDelivery||null};
   }
-  if (voice.operation?.number) voice.forwarding=forwardingInstructions({...c,phone:{...c.phone,twilioNumber:voice.operation.number}});
+  if (voice.operation?.ready===true && voice.operation?.number) voice.forwarding=forwardingInstructions({...c,phone:{...c.phone,twilioNumber:voice.operation.number}});
   if (calendar.connected && !calendarDelivery.enabled) calendar.detail="Google Calendar is connected. Sync is waiting for the platform delivery service; visits remain saved in your workspace.";
   return {voice,messaging,calendar,calendarDelivery,delivery};
 }

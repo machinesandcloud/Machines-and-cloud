@@ -14,10 +14,11 @@ const cents = value => {
   if (!match) throw new Error("Unsupported phone price precision");
   return Number(match[1]) * 100 + Number((match[2] || "").padEnd(2, "0"));
 };
-export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null }) {
-  async function request(path, method = "GET", body, pricing = false, deadline = Date.now() + 5000, binding = null, admission = null, cancellationProof = null) {
+export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null, maintenanceAllowed = null }) {
+  async function request(path, method = "GET", body, pricing = false, deadline = Date.now() + 5000, binding = null, admission = null, cancellationProof = null, maintenance = null) {
     const cancellationRead=cancellationProof?.outcome==='cancel'&&cancellationProof.kind==='mandatory_reservation_absent'&&cancellationProof.providerAccountHash===binding&&method==='GET'&&!pricing&&!body&&path==='IncomingPhoneNumbers.json?'+new URLSearchParams({FriendlyName:label(cancellationProof.correlationId),PageSize:'100'})&&Date.parse(cancellationProof.confirmedAt)<=Date.now()&&Date.now()-Date.parse(cancellationProof.confirmedAt)<=5000;
-    if (executionAllowed() !== true&&!cancellationRead) throw new Error("Phone acquisition gate is closed");
+    const maintenanceRead = maintenance && !pricing && !body && ["GET","DELETE"].includes(method) && sidValid(maintenance.resourceId) && path===`IncomingPhoneNumbers/${maintenance.resourceId}.json` && typeof maintenanceAllowed==='function' && await maintenanceAllowed(maintenance)===true;
+    if (executionAllowed() !== true&&!cancellationRead&&!maintenanceRead) throw new Error("Phone acquisition gate is closed");
     const account = process.env.TWILIO_ACCOUNT_SID, user = process.env.TWILIO_API_KEY || account, password = process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN;
     if (!/^AC[a-f0-9]{32}$/i.test(account || "") || !user || !password) throw new Error("Phone provider credentials unavailable");
     const base = pricing ? "https://pricing.twilio.com/v1/" : `https://api.twilio.com/2010-04-01/Accounts/${account}/`;
@@ -65,7 +66,7 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
       }
       if (resourceId) {
         if (!sidValid(resourceId)) throw new Error("Invalid phone resource receipt");
-        const found = await request(`IncomingPhoneNumbers/${resourceId}.json`,'GET',null,false,Date.now()+5000,binding);
+        const found = await request(`IncomingPhoneNumbers/${resourceId}.json`,'GET',null,false,Date.now()+5000,binding,null,null,{intentId,correlationId,resourceId,lookupToken});
         if (found.status === 404) return { status: "absent", definitive: true };
         return { status: "found", resource: receipt(found.data, correlationId) };
       }
@@ -81,15 +82,15 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
       if (found?.next_page_uri !== null || matches.length !== 1) return { status: "unknown", reasonCode: matches.length > 1 ? "multiple_correlated_resources" : "resource_not_confirmed" };
       return { status: "found", resource: receipt(matches[0], correlationId) };
     },
-    async release({ intentId, correlationId, resourceId }) {
+    async release({ intentId, correlationId, resourceId, cleanupToken }) {
       const binding=await managedResourceAccountBinding('number',intentId);
-      const deadline = Date.now() + 15000;
+      const deadline = Date.now() + 15000, maintenance={intentId,correlationId,resourceId,cleanupToken};
       if (!sidValid(resourceId)) throw new Error("Invalid phone resource receipt");
-      const before = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline,binding);
+      const before = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline,binding,null,null,maintenance);
       if (before.status === 404) return { confirmed: true, resourceId };
       receipt(before.data, correlationId);
-      await request(`IncomingPhoneNumbers/${resourceId}.json`, "DELETE", null, false, deadline,binding);
-      const after = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline,binding);
+      await request(`IncomingPhoneNumbers/${resourceId}.json`, "DELETE", null, false, deadline,binding,null,null,maintenance);
+      const after = await request(`IncomingPhoneNumbers/${resourceId}.json`, "GET", null, false, deadline,binding,null,null,maintenance);
       return { confirmed: after.status === 404, resourceId };
     },
   };

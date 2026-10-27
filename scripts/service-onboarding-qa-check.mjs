@@ -27,12 +27,24 @@ const RealDate = Date;
 let now = RealDate.now(), clockIncrement = 0;
 globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : [now])); } static now() { const value = now; now += clockIncrement; return value; } };
 const accountSid = 'AC' + 'a'.repeat(32), primarySid = 'BU' + 'b'.repeat(32), remoteNumbers = new Map();
-let serial = 0, numberLoss = null, holdNumber = null;
+let serial = 0, numberLoss = null, holdNumber = null, vapiFailure = false, releaseLoss = null, vapiRemote = new Map(), lastVapiAssistant = null;
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || 'GET').toUpperCase();
   if (url.origin === origin && url.pathname.startsWith('/.netlify/functions/')) {
     report.backgroundRequests.push({ method, path: url.pathname });
     return new Response(null, { status: 202 });
+  }
+  if(url.origin===origin&&url.pathname==='/api/voice-activation-background'){
+    assert.equal(method,'POST');assert.equal(new Headers(init.headers).get('x-service-worker-key'),process.env.SERVICE_WORKER_KEY);assert.deepEqual(JSON.parse(init.body),{});
+    report.backgroundRequests.push({method,path:url.pathname,executed:false});return new Response(null,{status:202});
+  }
+  if(vapiFailure&&url.origin==='https://api.vapi.ai'&&/^\/assistant(?:\/[a-f0-9-]{36})?$/.test(url.pathname)&&['GET','POST','DELETE'].includes(method)){
+    report.providerRequests.push({method,origin:url.origin,path:url.pathname});
+    if(method==='GET'){const id=url.pathname.split('/')[2];return id?vapiRemote.has(id)?Response.json(vapiRemote.get(id)):new Response(null,{status:404}):Response.json([...vapiRemote.values()]);}
+    if(method==='DELETE'){vapiRemote.delete(url.pathname.split('/')[2]);return new Response(null,{status:204});}
+    const body=JSON.parse(init.body);lastVapiAssistant=structuredClone(body);for(const tool of body.model.tools)assert.equal(tool.function.parameters.additionalProperties,undefined);
+    if(vapiFailure==='lost_after'){const id='12345678-1234-1234-1234-123456789abc';vapiRemote.set(id,{...body,id,orgId:'synthetic-bound-organization'});throw new Error('Synthetic assistant create response lost after provider commit');}
+    return Response.json({message:['Unexpected function DTO field; do not retain reflected secret qa-private-value']},{status:400,headers:{'x-request-id':'12345678-1234-1234-1234-123456789abc'}});
   }
   if (!['https://api.twilio.com', 'https://pricing.twilio.com'].includes(url.origin)) return deny(url.origin + url.pathname);
   report.providerRequests.push({ method, origin: url.origin, path: url.pathname });
@@ -57,7 +69,7 @@ globalThis.fetch = async (input, init = {}) => {
   }
   const sid = url.pathname.split('/').at(-1).replace(/\.json$/, ''), row = remoteNumbers.get(sid);
   if (method === 'GET') return row ? Response.json(row) : new Response(null, { status: 404 });
-  if (method === 'DELETE') { remoteNumbers.delete(sid); return new Response(null, { status: 204 }); }
+  if (method === 'DELETE') { if(releaseLoss==='before'){releaseLoss=null;throw new Error('Synthetic release result unavailable before effect');}remoteNumbers.delete(sid);if(releaseLoss==='after'){releaseLoss=null;throw new Error('Synthetic release result lost after effect');} return new Response(null, { status: 204 }); }
   throw new Error('Unexpected locally intercepted provider route: ' + method + ' ' + url.pathname);
 };
 
@@ -84,7 +96,7 @@ const check = async (name, run) => {
     await run(); report.checks.push({ name, pass: true });
   }
   catch (error) { report.checks.push({ name, pass: false, error: error.message, stack: error.stack }); }
-  finally { numberLoss = null; holdNumber = null; clockIncrement = 0; }
+  finally { numberLoss = null; holdNumber = null; vapiFailure = false; releaseLoss = null; vapiRemote.clear(); lastVapiAssistant=null; clockIncrement = 0; }
 };
 function policies() {
   return {
@@ -453,13 +465,13 @@ await check('Existing texting activation handler rejects missing/bogus worker au
   assert.equal((await run('POST', process.env.SERVICE_WORKER_KEY, { ...body, legal: legal() })).status, 400);
   assert.equal(report.providerRequests.length, before);
 });
-await check('New coordinator worker enforces auth/tenant/body and an authorized invocation queues the number', async () => {
+await check('New coordinator worker enforces auth/tenant/body and one authorized invocation acquires its same number and wakes child services', async () => {
   const f = await fresh('new-worker'), before = report.providerRequests.length; await submit(f);
   const { deliveryTenant } = await import('../netlify/functions/lib/managed-consent.mjs'); const body = { slug: f.c.slug, tenant: deliveryTenant(f.c) };
   const run = (method, key, value) => onboardingWorker(new Request(origin + '/.netlify/functions/service-onboarding-background', { method, headers: { 'content-type': 'application/json', 'x-service-worker-key': key }, ...(method === 'POST' ? { body: JSON.stringify(value) } : {}) }));
   assert.equal((await run('GET', process.env.SERVICE_WORKER_KEY, body)).status, 403); assert.equal((await run('POST', '', body)).status, 403); assert.equal((await run('POST', 'x'.repeat(48), body)).status, 403);
   assert.equal((await run('POST', process.env.SERVICE_WORKER_KEY, { ...body, tenant: '0'.repeat(64) })).status, 404); assert.equal((await run('POST', process.env.SERVICE_WORKER_KEY, { ...body, legal: legal() })).status, 400); assert.equal((await children(f)).number, null);
-  const approved = await run('POST', process.env.SERVICE_WORKER_KEY, body); assert.equal(approved.status, 200, await approved.text()); assert.ok((await children(f)).number?.id); assert.equal(report.providerRequests.length, before);
+  const approved = await run('POST', process.env.SERVICE_WORKER_KEY, body); assert.equal(approved.status, 200, await approved.text());const saved=await children(f);assert.equal(saved.number.state,'number_acquired');assert.ok(saved.voice?.id);assert.ok(saved.messaging?.id);assert.equal(numberPurchases(before),1);assert.equal(report.providerRequests.length-before,3);assert.equal((await store.list('phone_activation_intents',f.c.slug+'/')).length,1);assert.equal((await store.list('service_onboarding_intents',f.c.slug+'/')).length,1);assert.ok(report.backgroundRequests.some(row=>row.path==='/api/voice-activation-background'&&row.executed===false));
 });
 await check('Actual dedicated scheduler wiring advances the saved plan through number acquisition into both child intents', async () => {
   const f = await fresh('scheduled'); await submit(f);
@@ -601,9 +613,46 @@ await check('Only synthetic verified child proofs yield active, retire the queue
   const active = await onboarding.serviceOnboardingStatus(f.c); assert.equal(active.operation.state, 'active'); const queue = await strictRead('service_onboarding_queue', 'active_v1'); assert.equal(queue.intents[active.operation.id], undefined);
   await cancel(f); const admitted = await strictRead('service_onboarding_queue', 'active_v1'); assert.ok(admitted.intents[active.operation.id]); await continuePlan(f); assert.equal((await strictRead('voice_activation_intents', v.id)).cancelRequestedAt, at); assert.equal((await strictRead('messaging_activation', sms.id)).cancelRequestedAt, at);
 });
+async function cancelledUnknownVoice(label, loss=false){
+  const f=await fresh(label,['voice']);await submit(f);await advanceNumber(f);await continuePlan(f);vapiFailure=loss?'lost_after':true;await voice.recoverVoiceActivations({limit:1,deadlineAt:now+14000});const state=await children(f),v=await strictRead('voice_activation_intents',state.voice.id);assert.ok(v.assistantCreateStartedAt);assert.equal(v.assistant,undefined);await cancel(f);await continuePlan(f);configure(false);delete process.env.PHONE_ACTIVATION_OFFER_JSON;delete process.env.VOICE_ACTIVATION_POLICY_JSON;return {f,state,v:await strictRead('voice_activation_intents',v.id)};
+}
+for(const mutation of ['import_started','late_import','foreign_number','foreign_account','parent_generation','voice_policy','brake'])await check(`Number-use fence rejects ${mutation} without releasing a number or dispatching a new effect`,async()=>{
+  const {f,state,v}=await cancelledUnknownVoice('fence-'+mutation.replaceAll('_','-')),phoneRow=await strictRead('phone_activation_intents',state.number.id),plan=await onboarding.serviceOnboardingStatus(f.c);
+  if(mutation==='import_started')await store.put('voice_activation_intents',v.id,{...v,importStartedAt:new Date(now).toISOString()});
+  if(mutation==='late_import')await store.put('voice_activation_intents',v.id,{...v,lateReceipts:[{at:new Date(now).toISOString(),imported:{id:'12345678-1234-1234-1234-123456789abc'}}]});
+  if(mutation==='foreign_number')await store.put('voice_activation_intents',v.id,{...v,number:{...v.number,id:'PN'+'f'.repeat(32)}});
+  if(mutation==='foreign_account')await store.put('phone_activation_intents',phoneRow.id,{...phoneRow,resourceAccountHash:sha('foreign-account')});
+  if(mutation==='parent_generation')await store.atomicUpdate('service_onboarding_intents',plan.operation.id,old=>({value:{...old,generation:old.generation+1}}));
+  if(mutation==='voice_policy')await store.put('voice_activation_intents',v.id,{...v,policyDigest:sha('foreign-policy')});
+  if(mutation==='brake')await store.put('health','brake',{on:true});
+  const before=report.providerRequests.length;await voice.dispatchVoiceActivationWave();await phone.recoverPhoneActivations({limit:1,deadlineAt:now+14000});const requests=report.providerRequests.slice(before);if(['import_started','late_import'].includes(mutation))assert.deepEqual(requests.map(item=>[item.origin,item.path,item.method]),[['https://api.vapi.ai','/assistant','GET']]);else assert.deepEqual(requests,[]);assert.equal((await strictRead('voice_activation_intents',v.id)).numberUseFenced,undefined);assert.ok((await strictRead('phone_activation_intents',phoneRow.id)).dependencies.voice);assert.equal(remoteNumbers.has(phoneRow.resource.id),true);
+});
+for(const loss of ['before','after'])await check(`Lost ${loss}-effect cancelled PN delete stays same intent and reconciles without new purchase`,async()=>{
+  const {f,state,v}=await cancelledUnknownVoice('release-'+loss);await voice.dispatchVoiceActivationWave();releaseLoss=loss;const before=report.providerRequests.length;await phone.recoverPhoneActivations({limit:1,deadlineAt:now+14000});assert.equal((await strictRead('phone_activation_intents',state.number.id)).state,'cleanup_uncertain');await phone.recoverPhoneActivations({limit:1,deadlineAt:now+14000});
+  if(loss==='before'){assert.equal((await strictRead('phone_activation_intents',state.number.id)).state,'cleanup_pending');await phone.recoverPhoneActivations({limit:1,deadlineAt:now+14000});}
+  assert.equal((await strictRead('phone_activation_intents',state.number.id)).state,'cancelled');const effects=report.providerRequests.slice(before);assert.equal(effects.filter(item=>item.method==='DELETE').length,loss==='after'?1:2);assert.equal(effects.some(item=>item.method==='POST'||item.origin==='https://api.vapi.ai'),false);assert.equal((await strictRead('voice_activation_intents',v.id)).cleanupConfirmedAt,undefined);
+});
+for(const mutation of ['matching','wrong_revision','wrong_correlation','missing_key_binding','changed_key'])await check(`Gate-off Vapi cancellation uses only the retained credential and strict ownership: ${mutation}`,async()=>{
+  const {f,state,v}=await cancelledUnknownVoice('vapi-'+mutation.replaceAll('_','-'),true),plan=await onboarding.serviceOnboardingStatus(f.c),id=[...vapiRemote.keys()][0];assert.ok(id);vapiFailure=true;
+  if(mutation==='wrong_revision')vapiRemote.set(id,{...vapiRemote.get(id),metadata:{...vapiRemote.get(id).metadata,mcVoiceRevision:sha('foreign-revision')}});
+  if(mutation==='wrong_correlation')vapiRemote.set(id,{...vapiRemote.get(id),metadata:{...vapiRemote.get(id).metadata,mcVoiceCorrelation:sha('foreign-correlation')}});
+  if(mutation==='missing_key_binding')await store.atomicUpdate('service_onboarding_intents',plan.operation.id,old=>({value:{...old,providerBinding:{...old.providerBinding,vapiCredentialHash:null}}}));
+  if(mutation==='changed_key')process.env.VAPI_API_KEY='different-synthetic-credential';
+  const mark=report.providerRequests.length;await voice.dispatchVoiceActivationWave();const changes=report.providerRequests.slice(mark),latest=await strictRead('voice_activation_intents',v.id);
+  if(mutation==='matching'){assert.equal(latest.state,'cancelled');assert.ok(latest.cleanupConfirmedAt);assert.equal(vapiRemote.has(id),false);assert.deepEqual(changes.map(item=>item.method),['GET','GET','DELETE','GET']);assert.equal(latest.assistant.id,id);assert.ok(latest.cleanupReceipts.assistants.includes(id));}
+  else {assert.equal(latest.cleanupConfirmedAt,undefined);assert.equal(vapiRemote.has(id),true);assert.equal(changes.some(item=>item.method==='DELETE'||item.method==='POST'),false);if(['missing_key_binding','changed_key'].includes(mutation))assert.equal(changes.length,0);else assert.deepEqual(changes.map(item=>[item.path,item.method]),[['/assistant','GET']]);}
+});
+await check('Cancelled unknown assistant permits one bound lookup and ordinary gate-off maintenance releases only its same never-imported PN',async()=>{
+  const f=await fresh('unknown-assistant',['voice']);await submit(f);await advanceNumber(f);await continuePlan(f);vapiFailure=true;await voice.recoverVoiceActivations({limit:1,deadlineAt:now+14000});
+  const state=await children(f),row=await strictRead('voice_activation_intents',state.voice.id);assert.equal(row.state,'uncertain');assert.ok(row.assistantCreateStartedAt);assert.equal(row.assistant,undefined);assert.equal(row.importStartedAt,undefined);assert.equal(row.providerFailure.httpStatus,400);assert.equal(JSON.stringify(row).includes('qa-private-value'),false);
+  await cancel(f);assert.equal((await voice.voiceActivationStatus(f.c)).active,false);const cancelledView=await clientRequest(f);assert.equal(cancelledView.status,200);assert.equal(cancelledView.data.connections.voice.operation.ready,false);assert.equal(cancelledView.data.connections.voice.forwarding,undefined,'Cached clients must not receive test-call instructions while cancellation is saved');await continuePlan(f);const numberBefore=await strictRead('phone_activation_intents',state.number.id);assert.ok(numberBefore.dependencies.voice);assert.ok(numberBefore.cancelRequestedAt);configure(false);delete process.env.PHONE_ACTIVATION_OFFER_JSON;delete process.env.VOICE_ACTIVATION_POLICY_JSON;const mark=report.providerRequests.length;
+  await voice.dispatchVoiceActivationWave();const fenced=await strictRead('voice_activation_intents',row.id),numberFenced=await strictRead('phone_activation_intents',state.number.id);assert.ok(fenced.numberUseFenced);assert.equal(fenced.cleanupConfirmedAt,undefined);assert.equal(fenced.state,'cleanup_uncertain');assert.equal(numberFenced.dependencies.voice,undefined);assert.ok(numberFenced.numberUseFenceReleases[row.id]);
+  await phone.recoverPhoneActivations({limit:1,deadlineAt:now+14000});const released=await strictRead('phone_activation_intents',state.number.id);assert.equal(released.state,'cancelled');assert.ok(released.releasedAt);assert.equal(remoteNumbers.has(released.resource.id),false);assert.equal((await strictRead('voice_activation_intents',row.id)).state,'cleanup_uncertain');assert.equal((await voice.voiceRecoveryHealth()).ok,false);
+  const requests=report.providerRequests.slice(mark);assert.equal(requests.length,4);assert.deepEqual(requests.filter(item=>item.origin==='https://api.vapi.ai').map(item=>[item.path,item.method]),[['/assistant','GET']]);const maintenance=requests.filter(item=>item.origin==='https://api.twilio.com');assert.equal(maintenance.length,3);assert.ok(maintenance.every(item=>item.origin==='https://api.twilio.com'&&item.path.endsWith('/'+released.resource.id+'.json')&&['GET','DELETE'].includes(item.method)));assert.deepEqual(maintenance.map(item=>item.method),['GET','DELETE','GET']);assert.ok((await strictRead('voice_activation_queue','active_v1')).intents[row.id]);
+});
 await check('All external networking was denied; no email, model or service delivery was requested', async () => {
   assert.deepEqual(report.attemptedNetwork, []);
-  assert.ok(report.providerRequests.every(row => ['https://api.twilio.com', 'https://pricing.twilio.com'].includes(row.origin)));
+  assert.ok(report.providerRequests.every(row => ['https://api.twilio.com', 'https://pricing.twilio.com'].includes(row.origin)||row.origin==='https://api.vapi.ai'&&/^\/assistant(?:\/[a-f0-9-]{36})?$/.test(row.path)&&['GET','POST','DELETE'].includes(row.method)));
   assert.ok(report.providerRequests.every(row => !/Messages|Calls|CustomerProfiles|BrandRegistrations|Services/.test(row.path)));
 });
 report.sourceAfter = hashes();

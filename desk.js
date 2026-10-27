@@ -32,7 +32,7 @@
     closeTour(false, false);
     recover('Your session expired. Sign in by email to reopen your workspace.'); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
   });
-  document.addEventListener('mc:desk-refresh',function(event){if(!leaving)load(null,{soft:event.detail?.soft===true});});
+  document.addEventListener('mc:desk-refresh',function(event){if(!leaving)load(null,{soft:event.detail?.soft===true,connectionProgress:event.detail?.reason==='connection-progress',connectionProgressRequest:event.detail?.requestId});});
   document.addEventListener('mc:desk-snapshot',function(event){
     var snapshot=event.detail?.snapshot,session=event.detail?.session,currentSession;
     try{currentSession=sessionStorage.getItem('mc-onboarding-session-v1');}catch(error){return;}
@@ -951,8 +951,8 @@
 
   function load(snapshot, options) {
     options=options||{};
-    var generation = portalGeneration, fence = cfgFence, sequence = ++loadSequence;
-    if(options.soft&&data){$('inboxRefresh').hidden=false;$('inboxRefreshMessage').textContent='Checking for the latest requests…';$('inboxRefreshRetry').hidden=true;}
+    var generation = portalGeneration, fence = cfgFence, sequence = ++loadSequence,refreshApplied=false;
+    if(options.soft&&data&&!options.connectionProgress){$('inboxRefresh').hidden=false;$('inboxRefreshMessage').textContent='Checking for the latest requests…';$('inboxRefreshRetry').hidden=true;}
     loadPending = (snapshot && snapshot.client ? Promise.resolve(snapshot) : apiRequest()).then(function (d) {
       if (generation !== portalGeneration || fence !== cfgFence || sequence !== loadSequence || leaving) return;
       if (!d.client || !d.client.owner || !d.client.business) throw new Error('Your workspace could not be loaded. Sign in again to continue.');
@@ -1031,13 +1031,13 @@
         [c.status === 'live' ? 'ok' : 'wait', 'Live on your website'],
       ].map(function (x) { return '<div class="check"><span class="dot ' + x[0] + '"></span><span>' + x[1] + '</span></div>'; }).join('');
       $('liveEvents').innerHTML = (d.events || []).length ? d.events.slice(0, 8).map(function (e) { return '<div>' + esc((e.at || '').slice(5, 16).replace('T', ' ')) + ' ' + esc(e.type) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') : 'No service activity yet. Practice conversations stay separate.';
-      renderSetup(d); renderAccount(d);
+      renderSetup(d); renderAccount(d);refreshApplied=true;
     }).catch(function (error) {
       if (generation !== portalGeneration || fence !== cfgFence || sequence !== loadSequence || leaving) return;
       if (error.status === 401 || error.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
-      if(options.soft&&data){$('inboxRefresh').hidden=false;$('inboxRefreshMessage').textContent='The latest requests could not be checked. Your saved view and edits are kept.';$('inboxRefreshRetry').hidden=false;return;}
+      if(options.soft&&data){if(!options.connectionProgress){$('inboxRefresh').hidden=false;$('inboxRefreshMessage').textContent='The latest requests could not be checked. Your saved view and edits are kept.';$('inboxRefreshRetry').hidden=false;}return;}
       if (fence === cfgFence) recover(error.name === 'AbortError' ? 'Loading timed out. Try again or sign in by email.' : error.message);
-    });
+    }).finally(function(){if(options.connectionProgress&&generation===portalGeneration&&!leaving)document.dispatchEvent(new CustomEvent('mc:connection-progress-read',{detail:{requestId:options.connectionProgressRequest,slug:slug,ok:refreshApplied}}));});
     return loadPending;
   }
   function action(a, extra) { return apiRequest('POST', Object.assign({ action: a }, extra || {})); }

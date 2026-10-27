@@ -36,6 +36,19 @@ async function parentAllows(row) {
   const sequenceRetained = reference.admissionSequence === null ? parent?.version === 1 : reference.admissionSequence > 0 && Number.isSafeInteger(parent?.admissionSequence) && parent.admissionSequence >= reference.admissionSequence;
   return !!parent && sequenceRetained && parent.tenantIdentity === row.tenantIdentity && parent.generation === reference.generation && parent.inputRevision === row.inputRevision && parent.offer?.number?.digest === row.offerDigest && parent.authority?.actor?.email === row.authority.actor.email && parent.steps?.number?.startedAt && !parent.cancelRequestedAt && !queue?.intents?.[reference.id]?.cancelRequestedAt && parent.providerBinding?.accountSid === (process.env.TWILIO_ACCOUNT_SID || '');
 }
+// Additional coordinated-service authority, separate from number ownership.
+// Standalone numbers have no coordinator; their normal lifecycle checks remain.
+export async function phoneServiceOnboardingActive(c) {
+  const row=await strictRead(STORE,`${c.slug}/${hash('first-phone-acquisition:'+tenant(c))}`);
+  if(!row?.serviceOnboarding)return true;
+  return row.tenantIdentity===tenant(c)&&await parentAllows(row);
+}
+export async function phoneServiceOnboardingCancellationRequested(c) {
+  const row=await strictRead(STORE,`${c.slug}/${hash('first-phone-acquisition:'+tenant(c))}`),ref=row?.serviceOnboarding;
+  if(!ref||!validId(ref.id)||row.tenantIdentity!==tenant(c))return false;
+  const [parent,queue]=await Promise.all([strictRead('service_onboarding_intents',ref.id),strictRead('service_onboarding_queue','active_v1')]);
+  return !!parent&&parent.tenantIdentity===row.tenantIdentity&&parent.generation===ref.generation&&!!(parent.cancelRequestedAt||queue?.intents?.[ref.id]?.cancelRequestedAt);
+}
 const terminal = state => ["number_acquired", "cancelled", "superseded", "needs_review"].includes(state);
 const detail = state => ({
   queued: "Your number request is saved. Phone answering is not active.",
@@ -102,6 +115,46 @@ export async function clearPhoneResourceDependency(c, { kind, operationId, clean
     if (!row || row.tenantIdentity !== tenant(c) || row.dependencies?.[kind]?.operationId !== operationId) return { result: false };
     const dependencies = { ...row.dependencies }; delete dependencies[kind];
     return { value: { ...row, dependencies, updatedAt: iso() }, result: true };
+  });
+}
+// Cleanup authority is the retained owner cancellation, not a new acquisition
+// policy. This only describes the exact already recorded, cancelled resource.
+export async function cancelledPhoneMaintenanceContext(c, row, {allowReleased=false}={}) {
+  const current = await strictRead('clients', c?.slug), account = process.env.TWILIO_ACCOUNT_SID || '';
+  const stamp = (value, after) => typeof value === 'string' && Number.isFinite(Date.parse(value)) && Date.parse(value) >= Date.parse(after) && Date.parse(value) <= Date.now();
+  if (!current || !isSupportedSelfServiceClient(current) || tenant(current) !== tenant(c) || !row || row.version !== 1 || row.slug !== current.slug || row.tenantIdentity !== tenant(current) || row.id !== `${current.slug}/${hash('first-phone-acquisition:'+tenant(current))}` || row.correlationId !== hash('phone-acquire-v1:'+row.id+':'+row.tenantIdentity) || !Number.isSafeInteger(row.generation) || row.generation < 1 || !/^AC[a-f0-9]{32}$/i.test(account) || row.resourceAccountHash !== hash(account) || !/^PN[a-f0-9]{32}$/i.test(row.resource?.id || '') || !/^\+1\d{10}$/.test(row.resource?.number || '') || row.resource.correlationId !== row.correlationId || row.releasedAt&&!allowReleased || row.conflictingResourceIds?.length || row.offerDigest !== hash(JSON.stringify(row.offer)) || row.authority?.actor?.role !== 'owner' || normalizeAccountEmail(row.authority.actor.email) !== normalizeAccountEmail(current.owner?.email) || row.authority.costsAccepted !== true || row.authority.authorityAccepted !== true || !stamp(row.authority.acceptedAt, row.createdAt) || row.cancellationActor?.role !== 'owner' || normalizeAccountEmail(row.cancellationActor.email) !== normalizeAccountEmail(current.owner?.email) || !stamp(row.cancelRequestedAt, row.authority.acceptedAt) || (await strictRead('health','brake'))?.on === true) return null;
+  try { validateOffer(row.offer, {allowExpired:true}); } catch { return null; }
+  const ref = row.serviceOnboarding;
+  if (!ref || !validId(ref.id) || !ref.id.startsWith(row.slug+'/')) return null;
+  const [parent, queue] = await Promise.all([strictRead('service_onboarding_intents',ref.id), strictRead('service_onboarding_queue','active_v1')]);
+  const entry=queue?.intents?.[ref.id], retained=ref.admissionSequence===null?parent?.version===1:Number.isSafeInteger(ref.admissionSequence)&&ref.admissionSequence>0&&parent?.admissionSequence>=ref.admissionSequence;
+  if (!parent || !retained || parent.tenantIdentity !== row.tenantIdentity || parent.generation !== ref.generation || parent.inputRevision !== row.inputRevision || parent.offer?.number?.digest !== row.offerDigest || parent.authority?.actor?.role !== 'owner' || normalizeAccountEmail(parent.authority.actor.email) !== normalizeAccountEmail(current.owner?.email) || parent.providerBinding?.accountSid !== account || !parent.steps?.number?.startedAt || parent.cancellationActor?.role !== 'owner' || normalizeAccountEmail(parent.cancellationActor.email) !== normalizeAccountEmail(current.owner?.email) || !stamp(parent.cancelRequestedAt,parent.authority?.at||parent.createdAt) || entry && (entry.tenantIdentity !== parent.tenantIdentity || entry.admission?.generation !== parent.generation || entry.cancelRequestedAt !== parent.cancelRequestedAt)) return null;
+  return {version:1,phoneIntentId:row.id,phoneGeneration:row.generation,phoneOfferDigest:row.offerDigest,phoneCancellationAt:row.cancelRequestedAt,tenantIdentity:row.tenantIdentity,providerAccountHash:row.resourceAccountHash,numberId:row.resource.id,number:row.resource.number,parentId:parent.id,parentGeneration:parent.generation,parentCancellationAt:parent.cancelRequestedAt};
+}
+export function voiceHasNumberUse(row) {
+  return !!(row.importStartedAt || row.imported || row.importedRoute || row.routingStartedAt || row.routing || row.routingDetachedAt || (row.lateReceipts||[]).some(item=>item.importStartedAt||item.imported||item.importedRoute||item.routingStartedAt||item.routing||item.routingDetachedAt));
+}
+async function voiceCancellationContext(c, voice, {allowNumberUse=false,allowReleased=false,requireCredential=false}={}) {
+  if(!voice || voice.version!==1 || voice.id!==`${c.slug}/${hash('managed-voice-v1:'+tenant(c))}` || voice.tenantIdentity!==tenant(c) || !Number.isSafeInteger(voice.generation) || voice.generation<1 || !allowNumberUse&&voiceHasNumberUse(voice) || typeof voice.cancelRequestedAt!=='string' || typeof voice.authority?.at!=='string' || !Number.isFinite(Date.parse(voice.authority.at)) || typeof voice.createdAt!=='string' || !Number.isFinite(Date.parse(voice.createdAt)) || Date.parse(voice.authority.at)<Date.parse(voice.createdAt) || voice.authority?.actor?.role!=='owner' || normalizeAccountEmail(voice.authority.actor.email)!==normalizeAccountEmail(c.owner?.email) || voice.cancellationActor?.role!=='owner' || normalizeAccountEmail(voice.cancellationActor.email)!==normalizeAccountEmail(c.owner?.email) || !Number.isFinite(Date.parse(voice.cancelRequestedAt)) || Date.parse(voice.cancelRequestedAt)<Date.parse(voice.authority.at) || Date.parse(voice.cancelRequestedAt)>Date.now() || voice.policyDigest!==hash(JSON.stringify(voice.policy)) || voice.authority.acceptedAuthority!==true || voice.authority.policyDigest!==voice.policyDigest || voice.authority.policyVersion!==voice.policy?.version) return null;
+  const phone=await strictRead(STORE,voice.number?.intentId),context=await cancelledPhoneMaintenanceContext(c,phone,{allowReleased});
+  if(!context || voice.number.id!==context.numberId || voice.number.number!==context.number || voice.number.correlationId!==phone.correlationId || voice.inputRevision!==phone.inputRevision || phone.dependencies?.voice?.operationId!==voice.id && !phone.numberUseFenceReleases?.[voice.id])return null;
+  const parent=await strictRead('service_onboarding_intents',context.parentId);
+  if(parent?.offer?.voice?.digest!==voice.policyDigest||parent.steps?.voice?.id!==voice.id||typeof parent.steps.voice.startedAt!=='string'||!Number.isFinite(Date.parse(parent.steps.voice.startedAt))||Date.parse(parent.steps.voice.startedAt)>Date.parse(voice.createdAt)||parent.authority?.actor?.email!==voice.authority.actor.email||requireCredential&&(!process.env.VAPI_API_KEY||parent.providerBinding?.vapiCredentialHash!==hash(process.env.VAPI_API_KEY)))return null;
+  return {...context,voiceOperationId:voice.id,voiceGeneration:voice.generation,voicePolicyDigest:voice.policyDigest,voiceAuthorityDigest:hash(JSON.stringify(voice.authority)),voiceCancellationAt:voice.cancelRequestedAt};
+}
+export const voiceNumberCancellationContext=(c,voice)=>voiceCancellationContext(c,voice);
+export const voiceCleanupMaintenanceContext=(c,voice)=>voiceCancellationContext(c,voice,{allowNumberUse:true,allowReleased:true,requireCredential:true});
+// A number-use fence is not an assistant absence/cleanup receipt. Verify it
+// independently before clearing only this exact dependent service's PN claim.
+export async function releaseFencedVoiceNumberDependency(c, operationId) {
+  const voice=await strictRead('voice_activation_intents',operationId),context=await voiceNumberCancellationContext(c,voice),fence=voice?.numberUseFenced;
+  if(!context || !fence || Object.entries(context).some(([key,value])=>fence[key]!==value) || !Number.isFinite(Date.parse(fence.at)) || Date.parse(fence.at)<Date.parse(context.voiceCancellationAt) || Date.parse(fence.at)>Date.now())return false;
+  return atomicUpdate(STORE,context.phoneIntentId,async phone=>{
+    if(phone?.dependencies?.voice?.operationId!==operationId)return {result:false};
+    const latest=await strictRead('voice_activation_intents',operationId),current=await voiceNumberCancellationContext(c,latest);
+    if(!current || JSON.stringify(current)!==JSON.stringify(context) || JSON.stringify(latest.numberUseFenced)!==JSON.stringify(fence) || phone.cancelRequestedAt!==context.phoneCancellationAt || phone.resource?.id!==context.numberId || phone.generation!==context.phoneGeneration)return {result:false};
+    const dependencies={...phone.dependencies};delete dependencies.voice;
+    return {value:{...phone,dependencies,numberUseFenceReleases:{...phone.numberUseFenceReleases,[operationId]:{...context,fenceAt:fence.at,releasedAt:iso()}},updatedAt:iso()},result:true};
   });
 }
 function localFixtureContext() {
@@ -306,7 +359,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     });
     if (claimed.cleanupClaim !== token) return claimed;
     try {
-      const released = await provider.release({ intentId:row.id,correlationId: row.correlationId, resourceId: row.resource.id });
+      const released = await provider.release({ intentId:row.id,correlationId: row.correlationId, resourceId: row.resource.id, cleanupToken: token });
       if (released?.confirmed !== true || released.resourceId !== row.resource.id) throw new Error("Release not confirmed");
       return change(row.id, current => current.cleanupClaim === token ? { ...current, state: "cancelled", releasedAt: iso(), releaseReceipt: { resourceId: row.resource.id, confirmedAt: iso() }, reasonCode: null } : null);
     } catch { return change(row.id, current => current.cleanupClaim === token ? { ...current, state: "cleanup_uncertain", reasonCode: "release_result_unconfirmed", nextCheckAt: null } : null); }
@@ -357,13 +410,14 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
       return phoneActivationView(await change(id, old => old.resource||old.claim?.token!==token||old.purchaseStartedAt!==row.purchaseStartedAt ? null : ({ ...old, state: "uncertain", reasonCode: "acquisition_result_unconfirmed", nextCheckAt: null, claim: null })));
     }
   }
-  async function recover({ limit = 10 } = {}) {
+  async function recover({ limit = 10, operationId = null } = {}) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 10) throw new PhoneActivationError("invalid_limit", "Choose a bounded recovery limit.", 400);
+    if(operationId!==null&&(!validId(operationId)||limit!==1))throw new PhoneActivationError('invalid_limit','A targeted wake handles one retained number request.',400);
     const intents = await atomicUpdate(QUEUE, KEY, value => {
       const queue = queueValue(value), keys = Object.keys(queue.intents).sort(); if (!keys.length) return { result: [] };
       let start = keys.findIndex(key => key > queue.cursor); if (start < 0) start = 0;
-      const chosen = [...keys.slice(start), ...keys.slice(0, start)].slice(0, limit);
-      return { value: { ...queue, cursor: chosen.at(-1) }, result: chosen.map(key => queue.intents[key]) };
+      const chosen = operationId ? keys.filter(key=>key===operationId) : [...keys.slice(start), ...keys.slice(0, start)].slice(0, limit);
+      return { ...(chosen.length&&!operationId?{value:{...queue,cursor:chosen.at(-1)}}:{}), result: chosen.map(key => queue.intents[key]) };
     });
     const outcomes = [];
     for (const intent of intents) {
@@ -408,35 +462,39 @@ async function pendingPhoneWork({ repair = false } = {}) {
 // Creation-off maintenance can only finish an already accepted cancellation with
 // no recorded resource. The adapter independently authorizes one exact inventory
 // GET from durable no-reservation evidence; acquire and release stay gated off.
-async function recoverNoDispatchCancellations({limit,deadlineAt}) {
+async function recoverNoDispatchCancellations({limit,deadlineAt,operationId=null}) {
   const intents=await atomicUpdate(QUEUE,KEY,value=>{
-    const queue=queueValue(value),keys=Object.keys(queue.intents).filter(id=>queue.intents[id].cancellation).sort();
+    const queue=queueValue(value),keys=Object.keys(queue.intents).filter(id=>queue.intents[id].cancellation&&(!operationId||id===operationId)).sort();
     if(!keys.length)return {result:[]};
     let start=keys.findIndex(id=>id>queue.cursor);if(start<0)start=0;
     const chosen=[...keys.slice(start),...keys.slice(0,start)].slice(0,limit);
-    return {value:{...queue,cursor:chosen.at(-1)},result:chosen.map(id=>queue.intents[id])};
+    return {...(!operationId?{value:{...queue,cursor:chosen.at(-1)}}:{}),result:chosen.map(id=>queue.intents[id])};
   });
   const outcomes=[];
   for(const intent of intents) {
     try {
       await ensure(intent);const row=await applyCancellation(intent);
-      if(!row.cancelRequestedAt||row.resource||!row.purchaseStartedAt){outcomes.push(phoneActivationView(row));continue;}
-      const engine=phoneEngine({provider:createTwilioNumberAdapter({executionAllowed:()=>false,deadlineAt}),offer:row.offer,gate:false,allowExpiredOffer:true});
+      if(!row.cancelRequestedAt||!row.resource&&!row.purchaseStartedAt){outcomes.push(phoneActivationView(row));continue;}
+      const c=await strictRead('clients',row.slug);
+      if(row.resource&&!await cancelledPhoneMaintenanceContext(c,row)){outcomes.push(phoneActivationView(row));continue;}
+      const maintenanceAllowed=async args=>{const latest=await strictRead(STORE,row.id),context=await cancelledPhoneMaintenanceContext(c,latest);return !!context&&args.intentId===row.id&&args.resourceId===context.numberId&&args.correlationId===latest.correlationId&&(args.cleanupToken?latest.cleanupClaim===args.cleanupToken:args.lookupToken&&latest.lookupClaim?.token===args.lookupToken&&Date.parse(latest.lookupClaim.until)>Date.now());};
+      const engine=phoneEngine({provider:createTwilioNumberAdapter({executionAllowed:()=>false,deadlineAt,maintenanceAllowed}),offer:row.offer,gate:false,allowExpiredOffer:true});
       const view=await engine.run(row.id);outcomes.push(view);
       if(view.state==='cancelled')await remove(intent);
     } catch {outcomes.push({state:'uncertain',reasonCode:'phone_storage_unavailable'});}
   }
   return {processed:intents.length,outcomes};
 }
-export async function recoverPhoneActivations({ limit = 1, deadlineAt = Date.now() + 15000 } = {}) {
+export async function recoverPhoneActivations({ limit = 1, deadlineAt = Date.now() + 15000, operationId = null } = {}) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 1 || !Number.isFinite(deadlineAt) || deadlineAt > Date.now() + 15000 || deadlineAt <= Date.now()) throw new PhoneActivationError("invalid_recovery_limit", "Phone recovery must use one bounded operation.", 400);
+  if(operationId!==null&&!validId(operationId))throw new PhoneActivationError('invalid_recovery_limit','A targeted wake requires the retained number operation.',400);
   const braked=(await strictRead('health','brake'))?.on===true;
   if (!productionPolicy().enabled || braked) {
     await pendingPhoneWork({ repair: true });
-    const recovery=braked?{processed:0,outcomes:[]}:await recoverNoDispatchCancellations({limit,deadlineAt}),pending=await pendingPhoneWork();
+    const recovery=braked?{processed:0,outcomes:[]}:await recoverNoDispatchCancellations({limit,deadlineAt,operationId}),pending=await pendingPhoneWork();
     return { ok: pending.pending === 0, enabled: false, processed: recovery.processed, skipped: "Phone acquisition is disabled; cancellation checks retain the original request", reasonCode: pending.pending > pending.inspected ? "phone_scope_partial" : "product_gate_closed", scope: "bounded_candidates", ...pending, outcomes: recovery.outcomes.map(row=>({state:row.state,reasonCode:row.reasonCode||null})) };
   }
-  const recovery = await productionEngine(deadlineAt).recover({ limit }), pending = await pendingPhoneWork();
+  const recovery = await productionEngine(deadlineAt).recover({ limit, operationId }), pending = await pendingPhoneWork();
   // Public scheduler receipts contain counts and codes, not customer resources.
   return { ok: pending.pending <= pending.inspected && pending.unresolved === 0 && recovery.outcomes.every(row => row.reasonCode !== "phone_storage_unavailable"), enabled: true, processed: recovery.processed, scope: "bounded_candidates", ...pending, reasonCode: pending.pending > pending.inspected ? "phone_scope_partial" : null,
     outcomes: recovery.outcomes.map(row => ({ state: row.state, reasonCode: row.reasonCode || null })) };

@@ -18,11 +18,43 @@ function independentFallback() {
   if (url.protocol !== "https:" || url.hostname !== "handler.twilio.com" || !/^\/twiml\/EH[a-f0-9]{32}$/i.test(url.pathname) || url.username || url.password || url.port || url.hash || url.search) throw new Error("Independent voice fallback unavailable");
   return url.href;
 }
+// Vapi's function DTO is a supported subset of our stricter internal tool
+// schema. Serialize at this boundary; do not weaken the execution validator.
+function vapiPropertySchema(schema) {
+  if (!schema || typeof schema !== "object" || Array.isArray(schema)) throw new Error("Invalid voice tool schema");
+  const value = {};
+  for (const key of ["type", "description", "pattern", "format", "required", "enum", "title"]) if (Object.hasOwn(schema, key)) value[key] = structuredClone(schema[key]);
+  if (schema.items) value.items = vapiPropertySchema(schema.items);
+  if (schema.properties) value.properties = Object.fromEntries(Object.entries(schema.properties).map(([key, child]) => [key, vapiPropertySchema(child)]));
+  return value;
+}
+export function managedVoiceToolParameters(schema) {
+  if (schema?.type !== "object" || !schema.properties || !Array.isArray(schema.required)) throw new Error("Invalid voice function parameters");
+  return { type: "object", properties: Object.fromEntries(Object.entries(schema.properties).map(([key, child]) => [key, vapiPropertySchema(child)])), required: structuredClone(schema.required) };
+}
+class VoiceProviderResponseError extends Error {
+  constructor(failure) { super("Voice provider response was rejected"); this.failure = Object.freeze(failure); }
+}
+export const voiceProviderFailure = error => error instanceof VoiceProviderResponseError ? structuredClone(error.failure) : null;
+async function rejectedResponse(response, provider, path, method) {
+  // Retain classifications, never arbitrary provider text, echoed inputs or
+  // request/response headers. Even an HTML or oversized error stays bounded.
+  let text = "", bodyClass = "unreadable", reader;
+  try {
+    reader = response.body?.getReader(); const decoder = new TextDecoder();
+    if (reader) { for (let i = 0; i < 8 && text.length < 4096; i++) { const part = await reader.read(); if (part.done) break; text += decoder.decode(part.value.slice(0, 4096 - text.length)); } await reader.cancel(); }
+    let parsed; try { parsed = JSON.parse(text); } catch {}
+    bodyClass = parsed && typeof parsed === "object" ? ([400,422].includes(response.status) ? "validation_error" : "json_error") : text ? "text_error" : "empty_error";
+  } catch { try { await reader?.cancel(); } catch {} }
+  const requestId = response.headers.get("x-request-id") || response.headers.get("request-id") || response.headers.get("twilio-request-id"), safeRequestId = typeof requestId === "string" && !Object.entries(process.env).some(([key,value])=>value&&/(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)/i.test(key)&&value===requestId) && (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(requestId) || /^req_[A-Za-z0-9]{6,100}$/.test(requestId)) ? requestId : null;
+  const action = provider === "vapi" ? path.startsWith("/assistant") ? method === "POST" ? "assistant_create" : method === "PATCH" ? "assistant_update" : method === "DELETE" ? "assistant_delete" : "assistant_read" : method === "POST" ? "number_import" : method === "DELETE" ? "import_delete" : "import_read" : method === "GET" ? "route_read" : "route_update";
+  throw new VoiceProviderResponseError({ provider, action, httpStatus: response.status, requestId: safeRequestId, bodyClass, at: new Date().toISOString() });
+}
 export function managedAssistantBody(c, { correlationId, inputRevision, policy, site }) {
   const server = managedVoiceServer(site);
   const definitions = [GET_AVAILABILITY, BOOK_VISIT, NOTIFY_OWNER, REQUEST_HUMAN].map(def => ({ type: "function", async: false,
     function: { name: def.name, description: def.name === "book_visit" ? "Reserve an available listed visit after the caller explicitly agrees. Report only the returned status; do not claim an email, text or calendar delivery unless confirmed in the result." : def.name === "notify_owner" ? "Save the caller's request in the owner's workspace. Report only the returned delivery status, without promising a callback deadline." : def.description,
-      parameters: structuredClone(def.input_schema) }, server }));
+      parameters: managedVoiceToolParameters(def.input_schema) }, server }));
   return { name: label("voice", correlationId), firstMessage: `Thanks for calling ${c.business.name}. This is the front desk assistant.${c.business.spanish ? " Hablamos español." : ""} How can I help?`, firstMessageMode: "assistant-speaks-first",
     model: { provider: "anthropic", model: policy.model, temperature: 0.3, maxTokens: 350, messages: [{ role: "system", content: buildSystemPrompt(c, "voice") + "\nPhone delivery contract: Speak one short natural sentence at a time. Confirm the name, callback phone, address and selected date/window, and ask for agreement before booking. Tool results are authoritative. A workspace record is not proof of a text, email, calendar sync or human callback. Never invent successful delivery or a callback time. For a caller asking for a person, or a saved handoff rule, confirm the callback details and ask whether they want a live connection attempt or just a callback request. Use request_human only after their agreement. A callback request must never start a transfer. Never say a phone is ringing, someone accepted, help was dispatched, or a callback is scheduled without the corresponding authoritative result. Life-safety instructions come first; a transfer is not emergency dispatch. If a tool fails, say the request could not be confirmed and ask the caller to contact the shop directly. If asked, say you are an AI front desk assistant." }], tools: definitions },
     transcriber: { provider: "deepgram", model: "nova-3", language: c.business.spanish ? "multi" : "en" },
@@ -30,18 +62,19 @@ export function managedAssistantBody(c, { correlationId, inputRevision, policy, 
     maxDurationSeconds: policy.maxDurationSeconds, server, serverMessages: ["tool-calls", "end-of-call-report", "status-update"],
     artifactPlan: { recordingEnabled: false }, metadata: { mcVoiceCorrelation: correlationId, mcVoiceRevision: inputRevision }, endCallMessage: "Thanks for calling. Goodbye." };
 }
-export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null }) {
+export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null, maintenanceAllowed = null }) {
   const allowed = () => { if (executionAllowed() !== true) throw new Error("Voice execution is disabled"); };
-  async function request(origin, path, method = "GET", body) {
-    allowed(); const remaining = Math.min(5000, deadlineAt === null ? Infinity : deadlineAt - Date.now());
+  async function request(origin, path, method = "GET", body, maintenanceArgs = null) {
+    const maintenance = executionAllowed()!==true && origin==='vapi' && !body && ['GET','DELETE'].includes(method) && (method==='GET'&&/^\/(assistant|phone-number)(?:\/[a-f0-9-]{36}|\?limit=1000)$/.test(path)||method==='DELETE'&&/^\/(assistant|phone-number)\/[a-f0-9-]{36}$/.test(path)) && typeof maintenanceAllowed==='function' && await maintenanceAllowed({origin,path,method,args:maintenanceArgs})===true;
+    if(!maintenance)allowed(); const remaining = Math.min(5000, deadlineAt === null ? Infinity : deadlineAt - Date.now());
     if (remaining <= 0) throw new Error("Voice operation deadline reached");
     const vapi = origin === "vapi", account = process.env.TWILIO_ACCOUNT_SID;
     if (!vapi && !/^AC[a-f0-9]{32}$/i.test(account || "")) throw new Error("Invalid Twilio account");
     const auth = vapi ? `Bearer ${process.env.VAPI_API_KEY || ""}` : "Basic " + Buffer.from(`${process.env.TWILIO_API_KEY || account}:${process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN || ""}`).toString("base64");
     const response = await fetch((vapi ? "https://api.vapi.ai" : `https://api.twilio.com/2010-04-01/Accounts/${account}`) + path, { method, headers: { Authorization: auth, ...(body ? { "Content-Type": vapi ? "application/json" : "application/x-www-form-urlencoded" } : {}) },
       ...(body ? { body: vapi ? JSON.stringify(body) : new URLSearchParams(body).toString() } : {}), signal: AbortSignal.timeout(remaining), redirect: "error" });
-    if (response.status === 404) return null;
-    if (!response.ok) throw new Error("Voice provider request unavailable");
+    if (response.status === 404 && ["GET", "DELETE"].includes(method)) return null;
+    if (!response.ok) return rejectedResponse(response, vapi ? "vapi" : "twilio", path, method);
     return response.status === 204 ? {} : response.json();
   }
   async function authorize(fn) { allowed(); if (typeof fn !== "function" || await fn() !== true) { const err = new Error("Voice dispatch no longer authorized"); err.code = "dispatch_not_authorized"; throw err; } }
@@ -59,7 +92,7 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
   async function lookup(kind, args) {
     const field = kind === "assistant" ? "assistant" : "phone", path = kind === "assistant" ? "/assistant" : "/phone-number", id = args.resourceId;
     if (id && !uuid(id)) throw new Error("Invalid resource receipt");
-    const values = await request("vapi", id ? `${path}/${id}` : path + "?limit=1000");
+    const values = await request("vapi", id ? `${path}/${id}` : path + "?limit=1000", "GET", null, args);
     if (!values) return { status: id ? "absent" : "unknown" };
     if (!id && !Array.isArray(values)) throw new Error("Invalid resource list");
     const found = id ? [values] : values.filter(row => kind === "assistant" ? row.metadata?.mcVoiceCorrelation === args.correlationId : row.name === label("phone", args.correlationId));
@@ -67,6 +100,7 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
     // and duplicate correlations never authorize another POST.
     if (found.length !== 1) return { status: "unknown", reasonCode: found.length > 1 ? "duplicate_correlated_resources" : "resource_unconfirmed" };
     const resource = field === "assistant" ? assistantReceipt(found[0], args) : importedReceipt(found[0], args);
+    if(args.maintenanceOnly&&field==='assistant'&&resource.inputRevision!==args.inputRevision)throw new Error("Assistant cleanup revision mismatch");
     return { status: "found", resource, current: found[0] };
   }
   async function readTwilioNumber(args) {
@@ -171,19 +205,19 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
     },
     async deleteImportedNumber(args) {
       if (!uuid(args.resourceId)) throw new Error("Invalid import receipt");
-      const existing = await request("vapi", `/phone-number/${args.resourceId}`);
+      const existing = await request("vapi", `/phone-number/${args.resourceId}`, "GET", null, args);
       if (!existing) return { confirmed: true, resourceId: args.resourceId };
-      importedReceipt(existing, args); await authorize(args.authorizeDispatch);
-      await request("vapi", `/phone-number/${args.resourceId}`, "DELETE");
-      return { confirmed: !await request("vapi", `/phone-number/${args.resourceId}`), resourceId: args.resourceId };
+      importedReceipt(existing, args); if(args.maintenanceOnly){if(typeof args.authorizeDispatch!=="function"||!await args.authorizeDispatch())throw new Error("Cleanup no longer authorized");}else await authorize(args.authorizeDispatch);
+      await request("vapi", `/phone-number/${args.resourceId}`, "DELETE", null, args);
+      return { confirmed: !await request("vapi", `/phone-number/${args.resourceId}`, "GET", null, args), resourceId: args.resourceId };
     },
     async deleteAssistant(args) {
       if (!uuid(args.resourceId)) throw new Error("Invalid assistant receipt");
-      const existing = await request("vapi", `/assistant/${args.resourceId}`);
+      const existing = await request("vapi", `/assistant/${args.resourceId}`, "GET", null, args);
       if (!existing) return { confirmed: true, resourceId: args.resourceId };
-      assistantReceipt(existing, args); await authorize(args.authorizeDispatch);
-      await request("vapi", `/assistant/${args.resourceId}`, "DELETE");
-      return { confirmed: !await request("vapi", `/assistant/${args.resourceId}`), resourceId: args.resourceId };
+      const owned=assistantReceipt(existing, args);if(args.maintenanceOnly&&owned.inputRevision!==args.inputRevision)throw new Error("Assistant cleanup revision mismatch"); if(args.maintenanceOnly){if(typeof args.authorizeDispatch!=="function"||!await args.authorizeDispatch())throw new Error("Cleanup no longer authorized");}else await authorize(args.authorizeDispatch);
+      await request("vapi", `/assistant/${args.resourceId}`, "DELETE", null, args);
+      return { confirmed: !await request("vapi", `/assistant/${args.resourceId}`, "GET", null, args), resourceId: args.resourceId };
     },
   };
 }

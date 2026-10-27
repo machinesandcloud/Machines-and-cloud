@@ -4,8 +4,8 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
 import { atomicUpdate } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from "./setup.mjs";
-import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle } from "./phone-activation.mjs";
-import { createManagedVoiceProvider, managedAssistantBody } from "./voice-provider.mjs";
+import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle, phoneServiceOnboardingActive, phoneServiceOnboardingCancellationRequested, voiceHasNumberUse, voiceNumberCancellationContext, releaseFencedVoiceNumberDependency, voiceCleanupMaintenanceContext } from "./phone-activation.mjs";
+import { createManagedVoiceProvider, managedAssistantBody, voiceProviderFailure } from "./voice-provider.mjs";
 import { requestManagedHuman, handleManagedHumanCallback } from './managed-voice-handoff.mjs';
 
 export class VoiceActivationError extends Error { constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; } }
@@ -40,7 +40,7 @@ async function enqueue(row) {
     return { value: { ...queue, intents: { ...queue.intents, [row.id]: structuredClone(row) } } }; });
 }
 async function change(id, update) {
-  return atomicUpdate(STORE, id, current => { if (!current) throw new Error("Voice intent missing"); const next = update(current); if (!next) return { result: current }; const value = { ...next, updatedAt: iso() }; return { value, result: value }; });
+  return atomicUpdate(STORE, id, async current => { if (!current) throw new Error("Voice intent missing"); const next = await update(current); if (!next) return { result: current }; const value = { ...next, updatedAt: iso() }; return { value, result: value }; });
 }
 const stageReason = row => row.reasonCode || null;
 export function voiceActivationView(row, c) {
@@ -70,7 +70,7 @@ async function saveVoiceCancellation(c, body = {}) {
   if (!row.cleanupConfirmedAt) await enqueue(row); return voiceActivationView(row, current);
 }
 export function createVoiceActivationEngine(options) { if (!fixtureContext()) throw new VoiceActivationError("fixture_only", "Injected providers are available only in isolated tests.", 503); return voiceEngine(options); }
-function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber = getAcquiredPhoneResource, claimDependency = claimPhoneResourceDependency, clearDependency = clearPhoneResourceDependency, phoneLifecycle = getPhoneResourceLifecycle } = {}) {
+function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber = getAcquiredPhoneResource, claimDependency = claimPhoneResourceDependency, clearDependency = clearPhoneResourceDependency, phoneLifecycle = getPhoneResourceLifecycle, cleanupMaintenance = false } = {}) {
   const policy = validatePolicy(rawPolicy), policyDigest = digest(policy), enabled = () => typeof gate === "function" ? gate() === true : gate === true;
   if (!provider || !["createAssistant", "lookupAssistant", "updateAssistant", "verifyAssistant", "importNumber", "lookupNumber", "readImportedRoute", "configureRouting", "verifyRouting", "detachRouting", "deleteImportedNumber", "deleteAssistant"].every(key => typeof provider[key] === "function")) throw new Error("Complete voice provider adapters required");
   const offer = () => ({ ...structuredClone(policy), digest: policyDigest, available: enabled() });
@@ -102,12 +102,12 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   async function valid(row, { includeGate = true } = {}) {
     const c = await strictRead("clients", row.slug);
     const parent = c && row.number ? await phoneLifecycle(c) : null;
-    return c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && ["testing", "live"].includes(c.status) && row.inputRevision === configurationRevision(c) && row.lifecycle === life(c) && row.policyDigest === policyDigest && reviewed(c) && validNumber(c.owner?.phone) && (!row.number || parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id) && (!includeGate || enabled()) ? c : null;
+    return c && !row.cancelRequestedAt && !row.numberUseFenced && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && ["testing", "live"].includes(c.status) && row.inputRevision === configurationRevision(c) && row.lifecycle === life(c) && row.policyDigest === policyDigest && reviewed(c) && validNumber(c.owner?.phone) && (!row.number || parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id) && (!includeGate || enabled()) && await phoneServiceOnboardingActive(c) ? c : null;
   }
   async function args(row, token) {
     const client = await valid(row), authorizeDispatch = async () => {
       const latest = await strictRead(STORE, row.id);
-      return !!await valid(row) && latest?.claim?.token === token && latest.generation === row.generation;
+      return latest?.claim?.token === token && latest.generation === row.generation && Date.parse(latest.claim.until)>Date.now() && !!await valid(latest) && Date.parse(latest.claim.until)>Date.now();
     };
     if (!client) throw new VoiceActivationError("dispatch_not_authorized", "Phone setup changed.");
     return { client, correlationId: row.correlationId, inputRevision: row.inputRevision, policy: row.policy, site: siteUrl(), number: row.number, fallbackNumber: safeFallback(client), callbackToken: row.callbackToken, authorizeDispatch, phoneNumberId: row.imported?.id, savedVapiUrl: row.importedRoute?.vapiUrl };
@@ -128,17 +128,35 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   }
   async function cleanup(row, c) {
     if (row.cleanupConfirmedAt) { if (row.number) await clearDependency(c, { kind: "voice", operationId: row.id, cleanupConfirmed: true }); await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), intents = { ...queue.intents }; delete intents[row.id]; return { value: { ...queue, intents } }; }); return voiceActivationView(row, c); }
-    if (!enabled()) return voiceActivationView(await change(row.id, old => ({ ...old, state: "cleanup_pending", reasonCode: "product_gate_closed" })), c);
+    const maintenance = await voiceNumberCancellationContext(c, row), providerMaintenance = cleanupMaintenance && !!await voiceCleanupMaintenanceContext(c,row);
+    if (!enabled() && !maintenance && !providerMaintenance) return voiceActivationView(await change(row.id, old => ({ ...old, state: old.assistantCreateStartedAt && !old.assistant ? "cleanup_uncertain" : "cleanup_pending", reasonCode: "product_gate_closed" })), c);
     if (row.claim && Date.parse(row.claim.until) > Date.now()) return voiceActivationView(row, c);
     const token = randomBytes(16).toString("hex");
     row = await change(row.id, old => old.claim && Date.parse(old.claim.until) > Date.now() ? null : { ...old, claim: { token, until: new Date(Date.now() + 60000).toISOString() }, state: "cleanup_pending" });
     if (row.claim?.token !== token) return voiceActivationView(row, c);
-    const authorizeDispatch = async () => { const current = await strictRead(STORE, row.id); return enabled() && !!current?.cancelRequestedAt && current.claim?.token === token; };
-    const call = { client: c, correlationId: row.correlationId, inputRevision: row.inputRevision, policy: row.policy, site: siteUrl(), number: row.number, fallbackNumber: safeFallback(c), callbackToken: row.callbackToken, phoneNumberId: row.imported?.id, savedVapiUrl: row.importedRoute?.vapiUrl, authorizeDispatch };
+    // Persist the one-way number-use stop before releasing a dependency. An
+    // uncertain assistant alone cannot use the number; any import marker or
+    // late import receipt prevents this exception from being granted.
+    row = await change(row.id, async old => {
+      if (old.claim?.token !== token || !(Date.parse(old.claim.until)>Date.now()) || old.generation !== row.generation || voiceHasNumberUse(old)) return null;
+      const context = await voiceNumberCancellationContext(c, old);
+      if (!context || !(Date.parse(old.claim.until)>Date.now()) || old.numberUseFenced) return null;
+      return { ...old, numberUseFenced: { ...context, at: iso() } };
+    });
+    if (row.numberUseFenced) await releaseFencedVoiceNumberDependency(c, row.id);
+    if (!enabled() && !providerMaintenance) {
+      if (!row.assistantCreateStartedAt && !row.assistant && !voiceHasNumberUse(row)) {
+        row = await change(row.id, old => old.claim?.token === token && !old.assistantCreateStartedAt && !old.assistant && !voiceHasNumberUse(old) ? { ...old, state: "cancelled", cleanupConfirmedAt: iso(), claim: null, reasonCode: null } : null);
+        if (row.cleanupConfirmedAt) await atomicUpdate(QUEUE, KEY, value => { const queue=queueValue(value),intents={...queue.intents};delete intents[row.id];return {value:{...queue,intents}}; });
+      } else row = await change(row.id, old => old.claim?.token === token ? { ...old, state: "cleanup_uncertain", claim: null, reasonCode: "voice_cleanup_unconfirmed" } : null);
+      return voiceActivationView(row, c);
+    }
+    const authorizeDispatch = async () => { const current = await strictRead(STORE, row.id); return !!current?.cancelRequestedAt && current.generation===row.generation && current.claim?.token === token && Date.parse(current.claim.until)>Date.now() && (enabled() || cleanupMaintenance && !!await voiceCleanupMaintenanceContext(c,current)) && Date.parse(current.claim.until)>Date.now(); };
+    const call = { client: c, correlationId: row.correlationId, inputRevision: row.inputRevision, policy: row.policy, site: siteUrl(), number: row.number, fallbackNumber: safeFallback(c), callbackToken: row.callbackToken, phoneNumberId: row.imported?.id, savedVapiUrl: row.importedRoute?.vapiUrl, authorizeDispatch, maintenanceOnly: !enabled() && providerMaintenance, maintenanceClaimToken: token };
     try {
       if (row.assistantCreateStartedAt && !row.assistant) { const found = await provider.lookupAssistant(call); if (found.status !== "found") throw new Error("Assistant creation unconfirmed"); return voiceActivationView(await receipt(row, token, { assistant: { ...found.resource, recordedAt: iso() } }), c); }
       if (row.importStartedAt && !row.imported) { const found = await provider.lookupNumber(call); if (found.status !== "found") throw new Error("Import creation unconfirmed"); return voiceActivationView(await receipt(row, token, { imported: { ...found.resource, recordedAt: iso() } }), c); }
-      if (row.number && row.importStartedAt && !row.routingDetachedAt) { const detached = await provider.detachRouting(call); if (!detached.confirmed) throw new Error("Routing detachment unconfirmed"); return voiceActivationView(await receipt(row, token, { routingDetachedAt: iso() }), c); }
+      if (row.number && row.importStartedAt && !row.routingDetachedAt && !call.maintenanceOnly) { const detached = await provider.detachRouting(call); if (!detached.confirmed) throw new Error("Routing detachment unconfirmed"); return voiceActivationView(await receipt(row, token, { routingDetachedAt: iso() }), c); }
       const knownImports = [row.imported, ...(row.lateReceipts || []).map(item => item.imported)].filter(Boolean), knownAssistants = [row.assistant, ...(row.lateReceipts || []).map(item => item.assistant)].filter(Boolean);
       const missingImport = knownImports.find(resource => !(row.cleanupReceipts?.imports || []).includes(resource.id));
       if (missingImport) { const deleted = await provider.deleteImportedNumber({ ...call, resourceId: missingImport.id }); if (!deleted.confirmed || deleted.resourceId !== missingImport.id) throw new Error("Import deletion unconfirmed"); return voiceActivationView(await receipt(row, token, { cleanupReceipts: { ...row.cleanupReceipts, imports: [...(row.cleanupReceipts?.imports || []), missingImport.id] } }), c); }
@@ -151,15 +169,15 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
       if (row.cleanupConfirmedAt && row.number) await clearDependency(c, { kind: "voice", operationId: row.id, cleanupConfirmed: true });
       if (row.cleanupConfirmedAt) await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), intents = { ...queue.intents }; delete intents[row.id]; return { value: { ...queue, intents } }; });
       return voiceActivationView(row, c);
-    } catch { return voiceActivationView(await change(row.id, old => old.claim?.token === token ? { ...old, state: "cleanup_uncertain", reasonCode: "voice_cleanup_unconfirmed", claim: null } : null), c); }
+    } catch (error) { const failure = voiceProviderFailure(error); return voiceActivationView(await change(row.id, old => old.claim?.token === token ? { ...old, state: "cleanup_uncertain", reasonCode: "voice_cleanup_unconfirmed", ...(failure ? { providerFailure: failure } : {}), claim: null } : null), c); }
   }
   async function run(id) {
     if (!validId(id)) throw new VoiceActivationError("not_found", "Phone setup was not found.", 404);
     let row = await strictRead(STORE, id); if (!row) throw new VoiceActivationError("not_found", "Phone setup was not found.", 404);
     const actualClient = await strictRead("clients", row.slug);
     if (!actualClient || tenant(actualClient) !== row.tenantIdentity) return voiceActivationView(await change(id, old => ({ ...old, state: "needs_review", reasonCode: "workspace_unavailable" })), actualClient);
-    const parent = row.number ? await phoneLifecycle(actualClient, row.number.intentId) : null;
-    if (!row.cancelRequestedAt && (["cancelled", "archived"].includes(actualClient.status) || parent?.cancellationRequested)) row = await change(id, old => ({ ...old, state: "cleanup_pending", cancelRequestedAt: iso(), cancellationReason: parent?.cancellationRequested ? "parent_number_cancelled" : "workspace_cancelled" }));
+    const parent = row.number ? await phoneLifecycle(actualClient, row.number.intentId) : null, serviceCancellation = await phoneServiceOnboardingCancellationRequested(actualClient);
+    if (!row.cancelRequestedAt && (["cancelled", "archived"].includes(actualClient.status) || parent?.cancellationRequested || serviceCancellation)) row = await change(id, old => ({ ...old, state: "cleanup_pending", cancelRequestedAt: iso(), cancellationReason: parent?.cancellationRequested || serviceCancellation ? "parent_number_cancelled" : "workspace_cancelled" }));
     if (row.cancelRequestedAt) return cleanup(row, actualClient);
     // Owner edits and ordinary testing/live/pause/resume transitions can adopt
     // a fresh generation once the SAME accepted policy and current private
@@ -224,12 +242,13 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
       const configured = await provider.configureRouting(call);
       return voiceActivationView(await receipt(row, token, { state: configured.confirmed ? "ready" : "uncertain", routing: configured.confirmed ? { ...configured, checkedAt: iso() } : null, reasonCode: configured.confirmed ? null : "routing_readback_mismatch" }), await strictRead("clients", row.slug));
     } catch (error) {
-      return voiceActivationView(await change(id, old => old.claim?.token === token ? { ...old, state: error?.code === "dispatch_not_authorized" ? "needs_review" : "uncertain", claim: null, reasonCode: error?.code === "dispatch_not_authorized" ? "workspace_changed" : "provider_result_unconfirmed" } : null), await strictRead("clients", row.slug));
+      const failure = voiceProviderFailure(error);
+      return voiceActivationView(await change(id, old => old.claim?.token === token ? { ...old, ...(failure ? { providerFailure: failure } : {}), state: error?.code === "dispatch_not_authorized" ? "needs_review" : "uncertain", claim: null, reasonCode: error?.code === "dispatch_not_authorized" ? "workspace_changed" : "provider_result_unconfirmed" } : null), await strictRead("clients", row.slug));
     }
   }
-  async function recover({ limit = 1, deadlineAt = null } = {}) {
-    if (!Number.isInteger(limit) || limit < 1 || limit > 5) throw new VoiceActivationError("invalid_limit", "Choose a bounded phone recovery limit.", 400);
-    const ids = await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), keys = Object.keys(queue.intents).sort(); if (!keys.length) return { result: [] }; let start = keys.findIndex(key => key > queue.cursor); if (start < 0) start = 0; const chosen = [...keys.slice(start), ...keys.slice(0, start)].slice(0, limit); return { value: { ...queue, cursor: chosen.at(-1) }, result: chosen }; });
+  async function recover({ limit = 1, deadlineAt = null, operationId = null } = {}) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 5 || operationId!==null&&(!validId(operationId)||limit!==1)) throw new VoiceActivationError("invalid_limit", "Choose a bounded phone recovery limit.", 400);
+    const ids = await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), keys = Object.keys(queue.intents).filter(id=>!operationId||id===operationId).sort(); if (!keys.length) return { result: [] }; let start = keys.findIndex(key => key > queue.cursor); if (start < 0) start = 0; const chosen = [...keys.slice(start), ...keys.slice(0, start)].slice(0, limit); return { ...(!operationId?{value:{...queue,cursor:chosen.at(-1)}}:{}), result: chosen }; });
     const outcomes = [];
     for (const id of ids) { try { const queued = queueValue(await strictRead(QUEUE, KEY)).intents[id]; if (queued?.version === 1) await atomicUpdate(STORE, id, current => current ? {} : { value: queued }); let view; for (let step = 0; step < 6; step++) { if (deadlineAt && deadlineAt - Date.now() < 1000) break; view = await run(id); if (!["queued", "cleanup_pending"].includes(view.state)) break; } outcomes.push(view || { state: "queued", reasonCode: "voice_deadline_reached", active: false }); } catch { outcomes.push({ state: "uncertain", reasonCode: "voice_storage_unavailable", active: false }); } }
     return { ok: outcomes.every(row => !["uncertain", "failed", "needs_review"].includes(row.state)), processed: ids.length, outcomes };
@@ -241,10 +260,10 @@ export async function requestVoiceActivation(c, body, options) { return producti
 export async function cancelVoiceActivation(c, body) { return saveVoiceCancellation(c, body); }
 export async function voiceActivationStatus(c) {
   if (!isSupportedSelfServiceClient(c)) return { available: false, active: false, state: "unavailable", operation: null, offer: null };
-  const row = await strictRead(STORE, idFor(c)), { policy, enabled } = productionPolicy(), parent = row?.number ? await getPhoneResourceLifecycle(c) : null;
+  const row = await strictRead(STORE, idFor(c)), { policy, enabled } = productionPolicy(), parent = row?.number ? await getPhoneResourceLifecycle(c) : null, serviceCancellation = row && await phoneServiceOnboardingCancellationRequested(c);
   let operation = row?.tenantIdentity === tenant(c) ? voiceActivationView(row, c) : null;
   if (operation && row.cleanupConfirmedAt) operation = { ...operation, state: "cancelled", active: false, ready: false };
-  else if (operation && (row.cancelRequestedAt || parent?.cancellationRequested)) operation = { ...operation, state: row.state === "cleanup_uncertain" ? row.state : "cleanup_pending", active: false, ready: false, detail: "Phone answering is stopped. Recorded resources are waiting for confirmed cleanup." };
+  else if (operation && (row.cancelRequestedAt || parent?.cancellationRequested || serviceCancellation)) operation = { ...operation, state: row.state === "cleanup_uncertain" ? row.state : "cleanup_pending", active: false, ready: false, detail: "Phone answering is stopped. Recorded resources are waiting for confirmed cleanup." };
   else if (operation && !enabled) operation = { ...operation, state: "waiting_platform", active: false, ready: false, detail: "Your approval is saved. Phone service is not available yet; calls are not active." };
   else if (operation && (!parent || parent.state !== "number_acquired" || parent.resource?.id !== row.number?.id || !row.routing?.checkedAt || Date.now() - Date.parse(row.routing.checkedAt) > 25 * 60000)) operation = { ...operation, active: false, ready: false, ...(row.state === "ready" ? { state: "needs_review", detail: "Phone routing needs a fresh provider check before calls are answered." } : {}) };
   return { available: enabled, platformReady:enabled, active: operation?.active === true, state: operation?.state || "unavailable", offer: policy ? { ...policy, digest: digest(policy), available: enabled } : null, operation };
@@ -263,10 +282,25 @@ export async function voiceRecoveryHealth() {
   return { ok: !pending.partial && !pending.unresolved && !pending.staleRoutes && (!pending.pending || enabled && fresh && lastRun.ok === true), enabled, ...pending, lastRunAt: lastRun?.at || null,
     reasonCode: pending.partial ? "voice_scope_partial" : pending.unresolved ? "voice_unresolved_work" : pending.staleRoutes ? "voice_route_check_stale" : !enabled && pending.pending ? "product_gate_closed" : pending.pending && !fresh ? "voice_recovery_stale" : null };
 }
+async function recoverVoiceNumberFences({limit=1,deadlineAt=Date.now()+15000}={}) {
+  if ((await strictRead("health","brake"))?.on===true) return {processed:0};
+  const ids=await atomicUpdate(QUEUE,KEY,value=>{const queue=queueValue(value),keys=Object.keys(queue.intents).filter(id=>queue.intents[id]?.cancelRequestedAt).sort();if(!keys.length)return {result:[]};let start=keys.findIndex(id=>id>(queue.cursor||""));if(start<0)start=0;const chosen=[...keys.slice(start),...keys.slice(0,start)].slice(0,limit);return {value:{...queue,cursor:chosen.at(-1)},result:chosen};});
+  let processed=0;
+  for(const id of ids){if(Date.now()>=deadlineAt)break;const row=await strictRead(STORE,id),c=row&&await strictRead("clients",row.slug);if(!c||!row.cancelRequestedAt)continue;try{const policy=validatePolicy(row.policy);if(digest(policy)!==row.policyDigest||!await voiceNumberCancellationContext(c,row)&&!await voiceCleanupMaintenanceContext(c,row))continue;
+      const maintenanceAllowed=async({origin,path,method,args})=>{
+        const latest=await strictRead(STORE,id);
+        if(origin!=="vapi"||!args||args.maintenanceOnly!==true||latest?.generation!==row.generation||latest.claim?.token!==args.maintenanceClaimToken||!(Date.parse(latest.claim.until)>Date.now())||!await voiceCleanupMaintenanceContext(c,latest)||!(Date.parse(latest.claim.until)>Date.now()))return false;
+        const kind=path.startsWith("/assistant")?"assistant":"imported",base=kind==="assistant"?"/assistant":"/phone-number",known=[latest[kind],...(latest.lateReceipts||[]).map(item=>item[kind])].filter(Boolean);
+        if(path===base+"?limit=1000")return method==="GET"&&(kind==="assistant"?!!latest.assistantCreateStartedAt:!!latest.importStartedAt);
+        return ["GET","DELETE"].includes(method)&&known.some(resource=>path===base+"/"+resource.id&&args.resourceId===resource.id);
+      };
+      const engine=voiceEngine({provider:createManagedVoiceProvider({executionAllowed:()=>false,deadlineAt,maintenanceAllowed}),policy,gate:false,cleanupMaintenance:true});await engine.recover({limit:1,deadlineAt,operationId:id});processed++;}catch{/* Keep the same unresolved row for ordinary recovery. */}}
+  return {processed};
+}
 export async function recoverVoiceActivations({ limit = 1, deadlineAt = Date.now() + 15000 } = {}) {
   if (limit !== 1 || !Number.isFinite(deadlineAt) || deadlineAt <= Date.now() || deadlineAt > Date.now() + 15000) throw new VoiceActivationError("invalid_limit", "Phone recovery requires one bounded operation.", 400);
   const queue = queueValue(await strictRead(QUEUE, KEY)), count = Object.keys(queue.intents).length;
-  if (!productionPolicy().enabled || (await strictRead("health", "brake"))?.on === true) return { ok: count === 0, enabled: false, pending: count, processed: 0, reasonCode: "product_gate_closed" };
+  if (!productionPolicy().enabled || (await strictRead("health", "brake"))?.on === true) { const maintenance=await recoverVoiceNumberFences({limit,deadlineAt});return { ok: count === 0, enabled: false, pending: count, processed: maintenance.processed, reasonCode: "product_gate_closed" }; }
   const recovery = await productionEngine(deadlineAt).recover({ limit, deadlineAt });
   const pending = await pendingVoiceWork();
   return { ...recovery, ok: recovery.ok && !pending.partial && !pending.unresolved && !pending.staleRoutes, enabled: true, ...pending, reasonCode: pending.partial ? "voice_scope_partial" : pending.unresolved ? "voice_unresolved_work" : pending.staleRoutes ? "voice_route_check_stale" : null, outcomes: recovery.outcomes.map(row => ({ state: row.state, reasonCode: row.reasonCode || null })) };
@@ -307,7 +341,7 @@ export async function runVoiceActivationWave({ deadlineAt = Date.now() + 240000 
 }
 export async function dispatchVoiceActivationWave() {
   const pending = await pendingVoiceWork(), enabled = productionPolicy().enabled;
-  if (!enabled || !pending.pending || (await strictRead("health", "brake"))?.on === true) return { ok: pending.pending === 0, enabled, processed: 0, dispatched: false, ...pending, reasonCode: pending.pending ? "product_gate_closed" : null };
+  if (!enabled || !pending.pending || (await strictRead("health", "brake"))?.on === true) {const maintenance=!enabled?await recoverVoiceNumberFences({limit:1,deadlineAt:Date.now()+15000}):{processed:0};return { ok: pending.pending === 0, enabled, processed: maintenance.processed, dispatched: false, ...pending, reasonCode: pending.pending ? "product_gate_closed" : null };}
   const response = await fetch(siteUrl() + "/api/voice-activation-background", { method: "POST", headers: { "Content-Type": "application/json", "x-service-worker-key": process.env.SERVICE_WORKER_KEY }, body: "{}", signal: AbortSignal.timeout(5000), redirect: "error" });
   if (!response.ok) throw new Error("Voice continuation dispatch unavailable");
   return { ok: true, enabled: true, processed: 0, dispatched: true, ...pending };
@@ -332,7 +366,7 @@ async function serving(row) {
   const c = await strictRead("clients", row.slug);
   const parent = c && row.number ? await getPhoneResourceLifecycle(c) : null;
   const brake = await strictRead("health", "brake"), gate = productionPolicy();
-  const owned = c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && configurationRevision(c) === row.inputRevision && validNumber(c.owner?.phone) && gate.enabled && row.policy && digest(row.policy) === row.policyDigest && digest(gate.policy) === row.policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id && !brake?.on;
+  const owned = !row.numberUseFenced && c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && configurationRevision(c) === row.inputRevision && validNumber(c.owner?.phone) && gate.enabled && row.policy && digest(row.policy) === row.policyDigest && digest(gate.policy) === row.policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id && !brake?.on && await phoneServiceOnboardingActive(c);
   const valid = owned && !row.cancelRequestedAt && life(c) === row.lifecycle && ["testing", "live"].includes(c.status) && reviewed(c) && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000;
   // Pausing/detaching AI does not revoke an unchanged, approved owner route.
   // Workspace/number cancellation, changed configuration or the account stop do.

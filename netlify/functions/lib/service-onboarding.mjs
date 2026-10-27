@@ -309,10 +309,10 @@ function engine(options = {}) {
     const ownsClaim=plan=>plan?.version===claimed.version&&plan.generation===claimed.generation&&plan.claim?.token===claimed.token&&(claimed.version!==2||plan.admissionSequence===claimed.sequence)&&Number.isFinite(Date.parse(plan.claim.until))&&Date.parse(plan.claim.until)>deps.now();
     let workerStale=false;
     const stale=()=>new ServiceOnboardingError('setup_worker_stale','A newer setup check owns this request. Its saved work will continue safely.');
-    const hints = { voiceRequested: false, messagingRequested: false };
+    const hints = { voiceRequested: false, messagingRequested: false, numberPending:false, numberOperationId:null, voicePending:false, messagingPending:false };
     const save = patch => change(row.id, old => {if(!ownsClaim(old)){workerStale=true;return null;}return { ...old, ...patch, ...(old.cancelRequestedAt && patch.state !== 'cancelled' ? { state: 'cancellation_pending' } : {}) };});
     const finish = async (state, reasonCode = null) => {
-      row = await save({ state, reasonCode, claim: null, nextCheckAt: ['cancelled', 'active'].includes(state) ? null : new Date(deps.now() + 600000).toISOString() });
+      row = await save({ state, reasonCode, claim: null, nextCheckAt: ['cancelled', 'active'].includes(state) ? null : new Date(Math.floor(deps.now()/120000)*120000+120000).toISOString() });
       if(workerStale)return {ok:true,state:row.state,voiceRequested:false,messagingRequested:false,staleWorker:true,operation:operationView(row)};
       if (['active', 'cancelled'].includes(row.state)) await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), entry = queue.intents[row.id]; if (!entry || entry.admission?.generation !== row.generation || row.version===2&&entry.admission.admissionSequence!==row.admissionSequence || row.state === 'active' && entry.cancelRequestedAt) return {}; const intents = { ...queue.intents }; delete intents[row.id]; return { value: { ...queue, intents } }; });
       // A known customer review is a waiting outcome, not a failed platform
@@ -380,7 +380,10 @@ function engine(options = {}) {
         if (checked.brake || !samePlan(row, current) || !reviewed(current) || (row.version===1?!bindingMatches(row):row.providerBinding.accountSid!==(process.env.TWILIO_ACCOUNT_SID||''))) return finish(checked.brake ? 'waiting_platform' : 'needs_review', checked.brake ? 'usage_brake' : 'workspace_changed');
         facts = await deps.statuses(current); currentOffer = row.version===1?legacyQuote(current,facts):null;
         if (row.version===1&&(!currentOffer || currentOffer.digest !== row.offer.digest)) return finish(currentOffer ? 'needs_review' : 'waiting_platform', currentOffer ? 'terms_changed' : 'service_unavailable');
-        if (kind !== 'number' && (facts.number.operation?.id !== ids.number || facts.number.operation?.state !== 'number_acquired' || facts.number.operation?.cancellationRequested || facts.number.operation?.releaseConfirmed)) return finish('awaiting_number');
+        if (kind !== 'number' && (facts.number.operation?.id !== ids.number || facts.number.operation?.state !== 'number_acquired' || facts.number.operation?.cancellationRequested || facts.number.operation?.releaseConfirmed)) {
+          if(facts.number.operation?.id===ids.number&&!facts.number.operation.cancellationRequested&&['queued','running'].includes(facts.number.operation.state)){hints.numberPending=true;hints.numberOperationId=ids.number;}
+          return finish('awaiting_number');
+        }
         let child = await deps.readChild(kind, ids[kind]);
         // Renew only the exact worker-confirmed, unpurchased child retained by
         // this new owner approval. The number engine conditionally replaces it.
@@ -419,6 +422,8 @@ function engine(options = {}) {
         await saveStep(kind, { id: ids[kind], acknowledgedAt: row.steps[kind]?.acknowledgedAt || stamp() });
         if (kind === 'voice' && firstAcknowledgment) hints.voiceRequested = true;
         if (kind === 'sms' && firstAcknowledgment) hints.messagingRequested = true;
+        if(kind==='voice'&&['queued','creating_assistant','importing_number','configuring_routing'].includes(child.state))hints.voicePending=true;
+        if(kind==='sms'&&child.state==='queued')hints.messagingPending=true;
       }
       await latest(); if (row.cancelRequestedAt) return finish('cancellation_pending');
       facts = await deps.statuses(current);
@@ -440,7 +445,7 @@ function engine(options = {}) {
     const result = await continueOne(c, { deadlineAt });
     // Private selection metadata is consumed only by the bounded scheduler. It
     // must not be copied into public/health receipts.
-    return { ok: result.ok, processed: 1, visitedId: selected.id, voiceRequested: result.voiceRequested, messagingRequested: result.messagingRequested, outcomes: [{ state: result.state, reasonCode: result.operation?.reasonCode || null }], dispatch: result.voiceRequested || result.messagingRequested ? { slug: c.slug, tenant: tenant(c), voiceRequested: result.voiceRequested, messagingRequested: result.messagingRequested } : null };
+    return { ok: result.ok, processed: 1, visitedId: selected.id, voiceRequested: result.voiceRequested, messagingRequested: result.messagingRequested, outcomes: [{ state: result.state, reasonCode: result.operation?.reasonCode || null }], dispatch: result.numberPending||result.voiceRequested||result.voicePending||result.messagingRequested||result.messagingPending ? { slug: c.slug, tenant: tenant(c) } : null };
     } catch { return { ok: false, processed: 0, visitedId: selected.id, voiceRequested: false, messagingRequested: false, reasonCode: 'setup_receipt_unavailable', outcomes: [] }; }
   }
   async function health() {
