@@ -13,6 +13,12 @@ const hash = value => createHash('sha256').update(typeof value === 'string' ? va
 const day = () => new Date().toISOString().slice(0, 10);
 const empty = () => Object.fromEntries([...ACTIONS, 'totalRequests'].map(key => [key, 0]));
 const validLimits = value => value && Object.keys(value).sort().join(',') === KEYS && Object.values(value).every(n => Number.isSafeInteger(n) && n >= 0 && n <= 100000);
+const own = (value, key) => Object.hasOwn(value || {}, key);
+const hex = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+const validBookingId = value => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,80}$/.test(value);
+function validTenants(rows) {
+  return Array.isArray(rows) && rows.length > 0 && rows.length <= 100 && new Set(rows.map(row => row?.slug)).size === rows.length && new Set(rows.map(row => row?.identity)).size === rows.length && rows.every(row => row && !Array.isArray(row) && Object.keys(row).sort().join(',') === ['slug','identity',...(own(row,'targetIdHash')?['targetIdHash']:[])].sort().join(',') && typeof row.slug === 'string' && /^[a-z0-9][a-z0-9-]{0,39}$/.test(row.slug) && hex(row.identity) && (!own(row,'targetIdHash') || hex(row.targetIdHash)));
+}
 export class SelfServiceCalendarError extends Error {
   constructor(code, message = 'Calendar setup is saved. The platform needs to resolve its connection service before continuing.') { super(message); this.code = code; this.status = 503; }
 }
@@ -20,7 +26,7 @@ export function selfServiceCalendarPolicy() {
   try {
     if (process.env.CALENDAR_SELF_SERVICE_ENABLED !== 'true') return null;
     const p = JSON.parse(process.env.CALENDAR_SELF_SERVICE_POLICY_JSON || 'null');
-    if (!p || Object.keys(p).sort().join(',') !== ['mode','version','expiresAt','googleClientIdHash','limits','tenantLimits'].sort().join(',') || p.mode !== 'self_service' || !/^[a-z0-9_-]{1,80}$/.test(p.version || '') || process.env.CALENDAR_SELF_SERVICE_APPROVED_VERSION !== p.version || !Number.isFinite(Date.parse(p.expiresAt)) || Date.parse(p.expiresAt) <= Date.now() || !process.env.GOOGLE_CLIENT_ID || p.googleClientIdHash !== hash(process.env.GOOGLE_CLIENT_ID) || !validLimits(p.limits) || !validLimits(p.tenantLimits) || Object.keys(p.limits).some(key => p.tenantLimits[key] > p.limits[key])) return null;
+    if (!p || Object.keys(p).sort().join(',') !== ['mode','version','expiresAt','googleClientIdHash','limits','tenantLimits',...(own(p,'tenants')?['tenants']:[]),...(own(p,'maxDistinctBookingsPerTenant')?['maxDistinctBookingsPerTenant']:[])].sort().join(',') || p.mode !== 'self_service' || !/^[a-z0-9_-]{1,80}$/.test(p.version || '') || process.env.CALENDAR_SELF_SERVICE_APPROVED_VERSION !== p.version || !Number.isFinite(Date.parse(p.expiresAt)) || Date.parse(p.expiresAt) <= Date.now() || !process.env.GOOGLE_CLIENT_ID || p.googleClientIdHash !== hash(process.env.GOOGLE_CLIENT_ID) || !validLimits(p.limits) || !validLimits(p.tenantLimits) || Object.keys(p.limits).some(key => p.tenantLimits[key] > p.limits[key]) || own(p,'tenants') && !validTenants(p.tenants) || own(p,'maxDistinctBookingsPerTenant') && (!Number.isSafeInteger(p.maxDistinctBookingsPerTenant) || p.maxDistinctBookingsPerTenant < 1 || p.maxDistinctBookingsPerTenant > 100000)) return null;
     return { ...p, digest: hash(p) };
   } catch { return null; }
 }
@@ -29,16 +35,27 @@ export function selfServiceCalendarPolicy() {
 export const selfServiceCalendarBudgetKeys = c => ({ global: `self-service:${day()}:global`, tenant: `self-service:${day()}:tenant:${workspaceTenant(c)}` });
 function ledger(row, c, scope, atDay) {
   if (!row) return { version: 1, day: atDay, scope, ...(scope === 'tenant' ? { tenantIdentity: workspaceTenant(c) } : {}), used: empty() };
-  if (row.version !== 1 || row.day !== atDay || row.scope !== scope || scope === 'tenant' && row.tenantIdentity !== workspaceTenant(c) || !row.used || Object.keys(row.used).sort().join(',') !== KEYS || !Object.values(row.used).every(n => Number.isSafeInteger(n) && n >= 0) || row.used.totalRequests !== ACTIONS.filter(action => action !== 'oauthStart').reduce((sum, action) => sum + row.used[action], 0)) throw new SelfServiceCalendarError('calendar_budget_unavailable');
+  if (row.version !== 1 || row.day !== atDay || row.scope !== scope || scope === 'tenant' && row.tenantIdentity !== workspaceTenant(c) || !row.used || Object.keys(row.used).sort().join(',') !== KEYS || !Object.values(row.used).every(n => Number.isSafeInteger(n) && n >= 0) || row.used.totalRequests !== ACTIONS.filter(action => action !== 'oauthStart').reduce((sum, action) => sum + row.used[action], 0) || own(row,'bookingIds') && (scope !== 'tenant' || !Array.isArray(row.bookingIds) || row.bookingIds.length > 100000 || !row.bookingIds.every(validBookingId) || new Set(row.bookingIds).size !== row.bookingIds.length || row.bookingIds.length > row.used.totalRequests || row.bookingIds.length === 0 && ['eventCreate','eventUpdate','eventDelete'].some(action => row.used[action] > 0))) throw new SelfServiceCalendarError('calendar_budget_unavailable');
   return row;
 }
+function bookingHistory(row, p) {
+  if (own(row,'bookingIds')) return row.bookingIds;
+  if (!own(p,'maxDistinctBookingsPerTenant')) return null;
+  // A new policy cannot treat earlier untracked event effects as zero bookings.
+  if (['eventCreate','eventUpdate','eventDelete'].some(action => row.used[action] > 0)) throw new SelfServiceCalendarError('calendar_budget_unavailable');
+  return [];
+}
+const bookingRemains = (ids, p, bookingId) => !own(p,'maxDistinctBookingsPerTenant') || bookingId === undefined || ids.includes(bookingId) || ids.length < p.maxDistinctBookingsPerTenant;
 export async function assertSelfServiceCalendar(c, p, { targetId, bookingId, receipt, authorize, connecting = false, localOnly = false } = {}) {
   const current = await strictRead('clients', c.slug), identity = workspaceTenant(c);
+  const cohort = p.tenants?.find(row => row.slug === c.slug && row.identity === identity);
+  if (p.tenants && !cohort) throw new SelfServiceCalendarError('calendar_cohort_unavailable');
   const allowedStatuses = localOnly ? ['testing','live','paused'] : ['testing','live'];
   if (!isSupportedSelfServiceClient(current) || workspaceTenant(current) !== identity || !allowedStatuses.includes(current.status) || !current.onboarding?.desiredChannels?.includes('calendar') || (await strictRead('health', 'brake'))?.on === true && !localOnly) throw new SelfServiceCalendarError('calendar_authority_changed');
   if (receipt && (receipt.mode !== 'self_service' || receipt.day !== day() || receipt.tenantIdentity !== identity || receipt.policyDigest !== p.digest || receipt.version !== p.version)) throw new SelfServiceCalendarError('calendar_policy_changed');
   if (targetId !== undefined) {
     if (typeof targetId !== 'string' || !targetId || targetId.length > 1024 || /[\x00-\x1f]/.test(targetId)) throw new SelfServiceCalendarError('calendar_target_changed');
+    if (cohort?.targetIdHash && hash(targetId) !== cohort.targetIdHash) throw new SelfServiceCalendarError('calendar_target_changed');
     const connection = await strictRead('calendar_connections', c.slug);
     const bound = connection?.tenantIdentity === identity && connection.googleClientIdHash === p.googleClientIdHash && connection.status === 'connected' && connection.targetId === targetId && connection.targetHash === hash(targetId) && !!connection.refresh;
     // Only the owner/epoch-authorized OAuth completion can bind the primary
@@ -47,7 +64,7 @@ export async function assertSelfServiceCalendar(c, p, { targetId, bookingId, rec
     if (!bound && !grant) throw new SelfServiceCalendarError('calendar_target_changed');
   }
   if (bookingId !== undefined) {
-    if (typeof bookingId !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(bookingId)) throw new SelfServiceCalendarError('calendar_booking_unavailable');
+    if (!validBookingId(bookingId)) throw new SelfServiceCalendarError('calendar_booking_unavailable');
     const booking = await strictRead('bookings', `${c.slug}/${bookingId}`);
     if (!booking || booking.id !== bookingId || booking.slug !== c.slug || booking.delivery?.tenantIdentity !== identity || !belongsToWorkspace(current, booking) || booking.ownerVisitCreationAborted || booking.websiteSetupCheck || booking.simulation) throw new SelfServiceCalendarError('calendar_booking_unavailable');
   }
@@ -62,6 +79,7 @@ export async function selfServiceCalendarAvailable(c, p, options = {}) {
   if (options.localOnly === true) return true; // Retain desired work even when today's transport budget is exhausted.
   const atDay = day(), keys = selfServiceCalendarBudgetKeys(c);
   const rows = await Promise.all(['global','tenant'].map(async scope => ledger(await strictRead('calendar_execution_budgets', keys[scope]), c, scope, atDay)));
+  if (!bookingRemains(bookingHistory(rows[1],p),p,options.bookingId)) return false;
   const remains = action => ACTIONS.includes(action) && rows.every((row, i) => row.used[action] < (i ? p.tenantLimits : p.limits)[action]);
   return rows.every((row, i) => row.used.totalRequests < (i ? p.tenantLimits : p.limits).totalRequests) && (options.actions || []).every(remains) && (!options.anyActions || options.anyActions.some(remains));
 }
@@ -69,6 +87,7 @@ export async function reserveSelfServiceCalendar(c, p, action, options = {}) {
   if (!ACTIONS.includes(action)) throw new SelfServiceCalendarError('calendar_action_invalid');
   options = { ...options, localOnly: false };
   await assertSelfServiceCalendar(c, p, options);
+  if (own(p,'maxDistinctBookingsPerTenant') && ['eventCreate','eventUpdate','eventDelete'].includes(action) && options.bookingId === undefined) throw new SelfServiceCalendarError('calendar_booking_unavailable');
   const atDay = day(), keys = selfServiceCalendarBudgetKeys(c), attempt = randomBytes(16).toString('hex'), physical = action !== 'oauthStart';
   // Reserve global first. A failed tenant reservation consumes global capacity
   // conservatively; it can never issue an uncounted provider request.
@@ -76,8 +95,10 @@ export async function reserveSelfServiceCalendar(c, p, action, options = {}) {
     await assertSelfServiceCalendar(c, p, options);
     if (day() !== atDay) throw new SelfServiceCalendarError('calendar_policy_changed');
     const row = ledger(previous, c, scope, atDay), limits = scope === 'global' ? p.limits : p.tenantLimits;
+    const ids = scope === 'tenant' ? bookingHistory(row,p) : null;
+    if (scope === 'tenant' && !bookingRemains(ids,p,options.bookingId)) throw new SelfServiceCalendarError('calendar_budget_exhausted', 'Calendar work is saved. Its daily booking allowance is already in use; the existing visit can still sync and change.');
     if (row.used[action] >= limits[action] || physical && row.used.totalRequests >= limits.totalRequests) throw new SelfServiceCalendarError('calendar_budget_exhausted', 'Calendar work is saved. Sync resumes when its daily service allowance is available.');
-    return { value: { ...row, used: { ...row.used, [action]: row.used[action] + 1, totalRequests: row.used.totalRequests + Number(physical) }, lastAttempt: { id: attempt, action, policyDigest: p.digest, at: new Date().toISOString() } } };
+    return { value: { ...row, ...(ids ? {bookingIds: options.bookingId !== undefined && physical && !ids.includes(options.bookingId) ? [...ids,options.bookingId] : ids} : {}), used: { ...row.used, [action]: row.used[action] + 1, totalRequests: row.used.totalRequests + Number(physical) }, lastAttempt: { id: attempt, action, policyDigest: p.digest, at: new Date().toISOString() } } };
   });
   const receipt = { mode: 'self_service', day: atDay, tenantIdentity: workspaceTenant(c), version: p.version, policyDigest: p.digest, attempt };
   await assertSelfServiceCalendar(c, p, { ...options, receipt });
