@@ -4,6 +4,7 @@
 // that a timed-out creation is safe to repeat.
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
 import { REQUEST_HUMAN } from "./managed-voice-handoff.mjs";
+import { createHmac } from "node:crypto";
 
 const uuid = value => typeof value === "string" && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
 const pn = value => /^PN[a-f0-9]{32}$/i.test(value || "");
@@ -100,7 +101,14 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
   }
   async function verifyIndependentFallback(args) {
     allowed(); const remaining = Math.min(4000, deadlineAt === null ? Infinity : deadlineAt - Date.now()); if (remaining <= 0) throw new Error("Voice operation deadline reached");
-    const response = await fetch(independentFallback(), { method: "GET", signal: AbortSignal.timeout(remaining), redirect: "error" }); if (!response.ok) throw new Error("Independent voice fallback unavailable");
+    const account = process.env.TWILIO_ACCOUNT_SID, token = process.env.TWILIO_AUTH_TOKEN;
+    if (!/^AC[a-f0-9]{32}$/i.test(account || "") || !token) throw new Error("Independent voice fallback credentials unavailable");
+    // Programmatic Bin GETs require AccountSid and a Twilio signature over the
+    // complete URL. Query parameters are already in that URL, not appended again
+    // as POST fields. The installed VoiceFallbackUrl stays strictly queryless.
+    const probe = new URL(independentFallback()); probe.searchParams.set("AccountSid", account);
+    const signature = createHmac("sha1", token).update(probe.href).digest("base64");
+    const response = await fetch(probe.href, { method: "GET", headers: { "X-Twilio-Signature": signature }, signal: AbortSignal.timeout(remaining), redirect: "error" }); if (!response.ok) throw new Error("Independent voice fallback unavailable");
     const value = await response.text();
     // The one-time platform Bin is deliberately tiny. Do not accept arbitrary
     // XML, a redirect, a second destination, or a user-controlled phone number.

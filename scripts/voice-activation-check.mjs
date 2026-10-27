@@ -16,6 +16,17 @@ Object.assign(process.env, { MC_MEMORY_STORE: "1", MC_FAKE_MODEL: "1", NODE_ENV:
 const deny = () => { throw new Error("Voice test physical networking disabled"); }; net.connect = net.createConnection = http.request = http.get = https.request = https.get = deny; syncBuiltinESMExports();
 const NativeDate = Date; let clock = NativeDate.now(); globalThis.Date = class extends NativeDate { constructor(...args) { super(...(args.length ? args : [clock])); } static now() { return clock; } };
 const blobs = new Map(), assistants = new Map(), imports = new Map(), numbers = new Map(); let etag = 0, serial = 0, fault = null, providerFault = null, beforeResponse = null, enabled = true;
+let fallbackBody = '<Response><Say voice="Polly.Joanna">Please call back in a few minutes.</Say></Response>', fallbackRedirect = false;
+const fallbackProbes = [];
+function twimlBinFixture(input, init = {}) {
+  const url = new URL(String(input)), headers = new Headers(init.headers);
+  assert.equal(init.method || 'GET', 'GET'); assert.equal(init.redirect, 'error');
+  assert.equal(headers.has('authorization'), false); assert.equal(headers.has('cookie'), false);
+  if (url.searchParams.get('AccountSid') !== account || url.searchParams.size !== 1) return new Response('AccountSid parameter required', {status:400});
+  const expected = createHmac('sha1', twilioToken).update(url.href).digest('base64');
+  if (headers.get('x-twilio-signature') !== expected) return new Response('Only signed Twilio requests are allowed', {status:401});
+  return fallbackRedirect ? new Response(null, {status:302,headers:{Location:'https://foreign-fallback.invalid/'}}) : new Response(fallbackBody);
+}
 const uuid = input => { const h = hash(input); return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`; };
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
@@ -28,7 +39,7 @@ globalThis.fetch = async (input, init = {}) => {
     assert.equal(method, "PUT"); if ((headers.get("if-none-match") === "*" && current) || (headers.has("if-match") && headers.get("if-match") !== current?.etag)) { result.conflicts++; return new Response(null, { status: 412 }); }
     const next = String(++etag); blobs.set(name, { body: init.body, etag: next }); return new Response(null, { headers: { etag: next } });
   }
-  if (url.origin === "https://handler.twilio.com") { assert.equal(enabled, true); assert.equal(url.search, ""); return new Response('<Response><Say voice="Polly.Joanna">Please call back in a few minutes.</Say></Response>'); }
+  if (url.origin === "https://handler.twilio.com") { assert.equal(enabled, true); const response=twimlBinFixture(input,init); fallbackProbes.push({status:response.status,accountQueryPresent:url.searchParams.has('AccountSid'),signed:new Headers(init.headers).has('x-twilio-signature')}); return response; }
   if (!["https://api.vapi.ai", "https://api.twilio.com"].includes(url.origin)) { result.blocked.push({ origin: url.origin, path: url.pathname }); return deny(); }
   assert.equal(enabled, true); result.requests.push({ method, path: url.pathname });
   const req = { url, method, body: init.body ? url.origin === "https://api.vapi.ai" ? JSON.parse(init.body) : Object.fromEntries(new URLSearchParams(init.body)) : null };
@@ -55,7 +66,7 @@ globalThis.fetch = async (input, init = {}) => {
 };
 const { setEnvironmentContext } = await import("@netlify/blobs"); setEnvironmentContext({ siteID: "voice-site", token: "fixture-token", edgeURL: "https://voice-eventual.invalid", uncachedEdgeURL: "https://voice-blobs.invalid" });
 const store = await import("../netlify/functions/lib/store.mjs"), { strictRead: read } = await import("../netlify/functions/lib/accounts.mjs"), voice = await import("../netlify/functions/lib/voice-activation.mjs"), { createManagedVoiceProvider } = await import("../netlify/functions/lib/voice-provider.mjs"), { configurationRevision } = await import("../netlify/functions/lib/setup.mjs"), { newClient } = await import("../netlify/functions/lib/config.mjs"), phone = await import("../netlify/functions/lib/phone-activation.mjs");
-const check = async (name, fn) => { try { await store.put("voice_activation_queue", "active_v1", { version: 1, intents: {}, cursor: "" }); await fn(); result.checks.push({ name, pass: true }); } catch (error) { result.checks.push({ name, pass: false, error: error.message, stack: error.stack }); } finally { fault = null; providerFault = null; beforeResponse = null; enabled = true; process.env.VOICE_ACTIVATION_ENABLED = "true"; } };
+const check = async (name, fn) => { try { await store.put("voice_activation_queue", "active_v1", { version: 1, intents: {}, cursor: "" }); await fn(); result.checks.push({ name, pass: true }); } catch (error) { result.checks.push({ name, pass: false, error: error.message, stack: error.stack }); } finally { fault = null; providerFault = null; beforeResponse = null; enabled = true; fallbackBody='<Response><Say voice="Polly.Joanna">Please call back in a few minutes.</Say></Response>';fallbackRedirect=false;process.env.TWILIO_AUTH_TOKEN=twilioToken;process.env.VOICE_FALLBACK_TWIML_URL='https://handler.twilio.com/twiml/EH'+'f'.repeat(32);process.env.VOICE_ACTIVATION_ENABLED = "true"; } };
 async function client(mode, suffix) {
   const slug = `voice-${mode}-${suffix}-${++serial}`, c = newClient({ slug, ownerKey: "private-" + slug, owner: { email: slug + "@example.test", name: "Fixture Owner", phone: "+17135550100" }, business: { name: "Fixture Shop", trade: "HVAC", serviceArea: ["Houston"] } });
   Object.assign(c, { onboarding: { version: 1 }, status: "testing", build: { status: "built" }, channels: { web: { active: false }, voice: { active: false }, sms: { active: false } } }); c.phone.businessNumber = "+17135550122";c.services=["AC repair"];c.windows=["8 to 12"];c.rules.hours={mon:{open:"08:00",close:"17:00"}}; const revision = configurationRevision(c); c.setupProof = { reviewedRevision: revision, testedRevision: revision, testMode: "live" };
@@ -302,6 +313,27 @@ async function suite(mode) {
   });
 }
 await suite("memory"); await suite("sdk");
+await check('TwiML Bin protocol rejects missing AccountSid400 and missing/bad/double-counted GET signatures401',async()=>{
+  const base=process.env.VOICE_FALLBACK_TWIML_URL,url=base+'?AccountSid='+account;
+  assert.equal(twimlBinFixture(base,{method:'GET',redirect:'error'}).status,400);
+  assert.equal(twimlBinFixture(url,{method:'GET',redirect:'error'}).status,401);
+  assert.equal(twimlBinFixture(url,{method:'GET',redirect:'error',headers:{'x-twilio-signature':'invalid'}}).status,401);
+  const wrong=createHmac('sha1',twilioToken).update(url+'AccountSid'+account).digest('base64');
+  assert.equal(twimlBinFixture(url,{method:'GET',redirect:'error',headers:{'x-twilio-signature':wrong}}).status,401);
+  const correct=createHmac('sha1',twilioToken).update(url).digest('base64');
+  assert.equal(twimlBinFixture(url,{method:'GET',redirect:'error',headers:{'x-twilio-signature':correct}}).status,200);
+});
+await check('Actual fallback probe is signed privately while installed route remains queryless and SMS is untouched',async()=>{
+  process.env.MC_MEMORY_STORE='1';const c=await client('memory','signed-bin'),e=engine(),req=await request(e,c);await complete(e,req);const row=await rowFor(c),number=numbers.get(row.number.id);
+  assert.equal(number.voice_fallback_url,process.env.VOICE_FALLBACK_TWIML_URL);assert.equal(new URL(number.voice_fallback_url).search,'');assert.equal(number.sms_url,'https://fixture-sms.invalid/unchanged');
+  assert.ok(fallbackProbes.some(p=>p.status===200&&p.accountQueryPresent&&p.signed));
+  const args={client:c,correlationId:row.correlationId,inputRevision:row.inputRevision,policy:row.policy,site:origin,number:row.number,callbackToken:row.callbackToken,phoneNumberId:row.imported.id,savedVapiUrl:row.importedRoute.vapiUrl};
+  const adapter=createManagedVoiceProvider({executionAllowed:()=>enabled});
+  for(const body of ['<Response><Say>Hello</Say><Dial>+17135550100</Dial></Response>','<Response><Message>Unsafe</Message></Response>','<Response><Redirect>https://foreign.invalid</Redirect></Response>','<Response><Say>'+ 'x'.repeat(2000) +'</Say></Response>']){fallbackBody=body;await assert.rejects(()=>adapter.verifyRouting(args),/Independent fallback content mismatch/);}
+  fallbackBody='<Response><Say>Still only a safe outage message.</Say></Response>';fallbackRedirect=true;await assert.rejects(()=>adapter.verifyRouting(args),/Independent voice fallback unavailable/);fallbackRedirect=false;
+  process.env.TWILIO_AUTH_TOKEN='wrong-token';await assert.rejects(()=>adapter.verifyRouting(args),/Independent voice fallback unavailable/);assert.equal(fallbackProbes.at(-1).status,401);process.env.TWILIO_AUTH_TOKEN=twilioToken;
+  const before=fallbackProbes.length;process.env.VOICE_FALLBACK_TWIML_URL+='?AccountSid='+account;await assert.rejects(()=>adapter.verifyRouting(args),/Independent voice fallback unavailable/);assert.equal(fallbackProbes.length,before);
+});
 result.sourceAfter = hashes(); result.sourceStable = Object.entries(result.sourceBefore).every(([key, value]) => result.sourceAfter[key] === value); result.ok = result.checks.every(check => check.pass) && result.sourceStable && result.blocked.length === 0; result.passed = result.checks.filter(check => check.pass).length; result.total = result.checks.length;
 if (output) writeFileSync(output, JSON.stringify(result, null, 2) + "\n");
 console.log(JSON.stringify({ ok: result.ok, passed: result.passed, total: result.total, conflicts: result.conflicts, fixtureProviderRequests: result.requests.length, failures: result.checks.filter(check => !check.pass), output }, null, 2)); if (!result.ok) process.exitCode = 1;
