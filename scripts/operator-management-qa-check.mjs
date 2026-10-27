@@ -37,14 +37,22 @@ const req=(path,body,token,method='POST',headers={})=>new Request(base+path,{met
 const call=async(handler,path,body,token,method='POST',headers)=>{const startedAt=Date.now(),response=await handler(req(path,body,token,method,headers),{ip:'192.0.2.'+(++serial%230+1)});let bodyOut;try{bodyOut=await response.json();}catch{bodyOut=null;}return{status:response.status,body:bodyOut,headers:Object.fromEntries(response.headers),startedAt,finishedAt:Date.now()};};
 // Each read has its own assessment time. Validate it against that request before
 // comparing every other field, including provider/delivery proof times, exactly.
+function assessmentTime(value,response,label){
+ assert.equal(typeof value,'string','Missing '+label+' read time');
+ const time=Date.parse(value);assert(Number.isFinite(time),'Invalid '+label+' read time');assert.equal(new Date(time).toISOString(),value,'Noncanonical '+label+' read time');assert(time>=response.startedAt&&time<=response.finishedAt,label+' read time is outside its handler request');
+}
 function setupRowsForParity(rows,response){
  assert(Array.isArray(rows));return rows.map(row=>{
-  assert(row.verification&&typeof row.verification.checkedAt==='string','Missing verification read time');
-  const time=Date.parse(row.verification.checkedAt);assert(Number.isFinite(time),'Invalid verification read time');assert.equal(new Date(time).toISOString(),row.verification.checkedAt,'Noncanonical verification read time');assert(time>=response.startedAt&&time<=response.finishedAt,'Verification read time is outside its handler request');
-  const copy=structuredClone(row);delete copy.verification.checkedAt;return copy;
+  assessmentTime(row.verification?.checkedAt,response,'verification');
+  assessmentTime(row.guide?.success?.checkedAt,response,'guide success');
+  const copy=structuredClone(row);delete copy.verification.checkedAt;delete copy.guide.success.checkedAt;return copy;
  });
 }
-function setupJourneyForParity(journey,response){const copy=structuredClone(journey);copy.channels=setupRowsForParity(journey.channels,response);copy.leadSources=setupRowsForParity(journey.leadSources,response);return copy;}
+function setupJourneyForParity(journey,response){
+ const copy=structuredClone(journey);copy.channels=setupRowsForParity(journey.channels,response);copy.leadSources=setupRowsForParity(journey.leadSources,response);
+ assert(Array.isArray(journey.discovery));copy.discovery=journey.discovery.map(row=>{assessmentTime(row.guide?.success?.checkedAt,response,'discovery guide success');const value=structuredClone(row);delete value.guide.success.checkedAt;return value;});
+ return copy;
+}
 const check=async(name,fn)=>{try{const detail=await fn();report.checks.push({name,pass:true,...(detail===undefined?{}:{detail})});}catch(error){report.checks.push({name,pass:false,error:error.message,stack:error.stack});}};
 const session=async(email,scope='onboarding')=>{const token=sha('qa-session-'+ ++serial);await store.put('access_sessions',access.accessHash(token),{email,scope,status:'active',createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+3600000).toISOString()});return token;};
 async function inbox(email){if(process.env.MC_MEMORY_STORE==='1')return read('access_outbox',access.accessHash(email));const mail=report.mail.findLast(row=>row.to.includes(email)),link=mail?.text.match(/http:\/\/127\.0\.0\.1:8899\/(?:admin|onboard)\.html[^\s]*/)?.[0];return link?{link,token:new URL(link).hash.slice('#verify='.length)}:null;}
@@ -210,7 +218,12 @@ async function suite(mode){
   await store.atomicUpdate('lead_connections',leadConnections.leadConnectionKey(target,'thumbtack'),row=>({value:{...row,state:'awaiting_provider',native:{generation:row.generation,status:'setup_unconfirmed',tokens:{data:'CANARY-NATIVE-TOKEN'},password:'CANARY-NATIVE-PASSWORD',replies:[],pendingNegotiations:[]}}}));
   for(const status of ['testing','paused']){
    await store.put('clients',target.slug,{...target,status});const owner=await call(clientAPI,'/api/client?c='+target.slug,null,token,'GET'),staff=await call(manage,'/api/manage?c='+target.slug,null,bearer,'GET');assert.equal(owner.status,200);assert.equal(staff.status,200);
-   const customer=staff.body.customer;assert.deepEqual(setupJourneyForParity(customer.setup.connectionJourney,staff),setupJourneyForParity(owner.body.setup.connectionJourney,owner));assert.deepEqual(setupRowsForParity(customer.connections,staff),setupRowsForParity(owner.body.setup.connectionJourney.channels,owner));assert.deepEqual(setupRowsForParity(customer.leadSources,staff),setupRowsForParity(owner.body.setup.connectionJourney.leadSources,owner));assert.equal(customer.leadSources.find(row=>row.id==='angi').retained,true);assert.equal(customer.leadSources.find(row=>row.id==='thumbtack').retained,true);
+   const customer=staff.body.customer;assert.deepEqual(setupJourneyForParity(customer.setup.connectionJourney,staff),setupJourneyForParity(owner.body.setup.connectionJourney,owner));assert.deepEqual(setupRowsForParity(customer.connections,staff),setupRowsForParity(owner.body.setup.connectionJourney.channels,owner));assert.deepEqual(setupRowsForParity(customer.leadSources,staff),setupRowsForParity(owner.body.setup.connectionJourney.leadSources,owner));
+   // Read-clock normalization must never hide proof, provider facts or content.
+   const originalJourney=owner.body.setup.connectionJourney,comparable=setupJourneyForParity(originalJourney,owner);
+   for(const change of [j=>{j.channels[0].guide.success.evidenceAt='2020-01-01T00:00:00.000Z';},j=>{j.channels[0].verification.providerCheckedAt='2020-01-01T00:00:00.000Z';},j=>{j.channels[0].verification.checks[0].evidenceAt='2020-01-01T00:00:00.000Z';},j=>{j.channels[0].guide.steps[0].evidenceAt='2020-01-01T00:00:00.000Z';},j=>{j.channels[0].guide.steps[0].detail+=' altered';},j=>{j.discovery[0].guide.success.evidenceAt='2020-01-01T00:00:00.000Z';},j=>{j.discovery[0].guide.success.complete=!j.discovery[0].guide.success.complete;},j=>{j.channels[0].active=!j.channels[0].active;},j=>{j.discovery.pop();},j=>{j.leadSources.reverse();}]){const changed=structuredClone(originalJourney);change(changed);assert.notDeepEqual(setupJourneyForParity(changed,owner),comparable,'Parity normalization hid a material setup fact');}
+   for(const group of ['channels','leadSources','discovery'])for(const invalid of [undefined,null,'not-a-time',new Date(owner.startedAt).toUTCString(),new Date(owner.startedAt-1000).toISOString(),new Date(owner.finishedAt+1000).toISOString()]){const changed=structuredClone(originalJourney);changed[group][0].guide.success.checkedAt=invalid;assert.throws(()=>setupJourneyForParity(changed,owner),/read time/,'Invalid guide assessment time was normalized without validation');}
+   assert.equal(customer.leadSources.find(row=>row.id==='angi').retained,true);assert.equal(customer.leadSources.find(row=>row.id==='thumbtack').retained,true);
    for(const secret of [angi.setup.secret,'CANARY-NATIVE-TOKEN','CANARY-NATIVE-PASSWORD',target.calendar.google.refreshToken,target.ownerKey])assert(!JSON.stringify(staff.body).includes(secret),'Operator projection leaked a connection credential');
    assert(customer.issues.some(row=>row.id==='lead:thumbtack'&&row.detail.includes('existing webhook')));
   }
