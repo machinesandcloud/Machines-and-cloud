@@ -115,7 +115,10 @@ async function reconcile(job, deadline) {
       if (latest?.createAttempt && ["sending", "uncertain", "acknowledged"].includes(latest.createAttempt.state)) throw new CalendarError("creation_unconfirmed", "An earlier calendar creation is still unconfirmed. Cancellation will keep checking the same reference; no second event will be created.", 503);
       return { cancelled: true };
     }
-    if (remote.response.ok && remote.data.status === "cancelled") { await observedCreate(job); return { cancelled: true }; }
+    if (remote.response.ok && remote.data.status === "cancelled") {
+      if (remote.data.id !== job.eventId) throw new CalendarError("deletion_unconfirmed", "The cancelled event read did not match this saved reference. We will check the same event again.", 503);
+      await observedCreate(job); return { cancelled: true };
+    }
     if (!remote.response.ok) throw new CalendarError("google_unavailable", "Google could not confirm the existing calendar event.", 503);
     const version = assertOwned(job, remote.data);
     await observedCreate(job);
@@ -123,7 +126,17 @@ async function reconcile(job, deadline) {
     if (!remote.data.etag) throw new CalendarError("event_etag_missing", "Google did not return an event version. No deletion was attempted.");
     connection = await latestJob(job);
     const removed = await requestGoogle(job, connection, token, "DELETE", job.eventId, null, remote.data.etag, deadline);
-    if (removed.response.ok || [404, 410].includes(removed.response.status)) return { cancelled: true };
+    if (removed.response.ok) {
+      let absence;
+      try { absence = await requestGoogle(job, connection, token, "GET", job.eventId, null, null, deadline); }
+      catch (error) {
+        if (error.code?.startsWith("calendar_") || ["reconnect_required", "workspace_changed", "superseded"].includes(error.code)) throw error;
+        throw new CalendarError("deletion_unconfirmed", "Google accepted cancellation, but the same event's absence could not be confirmed. We will check its saved reference again.", 503);
+      }
+      if ([404, 410].includes(absence.response.status) || absence.response.ok && absence.data.id === job.eventId && absence.data.status === "cancelled") return { cancelled: true };
+      throw new CalendarError("deletion_unconfirmed", "Google accepted cancellation, but the same event's absence is not confirmed. We will check its saved reference again.", 503);
+    }
+    if ([404, 410].includes(removed.response.status)) return { cancelled: true };
     throw new CalendarError(removed.response.status === 412 ? "remote_changed" : "google_unavailable", "Calendar changed during cancellation. Saved work will be checked again.", 503);
   }
   const body = bodyFor(job);
