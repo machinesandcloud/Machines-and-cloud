@@ -13,7 +13,7 @@ for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|VAPI_|RESE
 Object.assign(process.env, { MC_MEMORY_STORE: "1", MC_FAKE_MODEL: "1", NODE_ENV: "test", URL: "http://127.0.0.1:8892", PUBLIC_SITE_URL: "http://127.0.0.1:8892" });
 const deny = () => { throw new Error("Phone test networking disabled"); }; net.connect = net.createConnection = http.request = http.get = https.request = https.get = deny; syncBuiltinESMExports();
 const NativeDate = Date; let clock = NativeDate.now(); globalThis.Date = class extends NativeDate { constructor(...args) { super(...(args.length ? args : [clock])); } static now() { return clock; } };
-const blobs = new Map(), remote = new Map(); let etag = 0, fault = null, lostPost = false, monthlyPrice = "1.15";
+const blobs = new Map(), remote = new Map(); let etag = 0, fault = null, lostPost = false, monthlyPrice = "1.15", priceCurrency='USD', capabilities={MMS:true,SMS:true,voice:true}, addressRequirements='none', inventoryOverride, beforeInventory=null, failPostBeforeCommit=false;
 const account = "AC" + "1".repeat(32), number = "+17135550101";
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
@@ -29,12 +29,13 @@ globalThis.fetch = async (input, init = {}) => {
   }
   if (!["https://api.twilio.com", "https://pricing.twilio.com"].includes(url.origin)) { result.blockedNetwork.push({ origin: url.origin, path: url.pathname }); return deny(); }
   result.twilio.push({ method, path: url.pathname, query: url.search });
-  if (url.origin === "https://pricing.twilio.com") return Response.json({ price_unit: "USD", phone_number_prices: [{ number_type: "local", current_price: monthlyPrice }] });
+  if (url.origin === "https://pricing.twilio.com") return Response.json({ price_unit: priceCurrency, phone_number_prices: [{ number_type: "local", current_price: monthlyPrice }] });
   assert.ok(url.pathname.startsWith("/2010-04-01/Accounts/" + account + "/"));
-  if (url.pathname.endsWith("/AvailablePhoneNumbers/US/Local.json")) return Response.json({ available_phone_numbers: [{ phone_number: number, capabilities: { voice: true, sms: true }, address_requirements: "none" }] });
+  if (url.pathname.endsWith("/AvailablePhoneNumbers/US/Local.json")) return Response.json({ available_phone_numbers: [{ phone_number: number, capabilities, address_requirements: addressRequirements }] });
   if (url.pathname.endsWith("/IncomingPhoneNumbers.json")) {
-    if (method === "GET") return Response.json({ incoming_phone_numbers: [...remote.values()].filter(row => row.friendly_name === url.searchParams.get("FriendlyName")), next_page_uri: null });
+    if (method === "GET") {if(beforeInventory)await beforeInventory();return Response.json(inventoryOverride===undefined?{ incoming_phone_numbers: [...remote.values()].filter(row => row.friendly_name === url.searchParams.get("FriendlyName")), next_page_uri: null }:inventoryOverride);}
     assert.equal(method, "POST"); const params = new URLSearchParams(init.body); assert.equal(params.get("PhoneNumber"), number); assert.equal(params.has("VoiceUrl"), false); assert.equal(params.has("SmsUrl"), false);
+    if(failPostBeforeCommit)throw new Error('Fixture response lost before remote commit');
     const sid = "PN" + hash(params.get("FriendlyName")).slice(0, 32), row = { sid, account_sid: account, phone_number: number, friendly_name: params.get("FriendlyName") }; remote.set(sid, row);
     if (lostPost) throw new Error("Fixture lost create response after remote commit"); return Response.json(row, { status: 201, headers: { "twilio-request-id": "fixture-request" } });
   }
@@ -149,6 +150,93 @@ await check("changed account price cannot dispatch a number purchase above the a
 await check("real adapter refuses expired aggregate deadline without any provider request", async () => {
   const before = result.twilio.length; await assert.rejects(() => createTwilioNumberAdapter({ executionAllowed: () => true, deadlineAt: clock - 1 }).lookup({ correlationId: hash("deadline") })); assert.equal(result.twilio.length, before);
 });
+// Separate SDK-backed cohort: real engine/adapter and ordinary accepted intents.
+// The response shape below is sanitized from the observed Twilio read response;
+// no live account, number, owner data or provider success is imported.
+process.env.MC_MEMORY_STORE='0';
+const posts=()=>result.twilio.filter(row=>row.method==='POST').length;
+async function preDispatchFixture() {
+  capabilities={MMS:true,SMS:true,voice:true};addressRequirements='none';monthlyPrice='1.15';priceCurrency='USD';inventoryOverride=undefined;beforeInventory=null;failPostBeforeCommit=false;lostPost=false;fault=null;process.env.TWILIO_ACCOUNT_SID=account;
+  const c=await client('sdk','predispatch');let open=true;
+  const allowance={version:'fixture_predispatch_v1',expiresAt:new Date(clock+86400000).toISOString(),mode:'self_service',providerAccountHash:hash(account),currency:'USD',rateBasis:'configured_upper_bound',rateSource:'https://example.test/synthetic-resource-bounds',bounds:{numberSetupCents:0,numberMonthlyCents:115,brandSetupCents:4400,campaignSetupCents:1500,campaignMonthlyCents:1000},accountLimits:{numbers:100,brands:100,campaigns:100,setupCents:1000000,monthlyCents:1000000},tenantLimits:{numbers:1,brands:1,campaigns:1,setupCents:10000,monthlyCents:2000},tenants:[]};
+  process.env.MANAGED_RESOURCE_ADMISSION_POLICY_JSON=JSON.stringify(allowance);process.env.MANAGED_RESOURCE_ADMISSION_APPROVED_VERSION=allowance.version;
+  const adapter=createTwilioNumberAdapter({executionAllowed:()=>open}),engine=phone.createPhoneActivationEngine({provider:adapter,offer:offer(),gate:()=>open}),operation=await request(engine,c);
+  return {c,engine,id:operation.id,gate:value=>{open=value;},saved:()=>read('phone_activation_intents',operation.id),async failBeforeReservation(){capabilities={voice:true,SMS:false};assert.equal((await engine.run(operation.id)).state,'uncertain');capabilities={MMS:true,SMS:true,voice:true};return this.saved();}};
+}
+await check('strictly absent lifetime ledger proves the first expired purchase never reached dispatch',async()=>{
+  const f=await preDispatchFixture(),before=posts();assert.equal(await read('managed_resource_admission','twilio_v1'),null);const original=await f.failBeforeReservation();clock+=60001;
+  assert.equal((await f.engine.run(f.id)).state,'queued');assert.equal(await read('managed_resource_admission','twilio_v1'),null);const ready=await f.saved();assert.equal(ready.purchaseAttempts,1);assert.equal(ready.preDispatchRecovery.purchaseStartedAt,original.purchaseStartedAt);assert.equal(posts(),before);
+});
+await check('observed SMS/voice boolean shape reserves once; legacy lowercase aliases still work',async()=>{
+  for(const caps of [{MMS:true,SMS:true,voice:true},{sms:true,voice:true},{SMS:true,sms:true,voice:true}]) {
+    const f=await preDispatchFixture(),before=posts();capabilities=caps;
+    assert.equal((await f.engine.run(f.id)).state,'number_acquired');assert.equal(posts(),before+1);assert.equal((await f.saved()).purchaseAttempts,1);
+  }
+});
+await check('missing, false, string and conflicting capability aliases never reserve or POST',async()=>{
+  for(const caps of [{voice:true},{voice:true,SMS:false},{voice:true,SMS:'true'},{voice:true,SMS:true,sms:false},{voice:true,SMS:true,sms:'true'},{voice:false,SMS:true},{voice:'true',SMS:true},{voice:true,Voice:false,SMS:true}]) {
+    const f=await preDispatchFixture(),before=posts(),ledger=await read('managed_resource_admission','twilio_v1');capabilities=caps;
+    assert.equal((await f.engine.run(f.id)).state,'uncertain');assert.equal(posts(),before);assert.deepEqual(await read('managed_resource_admission','twilio_v1'),ledger);
+  }
+});
+await check('USD115 and no-address qualification remain mandatory before any reservation',async()=>{
+  for(const change of [()=>{monthlyPrice='1.16';},()=>{priceCurrency='EUR';},()=>{addressRequirements='local';}]) {
+    const f=await preDispatchFixture(),before=posts(),ledger=await read('managed_resource_admission','twilio_v1');change();
+    assert.equal((await f.engine.run(f.id)).state,'uncertain');assert.equal(posts(),before);assert.deepEqual(await read('managed_resource_admission','twilio_v1'),ledger);
+  }
+});
+await check('strict no-reservation proof queues the same expired intent once without refund; concurrent retry buys one number',async()=>{
+  const f=await preDispatchFixture(),before=posts(),initial=await f.failBeforeReservation(),ledger=await read('managed_resource_admission','twilio_v1');clock+=60001;
+  assert.equal((await f.engine.run(f.id)).state,'queued');const ready=await f.saved();
+  assert.equal(ready.purchaseAttempts,1);assert.equal(ready.purchaseStartedAt,null);assert.equal(ready.preDispatchRecovery.purchaseStartedAt,initial.purchaseStartedAt);assert.equal(ready.preDispatchRecovery.providerAccountHash,hash(account));assert.equal(ready.correlationId,initial.correlationId);assert.equal(ready.generation,initial.generation);assert.equal(ready.id,initial.id);assert.equal(posts(),before);assert.deepEqual(await read('managed_resource_admission','twilio_v1'),ledger);
+  await Promise.all([f.engine.run(f.id),f.engine.run(f.id)]);const saved=await f.saved();assert.equal(saved.state,'number_acquired');assert.equal(saved.id,initial.id);assert.equal(saved.correlationId,initial.correlationId);assert.equal(saved.purchaseAttempts,2);assert.equal(saved.reconciliationAttempts,1);assert.deepEqual(saved.preDispatchRecovery,ready.preDispatchRecovery);assert.equal(posts(),before+1);
+});
+await check('a second proven predispatch failure stops for review with both spent attempts retained',async()=>{
+  const f=await preDispatchFixture(),before=posts();await f.failBeforeReservation();clock+=60001;await f.engine.run(f.id);capabilities={voice:true,SMS:false};assert.equal((await f.engine.run(f.id)).state,'uncertain');clock+=60001;
+  assert.equal((await f.engine.run(f.id)).state,'needs_review');const saved=await f.saved();assert.equal(saved.purchaseAttempts,2);assert.equal(saved.preDispatchRecovery.purchaseAttempts,1);assert.equal(saved.preDispatchStop.purchaseAttempts,2);assert.equal(saved.reasonCode,'pre_dispatch_retry_exhausted');for(let i=0;i<3;i++)await f.engine.run(f.id);assert.equal(posts(),before);
+});
+await check('a recovered attempt cannot refund its spent count or loop when admission later fails',async()=>{
+  const f=await preDispatchFixture(),before=posts();await f.failBeforeReservation();clock+=60001;await f.engine.run(f.id);
+  const policy=JSON.parse(process.env.MANAGED_RESOURCE_ADMISSION_POLICY_JSON);policy.tenantLimits.numbers=0;process.env.MANAGED_RESOURCE_ADMISSION_POLICY_JSON=JSON.stringify(policy);
+  assert.equal((await f.engine.run(f.id)).state,'waiting_platform');assert.equal((await f.saved()).purchaseAttempts,2);
+  for(let i=0;i<3;i++)assert.equal((await f.engine.run(f.id)).state,'needs_review');assert.equal((await f.saved()).purchaseAttempts,2);assert.equal(posts(),before);
+});
+await check('the original claim interval must expire before missing reservation can authorize recovery',async()=>{
+  const f=await preDispatchFixture(),before=posts();await f.failBeforeReservation();assert.equal((await f.engine.run(f.id)).state,'uncertain');assert.equal((await f.saved()).preDispatchRecovery,undefined);assert.equal((await f.saved()).purchaseAttempts,1);assert.equal(posts(),before);
+});
+await check('partial, malformed, missing pagination or foreign inventory never earns no-dispatch proof',async()=>{
+  for(const data of [{incoming_phone_numbers:[],next_page_uri:'/next'},{incoming_phone_numbers:[]},{incoming_phone_numbers:null,next_page_uri:null},{next_page_uri:null},{incoming_phone_numbers:[{friendly_name:'foreign'}],next_page_uri:null}]) {
+    const f=await preDispatchFixture(),before=posts();await f.failBeforeReservation();clock+=60001;inventoryOverride=data;
+    assert.equal((await f.engine.run(f.id)).state,'uncertain');assert.equal((await f.saved()).preDispatchRecovery,undefined);assert.equal((await f.saved()).purchaseAttempts,1);assert.equal(posts(),before);
+  }
+});
+await check('a reservation before a lost POST blocks retry even when a complete inventory is empty',async()=>{
+  const f=await preDispatchFixture(),before=posts();failPostBeforeCommit=true;assert.equal((await f.engine.run(f.id)).state,'uncertain');failPostBeforeCommit=false;const ledger=await read('managed_resource_admission','twilio_v1');clock+=60001;
+  for(let i=0;i<3;i++){assert.equal((await f.engine.run(f.id)).state,'uncertain');clock+=300001;}
+  assert.equal((await f.saved()).preDispatchRecovery,undefined);assert.equal((await f.saved()).purchaseAttempts,1);assert.equal(posts(),before+1);assert.deepEqual(await read('managed_resource_admission','twilio_v1'),ledger);
+});
+await check('strict ledger read failure and malformed counters cannot be mistaken for absent reservation',async()=>{
+  for(const mode of ['unavailable','malformed']) {
+    const f=await preDispatchFixture(),before=posts();await f.failBeforeReservation();clock+=60001;const original=await read('managed_resource_admission','twilio_v1');
+    if(mode==='unavailable')fault={kind:'site:managed_resource_admission',key:'twilio_v1',method:'GET'};
+    else await store.put('managed_resource_admission','twilio_v1',{...original,used:{...original.used,numbers:original.used.numbers+1}});
+    assert.equal((await f.engine.run(f.id)).state,'uncertain');fault=null;assert.equal((await f.saved()).preDispatchRecovery,undefined);assert.equal(posts(),before);await store.put('managed_resource_admission','twilio_v1',original);
+  }
+});
+await check('current account, owner rules, cancellation, quote expiry and product gate changes block recovery',async()=>{
+  for(const mode of ['account','rules','cancel','expiry','gate']) {
+    const f=await preDispatchFixture(),before=posts();await f.failBeforeReservation();clock+=60001;
+    beforeInventory=async()=>{beforeInventory=null;if(mode==='account')process.env.TWILIO_ACCOUNT_SID='AC'+'9'.repeat(32);if(mode==='rules')await store.put('clients',f.c.slug,{...f.c,summary:'Owner changed current rules'});if(mode==='cancel')await cancel(f.engine,f.c,f.id);if(mode==='expiry')clock+=86400001;if(mode==='gate')f.gate(false);};
+    await f.engine.run(f.id);const saved=await f.saved();assert.notEqual(saved.state,'queued');assert.equal(saved.preDispatchRecovery,undefined);assert.equal(saved.purchaseAttempts,1);assert.equal(posts(),before);
+  }
+});
+await check('lost recovery CAS write leaves uncertainty and later reconciles the same intent without purchasing',async()=>{
+  const f=await preDispatchFixture(),before=posts(),initial=await f.failBeforeReservation();clock+=60001;
+  beforeInventory=async()=>{beforeInventory=null;fault={kind:'site:phone_activation_intents',key:f.id,method:'PUT'};};
+  await assert.rejects(()=>f.engine.run(f.id));fault=null;const held=await f.saved();assert.equal(held.state,'uncertain');assert.equal(held.purchaseStartedAt,initial.purchaseStartedAt);assert.equal(held.purchaseAttempts,1);assert.equal(held.preDispatchRecovery,undefined);clock+=60001;
+  assert.equal((await f.engine.run(f.id)).state,'queued');assert.equal(posts(),before);assert.equal((await f.saved()).purchaseAttempts,1);assert.equal((await f.saved()).id,initial.id);
+});
+process.env.MC_MEMORY_STORE='1';capabilities={MMS:true,SMS:true,voice:true};addressRequirements='none';monthlyPrice='1.15';priceCurrency='USD';inventoryOverride=undefined;beforeInventory=null;failPostBeforeCommit=false;fault=null;process.env.TWILIO_ACCOUNT_SID=account;
 await check('expired number and resource offers permit recorded production cleanup; new acquisition, global-off and brake stay closed',async()=>{
   await store.put('phone_activation_queue','active_v1',{version:1,intents:{},cursor:''});
   const retained=await client('production','expiry-cleanup'),queued=await client('production','expiry-queued'),currentOffer=offer();process.env.PHONE_ACTIVATION_OFFER_JSON=JSON.stringify(currentOffer);

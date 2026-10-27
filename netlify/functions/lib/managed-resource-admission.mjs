@@ -145,3 +145,18 @@ export async function managedResourceAccountBinding(kind,operationId) {
   if(binding&&binding!==managedResourceAccountHash()||Object.values(row.resources||{}).some(r=>r.accountSid&&hash(r.accountSid)!==managedResourceAccountHash()))throw new Error('Managed resource belongs to another provider account');
   return binding;
 }
+// The adapter cannot POST before this permanent reservation exists. A successful
+// strict absence read is useful only for the original, expired purchase claim;
+// an empty provider inventory, a storage error or another account is not proof.
+export async function managedNumberPreDispatchProof({operationId,correlationId,purchaseStartedAt,lookupToken}) {
+  if(!validId(operationId))return null;
+  const p=managedResourceAdmissionPolicy();if(!p)return null;
+  const row=await strictRead('phone_activation_intents',operationId);
+  if(!row||row.id!==operationId||!operationId.startsWith(row.slug+'/')||row.state!=='uncertain'||row.resource||row.claim||row.cancelRequestedAt||row.releasedAt||row.resourceAccountHash!==p.providerAccountHash||!hex(row.tenantIdentity)||row.correlationId!==correlationId||correlationId!==hash('phone-acquire-v1:'+operationId+':'+row.tenantIdentity)||row.purchaseStartedAt!==purchaseStartedAt||!Number.isFinite(Date.parse(purchaseStartedAt))||Date.parse(purchaseStartedAt)+60000>Date.now()||!Number.isSafeInteger(row.purchaseAttempts)||row.purchaseAttempts<1||!Number.isSafeInteger(row.generation)||row.generation<1||!lease(row.lookupClaim)||row.lookupClaim.token!==lookupToken||row.offerDigest!==hash(JSON.stringify(row.offer))||row.authority?.costsAccepted!==true||row.authority?.authorityAccepted!==true||!Number.isFinite(Date.parse(row.authority.acceptedAt))||Date.parse(row.authority.acceptedAt)>Date.parse(purchaseStartedAt)||!await parentAuthority(row,'number',p))return null;
+  const c=await strictRead('clients',row.slug);
+  if(!isSupportedSelfServiceClient(c)||!c.ownerKey||!normalizeAccountEmail(c.owner?.email)||workspaceTenant(c)!==row.tenantIdentity||!['testing','live'].includes(c.status)||configurationRevision(c)!==row.inputRevision||normalizeAccountEmail(row.authority.actor?.email)!==normalizeAccountEmail(c.owner.email)||(p.mode==='cohort'&&!p.tenants.some(t=>t.slug===row.slug&&t.identity===row.tenantIdentity)))return null;
+  const reservationId=hash([operationId,'number']),saved=ledger(await strictRead(STORE,KEY),p);
+  if(saved.reservations[reservationId]||hash(await strictRead('phone_activation_intents',operationId))!==hash(row))return null;
+  currentPolicy(p);
+  return {version:1,kind:'mandatory_reservation_absent',operationId,correlationId,tenantIdentity:row.tenantIdentity,providerAccountHash:p.providerAccountHash,inputRevision:row.inputRevision,offerDigest:row.offerDigest,authorityDigest:hash(JSON.stringify({authority:row.authority,serviceOnboarding:row.serviceOnboarding,renewalSequence:row.renewalSequence||0})),generation:row.generation,purchaseStartedAt,purchaseAttempts:row.purchaseAttempts,reservationId,confirmedAt:new Date().toISOString()};
+}

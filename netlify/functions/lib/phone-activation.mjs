@@ -159,9 +159,9 @@ async function remove(row) {
   });
 }
 async function change(id, update) {
-  return atomicUpdate(STORE, id, current => {
+  return atomicUpdate(STORE, id, async current => {
     if (!current) throw new PhoneActivationError("not_found", "The phone request was not found.", 404);
-    const next = update(current); return next ? { value: { ...next, updatedAt: iso() }, result: { ...next, updatedAt: iso() } } : { result: current };
+    const next = await update(current); return next ? { value: { ...next, updatedAt: iso() }, result: { ...next, updatedAt: iso() } } : { result: current };
   });
 }
 async function authorizeCustomer(c, actor, revision) {
@@ -237,7 +237,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     });
     if (claimed.lookupClaim?.token !== token) return claimed;
     try {
-      const found = await provider.lookup({ intentId:row.id,correlationId: row.correlationId, resourceId: row.resource?.id || null });
+      const found = await provider.lookup({ intentId:row.id,correlationId: row.correlationId, resourceId: row.resource?.id || null, purchaseStartedAt:claimed.purchaseStartedAt,lookupToken:token });
       if (found?.status === "found") {
         if (["cleanup_uncertain", "releasing"].includes(claimed.state) && found.resource?.id === claimed.resource?.id) return change(row.id, current => current.lookupClaim?.token === token ? { ...current, state: "cleanup_pending", cleanupStartedAt: null, cleanupClaim: null, lookupClaim: null, nextCheckAt: null } : null);
         await recordResource(claimed, found.resource);
@@ -247,6 +247,17 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
       }
       if (["cleanup_uncertain", "releasing"].includes(claimed.state) && found?.status === "absent" && found.definitive === true && claimed.resource?.id) {
         return change(row.id, current => current.lookupClaim?.token === token ? { ...current, state: "cancelled", releasedAt: iso(), reasonCode: null, nextCheckAt: null, lookupClaim: null } : null);
+      }
+      if(found?.status==='not_dispatched'&&found.definitive===true) {
+        const proof=found.proof;
+        return change(row.id,async current=>{
+          if(current.lookupClaim?.token!==token||Date.parse(current.lookupClaim.until)<=Date.now()||!sameRequest(current,claimed)||current.resource||current.claim||current.cancelRequestedAt||current.state!=='uncertain'||proof?.version!==1||proof.kind!=='mandatory_reservation_absent'||proof.operationId!==current.id||proof.correlationId!==current.correlationId||proof.tenantIdentity!==current.tenantIdentity||proof.providerAccountHash!==current.resourceAccountHash||proof.inputRevision!==current.inputRevision||proof.offerDigest!==current.offerDigest||proof.generation!==current.generation||proof.purchaseStartedAt!==current.purchaseStartedAt||proof.purchaseAttempts!==current.purchaseAttempts||!Number.isFinite(Date.parse(proof.confirmedAt))||Date.parse(proof.confirmedAt)>Date.now()||Date.parse(proof.confirmedAt)<Date.parse(current.purchaseStartedAt)+60000)return null;
+          if(proof.authorityDigest!==hash(JSON.stringify({authority:current.authority,serviceOnboarding:current.serviceOnboarding,renewalSequence:current.renewalSequence||0}))||proof.reservationId!==hash(JSON.stringify([current.id,'number']))||proof.providerAccountHash!==hash(process.env.TWILIO_ACCOUNT_SID||'')||!enabled()||Date.parse(offer.expiresAt)<=Date.now()||current.offerDigest!==digest||!await parentAllows(current))return null;
+          const customer=await strictRead('clients',current.slug);
+          if(!customer||!isSupportedSelfServiceClient(customer)||tenant(customer)!==current.tenantIdentity||!['testing','live'].includes(customer.status)||configurationRevision(customer)!==current.inputRevision||normalizeAccountEmail(customer.owner?.email)!==normalizeAccountEmail(current.authority?.actor?.email))return null;
+          const retry=current.purchaseAttempts===1&&!current.preDispatchRecovery;
+          return {...current,state:retry?'queued':'needs_review',reasonCode:retry?'pre_dispatch_recovered':'pre_dispatch_retry_exhausted',purchaseStartedAt:null,claim:null,lookupClaim:null,nextCheckAt:null,...(retry?{preDispatchRecovery:proof}:{preDispatchStop:proof})};
+        });
       }
       // An absent acquisition lookup is never permission to purchase again.
       return change(row.id, current => current.lookupClaim?.token === token ? { ...current, state: current.resource ? "cleanup_uncertain" : "uncertain", reasonCode: "provider_result_unconfirmed", nextCheckAt: new Date(Date.now() + 300000).toISOString(), lookupClaim: null } : null);
@@ -288,6 +299,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     if (!enabled()) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: "waiting_platform", reasonCode: "product_gate_closed" }) : null));
     if(Date.parse(offer.expiresAt)<=Date.now())return phoneActivationView(await change(id,old=>sameRequest(old,row)?{...old,state:'waiting_platform',reasonCode:'offer_expired'}:null));
     if (row.offerDigest !== digest) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: "needs_review", reasonCode: "quote_changed" }) : null));
+    if(row.preDispatchRecovery&&row.purchaseAttempts>=2)return phoneActivationView(await change(id,old=>sameRequest(old,row)&&!old.purchaseStartedAt?{...old,state:'needs_review',reasonCode:'pre_dispatch_retry_exhausted'}:null));
     const token = randomBytes(16).toString("hex");
     row = await change(id, old => !sameRequest(old,row) || old.purchaseStartedAt || terminal(old.state) || old.cancelRequestedAt ? null : ({ ...old, state: "running", generation: old.generation + 1, purchaseAttempts: old.purchaseAttempts + 1, purchaseStartedAt: iso(), claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (row.claim?.token !== token) return phoneActivationView(row);
@@ -299,12 +311,12 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     };
     const stoppedBeforeDispatch = async () => {
       const latest=await strictRead('clients',row.slug),configurationChanged=latest&&isSupportedSelfServiceClient(latest)&&tenant(latest)===row.tenantIdentity&&['testing','live'].includes(latest.status)&&configurationRevision(latest)!==row.inputRevision;
-      return change(id, old => old.claim?.token === token && !old.resource && old.purchaseStartedAt===row.purchaseStartedAt ? { ...old, state: old.cancelRequestedAt ? "cancelled" : "superseded", purchaseStartedAt: null,purchaseAttempts:Math.max(0,old.purchaseAttempts-1), claim: null, reasonCode: configurationChanged?'configuration_changed':"dispatch_not_authorized" } : null);
+      return change(id, old => old.claim?.token === token && !old.resource && old.purchaseStartedAt===row.purchaseStartedAt ? { ...old, state: old.cancelRequestedAt ? "cancelled" : "superseded", purchaseStartedAt: null,purchaseAttempts:old.preDispatchRecovery?old.purchaseAttempts:Math.max(0,old.purchaseAttempts-1), claim: null, reasonCode: configurationChanged?'configuration_changed':"dispatch_not_authorized" } : null);
     };
     if (!await authorizeDispatch()) return phoneActivationView(await stoppedBeforeDispatch());
     try { return phoneActivationView(await recordResource(row, await provider.acquire({ intentId: row.id, correlationId: row.correlationId, offer: row.offer, attemptToken:token,authorizeDispatch }))); }
     catch (error) {
-      if(error instanceof ManagedResourceAdmissionError)return phoneActivationView(await change(id,old=>old.claim?.token===token&&!old.resource&&old.purchaseStartedAt===row.purchaseStartedAt?{...old,state:old.cancelRequestedAt?'cancelled':'waiting_platform',purchaseStartedAt:null,purchaseAttempts:Math.max(0,old.purchaseAttempts-1),claim:null,reasonCode:error.code,resourceWaitDetail:error.message,nextCheckAt:null}:null));
+      if(error instanceof ManagedResourceAdmissionError)return phoneActivationView(await change(id,old=>old.claim?.token===token&&!old.resource&&old.purchaseStartedAt===row.purchaseStartedAt?{...old,state:old.cancelRequestedAt?'cancelled':'waiting_platform',purchaseStartedAt:null,purchaseAttempts:old.preDispatchRecovery?old.purchaseAttempts:Math.max(0,old.purchaseAttempts-1),claim:null,reasonCode:error.code,resourceWaitDetail:error.message,nextCheckAt:null}:null));
       if (error?.code === "dispatch_not_authorized") return phoneActivationView(await stoppedBeforeDispatch());
       return phoneActivationView(await change(id, old => old.resource ? null : ({ ...old, state: "uncertain", reasonCode: "acquisition_result_unconfirmed", nextCheckAt: null, claim: null })));
     }

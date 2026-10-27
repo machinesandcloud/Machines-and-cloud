@@ -1,8 +1,14 @@
 // Number acquisition only. No routing, assistant, messaging registration or channel activation.
 // Every request is made only through the caller's explicit product-wide execution gate.
-import { ManagedResourceAdmissionError, reserveManagedResource, assertManagedResourceReservation, assertManagedResourceDispatchPolicy, managedResourceAccountBinding, managedResourceAccountHash } from './managed-resource-admission.mjs';
+import { ManagedResourceAdmissionError, reserveManagedResource, assertManagedResourceReservation, assertManagedResourceDispatchPolicy, managedResourceAccountBinding, managedResourceAccountHash, managedNumberPreDispatchProof } from './managed-resource-admission.mjs';
 const sidValid = value => /^PN[a-f0-9]{32}$/i.test(value || "");
 const label = correlationId => "mc-phone-" + correlationId.slice(0, 55);
+// Twilio's available-number response uses SMS/voice; older responses and local
+// fixtures use sms/voice. Every supplied alias must be exactly true.
+const capability = (value, names) => {
+  const supplied=names.filter(name=>Object.hasOwn(value||{},name));
+  return supplied.length>0&&supplied.every(name=>value[name]===true);
+};
 const cents = value => {
   const match = /^(\d{1,5})(?:\.(\d{1,2})(?:0*)?)?$/.exec(String(value));
   if (!match) throw new Error("Unsupported phone price precision");
@@ -38,7 +44,7 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
       if (price.price_unit !== "USD" || monthly > offer.monthlyCents || monthly > offer.maxAcquisitionCents || offer.oneTimeCents !== 0) throw new Error("Phone quote is no longer valid");
       const query = new URLSearchParams({ AreaCode: offer.areaCode, VoiceEnabled: "true", SmsEnabled: "true", ExcludeAllAddressRequired: "true", PageSize: "1" });
       const available = (await request("AvailablePhoneNumbers/US/Local.json?" + query, "GET", null, false, deadline)).data?.available_phone_numbers?.[0];
-      if (!/^\+1\d{10}$/.test(available?.phone_number || "") || available.capabilities?.voice !== true || available.capabilities?.sms !== true || available.address_requirements !== "none") throw new Error("No eligible phone number available");
+      if (!/^\+1\d{10}$/.test(available?.phone_number || "") || !capability(available.capabilities,['voice','Voice']) || !capability(available.capabilities,['sms','SMS']) || available.address_requirements !== "none") throw new Error("No eligible phone number available");
       const fields={ PhoneNumber: available.phone_number, FriendlyName: label(correlationId) }, input={kind:'number',operationId:intentId,correlationId,offer,claimToken:attemptToken,quotedMonthlyCents:monthly,payload:{path:'IncomingPhoneNumbers.json',fields}};
       let admission;
       try { admission=await reserveManagedResource(input); }
@@ -49,7 +55,7 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
       const created = await request("IncomingPhoneNumbers.json", "POST", fields, false, deadline, admission.providerAccountHash, admission);
       return receipt(created.data, correlationId, monthly, created.requestId);
     },
-    async lookup({ intentId, correlationId, resourceId }) {
+    async lookup({ intentId, correlationId, resourceId, purchaseStartedAt, lookupToken }) {
       const binding=await managedResourceAccountBinding('number',intentId);
       if (resourceId) {
         if (!sidValid(resourceId)) throw new Error("Invalid phone resource receipt");
@@ -58,10 +64,15 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
         return { status: "found", resource: receipt(found.data, correlationId) };
       }
       const found = (await request("IncomingPhoneNumbers.json?" + new URLSearchParams({ FriendlyName: label(correlationId), PageSize: "100" }),'GET',null,false,Date.now()+5000,binding)).data;
-      const matches = (found?.incoming_phone_numbers || []).filter(row => row.friendly_name === label(correlationId));
+      if(!Array.isArray(found?.incoming_phone_numbers))return {status:'unknown',reasonCode:'resource_not_confirmed'};
+      const matches = found.incoming_phone_numbers.filter(row => row.friendly_name === label(correlationId));
       // FriendlyName is a correlation aid, not a uniqueness/idempotency promise.
       // Pagination or no match cannot establish the absence of a timed-out create.
-      if (found?.next_page_uri || matches.length !== 1) return { status: "unknown", reasonCode: matches.length > 1 ? "multiple_correlated_resources" : "resource_not_confirmed" };
+      if(found.next_page_uri===null&&found.incoming_phone_numbers.length===0&&intentId) {
+        const proof=await managedNumberPreDispatchProof({operationId:intentId,correlationId,purchaseStartedAt,lookupToken});
+        if(proof)return {status:'not_dispatched',definitive:true,proof};
+      }
+      if (found?.next_page_uri !== null || matches.length !== 1) return { status: "unknown", reasonCode: matches.length > 1 ? "multiple_correlated_resources" : "resource_not_confirmed" };
       return { status: "found", resource: receipt(matches[0], correlationId) };
     },
     async release({ intentId, correlationId, resourceId }) {
