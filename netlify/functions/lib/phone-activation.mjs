@@ -115,6 +115,7 @@ function validateOffer(offer,{allowExpired=false}={}) {
 function queueValue(value) {
   if (!value) return { version: 1, intents: {}, cursor: "" };
   if (value.version !== 1 || !value.intents || typeof value.intents !== "object" || Array.isArray(value.intents) || typeof value.cursor !== "string") throw new Error("Phone activation queue unavailable");
+  if(Object.entries(value.intents).some(([id,row])=>!validId(id)||row?.id!==id||!validSlug(row.slug)||!/^[a-f0-9]{64}$/.test(row.tenantIdentity||'')||id!==row.slug+'/'+hash('first-phone-acquisition:'+row.tenantIdentity)||row.correlationId!==hash('phone-acquire-v1:'+id+':'+row.tenantIdentity)||!/^[a-f0-9]{32}$/.test(row.queueToken||'')))throw new Error('Phone activation queue identity unavailable');
   return value;
 }
 async function enqueue(row, cancellation) {
@@ -122,6 +123,21 @@ async function enqueue(row, cancellation) {
   return atomicUpdate(QUEUE, KEY, async value => {
     if (!cancellation && !await parentAllows(row)) throw new PhoneActivationError('setup_changed','The approved connection setup changed before the number request.');
     const queue = queueValue(value), previous = queue.intents[row.id];
+    let acceptedCancellation=cancellation,acceptedToken=queueToken;
+    if(cancellation) {
+      const current=await strictRead(STORE,row.id),customer=await strictRead('clients',row.slug),email=normalizeAccountEmail(customer?.owner?.email);
+      const valid=receipt=>receipt?.actor?.role==='owner'&&normalizeAccountEmail(receipt.actor.email)===email&&typeof receipt.at==='string'&&Number.isFinite(Date.parse(receipt.at))&&Date.parse(receipt.at)>=Date.parse(current?.authority?.acceptedAt)&&Date.parse(receipt.at)<=Date.now();
+      if(!current||!sameRequest(current,row)||!customer||!isSupportedSelfServiceClient(customer)||tenant(customer)!==current.tenantIdentity||current.authority?.actor?.role!=='owner'||normalizeAccountEmail(current.authority.actor.email)!==email||!valid(cancellation)||previous&&(!sameRequest(previous,current)||previous.id!==current.id||previous.slug!==current.slug||previous.authority?.actor?.role!=='owner'||normalizeAccountEmail(previous.authority.actor.email)!==email||previous.authority.acceptedAt!==current.authority.acceptedAt||previous.cancellation&&(!valid(previous.cancellation)||!/^[a-f0-9]{32}$/.test(previous.queueToken||''))))throw new PhoneActivationError('cancellation_conflict','The saved cancellation authority changed. Its existing request is retained.');
+      if(current.cancelRequestedAt) {
+        acceptedCancellation={actor:current.cancellationActor,at:current.cancelRequestedAt};
+        if(!valid(acceptedCancellation))throw new PhoneActivationError('cancellation_conflict','The original cancellation authority must be confirmed.');
+        if(current.state==='cancelled')return {result:current};
+      } else if(previous?.cancellation)acceptedCancellation=previous.cancellation;
+      // The first cancellation changes the acquisition token so late acquisition
+      // retirement cannot erase it. Its subsequent projections retain that token.
+      if(previous?.cancellation)acceptedToken=previous.queueToken;
+      if(previous?.cancellation&&JSON.stringify(previous.cancellation)===JSON.stringify(acceptedCancellation))return {result:previous};
+    }
     if (previous && !cancellation && !row.renewalFrom) return { result: previous };
     if (row.renewalFrom && !cancellation) {
       if (previous && !previous.cancellation && sequence(previous) === sequence(row) && sameRequest(previous,row)) return { result: previous };
@@ -130,7 +146,7 @@ async function enqueue(row, cancellation) {
       if (!current || tenant(current) !== row.tenantIdentity || !['testing','live'].includes(current.status) || configurationRevision(current) !== row.inputRevision) throw new PhoneActivationError('configuration_changed', 'Review your current setup before changing phone service.');
     }
     if (!previous && Object.keys(queue.intents).length >= 1000) throw new PhoneActivationError("queue_full", "Phone setup is temporarily busy.", 503);
-    const intent = { ...row, queueToken, ...(cancellation ? { cancellation } : {}) };
+    const intent = { ...row, queueToken:acceptedToken, ...(cancellation ? { cancellation:acceptedCancellation } : {}) };
     return { value: { ...queue, intents: { ...queue.intents, [row.id]: intent } }, result: intent };
   });
 }
@@ -174,9 +190,14 @@ async function authorizeCustomer(c, actor, revision) {
 }
 async function applyCancellation(intent) {
   if (!intent.cancellation) return ensure(intent);
+  const retained=await strictRead(STORE,intent.id);
+  if(retained?.cancelRequestedAt&&retained.state==='cancelled')return retained;
+  // Validate first-time queue authority as well as healing older same-owner
+  // projections. The returned tuple is the atomic canonical cancellation.
+  const accepted=await enqueue(retained,intent.cancellation);
   return change(intent.id, current => {
     if (current.cancelRequestedAt) return null;
-    return { ...current, cancelRequestedAt: intent.cancellation.at, cancellationActor: intent.cancellation.actor,
+    return { ...current, cancelRequestedAt: accepted.cancellation.at, cancellationActor: accepted.cancellation.actor,
       state: current.resource && !current.releasedAt ? "cleanup_pending" : current.purchaseStartedAt && !current.releasedAt ? "uncertain" : "cancelled", nextCheckAt: null };
   });
 }
@@ -184,8 +205,9 @@ async function saveCancellation(c, id, { actor, expectedRevision } = {}) {
   const current = await authorizeCustomer(c, actor, expectedRevision);
   if (!validId(id) || !id.startsWith(current.slug + "/")) throw new PhoneActivationError("not_found", "The phone request was not found.", 404);
   const row = await strictRead(STORE, id); if (!row || row.tenantIdentity !== tenant(current)) throw new PhoneActivationError("not_found", "The phone request was not found.", 404);
+  if(row.cancelRequestedAt&&row.state==='cancelled')return phoneActivationView(row);
   const cancellation = { actor: { role: "owner", email: normalizeAccountEmail(actor.email) }, at: iso() };
-  await enqueue(row, cancellation); return phoneActivationView(await applyCancellation({ ...row, cancellation }));
+  const accepted=await enqueue(row,cancellation);return phoneActivationView(await applyCancellation(accepted));
 }
 
 export function createPhoneActivationEngine({ provider, offer: suppliedOffer, gate = false } = {}) {
