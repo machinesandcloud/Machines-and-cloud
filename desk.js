@@ -23,7 +23,7 @@
   }
   document.addEventListener('mc:session-expired',function () {
     if (leaving && !ownerSession && !key) return;
-    leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; if (chatController) chatController.abort(); availabilityReset();
+    leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; cancelPracticeReply(); availabilityReset();
     websitePrivateClear();
     preferenceBaseline=[];preferenceDirty=false;preferenceBusy=false;homeActivityChosen=false;
     cfgBaseline = null; cfgRevision = null; cfgEditRevision = null; cfgConflict = null; cfgDirty = false; cfgBusy = false; reviewBusy = false; cfgClosed = true;
@@ -1167,7 +1167,7 @@
   $('deskSignOut').addEventListener('click', async function () {
     if(accountBusy){accountMessage('A service change is still being checked. You can sign out when that check finishes.');routeTo('account');$('accountServiceMessage').focus({preventScroll:true});return;}
     var button = $('deskSignOut'), interruptedExport = exportBusy; button.disabled = true;
-    leaving = true; portalGeneration++; closeTour(false, false); if (chatController) chatController.abort(); availabilityReset(); scheduleReset();
+    leaving = true; portalGeneration++; closeTour(false, false); cancelPracticeReply(); availabilityReset(); scheduleReset();
     try {
       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');
@@ -1207,26 +1207,60 @@
   });
 
   // test chat
-  var msgs = $('msgs');
+  var msgs = $('msgs'), chatPending = null;
   function add(role, text) { var el = document.createElement('div'); el.className = 'b ' + (role === 'user' ? 'u' : role === 'sys' ? 's' : 'a'); el.textContent = text; msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight; return el; }
-  function greet() { msgs.innerHTML = ''; add('a', (data && data.client.widget.greeting) || 'Hi, what can we help with today?'); }
-  $('newChat').addEventListener('click', function () { contact = 't' + Math.random().toString(36).slice(2, 10); transcript = []; greet(); });
+  function practiceStatus(text) { if ($('chatStatus')) $('chatStatus').textContent = text; }
+  function clearPracticePending() {
+    if (!chatPending) return;
+    clearTimeout(chatPending.timer); chatPending.element.remove(); chatPending = null;
+  }
+  function showPracticePending() {
+    clearPracticePending();
+    var element = add('a', ''), dots = document.createElement('span'), label = document.createElement('span');
+    element.classList.add('chat-pending'); element.setAttribute('aria-hidden', 'true'); dots.className = 'chat-pending-dots';
+    for (var i = 0; i < 3; i++) dots.appendChild(document.createElement('i'));
+    label.textContent = 'Preparing your reply…'; element.append(dots, label);
+    var pending = { element: element, timer: null }; chatPending = pending;
+    practiceStatus(label.textContent); $('testPreview').textContent = label.textContent; msgs.scrollTop = msgs.scrollHeight;
+    element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+    pending.timer = setTimeout(function () {
+      if (chatPending !== pending || leaving) return;
+      label.textContent = 'Still working on your reply…'; practiceStatus(label.textContent); $('testPreview').textContent = label.textContent;
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 8000);
+  }
+  function practiceControls(busy) {
+    chatBusy = busy;
+    if ($('chatForm')) { $('chatForm').setAttribute('aria-busy', String(busy)); var button = $('chatForm').querySelector('button'); button.disabled = busy; button.textContent = busy ? 'Replying…' : 'Send'; }
+    if ($('newChat')) $('newChat').disabled = busy;
+    msgs.setAttribute('aria-busy', String(busy));
+  }
+  function cancelPracticeReply() {
+    var controller = chatController, pending = chatBusy;
+    chatController = null; if (controller) controller.abort(); clearPracticePending(); practiceControls(false); practiceStatus('');
+    if (pending && $('testPreview')) $('testPreview').textContent = 'The reply was stopped. Start a new conversation to try again.';
+  }
+  function greet() { clearPracticePending(); practiceStatus(''); msgs.innerHTML = ''; add('a', (data && data.client.widget.greeting) || 'Hi, what can we help with today?'); }
+  $('newChat').addEventListener('click', function () { if (chatBusy || leaving) return; contact = 't' + Math.random().toString(36).slice(2, 10); transcript = []; greet(); $('testPreview').textContent = 'Send a practice message to see the result here.'; });
   $('chatIn').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatForm').requestSubmit(); } });
   var chatBusy = false;
+  window.addEventListener('pagehide', cancelPracticeReply);
   $('chatForm').addEventListener('submit', async function (event) {
-    event.preventDefault(); var text = $('chatIn').value.trim(); if (!text || chatBusy || !data) return;
+    event.preventDefault(); var text = $('chatIn').value.trim(); if (!text || chatBusy || !data || leaving) return;
     var practiceRevision=data.setup?.revision,practiceGeneration=portalGeneration,proofRecorded=false;
-    chatBusy = true; $('chatForm').setAttribute('aria-busy','true');document.dispatchEvent(new CustomEvent('mc:guide-state-change'));$('chatForm').querySelector('button').disabled = true; $('newChat').disabled = true; $('chatIn').value = '';
+    practiceControls(true);document.dispatchEvent(new CustomEvent('mc:guide-state-change'));$('chatIn').value = '';
     transcript.push({ role: 'user', content: text }); add('user', text); var bubble = null, full = '', finished = false;
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 60000);
-    chatController = controller;
+    chatController = controller; showPracticePending();
+    function current() { return !leaving && practiceGeneration === portalGeneration && chatController === controller; }
     function receive(line) {
-      if (leaving) return;
+      if (!current() || finished) return;
       if (!line.trim()) return;
       var out = JSON.parse(line);
-      if (out.t === 'delta') { if (!bubble) bubble = add('a', ''); full += out.text; bubble.textContent = full; msgs.scrollTop = msgs.scrollHeight; }
+      if (out.t === 'delta' && typeof out.text === 'string' && out.text) { full += out.text; if (!full.trim()) return; if (!bubble) { clearPracticePending(); bubble = add('a', ''); practiceStatus('Your front desk is replying.'); $('testPreview').textContent = 'Your reply is arriving…'; } bubble.textContent = full; msgs.scrollTop = msgs.scrollHeight; }
       if (out.t === 'error') throw new Error(out.error === 'offline' ? 'AI service is unavailable. Your setup is saved; retry later.' : 'The practice reply could not be completed. Try a new conversation.');
       if (out.t === 'done') {
+        clearPracticePending(); msgs.setAttribute('aria-busy', 'false'); practiceStatus('Reply received.'); $('chatForm').querySelector('button').textContent = 'Updating…';
         proofRecorded=out.test?.proofRecorded===true;
         finished = true; if (!bubble) bubble = add('a', out.reply); else bubble.textContent = out.reply;
         transcript.push({ role: 'assistant', content: out.reply });
@@ -1237,6 +1271,7 @@
     }
     try {
       var response = await fetch(API_BASE + '/api/chat', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ client: slug, key: key, channel: 'test', contact: contact, messages: transcript.slice(-20), stream: true }), signal: controller.signal });
+      if (!current()) return;
       if (!response.ok) {
         var failure = await response.json().catch(function () { return {}; });
         if (response.status === 429) { await load(); throw new Error(failure.message || 'The daily practice allowance has been used. Try again after midnight Houston time.'); }
@@ -1246,9 +1281,9 @@
       for (;;) { var part = await reader.read(); if (part.done) break; buffer += decoder.decode(part.value, { stream: true }); var lines = buffer.split('\n'); buffer = lines.pop(); lines.forEach(receive); }
       buffer += decoder.decode(); if (buffer.trim()) receive(buffer);
       if (!finished) throw new Error('The practice reply was interrupted. Try a new conversation.');
-      if (!leaving) await latestWorkspaceRead(); // Use the latest canonical revision before offering a connector continuation.
-    } catch (error) { if (!leaving) add('sys', error.name === 'AbortError' ? 'The practice reply timed out. Try a new conversation.' : error.message); }
-    finally { clearTimeout(timeout); if (chatController === controller) chatController = null; chatBusy = false; if ($('chatForm')) { $('chatForm').setAttribute('aria-busy','false');$('chatForm').querySelector('button').disabled = false; $('newChat').disabled = false; if (!leaving) $('chatIn').focus(); }if(!leaving){document.dispatchEvent(new CustomEvent('mc:guide-state-change'));if(proofRecorded&&practiceGeneration===portalGeneration&&data?.setup?.revision===practiceRevision&&data.client.setupProof?.testedRevision===practiceRevision&&data.client.setupProof?.testMode==='live'&&!cfgDirty&&!cfgBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'practice',revision:practiceRevision,slug:slug}}));} }
+      if (current()) await latestWorkspaceRead(); // Use the latest canonical revision before offering a connector continuation.
+    } catch (error) { if (current()) { var message = error.name === 'AbortError' ? 'The practice reply timed out. Try a new conversation.' : error.message; add('sys', message); practiceStatus(message); $('testPreview').textContent = message; } }
+    finally { clearTimeout(timeout); if (chatController === controller) { clearPracticePending(); chatController = null; practiceControls(false); if (!leaving && $('chatIn')) $('chatIn').focus(); if(!leaving){document.dispatchEvent(new CustomEvent('mc:guide-state-change'));if(proofRecorded&&practiceGeneration===portalGeneration&&data?.setup?.revision===practiceRevision&&data.client.setupProof?.testedRevision===practiceRevision&&data.client.setupProof?.testMode==='live'&&!cfgDirty&&!cfgBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'practice',revision:practiceRevision,slug:slug}}));} } }
   });
   load().then(greet);
 })();
