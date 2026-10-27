@@ -5,7 +5,7 @@ import { atomicUpdate, list } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient } from "./setup.mjs";
 import { createTwilioNumberAdapter } from "./phone-twilio.mjs";
-import { ManagedResourceAdmissionError } from './managed-resource-admission.mjs';
+import { ManagedResourceAdmissionError, fenceManagedNumberCancellation } from './managed-resource-admission.mjs';
 
 export class PhoneActivationError extends Error {
   constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; }
@@ -51,7 +51,7 @@ const detail = state => ({
   needs_review: "This request needs a platform review. Its recorded resource has been retained and phone answering is not active.",
 })[state] || "Phone setup is not available yet.";
 export function phoneActivationView(row) {
-  return { id: row.id, state: row.state, active: false, label: "Phone setup", detail: row.state==='waiting_platform'&&row.reasonCode?.startsWith('resource_')?row.resourceWaitDetail||detail(row.state):detail(row.state),
+  return { id: row.id, state: row.state, active: false, label: "Phone setup", detail: row.state==='cancelled'&&row.cancellationProof?'Your number request was cancelled before a purchase was dispatched.':row.state==='waiting_platform'&&row.reasonCode?.startsWith('resource_')?row.resourceWaitDetail||detail(row.state):detail(row.state),
     createdAt: row.createdAt, updatedAt: row.updatedAt, nextCheckAt: row.nextCheckAt || null,
     cancellationRequested: !!row.cancelRequestedAt, number: row.resource?.number || null,
     resourceRecorded: !!row.resource?.id, releaseConfirmed: !!row.releasedAt, reasonCode: row.reasonCode || null };
@@ -161,6 +161,7 @@ async function remove(row) {
 async function change(id, update) {
   return atomicUpdate(STORE, id, async current => {
     if (!current) throw new PhoneActivationError("not_found", "The phone request was not found.", 404);
+    if(current.state==='cancelled'&&current.cancellationProof?.reservationFence==='lifetime_ledger_cas')return {result:current};
     const next = await update(current); return next ? { value: { ...next, updatedAt: iso() }, result: { ...next, updatedAt: iso() } } : { result: current };
   });
 }
@@ -251,7 +252,14 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
       if(found?.status==='not_dispatched'&&found.definitive===true) {
         const proof=found.proof;
         return change(row.id,async current=>{
-          if(current.lookupClaim?.token!==token||Date.parse(current.lookupClaim.until)<=Date.now()||!sameRequest(current,claimed)||current.resource||current.claim||current.cancelRequestedAt||current.state!=='uncertain'||proof?.version!==1||proof.kind!=='mandatory_reservation_absent'||proof.operationId!==current.id||proof.correlationId!==current.correlationId||proof.tenantIdentity!==current.tenantIdentity||proof.providerAccountHash!==current.resourceAccountHash||proof.inputRevision!==current.inputRevision||proof.offerDigest!==current.offerDigest||proof.generation!==current.generation||proof.purchaseStartedAt!==current.purchaseStartedAt||proof.purchaseAttempts!==current.purchaseAttempts||!Number.isFinite(Date.parse(proof.confirmedAt))||Date.parse(proof.confirmedAt)>Date.now()||Date.parse(proof.confirmedAt)<Date.parse(current.purchaseStartedAt)+60000)return null;
+          if(current.lookupClaim?.token!==token||Date.parse(current.lookupClaim.until)<=Date.now()||!sameRequest(current,claimed)||current.resource||current.claim||!!current.cancelRequestedAt!==(proof?.outcome==='cancel')||current.state!=='uncertain'||proof?.version!==1||proof.kind!=='mandatory_reservation_absent'||proof.operationId!==current.id||proof.correlationId!==current.correlationId||proof.tenantIdentity!==current.tenantIdentity||proof.providerAccountHash!==current.resourceAccountHash||proof.inputRevision!==current.inputRevision||proof.offerDigest!==current.offerDigest||proof.generation!==current.generation||proof.purchaseStartedAt!==current.purchaseStartedAt||proof.purchaseAttempts!==current.purchaseAttempts||!Number.isFinite(Date.parse(proof.confirmedAt))||Date.parse(proof.confirmedAt)>Date.now()||Date.parse(proof.confirmedAt)<Date.parse(current.purchaseStartedAt)+60000)return null;
+          if(proof.outcome==='cancel') {
+            if(proof.cancellationDigest!==hash(JSON.stringify({at:current.cancelRequestedAt,actor:current.cancellationActor})))return null;
+            const fenced=await fenceManagedNumberCancellation({operationId:current.id,correlationId:current.correlationId,purchaseStartedAt:current.purchaseStartedAt,lookupToken:token},proof);
+            if(!fenced)return {...current,reasonCode:'provider_result_unconfirmed',nextCheckAt:new Date(Date.now()+300000).toISOString(),lookupClaim:null};
+            return {...current,state:'cancelled',reasonCode:'cancelled_before_dispatch',purchaseStartedAt:null,claim:null,lookupClaim:null,nextCheckAt:null,cancellationProof:fenced};
+          }
+          if(proof.outcome!=='retry')return null;
           if(proof.authorityDigest!==hash(JSON.stringify({authority:current.authority,serviceOnboarding:current.serviceOnboarding,renewalSequence:current.renewalSequence||0}))||proof.reservationId!==hash(JSON.stringify([current.id,'number']))||proof.providerAccountHash!==hash(process.env.TWILIO_ACCOUNT_SID||'')||!enabled()||Date.parse(offer.expiresAt)<=Date.now()||current.offerDigest!==digest||!await parentAllows(current))return null;
           const customer=await strictRead('clients',current.slug);
           if(!customer||!isSupportedSelfServiceClient(customer)||tenant(customer)!==current.tenantIdentity||!['testing','live'].includes(customer.status)||configurationRevision(customer)!==current.inputRevision||normalizeAccountEmail(customer.owner?.email)!==normalizeAccountEmail(current.authority?.actor?.email))return null;
@@ -287,7 +295,13 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     if (row.nextCheckAt && Date.parse(row.nextCheckAt) > Date.now()) return phoneActivationView(row);
     const current = await strictRead("clients", row.slug);
     if (!current || !isSupportedSelfServiceClient(current) || tenant(current) !== row.tenantIdentity) return phoneActivationView(await change(id, old => sameRequest(old,row) ? ({ ...old, state: old.purchaseStartedAt ? "needs_review" : "cancelled", reasonCode: "workspace_unavailable" }) : null));
-    if (row.cancelRequestedAt) return phoneActivationView(await (row.resource ? cleanup(row) : row.purchaseStartedAt ? lookup(row) : change(id, old => ({ ...old, state: "cancelled" }))));
+    if (row.cancelRequestedAt) {
+      if(row.resource)return phoneActivationView(await cleanup(row));
+      if(!row.purchaseStartedAt)return phoneActivationView(await change(id,old=>({...old,state:'cancelled'})));
+      if(row.claim&&Date.parse(row.claim.until)>Date.now())return phoneActivationView(row);
+      if(row.claim)row=await change(id,old=>sameRequest(old,row)&&old.purchaseStartedAt===row.purchaseStartedAt&&Date.parse(old.claim?.until)<=Date.now()?{...old,claim:null}:null);
+      return phoneActivationView(await lookup(row));
+    }
     if (terminal(row.state)) return phoneActivationView(row);
     if (row.purchaseStartedAt) {
       if (row.state === "running" && Date.parse(row.claim?.until) > Date.now()) return phoneActivationView(row);
@@ -318,7 +332,7 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     catch (error) {
       if(error instanceof ManagedResourceAdmissionError)return phoneActivationView(await change(id,old=>old.claim?.token===token&&!old.resource&&old.purchaseStartedAt===row.purchaseStartedAt?{...old,state:old.cancelRequestedAt?'cancelled':'waiting_platform',purchaseStartedAt:null,purchaseAttempts:old.preDispatchRecovery?old.purchaseAttempts:Math.max(0,old.purchaseAttempts-1),claim:null,reasonCode:error.code,resourceWaitDetail:error.message,nextCheckAt:null}:null));
       if (error?.code === "dispatch_not_authorized") return phoneActivationView(await stoppedBeforeDispatch());
-      return phoneActivationView(await change(id, old => old.resource ? null : ({ ...old, state: "uncertain", reasonCode: "acquisition_result_unconfirmed", nextCheckAt: null, claim: null })));
+      return phoneActivationView(await change(id, old => old.resource||old.claim?.token!==token||old.purchaseStartedAt!==row.purchaseStartedAt ? null : ({ ...old, state: "uncertain", reasonCode: "acquisition_result_unconfirmed", nextCheckAt: null, claim: null })));
     }
   }
   async function recover({ limit = 10 } = {}) {
@@ -369,11 +383,36 @@ async function pendingPhoneWork({ repair = false } = {}) {
   return { pending: count, inspected: candidates.length, unresolved: rows.filter(row => ["uncertain", "cleanup_uncertain", "needs_review"].includes(row.state)).length,
     cleanupPending: rows.filter(row => ["cleanup_pending", "releasing", "cleanup_uncertain"].includes(row.state)).length };
 }
+// Creation-off maintenance can only finish an already accepted cancellation with
+// no recorded resource. The adapter independently authorizes one exact inventory
+// GET from durable no-reservation evidence; acquire and release stay gated off.
+async function recoverNoDispatchCancellations({limit,deadlineAt}) {
+  const intents=await atomicUpdate(QUEUE,KEY,value=>{
+    const queue=queueValue(value),keys=Object.keys(queue.intents).filter(id=>queue.intents[id].cancellation).sort();
+    if(!keys.length)return {result:[]};
+    let start=keys.findIndex(id=>id>queue.cursor);if(start<0)start=0;
+    const chosen=[...keys.slice(start),...keys.slice(0,start)].slice(0,limit);
+    return {value:{...queue,cursor:chosen.at(-1)},result:chosen.map(id=>queue.intents[id])};
+  });
+  const outcomes=[];
+  for(const intent of intents) {
+    try {
+      await ensure(intent);const row=await applyCancellation(intent);
+      if(!row.cancelRequestedAt||row.resource||!row.purchaseStartedAt){outcomes.push(phoneActivationView(row));continue;}
+      const engine=phoneEngine({provider:createTwilioNumberAdapter({executionAllowed:()=>false,deadlineAt}),offer:row.offer,gate:false,allowExpiredOffer:true});
+      const view=await engine.run(row.id);outcomes.push(view);
+      if(view.state==='cancelled')await remove(intent);
+    } catch {outcomes.push({state:'uncertain',reasonCode:'phone_storage_unavailable'});}
+  }
+  return {processed:intents.length,outcomes};
+}
 export async function recoverPhoneActivations({ limit = 1, deadlineAt = Date.now() + 15000 } = {}) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 1 || !Number.isFinite(deadlineAt) || deadlineAt > Date.now() + 15000 || deadlineAt <= Date.now()) throw new PhoneActivationError("invalid_recovery_limit", "Phone recovery must use one bounded operation.", 400);
-  if (!productionPolicy().enabled || (await strictRead("health", "brake"))?.on === true) {
-    const pending = await pendingPhoneWork({ repair: true });
-    return { ok: pending.pending === 0, enabled: false, processed: 0, skipped: "Phone execution is disabled; saved work is retained", reasonCode: pending.pending > pending.inspected ? "phone_scope_partial" : "product_gate_closed", scope: "bounded_candidates", ...pending, outcomes: [] };
+  const braked=(await strictRead('health','brake'))?.on===true;
+  if (!productionPolicy().enabled || braked) {
+    await pendingPhoneWork({ repair: true });
+    const recovery=braked?{processed:0,outcomes:[]}:await recoverNoDispatchCancellations({limit,deadlineAt}),pending=await pendingPhoneWork();
+    return { ok: pending.pending === 0, enabled: false, processed: recovery.processed, skipped: "Phone acquisition is disabled; cancellation checks retain the original request", reasonCode: pending.pending > pending.inspected ? "phone_scope_partial" : "product_gate_closed", scope: "bounded_candidates", ...pending, outcomes: recovery.outcomes.map(row=>({state:row.state,reasonCode:row.reasonCode||null})) };
   }
   const recovery = await productionEngine(deadlineAt).recover({ limit }), pending = await pendingPhoneWork();
   // Public scheduler receipts contain counts and codes, not customer resources.

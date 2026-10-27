@@ -13,7 +13,7 @@ for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|VAPI_|RESE
 Object.assign(process.env, { MC_MEMORY_STORE: "1", MC_FAKE_MODEL: "1", NODE_ENV: "test", URL: "http://127.0.0.1:8892", PUBLIC_SITE_URL: "http://127.0.0.1:8892" });
 const deny = () => { throw new Error("Phone test networking disabled"); }; net.connect = net.createConnection = http.request = http.get = https.request = https.get = deny; syncBuiltinESMExports();
 const NativeDate = Date; let clock = NativeDate.now(); globalThis.Date = class extends NativeDate { constructor(...args) { super(...(args.length ? args : [clock])); } static now() { return clock; } };
-const blobs = new Map(), remote = new Map(); let etag = 0, fault = null, lostPost = false, monthlyPrice = "1.15", priceCurrency='USD', capabilities={MMS:true,SMS:true,voice:true}, addressRequirements='none', inventoryOverride, beforeInventory=null, failPostBeforeCommit=false;
+const blobs = new Map(), remote = new Map(); let etag = 0, fault = null, lostPost = false, monthlyPrice = "1.15", priceCurrency='USD', capabilities={MMS:true,SMS:true,voice:true}, addressRequirements='none', inventoryOverride, beforeInventory=null, beforeAvailable=null, beforeBlobWrite=null, failPostBeforeCommit=false;
 const account = "AC" + "1".repeat(32), number = "+17135550101";
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
@@ -24,14 +24,14 @@ globalThis.fetch = async (input, init = {}) => {
     const current = blobs.get(name), headers = new Headers(init.headers);
     if (method === "GET") return current ? new Response(current.body, { headers: { etag: current.etag, "content-type": "application/json" } }) : new Response(null, { status: 404 });
     if (method === "DELETE") { blobs.delete(name); return new Response(null, { status: 204 }); }
-    assert.equal(method, "PUT"); if ((headers.get("if-none-match") === "*" && current) || (headers.has("if-match") && headers.get("if-match") !== current?.etag)) { result.conflicts++; return new Response(null, { status: 412 }); }
+    assert.equal(method, "PUT");if(beforeBlobWrite)await beforeBlobWrite(kind,key);const latest=blobs.get(name);if ((headers.get("if-none-match") === "*" && latest) || (headers.has("if-match") && headers.get("if-match") !== latest?.etag)) { result.conflicts++; return new Response(null, { status: 412 }); }
     const next = String(++etag); blobs.set(name, { body: init.body, etag: next }); return new Response(null, { headers: { etag: next } });
   }
   if (!["https://api.twilio.com", "https://pricing.twilio.com"].includes(url.origin)) { result.blockedNetwork.push({ origin: url.origin, path: url.pathname }); return deny(); }
   result.twilio.push({ method, path: url.pathname, query: url.search });
   if (url.origin === "https://pricing.twilio.com") return Response.json({ price_unit: priceCurrency, phone_number_prices: [{ number_type: "local", current_price: monthlyPrice }] });
   assert.ok(url.pathname.startsWith("/2010-04-01/Accounts/" + account + "/"));
-  if (url.pathname.endsWith("/AvailablePhoneNumbers/US/Local.json")) return Response.json({ available_phone_numbers: [{ phone_number: number, capabilities, address_requirements: addressRequirements }] });
+  if (url.pathname.endsWith("/AvailablePhoneNumbers/US/Local.json")) {if(beforeAvailable)await beforeAvailable();return Response.json({ available_phone_numbers: [{ phone_number: number, capabilities, address_requirements: addressRequirements }] });}
   if (url.pathname.endsWith("/IncomingPhoneNumbers.json")) {
     if (method === "GET") {if(beforeInventory)await beforeInventory();return Response.json(inventoryOverride===undefined?{ incoming_phone_numbers: [...remote.values()].filter(row => row.friendly_name === url.searchParams.get("FriendlyName")), next_page_uri: null }:inventoryOverride);}
     assert.equal(method, "POST"); const params = new URLSearchParams(init.body); assert.equal(params.get("PhoneNumber"), number); assert.equal(params.has("VoiceUrl"), false); assert.equal(params.has("SmsUrl"), false);
@@ -156,12 +156,12 @@ await check("real adapter refuses expired aggregate deadline without any provide
 process.env.MC_MEMORY_STORE='0';
 const posts=()=>result.twilio.filter(row=>row.method==='POST').length;
 async function preDispatchFixture() {
-  capabilities={MMS:true,SMS:true,voice:true};addressRequirements='none';monthlyPrice='1.15';priceCurrency='USD';inventoryOverride=undefined;beforeInventory=null;failPostBeforeCommit=false;lostPost=false;fault=null;process.env.TWILIO_ACCOUNT_SID=account;
+  capabilities={MMS:true,SMS:true,voice:true};addressRequirements='none';monthlyPrice='1.15';priceCurrency='USD';inventoryOverride=undefined;beforeInventory=null;beforeAvailable=null;beforeBlobWrite=null;failPostBeforeCommit=false;lostPost=false;fault=null;process.env.TWILIO_ACCOUNT_SID=account;
   const c=await client('sdk','predispatch');let open=true;
   const allowance={version:'fixture_predispatch_v1',expiresAt:new Date(clock+86400000).toISOString(),mode:'self_service',providerAccountHash:hash(account),currency:'USD',rateBasis:'configured_upper_bound',rateSource:'https://example.test/synthetic-resource-bounds',bounds:{numberSetupCents:0,numberMonthlyCents:115,brandSetupCents:4400,campaignSetupCents:1500,campaignMonthlyCents:1000},accountLimits:{numbers:100,brands:100,campaigns:100,setupCents:1000000,monthlyCents:1000000},tenantLimits:{numbers:1,brands:1,campaigns:1,setupCents:10000,monthlyCents:2000},tenants:[]};
   process.env.MANAGED_RESOURCE_ADMISSION_POLICY_JSON=JSON.stringify(allowance);process.env.MANAGED_RESOURCE_ADMISSION_APPROVED_VERSION=allowance.version;
   const adapter=createTwilioNumberAdapter({executionAllowed:()=>open}),engine=phone.createPhoneActivationEngine({provider:adapter,offer:offer(),gate:()=>open}),operation=await request(engine,c);
-  return {c,engine,id:operation.id,gate:value=>{open=value;},saved:()=>read('phone_activation_intents',operation.id),async failBeforeReservation(){capabilities={voice:true,SMS:false};assert.equal((await engine.run(operation.id)).state,'uncertain');capabilities={MMS:true,SMS:true,voice:true};return this.saved();}};
+  return {c,engine,allowance,id:operation.id,gate:value=>{open=value;},saved:()=>read('phone_activation_intents',operation.id),async failBeforeReservation(){capabilities={voice:true,SMS:false};assert.equal((await engine.run(operation.id)).state,'uncertain');capabilities={MMS:true,SMS:true,voice:true};return this.saved();}};
 }
 await check('strictly absent lifetime ledger proves the first expired purchase never reached dispatch',async()=>{
   const f=await preDispatchFixture(),before=posts();assert.equal(await read('managed_resource_admission','twilio_v1'),null);const original=await f.failBeforeReservation();clock+=60001;
@@ -236,7 +236,56 @@ await check('lost recovery CAS write leaves uncertainty and later reconciles the
   await assert.rejects(()=>f.engine.run(f.id));fault=null;const held=await f.saved();assert.equal(held.state,'uncertain');assert.equal(held.purchaseStartedAt,initial.purchaseStartedAt);assert.equal(held.purchaseAttempts,1);assert.equal(held.preDispatchRecovery,undefined);clock+=60001;
   assert.equal((await f.engine.run(f.id)).state,'queued');assert.equal(posts(),before);assert.equal((await f.saved()).purchaseAttempts,1);assert.equal((await f.saved()).id,initial.id);
 });
-process.env.MC_MEMORY_STORE='1';capabilities={MMS:true,SMS:true,voice:true};addressRequirements='none';monthlyPrice='1.15';priceCurrency='USD';inventoryOverride=undefined;beforeInventory=null;failPostBeforeCommit=false;fault=null;process.env.TWILIO_ACCOUNT_SID=account;
+// Fresh SDK fixture realm for cancellation; no live or retained budget is reset.
+blobs.clear();remote.clear();
+function closeCreation() {
+  process.env.PHONE_ACQUISITION_ENABLED='false';
+  for(const key of ['PHONE_ACTIVATION_OFFER_JSON','PHONE_ACTIVATION_APPROVED_VERSION','MANAGED_RESOURCE_ADMISSION_POLICY_JSON','MANAGED_RESOURCE_ADMISSION_APPROVED_VERSION'])delete process.env[key];
+}
+async function cancellationFixture() {
+  await store.put('phone_activation_queue','active_v1',{version:1,intents:{},cursor:''});
+  const f=await preDispatchFixture();await f.failBeforeReservation();clock+=60001;
+  await cancel(f.engine,f.c,f.id);await store.put('clients',f.c.slug,{...f.c,status:'cancelled',summary:'Owner cancelled after the original setup.'});closeCreation();return f;
+}
+await check('missing creation policies and cancelled workspace close the same undispatched intent without a release receipt',async()=>{
+  const f=await cancellationFixture(),before=posts(),original=await f.saved();assert.equal(await read('managed_resource_admission','twilio_v1'),null);
+  const outcome=await phone.recoverPhoneActivations(),saved=await f.saved();assert.equal(outcome.enabled,false);assert.equal(saved.state,'cancelled');assert.equal(saved.reasonCode,'cancelled_before_dispatch');assert.equal(saved.purchaseStartedAt,null);assert.equal(saved.purchaseAttempts,1);assert.equal(saved.id,original.id);assert.equal(saved.correlationId,original.correlationId);assert.equal(saved.cancellationProof.purchaseStartedAt,original.purchaseStartedAt);assert.equal(saved.cancellationProof.reservationFence,'lifetime_ledger_cas');for(const key of ['resource','releasedAt','releaseReceipt'])assert.equal(saved[key],undefined);assert.equal(posts(),before);
+  const ledger=await read('managed_resource_admission','twilio_v1');assert.deepEqual(ledger.used,{numbers:0,brands:0,campaigns:0,setupCents:0,monthlyCents:0});assert.deepEqual(ledger.reservations,{});assert.equal((await read('phone_activation_queue','active_v1')).intents[f.id],undefined);
+});
+await check('expired phone offer and resource policy permit cancellation proof without authorizing purchase',async()=>{
+  const f=await cancellationFixture(),original=await f.saved(),before=posts();process.env.PHONE_ACQUISITION_ENABLED='true';process.env.PHONE_ACTIVATION_APPROVED_VERSION=original.offer.version;process.env.PHONE_ACTIVATION_OFFER_JSON=JSON.stringify(original.offer);clock=Date.parse(original.offer.expiresAt)+1;process.env.MANAGED_RESOURCE_ADMISSION_POLICY_JSON=JSON.stringify({...f.allowance,expiresAt:new Date(clock-1).toISOString()});process.env.MANAGED_RESOURCE_ADMISSION_APPROVED_VERSION=f.allowance.version;
+  await phone.recoverPhoneActivations();assert.equal((await f.saved()).state,'cancelled');assert.equal((await f.saved()).purchaseAttempts,1);assert.equal(posts(),before);
+});
+await check('known reservation and possibly dispatched POST never become no-dispatch cancellation',async()=>{
+  await store.put('phone_activation_queue','active_v1',{version:1,intents:{},cursor:''});const f=await preDispatchFixture(),before=posts();failPostBeforeCommit=true;await f.engine.run(f.id);failPostBeforeCommit=false;clock+=60001;await cancel(f.engine,f.c,f.id);closeCreation();const ledger=await read('managed_resource_admission','twilio_v1');
+  await phone.recoverPhoneActivations();const saved=await f.saved();assert.equal(saved.state,'uncertain');assert.equal(saved.cancellationProof,undefined);assert.equal(saved.purchaseAttempts,1);assert.equal(posts(),before+1);assert.deepEqual(await read('managed_resource_admission','twilio_v1'),ledger);
+});
+await check('incomplete or foreign inventory cannot close cancellation or create a ledger fence',async()=>{
+  for(const data of [{incoming_phone_numbers:[],next_page_uri:'/next'},{incoming_phone_numbers:[]},{next_page_uri:null},{incoming_phone_numbers:[{friendly_name:'foreign'}],next_page_uri:null}]) {
+    const f=await cancellationFixture(),before=posts(),ledger=await read('managed_resource_admission','twilio_v1');inventoryOverride=data;await phone.recoverPhoneActivations();assert.equal((await f.saved()).state,'uncertain');assert.equal((await f.saved()).cancellationProof,undefined);assert.deepEqual(await read('managed_resource_admission','twilio_v1'),ledger);assert.equal(posts(),before);
+  }
+});
+await check('storage uncertainty, changed account and hard brake retain pending cancellation',async()=>{
+  for(const mode of ['storage','account','brake']) {
+    const f=await cancellationFixture(),before=posts();if(mode==='storage')fault={kind:'site:managed_resource_admission',key:'twilio_v1',method:'GET'};if(mode==='account')process.env.TWILIO_ACCOUNT_SID='AC'+'9'.repeat(32);if(mode==='brake')await store.put('health','brake',{on:true});
+    await phone.recoverPhoneActivations();fault=null;assert.equal((await f.saved()).state,'uncertain');assert.equal((await f.saved()).cancellationProof,undefined);assert.equal(posts(),before);await store.put('health','brake',{on:false});
+  }
+});
+await check('delayed original Available GET failure cannot overwrite proved terminal cancellation',async()=>{
+  await store.put('phone_activation_queue','active_v1',{version:1,intents:{},cursor:''});const f=await preDispatchFixture(),before=posts();let reached,release;const paused=new Promise(resolve=>{reached=resolve;}),gate=new Promise(resolve=>{release=resolve;});beforeAvailable=async()=>{beforeAvailable=null;reached();await gate;throw new Error('Old provider response lost');};
+  const old=f.engine.run(f.id);await paused;clock+=60001;await cancel(f.engine,f.c,f.id);await store.put('clients',f.c.slug,{...f.c,status:'cancelled'});closeCreation();await phone.recoverPhoneActivations();const saved=await f.saved();assert.equal(saved.state,'cancelled');release();await old;assert.deepEqual(await f.saved(),saved);assert.equal(saved.purchaseAttempts,1);assert.equal(posts(),before);
+});
+for(const order of ['fence_first','reservation_first'])await check('prepared reservation PUT '+order+' respects cancellation fence without dispatch or refund',async()=>{
+  await store.put('phone_activation_queue','active_v1',{version:1,intents:{},cursor:''});const f=await preDispatchFixture(),before=posts();let reached,release;const paused=new Promise(resolve=>{reached=resolve;}),gate=new Promise(resolve=>{release=resolve;});
+  beforeBlobWrite=async(kind,key)=>{if(kind==='site:managed_resource_admission'&&key==='twilio_v1'){beforeBlobWrite=null;reached();await gate;}};
+  const old=f.engine.run(f.id);await paused;clock+=60001;await cancel(f.engine,f.c,f.id);closeCreation();
+  if(order==='reservation_first')beforeInventory=async()=>{beforeInventory=null;release();await old;};
+  await phone.recoverPhoneActivations();if(order==='fence_first'){release();await old;}
+  const saved=await f.saved(),ledger=await read('managed_resource_admission','twilio_v1');assert.equal(posts(),before);assert.equal(saved.purchaseAttempts,1);
+  if(order==='fence_first'){assert.equal(saved.state,'cancelled');assert.equal(ledger.reservations[hash(JSON.stringify([f.id,'number']))],undefined);}
+  else{assert.equal(saved.state,'uncertain');assert.equal(saved.cancellationProof,undefined);assert.ok(ledger.reservations[hash(JSON.stringify([f.id,'number']))]);}
+});
+process.env.MC_MEMORY_STORE='1';capabilities={MMS:true,SMS:true,voice:true};addressRequirements='none';monthlyPrice='1.15';priceCurrency='USD';inventoryOverride=undefined;beforeInventory=null;beforeAvailable=null;beforeBlobWrite=null;failPostBeforeCommit=false;fault=null;process.env.TWILIO_ACCOUNT_SID=account;process.env.PHONE_ACQUISITION_ENABLED='true';process.env.PHONE_ACTIVATION_APPROVED_VERSION='fixture_number_v1';
 await check('expired number and resource offers permit recorded production cleanup; new acquisition, global-off and brake stay closed',async()=>{
   await store.put('phone_activation_queue','active_v1',{version:1,intents:{},cursor:''});
   const retained=await client('production','expiry-cleanup'),queued=await client('production','expiry-queued'),currentOffer=offer();process.env.PHONE_ACTIVATION_OFFER_JSON=JSON.stringify(currentOffer);

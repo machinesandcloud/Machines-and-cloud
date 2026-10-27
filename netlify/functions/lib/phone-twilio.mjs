@@ -15,8 +15,9 @@ const cents = value => {
   return Number(match[1]) * 100 + Number((match[2] || "").padEnd(2, "0"));
 };
 export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null }) {
-  async function request(path, method = "GET", body, pricing = false, deadline = Date.now() + 5000, binding = null, admission = null) {
-    if (executionAllowed() !== true) throw new Error("Phone acquisition gate is closed");
+  async function request(path, method = "GET", body, pricing = false, deadline = Date.now() + 5000, binding = null, admission = null, cancellationProof = null) {
+    const cancellationRead=cancellationProof?.outcome==='cancel'&&cancellationProof.kind==='mandatory_reservation_absent'&&cancellationProof.providerAccountHash===binding&&method==='GET'&&!pricing&&!body&&path==='IncomingPhoneNumbers.json?'+new URLSearchParams({FriendlyName:label(cancellationProof.correlationId),PageSize:'100'})&&Date.parse(cancellationProof.confirmedAt)<=Date.now()&&Date.now()-Date.parse(cancellationProof.confirmedAt)<=5000;
+    if (executionAllowed() !== true&&!cancellationRead) throw new Error("Phone acquisition gate is closed");
     const account = process.env.TWILIO_ACCOUNT_SID, user = process.env.TWILIO_API_KEY || account, password = process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN;
     if (!/^AC[a-f0-9]{32}$/i.test(account || "") || !user || !password) throw new Error("Phone provider credentials unavailable");
     const base = pricing ? "https://pricing.twilio.com/v1/" : `https://api.twilio.com/2010-04-01/Accounts/${account}/`;
@@ -57,13 +58,18 @@ export function createTwilioNumberAdapter({ executionAllowed, deadlineAt = null 
     },
     async lookup({ intentId, correlationId, resourceId, purchaseStartedAt, lookupToken }) {
       const binding=await managedResourceAccountBinding('number',intentId);
+      let cancellationProof=null;
+      if(executionAllowed()!==true&&!resourceId) {
+        cancellationProof=await managedNumberPreDispatchProof({operationId:intentId,correlationId,purchaseStartedAt,lookupToken});
+        if(cancellationProof?.outcome!=='cancel')throw new Error('Phone acquisition gate is closed');
+      }
       if (resourceId) {
         if (!sidValid(resourceId)) throw new Error("Invalid phone resource receipt");
         const found = await request(`IncomingPhoneNumbers/${resourceId}.json`,'GET',null,false,Date.now()+5000,binding);
         if (found.status === 404) return { status: "absent", definitive: true };
         return { status: "found", resource: receipt(found.data, correlationId) };
       }
-      const found = (await request("IncomingPhoneNumbers.json?" + new URLSearchParams({ FriendlyName: label(correlationId), PageSize: "100" }),'GET',null,false,Date.now()+5000,binding)).data;
+      const found = (await request("IncomingPhoneNumbers.json?" + new URLSearchParams({ FriendlyName: label(correlationId), PageSize: "100" }),'GET',null,false,Date.now()+5000,binding,null,cancellationProof)).data;
       if(!Array.isArray(found?.incoming_phone_numbers))return {status:'unknown',reasonCode:'resource_not_confirmed'};
       const matches = found.incoming_phone_numbers.filter(row => row.friendly_name === label(correlationId));
       // FriendlyName is a correlation aid, not a uniqueness/idempotency promise.

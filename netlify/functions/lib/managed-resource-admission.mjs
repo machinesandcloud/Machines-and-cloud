@@ -54,7 +54,7 @@ function cost(p,kind,offer,quotedMonthlyCents) {
   }
   return amount;
 }
-async function parentAuthority(row,kind,p) {
+async function parentAuthority(row,kind,p,{allowCancellation=false}={}) {
   if(kind!=='number') {
     if(!validId(row?.number?.intentId)||!row.number.intentId.startsWith(row.slug+'/'))return false;
     const parent=await strictRead('phone_activation_intents',row.number.intentId);
@@ -65,7 +65,7 @@ async function parentAuthority(row,kind,p) {
   if(!validId(ref.id)||!ref.id.startsWith(row.slug+'/')||!Number.isSafeInteger(ref.generation)||ref.generation<1||ref.admissionSequence!==null&&!Number.isSafeInteger(ref.admissionSequence))return false;
   const [parent,queue]=await Promise.all([strictRead('service_onboarding_intents',ref.id),strictRead('service_onboarding_queue','active_v1')]);
   const retained=ref.admissionSequence===null?parent?.version===1:ref.admissionSequence>0&&Number.isSafeInteger(parent?.admissionSequence)&&parent.admissionSequence>=ref.admissionSequence;
-  return !!parent&&retained&&parent.tenantIdentity===row.tenantIdentity&&parent.generation===ref.generation&&parent.inputRevision===row.inputRevision&&parent.offer?.number?.digest===row.offerDigest&&parent.authority?.actor?.email===row.authority?.actor?.email&&!!parent.steps?.number?.startedAt&&!parent.cancelRequestedAt&&!queue?.intents?.[ref.id]?.cancelRequestedAt&&hash(parent.providerBinding?.accountSid||'')===p.providerAccountHash;
+  return !!parent&&retained&&parent.tenantIdentity===row.tenantIdentity&&parent.generation===ref.generation&&parent.inputRevision===row.inputRevision&&parent.offer?.number?.digest===row.offerDigest&&parent.authority?.actor?.email===row.authority?.actor?.email&&!!parent.steps?.number?.startedAt&&(allowCancellation||!parent.cancelRequestedAt&&!queue?.intents?.[ref.id]?.cancelRequestedAt)&&hash(parent.providerBinding?.accountSid||'')===p.providerAccountHash;
 }
 async function authority(input,p) {
   currentPolicy(p);
@@ -150,13 +150,31 @@ export async function managedResourceAccountBinding(kind,operationId) {
 // an empty provider inventory, a storage error or another account is not proof.
 export async function managedNumberPreDispatchProof({operationId,correlationId,purchaseStartedAt,lookupToken}) {
   if(!validId(operationId))return null;
-  const p=managedResourceAdmissionPolicy();if(!p)return null;
   const row=await strictRead('phone_activation_intents',operationId);
-  if(!row||row.id!==operationId||!operationId.startsWith(row.slug+'/')||row.state!=='uncertain'||row.resource||row.claim||row.cancelRequestedAt||row.releasedAt||row.resourceAccountHash!==p.providerAccountHash||!hex(row.tenantIdentity)||row.correlationId!==correlationId||correlationId!==hash('phone-acquire-v1:'+operationId+':'+row.tenantIdentity)||row.purchaseStartedAt!==purchaseStartedAt||!Number.isFinite(Date.parse(purchaseStartedAt))||Date.parse(purchaseStartedAt)+60000>Date.now()||!Number.isSafeInteger(row.purchaseAttempts)||row.purchaseAttempts<1||!Number.isSafeInteger(row.generation)||row.generation<1||!lease(row.lookupClaim)||row.lookupClaim.token!==lookupToken||row.offerDigest!==hash(JSON.stringify(row.offer))||row.authority?.costsAccepted!==true||row.authority?.authorityAccepted!==true||!Number.isFinite(Date.parse(row.authority.acceptedAt))||Date.parse(row.authority.acceptedAt)>Date.parse(purchaseStartedAt)||!await parentAuthority(row,'number',p))return null;
+  const cancellation=!!row?.cancelRequestedAt,p=managedResourceAdmissionPolicy(),binding={providerAccountHash:managedResourceAccountHash()};
+  if(!cancellation&&!p)return null;
+  if((await strictRead('health','brake'))?.on===true)return null;
+  if(!/^AC[a-f0-9]{32}$/i.test(process.env.TWILIO_ACCOUNT_SID||'')||!row||row.version!==1||row.id!==operationId||operationId!==row.slug+'/'+hash('first-phone-acquisition:'+row.tenantIdentity)||row.state!=='uncertain'||row.resource||row.claim||row.releasedAt||row.cleanupStartedAt||row.conflictingResourceIds?.length||Object.keys(row.dependencies||{}).length||row.resourceAccountHash!==binding.providerAccountHash||!hex(row.tenantIdentity)||row.correlationId!==correlationId||correlationId!==hash('phone-acquire-v1:'+operationId+':'+row.tenantIdentity)||row.purchaseStartedAt!==purchaseStartedAt||!Number.isFinite(Date.parse(purchaseStartedAt))||Date.parse(purchaseStartedAt)+60000>Date.now()||!Number.isSafeInteger(row.purchaseAttempts)||row.purchaseAttempts<1||!Number.isSafeInteger(row.generation)||row.generation<1||!lease(row.lookupClaim)||row.lookupClaim.token!==lookupToken||row.offerDigest!==hash(JSON.stringify(row.offer))||row.authority?.costsAccepted!==true||row.authority?.authorityAccepted!==true||!Number.isFinite(Date.parse(row.authority.acceptedAt))||Date.parse(row.authority.acceptedAt)>Date.parse(purchaseStartedAt)||!await parentAuthority(row,'number',binding,{allowCancellation:cancellation}))return null;
   const c=await strictRead('clients',row.slug);
-  if(!isSupportedSelfServiceClient(c)||!c.ownerKey||!normalizeAccountEmail(c.owner?.email)||workspaceTenant(c)!==row.tenantIdentity||!['testing','live'].includes(c.status)||configurationRevision(c)!==row.inputRevision||normalizeAccountEmail(row.authority.actor?.email)!==normalizeAccountEmail(c.owner.email)||(p.mode==='cohort'&&!p.tenants.some(t=>t.slug===row.slug&&t.identity===row.tenantIdentity)))return null;
-  const reservationId=hash([operationId,'number']),saved=ledger(await strictRead(STORE,KEY),p);
+  if(!isSupportedSelfServiceClient(c)||!c.ownerKey||!normalizeAccountEmail(c.owner?.email)||workspaceTenant(c)!==row.tenantIdentity||row.authority.actor?.role!=='owner'||normalizeAccountEmail(row.authority.actor?.email)!==normalizeAccountEmail(c.owner.email))return null;
+  if(cancellation) {
+    const entry=(await strictRead('phone_activation_queue','active_v1'))?.intents?.[operationId],actor=normalizeAccountEmail(row.cancellationActor?.email);
+    if(!Number.isFinite(Date.parse(row.cancelRequestedAt))||row.cancellationActor?.role!=='owner'||actor!==normalizeAccountEmail(c.owner.email)||entry?.tenantIdentity!==row.tenantIdentity||entry.correlationId!==row.correlationId||entry.cancellation?.at!==row.cancelRequestedAt||entry.cancellation.actor?.role!=='owner'||normalizeAccountEmail(entry.cancellation.actor?.email)!==actor)return null;
+  } else if(!['testing','live'].includes(c.status)||configurationRevision(c)!==row.inputRevision||p.mode==='cohort'&&!p.tenants.some(t=>t.slug===row.slug&&t.identity===row.tenantIdentity))return null;
+  const reservationId=hash([operationId,'number']),saved=ledger(await strictRead(STORE,KEY),binding);
   if(saved.reservations[reservationId]||hash(await strictRead('phone_activation_intents',operationId))!==hash(row))return null;
-  currentPolicy(p);
-  return {version:1,kind:'mandatory_reservation_absent',operationId,correlationId,tenantIdentity:row.tenantIdentity,providerAccountHash:p.providerAccountHash,inputRevision:row.inputRevision,offerDigest:row.offerDigest,authorityDigest:hash(JSON.stringify({authority:row.authority,serviceOnboarding:row.serviceOnboarding,renewalSequence:row.renewalSequence||0})),generation:row.generation,purchaseStartedAt,purchaseAttempts:row.purchaseAttempts,reservationId,confirmedAt:new Date().toISOString()};
+  if(!cancellation)currentPolicy(p);
+  return {version:1,kind:'mandatory_reservation_absent',outcome:cancellation?'cancel':'retry',operationId,correlationId,tenantIdentity:row.tenantIdentity,providerAccountHash:binding.providerAccountHash,inputRevision:row.inputRevision,offerDigest:row.offerDigest,authorityDigest:hash(JSON.stringify({authority:row.authority,serviceOnboarding:row.serviceOnboarding,renewalSequence:row.renewalSequence||0})),...(cancellation?{cancellationDigest:hash(JSON.stringify({at:row.cancelRequestedAt,actor:row.cancellationActor}))}:{}),generation:row.generation,purchaseStartedAt,purchaseAttempts:row.purchaseAttempts,reservationId,confirmedAt:new Date().toISOString()};
+}
+// Preserve the ledger and its nonrefundable counters while advancing its ETag.
+// An old reservation PUT prepared before the claim closed must lose this CAS,
+// then reread the cancelled authority before it can reserve or dispatch.
+export async function fenceManagedNumberCancellation(input,expected) {
+  return atomicUpdate(STORE,KEY,async previous=>{
+    const proof=await managedNumberPreDispatchProof(input);
+    if(proof?.outcome!=='cancel'||['operationId','correlationId','tenantIdentity','providerAccountHash','authorityDigest','cancellationDigest','purchaseStartedAt','purchaseAttempts','generation'].some(key=>proof[key]!==expected?.[key]))return {result:null};
+    const saved=ledger(previous,{providerAccountHash:proof.providerAccountHash});
+    if(saved.reservations[proof.reservationId])return {result:null};
+    return {value:saved,result:{...proof,reservationFence:'lifetime_ledger_cas',fencedAt:new Date().toISOString()}};
+  });
 }
