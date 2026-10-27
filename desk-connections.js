@@ -104,7 +104,7 @@
     if(action.kind==='wait')return '<span class="connection-guide-wait">'+esc(action.label||row.nextStep)+'</span>';
     if(seen[key])return '<button type="button" class="connection-guide-link" data-journey-jump="'+esc(seen[key])+'">'+esc(action.kind==='route'?(action.target==='know'?'Use the shared business review above':'Use the shared private practice above'):'Included in the shared service review above')+'</button>';
     if(action.kind==='route'&&['know','test','setup','leads','availability'].includes(action.target)){seen[key]=row.id;return '<button type="button" class="btn-pill btn-pill-blue btn-sm" data-journey-route="'+action.target+'">'+esc(action.label)+'</button>';}
-    var allowed=['review_setup','review_voice','review_sms','start_calendar','show_phone_steps','show_text_steps','show_calendar_steps','check_status'];
+    var allowed=['review_setup','review_voice','review_sms','start_calendar','show_phone_steps','show_text_steps','show_calendar_steps','renew_text_probe','check_status'];
     if(action.kind==='connection'&&allowed.includes(action.target)){seen[key]=row.id;return button(action.target,action.label);}
     return '<span class="connection-guide-wait">'+esc(row.nextStep)+'</span>';
   }
@@ -145,7 +145,7 @@
     var operation = plan.operation, content = '<div class="connection-plan"><div class="connection-plan-heading"><div><h4>Approved setup progress</h4></div><span class="connection-badge">' + esc(operation ? labelState(operation.state) : plan.available ? 'Ready to review' : 'Not available yet') + '</span></div>';
     content += '<p>Your saved review covers only the services you approved. We prepare those connections in the background; other selected services wait for their own available review.</p>';
     if (operation) {
-      content += '<p role="status">' + esc(operation.detail) + '</p><ol class="connection-progress"><li>Business details saved</li><li>' + (d.phoneActivation?.operation?.state === 'number_acquired' ? 'Front desk number reserved' : operation.numberRequested ? 'Number request saved' : 'Number setup awaiting approval') + '</li>';
+      content += '<p role="status">' + esc(operation.detail) + '</p><ol class="connection-progress"><li>Business details saved</li><li>' + (d.phoneActivation?.operation?.state === 'number_acquired' ? 'Front desk number reserved' : operation.numberRequested ? 'Number request saved' : 'Approval saved; number setup queued') + '</li>';
       if ((operation.requestedChannels || plan.acceptedChannels || plan.requestedChannels).includes('voice')) content += '<li>' + esc(d.connections.voice.active ? 'Phone answering verified' : operation.voiceRequested ? 'Phone answering setup requested' : 'Phone answering follows number setup') + '</li>';
       if ((operation.requestedChannels || plan.acceptedChannels || plan.requestedChannels).includes('sms')) content += '<li>' + esc(d.connections.messaging.active ? 'Text messaging verified' : operation.messagingRequested ? 'Text registration requested' : 'Text registration follows number setup') + '</li>';
       content += '</ol>';
@@ -181,7 +181,7 @@
     if ((!guideShown && !coordinated && requested.indexOf('sms') >= 0) || c.messaging.operation) html += '<div class="setup-step" id="textConnectionSteps"><div><h4>Text from your front desk number</h4><p>' + esc(c.messaging.operation ? c.messaging.operation.detail : c.messaging.detail) + '</p>' + (c.messaging.available && c.messaging.operation?.customerAction === 'renew_setup_text' ? button('renew_text_probe','Request a new setup text') : c.messaging.operation?.customerAction === 'reply_to_setup_text' && c.messaging.operation.probe ? '<p>When the setup text arrives at ' + esc(c.messaging.operation.probe.to) + ', reply ' + esc(c.messaging.operation.probe.nonce) + ' to confirm.</p>' : '') + (c.messaging.available && (!coordinated || c.messaging.operation?.customerAction === 'correct_registration') && (!c.messaging.operation || c.messaging.operation.customerAction === 'correct_registration') && d.phoneActivation.operation && d.phoneActivation.operation.state === 'number_acquired' ? button('review_sms', c.messaging.operation ? 'Review registration details' : 'Review texting setup') : '') + (c.messaging.operation && !c.messaging.operation.cancellationRequested && c.messaging.operation.state !== 'cancelled' ? button('cancel_sms', 'Disconnect texting') : '') + '</div></div>';
     if (c.delivery.total || c.calendarDelivery.total) html += '<details><summary>Recent delivery status</summary><p>Saved requests stay in your workspace. Provider acceptance and confirmed delivery are tracked separately.</p><ul>' + c.delivery.jobs.map(function (j) { return deliveryStatus(j,false); }).concat(c.calendarDelivery.jobs.map(function (j) { return deliveryStatus(j,true); })).join('') + '</ul></details>';
     container.innerHTML = html;var controls=$('connectionServiceDetails');if(controls)controls.hidden=!html.trim();
-    connectionRefreshInFlight=false;if(wasRefreshing&&message.textContent==='Checking saved connection status…')message.textContent='Saved connection status updated.';scheduleConnectionRefresh();
+    connectionRefreshInFlight=false;if(wasRefreshing&&message.textContent==='Checking saved connection status…')message.textContent='Saved connection status updated.';if(['Your fresh verification request is saved. Checking its current steps…','We could not confirm the renewal response. Checking your saved texting setup.'].includes(message.textContent))message.textContent='Saved texting status updated. Follow the current verification step above.';scheduleConnectionRefresh();
     var states = $('channelStates');
     if(states&&hasJourney(d)){var statusLabels={limited:'AI allowance reached',ready_for_website:'ready for website setup',active:'verified',connected:'permission saved · ready to sync',needs_action:'setup needed',waiting_platform:'waiting for service',waiting_carrier:'carrier review',working:'setup in progress',paused:'paused',closed:'workspace cancelled',cleanup_pending:'checking cleanup',cleanup_uncertain:'checking cleanup',cancel_pending:'checking cleanup',cancelled:'disconnected'};states.innerHTML=d.setup.connectionJourney.channels.map(function(row){return '<span class="channel-state">'+esc(row.label)+': '+esc(statusLabels[row.status]||labelState(row.status))+'</span>';}).join('');}
     else if(states) states.innerHTML = '<span class="channel-state">Website chat: ' + (d.webAvailable ? 'active' : 'not active') + '</span><span class="channel-state">Phone: ' + (c.voice.active ? 'active' : esc(labelState(c.voice.state))) + '</span><span class="channel-state">Texts: ' + (c.messaging.active ? 'active' : esc(labelState(c.messaging.state))) + '</span><span class="channel-state">Google permission: ' + esc(labelState(c.calendar.status)) + '</span>' + (c.calendar.connected ? '<span class="channel-state">Calendar delivery: ' + (c.calendarDelivery.enabled ? 'ready to sync' : 'waiting for service') + '</span>' : '');
@@ -288,6 +288,7 @@
         savedSetupReadback.confirmed = true; try { await rememberApproval(); } catch (error) { /* The original submission remains retained. */ }
         clearTimeout(timeout); await readSavedSetup(true); return;
       }
+      if(action==='renew_messaging_probe'){if(result.connections)data.connections=result.connections;if(dialog.open)dialog.close();var next=$('setupGuideContinue');if(next)next.disabled=true;message.textContent='Your fresh verification request is saved. Checking its current steps…';document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
       if(!result.connections){document.dispatchEvent(new CustomEvent('mc:desk-refresh'));if(dialog.open)dialog.close();message.textContent='Your change is saved. Refreshing connection status…';return;}
       if(result.client)data.client=result.client;
       if(result.setup)data.setup=result.setup;
@@ -303,7 +304,8 @@
           clearApproval();
         }
         if (action === 'complete_calendar_connection') { clearCalendarReturn(); if (data) render(data); document.dispatchEvent(new CustomEvent('mc:desk-refresh')); }
-        (dialog.open ? $('connectionDialogMessage') : message).textContent = error.name==='AbortError'?'The request timed out. Your change may be saved; refresh its status before retrying.':error.message;
+        if (action === 'renew_messaging_probe') {if(dialog.open)dialog.close();var next=$('setupGuideContinue');if(next)next.disabled=true;document.dispatchEvent(new CustomEvent('mc:desk-refresh'));}
+        (dialog.open ? $('connectionDialogMessage') : message).textContent = action==='renew_messaging_probe'&&(!response||response.ok)?'We could not confirm the renewal response. Checking your saved texting setup.':error.name==='AbortError'?'The request timed out. Your change may be saved; refresh its status before retrying.':error.message;
       }
     }
     finally { clearTimeout(timeout); if(generation===expectedGeneration){busy = false; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = false; });scheduleConnectionRefresh();} }
@@ -405,7 +407,7 @@
   }
   container.addEventListener('focusin',revealFocusedConnection);
   $('connectionJourney').addEventListener('focusin',revealFocusedConnection);
-  document.addEventListener('mc:connection-action',function(event){if(!['review_setup','review_voice','review_sms','start_calendar','show_phone_steps','show_text_steps','show_calendar_steps','check_status'].includes(event.detail?.action))return;var button=document.createElement('button');button.dataset.connection=event.detail.action;handleConnectionClick({target:button});});
+  document.addEventListener('mc:connection-action',function(event){if(!['review_setup','review_voice','review_sms','start_calendar','show_phone_steps','show_text_steps','show_calendar_steps','renew_text_probe','check_status'].includes(event.detail?.action))return;var button=document.createElement('button');button.dataset.connection=event.detail.action;handleConnectionClick({target:button});});
   container.addEventListener('click',handleConnectionClick);
   $('connectionJourney').addEventListener('click',handleConnectionClick);
   dialog.addEventListener('click',handleConnectionClick);
