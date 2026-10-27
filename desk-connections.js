@@ -10,7 +10,7 @@
   var calendarAutoAttempted = false, calendarNotice = hasCalendarReturn && !calendarReturn ? 'This calendar return could not be matched to this workspace. Connect Google Calendar again to continue.' : '';
   if (hasCalendarReturn || query.has('calendar')) { query.delete('calendar'); history.replaceState(null, '', location.pathname + '?' + query.toString() + '#setup'); }
   if (!session || !slug) return;
-  var data, busy = false, generation = 0, savedSetupReadback = null, dialog = document.createElement('dialog'); dialog.id = 'connectionDialog'; dialog.className = 'walkthrough'; dialog.setAttribute('aria-labelledby', 'connectionTitle'); document.body.appendChild(dialog);
+  var data, busy = false, generation = 0, savedSetupReadback = null, mutationReadback = null, dialog = document.createElement('dialog'); dialog.id = 'connectionDialog'; dialog.className = 'walkthrough'; dialog.setAttribute('aria-labelledby', 'connectionTitle'); document.body.appendChild(dialog);
   var $ = function (id) { return document.getElementById(id); }, container = $('serviceConnections'), message = $('serviceConnectionMessage');
   var meta = document.querySelector('meta[name="mc-api-base"]'), base = meta && meta.content ? meta.content.replace(/\/$/, '') : '';
   async function sessionBinding() {
@@ -189,14 +189,14 @@
   var connectionRefreshTimer=null,connectionAutoReads=0,connectionRefreshInFlight=false;
   var connectionRefreshDelays=[15000,30000,60000,60000,60000,60000];
   function connectionRefreshStop(){if(connectionRefreshTimer)clearTimeout(connectionRefreshTimer);connectionRefreshTimer=null;}
-  function connectionHasWork(){if(!data)return false;var states=['queued','running','awaiting_number','waiting_number','connecting','preparing','creating_assistant','importing_number','configuring_routing','uncertain'];return [data.serviceOnboarding?.operation,data.phoneActivation?.operation,data.connections?.voice?.operation,data.connections?.messaging?.operation].some(function(operation){return operation&&states.includes(operation.state);});}
-  function connectionCanRefresh(){return data&&currentSession()&&document.body.dataset.activePage==='setup'&&document.body.dataset.workspaceState==='ready'&&!$('portalContent').hidden&&document.visibilityState==='visible'&&!busy&&!connectionRefreshInFlight&&!document.querySelector('dialog[open]')&&connectionHasWork();}
+  function connectionHasWork(){if(!data)return false;var states=['queued','running','awaiting_number','waiting_number','connecting','preparing','creating_assistant','importing_number','configuring_routing','uncertain'];return [data.serviceOnboarding?.operation,data.phoneActivation?.operation,data.connections?.voice?.operation,data.connections?.messaging?.operation].some(function(operation){return operation&&states.includes(operation.state);})||Object.values(data.leadConnections||{}).some(function(row){return row&&(['awaiting_provider','preparing','configuring','setup_unconfirmed','waiting_platform'].includes(row.state)||row.setupRequest?.state==='waiting_platform');});}
+  function connectionCanRefresh(){var modal=document.querySelector('dialog[open]'),waitingLead=modal?.id==='leadSourceDialog'&&modal.dataset.connectorStage==='waiting'&&modal.getAttribute('aria-busy')!=='true';return data&&currentSession()&&document.body.dataset.activePage==='setup'&&document.body.dataset.workspaceState==='ready'&&!$('portalContent').hidden&&document.visibilityState==='visible'&&!busy&&!connectionRefreshInFlight&&(!modal||waitingLead)&&connectionHasWork();}
   function scheduleConnectionRefresh(){connectionRefreshStop();var status=$('connectionRefreshStatus');if(status)status.textContent=connectionAutoReads>=6?'Automatic status checks paused. You can check saved status again below.':connectionHasWork()?'Progress updates while setup is running. The background setup continues if you leave this page.':'Check saved setup progress at any time.';if(connectionAutoReads>=6||!connectionCanRefresh())return;var expectedGeneration=generation;connectionRefreshTimer=setTimeout(function(){connectionRefreshTimer=null;if(expectedGeneration!==generation||!connectionCanRefresh())return;connectionAutoReads++;connectionRefreshInFlight=true;document.querySelectorAll('[data-connection="check_status"]').forEach(function(button){button.disabled=true;});document.dispatchEvent(new CustomEvent('mc:desk-refresh'));},connectionRefreshDelays[connectionAutoReads]);}
   document.addEventListener('visibilitychange',scheduleConnectionRefresh);window.addEventListener('hashchange',scheduleConnectionRefresh);document.addEventListener('close',scheduleConnectionRefresh,true);
-  new MutationObserver(scheduleConnectionRefresh).observe(document.body,{attributes:true,attributeFilter:['data-active-page','data-workspace-state']});
+  var connectionRefreshObserver=new MutationObserver(scheduleConnectionRefresh);connectionRefreshObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['data-active-page','data-workspace-state','open','data-connector-stage','aria-busy']});
   document.addEventListener('mc:desk', function (event) { render(event.detail); resumeApproval(); if (calendarNotice) { message.textContent = calendarNotice; calendarNotice = ''; } continueCalendarReturn(event.detail); });
-  $('deskSignOut').addEventListener('click', function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; clearApproval(); if (dialog.open) dialog.close(); dialog.innerHTML = ''; container.innerHTML = ''; });
-  document.addEventListener('mc:session-expired',function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; data = null; calendarReturn = null; clearApproval(); if (dialog.open) dialog.close(); dialog.innerHTML = ''; });
+  $('deskSignOut').addEventListener('click', function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; mutationReadback=null; data = null; calendarReturn = null; clearApproval(); if (dialog.open) dialog.close(); dialog.innerHTML = ''; container.innerHTML = ''; });
+  document.addEventListener('mc:session-expired',function () { generation++; connectionRefreshStop(); connectionRefreshInFlight=false; busy=false; mutationReadback=null; data = null; calendarReturn = null; clearApproval(); if (dialog.open) dialog.close(); dialog.innerHTML = ''; });
   function review(title, content, submitLabel, onSubmit) {
     if (savedSetupReadback) { showSavedSetupReadback(savedSetupReadback.confirmed ? 'Your approval is saved. Check its current progress before making another setup change.' : 'Check whether your earlier request was saved before submitting another approval.'); return; }
     dialog.innerHTML = '<form id="connectionForm"><h2 id="connectionTitle">' + esc(title) + '</h2>' + content + '<p id="connectionDialogMessage" role="status" aria-live="polite"></p><div class="walkthrough-actions"><button type="submit" class="btn-pill btn-pill-blue btn-sm">' + esc(submitLabel) + '</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="connectionBack">Back</button></div></form>';
@@ -257,8 +257,49 @@
       if (held.generation === generation && currentSession()) { busy = false; dialog.querySelectorAll('button').forEach(function (button) { button.disabled = false; }); scheduleConnectionRefresh(); document.dispatchEvent(new CustomEvent('mc:guide-state-change')); }
     }
   }
+  function mutationReadbackNotice(state, text) {
+    message.textContent=text;message.hidden=state!=='complete';
+    document.dispatchEvent(new CustomEvent('mc:connection-readback', { detail: { state: state, message: text } }));
+  }
+  async function readMutationStatus(alreadyBusy) {
+    var held=mutationReadback;
+    if(!held||busy&&alreadyBusy!==true||held.generation!==generation||!currentSession())return;
+    busy=true;connectionRefreshStop();
+    mutationReadbackNotice('checking','Your change is saved. Checking the latest connection status…');
+    if(dialog.open)dialog.close();
+    var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);
+    try {
+      var response=await fetch(base+'/api/client?c='+encodeURIComponent(slug),{headers:{Authorization:'Bearer '+session},cache:'no-store',signal:controller.signal});
+      if(held!==mutationReadback||held.generation!==generation||!currentSession())return;
+      if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}
+      var latest=await response.json();
+      if(held!==mutationReadback||held.generation!==generation||!currentSession())return;
+      if(!response.ok||latest.error||latest.ok===false||latest.client?.slug!==slug||!latest.setup?.connectionJourney)throw new Error('Latest connection status is unavailable.');
+      await new Promise(function(resolve,reject){
+        var timer=setTimeout(function(){finish(new Error('Updated status could not be displayed.'));},5000);
+        function finish(error){clearTimeout(timer);document.removeEventListener('mc:desk',observed);error?reject(error):resolve();}
+        function observed(event){
+          if(held!==mutationReadback||held.generation!==generation||!currentSession())return finish(new Error('Workspace session changed.'));
+          var shown=event.detail;
+          if(shown?.client?.slug===slug&&shown.setup?.connectionJourney&&shown.configurationRevision===latest.configurationRevision&&shown.editRevision===latest.editRevision)finish();
+        }
+        document.addEventListener('mc:desk',observed);
+        document.dispatchEvent(new CustomEvent('mc:desk-snapshot',{detail:{snapshot:latest,session:session}}));
+      });
+      if(held!==mutationReadback||held.generation!==generation||!currentSession())return;
+      mutationReadback=null;mutationReadbackNotice('complete','Connection status updated.');
+      if(held.serviceReturn)document.dispatchEvent(new CustomEvent('mc:connector-return',{detail:{service:held.serviceReturn}}));
+      message.textContent=held.successMessage;
+    } catch(error) {
+      if(held===mutationReadback&&held.generation===generation&&currentSession())mutationReadbackNotice('failed','Your change is saved, but the updated status could not be checked. Check status again; your change will not be submitted again.');
+    } finally {
+      clearTimeout(timeout);
+      if(held.generation===generation&&currentSession()){busy=false;scheduleConnectionRefresh();}
+    }
+  }
+  document.addEventListener('mc:connection-readback-retry',function(){readMutationStatus();});
   async function request(action, fields) {
-    if (busy || !data) return; if (savedSetupReadback) { readSavedSetup(); return; } busy = true; var expectedGeneration = generation, approvalDispatched = false;
+    if (busy || !data) return; if (mutationReadback) { readMutationStatus(); return; } if (savedSetupReadback) { readSavedSetup(); return; } busy = true; var expectedGeneration = generation, approvalDispatched = false;
     var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},20000);
     message.textContent = action === 'complete_calendar_connection' ? (fields.error ? 'Confirming your calendar choice…' : 'Connecting your Google Calendar…') : 'Saving your connection…'; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     try {
@@ -288,15 +329,8 @@
         savedSetupReadback.confirmed = true; try { await rememberApproval(); } catch (error) { /* The original submission remains retained. */ }
         clearTimeout(timeout); await readSavedSetup(true); return;
       }
-      if(action==='renew_messaging_probe'){if(result.connections)data.connections=result.connections;if(dialog.open)dialog.close();var next=$('setupGuideContinue');if(next)next.disabled=true;message.textContent='Your fresh verification request is saved. Checking its current steps…';document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
-      if(!result.connections){document.dispatchEvent(new CustomEvent('mc:desk-refresh'));if(dialog.open)dialog.close();message.textContent='Your change is saved. Refreshing connection status…';return;}
-      if(result.client)data.client=result.client;
-      if(result.setup)data.setup=result.setup;
-      if(result.serviceIntake)data.serviceIntake=result.serviceIntake;
-      if(result.serviceOnboarding)data.serviceOnboarding=result.serviceOnboarding;
-      if(result.phoneActivation)data.phoneActivation=result.phoneActivation;
-      if (dialog.open) dialog.close(); data.connections = result.connections; render(data);
-      message.textContent = action === 'complete_calendar_connection' ? result.result?.denied ? 'Calendar access was not granted. Your existing settings are unchanged.' : result.connections.calendar.connected ? 'Google Calendar is connected. ' + (result.connections.calendar.detail || 'Check each visit’s delivery status above.') : 'Your calendar status is saved. Check its next step above.' : 'Your change is saved. Its status above shows what happens next.';
+      mutationReadback={generation:expectedGeneration,serviceReturn:action==='complete_calendar_connection'?'calendar':null,successMessage:action==='complete_calendar_connection'?result.result?.denied?'Calendar access was not granted. Your existing settings are unchanged.':result.connections?.calendar?.connected?'Google account access is saved. Next, check a saved visit’s Calendar delivery.':'Your calendar status is saved. Check its next step above.':'Your change is saved. Its current status is shown above.'};
+      clearTimeout(timeout);await readMutationStatus(true);
     } catch (error) {
       if (expectedGeneration === generation) {
         if (action === 'request_service_onboarding' && savedSetupReadback) {

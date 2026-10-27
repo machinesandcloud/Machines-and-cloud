@@ -41,7 +41,7 @@
     if(data&&(snapshot.configurationRevision!==data.configurationRevision||snapshot.editRevision!==data.editRevision)){load(null,{soft:true});return;}
     load(snapshot,{soft:true});
   });
-  document.addEventListener('mc:desk-route',function(event){if(!leaving && pageCopy[event.detail?.tab])routeTo(event.detail.tab);});
+  document.addEventListener('mc:desk-route',function(event){if(!leaving && pageCopy[event.detail?.tab])routeTo(event.detail.tab,event.detail.connectionHash);});
   async function apiRequest(method, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
@@ -249,17 +249,17 @@
   }
   $('homeActivityDetails').querySelector('summary').addEventListener('click',function(){homeActivityChosen=true;});
   function syncNextActionVisibility() { var guide = $('workspaceGuide'); guide.hidden = guide.dataset.needed !== 'true' || document.body.dataset.activePage !== 'today'; }
-  if (location.hash && document.getElementById('p-' + location.hash.slice(1))) showTab(location.hash.slice(1));
+  if (location.hash && document.getElementById('p-' + location.hash.slice(1).split('/')[0])) showTab(location.hash.slice(1).split('/')[0]);
   else showTab('today');
   document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { routeTo(b.dataset.t); }); });
   document.querySelectorAll('[data-workspace-route]').forEach(function (b) { b.addEventListener('click', function () { routeTo(b.dataset.workspaceRoute); }); });
-  window.addEventListener('hashchange', function () { if (!leaving && pageCopy[location.hash.slice(1)]) routeTo(location.hash.slice(1)); });
-  function routeTo(tab) {
+  window.addEventListener('hashchange', function () { var tab=location.hash.slice(1).split('/')[0];if(!leaving&&pageCopy[tab])routeTo(tab,location.hash); });
+  function routeTo(tab,connectionHash) {
     if (!pageCopy[tab] || leaving) return;
     var previous=document.body.dataset.activePage;
     window.__tabPicked = true; if (tab === 'test') $('tabTest').style.display = '';
     showTab(tab); var pane = $('p-' + tab); if (!pane) return;
-    history.replaceState(null, '', location.pathname + location.search + '#' + tab);
+    history.replaceState(history.state, '', location.pathname + location.search + (typeof connectionHash==='string'&&/^#setup\/(?:web|voice|sms|calendar|thumbtack|angi)\/[a-z0-9_-]+$/.test(connectionHash)?connectionHash:'#' + tab));
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
     pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
     if(tab==='leads'&&previous!==tab&&data){var readSequence=loadSequence;queueMicrotask(function(){if(!leaving&&data&&document.body.dataset.activePage==='leads'&&loadSequence===readSequence)load(null,{soft:true});});}

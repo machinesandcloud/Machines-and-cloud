@@ -4,6 +4,7 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { transform } from 'esbuild';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = resolve(root, 'dist'), marker = '.mc-static-output';
@@ -35,6 +36,11 @@ function assets(relative) {
   }
 }
 assets('assets');
+const stylesheets = Object.keys(manifest).filter(name => name.endsWith('.css'));
+for (const name of stylesheets) {
+  const result = await transform(readFileSync(resolve(output, name), 'utf8'), { loader: 'css', sourcefile: name, logLevel: 'silent' });
+  if (result.warnings.length) throw new Error('Invalid stylesheet ' + name + ': ' + result.warnings.map(item => item.text).join('; '));
+}
 for (const name of names) if (!manifest[name]) throw new Error('Missing required public file: ' + name);
 for (const name of ['index.html', 'onboard.html', 'desk.html', 'privacy-policy.html', 'sms-terms.html', '404.html']) if (!manifest[name]) throw new Error('Missing required public page: ' + name);
 // Fail if a local HTML dependency was omitted from the public package. Routes/anchors are not files.
@@ -49,6 +55,6 @@ for (const name of Object.keys(manifest).filter(name => name.endsWith('.html')))
 for (const forbidden of ['product', 'scratchpad', 'scripts', 'netlify', 'node_modules', '.env', '.env.example', 'package.json', 'CLAUDE.md', 'OPERATIONS.md']) {
   if (existsSync(resolve(output, forbidden))) throw new Error('Internal file in public output: ' + forbidden);
 }
-const report = { at: new Date().toISOString(), output: 'dist', html: Object.keys(manifest).filter(name => name.endsWith('.html')).length, files: Object.keys(manifest).length, sourceAndOutputHashes: manifest, internalDirectoriesAbsent: true, outboundRequests: 0 };
+const report = { at: new Date().toISOString(), output: 'dist', html: Object.keys(manifest).filter(name => name.endsWith('.html')).length, files: Object.keys(manifest).length, stylesheetsParsed: stylesheets.length, sourceAndOutputHashes: manifest, internalDirectoriesAbsent: true, outboundRequests: 0 };
 if (existsSync(resolve(root, 'scratchpad'))) writeFileSync(resolve(root, 'scratchpad/public-build-manifest.json'), JSON.stringify(report, null, 2) + '\n');
-console.log(JSON.stringify({ ok: true, output: 'dist', html: report.html, files: report.files, internalDirectoriesAbsent: true }));
+console.log(JSON.stringify({ ok: true, output: 'dist', html: report.html, files: report.files, stylesheetsParsed: report.stylesheetsParsed, internalDirectoriesAbsent: true }));
