@@ -86,6 +86,19 @@ async function updateWorkspace(c, body, ownsCurrent) {
   return json({ ok: true, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), editRevision: workspaceEditRevision(result.client) }, 200, { "Cache-Control": "no-store" });
 }
 
+// Mutation readbacks use the same full service facts as the owner view. A save
+// must not replace another connector's earned state with a partial projection.
+async function currentConnectionSnapshot(req,client) {
+  client=await assertCurrentWorkspace(client);
+  const [connections,plan,leads,allowance,preparation]=await Promise.all([serviceConnections(client),serviceOnboardingStatus(client),leadConnectionsView(client),getAIAllowance(client),connectionPreparationView(client)]);
+  const [installation,intake]=await Promise.all([websiteInstallationView(client,allowance),serviceIntakeView(client,connections)]);
+  const [latest,active]=await Promise.all([strictRead('clients',client.slug),getAccessSession(req)]);
+  if(!active||normalizeAccountEmail(active.email)!==normalizeAccountEmail(client.owner?.email))throw new LeadConnectionError('verification_required','Sign in again to read your saved connection status.',401);
+  if(!latest||workspaceTenant(latest)!==workspaceTenant(client)||!isSupportedSelfServiceClient(latest))throw new LeadConnectionError('forbidden','This connection belongs to another workspace.',403);
+  if(configurationRevision(latest)!==configurationRevision(client)||workspaceEditRevision(latest)!==workspaceEditRevision(client)||serviceIntakeRevision(latest)!==serviceIntakeRevision(client))throw new LeadConnectionError('setup_changed','Saved setup changed while its status was read. Check the latest saved details before continuing.');
+  return {client:ownerView(client),setup:{...serviceSetupView(client,connections,plan,installation,leads,intake),connectionPreparation:preparation},connections,leadConnections:leads,websiteInstallation:installation,serviceIntake:intake,serviceOnboarding:plan,configurationRevision:configurationRevision(client),editRevision:workspaceEditRevision(client)};
+}
+
 export default async (req) => {
   let out;
   try { out = await handle(req); } catch(error) { if(error instanceof ServiceIntakeError)out=json({error:error.code,message:error.message,...(error.fieldErrors?{fieldErrors:error.fieldErrors}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConnectionPreparationError)out=json({error:error.code,message:error.message,...(error.field?{field:error.field}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof SupportReportError)out=json({error:error.code,message:error.message,field:error.field,...(Object.hasOwn(error,'supportReport')?{supportReport:error.supportReport}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
@@ -149,7 +162,7 @@ async function handle(req) {
     if(!active||normalizeAccountEmail(active.email)!==normalizeAccountEmail(c.owner?.email))return json({error:'verification_required'},401,{'Cache-Control':'no-store'});
     if(!current||workspaceTenant(current)!==workspaceTenant(c)||!isSupportedSelfServiceClient(current)||normalizeAccountEmail(current.owner?.email)!==normalizeAccountEmail(active.email))return json({error:'forbidden'},403,{'Cache-Control':'no-store'});
     if(configurationRevision(current)!==revision||workspaceEditRevision(current)!==editRevision||serviceIntakeRevision(current)!==intakeRevision)return json({error:'setup_changed',message:'Setup changed while it was being read. Read the current setup again.'},409,{'Cache-Control':'no-store'});
-    const setup=serviceSetupView(c,connections,plan,installation,leads);
+    const setup=serviceSetupView(c,connections,plan,installation,leads,serviceIntake);
     return json({ok:true,client:{slug:c.slug},setup:{channels:setup.channels,reviewRequirements:setup.reviewRequirements,connectionJourney:setup.connectionJourney,connectionPreparation:preparation},connections,websiteInstallation:installation,serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
   }
 
@@ -202,9 +215,10 @@ async function handle(req) {
     const serviceOnboarding=selfService?await serviceOnboardingStatus(c):null;
     const leadConnections=selfService?await leadConnectionsView(c):null;
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
+    const serviceIntake=selfService?await serviceIntakeView(c,connections):null;
     const supportReports=selfService?supportReportViews(c):[];
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake:await serviceIntakeView(c,connections), operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
       conversations: convs.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).map(v=>{
         const supportReport=selfService?supportReports.find(row=>row.channel===v.channel&&row.contact===v.contact)||null:null;
         return {channel:v.channel,contact:v.contact,updatedAt:v.updatedAt,flag:supportReport?(supportReport.status==='resolved'?null:{at:supportReport.reportedAt,note:supportReport.note,by:'owner',supportReportId:supportReport.id}):v.flag||null,...(selfService?{supportReport}:{}),...(selfService&&v.channel==='web'?{reference:conversationReference(c,v.channel,v.contact),retainedMessages:v.history?.total??v.messages.length,historyComplete:v.history?.complete===true}:{}),messages:v.messages.slice(-12)};
@@ -275,8 +289,8 @@ async function handle(req) {
     if(['save_service_intake','apply_service_intake'].includes(b?.action)) {
       if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
       if(JSON.stringify(b).length>12000)return json({error:'invalid_intake'},413);
-      const result=await changeServiceIntake(c,session,b),updated=result.client,connections=await serviceConnections(updated),plan=await serviceOnboardingStatus(updated);
-      return json({ok:true,intake:result.intake,serviceIntake:await serviceIntakeView(updated,connections),client:ownerView(updated),setup:serviceSetupView(updated,connections,plan),connections,serviceOnboarding:plan,configurationRevision:configurationRevision(updated),editRevision:workspaceEditRevision(updated)},200,{'Cache-Control':'no-store'});
+      const result=await changeServiceIntake(c,session,b),updated=result.client;
+      return json({ok:true,intake:result.intake,...await currentConnectionSnapshot(req,updated)},200,{'Cache-Control':'no-store'});
     }
     if(b?.action==='prepare_connections') {
       if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
@@ -286,7 +300,7 @@ async function handle(req) {
     }
     if(b?.action==='report_conversation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await reportConversation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='platform_automation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const result=await changePlatformAutomation(c,session,b);return json({...result,leadConnections:await leadConnectionsView(c),...(['takeover','resume'].includes(b.operation)?await readRequestFollowthrough(c,session,b.requestId):{})},200,{'Cache-Control':'no-store'});}
-    if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);if(['prepare','rotate'].includes(b.operation))await fenceConnectionPreparation(c,session,'lead_platform');return json(await changeLeadConnection(c,session,b),200,{'Cache-Control':'no-store'});}
+    if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);if(['prepare','rotate'].includes(b.operation))await fenceConnectionPreparation(c,session,'lead_platform');const result=await changeLeadConnection(c,session,b);return json({...result,...await currentConnectionSnapshot(req,c)},200,{'Cache-Control':'no-store'});}
     if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business','send_platform_reply'].includes(b?.action)){
       if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);
       if(['start_thumbtack_connection','continue_thumbtack_connection','select_thumbtack_business'].includes(b.action))await fenceConnectionPreparation(c,session,'lead_platform');

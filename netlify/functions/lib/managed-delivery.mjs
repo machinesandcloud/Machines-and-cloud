@@ -13,6 +13,7 @@ const hash = s => createHash("sha256").update(s).digest("hex");
 const stamp = () => new Date().toISOString();
 const STORE = "managed_deliveries";
 const INDEX = "managed_delivery_pending";
+const messageId = (c,channel,eventId) => `${c.slug}/${hash(`${deliveryTenant(c)}:${channel}:${eventId}`)}`;
 const canonical = value => value && typeof value === "object" ? Array.isArray(value) ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key => [key,canonical(value[key])])) : value;
 export const managedDeliveryEnabled = () => process.env.SERVICE_DELIVERY_ENABLED === "true" && (process.env.SERVICE_WORKER_KEY || "").length>=32;
 // A deployed internal AI proof also narrows this worker, before discovery or
@@ -68,7 +69,7 @@ export async function queueManagedMessage(c, { eventId, channel, purpose, to, bo
   await currentClient(c);
   if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe", "followup_consent_ask", "quote_followup", "request_followup"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
   if (channel === "email" && !["owner_booking", "owner_lead"].includes(purpose)) throw new Error("Unsupported email purpose");
-  const id = `${c.slug}/${hash(`${deliveryTenant(c)}:${channel}:${eventId}`)}`;
+  const id = messageId(c,channel,eventId);
   const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}) }, digest = hash(JSON.stringify(canonical(payload)));
   const identity = hash(JSON.stringify(canonical({ ...payload, body: null })));
   const previous=await strictRead(STORE,id);
@@ -133,6 +134,14 @@ function inQuietHours() {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(new Date());
   const hour = Number(parts.find(x => x.type === "hour").value), sunday = parts.find(x => x.type === "weekday").value === "Sun";
   return hour < (sunday ? 12 : 9) || hour >= 21;
+}
+function nextSendingWindow() {
+  if(!inQuietHours())return null;
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'numeric',hourCycle:'h23'}).formatToParts(new Date()).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+  let day=`${parts.year}-${parts.month}-${parts.day}`;
+  if(Number(parts.hour)>=21)day=new Date(Date.parse(day+'T12:00:00Z')+86400000).toISOString().slice(0,10);
+  const sunday=new Date(day+'T12:00:00Z').getUTCDay()===0;
+  return new Date(arrivalInstant(day,sunday?'12 to 1':'9 to 10')).toISOString();
 }
 async function senderFor(c) { const { messagingSender } = await import("./messaging-activation.mjs"); return messagingSender(c); }
 async function probeFor(c, job) {
@@ -320,11 +329,26 @@ export async function recordManagedSMSReceipt(id, fields) {
   if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt,senderNumber:job.from,messagingServiceSid:job.serviceSid});}
   return true;
 }
-export async function managedDeliveryView(c) {
+// Read the exact current probe intent, including when it is outside the recent
+// jobs page. No nonce, message body, recipient or provider ID enters this DTO.
+async function activationProbeView(c,expected) {
+  if(!expected||expected.state!=='awaiting_test'||expected.customerAction!=='reply_to_setup_text')return null;
+  const {pendingMessagingProbe}=await import('./messaging-activation.mjs'),probe=await pendingMessagingProbe(c);
+  if(!probe||probe.operationId!==expected.id||probe.nonce!==expected.probe?.nonce||probe.to!==expected.probe?.to||probe.expiresAt!==expected.probe?.expiresAt)return null;
+  const id=messageId(c,'sms',`probe:${hash(probe.operationId)}:${probe.nonce}`),row=await strictRead(STORE,id);
+  const matches=row&&row.id===id&&row.slug===c.slug&&row.tenant===deliveryTenant(c)&&row.channel==='sms'&&row.purpose==='activation_probe'&&row.probe?.operationId===probe.operationId&&row.probe?.nonce===probe.nonce&&row.probe?.expiresAt===probe.expiresAt&&row.to===probe.to&&row.body===probe.body;
+  const observed=at=>typeof at==='string'&&Number.isFinite(Date.parse(at))&&Date.parse(at)<=Date.now();
+  const acceptedAt=matches&&observed(row.acceptedAt)?row.acceptedAt:matches&&observed(row.receiptVerifiedAt)?row.receiptVerifiedAt:null;
+  const outboundAccepted=!!(matches&&['accepted','delivered'].includes(row.state)&&/^SM[a-f0-9]{32}$/i.test(row.providerId||'')&&row.from===probe.from&&row.serviceSid===probe.serviceSid&&acceptedAt&&observed(row.attemptStartedAt)&&Date.parse(acceptedAt)>=Date.parse(row.attemptStartedAt));
+  const current=await pendingMessagingProbe(c);
+  if(!current||current.operationId!==probe.operationId||current.nonce!==probe.nonce||current.to!==probe.to||current.body!==probe.body||current.expiresAt!==probe.expiresAt)return null;
+  return {operationId:probe.operationId,jobId:matches?id:null,state:matches?row.state:row?'unavailable':'pending_queue',reasonCode:matches?row.reasonCode||null:row?'setup_text_identity_mismatch':null,attempts:matches&&Number.isSafeInteger(row.attempts)?row.attempts:0,queuedAt:matches&&observed(row.createdAt)?row.createdAt:null,updatedAt:matches&&observed(row.updatedAt)?row.updatedAt:null,acceptedAt:outboundAccepted?acceptedAt:null,receiptVerifiedAt:matches&&observed(row.receiptVerifiedAt)?row.receiptVerifiedAt:null,deliveredAt:matches&&row.state==='delivered'&&observed(row.deliveredAt)?row.deliveredAt:null,outboundAccepted,nextDeliveryAt:!outboundAccepted&&(!row||matches&&row.state==='waiting_hours')?nextSendingWindow():null,timeZone:'America/Chicago'};
+}
+export async function managedDeliveryView(c,{activationProbe=null}={}) {
   await currentClient(c);
   const rows = (await Promise.all((await list(STORE, `${c.slug}/`)).map(key => strictRead(STORE, key)))).filter(row => row?.tenant === deliveryTenant(c));
   const counts = {}; for (const row of rows) counts[row.state] = (counts[row.state] || 0) + 1;
-  return { enabled: managedDeliveryEnabled(), total: rows.length, counts, jobs: rows.sort((a,b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0,30).map(row => ({ id: row.id, channel: row.channel, purpose: row.purpose, state: row.state, reasonCode: row.reasonCode || null, detail:row.detail || null, updatedAt: row.updatedAt, deliveredAt: row.deliveredAt || null })) };
+  return { enabled: managedDeliveryEnabled(), total: rows.length, counts, jobs: rows.sort((a,b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0,30).map(row => ({ id: row.id, channel: row.channel, purpose: row.purpose, state: row.state, reasonCode: row.reasonCode || null, detail:row.detail || null, updatedAt: row.updatedAt, deliveredAt: row.deliveredAt || null })),...(activationProbe?{activationProbe:await activationProbeView(c,activationProbe)}:{}) };
 }
 async function fairPage(kind, cursorKey, limit, prefix = '') {
   const keys = await list(kind, prefix), cursor = await strictRead("managed_delivery_cursors", cursorKey);

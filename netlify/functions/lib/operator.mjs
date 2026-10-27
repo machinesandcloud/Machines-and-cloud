@@ -10,6 +10,7 @@ import { serviceConnections, serviceSetupView } from './service-connections.mjs'
 import { serviceOnboardingStatus } from './service-onboarding.mjs';
 import { websiteInstallationView } from './website-installation.mjs';
 import { leadConnectionsView } from './lead-connections.mjs';
+import { serviceIntakeView } from './service-intake.mjs';
 import { deliveryTenant } from './managed-consent.mjs';
 import { managedSMSConversations } from './managed-history.mjs';
 import { queueServiceReconciliation, runServiceReconciliation, serviceReconciliationView } from './service-reconciliation.mjs';
@@ -72,7 +73,7 @@ const sanitizedActivity = row => ({ at: row.at || null, type: trim(row.type || r
 export async function customerView(c, detail = false) {
   const selfService = isSelfServiceClient(c); let setup = selfService ? setupReadiness(c) : null;
   const [operations, aiAllowance, phoneActivation, services, serviceOnboarding, leadConnections] = await Promise.all([selfService ? listWorkspaceOperations(c) : [], selfService ? getAIAllowance(c) : null, selfService ? phoneActivationStatus(c) : null, selfService ? serviceConnections(c) : null, selfService ? serviceOnboardingStatus(c) : null, selfService ? leadConnectionsView(c) : null]);
-  if (services) setup=serviceSetupView(c,services,serviceOnboarding,await websiteInstallationView(c,aiAllowance),leadConnections);
+  if (services) setup=serviceSetupView(c,services,serviceOnboarding,await websiteInstallationView(c,aiAllowance),leadConnections,await serviceIntakeView(c,services));
   const issues = [];
   if(selfService)issues.push(...supportReportIssues(c));
   if (c.build?.status === 'failed') issues.push({ id: 'draft', severity: 'high', title: 'Desk draft needs repair', detail: 'Saved customer answers are retained. Queue a workspace rebuild.' });
@@ -88,7 +89,8 @@ export async function customerView(c, detail = false) {
   }
   const serviceChecks = selfService ? await serviceReconciliationView(c) : [];
   if (serviceChecks[0]?.state === 'needs_attention') issues.push({id:'service_checks',severity:'high',title:'Service checks could not be dispatched',detail:serviceChecks[0].detail});
-  const connections = setup?.connectionJourney?.channels || [],leadSources=setup?.connectionJourney?.leadSources || [];
+  const connections = setup?.connectionJourney?.channels || [],leadSources=setup?.connectionJourney?.leadSources || [],discovery=setup?.connectionJourney?.discovery||[];
+  if(!['paused','cancelled','archived'].includes(c.status))for(const source of discovery.filter(row=>row.setupRequest))issues.push({id:'lead:'+source.id+':setup',severity:'high',title:source.label+' setup requested',detail:source.nextStep+' No provider connection or delivery is confirmed.',requestId:source.setupRequest.id,requestedAt:source.setupRequest.requestedAt,responsible:'machines_and_cloud'});
   if(!['paused','cancelled','archived'].includes(c.status))for(const connection of connections.filter(row=>row.requested&&row.activation?.blockedBy==='machines_and_cloud'))issues.push({id:'connection:'+connection.id+':platform',severity:'high',title:connection.label+' platform setup needed',detail:connection.nextStep+' '+(connection.setupProgress?.requestSaved?'Preserve and continue the recorded setup operation.':'No provider setup has been requested. Make the current customer approval available after resolving this blocker.'),reasonCode:connection.activation.reasonCode,responsible:'machines_and_cloud',setupProgress:connection.setupProgress});
   const native=leadConnections?.thumbtack;
   if(!['paused','cancelled','archived'].includes(c.status)&&native?.setupRequest)issues.push({id:'lead:thumbtack:setup',severity:'high',title:'Requested Thumbtack setup needs platform access',detail:'The customer’s request is saved. Configure the Machines & Cloud partner connection before requesting their account permission. No provider job has started.',requestId:native.setupRequest.id,requestedAt:native.setupRequest.requestedAt,responsible:'machines_and_cloud'});
