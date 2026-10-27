@@ -506,7 +506,7 @@
   function websiteCheckLink(check){var url=websiteURL(check&&check.url);return url&&url.origin===check.origin&&url.hash==='#mc-website-check='+check.id+'.'+check.challenge?url.href:null;}
   function renderWebsiteInstallation(d){
     if(!d||leaving||!$('websiteInstallCard'))return;var w=d.websiteInstallation,legacy=!d.setup,site=d.client.business.website||'',link=websiteURL(site),root=$('websiteInstallCard');
-    var web=d.setup?.connectionJourney?.channels?.find(function(channel){return channel.id==='web';});if($('websiteSetupDetails'))$('websiteSetupDetails').hidden=!!web&&!web.requested;
+    var web=d.setup?.connectionJourney?.channels?.find(function(channel){return channel.id==='web';});if($('websiteSetupDetails'))$('websiteSetupDetails').hidden=$('connectionsCard')?.classList.contains('has-connector-pages')&&document.body.dataset.connectorFlow==='step'||!!web&&!web.requested&&!web.retained;
     if(!websiteCacheLoaded&&w){websiteCacheLoaded=true;websiteRestore(d);}
     $('websiteInstallSite').replaceChildren();if(link){var a=document.createElement('a');a.href=link.href;a.target='_blank';a.rel='noopener noreferrer';a.textContent=link.href;$('websiteInstallSite').appendChild(a);}else $('websiteInstallSite').textContent=site||'Add your business website';
     if(!websiteDirty&&document.activeElement!==$('websiteInstallWebsite'))$('websiteInstallWebsite').value=site;

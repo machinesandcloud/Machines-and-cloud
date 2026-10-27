@@ -98,12 +98,26 @@
     var intake=data.serviceIntake&&data.serviceIntake[id];
     return !!intake&&!!window.MCServiceIntake&&intake.canSave!==false&&!['cancelled','archived','paused'].includes(data.client.status)&&(['voice','sms'].includes(id)?!intake.complete||id==='voice'&&intake.canApply:id==='web'?!intake.preferences?.builder||!intake.preferences?.installationBy||intake.canApply:!intake.preferences?.accountEmail);
   }
+  function platformHold(row) {
+    if(!row||!['web','voice','sms','calendar'].includes(row.id)||row.verification?.working||['cancelled','archived','paused'].includes(data.client.status)||['closed','cancelled','cancellation_pending','cancel_pending','cleanup_pending','cleanup_uncertain'].includes(row.status))return null;
+    if(row.id==='web'){var website=data.websiteInstallation;return website?.configurationRevision===data.configurationRevision&&website?.originAllowed===true&&website?.observation?.state==='found'&&website?.customerChat?.state==='unavailable'?{saved:true,summary:'Your website installation is confirmed. Customer chat is not active because the AI service is unavailable.'}:null;}
+    var service=data.connections?.[row.id==='sms'?'messaging':row.id],requested=row.setupProgress?.requestSaved===true||row.activation?.requestSaved===true;
+    if(row.id==='calendar'&&service?.connected&&data.connections?.calendarDelivery?.enabled===false)return {saved:true,summary:'Your Google permission is saved. Calendar syncing is not enabled for this workspace. Your saved visits are kept.'};
+    if(requested||service?.operation||row.id==='calendar'&&(service?.connected||service?.reconnectRequired))return null;
+    if(row.id==='calendar'?service?.available!==false:row.activation?.blockedBy!=='machines_and_cloud')return null;
+    var intake=data.serviceIntake?.[row.id],saved=row.id==='calendar'?!!intake?.preferences?.accountEmail:intake?.complete===true;
+    return {saved:saved,summary:row.id==='calendar'?'Google Calendar is not enabled for this workspace. Your account has not been connected.':labels[row.id]+' is not enabled for this workspace, so '+(row.id==='sms'?'registration':'setup')+' has not started.'+(saved?' Your '+(row.id==='voice'?'call-routing preferences':'business details')+' are saved.':'')};
+  }
+  function holdActions() {
+    return '<button type="button" id="setupGuideCheckConnection" class="connection-guide-link"'+(connectionCheck?' disabled':'')+'>'+(connectionCheck?'Checking availability…':'Check availability again')+'</button><a id="connectorHoldSupport" class="btn-pill btn-pill-blue btn-sm" href="mailto:support@machinesandcloud.com">Contact support</a>';
+  }
   function serviceStatus(row) {
     if(['closed','cancelled','archived'].includes(row.status))return 'Disconnected';
     if(['cancellation_pending','cancel_pending','cleanup_pending','cleanup_uncertain'].includes(row.status))return 'Checking cleanup';
     if(row.status==='paused')return 'Paused';
     if(row.status==='not_selected'||!row.requested&&!row.retained)return 'Not selected';
     if(row.verification?.working===true)return 'Delivery verified';
+    if(platformHold(row))return 'Setup needs our help';
     if(needsServiceInformation(row.id))return 'Your details needed';
     if(row.activation?.blockedBy==='machines_and_cloud')return 'Needs our attention';
     if(row.verification?.state==='needs_attention')return 'Check needs attention';
@@ -145,7 +159,7 @@
       if(!result.connections||!result.websiteInstallation||!result.setup.channels)throw new Error('unavailable');
       // Replace server-derived connection facts only. Business fields, private
       // intake drafts and pending owner edits stay under their existing owners.
-      data.connections=result.connections;data.websiteInstallation=result.websiteInstallation;data.setup.channels=result.setup.channels;if(result.setup.reviewRequirements)data.setup.reviewRequirements=result.setup.reviewRequirements;data.setup.connectionJourney=journey;connectionNotices[id]={confirmed:true,working:checked.verification.working===true,error:false,text:'Saved status checked '+checkedTime(checked.verification.checkedAt)+'. '+(checked.verification.working?'Delivery was verified at the time shown above.':checked.verification.summary)};
+      data.connections=result.connections;data.websiteInstallation=result.websiteInstallation;data.setup.channels=result.setup.channels;if(result.setup.reviewRequirements)data.setup.reviewRequirements=result.setup.reviewRequirements;data.setup.connectionJourney=journey;var hold=platformHold(checked);connectionNotices[id]={confirmed:true,working:checked.verification.working===true,error:false,text:hold?'Availability checked '+checkedTime(checked.verification.checkedAt)+'. This connection still needs our attention.':'Saved status checked '+checkedTime(checked.verification.checkedAt)+'. '+(checked.verification.working?'Delivery was verified at the time shown above.':checked.verification.summary)};
       document.dispatchEvent(new CustomEvent('mc:desk-refresh'));
     } catch(error) {if(generation===connectionCheckGeneration&&current())connectionNotices[id]={error:true,text:error.message==='changed'?'Your setup changed while it was checked. Refreshing the latest details; check again before continuing.':'The connection check could not finish. Your setup is kept. Check again to confirm its current status.'};}
     finally {clearTimeout(timeout);if(generation===connectionCheckGeneration){connectionCheck=null;if(current()){render();assistTask();if(selected===id&&!quiet)$('setupGuideCheckConnection')?.focus({preventScroll:true});}}}
@@ -306,6 +320,7 @@
   }
   function renderOverview(items) {
     selected=null;pageScreen='overview';host.dataset.connectorView='overview';var retainedControls=!!(data.connections?.voice?.operation||data.connections?.messaging?.operation||data.connections?.calendar?.connected||data.connections?.calendar?.reconnectRequired||data.serviceOnboarding?.operation),management=$('connectionServiceDetails');if(management){management.hidden=!retainedControls;if(management.querySelector('summary'))management.querySelector('summary').textContent='Connection settings';}
+    var websiteManagement=$('websiteSetupDetails'),websiteRow=items.find(function(row){return row.id==='web';});if(websiteManagement){websiteManagement.hidden=!websiteRow||!websiteRow.requested&&!websiteRow.retained;if(!websiteManagement.dataset.connectorManagement){websiteManagement.dataset.connectorManagement='true';websiteManagement.open=false;var caption=websiteManagement.querySelector('summary span');if(caption)caption.innerHTML='Website chat settings<small>Change your website, get installation code or check setup</small>';}}
     host.innerHTML='<div class="setup-guide-heading"><h3 id="setupGuideTitle" tabindex="-1">Your connections</h3><p class="muted">Choose a service. We’ll walk you through one step at a time.</p></div><nav class="connector-service-list" aria-label="Choose a connection">'+items.map(function(row){return '<button type="button" data-guide-service="'+row.id+'" class="connector-service-choice"><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(labels[row.id])+'</span></span><span class="connector-choice-status">'+esc(serviceStatus(row))+'</span><span aria-hidden="true">→</span></button>';}).join('')+'</nav>';
   }
   function render() {
@@ -330,13 +345,20 @@
     var verified=row.verification?.working===true,closed=['cancelled','archived','paused'].includes(data.client.status),total=steps.length+1,index=nextIndex;
     if(pageScreen==='complete'&&(!verified||!connectionNotices[selected]?.confirmed||!connectionNotices[selected]?.working||connectionNotices[selected]?.error)){pageScreen='connection-check';pageRoute(selected,'connection-check',true);}
     if(!['intro','connection-check','complete','installation-check'].includes(pageScreen)&&!/^details-\d(?:-\d)?$/.test(pageScreen)&&!steps.some(function(step){return step.id===pageScreen;})){pageScreen=canonical.id;pageRoute(selected,pageScreen,true);}
-    if(selected==='web'&&pageScreen==='install'&&!needsServiceInformation('web')&&!websiteInstructionsFinished){pageRoute('web','details-1-0',true);}
+    if(selected==='web'&&!['intro','connection-check','complete','installation-check'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&next.kind==='route'&&next.target==='setup'&&!needsServiceInformation('web')&&!websiteInstructionsFinished&&!platformHold(row)){pageRoute('web','details-1-0',true);}
     var viewedIndex=steps.findIndex(function(item){return item.id===pageScreen;});if(viewedIndex>nextIndex){pageRoute(selected,canonical.id,true);viewedIndex=nextIndex;}
     var step=steps.find(function(item){return item.id===pageScreen;})||canonical;index=viewedIndex>=0?viewedIndex:index;
     if(/^details-\d(?:-\d)?$/.test(pageScreen)&&$('serviceIntakeWorkbench')&&window.MCServiceIntake?.isOpen(selected)){window.MCServiceIntake.mount(host.querySelector('.connector-page'),selected,data);return;}
     guideService=selected;guideStep=step.id;host.dataset.guideCurrentStep=canonical.id;host.dataset.guidePreviewStep=step.id;
     var body='',footer='',back='<button type="button" id="connectorBack" class="btn-pill btn-pill-dark btn-sm">Back</button>',exit='<button type="button" id="connectorSaveExit" class="connection-guide-link">Exit setup</button>';
-    if(pageScreen==='intro') {
+    var hold=platformHold(row);
+    if(hold&&!/^details-/.test(pageScreen)) {
+      body='<h4 id="setupGuideStageTitle" tabindex="-1">Setup needs our help</h4><p class="connector-page-description" id="connectorPlatformHold">'+esc(hold.summary)+'</p>';
+      if(['voice','sms'].includes(selected)&&data.serviceIntake?.[selected]?.canSave!==false)body+='<p><button type="button" id="connectorHoldDetails" class="connection-guide-link">'+(hold.saved?'Review saved details':'Save details for later')+'</button></p>';
+      if(selected==='calendar'&&!row.requested&&!data.connections?.calendar?.connected)body+='<p><button type="button" id="setupGuideChoose" class="connection-guide-link">Save Calendar preference</button></p>';
+      if(connectionNotices[selected])body+='<p id="connectionVerificationNotice" class="connection-verification-notice" role="status" aria-live="polite"'+(connectionNotices[selected].error?' data-error="true"':'')+'>'+esc(connectionNotices[selected].text)+'</p>';
+      footer=holdActions();
+    } else if(pageScreen==='intro') {
       body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(verified?'Your '+labels[selected]+' connection':'Connect '+labels[selected])+'</h4><p class="connector-page-description">'+esc(verified?row.verification.summary:row.guide?.overview||'Use your saved business details and follow each connection step.')+'</p><dl class="connector-intro-summary"><div><dt>Current status</dt><dd>'+esc(serviceStatus(row))+'</dd></div><div><dt>Next</dt><dd>'+esc(verified?'Review connection checks':needsServiceInformation(selected)?'Confirm your connection details':canonical.label)+'</dd></div></dl>';
       footer='<button type="button" id="connectorStart" class="btn-pill btn-pill-blue btn-sm">'+(verified?'View connection checks':row.requested||row.retained?'Continue setup':'Start setup')+'</button>';if(['thumbtack','angi'].includes(selected)&&(data.leadConnections?.[selected]?.generation||data.leadConnections?.[selected]?.setupRequest))footer='<button type="button" id="connectorManageLead" class="connection-guide-link">Manage connection</button>'+footer;
     } else if(pageScreen==='complete') {
@@ -351,8 +373,8 @@
       if(manualCheck){title=selected==='voice'?'Make a test call':'Reply to your setup text';detail=selected==='voice'?'Follow the routing instructions below, then call your front desk number. We check the completed call before confirming this connection.':'Reply to the verification text on your saved mobile. We check the incoming reply before confirming two-way texting.';}
       if(needsServiceInformation(selected)){title='Your '+(selected==='voice'?'call-routing':selected==='sms'?'business registration':'website')+' details';detail='Confirm the details for this connection, then continue to the next step.';}
       body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(title||labels[selected])+'</h4><p class="connector-page-description">'+esc(detail||'Complete this step to continue.')+'</p>';
-      if(waiting)body+='<div class="connector-wait-state" role="status"><span class="connector-wait-dot" aria-hidden="true"></span><span>'+esc(row.responsibility==='carrier'?'Carrier review is in progress. We’ll keep tracking it.':row.responsibility==='customer'?'Complete the action shown here, then check again.':row.setupProgress?.requestSaved?'Machines & Cloud is handling your approved setup. Your progress is kept.':'Machines & Cloud must enable this connection before setup can start.')+'</span></div>'+(row.setupProgress?.nextCheckAt?'<p class="connector-evidence-time">Next scheduled check: '+esc(checkedTime(row.setupProgress.nextCheckAt))+'</p>':'');
-      if(waiting||manualCheck)body+='<p class="muted" id="connectorAutoCheckStatus" role="status" aria-live="polite">'+esc(document.body.dataset.connectionProgressStatus||'Your saved setup is kept. Follow the next step shown.')+'</p>';
+      if(waiting&&row.setupProgress?.nextCheckAt)body+='<p class="connector-evidence-time">Next scheduled check: '+esc(checkedTime(row.setupProgress.nextCheckAt))+'</p>';
+      if(waiting||manualCheck)body+='<p class="muted" id="connectorAutoCheckStatus" role="status" aria-live="polite">'+esc(document.body.dataset.connectionProgressStatus||'Your saved connection details are kept.')+'</p>';
       // Provider instructions appear only on their dedicated current task page.
       var main=closed?'':manualCheck?'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">'+(connectionCheck?'Checking…':selected==='voice'?'Check call result':'Check text reply')+'</button>':verified?'<button type="button" id="connectorCheckPage" class="btn-pill btn-pill-blue btn-sm">Check connection</button>':needsServiceInformation(selected)?'<button type="button" id="setupGuideDetails" class="btn-pill btn-pill-blue btn-sm">Continue</button>':row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected)?'<button type="button" id="setupGuideChoose" class="btn-pill btn-pill-blue btn-sm">Connect '+esc(labels[selected])+'</button>':next.kind==='wait'?'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">'+(connectionCheck?'Checking…':'Check progress')+'</button>':'<button type="button" id="setupGuideContinue" class="btn-pill btn-pill-blue btn-sm">'+esc(next.label||'Continue')+'</button>';
       footer=back+exit+main;
@@ -365,12 +387,12 @@
       var original=$('serviceConnections')?.querySelector(next.target==='show_phone_steps'?'#phoneRoutingSteps':'#textConnectionSteps');
       if(original){var instructions=original.cloneNode(true);instructions.removeAttribute('id');instructions.className='connector-focused-instructions';instructions.querySelectorAll('[id]').forEach(function(node){node.removeAttribute('id');});instructions.querySelectorAll('h4,[data-connection="cancel_voice"],[data-connection="cancel_sms"]').forEach(function(node){node.remove();});host.querySelector('.connector-page-body').appendChild(instructions);}
     }
-    if(selected==='web'&&!['intro','connection-check','complete'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&!needsServiceInformation(selected)&&next.kind==='route'&&next.target==='setup'&&websiteTaskCard){host.querySelector('.connector-page-body').appendChild(websiteTaskCard);host.querySelector('.connector-page').classList.add('has-website-task');websiteTaskActive=true;}
+    if(selected==='web'&&!hold&&!['intro','connection-check','complete'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&!needsServiceInformation(selected)&&next.kind==='route'&&next.target==='setup'&&websiteTaskCard){host.querySelector('.connector-page-body').appendChild(websiteTaskCard);host.querySelector('.connector-page').classList.add('has-website-task');websiteTaskActive=true;}
     if(['thumbtack','angi'].includes(selected)&&!['intro','connection-check','complete'].includes(pageScreen)&&next.kind==='lead'&&autoLeadKey!==selected+'/'+pageScreen){autoLeadKey=selected+'/'+pageScreen;queueMicrotask(function(){if(current()&&selected===row.id&&pageScreen===step.id&&!$('leadSourceDialog')?.open)executeAction(row);});}
     if(pageScreen==='connection-check'&&autoCheckKey!==selected){autoCheckKey=selected;queueMicrotask(function(){if(current()&&pageScreen==='connection-check')checkConnection(selected,true);});}
     if(/^details-\d(?:-\d)?$/.test(pageScreen)&&!restoringPage&&window.MCServiceIntake&&!$('serviceIntakeWorkbench')){restoringPage=true;window.MCServiceIntake.open(selected,false,false,Number(pageScreen.split('-')[1]),Number(pageScreen.split('-')[2]||0)).finally(function(){restoringPage=false;});}
   }
-  function goToCurrent(row,replace) { if(!row)return;var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];pageRoute(row.id,row.verification?.working?'connection-check':needsServiceInformation(row.id)?'details-0':step?.id||'connection',replace);autoLeadKey=null;render();focusStage(); }
+  function goToCurrent(row,replace) { if(!row)return;var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];pageRoute(row.id,row.verification?.working?'connection-check':!platformHold(row)&&needsServiceInformation(row.id)?'details-0':step?.id||'connection',replace);autoLeadKey=null;render();focusStage(); }
   function restorePage(){if(!current())return;autoLeadKey=null;autoCheckKey=null;var incoming=routeParts();if(incoming&&['connection-check','complete'].includes(incoming.screen))delete connectionNotices[incoming.service];returnWebsiteTask();document.querySelectorAll('#leadSourceDialog[open],#connectionDialog[open]').forEach(function(dialog){dialog.close();});var route=routeParts();if(window.MCServiceIntake?.isOpen(selected))window.MCServiceIntake.close();endTask();if(route){selected=route.service;pageScreen=route.screen;manualSelection=true;}else{selected=null;pageScreen='overview';manualSelection=false;}render();}
   window.addEventListener('hashchange',function(){if(location.hash==='#setup'||location.hash.startsWith('#setup/'))restorePage();});
   document.addEventListener('mc:connector-intake-step',function(event){if(!current()||event.detail?.service!==selected)return;pageRoute(selected,'details-'+event.detail.step+(event.detail.installStage!=null?'-'+event.detail.installStage:''),restoringPage);});
@@ -390,6 +412,7 @@
     var pageRow=rows().find(function(item){return item.id===selected;});
     if(event.target.closest('#connectorAllServices')||event.target.closest('#connectorSaveExit')){returnWebsiteTask();endTask();pageRoute(null);render();$('setupGuideTitle')?.focus();return;}
     if(event.target.closest('#connectorManageLead')&&['thumbtack','angi'].includes(selected)){document.dispatchEvent(new CustomEvent('mc:lead-source-manage',{detail:{source:selected}}));return;}
+    if(event.target.closest('#connectorHoldDetails')&&platformHold(pageRow)&&window.MCServiceIntake){endTask();pageRoute(selected,'details-0');render();focusStage();return;}
     if(event.target.closest('#connectorStart')||event.target.closest('#connectorResume')){goToCurrent(pageRow);return;}
     if(event.target.closest('#connectorCheckPage')){pageRoute(selected,'connection-check');render();focusStage();return;}
     if(event.target.closest('#connectorFinish')&&pageRow?.verification?.working&&!connectionCheck&&connectionNotices[selected]?.confirmed&&connectionNotices[selected]?.working&&!connectionNotices[selected]?.error){pageRoute(selected,'complete');render();focusStage();return;}

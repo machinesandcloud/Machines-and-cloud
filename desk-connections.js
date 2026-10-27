@@ -200,7 +200,7 @@
   function scheduleConnectionRefresh(){
     connectionRefreshStop();if(!data)return;progressWindow(false);
     var expired=connectionAutoReads>=connectionRefreshDelays.length||Date.now()>=connectionProgressStarted+connectionProgressWindow,working=connectionHasWork();
-    progressStatus(!working?'Your saved setup is kept. Follow the next step shown.':expired?'Automatic updates are paused. Your setup continues in the background. Check progress now, or leave and return later for fresh updates.':connectionProgressFailed?'We couldn’t check the latest progress. Your saved setup stays here; we’ll check again automatically.':'Progress updates automatically while setup runs. You can leave and return.');
+    progressStatus(!working?'Your saved connection details are kept.':expired?'Automatic status updates are paused. Your connection details are kept. Check status now, or leave and return later for fresh updates.':connectionProgressFailed?'We couldn’t check the latest status. Your connection details stay here; we’ll check again automatically.':'Connection status updates automatically while this page is open. You can leave and return.');
     if(expired||!connectionCanRefresh())return;var expectedGeneration=generation,delay=Math.min(connectionRefreshDelays[connectionAutoReads],connectionProgressStarted+connectionProgressWindow-Date.now());
     connectionRefreshTimer=setTimeout(function(){connectionRefreshTimer=null;if(expectedGeneration!==generation||!connectionCanRefresh())return;if(Date.now()>connectionProgressStarted+connectionProgressWindow||connectionAutoReads>=connectionRefreshDelays.length){scheduleConnectionRefresh();return;}readConnectionProgress(true);},Math.max(0,delay));
   }
