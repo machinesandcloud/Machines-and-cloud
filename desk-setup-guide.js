@@ -94,7 +94,6 @@
   function needsServiceInformation(id) {
     if(id==='calendar')return false; // Google selects the actual account during permission review.
     var row=rows().find(function(item){return item.id===id;});
-    if(row?.activation?.blockedBy==='machines_and_cloud')return false;
     var intake=data.serviceIntake&&data.serviceIntake[id];
     return !!intake&&!!window.MCServiceIntake&&intake.canSave!==false&&!['cancelled','archived','paused'].includes(data.client.status)&&(['voice','sms'].includes(id)?!intake.complete||id==='voice'&&intake.canApply:id==='web'?!intake.preferences?.builder||!intake.preferences?.installationBy||intake.canApply:!intake.preferences?.accountEmail);
   }
@@ -103,6 +102,7 @@
     if(row.status==='paused')return 'Paused';
     if(row.status==='not_selected'||!row.requested&&!row.retained)return 'Not selected';
     if(row.verification?.working===true)return 'Delivery verified';
+    if(needsServiceInformation(row.id))return 'Your details needed';
     if(row.activation?.blockedBy==='machines_and_cloud')return 'Needs our attention';
     if(row.verification?.state==='needs_attention')return 'Check needs attention';
     if(needsServiceInformation(row.id))return 'Your next step';
@@ -127,9 +127,9 @@
     var notice=connectionNotices[row.id],pending=connectionCheck&&connectionCheck.service===row.id;
     return '<section class="connection-verification" data-verification-state="'+esc(facts.state)+'" aria-labelledby="connectionVerificationTitle"><div class="connection-verification-heading"><div><h4 id="connectionVerificationTitle">Setup and delivery checks</h4><span class="connection-verification-result">'+esc(facts.label)+'</span><p>'+esc(facts.summary)+'</p></div><button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-dark btn-sm"'+(connectionCheck?' disabled':'')+'>'+(pending?'Checking saved status…':'Check saved status')+'</button></div><ul class="connection-verification-checks">'+facts.checks.map(function(item){var label=item.state==='passed'?'Passed':item.state==='needs_attention'?'Needs attention':'Not confirmed';return '<li data-check-state="'+esc(item.state)+'"><span class="connection-check-indicator" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/>'+(item.state==='passed'?'<path d="m6.5 10 2.3 2.4 4.7-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>':item.state==='needs_attention'?'<path d="M10 6v4.5m0 3v.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>':'<path d="M7 10h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>')+'</svg></span><span>'+esc(item.label)+'</span><small>'+label+'</small></li>';}).join('')+'</ul>'+(facts.evidenceAt?'<p class="connection-verification-evidence">Latest delivery evidence: <time datetime="'+esc(facts.evidenceAt)+'">'+esc(checkedTime(facts.evidenceAt))+'</time></p>':'')+(facts.providerCheckedAt?'<p class="connection-verification-evidence">Provider settings last confirmed: <time datetime="'+esc(facts.providerCheckedAt)+'">'+esc(checkedTime(facts.providerCheckedAt))+'</time></p>':'')+'<p id="connectionVerificationNotice" class="connection-verification-notice" role="status" aria-live="polite"'+(notice&&notice.error?' data-error="true"':'')+'>'+esc(pending?'Reading current setup and delivery records…':notice?notice.text:'Check the saved setup and delivery results here.')+'</p></section>';
   }
-  async function checkConnection() {
+  async function checkConnection(service,quiet) {
     if(!current()||connectionCheck)return;
-    var session=preparationSession(),id=selected,slug=data.client.slug;if(!session)return;
+    var session=preparationSession(),id=typeof service==='string'?service:selected,slug=data.client.slug;if(!session)return;
     var generation=connectionCheckGeneration,revision=data.configurationRevision,edit=data.editRevision,controller=new AbortController();connectionCheck={service:id,controller:controller};render();
     var timeout=setTimeout(function(){controller.abort();},15000);
     try {
@@ -146,14 +146,21 @@
       data.connections=result.connections;data.websiteInstallation=result.websiteInstallation;data.setup.channels=result.setup.channels;if(result.setup.reviewRequirements)data.setup.reviewRequirements=result.setup.reviewRequirements;data.setup.connectionJourney=journey;connectionNotices[id]={error:false,text:'Saved status checked '+checkedTime(checked.verification.checkedAt)+'. '+(checked.verification.working?'Delivery was verified at the time shown above.':checked.verification.summary)};
       document.dispatchEvent(new CustomEvent('mc:desk-refresh'));
     } catch(error) {if(generation===connectionCheckGeneration&&current())connectionNotices[id]={error:true,text:error.message==='changed'?'Your setup changed while it was checked. Refreshing the latest details; check again before continuing.':'The connection check could not finish. Your setup is kept. Check again to confirm its current status.'};}
-    finally {clearTimeout(timeout);if(generation===connectionCheckGeneration){connectionCheck=null;if(current()){render();assistTask();if(selected===id)$('setupGuideCheckConnection')?.focus({preventScroll:true});}}}
+    finally {clearTimeout(timeout);if(generation===connectionCheckGeneration){connectionCheck=null;if(current()){render();assistTask();if(selected===id&&!quiet)$('setupGuideCheckConnection')?.focus({preventScroll:true});}}}
   }
+  function actorLabel(actor){return actor==='customer'?'You':actor==='platform'?'Machines & Cloud':actor==='provider'||actor==='carrier'?'Provider':actor==='complete'?'Confirmed':'Machines & Cloud';}
+  function stepStatus(step,isNext){return (step.state==='complete'?(step.completionSource==='owner_report'?'Reported by you; delivery unverified':'Complete'):isNext?'Current required step':'Pending')+' · '+actorLabel(step.actor);}
+  function renderManualTask(row){var task=row.guide?.manualTask;if(!task||!window.MCManualGuide||row.verification?.working)return '';var scene=row.id==='voice'?'phone':row.id==='angi'?'angi':row.id;return window.MCManualGuide.render(Object.assign({},task,{scene:scene,businessNumber:task.businessNumber||data.serviceIntake?.voice?.routing?.businessNumber,destination:task.destination||data.connections?.voice?.number}),row.id,'connection-'+row.id);}
+  function renderHomeProgress(){var host=$('homeConnectionProgress'),body=$('homeConnectionProgressRows');if(!host||!body)return;var journey=data?.setup?.connectionJourney,items=journey?(journey.channels||[]).concat(journey.leadSources||[],journey.discovery||[]).filter(function(row){return row.requested||row.retained;}):[];host.hidden=!items.length;if(!items.length){body.replaceChildren();return;}if(!host.dataset.initialized){host.open=!items.some(function(row){return row.verification?.working;});host.dataset.initialized='true';}var confirmed=items.filter(function(row){return row.guide?.success?.verified===true||row.verification?.working===true;}).length;$('homeConnectionProgressSummary').textContent=confirmed+' of '+items.length+' selected services have verified delivery';body.innerHTML=items.map(function(row){var steps=row.guide?.steps||[],done=steps.filter(function(s){return s.state==='complete';}).length,next=steps.find(function(s){return s.state!=='complete';}),evidence=row.guide?.success?.evidenceAt||row.verification?.evidenceAt||steps.filter(function(s){return s.evidenceAt;}).map(function(s){return s.evidenceAt;}).sort().pop(),checked=row.guide?.success?.checkedAt||row.verification?.checkedAt;return '<article class="home-connection-row" data-home-service="'+esc(row.id)+'"><div><h4 class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(row.label||labels[row.id])+'</span></h4><p>'+esc(row.guide?.success?.verified||row.verification?.working?'Delivery verified':next?next.label:row.nextStep||row.detail)+'</p><small>'+done+' of '+steps.length+' required steps complete'+(next?' · Next: '+esc(next.actor==='provider'||next.actor==='carrier'?row.id==='sms'?'Carrier':row.label||labels[row.id]:actorLabel(next.actor)):'')+'</small>'+(row.requestSent?'<p class="home-connection-report">Reported sent by you '+esc(checkedTime(row.requestSent.reportedAt))+'. Delivery remains unverified.</p>':'')+'<p class="home-connection-evidence">'+esc(evidence?'Latest saved evidence: '+checkedTime(evidence):'Delivery evidence not recorded')+(checked?' · Checked '+esc(checkedTime(checked)):'')+'</p></div><button type="button" class="connection-guide-link" data-home-connection="'+esc(row.id)+'">'+esc(row.guide?.success?.verified||row.verification?.working?'View connection':'View next step')+'</button></article>';}).join('');}
+  $('homeConnectionProgressRows')?.addEventListener('click',function(event){var button=event.target.closest('[data-home-connection]');if(!button||!current())return;var id=button.dataset.homeConnection;document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup'}}));if(labels[id])document.dispatchEvent(new CustomEvent('mc:service-guide',{detail:{service:id}}));else document.dispatchEvent(new CustomEvent('mc:lead-source-open',{detail:{source:id}}));});
+  document.addEventListener('mc:manual-return',function(event){if(!current()||event.detail?.slug!==data.client.slug)return;if(['web','voice','sms','calendar'].includes(event.detail.service))checkConnection(event.detail.service,true);});
   function chooseDefault(items) {
     var next = data.setup.connectionJourney.nextAction;
     var row = next && next.kind !== 'wait' && items.find(function (item) { var own=action(item);return (item.requested||item.retained)&&own.kind===next.kind&&own.target===next.target&&own.label===next.label; });
     return row || items.find(function (item) { return (item.requested || item.retained) && ['route', 'connection', 'lead'].includes(action(item).kind); }) || items.find(function (item) { return item.requested || item.retained; }) || items[0];
   }
   function currentStep(row,steps){
+    var canonical=steps.findIndex(function(step){return step.state==='current'||step.state==='waiting';});if(canonical>=0)return canonical;
     var next=action(row),id=next.kind==='route'&&next.target==='know'?'business':next.kind==='route'&&next.target==='test'?'practice':null;
     if(row.id==='web'&&next.kind==='route'&&next.target==='setup'&&data.websiteInstallation){id=data.websiteInstallation.observation?.state==='found'?'check':'install';}
     var index=id?steps.findIndex(function(step){return step.id===id;}):-1;
@@ -198,6 +205,7 @@
     }
     document.querySelectorAll('[data-setup-guide-context]').forEach(function(node){node.remove();});
     var tab=document.body.dataset.activePage;
+    if(tab==='today'){coach.hidden=true;clearTarget();return;}
     if(tab==='setup')target=guideTask.action.kind==='route'&&guideTask.action.target==='setup'?$('websiteInstallStep'):null;
     else if(tab==='know')target=$('reviewCard');else if(tab==='test')target=$('chatForm');else if(tab==='availability')target=$('scheduleVisits');else if(tab==='leads')target=$('requestTourHeading');
     if(target&&target.getClientRects().length){
@@ -208,10 +216,10 @@
     } else {
       clearTarget();var pageHeading=document.querySelector('#portalContent .desk-page-heading');if(pageHeading&&pageHeading.nextElementSibling!==coach)pageHeading.after(coach);
     }
-    var title=progress.complete&&progress.changed?({business:'Business details confirmed',practice:'Your answers are checked',permission:'Account access saved',delivery:'Delivery confirmed'}[guideTask.step]||guideTask.label+' completed'):progress.changed?'Your next setup step':guideTask.label;
+    var title=progress.complete&&progress.changed?({business:'Business details confirmed',practice:'Your answers are checked',permission:'Account access saved',delivery:'Delivery confirmed',prepare:labels[row.id]+' account details saved',request:labels[row.id]+' request reported sent'}[guideTask.step]||'Step saved'):progress.changed?'Your next setup step':guideTask.label;
     var detail=progress.required?(row.nextStep||'Complete the required business details below before continuing.'):progress.busy?'Save your changes and finish the current check before continuing.':progress.changed?'Next: '+(progress.now?.label||progress.next.label||labels[row.id]+' setup')+'. '+(progress.now?.detail||row.nextStep||'Continue with your saved setup.'):(row.nextStep||progress.now?.detail||'Complete the highlighted step below.');
     if(!progress.changed&&target&&!progress.busy)detail=guideTask.step==='business'?'Check the required business details below, then confirm the saved answers. '+(row.nextStep||''):guideTask.step==='practice'?'Ask a customer question below. When its saved check is confirmed, your next setup step appears here.':detail;
-    var button=progress.changed?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="guideReturn"'+(progress.canContinue?'':' disabled')+'>'+(progress.waiting?'View '+esc(labels[row.id].toLowerCase())+' progress':'Continue '+esc(labels[row.id].toLowerCase())+' setup')+'</button>':'';
+    var button=progress.changed?'<button type="button" class="btn-pill btn-pill-blue btn-sm" id="guideReturn"'+(progress.canContinue?'':' disabled')+'>'+(progress.waiting?'View '+esc(labels[row.id])+' progress':'Continue '+esc(labels[row.id])+' setup')+'</button>':'';
     var key=[guideTask.service,title,detail,tab,progress.canContinue,progress.waiting].join('|'),focused=coach.contains(document.activeElement)?document.activeElement.id:null;
     coach.hidden=false;coach.dataset.guideService=row.id;coach.dataset.guideStep=guideTask.step;coach.dataset.guideComplete=String(progress.complete&&progress.changed);
     if(coach.dataset.contentKey!==key){coach.dataset.contentKey=key;coach.innerHTML='<div><span>'+esc(labels[row.id])+' setup</span><strong id="guideCoachTitle">'+esc(title)+'</strong><p id="guideCoachDetail">'+esc(detail)+'</p></div><div class="guide-coach-actions">'+button+'<button type="button" class="guide-coach-dismiss" id="guideDismiss">Close guide</button></div>';if(focused&&$(focused))$(focused).focus({preventScroll:true});}
@@ -255,9 +263,9 @@
     if (!items.length) { host.hidden = true; return; }
     var row = manualSelection && items.find(function (item) { return item.id === selected; }) || chooseDefault(items);
     selected = row.id;
-    var guide = row.guide || {}, steps = Array.isArray(guide.steps) ? guide.steps.slice(0,8) : [], next = action(row);
+    var guide = row.guide || {}, steps = Array.isArray(guide.steps) ? guide.steps.slice() : [], next = action(row);
     var platformBlocked=row.activation?.blockedBy==='machines_and_cloud';
-    var intake=data.serviceIntake&&data.serviceIntake[selected],intakeEnabled=selected!=='calendar'&&!platformBlocked&&!!intake&&!!window.MCServiceIntake&&!['cancelled','archived','paused'].includes(data.client.status),intakeNeeded=needsServiceInformation(selected);
+    var intake=data.serviceIntake&&data.serviceIntake[selected],intakeEnabled=selected!=='calendar'&&!!intake&&!!window.MCServiceIntake&&!['cancelled','archived','paused'].includes(data.client.status),intakeNeeded=needsServiceInformation(selected);
     var nextIndex = currentStep(row, steps), nextId = steps[nextIndex] && steps[nextIndex].id;
     if(guideService!==selected){guideService=selected;guideStep=nextId;guideManual=false;}
     if(!guideManual || !steps.some(function(step){return step.id===guideStep;}))guideStep=nextId;
@@ -266,7 +274,7 @@
     var complete=steps.filter(function(item){return item.state==='complete';}).length, finished=steps.length>0&&complete===steps.length;
     var focused = host.contains(document.activeElement) ? document.activeElement.dataset.guideService || document.activeElement.id : null;
     var existingPath=$('guideSetupPath');if(existingPath)pathExpanded=existingPath.open;
-    var showPath=pathExpanded===true;
+    var showPath=true;
     host.hidden=false;host.closest('#connectionsCard').classList.add('has-setup-guide');
     host.dataset.guideCurrentStep=nextId||'';host.dataset.guidePreviewStep=step.id;host.dataset.guideSelectedService=selected;
     var status=step.state==='complete'?'Saved':!isNext?'Looking ahead':finished?'All steps confirmed':next.kind==='wait'?'Setup is continuing':'Your next step';
@@ -278,10 +286,10 @@
       detail={web:'Add your website and choose its builder. We’ll prepare the installation steps for you.',voice:'Choose your business line or a new front desk number, then confirm where owner callbacks should go.',sms:'Confirm your registered business and contact details. We’ll keep them ready for the carrier review.',calendar:'Choose the Google account you use for work, then continue to its permission review.'}[selected];
       kind=selected==='voice'?'phone':selected==='web'?'website':selected;
     }
-    if(platformBlocked&&isNext){status='Needs our attention';title=labels[selected]+' needs Machines & Cloud setup';detail=row.nextStep||'Your service choice is saved. Machines & Cloud must finish enabling this connection before you can activate it.';kind='waiting';}
+    if(platformBlocked&&isNext&&!intakeNeeded){status='Needs our attention';title=labels[selected]+' needs Machines & Cloud setup';detail=row.nextStep||'Your service choice is saved. Machines & Cloud must finish enabling this connection before you can activate it.';kind='waiting';}
     var primary='',secondary='';
     if(!isNext)primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideCurrent">Return to current task</button>';
-    else if(!closed&&intakeNeeded)primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideDetails">Connect '+esc(labels[selected])+'</button>';
+    else if(!closed&&intakeNeeded)primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideDetails">Save '+esc(selected==='voice'?'call-routing details':selected==='sms'?'registration details':'website details')+'</button>';
     else if(!closed&&row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected))primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideChoose">'+(platformBlocked?'Add ':'Connect ')+esc(labels[selected])+'</button>';
     else if(!closed&&verified&&['voice','sms','thumbtack','angi'].includes(selected))primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideOpenInbox">Open Inbox</button>';
     else if(!closed&&next.kind!=='wait')primary='<button type="button" class="btn-pill btn-pill-blue btn-sm" id="setupGuideContinue">'+esc(next.label||'Connect '+labels[selected])+'</button>';
@@ -295,9 +303,9 @@
       '<div class="guide-task-grid"><div class="guide-task-copy"><h4 id="setupGuideStageTitle" tabindex="-1">'+esc(title)+'</h4>'+(status!=='Your next step'?'<p class="guide-task-status muted">'+esc(status)+'</p>':'')+'<p class="guide-task-detail">'+esc(detail)+'</p>'+
       renderSetupProgress(row)+'<div class="setup-guide-actions">'+primary+secondary+'</div>'+
       (row.setupProgress&&!row.setupProgress.requestSaved?'':'<p class="guide-task-expectation">'+esc(verified?'Your delivery evidence is saved. You can check this connection again whenever you need.':intakeNeeded&&isNext?'Your saved business details are filled in where they apply. You can save and return anytime.':taskOutcome(row,step,isNext))+'</p>')+'</div>'+
-      '</div><details class="direct-connection-help"><summary>How this connection works</summary><p>'+esc(guide.overview||row.ownerTask||'')+'</p><figure class="guide-task-visual"><div id="guideVisualScene">'+(window.MCSetupVisuals?window.MCSetupVisuals.render(kind):'')+'</div><figcaption>Illustrated setup example</figcaption></figure></details>'+
+      '</div>'+renderManualTask(row)+'<details class="direct-connection-help"><summary>How this connection works</summary><p>'+esc(guide.overview||row.ownerTask||'')+'</p><figure class="guide-task-visual"><div id="guideVisualScene">'+(window.MCSetupVisuals?window.MCSetupVisuals.render(kind):'')+'</div><figcaption>Illustrated setup example</figcaption></figure></details>'+
       (row.verification?'<details class="direct-connection-checks"><summary>Connection and delivery checks</summary>'+renderVerification(row)+'</details>':'')+
-      '<details class="guide-path-details" id="guideSetupPath"'+(showPath?' open':'')+'><summary>See all '+steps.length+' setup steps</summary><nav class="guide-path" aria-label="'+esc(labels[row.id])+' setup steps"><ol>'+steps.map(function(item,i){return '<li><button type="button" data-guide-step="'+esc(item.id)+'"'+(i===index?' aria-current="step"':'')+' data-step-state="'+esc(item.state)+'"><span class="guide-path-number" aria-hidden="true">'+(item.state==='complete'?'✓':i+1)+'</span><span>'+esc(item.label)+'<small>'+esc(item.state==='complete'?'Saved':i===nextIndex?'Next required step':item.actor==='provider'?'Provider check':item.actor==='platform'?'Handled for you':'Coming up')+'</small></span></button></li>';}).join('')+'</ol></nav></details>'+
+      '<section class="guide-path-details" id="guideSetupPath" aria-labelledby="guidePathTitle"><h5 id="guidePathTitle">Required path <span>'+complete+' of '+steps.length+' complete</span></h5><nav class="guide-path" aria-label="'+esc(labels[row.id])+' setup steps"><ol>'+steps.map(function(item,i){return '<li><button type="button" data-guide-step="'+esc(item.id)+'"'+(i===index?' aria-current="step"':'')+' data-step-state="'+esc(item.state)+'"><span class="guide-path-number" aria-hidden="true">'+(item.state==='complete'?'✓':i+1)+'</span><span>'+esc(item.label)+'<small>'+esc(stepStatus(item,i===nextIndex))+'</small>'+(item.evidenceAt?'<time datetime="'+esc(item.evidenceAt)+'">'+esc(checkedTime(item.evidenceAt))+'</time>':'')+'</span></button></li>';}).join('')+'</ol></nav><p class="guide-success-condition"><strong>Working when:</strong> '+esc(guide.success?.description||row.readyWhen||'The required setup and actual delivery checks are confirmed.')+'</p></section>'+
       '</section></div>';
     if(intakeSaved[selected]&&!row.setupProgress){
       var savedNotice=document.createElement('p');savedNotice.id='connectionIntakeSaved';savedNotice.className='preparation-status';savedNotice.setAttribute('role','status');savedNotice.tabIndex=-1;
@@ -338,8 +346,8 @@
   document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;render();var row=rows().find(function(item){return item.id===selected;});if(row&&action(row).kind!=='wait')executeAction(row);else focusStage();});
   document.addEventListener('mc:connection-selected',function(event){if(!current()||!labels[event.detail?.service])return;selected=event.detail.service;manualSelection=true;guideManual=false;render();if(event.detail.confirmed){var row=rows().find(function(item){return item.id===selected;});if(row&&!needsServiceInformation(selected)&&action(row).kind!=='wait')executeAction(row);else if(row&&needsServiceInformation(selected)&&window.MCServiceIntake)window.MCServiceIntake.open(selected);else focusStage();}else{var note=document.createElement('p');note.className='preparation-status';note.setAttribute('role','alert');note.textContent='Your service choice could not be confirmed. Your saved setup is kept. Try connecting again.';host.querySelector('.setup-guide-current')?.prepend(note);}});
   document.addEventListener('mc:guide-select',function(event){if(!labels[event.detail?.service]||!current())return;endTask();selected=event.detail.service;manualSelection=true;render();});
-  document.addEventListener('mc:desk', function (event) { data = event.detail; observePreparation();render();assistTask(); });
+  document.addEventListener('mc:desk', function (event) { data = event.detail; observePreparation();renderHomeProgress();render();assistTask(); });
   function clearConnectionCheck(){connectionCheckGeneration++;if(connectionCheck)connectionCheck.controller.abort();connectionCheck=null;connectionNotices={};}
-  document.addEventListener('mc:session-expired', function () { clearConnectionCheck();preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true; });
-  if ($('deskSignOut')) $('deskSignOut').addEventListener('click', function () { clearConnectionCheck();preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true; });
+  document.addEventListener('mc:session-expired', function () { clearConnectionCheck();preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true;if($('homeConnectionProgress')){$('homeConnectionProgress').hidden=true;$('homeConnectionProgressRows').replaceChildren();delete $('homeConnectionProgress').dataset.initialized;} });
+  if ($('deskSignOut')) $('deskSignOut').addEventListener('click', function () { clearConnectionCheck();preparationGeneration++;clearTimeout(preparationTimer);preparation=null;intakeSaved={};endTask();data = null; selected = null; manualSelection = false;guideService=null;guideStep=null;guideManual=false;guideOpened=false; host.replaceChildren(); host.hidden = true;if($('homeConnectionProgress')){$('homeConnectionProgress').hidden=true;$('homeConnectionProgressRows').replaceChildren();delete $('homeConnectionProgress').dataset.initialized;} });
 })();
