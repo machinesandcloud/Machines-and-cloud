@@ -127,7 +127,7 @@ async function fixture(label = 'normal') {
   await store.put('access_sessions', sha(token), { email: c.owner.email, scope: 'onboarding', status: 'active', createdAt: new Date(now).toISOString(), expiresAt: new Date(now + 2 * 3600000).toISOString() });
   return { c, token, revision };
 }
-const legal = () => ({ legalName: 'QA Synthetic Service LLC', ein: '92-1234567', businessType: 'llc', street: '123 Fixture Street', street2: '', city: 'Houston', state: 'TX', zip: '77057', website: 'https://shop.example.test', representative: { firstName: 'Alex', lastName: 'Fixture', email: 'qa-representative@example.test', phone: '+17135550198', title: 'Owner', jobPosition: 'CEO' } });
+const legal = () => ({ legalName: 'QA Synthetic Service LLC', ein: '92-1234567', businessType: 'llc', businessIndustry: 'PROFESSIONAL_SERVICES', street: '123 Fixture Street', street2: '', city: 'Houston', state: 'TX', zip: '77057', website: 'https://shop.example.test', representative: { firstName: 'Alex', lastName: 'Fixture', email: 'qa-representative@example.test', phone: '+17135550198', title: 'Owner', jobPosition: 'CEO' } });
 async function clientRequest(f, body, { token = f.token, slug = f.c.slug } = {}) {
   const response = await clientHandler(new Request(origin + '/api/client?c=' + slug, { method: body ? 'POST' : 'GET', headers: { origin, authorization: 'Bearer ' + token, ...(body ? { 'content-type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }));
   return { status: response.status, data: await response.json() };

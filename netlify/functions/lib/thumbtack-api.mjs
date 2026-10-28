@@ -104,10 +104,19 @@ function fields(value, names) { const result = {}; if (plain(value)) for (const 
 function providerID(value, status) { if (typeof value !== 'string' || !/^\d{1,32}$/.test(value)) responseFailure(status); return value; }
 function businessRow(row, status) { if (!plain(row)) responseFailure(status); return { businessID: providerID(row.businessID, status), ...fields(row, ['name', 'imageURL']) }; }
 function negotiationRow(row, status) {
-  if (!plain(row) || !plain(row.business)) responseFailure(status);
-  const result = { negotiationID: providerID(row.negotiationID, status), ...fields(row, ['status', 'createTime']), business: businessRow(row.business, status), customer: fields(row.customer, ['customerID', 'displayName']), category: fields(row.category, ['categoryID', 'name']) };
-  if (plain(row.customer?.location)) result.customer.location = fields(row.customer.location, ['city', 'state', 'zipCode']);
-  if (row.details !== undefined) { if (!Array.isArray(row.details) || row.details.length > 100) responseFailure(status); result.details = row.details.map(detail => fields(detail, ['question', 'answer'])); }
+  if (!plain(row) || !plain(row.business) || row.request !== undefined && !plain(row.request)) responseFailure(status);
+  // The current V4 contract puts project facts under request and names under
+  // customer.firstName/lastName. Keep the earlier flat response compatible.
+  const request = row.request || {}, customer = fields(row.customer, ['customerID', 'displayName']);
+  if (!customer.displayName) { const name = ['firstName','lastName'].map(key => optionalText(row.customer?.[key], 200)).filter(Boolean).join(' ').trim(); if (name) customer.displayName = name; }
+  const result = { negotiationID: providerID(row.negotiationID, status), ...fields(row, ['status']), business: businessRow(row.business, status), customer, category: fields(request.category ?? row.category, ['categoryID', 'name']) };
+  const created = optionalText(row.createdAt ?? row.createTime), description = optionalText(request.description ?? row.description);
+  if (created !== undefined) result.createTime = created;
+  if (description !== undefined) result.description = description;
+  const location = plain(row.customer?.location) ? row.customer.location : request.location;
+  if (plain(location)) result.customer.location = fields(location, ['city', 'state', 'zipCode']);
+  const details = request.details ?? row.details;
+  if (details !== undefined) { if (!Array.isArray(details) || details.length > 100) responseFailure(status); result.details = details.map(detail => fields(detail, ['question', 'answer'])); }
   return result;
 }
 function messageRow(row, status) {

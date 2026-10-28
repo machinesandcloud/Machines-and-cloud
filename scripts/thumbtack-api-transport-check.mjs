@@ -66,6 +66,15 @@ try {
     respond = () => json(negotiation); const result = await api.thumbtackNegotiation({ accessToken, negotiationID: '222' }); assert.equal(result.business.businessID, '111'); assert.equal(result.customer.location.city, 'Houston'); assert.equal(result.details[0].answer, 'AC not cooling'); assert.ok(!JSON.stringify(result).includes(accessToken)); assert.ok(!JSON.stringify(result).includes(refreshToken));
     respond = () => json({ ...negotiation, negotiationID: '999' }); await rejects(() => api.thumbtackNegotiation({ accessToken, negotiationID: '222' }), 'provider_invalid_response', 'unavailable', 1);
   });
+  await group('Documented nested lead response preserves the project, customer name, date and location', async () => {
+    const nested = { negotiationID:'222', createdAt:'2026-10-28T12:00:00Z', status:'Open', business,
+      customer:{customerID:'555',firstName:'Olivia',lastName:'Young',phone:'555-555-5555',refresh_token:refreshToken},
+      request:{requestID:'666',description:'Looking to fully renovate my kitchen.',category:{categoryID:'444',name:'Kitchen Remodel'},location:{city:'Katy',state:'TX',zipCode:'77494'},details:[{question:'Project scope',answer:'Full kitchen renovation'}],attachments:[{url:'https://unfetched.invalid/'}],access_token:accessToken} };
+    respond=()=>json(nested);const result=await api.thumbtackNegotiation({accessToken,negotiationID:'222'});
+    assert.equal(result.customer.displayName,'Olivia Young');assert.equal(result.customer.location.city,'Katy');assert.equal(result.category.name,'Kitchen Remodel');assert.equal(result.details[0].answer,'Full kitchen renovation');assert.equal(result.description,nested.request.description);assert.equal(result.createTime,nested.createdAt);
+    assert.ok(!JSON.stringify(result).includes(accessToken));assert.ok(!JSON.stringify(result).includes(refreshToken));assert.ok(!JSON.stringify(result).includes('unfetched.invalid'));assert.ok(!JSON.stringify(result).includes('555-555-5555'));
+    for(const request of [[], 'not-an-object', {details:'not-an-array'}, {details:Array(101).fill({question:'x',answer:'y'})}]){respond=()=>json({...nested,request});await rejects(()=>api.thumbtackNegotiation({accessToken,negotiationID:'222'}),'provider_invalid_response','unavailable',1);}
+  });
   await group('Business negotiation list refuses cross-business records', async () => {
     respond = () => json({ data: [negotiation] }); const result = await api.thumbtackNegotiations({ accessToken, businessID: '111' }); assert.equal(result.data.length, 1);
     respond = () => json({ data: [{ ...negotiation, business: { businessID: '999' } }] }); await rejects(() => api.thumbtackNegotiations({ accessToken, businessID: '111' }), 'provider_invalid_response', 'unavailable', 1);

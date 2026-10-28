@@ -1,3 +1,4 @@
+import { MESSAGING_BUSINESS_INDUSTRIES } from './messaging-industry.mjs';
 // Real Twilio ISV adapter. The activation engine, not an HTTP caller, owns this adapter.
 // A persisted dispatch intent precedes every write; a timeout is never permission to create again.
 import { createHash } from 'node:crypto';
@@ -21,7 +22,7 @@ function descriptor(row, name, primary) {
     case "service": return named(messaging("Services", "services"), "MG", { InboundRequestUrl: row.inboundUrl, InboundMethod: "POST", StatusCallback: row.statusUrl, UseInboundWebhookOnNumber: "false", StickySender: "true", SmartEncoding: "false" });
     case "profile": return named(trust("CustomerProfiles"), "BU", { Email: row.notifyEmail, PolicySid: POLICY_SECONDARY });
     case "business": return named(trust("EndUsers"), "IT", { Type: "customer_profile_business_information", Attributes: JSON.stringify({ business_name: L.legalName, website_url: L.website,
-      business_regions_of_operation: "USA_AND_CANADA", business_type: types[L.businessType], business_registration_identifier: "EIN", business_identity: "direct_customer", business_industry: "CONSTRUCTION", business_registration_number: L.ein }) });
+      business_regions_of_operation: "USA_AND_CANADA", business_type: types[L.businessType], business_registration_identifier: "EIN", business_identity: "direct_customer", business_industry: L.businessIndustry, business_registration_number: L.ein }) });
     case "representative": return named(trust("EndUsers"), "IT", { Type: "authorized_representative_1", Attributes: JSON.stringify({ first_name: L.representative.firstName, last_name: L.representative.lastName,
       email: L.representative.email, phone_number: L.representative.phone, business_title: L.representative.title, job_position: L.representative.jobPosition }) });
     case "address": return named({ host: "account", path: "Addresses.json", collection: "addresses" }, "AD", { CustomerName: L.legalName, Street: L.street, StreetSecondary: L.street2 || "", City: L.city, Region: L.state, PostalCode: L.zip, IsoCountry: "US", AutoCorrectAddress: "false" });
@@ -104,6 +105,7 @@ export function createTwilioMessagingAdapter({ executionAllowed, deadlineAt = nu
     },
     async execute({ row, name, authorize }) {
       if(['correct_brand','correct_campaign'].includes(name))throw new ManagedResourceAdmissionError('resource_paid_correction_unapproved','Your registration records are retained. The platform must review any paid brand or campaign correction before it can be submitted.');
+      if(['business','correct_business'].includes(name)&&!MESSAGING_BUSINESS_INDUSTRIES.includes(row.legal?.businessIndustry)) { const error=new Error('Choose the correct registered business industry before filing.');error.code='dispatch_not_authorized';throw error; }
       const step = descriptor(row, name, primary());
       const binding=await managedResourceAccountBinding('brand',row.id);
       let input,admission;

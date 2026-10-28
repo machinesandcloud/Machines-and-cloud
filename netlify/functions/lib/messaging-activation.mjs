@@ -7,6 +7,8 @@ import { buildMessagingProgram } from "./messaging-program.mjs";
 export { buildMessagingProgram } from "./messaging-program.mjs";
 import { createTwilioMessagingAdapter } from "./messaging-provider.mjs";
 import { ManagedResourceAdmissionError } from './managed-resource-admission.mjs';
+import { MESSAGING_BUSINESS_INDUSTRIES } from './messaging-industry.mjs';
+export { MESSAGING_BUSINESS_INDUSTRIES } from './messaging-industry.mjs';
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle } from "./phone-activation.mjs";
 
 export class MessagingActivationError extends Error { constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; } }
@@ -62,10 +64,13 @@ function validOffer(value, { allowExpired = false } = {}) {
   return structuredClone(value);
 }
 const digestOffer = offer => hash(JSON.stringify(offer));
-export function normalizeMessagingRegistration(value) {
+export function normalizeMessagingRegistration(value, {allowMissingIndustry = false} = {}) {
   const strings = { legalName: [2, 100], ein: [9, 10], businessType: [3, 20], street: [2, 100], street2: [0, 100], city: [2, 100], state: [2, 2], zip: [5, 10], website: [10, 500] };
-  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(key => ![...Object.keys(strings), "representative"].includes(key))) throw new MessagingActivationError("invalid_legal_details", "Check the legal business details.", 400);
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(key => ![...Object.keys(strings), "businessIndustry", "representative"].includes(key))) throw new MessagingActivationError("invalid_legal_details", "Check the legal business details.", 400);
   const out = {};
+  const industry = typeof value.businessIndustry === 'string' ? value.businessIndustry.trim() : '';
+  if (!MESSAGING_BUSINESS_INDUSTRIES.includes(industry) && !(allowMissingIndustry && !industry && (value.businessIndustry === undefined || value.businessIndustry === ''))) throw new MessagingActivationError('invalid_business_industry', 'Choose the industry that accurately describes this business before confirming its registration.', 400);
+  out.businessIndustry = industry;
   for (const [key, [min, max]] of Object.entries(strings)) { const text = String(value[key] ?? "").trim(); if (text.length < min || text.length > max || /[\u0000-\u001f]/.test(text)) throw new MessagingActivationError("invalid_legal_details", `Check the ${key === "ein" ? "EIN" : key} field.`, 400); out[key] = text; }
   out.ein = out.ein.replace("-", "");
   if (!/^\d{9}$/.test(out.ein) || !["llc", "corporation", "partnership"].includes(out.businessType) || !US_STATES.has(out.state) || !/^\d{5}(?:-\d{4})?$/.test(out.zip)) throw new MessagingActivationError("invalid_legal_details", "Use a supported US registered business with an EIN, state abbreviation and ZIP code. Sole-proprietor, territory and special registrations need a supported registration path.", 400);
@@ -198,6 +203,7 @@ function engine({ provider, offer: suppliedOffer, gate = false, allowExpiredOffe
       if (row.state === "needs_action") return view(await change(old => ({ ...old, claim: null })), current);
       const feeWorkPending = [...MESSAGING_STEPS, ...(row.correctionSteps || [])].some(name => row.steps[name]?.state !== "complete");
       if (feeWorkPending && (row.offerDigest !== digest || Date.parse(row.offer.expiresAt) <= Date.now())) return view(await change(old => ({ ...old, state: "blocked", reasonCode: "offer_expired_or_changed", claim: null })), current);
+      if ((row.steps.business?.state !== 'complete' || row.correctionSteps?.includes('correct_business') && row.steps.correct_business?.state !== 'complete') && !MESSAGING_BUSINESS_INDUSTRIES.includes(wire(row).legal?.businessIndustry)) return view(await change(old => ({ ...old, state:'needs_action', reasonCode:'business_industry_required', issues:[{code:'business_industry_required',field:'businessIndustry'}], claim:null, nextCheckAt:null })), current);
       await provider.preflight(wire(row));
       if (!row.parentClaimed) { row = await change(old => ({ ...old, parentClaimStartedAt: old.parentClaimStartedAt || iso() })); await claimParent(current, { kind: "messaging", operationId: id }); row = await change(old => ({ ...old, parentClaimed: true })); }
       const plan = MESSAGING_STEPS.map(name => row.correctionSteps?.includes("correct_" + name) ? "correct_" + name : name);
