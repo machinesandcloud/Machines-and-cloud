@@ -12,6 +12,7 @@ const exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&
 export class SupportReportError extends Error{constructor(code,message,status=409,extra={}){super(message);Object.assign(this,{code,status,...extra});}}
 const fail=(code,message,status=409,extra)=>{throw new SupportReportError(code,message,status,extra);};
 const stamp=()=>new Date().toISOString();
+const CONNECTIONS={web:'Website chat',voice:'Phone answering',sms:'Text messaging',calendar:'Google Calendar',thumbtack:'Thumbtack',angi:'Angi'};
 function rows(c){
  const list=c.management?.supportReports||[];
  if(!Array.isArray(list)||list.length>LIMIT)fail('support_unavailable','Saved reports need checking. Your conversation is kept.',503);
@@ -21,11 +22,12 @@ function rows(c){
 }
 export const supportReportRevision=row=>hash([row.tenantIdentity,row.id,row.status,row.note,row.reportedAt,row.acknowledgedAt||null,row.resolvedAt||null,row.resolution||null,row.operations]);
 function view(row,operator=false){
- return {id:row.id,reference:'MC-'+row.id.slice(0,8).toUpperCase(),channel:row.channel,contact:row.contact,conversationRef:row.conversationRef,note:row.note,status:row.status,label:{reported:'Reported',acknowledged:'Under review',resolved:'Resolved'}[row.status],reportedAt:row.reportedAt,acknowledgedAt:row.acknowledgedAt||null,resolvedAt:row.resolvedAt||null,resolution:row.resolution||null,revision:supportReportRevision(row),reportOperationId:row.reportOperationId,lastOperationId:row.operations.at(-1).id,operationIds:row.operations.map(op=>op.id),...(operator?{messages:row.messages||[],attention:{state:row.status==='resolved'?'closed':'operator_portal',detail:row.status==='reported'?'Available in operator Issues; no human acknowledgement is recorded.':row.status==='acknowledged'?'An operator acknowledged the report. A resolution is still pending.':'A customer-visible resolution is saved.'}}:{})};
+ return {id:row.id,reference:'MC-'+row.id.slice(0,8).toUpperCase(),...(row.kind==='connection'?{kind:'connection',service:row.service,serviceLabel:CONNECTIONS[row.service]}:{}),channel:row.channel,contact:row.contact,conversationRef:row.conversationRef,note:row.note,status:row.status,label:{reported:'Reported',acknowledged:'Under review',resolved:'Resolved'}[row.status],reportedAt:row.reportedAt,acknowledgedAt:row.acknowledgedAt||null,resolvedAt:row.resolvedAt||null,resolution:row.resolution||null,revision:supportReportRevision(row),reportOperationId:row.reportOperationId,lastOperationId:row.operations.at(-1).id,operationIds:row.operations.map(op=>op.id),...(operator?{messages:row.messages||[],attention:{state:row.status==='resolved'?'closed':'operator_portal',detail:row.status==='reported'?'Available in operator Issues; no human acknowledgement is recorded.':row.status==='acknowledged'?'An operator acknowledged the report. A resolution is still pending.':'A customer-visible resolution is saved.'}}:{})};
 }
 export function supportReportViews(c,{operator=false}={}){return rows(c).map(row=>view(row,operator)).reverse();}
+export function connectionAssistanceViews(c){return Object.fromEntries(Object.keys(CONNECTIONS).flatMap(service=>{const row=rows(c).findLast(row=>row.kind==='connection'&&row.service===service);return row?[[service,view(row)]]:[];}));}
 export function conversationSupportReport(c,channel,contact){const row=rows(c).findLast(row=>row.channel===channel&&row.contact===contact);return row?view(row):null;}
-export function supportReportIssues(c){return supportReportViews(c).filter(row=>row.status!=='resolved').map(row=>({id:'support:'+row.id,reportId:row.id,reference:row.reference,state:row.status,severity:'high',title:'Owner reported a conversation problem',detail:row.note}));}
+export function supportReportIssues(c){return supportReportViews(c).filter(row=>row.status!=='resolved').map(row=>({id:'support:'+row.id,reportId:row.id,reference:row.reference,state:row.status,severity:'high',title:row.kind==='connection'?row.serviceLabel+' connection review requested':'Owner reported a conversation problem',detail:row.note}));}
 async function sessionActive(session,scope){
  if(!HEX.test(session?.sessionHash||''))fail('verification_required','Sign in again before sending this report.',401);
  const saved=await strictRead('access_sessions',session.sessionHash);
@@ -35,6 +37,28 @@ async function sessionActive(session,scope){
 const snapshot=conversation=>(conversation.messages||[]).slice(-6).map(message=>({role:message.role==='user'?'user':'assistant',content:String(message.content||'').slice(0,1000),at:typeof message.at==='string'?message.at:null}));
 const latestFor=(list,channel,contact)=>list.findLast(row=>row.channel===channel&&row.contact===contact);
 const audit=(c,event)=>({...c.management,revision:(c.management?.revision||0)+1,audit:[...(c.management?.audit||[]),event].slice(-100)});
+
+// Use the existing owner report/operator Issues CAS, not a new helpdesk or job.
+// A review request never accepts costs, provisions resources or verifies service.
+export async function reportConnection(c,session,body){
+ if(!supportedWorkspace(c)||!exact(body,['action','service','operationId','expectedReportRevision'])||body.action!=='report_connection'||!Object.hasOwn(CONNECTIONS,body.service)||!NONCE.test(body.operationId||'')||body.expectedReportRevision!==null&&!HEX.test(body.expectedReportRevision||''))fail('invalid_connection_report','Choose a connection and check its current review status.',400);
+ const inputHash=hash(body),tenant=workspaceTenant(c),at=stamp(),id=hash([tenant,'connection',body.service,body.operationId]).slice(0,32);
+ const outcome=await atomicUpdate('clients',c.slug,async saved=>{
+  if(!supportedWorkspace(saved)||workspaceTenant(saved)!==tenant)fail('workspace_changed','This workspace changed. Sign in again before continuing.');
+  await sessionActive(session,'onboarding');if(normalizeAccountEmail(saved.owner?.email)!==normalizeAccountEmail(session.email))fail('forbidden','This review belongs to another workspace.',403);
+  const list=rows(saved),replay=list.find(row=>row.operations.some(op=>op.id===body.operationId));
+  if(replay){const op=replay.operations.find(op=>op.id===body.operationId);if(op.action!=='report_connection'||op.inputHash!==inputHash)fail('operation_conflict','This request already belongs to another connection review. Check its saved result.');return {result:{report:replay,client:saved}};}
+  if(['cancelled','paused','archived'].includes(saved.status))fail('workspace_stopped','Open Account to review your stopped service before requesting connection setup.');
+  const previous=list.findLast(row=>row.kind==='connection'&&row.service===body.service);
+  if(previous&&previous.status!=='resolved')return {result:{report:previous,client:saved,alreadyOpen:true}};
+  if((previous?supportReportRevision(previous):null)!==body.expectedReportRevision)fail('report_changed','The connection review changed. Read its current status before requesting another review.',409,{supportReport:previous?view(previous):null});
+  if((saved.management?.supportReports||[]).length>=LIMIT)fail('report_capacity','Existing connection reviews are kept. We could not save another review.');
+  await sessionActive(session,'onboarding');
+  const report={version:1,kind:'connection',service:body.service,tenantIdentity:tenant,id,reportOperationId:body.operationId,channel:'connection',contact:body.service,conversationRef:null,note:'The owner requested a review of '+CONNECTIONS[body.service]+' setup. Review the saved settings and platform requirements. This request does not authorize provisioning or fees.',status:'reported',reportedAt:at,messages:[],operations:[{id:body.operationId,action:'report_connection',inputHash,at}]};
+  const management=audit(saved,{id:body.operationId,tenantIdentity:tenant,at,actor:session.email,action:'report_connection',reason:'Owner requested connection review',reportId:id});management.supportReports=[...(saved.management?.supportReports||[]),report];const value={...saved,management,updatedAt:at};return {value,result:{report,client:value}};
+ });
+ return {ok:true,supportReport:view(outcome.report),connectionAssistance:connectionAssistanceViews(outcome.client),receipt:{operationId:body.operationId,reportId:outcome.report.id,action:body.action,...(outcome.alreadyOpen?{alreadyOpen:true}:{})}};
+}
 
 export async function reportConversation(c,session,body){
  if(!supportedWorkspace(c)||!exact(body,['action','channel','contact','note','operationId','expectedReportRevision'])||body.action!=='report_conversation'||!NONCE.test(body.operationId||'')||!['web','sms','phone','voice','thumbtack','angi'].includes(body.channel)||typeof body.contact!=='string'||!body.contact||body.contact.length>60||/[\u0000-\u001f/]/.test(body.contact)||typeof body.note!=='string'||body.note.trim().length<3||body.note.length>1000||body.expectedReportRevision!==null&&!HEX.test(body.expectedReportRevision||''))fail('invalid_report','Describe what went wrong using 3 to 1,000 characters.',400,{field:'note'});

@@ -49,7 +49,7 @@ import { leadConnectionsView, changeLeadConnection, LeadConnectionError } from '
 import { startThumbtackConnection, continueOwnerThumbtack, selectThumbtackBusiness, sendPlatformReply } from './lib/thumbtack-connection.mjs';
 import { serviceIntakeView, serviceIntakeRevision, readServiceIntake, changeServiceIntake, fenceServiceIntake, ServiceIntakeError } from './lib/service-intake.mjs';
 import { connectionPreparationView, prepareConnections, fenceConnectionPreparation, ConnectionPreparationError } from './lib/connection-preparation.mjs';
-import {reportConversation,supportReportViews,SupportReportError} from './lib/support-reports.mjs';
+import {reportConversation,reportConnection,connectionAssistanceViews,supportReportViews,SupportReportError} from './lib/support-reports.mjs';
 import {readOwnerSchedule,ScheduleReadError} from './lib/owner-schedule.mjs';
 
 export const config = { path: "/api/client" };
@@ -163,7 +163,7 @@ async function handle(req) {
     if(!current||workspaceTenant(current)!==workspaceTenant(c)||!isSupportedSelfServiceClient(current)||normalizeAccountEmail(current.owner?.email)!==normalizeAccountEmail(active.email))return json({error:'forbidden'},403,{'Cache-Control':'no-store'});
     if(configurationRevision(current)!==revision||workspaceEditRevision(current)!==editRevision||serviceIntakeRevision(current)!==intakeRevision)return json({error:'setup_changed',message:'Setup changed while it was being read. Read the current setup again.'},409,{'Cache-Control':'no-store'});
     const setup=serviceSetupView(c,connections,plan,installation,leads,serviceIntake);
-    return json({ok:true,client:{slug:c.slug},setup:{channels:setup.channels,reviewRequirements:setup.reviewRequirements,connectionJourney:setup.connectionJourney,connectionPreparation:preparation},connections,websiteInstallation:installation,serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
+    return json({ok:true,client:{slug:c.slug},setup:{channels:setup.channels,reviewRequirements:setup.reviewRequirements,connectionJourney:setup.connectionJourney,connectionPreparation:preparation},connections,connectionAssistance:connectionAssistanceViews(current),websiteInstallation:installation,serviceIntake,configurationRevision:revision,editRevision},200,{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'});
   }
 
   if (req.method === 'GET' && url.searchParams.has('report')) {
@@ -216,9 +216,9 @@ async function handle(req) {
     const leadConnections=selfService?await leadConnectionsView(c):null;
     const websiteInstallation=selfService?await websiteInstallationView(c,aiAllowance):null;
     const serviceIntake=selfService?await serviceIntakeView(c,connections):null;
-    const supportReports=selfService?supportReportViews(c):[];
+    const supportReports=selfService?supportReportViews(c):[],connectionAssistance=selfService?connectionAssistanceViews(c):{};
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { connectionAssistance, setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
       conversations: convs.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).map(v=>{
         const supportReport=selfService?supportReports.find(row=>row.channel===v.channel&&row.contact===v.contact)||null:null;
         return {channel:v.channel,contact:v.contact,updatedAt:v.updatedAt,flag:supportReport?(supportReport.status==='resolved'?null:{at:supportReport.reportedAt,note:supportReport.note,by:'owner',supportReportId:supportReport.id}):v.flag||null,...(selfService?{supportReport}:{}),...(selfService&&v.channel==='web'?{reference:conversationReference(c,v.channel,v.contact),retainedMessages:v.history?.total??v.messages.length,historyComplete:v.history?.complete===true}:{}),messages:v.messages.slice(-12)};
@@ -298,6 +298,7 @@ async function handle(req) {
       const result=await prepareConnections(c,session,b), updated=result.client;
       return json({ok:true,preparation:result.preparation,client:ownerView(updated),setup:{...setupReadiness(updated),connectionPreparation:result.connectionPreparation},configurationRevision:configurationRevision(updated),editRevision:workspaceEditRevision(updated)},200,{'Cache-Control':'no-store'});
     }
+    if(b?.action==='report_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await reportConnection(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='report_conversation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);return json(await reportConversation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='platform_automation'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const result=await changePlatformAutomation(c,session,b);return json({...result,leadConnections:await leadConnectionsView(c),...(['takeover','resume'].includes(b.operation)?await readRequestFollowthrough(c,session,b.requestId):{})},200,{'Cache-Control':'no-store'});}
     if(b?.action==='lead_connection'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);if(['prepare','rotate'].includes(b.operation))await fenceConnectionPreparation(c,session,'lead_platform');const result=await changeLeadConnection(c,session,b);return json({...result,...await currentConnectionSnapshot(req,c)},200,{'Cache-Control':'no-store'});}
