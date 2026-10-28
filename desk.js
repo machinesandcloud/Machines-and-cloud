@@ -259,7 +259,9 @@
     var previous=document.body.dataset.activePage;
     window.__tabPicked = true; if (tab === 'test') $('tabTest').style.display = '';
     showTab(tab); var pane = $('p-' + tab); if (!pane) return;
-    history.replaceState(history.state, '', location.pathname + location.search + (typeof connectionHash==='string'&&/^#setup\/(?:web|voice|sms|calendar|thumbtack|angi)\/[a-z0-9_-]+$/.test(connectionHash)?connectionHash:'#' + tab));
+    var connectorHash=typeof connectionHash==='string'&&/^#setup\/(?:web|voice|sms|calendar|thumbtack|angi)(?:\/[a-z0-9_-]+)?$/.test(connectionHash)?connectionHash:null;
+    if(connectorHash&&connectorHash.split('/').length===2)connectorHash+='/intro';
+    history.replaceState(history.state, '', location.pathname + location.search + (connectorHash||'#' + tab));
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
     pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
     if(tab==='leads'&&previous!==tab&&data){var readSequence=loadSequence;queueMicrotask(function(){if(!leaving&&data&&document.body.dataset.activePage==='leads'&&loadSequence===readSequence)load(null,{soft:true});});}

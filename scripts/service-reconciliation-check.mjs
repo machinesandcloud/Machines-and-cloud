@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import net from "node:net"; import http from "node:http"; import https from "node:https";
 const outIndex = process.argv.indexOf("--output"), output = outIndex < 0 ? null : process.argv[outIndex + 1]; if (output && (!/^scratchpad\/[a-z0-9-]+\.json$/.test(output) || existsSync(output))) throw new Error("Choose a new receipt");
-const files = ["netlify/functions/lib/operator.mjs", "netlify/functions/lib/service-reconciliation.mjs", "netlify/functions/service-reconciliation-scheduler.mjs", "netlify/functions/lib/service-health.mjs", "netlify/functions/scheduler.mjs", "netlify/functions/health.mjs", "netlify/functions/lib/calendar-execution.mjs", "netlify/functions/lib/calendar-connection.mjs", "netlify/functions/lib/calendar-delivery.mjs", "admin.js"], hash = value => createHash("sha256").update(value).digest("hex"), hashes = () => Object.fromEntries(files.map(path => [path, hash(readFileSync(path))]));
+const files = ["scripts/service-reconciliation-check.mjs", "netlify/functions/manage.mjs", "netlify/functions/lib/operator.mjs", "netlify/functions/lib/service-reconciliation.mjs", "netlify/functions/service-reconciliation-scheduler.mjs", "netlify/functions/lib/service-health.mjs", "netlify/functions/scheduler.mjs", "netlify/functions/health.mjs", "netlify/functions/lib/calendar-execution.mjs", "netlify/functions/lib/calendar-connection.mjs", "netlify/functions/lib/calendar-delivery.mjs", "admin.js"], hash = value => createHash("sha256").update(value).digest("hex"), hashes = () => Object.fromEntries(files.map(path => [path, hash(readFileSync(path))]));
 const report = { at: new Date().toISOString(), mode: "actual operator HTTP handler + durable service reconciliation; memory fixture; physical networking disabled", before: hashes(), checks: [], dispatches: [] };
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|VAPI_|RESEND_|GOOGLE_|STRIPE_|PHONE_|VOICE_|MESSAGING_|CALENDAR_|SERVICE_)/.test(key)) delete process.env[key];
 const origin = "https://reconciliation.example.test", token = "a".repeat(64), ownerToken = "b".repeat(64);
@@ -58,4 +58,65 @@ await check("A retained dispatch exception fails main health after the active qu
 await check("A stale scanner with pending operator checks fails the monitored main health endpoint",async()=>{await resetHealthFixture();await store.put("service_reconciliation_queue","active_v1",{version:1,intents:{"private-tenant/private-request":{slug:"private-tenant",id:"private-request"}},cursor:""});await store.put("health","serviceChecks:lastRun",{ok:true,at:new Date(clock-26*60000).toISOString()});const health=await mainHealth(false);assert.equal(health.pending,1);assert.equal(health.reasonCode,"service_check_recovery_stale");await store.del("health","serviceChecks:lastRun");assert.equal((await serviceDeliveryHealth()).serviceChecks.ok,false);});
 await check("A failed recovery scan fails main health even with no projected pending request",async()=>{await resetHealthFixture();await store.put("health","serviceChecks:lastRun",{ok:false,at:new Date().toISOString(),reasonCode:"service_check_recovery_unavailable"});const health=await mainHealth(false);assert.equal(health.failures,0);assert.equal(health.pending,0);assert.equal(health.reasonCode,"service_check_recovery_failed");});
 await check("A later resolved watermark and successful pending scan restore monitored main health",async()=>{await resetHealthFixture();await store.put("service_reconciliation_health","active_v1",{version:1,failures:{"private-tenant":{failed:false,sequence:5,at:new Date().toISOString()}}});await store.put("service_reconciliation_queue","active_v1",{version:1,intents:{"private-tenant/private-request":{slug:"private-tenant",id:"private-request"}},cursor:""});await store.put("health","serviceChecks:lastRun",{ok:true,at:new Date().toISOString()});const health=await mainHealth(true);assert.equal(health.pending,1);assert.equal(health.failures,0);assert.equal(health.reasonCode,null);});
+// The ordinary main scan must preserve a real unresolved service reason, rather
+// than flattening it into a generic failure or calling a released number healthy
+// proof of the separate assistant's absence.
+await check("An unknown assistant after number release remains unhealthy with a specific monitored cause",async()=>{
+  await resetHealthFixture();
+  const id="cancelled-health/"+hash("owned synthetic voice"),at=new Date().toISOString();
+  const unknown={id,state:"cleanup_uncertain",createdAt:at,cancelRequestedAt:at,assistantCreateStartedAt:at,reasonCode:"voice_cleanup_unconfirmed",number:{id:"PN"+"c".repeat(32)},privateProviderBody:"do-not-publish-tenant@example.test"};
+  await store.put("voice_activation_intents",id,unknown);
+  await store.put("voice_activation_queue","active_v1",{version:1,intents:{[id]:{id,cancelRequestedAt:at}},cursor:""});
+  const run=await runMainScheduler({forceHour:2,forceDay:"Tue",inline:true}),response=await publicHealth(),body=await response.json();
+  assert.equal(run.blocks.serviceDeliveryRecovery.ok,false);assert.equal(response.status,503);
+  assert.equal(run.blocks.serviceDeliveryRecovery.reasonCode,"voice_unresolved_work");
+  assert.deepEqual(run.blocks.serviceDeliveryRecovery.failingComponents,[{component:"voice",reasonCode:"voice_unresolved_work"}]);
+  assert.ok(body.failingBlocks.includes("serviceDeliveryRecovery: voice_unresolved_work"));
+  assert.doesNotMatch(JSON.stringify(body),/do-not-publish|PNcccc|cancelled-health|reported failure/);
+  assert.deepEqual(await store.get("voice_activation_intents",id),unknown);
+  await store.del("voice_activation_intents",id);await store.del("voice_activation_queue","active_v1");
+});
+await check("Aggregate diagnostics report every fixed failing component and do not alter health predicates",async()=>{
+  await resetHealthFixture();await store.put("service_reconciliation_health","active_v1",{version:1,failures:{"private-identity":{failed:true}}});
+  await store.put("health","platformSMS:lastRun",{at:new Date().toISOString(),ok:false,reasonCode:"private-provider-secret"});
+  const summary=await serviceDeliveryHealth();assert.equal(summary.ok,false);assert.equal(summary.reasonCode,"service_checks_unresolved");
+  assert.deepEqual(summary.failingComponents,[{component:"serviceChecks",reasonCode:"service_checks_unresolved"},{component:"platformSMS",reasonCode:"platform_sms_processing_failed"}]);
+  await store.del("health","platformSMS:lastRun");await resetHealthFixture();
+  const healthy=await serviceDeliveryHealth();assert.equal(healthy.ok,true);assert.equal(healthy.reasonCode,null);assert.deepEqual(healthy.failingComponents,[]);
+});
+await check("Public and actual operator health reads share a bounded finite diagnostic schema",async()=>{
+  const {serviceFailureFacts}=await import("../netlify/functions/lib/service-health.mjs");
+  const rows=[{component:"voice",reasonCode:"private-token-value",providerBody:"secret provider body"},{component:"foreign-tenant",reasonCode:"private-token-value"},{component:"setupCoordinator",reasonCode:"service_setup_uncertain",tenant:"private-identity"}];
+  const expected=[{component:"voice",reasonCode:"voice_recovery_failed"},{component:"setupCoordinator",reasonCode:"service_setup_uncertain"}];
+  assert.deepEqual(serviceFailureFacts(rows),expected);assert.deepEqual(serviceFailureFacts(null),[]);assert.deepEqual(serviceFailureFacts({voice:"secret"}),[]);
+  await store.put("health","scheduler:lastRun",{at:new Date().toISOString(),ok:false,blocks:{serviceDeliveryRecovery:{ok:false,reasonCode:"private-token-value",error:"private error body",failingComponents:rows}}});
+  const publicResponse=await publicHealth(),publicBody=await publicResponse.json();assert.equal(publicResponse.status,503);assert.deepEqual(publicBody.failingComponents,expected);assert.deepEqual(publicBody.failingBlocks,["serviceDeliveryRecovery: voice_recovery_failed"]);
+  const response=await handler(new Request(origin+"/api/manage",{headers:{Authorization:"Bearer "+token}}));assert.equal(response.status,200);
+  const operator=await response.json(),block=operator.system.scheduler.blocks.find(row=>row.name==="serviceDeliveryRecovery");assert.deepEqual(block.failingComponents,expected);assert.equal(block.reasonCode,"voice_recovery_failed");
+  assert.doesNotMatch(JSON.stringify({publicBody,block}),/private-|secret provider|providerBody|tenant|foreign/);
+  assert.equal((await handler(new Request(origin+"/api/manage",{headers:{Authorization:"Bearer "+ownerToken}}))).status,401);
+  const cap=Array.from({length:9},()=>({component:"foreign",reasonCode:"secret"}));assert.deepEqual(serviceFailureFacts([...cap,{component:"voice",reasonCode:"voice_unresolved_work"}]),[]);
+});
+await check("Legacy C2 nested failure receipts expose safe specific diagnostics before the next scheduler tick",async()=>{
+  const at=new Date().toISOString(),legacy={ok:false,voice:{ok:false,reasonCode:"voice_unresolved_work",resource:"private-provider-id"},setupCoordinator:{ok:false,reasonCode:"service_setup_uncertain",tenant:"private-identity"}};
+  await store.put("health","scheduler:lastRun",{at,ok:false,blocks:{serviceDeliveryRecovery:legacy}});
+  const expected=[{component:"voice",reasonCode:"voice_unresolved_work"},{component:"setupCoordinator",reasonCode:"service_setup_uncertain"}];
+  const response=await publicHealth(),body=await response.json();assert.equal(response.status,503);assert.deepEqual(body.failingComponents,expected);assert.deepEqual(body.failingBlocks,["serviceDeliveryRecovery: voice_unresolved_work"]);
+  const operatorResponse=await handler(new Request(origin+"/api/manage",{headers:{Authorization:"Bearer "+token}})),operator=await operatorResponse.json();assert.equal(operatorResponse.status,200);assert.deepEqual(operator.system.scheduler.blocks[0].failingComponents,expected);assert.doesNotMatch(JSON.stringify({body,block:operator.system.scheduler.blocks[0]}),/private-|resource|tenant/);
+  assert.deepEqual(await store.get("health","scheduler:lastRun"),{at,ok:false,blocks:{serviceDeliveryRecovery:legacy}},"Read projection must not rewrite the old receipt");
+});
+await check("Healthy old receipts cannot publish stale declared failures and unknown old shapes stay generic",async()=>{
+  const {serviceHealthFailureFacts}=await import("../netlify/functions/lib/service-health.mjs");
+  assert.deepEqual(serviceHealthFailureFacts({ok:true,voice:{ok:false,reasonCode:"voice_unresolved_work"},failingComponents:[{component:"voice",reasonCode:"voice_unresolved_work"}]}),[]);
+  assert.deepEqual(serviceHealthFailureFacts({ok:false,voice:{ok:true},failingComponents:[{component:"voice",reasonCode:"voice_unresolved_work"}]}),[]);
+  await store.put("health","scheduler:lastRun",{at:new Date().toISOString(),ok:false,blocks:{serviceDeliveryRecovery:{ok:false,reasonCode:"private-raw-message"}}});
+  const response=await publicHealth(),body=await response.json();assert.equal(response.status,503);assert.deepEqual(body.failingComponents,[]);assert.deepEqual(body.failingBlocks,["serviceDeliveryRecovery: service_delivery_unresolved"]);
+});
+await check("Operator and public monitoring agree on future, exact expiry, and contradictory saved scans",async()=>{
+  for(const [delta,ok,blocks,expected] of [[60000,true,{one:{ok:true}},false],[-25*60000,true,{one:{ok:true}},true],[0,true,{one:{ok:false}},false],[0,true,{},false],[0,true,[],false],[0,true,{one:null},false],[0,true,{one:{ok:true}},true]]){
+    await store.put("health","scheduler:lastRun",{at:new Date(clock+delta).toISOString(),ok,blocks});
+    const publicResponse=await publicHealth(),publicBody=await publicResponse.json(),operatorResponse=await handler(new Request(origin+"/api/manage",{headers:{Authorization:"Bearer "+token}}));assert.equal(operatorResponse.status,200);const operator=await operatorResponse.json();
+    assert.equal(publicBody.ok,expected);assert.equal(publicResponse.status,expected?200:503);assert.equal(operator.system.scheduler.healthy,expected);assert.equal(operator.system.scheduler.minutesAgo,publicBody.minutesAgo);
+  }
+});
 report.after = hashes(); report.sourceStable = JSON.stringify(report.before) === JSON.stringify(report.after); report.passed = report.checks.filter(row => row.pass).length; report.total = report.checks.length; report.ok = report.passed === report.total && report.sourceStable; if (output) writeFileSync(output, JSON.stringify(report, null, 2) + "\n"); console.log(JSON.stringify({ ok: report.ok, passed: report.passed, total: report.total, sourceStable: report.sourceStable, fixtureDispatches: report.dispatches.length, failures: report.checks.filter(row => !row.pass), output }, null, 2)); if (!report.ok) process.exitCode = 1;

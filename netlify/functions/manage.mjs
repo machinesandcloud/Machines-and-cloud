@@ -3,6 +3,7 @@ import { normalizeAccountEmail, strictRead } from './lib/accounts.mjs';
 import { OperatorError, operatorEmails, requireOperator, requireCurrentOperator, customerPage, customerView, supportAction, operatorProviderStates } from './lib/operator.mjs';
 import { prospectAudience, prospectsCSV } from './lib/intake.mjs';
 import { platformSMSView } from './lib/platform-sms.mjs';
+import { serviceHealthFailureFacts, schedulerHealthState } from './lib/service-health.mjs';
 
 export const config = { path: '/api/manage' };
 const headers = { 'Cache-Control': 'no-store', 'Netlify-CDN-Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex', Vary: 'Authorization, Origin' };
@@ -58,8 +59,8 @@ export default async (req, context) => {
     }
     const page = await customerPage(url.searchParams.get('cursor') || '');
     const scheduler = await strictRead('health', 'scheduler:lastRun');
-    const age = scheduler?.at ? Math.floor((Date.now() - Date.parse(scheduler.at)) / 60000) : null;
-    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy: age !== null && age < 25 && scheduler?.ok === true, minutesAgo: age, blocks: Object.entries(scheduler?.blocks || {}).map(([name, row]) => ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: row.reasonCode })) }, providerStates: operatorProviderStates() } };
+    const {healthy,minutesAgo:age,blocks}=schedulerHealthState(scheduler);
+    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
     await requireCurrentOperator(session);
     return reply(result);
   } catch (error) {
