@@ -14,7 +14,7 @@ import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
 import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool } from "./lib/sales-desk.mjs";
 import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
-import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordContext, noteWebsiteRecord, finishWebsiteTurn, failWebsiteTurn, WebsiteInstallationError } from './lib/website-installation.mjs';
+import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordContext, noteWebsiteRecord, finishWebsiteTurn, failWebsiteTurn, WebsiteInstallationError, exactWebsiteOrigin } from './lib/website-installation.mjs';
 
 import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
 import { appointmentTextInvitation } from './lib/appointment-texts.mjs';
@@ -31,6 +31,10 @@ function siteOrigin(origin) {
 function hostOf(u) { try { return new URL(u.startsWith("http") ? u : "https://" + u).hostname.replace(/^www\./, ""); } catch { return ""; } }
 function clientOriginAllowed(c, origin) {
   if (!origin || siteOrigin(origin)) return true;
+  if (isSelfServiceClient(c)) {
+    const exact = exactWebsiteOrigin(origin);
+    return !!exact && (c.widget?.allowedOrigins || []).some(value => exactWebsiteOrigin(value) === exact);
+  }
   const h = hostOf(origin);
   const allowed = [c.business?.website, ...(c.widget?.allowedOrigins || [])].map(hostOf).filter(Boolean);
   return allowed.includes(h);

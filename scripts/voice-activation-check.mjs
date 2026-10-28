@@ -7,7 +7,7 @@ import { syncBuiltinESMExports } from "node:module";
 import net from "node:net"; import http from "node:http"; import https from "node:https";
 const outputIndex = process.argv.indexOf("--output"), output = outputIndex < 0 ? null : process.argv[outputIndex + 1];
 if (output && (!/^scratchpad\/[a-z0-9-]+\.json$/.test(output) || existsSync(output))) throw new Error("Choose a new scratchpad receipt");
-const sources = ["netlify/functions/lib/voice-activation.mjs", "netlify/functions/lib/voice-provider.mjs", "netlify/functions/managed-voice.mjs", "netlify/functions/managed-vapi.mjs", "netlify/functions/voice-activation-background.mjs", "netlify/functions/voice-activation-scheduler.mjs"], hash = value => createHash("sha256").update(value).digest("hex"), hashes = () => Object.fromEntries(sources.map(file => [file, hash(readFileSync(file))]));
+const sources = ["netlify/functions/lib/voice-activation.mjs", "netlify/functions/lib/voice-provider.mjs", "netlify/functions/lib/service-lifecycle.mjs", "netlify/functions/managed-voice.mjs", "netlify/functions/managed-vapi.mjs", "netlify/functions/voice-activation-background.mjs", "netlify/functions/voice-activation-scheduler.mjs"], hash = value => createHash("sha256").update(value).digest("hex"), hashes = () => Object.fromEntries(sources.map(file => [file, hash(readFileSync(file))]));
 const result = { at: new Date().toISOString(), mode: "actual voice engine, HTTP adapter and webhook protocols; memory + installed Blobs SDK fixtures; zero real requests", sourceBefore: hashes(), checks: [], conflicts: 0, blocked: [], requests: [] };
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|VAPI_|RESEND_|GOOGLE_|STRIPE_|VOICE_|PHONE_)/.test(key)) delete process.env[key];
 const account = "AC" + "1".repeat(32), twilioToken = "fixture-twilio-token", secret = "fixture-vapi-secret-" + "a".repeat(32), origin = "http://127.0.0.1:8897";
@@ -347,6 +347,17 @@ await check('Actual fallback probe is signed privately while installed route rem
   fallbackBody='<Response><Say>Still only a safe outage message.</Say></Response>';fallbackRedirect=true;await assert.rejects(()=>adapter.verifyRouting(args),/Independent voice fallback unavailable/);fallbackRedirect=false;
   process.env.TWILIO_AUTH_TOKEN='wrong-token';await assert.rejects(()=>adapter.verifyRouting(args),/Independent voice fallback unavailable/);assert.equal(fallbackProbes.at(-1).status,401);process.env.TWILIO_AUTH_TOKEN=twilioToken;
   const before=fallbackProbes.length;process.env.VOICE_FALLBACK_TWIML_URL+='?AccountSid='+account;await assert.rejects(()=>adapter.verifyRouting(args),/Independent voice fallback unavailable/);assert.equal(fallbackProbes.length,before);
+});
+await check('Web activation keeps current and legacy native authority; real pause/resume/cancel still fence it', async () => {
+  const {serviceLifecycle, serviceLifecycleMatches}=await import('../netlify/functions/lib/service-lifecycle.mjs');
+  const testing={status:'testing',operationLifecycleVersion:7,pausedAt:null,cancelledAt:null,liveAt:null};
+  const legacy=hash(JSON.stringify(['testing',7,null,null,null])), current=serviceLifecycle(testing), live={...testing,status:'live',liveAt:new Date().toISOString()};
+  assert(serviceLifecycleMatches(live,legacy)); assert(serviceLifecycleMatches(live,current)); assert.equal(serviceLifecycle(live),current);
+  const oldLive=hash(JSON.stringify(['live',7,null,null,live.liveAt]));assert(serviceLifecycleMatches(live,oldLive));
+  for(const changed of [{...live,operationLifecycleVersion:8},{...live,status:'paused',pausedAt:new Date().toISOString()},{...live,status:'cancelled',cancelledAt:new Date().toISOString()},{...live,cancelledAt:'2026-01-01T00:00:00.000Z'}]) {
+    assert.equal(serviceLifecycleMatches(changed,legacy),false); assert.equal(serviceLifecycleMatches(changed,current),false);
+  }
+  assert.equal(serviceLifecycleMatches(live,'0'.repeat(64)),false);
 });
 result.sourceAfter = hashes(); result.sourceStable = Object.entries(result.sourceBefore).every(([key, value]) => result.sourceAfter[key] === value); result.ok = result.checks.every(check => check.pass) && result.sourceStable && result.blocked.length === 0; result.passed = result.checks.filter(check => check.pass).length; result.total = result.checks.length;
 if (output) writeFileSync(output, JSON.stringify(result, null, 2) + "\n");

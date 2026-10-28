@@ -170,6 +170,15 @@ await check('Replacing a workspace incarnation cannot inherit installation/check
   const replacement = { ...c, ownerKey: 'new-private-incarnation' }; await store.put('clients', c.slug, replacement); const dto = (await owner()).body.websiteInstallation;
   assert.equal(dto.observation.state, 'not_checked'); assert.equal(dto.setupRequest.state, 'not_checked'); assert.equal(dto.firstExternalRequest.state, 'none'); assert.equal((await publicCall(checkA, 'status')).status, 409); await store.put('clients', c.slug, c);
 });
+await check('Removing an allowed website rejects its actual installation and chat despite preserved business revision', async () => {
+  await store.put('clients', c.slug, c); const pending = await start(); assert.equal((await publicCall(pending, 'observe')).status, 200);
+  const before = await store.get('clients', c.slug), oldRevision=configurationRevision(before), calls=modelRequests;
+  const updated=await invoke(clientAPI,'/api/client?c='+c.slug,{expectedRevision:oldRevision,expectedEditRevision:workspaceEditRevision(before),widget:{allowedOrigins:[siteB]}},{method:'PUT'});
+  assert.equal(updated.status,200);const saved=await store.get('clients',c.slug);assert.equal(configurationRevision(saved),oldRevision);assert.deepEqual(saved.widget.allowedOrigins,[siteB]);
+  assert.ok([403,409].includes((await publicCall(pending,'observe')).status));
+  const blocked=await chatAPI(req('/api/chat',{client:c.slug,contact:'removed-origin',messages:[{role:'user',content:'No model request may run.'}]},{origin:siteA,bearer:null}));
+  assert.equal(blocked.status,403);assert.equal(modelRequests,calls);const view=(await owner()).body.websiteInstallation;assert.notEqual(view.observation.state,'found');assert.notEqual(view.setupRequest.state,'complete');await store.put('clients',c.slug,c);
+});
 assert.equal(unexpected, 0);
 const report = { ok: true, checks, model: 'Installed Anthropic SDK with scripted in-process SSE responses; no actual inference', actualExternalRequests: unexpected, actualModelCalls: 0, actualProviderCalls: 0, fixtureSdkRequests: modelRequests, actualHandlersAndDurableMemoryRecords: true };
 const outputAt = process.argv.indexOf('--output'), output = outputAt >= 0 ? process.argv[outputAt + 1] : null;

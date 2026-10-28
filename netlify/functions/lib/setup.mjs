@@ -1,13 +1,35 @@
 // Derived owner readiness. Tutorial clicks and provider keys cannot certify a channel.
 import { createHash } from "node:crypto";
 import { loopCheck } from "./config.mjs";
+import { workspaceTenant } from './workspace-identity.mjs';
 // An unknown marker must never fall back into legacy paid/provider workflows.
 export const isSelfServiceClient = c => !!c && Object.hasOwn(c, "onboarding");
 export const isSupportedSelfServiceClient = c => c?.onboarding?.version === 1;
 const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
+const originArray = values => Array.isArray(values) && values.length <= 5 && new Set(values).size === values.length && values.every(value => {
+  try { const url = new URL(value); return typeof value === 'string' && value.length <= 300 && url.protocol === 'https:' && url.origin === value && !url.username && !url.password && !url.port; } catch { return false; }
+});
+function originRevision(c) {
+  const marker = c.management?.websiteOriginRevision;
+  return marker && Object.keys(marker).length === 3 && marker.version === 1 && marker.tenantIdentity === workspaceTenant(c) && originArray(marker.allowedOrigins) ? marker : null;
+}
+function revisionWidget(c) {
+  const marker = originRevision(c);
+  return marker ? { ...c.widget, allowedOrigins: marker.allowedOrigins } : c.widget;
+}
+// Transport permissions do not change the answers an already approved phone or
+// texting service uses. Keep their exact original hash contribution, including
+// legacy nonempty lists. Actual website permissions and edit CAS still use the
+// current widget.allowedOrigins; this marker never authorizes a website.
+export function preserveWebsiteOriginRevision(current, next) {
+  if (originRevision(current) || !isSupportedSelfServiceClient(current) || !current.widget || !next.widget || !originArray(current.widget.allowedOrigins) || !originArray(next.widget.allowedOrigins) || JSON.stringify(current.widget.allowedOrigins) === JSON.stringify(next.widget.allowedOrigins)) return next;
+  const unchanged = { ...next, widget: { ...next.widget, allowedOrigins: current.widget.allowedOrigins } };
+  if (configurationRevision(unchanged) !== configurationRevision(current)) return next;
+  return { ...next, management: { ...next.management, websiteOriginRevision: { version: 1, tenantIdentity: workspaceTenant(current), allowedOrigins: [...current.widget.allowedOrigins] } } };
+}
 export function configurationRevision(c) {
   const business = Object.fromEntries(["name", "trade", "city", "serviceArea", "notServed", "hours", "afterHours", "spanish", "licenses"].map(key => [key, c.business?.[key] ?? null]));
-  const config = { business, owner: { name: c.owner?.name, phone: c.owner?.phone, backupPhone: c.owner?.backupPhone }, services: c.services, fees: c.fees, windows: c.windows, rules: c.rules, faq: c.faq, summary: c.summary, phone: { businessNumber: c.phone?.businessNumber, forwarding: c.phone?.forwarding, transferTo: c.phone?.transferTo, ...(c.phone?.handoffEnabled === true ? {handoffEnabled:true}:{}) }, widget: c.widget };
+  const config = { business, owner: { name: c.owner?.name, phone: c.owner?.phone, backupPhone: c.owner?.backupPhone }, services: c.services, fees: c.fees, windows: c.windows, rules: c.rules, faq: c.faq, summary: c.summary, phone: { businessNumber: c.phone?.businessNumber, forwarding: c.phone?.forwarding, transferTo: c.phone?.transferTo, ...(c.phone?.handoffEnabled === true ? {handoffEnabled:true}:{}) }, widget: revisionWidget(c) };
   return createHash("sha256").update(JSON.stringify(canonical(config))).digest("hex");
 }
 // One requirement contract drives both the owner form and the review write.

@@ -3,6 +3,7 @@
 import { ACK_MINUTES, normalizeHours, normalizeEmergencies, emergency247 } from './config.mjs';
 import { parseHours } from './config.mjs';
 import { createHash } from 'node:crypto';
+import { preserveWebsiteOriginRevision } from './setup.mjs';
 
 const own = (value, key) => Object.hasOwn(value || {}, key);
 const plain = value => !!value && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
@@ -148,7 +149,7 @@ export function applyWorkspacePatch(current, patch) {
   else if (own(patch.business, 'hours')) value.rules = { ...value.rules, hours: parseHours(value.business.hours) };
   if (own(patch.rules, 'emergencies')) value.rules.emergencies = normalizeEmergencies({ ...normalizeEmergencies(current.rules?.emergencies, value.business?.trade), ...patch.rules.emergencies }, value.business?.trade);
   if (own(patch.business, 'hours') && !own(patch.rules, 'emergency247')) value.rules = { ...value.rules, emergency247: emergency247(value.business.hours) };
-  return value;
+  return own(patch.widget, 'allowedOrigins') ? preserveWebsiteOriginRevision(current, value) : value;
 }
 
 // An omitted value differs from an explicit blank, even for non-revision metadata.

@@ -443,7 +443,8 @@ async function handle(req) {
         }
         if (b.action === "pause" && !["live", "testing"].includes(current.status)) return { result: { error: "not_active", status: 409, setup } };
         const status = b.action === "pause" ? "paused" : b.action === "cancel" ? "cancelled" : "live";
-        const updated = { ...current, status, operationLifecycleVersion: (current.operationLifecycleVersion || 0) + 1, channels: { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
+        const webOnly = ["go_live", "resume"].includes(b.action) && ["testing", "live"].includes(current.status);
+        const updated = { ...current, status, operationLifecycleVersion: (current.operationLifecycleVersion || 0) + (webOnly ? 0 : 1), channels: webOnly ? { ...current.channels, web: { ...current.channels?.web, active: true } } : { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
           ...(status === "live" ? { liveAt: current.liveAt || now, pausedAt: null } : status === "paused" ? { pausedAt: now, pausedFrom: current.status,pausedChannels:current.channels } : { cancelledAt: current.cancelledAt || now, cancelReason: s(b.reason, 300) }) };
         return { value: updated, result: { client: updated } };
       });

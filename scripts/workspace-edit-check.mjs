@@ -57,7 +57,7 @@ await check('Partial valid updates normalize the supplied callback and preserve 
   assert.equal(saved.owner.email, c.owner.email); assert.deepEqual(saved.setupProof, c.setupProof);
 });
 await check('Malformed lists, blank origins and unsupported keys cannot partially mutate', async () => {
-  for (const patch of [{ services: 'A string instead of a list' }, { fees: [{ label: 'Diagnostic' }] }, { widget: { allowedOrigins: [''] } }, { rules: { consentAsk: 'false' } }, { rules: { windowCapacity: 1.5 } }, { services: Array(61).fill('Repair') }, { business: { name: 99 } }, { owner: { email: 'takeover@example.test' } }]) {
+  for (const patch of [{ services: 'A string instead of a list' }, { fees: [{ label: 'Diagnostic' }] }, { widget: { allowedOrigins: [''] } }, { rules: { consentAsk: 'false' } }, { rules: { windowCapacity: 1.5 } }, { services: Array(61).fill('Repair') }, { business: { name: 99 } }, { owner: { email: 'takeover@example.test' } }, { management: { websiteOriginRevision: { version: 1, tenantIdentity: '0'.repeat(64), allowedOrigins: [] } } }]) {
     await reset(); const response = await call({ ...revision(c), summary: 'Must not partially save', ...patch });
     assert.ok([400, 422].includes(response.status), JSON.stringify(response)); assert.ok(Object.keys(response.body.fieldErrors).length); assert.deepEqual(await read(), c);
   }
@@ -118,6 +118,34 @@ await check('Shared owner/operator field limits agree and exact-leaf conflict de
   const patch = parseWorkspacePatch({ business: { name: 'New name' } }); const background = structuredClone(c); background.business.payLink = 'https://example.test/pay';
   assert.equal(workspacePatchConflicts(c, background, patch), false); assert.equal(applyWorkspacePatch(background, patch).business.payLink, background.business.payLink);
   background.business.name = 'Other editor'; assert.equal(workspacePatchConflicts(c, background, patch), true);
+});
+await check('Website origin-only owner writes preserve exact empty and nonempty business revisions', async () => {
+  for (const initial of [[], ['https://fixture.example.test']]) {
+    const before = structuredClone(c); before.widget.allowedOrigins = initial; await store.put('clients', c.slug, before);
+    const old = revision(before), response = await call({ ...old, widget: { allowedOrigins: ['https://new.example.test'] } });
+    assert.equal(response.status, 200); const saved = await read();
+    assert.equal(configurationRevision(saved), old.expectedRevision); assert.notEqual(workspaceEditRevision(saved), old.expectedEditRevision);
+    assert.deepEqual(saved.widget.allowedOrigins, ['https://new.example.test']); assert.deepEqual(saved.management.websiteOriginRevision.allowedOrigins, initial);
+    assert.equal((await call({ ...old, widget: { allowedOrigins: [] } })).status, 409, 'Old edit token cannot change a transport permission');
+    const removed = await call({ ...revision(saved), widget: { allowedOrigins: [] } }); assert.equal(removed.status, 200);
+    assert.equal(configurationRevision(await read()), old.expectedRevision); assert.deepEqual((await read()).widget.allowedOrigins, []);
+  }
+});
+await check('Foreign or malformed website revision markers do not preserve accepted business revision', async () => {
+  const original = structuredClone(c), changed = applyWorkspacePatch(original, { widget: { allowedOrigins: ['https://new.example.test'] } });
+  assert.equal(configurationRevision(changed), configurationRevision(original));
+  for (const mutate of [m => m.version = 2, m => m.tenantIdentity = '0'.repeat(64), m => m.allowedOrigins = ['https://new.example.test/path'], m => m.unapproved = true]) {
+    const bad = structuredClone(changed); mutate(bad.management.websiteOriginRevision); assert.notEqual(configurationRevision(bad), configurationRevision(original));
+  }
+  const recreated = { ...changed, ownerKey: 'other-owner-incarnation' }; assert.notEqual(configurationRevision(recreated), configurationRevision(original));
+});
+await check('Origin permission changes never hide mixed knowledge, greeting or routing edits', async () => {
+  for (const patch of [{ owner: { phone: '+17135550199' } }, { widget: { greeting: 'Changed answer greeting' } }, { rules: { callbackHours: 'Different hours' } }, { services: ['Different work'] }]) {
+    await reset(); const mixed = { ...patch, widget: { ...patch.widget, allowedOrigins: ['https://new.example.test'] } };
+    assert.equal((await call({ ...revision(c), ...mixed })).status, 200); assert.notEqual(configurationRevision(await read()), configurationRevision(c));
+  }
+  const anchored = applyWorkspacePatch(c, { widget: { allowedOrigins: ['https://new.example.test'] } });
+  assert.notEqual(configurationRevision(applyWorkspacePatch(anchored, { widget: { greeting: 'New greeting' } })), configurationRevision(c));
 });
 const failed = checks.filter(row => !row.pass);
 console.log(JSON.stringify({ passed: checks.length - failed.length, failed: failed.length, checks, physicalRequests: 0 }));

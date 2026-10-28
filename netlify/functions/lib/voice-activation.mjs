@@ -4,6 +4,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
 import { atomicUpdate } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from "./setup.mjs";
+import { serviceLifecycle as life, serviceLifecycleMatches } from './service-lifecycle.mjs';
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle, phoneServiceOnboardingActive, phoneServiceOnboardingCancellationRequested, voiceHasNumberUse, voiceNumberCancellationContext, releaseFencedVoiceNumberDependency, voiceCleanupMaintenanceContext } from "./phone-activation.mjs";
 import { createManagedVoiceProvider, managedAssistantBody, voiceProviderFailure } from "./voice-provider.mjs";
 import { requestManagedHuman, handleManagedHumanCallback } from './managed-voice-handoff.mjs';
@@ -13,7 +14,6 @@ const STORE = "voice_activation_intents", QUEUE = "voice_activation_queue", KEY 
 const hash = value => createHash("sha256").update(value).digest("hex"), iso = () => new Date().toISOString();
 const tenant = c => hash(JSON.stringify([c.slug, c.ownerKey, normalizeAccountEmail(c.owner?.email)]));
 const idFor = c => c.slug + "/" + hash("managed-voice-v1:" + tenant(c));
-const life = c => hash(JSON.stringify([c.status, c.operationLifecycleVersion || 0, c.pausedAt || null, c.cancelledAt || null, c.liveAt || null]));
 const validId = value => /^[a-z0-9][a-z0-9-]{0,39}\/[a-f0-9]{64}$/.test(value || "");
 const validNumber = value => /^\+1\d{10}$/.test(value || "");
 const safeFallback = c => validNumber(c.owner?.phone) && c.owner.phone !== c.phone?.businessNumber && c.owner.phone !== c.phone?.twilioNumber ? c.owner.phone : null;
@@ -44,7 +44,7 @@ async function change(id, update) {
 }
 const stageReason = row => row.reasonCode || null;
 export function voiceActivationView(row, c) {
-  const current = !!c && row.tenantIdentity === tenant(c) && row.inputRevision === configurationRevision(c) && row.lifecycle === life(c) && ["testing", "live"].includes(c.status);
+  const current = !!c && row.tenantIdentity === tenant(c) && row.inputRevision === configurationRevision(c) && serviceLifecycleMatches(c, row.lifecycle) && ["testing", "live"].includes(c.status);
   const evidence = row.evidence || {}, forwarded = row.forwardingMode === "use_new_number" || !!evidence.forwardedAt;
   const active = current && row.state === "ready" && !!row.routing?.confirmed && !!evidence.successfulCallAt && evidence.latestCallOutcome !== "failed" && forwarded;
   const state = !current && row.state === "ready" ? "needs_review" : active ? "active" : row.state;
@@ -81,7 +81,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
     const id = idFor(current), existing = await strictRead(STORE, id);
     if (existing?.cancelRequestedAt) throw new VoiceActivationError("cancellation_pending", "A cancelled phone setup cannot be restarted here.");
     if (existing?.tenantIdentity && existing.tenantIdentity !== tenant(current)) throw new VoiceActivationError("identity_conflict", "Phone setup identity changed.");
-    const row = existing && existing.inputRevision === body.expectedRevision && existing.lifecycle === life(current) && existing.policyDigest === policyDigest && existing.forwardingMode === body.forwardingMode ? existing : {
+    const row = existing && existing.inputRevision === body.expectedRevision && serviceLifecycleMatches(current, existing.lifecycle) && existing.policyDigest === policyDigest && existing.forwardingMode === body.forwardingMode ? existing : {
       ...(existing || {}), version: 1, id, slug: current.slug, tenantIdentity: tenant(current), inputRevision: body.expectedRevision, lifecycle: life(current), correlationId: existing?.correlationId || hash("voice-correlation:" + id), callbackToken: existing?.callbackToken || randomBytes(32).toString("hex"),
       createdAt: existing?.createdAt || iso(), updatedAt: iso(), state: enabled() ? "queued" : "waiting_platform", policy, policyDigest, forwardingMode: body.forwardingMode, forwardingBusinessNumber: current.phone?.businessNumber || null,
       authority: { actor: { role: "owner", email: normalizeAccountEmail(body.actor.email) }, at: iso(), policyVersion: policy.version, policyDigest, acceptedAuthority: true },
@@ -102,7 +102,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   async function valid(row, { includeGate = true } = {}) {
     const c = await strictRead("clients", row.slug);
     const parent = c && row.number ? await phoneLifecycle(c) : null;
-    return c && !row.cancelRequestedAt && !row.numberUseFenced && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && ["testing", "live"].includes(c.status) && row.inputRevision === configurationRevision(c) && row.lifecycle === life(c) && row.policyDigest === policyDigest && reviewed(c) && validNumber(c.owner?.phone) && (!row.number || parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id) && (!includeGate || enabled()) && await phoneServiceOnboardingActive(c) ? c : null;
+    return c && !row.cancelRequestedAt && !row.numberUseFenced && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && ["testing", "live"].includes(c.status) && row.inputRevision === configurationRevision(c) && serviceLifecycleMatches(c, row.lifecycle) && row.policyDigest === policyDigest && reviewed(c) && validNumber(c.owner?.phone) && (!row.number || parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id) && (!includeGate || enabled()) && await phoneServiceOnboardingActive(c) ? c : null;
   }
   async function args(row, token) {
     const client = await valid(row), authorizeDispatch = async () => {
@@ -183,7 +183,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
     // a fresh generation once the SAME accepted policy and current private
     // review/test proof are present. Reuse recorded resources and all uncertain
     // create evidence; never mint a replacement or replay a create here.
-    if (isSupportedSelfServiceClient(actualClient) && ["testing","live"].includes(actualClient.status) && reviewed(actualClient) && validNumber(actualClient.owner?.phone) && row.authority?.acceptedAuthority === true && row.policyDigest === policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number?.id && row.assistant?.id && row.imported?.id && row.importedRoute?.vapiUrl && (row.inputRevision !== configurationRevision(actualClient) || row.lifecycle !== life(actualClient))) {
+    if (isSupportedSelfServiceClient(actualClient) && ["testing","live"].includes(actualClient.status) && reviewed(actualClient) && validNumber(actualClient.owner?.phone) && row.authority?.acceptedAuthority === true && row.policyDigest === policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number?.id && row.assistant?.id && row.imported?.id && row.importedRoute?.vapiUrl && (row.inputRevision !== configurationRevision(actualClient) || !serviceLifecycleMatches(actualClient, row.lifecycle))) {
       const previousGeneration = row.generation, inputRevision = configurationRevision(actualClient), rulesChanged = row.inputRevision !== inputRevision, forwardingChanged = row.forwardingBusinessNumber !== (actualClient.phone?.businessNumber || null);
       row = await change(id, old => old.generation === previousGeneration && !old.cancelRequestedAt ? { ...old, generation: old.generation + 1, inputRevision, lifecycle: life(actualClient), state: "queued", claim: null, routing: null, assistantUpdateStartedAt: rulesChanged ? iso() : old.assistantUpdateStartedAt || null,
         forwardingBusinessNumber: actualClient.phone?.businessNumber || null, evidence: { ...old.evidence, ...(rulesChanged ? { successfulCallAt:null,latestCallOutcome:null,lastCallEndedAt:null } : {}), ...(forwardingChanged ? {forwardedAt:null} : {}) }, adoptedAt:iso(), adoptionReason:rulesChanged ? 'reviewed_rules_changed' : 'workspace_lifecycle_changed', reasonCode:null } : null);
@@ -367,7 +367,7 @@ async function serving(row) {
   const parent = c && row.number ? await getPhoneResourceLifecycle(c) : null;
   const brake = await strictRead("health", "brake"), gate = productionPolicy();
   const owned = !row.numberUseFenced && c && isSupportedSelfServiceClient(c) && tenant(c) === row.tenantIdentity && configurationRevision(c) === row.inputRevision && validNumber(c.owner?.phone) && gate.enabled && row.policy && digest(row.policy) === row.policyDigest && digest(gate.policy) === row.policyDigest && parent?.state === "number_acquired" && !parent.cancellationRequested && parent.resource?.id === row.number.id && !brake?.on && await phoneServiceOnboardingActive(c);
-  const valid = owned && !row.cancelRequestedAt && life(c) === row.lifecycle && ["testing", "live"].includes(c.status) && reviewed(c) && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000;
+  const valid = owned && !row.cancelRequestedAt && serviceLifecycleMatches(c, row.lifecycle) && ["testing", "live"].includes(c.status) && reviewed(c) && row.state === "ready" && row.routing?.confirmed && Date.now() - Date.parse(row.routing.checkedAt) <= 25 * 60000;
   // Pausing/detaching AI does not revoke an unchanged, approved owner route.
   // Workspace/number cancellation, changed configuration or the account stop do.
   const fallbackAllowed = owned && ["testing", "live", "paused"].includes(c.status) && row.authority?.acceptedAuthority === true && row.authority.policyDigest === row.policyDigest && normalizeAccountEmail(row.authority.actor?.email) === normalizeAccountEmail(c.owner?.email);
