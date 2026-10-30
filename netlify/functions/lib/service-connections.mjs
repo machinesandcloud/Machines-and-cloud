@@ -1,3 +1,4 @@
+import { paidServiceAuthority } from './paid-service-authority.mjs';
 import { voiceActivationStatus } from "./voice-activation.mjs";
 import { messagingActivationStatus } from "./messaging-activation.mjs";
 import { calendarConnectionView } from "./calendar-connection.mjs";
@@ -46,6 +47,20 @@ export function serviceSetupView(c,services,plan=null,websiteInstallation=null,l
 }
 export async function serviceConnections(c) {
   const [voice,messaging,calendar,calendarDelivery]=await Promise.all([voiceActivationStatus(c),messagingActivationStatus(c),calendarConnectionView(c),calendarDeliveryView(c)]);
+  // Provider receipts describe past delivery; they do not fund new paid work.
+  // Keep unknown/cleanup and platform gates authoritative, and preserve the
+  // independently authorized fixed-owner SMS setup probe before verification.
+  const paymentChecks=[];
+  if(['testing','live'].includes(c.status)){
+    if(voice.platformReady===true&&voice.operation&&!voice.operation.cancellationRequested&&(voice.active||voice.operation.ready===true||voice.operation.state==='waiting_platform'&&voice.operation.reasonCode==='paid_service_unconfirmed'))paymentChecks.push(['voice',voice]);
+    if(messaging.platformReady===true&&messaging.operation&&!messaging.operation.cancellationRequested&&(messaging.active||messaging.operation.state==='waiting_platform'&&messaging.operation.reasonCode==='paid_service_unconfirmed'))paymentChecks.push(['sms',messaging]);
+    if(calendar.connected&&!calendar.reconnectRequired&&calendarDelivery.enabled&&(!calendarDelivery.verification?.attention||calendarDelivery.verification?.paymentHoldOnly===true))paymentChecks.push(['calendar',calendarDelivery]);
+  }
+  await Promise.all(paymentChecks.map(async([id,service])=>{const payment=await paidServiceAuthority(c,id);if(payment.enrolled&&payment.reasonCode==='paid_service_unconfirmed'){
+    service.paymentRequired=true;
+    if(id==='calendar'){service.enabled=false;calendar.detail='Google access is saved. Payment for new Calendar delivery needs confirmation.';}
+    else {service.active=false;service.detail='Your connection is retained. Payment for new service needs confirmation.';service.operation={...service.operation,active:false,...(id==='voice'?{ready:false}:{}),detail:service.detail};}
+  }else if(payment.allowed)service.paymentRequired=false;}));
   const delivery=await managedDeliveryView(c,{activationProbe:messaging.operation});
   if(messaging.operation?.customerAction==='reply_to_setup_text'){
     const probeDelivery=delivery.activationProbe,accepted=probeDelivery?.outboundAccepted===true;

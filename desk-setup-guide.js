@@ -93,6 +93,8 @@
     return journey ? (journey.channels || []).concat(journey.leadSources || []).filter(function (row) { return labels[row.id]; }) : [];
   }
   function action(row) { return row.nextAction || row.action || { kind: 'wait', label: 'Checking setup status' }; }
+  function paymentHold(row) { return row?.activation?.reasonCode==='paid_service_unconfirmed'&&action(row).kind==='route'&&action(row).target==='account'; }
+  function openAccount() { endTask();pageRoute(selected,pageScreen==='intro'?'intro':pageScreen,true);history.pushState(history.state,'',location.pathname+location.search+'#account');document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'account'}})); }
   function needsServiceInformation(id) {
     if(id==='calendar')return false; // Google selects the actual account during permission review.
     var row=rows().find(function(item){return item.id===id;});
@@ -173,6 +175,7 @@
     if(row.verification?.working===true)return 'Delivery verified';
     if(platformHold(row))return 'Setup needs our help';
     if(needsServiceInformation(row.id))return 'Your details needed';
+    if(paymentHold(row))return 'Payment needs confirmation';
     if(row.activation?.blockedBy==='machines_and_cloud')return 'Needs our attention';
     if(row.verification?.state==='needs_attention')return 'Check needs attention';
     if(needsServiceInformation(row.id))return 'Your next step';
@@ -321,6 +324,7 @@
     if(!row||stoppedConnection(row))return;var next=action(row);
     selected=row.id;manualSelection=true;guideManual=false;
     if(row.verification?.working){goToCurrent(row);document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup',connectionHash:location.hash}}));return;}
+    if(paymentHold(row)){openAccount();return;}
     if(next.kind==='wait'){returnToGuide();return;}
     if(row.id==='web'&&next.kind==='route'&&next.target==='setup'){document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup',connectionHash:location.hash}}));render();$('websiteInstallPrimary')?.focus({preventScroll:true});return;}
     if(next.kind==='connection'&&['show_phone_steps','show_text_steps'].includes(next.target)){render();$('setupGuideStageTitle')?.focus({preventScroll:true});return;}
@@ -412,6 +416,12 @@
       if(stopped.updatedAt)body+='<p class="connector-evidence-time">Last saved update: '+esc(checkedTime(stopped.updatedAt))+'</p>';
       if(connectionNotices[selected])body+='<p class="connection-verification-notice" role="status"'+(connectionNotices[selected].error?' data-error="true"':'')+'>'+esc(connectionNotices[selected].text)+'</p>';
       footer='<a class="connection-guide-link" href="mailto:support@machinesandcloud.com">Contact support</a>'+(stopped.pending?'<button type="button" id="setupGuideCheckConnection" class="connection-guide-link"'+(connectionCheck?' disabled':'')+'>'+(connectionCheck?'Checking…':'Check cleanup status')+'</button>':'')+'<button type="button" id="connectorStoppedAccount" class="btn-pill btn-pill-blue btn-sm">Open Account</button>';
+    } else if(paymentHold(row)) {
+      body='<h4 id="setupGuideStageTitle" tabindex="-1">Payment needs confirmation</h4><p class="connector-page-description" id="connectorPaymentHold">'+esc(row.nextStep)+'</p>';
+      footer=back+exit+'<button type="button" id="setupGuideContinue" class="btn-pill btn-pill-blue btn-sm">Check payment in Account</button>';
+    } else if(row.activation?.reasonCode==='saved_setup_waiting_check') {
+      body='<h4 id="setupGuideStageTitle" tabindex="-1">Waiting for the next setup check</h4><p class="connector-page-description" id="connectorSetupWaitingCheck">'+esc(row.nextStep)+'</p>'+(row.setupProgress?.nextCheckAt?'<p class="connector-evidence-time">Next scheduled check: '+esc(checkedTime(row.setupProgress.nextCheckAt))+'</p>':'')+'<p class="muted" id="connectorAutoCheckStatus" role="status">'+esc(document.body.dataset.connectionProgressStatus||'Your saved connection details are kept.')+'</p>';
+      footer=back+exit+'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">Check setup status</button>';
     } else if(pageScreen==='connection-review'||hold&&!/^details-/.test(pageScreen)&&!(next.kind==='route'&&['know','test'].includes(next.target)&&pageScreen!=='intro')) {
       body='<h4 id="setupGuideStageTitle" tabindex="-1">'+(hold?'Prepare '+esc(labels[selected]):'Your connection review')+'</h4><p class="connector-page-description" id="connectorPlatformHold">'+esc(hold?hold.summary:row.nextStep||row.detail||'Follow your saved connection review here.')+'</p>';
       body+=reviewMarkup(selected);
@@ -457,7 +467,7 @@
     if(!stopped&&pageScreen==='connection-check'&&autoCheckKey!==selected){autoCheckKey=selected;queueMicrotask(function(){if(current()&&pageScreen==='connection-check')checkConnection(selected,true);});}
     if(!stopped&&/^details-\d(?:-\d)?$/.test(pageScreen)&&!restoringPage&&window.MCServiceIntake&&!$('serviceIntakeWorkbench')){restoringPage=true;window.MCServiceIntake.open(selected,false,false,Number(pageScreen.split('-')[1]),Number(pageScreen.split('-')[2]||0)).finally(function(){restoringPage=false;});}
   }
-  function goToCurrent(row,replace) { if(!row)return;var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];pageRoute(row.id,row.verification?.working?'connection-check':needsServiceInformation(row.id)?'details-0':step?.id||'connection',replace);autoLeadKey=null;render();focusStage(); }
+  function goToCurrent(row,replace) { if(!row)return;var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];pageRoute(row.id,row.verification?.working?'connection-check':paymentHold(row)?'payment':row.activation?.reasonCode==='saved_setup_waiting_check'?'setup-check':needsServiceInformation(row.id)?'details-0':step?.id||'connection',replace);autoLeadKey=null;render();focusStage(); }
   function restorePage(){if(!current())return;autoLeadKey=null;autoCheckKey=null;var incoming=routeParts();if(incoming&&['connection-check','complete'].includes(incoming.screen))delete connectionNotices[incoming.service];returnWebsiteTask();document.querySelectorAll('#leadSourceDialog[open],#connectionDialog[open]').forEach(function(dialog){dialog.close();});var route=routeParts();if(window.MCServiceIntake?.isOpen(selected))window.MCServiceIntake.close();endTask();if(route){selected=route.service;pageScreen=route.screen;manualSelection=true;}else{selected=null;pageScreen='overview';manualSelection=false;}render();}
   window.addEventListener('hashchange',function(){if(location.hash==='#setup'||location.hash.startsWith('#setup/'))restorePage();});
   document.addEventListener('mc:connector-intake-step',function(event){if(!current()||event.detail?.service!==selected)return;pageRoute(selected,'details-'+event.detail.step+(event.detail.installStage!=null?'-'+event.detail.installStage:''),restoringPage);});

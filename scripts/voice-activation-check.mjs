@@ -423,6 +423,20 @@ await check('Web activation keeps current and legacy native authority; real paus
   }
   assert.equal(serviceLifecycleMatches(live,'0'.repeat(64)),false);
 });
+await check('A ready paid route becomes an Account payment hold at expiry without rewriting its provider receipts',async()=>{
+  const started=clock,c=await client('memory','ready-paid-projection'),e=engine(),requested=await request(e,c),paid=paidFixture(c);await store.put('workspace_billing',paid.key,paid.row);
+  try{assert.equal((await complete(e,requested)).state,'ready');const original=await rowFor(c),before=JSON.stringify(original),calls=result.requests.length,{serviceConnections}=await import('../netlify/functions/lib/service-connections.mjs');
+    assert.equal((await serviceConnections(c)).voice.operation.ready,true);clock=paid.row.paidPeriod.end*1000;
+    const services=await serviceConnections(c);assert.equal(services.voice.paymentRequired,true);assert.equal(services.voice.active,false);assert.equal(services.voice.operation.ready,false);assert.equal(services.voice.forwarding,undefined);assert.equal(services.voice.operation.id,original.id);assert.deepEqual(services.voice.operation.evidence,voice.voiceActivationView(original,c).evidence);assert.equal(JSON.stringify(await rowFor(c)),before);assert.equal(result.requests.length,calls);
+    const {buildConnectionJourney}=await import('../netlify/functions/lib/connection-journey.mjs'),project=services=>buildConnectionJourney(c,services,null,{channels:{web:{blockers:[]}}}).channels.find(r=>r.id==='voice');assert.equal(project(services).action.target,'account');assert.equal(project(services).verification.working,false);
+    clock=paid.row.paidPeriod.end*1000-1000;assert.equal((await serviceConnections(c)).voice.operation.ready,true);assert.equal(JSON.stringify(await rowFor(c)),before);
+  }finally{clock=started;}
+});
+await check('A saved payment hold uses current confirmed funding before its next worker check',async()=>{
+  const started=clock,c=await client('memory','saved-paid-projection'),e=engine(),requested=await request(e,c),paid=paidFixture(c);await store.put('workspace_billing',paid.key,paid.row);
+  try{clock=paid.row.paidPeriod.end*1000;await e.run(requested.id);const original=await rowFor(c),before=JSON.stringify(original),calls=result.requests.length,{serviceConnections}=await import('../netlify/functions/lib/service-connections.mjs'),{buildConnectionJourney}=await import('../netlify/functions/lib/connection-journey.mjs'),project=services=>buildConnectionJourney(c,services,null,{channels:{web:{blockers:[]}}}).channels.find(r=>r.id==='voice');assert.equal(project(await serviceConnections(c)).action.target,'account');clock-=1000;const current=await serviceConnections(c);assert.equal(current.voice.paymentRequired,false);assert.equal(project(current).activation.reasonCode,'saved_setup_waiting_check');assert.equal(project(current).action.kind,'wait');assert.equal(JSON.stringify(await rowFor(c)),before);assert.equal(result.requests.length,calls);
+  }finally{clock=started;}
+});
 result.sourceAfter = hashes(); result.sourceStable = Object.entries(result.sourceBefore).every(([key, value]) => result.sourceAfter[key] === value); result.ok = result.checks.every(check => check.pass) && result.sourceStable && result.blocked.length === 0; result.passed = result.checks.filter(check => check.pass).length; result.total = result.checks.length;
 if (output) writeFileSync(output, JSON.stringify(result, null, 2) + "\n");
 console.log(JSON.stringify({ ok: result.ok, passed: result.passed, total: result.total, conflicts: result.conflicts, fixtureProviderRequests: result.requests.length, failures: result.checks.filter(check => !check.pass), output }, null, 2)); if (!result.ok) process.exitCode = 1;
