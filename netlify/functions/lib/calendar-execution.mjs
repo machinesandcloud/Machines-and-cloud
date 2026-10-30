@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 // A named Calendar cohort and non-refundable physical-attempt budget. This is not
 // a provider dollar ceiling or authority for any phone, SMS or other service.
 import { createHash, randomBytes } from 'node:crypto';
@@ -138,10 +139,12 @@ export async function guardedCalendarFetch(c, action, url, init, options = {}) {
   if (process.env.CALENDAR_CONNECTION_ENABLED !== 'true' || deliveryAction && (process.env.CALENDAR_DELIVERY_ENABLED !== 'true' || (process.env.SERVICE_WORKER_KEY || '').length < 32)) throw new CalendarExecutionError('calendar_gate_closed');
   const site = new URL(process.env.PUBLIC_SITE_URL || process.env.URL || 'https://machinesandcloud.com');
   if (target.username || target.password || target.hash || method !== expectedMethod || !(action === 'tokenExchange' || action === 'tokenRefresh' ? target.href === 'https://oauth2.googleapis.com/token' : action === 'workerDispatch' ? target.origin === site.origin && target.pathname === '/api/calendar-delivery-background' && !target.search : calendarPath)) throw new CalendarExecutionError('calendar_transport_invalid');
+  if(["eventCreate","eventUpdate"].includes(action))await assertPaidServiceAuthority(c,"calendar");
   const receipt = await reserveCalendarExecution(c, action, options);
   await assertCalendarExecution(c, { ...options, receipt });
   if (options.deadline !== undefined && Date.now() >= options.deadline) throw new CalendarExecutionError('calendar_deadline_reached');
   if (process.env.CALENDAR_CONNECTION_ENABLED !== 'true' || deliveryAction && (process.env.CALENDAR_DELIVERY_ENABLED !== 'true' || (process.env.SERVICE_WORKER_KEY || '').length < 32)) throw new CalendarExecutionError('calendar_gate_closed');
+  if(["eventCreate","eventUpdate"].includes(action))await assertPaidServiceAuthority(c,"calendar");
   // Redirects could create uncounted requests or replay credentials to another host.
   return fetch(url, { ...init, redirect: 'error' });
 }

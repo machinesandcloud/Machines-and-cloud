@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority, PaidServiceAuthorityError } from './paid-service-authority.mjs';
 // Managed REST outbox/probe exposure only, not the complete Twilio account bill.
 // Limits are cumulative for this path under a provider account,
 // not a billing plan or a live provider price. Only an explicit approved policy
@@ -20,6 +21,7 @@ const within=(a,b)=>Object.keys(zero()).every(k=>a[k]<=b[k]);
 export class ManagedSMSBudgetError extends Error {
   constructor(code,message='Texting is waiting for an approved platform sending allowance. Your message remains saved.') { super(message);this.code=code; }
 }
+async function paidAuthority(c,job){if(job?.purpose==='activation_probe')return;try{await assertPaidServiceAuthority(c,'sms');}catch(error){if(error instanceof PaidServiceAuthorityError)throw new ManagedSMSBudgetError(error.code,error.message);throw error;}}
 export const managedSMSBudgetKey=()=>`twilio:${hash(process.env.TWILIO_ACCOUNT_SID||'')}`;
 export function managedSMSBudgetPolicy() {
   try {
@@ -67,7 +69,7 @@ function ledger(row,p) {
   return row;
 }
 export async function reserveManagedSMS(c,job) {
-  const p=managedSMSBudgetPolicy();await authority(c,p);const input=payload(c,job),key=managedSMSBudgetKey();
+  const p=managedSMSBudgetPolicy();await authority(c,p);await paidAuthority(c,job);const input=payload(c,job),key=managedSMSBudgetKey();
   const reserved=await atomicUpdate(STORE,key,async previous=>{
     await authority(c,p);const row=ledger(previous,p),old=row.reservations[input.id];
     if(old&&(old.identity!==input.identity||old.tenant!==input.tenant||old.segments!==input.segments))throw new ManagedSMSBudgetError('sms_budget_message_changed');
@@ -81,7 +83,7 @@ export async function reserveManagedSMS(c,job) {
   await assertManagedSMSReservation(c,job,receipt);return receipt;
 }
 export async function assertManagedSMSReservation(c,job,receipt) {
-  const p=managedSMSBudgetPolicy();await authority(c,p);const input=payload(c,job);
+  const p=managedSMSBudgetPolicy();await authority(c,p);await paidAuthority(c,job);const input=payload(c,job);
   if(!receipt||receipt.key!==managedSMSBudgetKey()||receipt.id!==input.id||receipt.identity!==input.identity||receipt.policyDigest!==p.digest)throw new ManagedSMSBudgetError('sms_budget_reservation_changed');
   const row=ledger(await strictRead(STORE,receipt.key),p),saved=row.reservations[input.id],required=p.rates.perMessageMicros+input.segments*p.rates.perSegmentMicros;
   if(!saved||saved.identity!==input.identity||saved.tenant!==input.tenant||saved.segments!==input.segments||saved.costMicros<required||!within(row.used,p.accountLimits)||!within(row.tenants[input.tenant],p.tenantLimits))throw new ManagedSMSBudgetError('sms_budget_reservation_changed');

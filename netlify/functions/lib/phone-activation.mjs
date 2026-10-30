@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 // First irreversible number step. The production gate is OFF by default.
 // No HTTP caller chooses its adapter, execution policy, quote or fixture mode.
 import { createHash, randomBytes } from "node:crypto";
@@ -396,13 +397,15 @@ function phoneEngine({ provider, offer: suppliedOffer, gate = false,allowExpired
     if (row.claim?.token !== token) return phoneActivationView(row);
     // Recheck the product gate after the durable claim and before the adapter.
     if (!enabled()) return phoneActivationView(await change(id, old => old.claim?.token === token ? { ...old, state: "waiting_platform", purchaseStartedAt: null, claim: null, reasonCode: "product_gate_closed" } : null));
+    let paidDispatchBlocked=false;
     const authorizeDispatch = async () => {
       const latestIntent=await strictRead(STORE,id),parentAllowed=latestIntent&&await parentAllows(latestIntent),latestClient=await strictRead('clients',row.slug);
+      try{if(latestClient)await assertPaidServiceAuthority(latestClient,'phone_number');}catch{paidDispatchBlocked=true;return false;}
       return enabled() && !!latestClient && isSupportedSelfServiceClient(latestClient) && tenant(latestClient) === row.tenantIdentity && ["testing", "live"].includes(latestClient.status) && configurationRevision(latestClient) === row.inputRevision && latestIntent?.claim?.token === token && !latestIntent.cancelRequestedAt && parentAllowed;
     };
     const stoppedBeforeDispatch = async () => {
       const latest=await strictRead('clients',row.slug),configurationChanged=latest&&isSupportedSelfServiceClient(latest)&&tenant(latest)===row.tenantIdentity&&['testing','live'].includes(latest.status)&&configurationRevision(latest)!==row.inputRevision;
-      return change(id, old => old.claim?.token === token && !old.resource && old.purchaseStartedAt===row.purchaseStartedAt ? { ...old, state: old.cancelRequestedAt ? "cancelled" : "superseded", purchaseStartedAt: null,purchaseAttempts:old.preDispatchRecovery?old.purchaseAttempts:Math.max(0,old.purchaseAttempts-1), claim: null, reasonCode: configurationChanged?'configuration_changed':"dispatch_not_authorized" } : null);
+      return change(id, old => old.claim?.token === token && !old.resource && old.purchaseStartedAt===row.purchaseStartedAt ? { ...old, state: old.cancelRequestedAt ? "cancelled" : paidDispatchBlocked ? "waiting_platform" : "superseded", purchaseStartedAt: null,purchaseAttempts:old.preDispatchRecovery?old.purchaseAttempts:Math.max(0,old.purchaseAttempts-1), claim: null, reasonCode: configurationChanged?'configuration_changed':paidDispatchBlocked?'paid_service_unconfirmed':"dispatch_not_authorized" } : null);
     };
     if (!await authorizeDispatch()) return phoneActivationView(await stoppedBeforeDispatch());
     try { return phoneActivationView(await recordResource(row, await provider.acquire({ intentId: row.id, correlationId: row.correlationId, offer: row.offer, attemptToken:token,authorizeDispatch }))); }

@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 // Durable customer-specific US texting registration and proof. No execution is enabled by default.
 import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
@@ -175,7 +176,7 @@ function engine({ provider, offer: suppliedOffer, gate = false, allowExpiredOffe
     row = await update(id, old => old.claim && Date.parse(old.claim.until) > Date.now() ? null : ({ ...old, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (row.claim?.token !== token) return view(row, current);
     const change = fn => update(id, old => old.claim?.token === token ? fn(old) : null);
-    const authorizeWrite = async (cleanup = false) => { const [context, job, brake] = await Promise.all([strictRead("clients", row.slug), strictRead(STORE, id), strictRead("health", "brake")]), parent = context ? await parentLifecycle(context) : null,latest=await strictRead('clients',row.slug); return enabled() && brake?.on !== true && Date.now() < deadlineAt && latest && isSupportedSelfServiceClient(latest) && tenant(latest) === row.tenantIdentity && job?.claim?.token === token && job.submissionRevision === row.submissionRevision && (cleanup ? !!job.cancelRequestedAt : !job.cancelRequestedAt && !parent?.cancelRequestedAt && parent?.cancellationRequested !== true && !closed(latest) && job.programDigest === buildMessagingProgram(latest).digest); };
+    const authorizeWrite = async (cleanup = false) => { const [context, job, brake] = await Promise.all([strictRead("clients", row.slug), strictRead(STORE, id), strictRead("health", "brake")]), parent = context ? await parentLifecycle(context) : null,latest=await strictRead('clients',row.slug); if(!cleanup){try{await assertPaidServiceAuthority(latest,'sms');}catch{return false;}} return enabled() && brake?.on !== true && Date.now() < deadlineAt && latest && isSupportedSelfServiceClient(latest) && tenant(latest) === row.tenantIdentity && job?.claim?.token === token && job.submissionRevision === row.submissionRevision && (cleanup ? !!job.cancelRequestedAt : !job.cancelRequestedAt && !parent?.cancelRequestedAt && parent?.cancellationRequested !== true && !closed(latest) && job.programDigest === buildMessagingProgram(latest).digest); };
     try {
       if (!row.number && !row.cancelRequestedAt) {
         const number = await resolveNumber(current);

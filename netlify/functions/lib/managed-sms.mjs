@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority, PaidServiceAuthorityError } from './paid-service-authority.mjs';
 import { createHmac, timingSafeEqual, randomBytes, createHash } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
 import { strictRead } from "./accounts.mjs";
@@ -7,7 +8,7 @@ import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, 
 import { getAcquiredPhoneResource } from "./phone-activation.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
 import { runAgent } from "./agent.mjs";
-import { reserveAIRequest } from "./self-service-ai.mjs";
+import { reserveAIRequest, selfServiceAIModelFetch } from "./self-service-ai.mjs";
 import { dispatchManagedVoiceTool } from "./managed-actions.mjs";
 const hash = value => createHash("sha256").update(value).digest("hex");
 const stamp = () => new Date().toISOString();
@@ -94,13 +95,14 @@ export async function processManagedSMS(id) {
   }
   const consent=await managedSMSConsent(c,job.from);
   if (!["testing","live"].includes(c.status) || consent?.suppressed || !await messagingSender(c)) { await updateInbound(id,row=>({...row,state:"suppressed",reasonCode:"channel_unavailable"})); return {ok:true,suppressed:true}; }
+  try{await assertPaidServiceAuthority(c,'sms');}catch(error){if(!(error instanceof PaidServiceAuthorityError))throw error;await updateInbound(id,row=>({...row,state:'queued',reasonCode:error.code}));return {ok:true,waiting:true,reasonCode:error.code};}
   const incoming=(await Promise.all((await list("managed_sms_inbound",`${c.slug}/${job.tenant}/`)).map(key=>strictRead("managed_sms_inbound",key)))).filter(row=>row?.from===job.from && row.kind==="conversation" && ["queued","running"].includes(row.state)).sort((a,b)=>Date.parse(a.providerDate)-Date.parse(b.providerDate)||a.id.localeCompare(b.id));
   if(incoming[0]?.id!==id)return {ok:true,busy:true};
   const lockKey=`${c.slug}/${job.tenant}/${job.from}`, token=randomBytes(16).toString("hex");
   const locked=await atomicUpdate("managed_sms_locks",lockKey,row=>row && Date.parse(row.until)>Date.now()?{result:false}:{value:{token,until:new Date(Date.now()+180000).toISOString()},result:true});
   if (!locked) return {ok:true,busy:true};
   try {
-    job=await updateInbound(id,row=>row.claim && Date.parse(row.claim.until)>Date.now()?null:({...row,state:"running",attempts:row.attempts+1,claim:{token,until:new Date(Date.now()+180000).toISOString()}}));
+    job=await updateInbound(id,row=>row.claim && Date.parse(row.claim.until)>Date.now()?null:({...row,state:"running",reasonCode:null,attempts:row.attempts+1,claim:{token,until:new Date(Date.now()+180000).toISOString()}}));
     if (job.claim?.token!==token) return {ok:true,busy:true};
     if (job.attempts>3) { await updateInbound(id,row=>({...row,state:"failed",reasonCode:"retry_limit",claim:null})); return {ok:false,reasonCode:"retry_limit"}; }
     const freshAuthority=async()=>{
@@ -131,7 +133,7 @@ export async function processManagedSMS(id) {
       await updateInbound(id,row=>row.claim?.token===token?{...row,state:"completed",claim:null,completedAt:stamp()}:null);
       return {ok:true,recovered:true};
     }
-    const allowance=await reserveAIRequest(c,"web"); if (!allowance.allowed) {
+    const allowance=await reserveAIRequest(c,"web",{service:"sms"}); if (!allowance.allowed) {
       const reply=`${c.business.name}: I cannot complete this reply right now. Please contact ${c.phone?.businessNumber || c.owner.email}. The shop can review your message in its workspace.`;
       if(!await freshAuthority())return {ok:true,suppressed:true};
       await updateInbound(id,row=>row.claim?.token===token?{...row,reply,replyPurpose:"reply",reasonCode:"ai_daily_limit"}:null);
@@ -142,7 +144,7 @@ export async function processManagedSMS(id) {
       return {ok:true,limited:true};
     }
     let mutationIndex=0, booked=false;
-    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach.",tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:1200,maxRetries:0,requireComplete:true,execTool:async(name,input)=>{
+    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach.",tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:1200,maxRetries:0,requireComplete:true,modelFetch:await selfServiceAIModelFetch(c,allowance.proof,{service:"sms"}),execTool:async(name,input)=>{
       if (!await freshAuthority()) throw new Error("Channel authority changed");
       const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`;
       const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms"});
@@ -158,10 +160,10 @@ export async function processManagedSMS(id) {
     await appendHistoryOnce(historyKey,job,planned.reply);
     await updateInbound(id,row=>row.claim?.token===token?{...row,state:"completed",claim:null,completedAt:stamp()}:null);
     return {ok:true};
-  } catch { await updateInbound(id,row=>row.claim?.token===token?{...row,state:row.attempts>=3?"failed":"queued",claim:null,reasonCode:"processing_failed"}:null); return {ok:false,reasonCode:"processing_failed"}; }
+  } catch(error) { const paidHold=error instanceof PaidServiceAuthorityError;await updateInbound(id,row=>row.claim?.token===token?{...row,state:paidHold?"queued":row.attempts>=3?"failed":"queued",attempts:paidHold?Math.max(0,row.attempts-1):row.attempts,claim:null,reasonCode:paidHold?error.code:"processing_failed"}:null); return {ok:paidHold,...(paidHold?{waiting:true}:{}),reasonCode:paidHold?error.code:"processing_failed"}; }
   finally {
     await atomicUpdate("managed_sms_locks",lockKey,row=>row?.token===token?{value:{...row,until:stamp(),token:null}}:{});
-    const pending=(await Promise.all((await list("managed_sms_inbound",`${c.slug}/${job.tenant}/`)).map(key=>strictRead("managed_sms_inbound",key)))).filter(row=>row?.from===job.from&&row.kind==="conversation"&&row.state==="queued").sort((a,b)=>Date.parse(a.providerDate)-Date.parse(b.providerDate)||a.id.localeCompare(b.id));
+    const pending=(await Promise.all((await list("managed_sms_inbound",`${c.slug}/${job.tenant}/`)).map(key=>strictRead("managed_sms_inbound",key)))).filter(row=>row?.from===job.from&&row.kind==="conversation"&&row.state==="queued"&&row.reasonCode!=="paid_service_unconfirmed").sort((a,b)=>Date.parse(a.providerDate)-Date.parse(b.providerDate)||a.id.localeCompare(b.id));
     if(pending[0])try{await dispatchServiceWorker("managed-sms-background",{id:pending[0].id});}catch{/* Scheduled dispatch retries this durable message. */}
   }
 }

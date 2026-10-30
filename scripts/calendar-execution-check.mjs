@@ -1,6 +1,7 @@
 // Physical networking is disabled by the fixture. These checks exercise the real
 // cohort ledger plus real OAuth admission; no provider credentials are loaded.
 import assert from 'node:assert/strict';
+import {paidFixture} from './paid-service-test-fixtures.mjs';
 import { createHash } from 'node:crypto';
 import { fixture, report } from './calendar-test-fixtures.mjs';
 const f = await fixture(), checks = [], hash = value => createHash('sha256').update(value).digest('hex');
@@ -8,6 +9,11 @@ const check = async (name, run) => { await run(); checks.push(name); };
 const publish = p => { process.env.CALENDAR_EXECUTION_POLICY_JSON = JSON.stringify(p); process.env.CALENDAR_EXECUTION_APPROVED_VERSION = p.version; };
 let sequence = 0;
 async function named() { const slug='execution-' + ++sequence;f.setTarget(slug+'@calendar.example.test');return f.seed(slug); }
+await check('Paid Calendar expiry fences new event create/update at physical dispatch while known reads/delete remain available',async()=>{
+ const {client}=await named(),target=client.slug+'@calendar.example.test',fpaid=paidFixture(client),id=f.delivery.calendarEventId(client,'visit-1'),url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(target)+'/events';await f.store.put('workspace_billing',fpaid.key,fpaid.row);
+ const before=f.requests.length;await assert.rejects(f.execution.guardedCalendarFetch(client,'eventCreate',url+'?sendUpdates=none',{method:'POST',headers:{Authorization:'Bearer dummy-access'},body:JSON.stringify({id})},{targetId:target,bookingId:'visit-1',authorize:()=>{f.advance(61000);return true;}}),e=>e.code==='paid_service_unconfirmed');assert.equal(f.requests.length,before);await assert.rejects(f.execution.guardedCalendarFetch(client,'eventUpdate',url+'/'+id,{method:'PATCH',body:'{}'},{targetId:target,bookingId:'visit-1'}),e=>e.code==='paid_service_unconfirmed');
+ const read=await f.execution.guardedCalendarFetch(client,'calendarRead','https://www.googleapis.com/calendar/v3/calendars/primary',{method:'GET'});assert.equal(read.status,200);const removed=await f.execution.guardedCalendarFetch(client,'eventDelete',url+'/'+id+'?sendUpdates=none',{method:'DELETE',headers:{Authorization:'Bearer dummy-access'}},{targetId:target,bookingId:'visit-1'});assert.equal(removed.status,404);
+});
 await check('Missing execution approval blocks real OAuth despite ordinary gates and keys', async () => {
   const {client,session} = await named(); delete process.env.CALENDAR_EXECUTION_APPROVED_VERSION;
   const before = f.requests.length; await assert.rejects(f.connection.startCalendarConnection(client,session,{availabilityConsentVersion:f.connection.CALENDAR_AVAILABILITY_CONSENT_VERSION}), e => e.code === 'calendar_unavailable'); assert.equal(f.requests.length,before);

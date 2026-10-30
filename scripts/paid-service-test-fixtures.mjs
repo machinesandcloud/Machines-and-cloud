@@ -1,0 +1,12 @@
+// Synthetic accepted contract/paid invoice fixtures only. No production imports this file.
+import {createHash} from 'node:crypto';
+import {workspaceTenant} from '../netlify/functions/lib/workspace-identity.mjs';
+const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
+export const paidHash=v=>createHash('sha256').update(typeof v==='string'?v:JSON.stringify(canonical(v))).digest('hex');
+export function paidFixture(c,{services=['voice','sms','calendar'],start=Math.floor(Date.now()/1000)-60,end=Math.floor(Date.now()/1000)+60,funded=true}={}){
+ const tenant=workspaceTenant(c),suffix=paidHash(c.slug).slice(0,12),terms={version:'offline_terms_v1',text:'Offline existing accepted contract fixture.',url:'https://fixture.example.test/terms'},body={version:'offline_paid_v1',stripeAccountId:'acct_paidfixture',currency:'usd',terms,plans:{starter:{priceId:'price_paidfixture',amountCents:9900,services}}},offer={...body,digest:paidHash(body)},attempt=paidHash(c.slug+'checkout').slice(0,32);
+ const row={version:1,slug:c.slug,tenant,livemode:true,stripeAccountId:offer.stripeAccountId,customerId:'cus_'+suffix,checkout:{id:attempt,state:'complete',plan:'starter',services,offer,acceptedTerms:{version:terms.version,digest:paidHash(terms),at:new Date(Date.now()-1000).toISOString()},sessionId:'cs_live_'+suffix},subscription:{id:'sub_'+suffix,status:'active',plan:'starter',services,cancelAtPeriodEnd:false,currentPeriodEnd:new Date(end*1000).toISOString()}};
+ const invoice={id:'in_'+suffix,livemode:true,customer:row.customerId,parent:{type:'subscription_details',subscription_details:{subscription:row.subscription.id}},currency:'usd',status:'paid',billing_reason:'subscription_cycle',amount_paid:9900,amount_remaining:0,total:9900,lines:{has_more:false,data:[{amount:9900,currency:'usd',livemode:true,quantity:1,parent:{type:'subscription_item_details',subscription_item_details:{subscription:row.subscription.id,proration:false}},pricing:{price_details:{price:'price_paidfixture'}},period:{start,end}}]}};
+ if(funded)row.paidPeriod={version:1,tenant,stripeAccountId:row.stripeAccountId,livemode:true,checkoutId:attempt,subscriptionId:row.subscription.id,customerId:row.customerId,offerDigest:offer.digest,priceId:'price_paidfixture',services,invoiceId:invoice.id,start,end,confirmedAt:new Date().toISOString()};
+ return {row,key:c.slug+'/'+tenant,invoice};
+}

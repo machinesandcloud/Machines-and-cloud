@@ -1,5 +1,6 @@
 // Actual production engine and Twilio adapter under intercepted HTTP + memory/installed Blobs SDK.
 import assert from "node:assert/strict";
+import {paidFixture} from "./paid-service-test-fixtures.mjs";
 import { createCipheriv, createDecipheriv, createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
@@ -92,6 +93,7 @@ async function advance(f, wanted = "awaiting_test", max = 80) { let result; f.op
 async function removeLegacyIndustry(id){const row=await strictRead('messaging_activation',id),key=Buffer.from(process.env.PLATFORM_DATA_ENCRYPTION_KEY,'base64'),d=createDecipheriv('aes-256-gcm',key,Buffer.from(row.privateData.nonce,'base64'));d.setAAD(Buffer.from(id));d.setAuthTag(Buffer.from(row.privateData.tag,'base64'));const value=JSON.parse(Buffer.concat([d.update(Buffer.from(row.privateData.ciphertext,'base64')),d.final()]).toString());delete value.legal.businessIndustry;const nonce=Buffer.alloc(12,9),c=createCipheriv('aes-256-gcm',key,nonce);c.setAAD(Buffer.from(id));row.privateData={version:1,nonce:nonce.toString('base64'),ciphertext:Buffer.concat([c.update(JSON.stringify(value)),c.final()]).toString('base64'),tag:c.getAuthTag().toString('base64')};await store.put('messaging_activation',id,row);}
 async function suite(mode) {
   process.env.MC_MEMORY_STORE = mode === "memory" ? "1" : "0";
+  await check(mode+': expired LIVE billing cannot dispatch carrier setup resources; fresh funded period resumes same job',async()=>{const f=await fixture(mode,'paid-registration'),paid=paidFixture(f.c,{start:Math.floor(clock/1000)-120,end:Math.floor(clock/1000)-60});await store.put('workspace_billing',paid.key,paid.row);f.operationId=(await f.engine.request(f.c,f.body())).id;const before=result.providerWrites.length,held=await f.engine.run(f.operationId);assert.equal(held.state,'paused');assert.equal(result.providerWrites.length,before);const current=paidFixture(f.c,{end:Math.floor(clock/1000)+864000});await store.put('workspace_billing',paid.key,current.row);await f.engine.run(f.operationId);assert.ok(result.providerWrites.length>before);assert.equal((await strictRead('messaging_activation',f.operationId)).id,f.operationId);});
   await check(mode+': explicit supported industry reaches the exact carrier payload, never a trade-derived default',async()=>{
     for(const industry of ['TECHNOLOGY','PROFESSIONAL_SERVICES']){const f=await fixture(mode,industry==='TECHNOLOGY'?'industry-tech':'industry-services'),body=f.body({legal:{...legal(),businessIndustry:industry}});f.operationId=(await f.engine.request(f.c,body)).id;await advance(f);const saved=await strictRead('messaging_activation',f.operationId),resource=remote.get('https://trusthub.twilio.com/v1/EndUsers/'+saved.resources.business.sid);assert.equal(resource.attributes.business_industry,industry);assert.equal(resource.attributes.business_name,legal().legalName);}
   });

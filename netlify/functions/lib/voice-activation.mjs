@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 // Durable managed voice setup. Vapi creation, import and Twilio routing each
 // have a stored intent and separately retained resource/readback receipt.
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
@@ -108,6 +109,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   async function args(row, token) {
     const client = await valid(row), authorizeDispatch = async () => {
       const latest = await strictRead(STORE, row.id);
+      try{await assertPaidServiceAuthority(client,'voice');}catch{return false;}
       return latest?.claim?.token === token && latest.generation === row.generation && Date.parse(latest.claim.until)>Date.now() && !!await valid(latest) && Date.parse(latest.claim.until)>Date.now();
     };
     if (!client) throw new VoiceActivationError("dispatch_not_authorized", "Phone setup changed.");
@@ -201,6 +203,12 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
     const c = await valid(row, { includeGate: false });
     if (!c) { const latest = await strictRead("clients", row.slug); return voiceActivationView(await change(id, old => ({ ...old, state: ["cancelled", "archived"].includes(latest?.status) ? "cancelled" : latest?.status === "paused" ? "suspended" : "needs_review", claim: null, reasonCode: "workspace_changed" })), latest); }
     if (!enabled()) return voiceActivationView(await change(id, old => ({ ...old, state: "waiting_platform", reasonCode: "product_gate_closed" })), c);
+    // Keep receipt reconciliation independent from funding. Only a genuinely new
+    // provider mutation waits for payment; no create marker is written on a hold.
+    if ((!row.assistant||row.assistant.inputRevision!==row.inputRevision||row.assistantUpdateStartedAt||!row.imported||!row.importedRoute||!row.routing?.confirmed) && !(row.assistantCreateStartedAt&&!row.assistant || row.importStartedAt&&!row.imported)) {
+      try { await assertPaidServiceAuthority(c,'voice'); }
+      catch(error) { if(error.code==='paid_service_unconfirmed')return voiceActivationView(await change(id,old=>({...old,state:'waiting_platform',reasonCode:error.code})),c);throw error; }
+    }
     if (row.claim && Date.parse(row.claim.until) > Date.now()) return voiceActivationView(row, c);
     const token = randomBytes(16).toString("hex"), generation = row.generation;
     row = await change(id, old => old.generation !== generation || old.claim && Date.parse(old.claim.until) > Date.now() ? null : { ...old, claim: { token, until: new Date(Date.now() + 60000).toISOString() } });
@@ -412,6 +420,7 @@ export async function handleManagedVoiceWebhook(req) {
   if (kind === "inbound" && !safeCaller(c, row, params.From)) return xml(unavailable());
   if (kind === "inbound" && !valid) kind = "fallback";
   if (kind === "inbound") {
+    if(!await strictRead(CALLS,callKey)){try{await assertPaidServiceAuthority(c,"voice");}catch{return xml(unavailable());}}
     const forwardingMatches = row.forwardingMode === "forward_business_line" && validNumber(c.phone?.businessNumber) && params.ForwardedFrom === c.phone.businessNumber;
     const saved = await atomicUpdate(CALLS, callKey, previous => {
       if (previous && (previous.operationId !== row.id || previous.generation !== row.generation || previous.from !== params.From || previous.number !== params.To)) return { result: false };
@@ -487,10 +496,12 @@ async function reserveVoiceBudget(row, sid, purpose = "assistant") {
     // Each Houston day has its own key. A delayed old-day request cannot reset
     // a newer day's counters, and an uncertain reservation is never refunded.
     const day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-    return atomicUpdate("managed_voice_usage", `${scope}/${day}`, current => {
+    return atomicUpdate("managed_voice_usage", `${scope}/${day}`, async current => {
       const value = current || { version: 1, day, calls: 0, reservedSeconds: 0, reservations: {} };
       if (value.version !== 1 || value.day !== day || !Number.isSafeInteger(value.calls) || !Number.isSafeInteger(value.reservedSeconds) || !value.reservations || typeof value.reservations !== "object") throw new Error("Voice usage budget unavailable");
       if (value.reservations[key]) return { result: true };
+      const customer=await strictRead("clients",row.slug);if(!customer||tenant(customer)!==row.tenantIdentity)return {result:false};
+      try{await assertPaidServiceAuthority(customer,"voice");}catch{return {result:false};}
       if (value.calls >= callsLimit || value.reservedSeconds + seconds > minutesLimit * 60 || Object.keys(value.reservations).length >= 10000) return { result: false };
       return { value: { ...value, calls: value.calls + 1, reservedSeconds: value.reservedSeconds + seconds, reservations: { ...value.reservations, [key]: { seconds, at: iso() } } }, result: true };
     });

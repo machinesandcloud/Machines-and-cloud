@@ -1,5 +1,6 @@
 // Strict daily new-workspace AI budget. Installed SDK responses and Blobs are offline protocol fixtures.
 import assert from 'node:assert/strict';
+import {paidFixture} from './paid-service-test-fixtures.mjs';
 import { createHash } from 'node:crypto';
 import { syncBuiltinESMExports } from 'node:module';
 import net from 'node:net'; import http from 'node:http'; import https from 'node:https';
@@ -71,9 +72,11 @@ async function suite(backend){
  response=await clientAPI(req('/api/client?c='+c.slug,null,null,'GET'));const publicView=await response.json();check(backend+': public availability exposes no private quota',()=>{assert.equal(response.status,200);assert.equal(publicView.webAvailable,false);assert.equal(publicView.aiAllowance,undefined);});
  response=await clientAPI(req('/api/client?c='+c.slug,null,token,'GET'));const owner=await response.json();check(backend+': owner receives quota but not other tenant records',()=>{assert.equal(owner.aiAllowance.web.remaining,0);assert.equal(owner.webAvailable,false);assert.equal(owner.aiAllowance.tenants,undefined);});
  await store.saveClient({...c,status:'testing',channels:{web:{active:false}}});response=await clientAPI(req('/api/client?c='+c.slug,{action:'go_live'},token));check(backend+': exhausted quota cannot activate chat',()=>assert.equal(response.status,429));assert.equal((await store.getClient(c.slug)).status,'testing');await store.saveClient(c);
+ const expired=paidFixture(c,{start:Math.floor(clock/1000)-120,end:Math.floor(clock/1000)-60});await store.put('workspace_billing',expired.key,expired.row);
  await reset();modelMode='reject';modelRequests=0;response=await callChat(c,token);check(backend+': failed SDK/model attempt remains charged',()=>{assert.equal(response.status,502);assert.ok(modelRequests>=1);});assert.equal((await getAIAllowance(c)).private.used,1);assert.deepEqual(await store.list('owner_tests',c.slug+'/'),beforeHistory);
- modelMode='success';response=await callChat(c,token);check(backend+': next accepted private turn charges again',()=>assert.equal(response.status,200));assert.equal((await getAIAllowance(c)).private.used,2);
- response=await callChat(c,null,'web');check(backend+': actual public handler consumes same global document',()=>assert.equal(response.status,200));assert.equal((await getAIAllowance(c)).web.used,1);assert.equal((await store.get(KIND,KEY)).used,3);
+ modelMode='success';response=await callChat(c,token);check(backend+': expired LIVE billing retains free private practice',()=>assert.equal(response.status,200));assert.equal((await getAIAllowance(c)).private.used,2);
+ response=await callChat(c,null,'web');check(backend+': expired LIVE billing retains actual free Web model dispatch and its daily budget',()=>assert.equal(response.status,200));assert.equal((await getAIAllowance(c)).web.used,1);assert.equal((await store.get(KIND,KEY)).used,3);
+ const beforePausedModel=modelRequests;await store.saveClient({...c,status:'paused'});response=await callChat(c,null,'web');check(backend+': expired billing never overrides actual pause for free Web',()=>{assert.equal(response.status,403);assert.equal(modelRequests,beforePausedModel);});await store.saveClient(c);
  if(backend==='sdk'){
   await reset();clock=RealDate.parse('2030-06-11T04:59:59Z');await store.put(KIND,KEY,state('2030-06-10',c.slug,19,30));let reached,release;const entered=new Promise(r=>{reached=r;}),gate=new Promise(r=>{release=r;});hold={kind:'site:'+KIND,key:KEY,reached,release:gate};const beforeConflicts=conflicts,pending=reserveAIRequest(c,'private');await entered;
   await store.put(KIND,KEY,state('2030-06-10',c.slug,20,30));clock=RealDate.parse('2030-06-11T05:00:01Z');release();const reserved=await pending,rolled=await store.get(KIND,KEY);

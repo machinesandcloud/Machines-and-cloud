@@ -1,6 +1,7 @@
 // New-workspace AI allowance. Counts accepted logical turns, including failed/ambiguous attempts.
 // One CAS document arbitrates the shared ceiling across tenants and both chat modes.
 import { atomicUpdate } from './store.mjs';
+import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 import { workspaceTenant, supportedWorkspace } from './workspace-identity.mjs';
 import { addDays, houstonToday } from './availability.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
@@ -60,7 +61,8 @@ export async function getAIAllowance(client) {
   });
   return projectProofAllowance(client, current);
 }
-export async function reserveAIRequest(client, mode) {
+export async function reserveAIRequest(client, mode, {service='web'}={}) {
+  if(mode==='web'&&service!=='web')await assertPaidServiceAuthority(client,service);
   const slug = tenantSlug(client), key = `${slug}:${workspaceTenant(client)}`;
   if (mode !== 'private' && mode !== 'web') throw new Error('Invalid AI mode');
   const current = await atomicUpdate(AI_BUDGET_KIND, AI_BUDGET_KEY, previous => {
@@ -144,10 +146,11 @@ async function projectProofAllowance(c, allowance) {
   try { selected=await proofSelection(c);if(!selected)return allowance;await proofAuthority(c,selected.p);const row=proofLedger(selected.row,selected.p),logical=Math.max(0,selected.p.limits.logical-Object.keys(row.logical).length),physical=Math.max(0,selected.p.limits.physical-Object.keys(row.physical).length),remaining=physical>0?logical:0;return {...allowance,private:{...allowance.private,remaining:Math.min(allowance.private.remaining,remaining)},web:{...allowance.web,remaining:Math.min(allowance.web.remaining,remaining)},available:allowance.available&&remaining>0}; }
   catch(error) { if(!(error instanceof AIProofError))throw error;return {...allowance,private:{...allowance.private,remaining:0},web:{...allowance.web,remaining:0},available:false}; }
 }
-export async function selfServiceAIModelFetch(c, receipt) {
-  if (!await proofTurn(c,receipt)) return undefined;
-  const transport=globalThis.fetch;
+export async function selfServiceAIModelFetch(c, receipt, {service='web',mode='web'}={}) {
+  const proof=await proofTurn(c,receipt),transport=globalThis.fetch;
+  if(!proof){if(mode==='private'||service==='web')return undefined;return async(input,init={})=>{await assertPaidServiceAuthority(c,service);return transport(input,init);};}
   return async (input, init={}) => {
+    if(mode!=='private'&&service!=='web')await assertPaidServiceAuthority(c,service);
     const selected=await proofTurn(c,receipt),p=selected?.p;if(!p)proofFail('ai_proof_binding_missing');
     const url=new URL(typeof input==='string'||input instanceof URL?String(input):input.url),method=(init.method||'GET').toUpperCase();
     if(url.origin!=='https://api.anthropic.com'||url.pathname!=='/v1/messages'||url.hash||url.username||url.password||[...url.searchParams.keys()].some(key=>key!=='beta')||url.searchParams.getAll('beta').length>1||url.searchParams.has('beta')&&url.searchParams.get('beta')!=='true'||method!=='POST'||typeof init.body!=='string'||Buffer.byteLength(init.body,'utf8')>p.maxRequestBytes)proofFail('ai_proof_transport_forbidden');
@@ -157,6 +160,7 @@ export async function selfServiceAIModelFetch(c, receipt) {
     await atomicUpdate(PROOF_STORE,c.slug,async previous=>{await proofAuthority(c,p,receipt);const row=proofLedger(previous,p),turn=row.logical[receipt.turnId];if(!turn||turn.policyDigest!==receipt.policyDigest)proofFail('ai_proof_turn_changed');if(Object.keys(row.physical).length>=p.limits.physical)proofFail('ai_proof_exhausted');return {value:{...row,physical:{...row.physical,[attemptId]:{turnId:receipt.turnId,policyDigest:p.digest,bodyDigest:digest(init.body),at:new Date().toISOString()}}}};});
     await proofAuthority(c,p,receipt);
     if(selfServiceAIProofPolicy()?.digest!==p.digest)proofFail('ai_proof_policy_changed');
+    if(mode!=='private'&&service!=='web')await assertPaidServiceAuthority(c,service);
     return transport(input,{...init,redirect:'error'});
   };
 }

@@ -1,6 +1,7 @@
 // Actual production state machine, provider HTTP adapter and signed webhook handlers.
 // All credentials are dummy and every physical network primitive is disabled.
 import assert from "node:assert/strict";
+import {paidFixture} from "./paid-service-test-fixtures.mjs";
 import { createHash, createHmac } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
@@ -86,6 +87,19 @@ function event(row, type, extra = {}, headers = true, sidOverride = null) { cons
 const end = row => event(row, "end-of-call-report", { startedAt: new Date(clock - 20000).toISOString(), endedAt: new Date(clock).toISOString(), endedReason: "customer-ended-call", artifact: { transcript: "Fixture customer asked about AC service." }, analysis: { summary: "Fixture service inquiry." } });
 async function suite(mode) {
   process.env.MC_MEMORY_STORE = mode === "memory" ? "1" : "0"; const name = text => mode + ": " + text;
+  await check(name("paid period expiration blocks new calls and paid legs but retains admitted call settlement and cleanup"),async()=>{
+    const c=await client(mode,'paid'),e=engine(),requested=await request(e,c);await complete(e,requested);const row=await rowFor(c),f=paidFixture(c);await store.put('workspace_billing',f.key,f.row);
+    const first=await voice.handleManagedVoiceWebhook(signed(row,'inbound'));assert.match(await first.text(),/Redirect/);assert.ok((await(await voice.handleManagedVapiWebhook(event(row,'assistant-request'))).json()).assistant);
+    clock=f.row.paidPeriod.end*1000;
+    const replay=await voice.handleManagedVoiceWebhook(signed(row,'inbound'));assert.match(await replay.text(),/Redirect/,'Already admitted same call is settled on its original reservation');
+    const rejected=await voice.handleManagedVoiceWebhook(signed(row,'inbound',{CallSid:'CA'+hash(c.slug+'new-paid-call').slice(0,32)}));assert.doesNotMatch(await rejected.text(),/Redirect|<Dial/);
+    const fallback=await voice.handleManagedVoiceWebhook(signed(row,'fallback'));assert.doesNotMatch(await fallback.text(),/<Dial/,'New fallback leg is chargeable');
+    assert.equal((await voice.handleManagedVapiWebhook(end(row))).status,200);
+    await e.cancel(c,{actor:{role:'owner',email:c.owner.email},expectedRevision:configurationRevision(c)});for(let n=0;n<8;n++)await e.run(requested.id);assert.equal((await rowFor(c)).state,'cancelled');
+  });
+  await check(name("expired paid service cannot create another assistant or import and writes no uncertain-create marker"),async()=>{
+    const c=await client(mode,'paid-create'),e=engine(),requested=await request(e,c),f=paidFixture(c,{start:Math.floor(clock/1000)-120,end:Math.floor(clock/1000)-60});await store.put('workspace_billing',f.key,f.row);const before=result.requests.filter(x=>x.method==='POST').length;assert.equal((await e.run(requested.id)).state,'waiting_platform');const saved=await rowFor(c);assert.equal(saved.assistantCreateStartedAt,undefined);assert.equal(result.requests.filter(x=>x.method==='POST').length,before);
+  });
   await check(name("authority is saved while account gate is closed; unknown owner is rejected"), async () => {
     const c = await client(mode, "gate"), e = engine(), before = result.requests.length; enabled = false; const row = await request(e, c); assert.equal(row.state, "waiting_platform"); assert.equal((await e.run(row.id)).state, "waiting_platform"); assert.equal(result.requests.length, before);
     await assert.rejects(() => request(e, c, { actor: { role: "owner", email: "foreign@example.test" } }), err => err.status === 403); await assert.rejects(() => request(e, c, { acceptedAuthority: false }), err => err.status === 400);
