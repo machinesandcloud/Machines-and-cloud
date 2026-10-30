@@ -7,7 +7,7 @@ import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from "./setup.mjs";
 import { serviceLifecycle as life, serviceLifecycleMatches } from './service-lifecycle.mjs';
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle, phoneServiceOnboardingActive, phoneServiceOnboardingCancellationRequested, voiceHasNumberUse, voiceNumberCancellationContext, releaseFencedVoiceNumberDependency, voiceCleanupMaintenanceContext } from "./phone-activation.mjs";
-import { createManagedVoiceProvider, managedAssistantBody, voiceProviderFailure } from "./voice-provider.mjs";
+import { createManagedVoiceProvider, managedAssistantBody, voiceProviderFailure, voiceMutationWasNotDispatched } from "./voice-provider.mjs";
 import { confirmedVoiceCreateRejection } from "./voice-provider-evidence.mjs";
 import { requestManagedHuman, handleManagedHumanCallback } from './managed-voice-handoff.mjs';
 
@@ -123,7 +123,7 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
         const late = { at: iso(), generation: row.generation, ...patch };
         return { ...current, lateReceipts: [...(current.lateReceipts || []), late].slice(-20) };
       }
-      return { ...current, ...patch, ...(current.cancelRequestedAt ? { state: "cleanup_pending" } : {}), claim: null, reasonCode: patch.reasonCode || null };
+      return { ...current, ...patch, ...(current.cancelRequestedAt ? { state: "cleanup_pending" } : {}), pendingMutationDispatch:null, claim: null, reasonCode: patch.reasonCode || null };
     });
   }
   async function cancel(c, body = {}) {
@@ -213,6 +213,20 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
     const token = randomBytes(16).toString("hex"), generation = row.generation;
     row = await change(id, old => old.generation !== generation || old.claim && Date.parse(old.claim.until) > Date.now() ? null : { ...old, claim: { token, until: new Date(Date.now() + 60000).toISOString() } });
     if (row.claim?.token !== token) return voiceActivationView(row, c);
+    let mutationAttempt=null;
+    const resourcesStamp=value=>digest([value.assistant||null,value.imported||null,value.importedRoute||null,value.routing||null,value.lateReceipts||[]]);
+    async function markMutation(field,state){
+      const intent={operationId:id,generation,tenantIdentity:row.tenantIdentity,inputRevision:row.inputRevision,claimToken:token,field,markerAt:iso(),numberId:row.number?.id||null,nonce:randomBytes(16).toString('hex'),resourcesStamp:resourcesStamp(row)};
+      row=await change(id,old=>old.claim?.token!==token||old.generation!==generation||!(Date.parse(old.claim.until)>Date.now())?null:{...old,[field]:old[field]||intent.markerAt,...(!old[field]?{pendingMutationDispatch:intent}:{}),state});
+      // The durable nonce distinguishes this invocation from an older unknown
+      // marker, including when two attempts happen at the same clock instant.
+      mutationAttempt=row.pendingMutationDispatch?.nonce===intent.nonce?{intent,invoked:false}:null;
+    }
+    async function invokeMutation(method,call,extra={}){
+      if(!await call.authorizeDispatch())throw new VoiceActivationError('dispatch_not_authorized','Phone setup changed.');
+      if(mutationAttempt)mutationAttempt.invoked=true;
+      return provider[method]({...call,...extra,...(mutationAttempt?{dispatchIntent:mutationAttempt.intent}:{})});
+    }
     try {
       const number = await acquiredNumber(c);
       if (!number || !/^PN[a-f0-9]{32}$/i.test(number.id || "") || !validNumber(number.number)) return voiceActivationView(await receipt(row, token, { state: "waiting_number", reasonCode: "number_unavailable" }), c);
@@ -228,15 +242,14 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
           if (found.status !== "found") return voiceActivationView(await receipt(row, token, { state: "uncertain", reasonCode: found.reasonCode || "assistant_create_unconfirmed" }), c);
           return voiceActivationView(await receipt(row, token, { assistant: { ...found.resource, recordedAt: iso() }, state: "queued" }), c);
         }
-        row = await change(id, old => old.claim?.token === token ? { ...old, assistantCreateStartedAt: iso(), state: "creating_assistant" } : null);
-        if (!await call.authorizeDispatch()) throw new VoiceActivationError("dispatch_not_authorized", "Phone setup changed.");
-        const assistant = await provider.createAssistant(call); return voiceActivationView(await receipt(row, token, { assistant: { ...assistant, recordedAt: iso() }, state: "queued" }), await strictRead("clients", row.slug));
+        await markMutation('assistantCreateStartedAt','creating_assistant');
+        const assistant = await invokeMutation('createAssistant',call); return voiceActivationView(await receipt(row, token, { assistant: { ...assistant, recordedAt: iso() }, state: "queued" }), await strictRead("clients", row.slug));
       }
       if (row.assistant.inputRevision !== row.inputRevision || row.assistantUpdateStartedAt) {
         const verification = await provider.verifyAssistant({ ...call, resourceId: row.assistant.id });
         if (!verification.confirmed) {
-          row = await change(id, old => old.claim?.token === token ? { ...old, assistantUpdateStartedAt: iso(), state: "creating_assistant" } : null);
-          const assistant = await provider.updateAssistant({ ...call, resourceId: row.assistant.id });
+          await markMutation('assistantUpdateStartedAt','creating_assistant');
+          const assistant = await invokeMutation('updateAssistant',call,{resourceId:row.assistant.id});
           return voiceActivationView(await receipt(row, token, { assistant: { ...assistant, recordedAt: iso() }, assistantUpdateStartedAt: null, state: "queued" }), c);
         }
         return voiceActivationView(await receipt(row, token, { assistant: { ...verification.resource, recordedAt: iso() }, assistantUpdateStartedAt: null, state: "queued" }), c);
@@ -246,8 +259,8 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
           const found = await provider.lookupNumber(call); if (found.status !== "found") return voiceActivationView(await receipt(row, token, { state: "uncertain", reasonCode: found.reasonCode || "number_import_unconfirmed" }), c);
           return voiceActivationView(await receipt(row, token, { imported: { ...found.resource, recordedAt: iso() }, state: "queued" }), c);
         }
-        row = await change(id, old => old.claim?.token === token ? { ...old, importStartedAt: iso(), state: "importing_number" } : null);
-        const imported = await provider.importNumber(call); return voiceActivationView(await receipt(row, token, { imported: { ...imported, recordedAt: iso() }, state: "queued" }), await strictRead("clients", row.slug));
+        await markMutation('importStartedAt','importing_number');
+        const imported = await invokeMutation('importNumber',call); return voiceActivationView(await receipt(row, token, { imported: { ...imported, recordedAt: iso() }, state: "queued" }), await strictRead("clients", row.slug));
       }
       if (!row.importedRoute) {
         const route = await provider.readImportedRoute(call); return voiceActivationView(await receipt(row, token, { importedRoute: { ...route, recordedAt: iso() }, state: "queued" }), c);
@@ -256,10 +269,25 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
       if (!assistant.confirmed) return voiceActivationView(await receipt(row, token, { state: "queued", assistantUpdateStartedAt: iso(), reasonCode: "assistant_readback_mismatch" }), c);
       const routing = await provider.verifyRouting(call);
       if (routing.confirmed) return voiceActivationView(await receipt(row, token, { routing: { ...routing, checkedAt: iso() }, state: "ready" }), c);
-      row = await change(id, old => old.claim?.token === token ? { ...old, routingStartedAt: iso(), state: "configuring_routing" } : null);
-      const configured = await provider.configureRouting(call);
+      await markMutation('routingStartedAt','configuring_routing');
+      const configured = await invokeMutation('configureRouting',call);
       return voiceActivationView(await receipt(row, token, { state: configured.confirmed ? "ready" : "uncertain", routing: configured.confirmed ? { ...configured, checkedAt: iso() } : null, reasonCode: configured.confirmed ? null : "routing_readback_mismatch" }), await strictRead("clients", row.slug));
     } catch (error) {
+      const knownNoDispatch=mutationAttempt&&error?.code==='dispatch_not_authorized'&&(!mutationAttempt.invoked||voiceMutationWasNotDispatched(error,mutationAttempt.intent));
+      if(knownNoDispatch){
+        const intent=mutationAttempt.intent;
+        const held=await change(id,async old=>{
+          if(old.claim?.token!==token||old.generation!==generation||!(Date.parse(old.claim.until)>Date.now())||old.tenantIdentity!==intent.tenantIdentity||old.inputRevision!==intent.inputRevision||old.number?.id!==intent.numberId||old[intent.field]!==intent.markerAt||digest(old.pendingMutationDispatch)!==digest(intent)||resourcesStamp(old)!==intent.resourcesStamp)return null;
+          const current=await strictRead('clients',old.slug),validCurrent=await valid(old,{includeGate:false});let state='needs_review',reasonCode='workspace_changed';
+          if(old.cancelRequestedAt){state='cleanup_pending';reasonCode=old.reasonCode||null;}
+          else if(current?.status==='paused')state='suspended';
+          else if(validCurrent){state='waiting_platform';reasonCode=enabled()?'paid_service_unconfirmed':'product_gate_closed';}
+          if(!(Date.parse(old.claim.until)>Date.now()))return null;
+          const proof={...intent,at:iso(),mutationDispatched:false,reasonCode};
+          return {...old,[intent.field]:null,pendingMutationDispatch:null,knownNoDispatch:[...(old.knownNoDispatch||[]),proof].slice(-20),state,reasonCode,claim:null};
+        });
+        return voiceActivationView(held,await strictRead('clients',row.slug));
+      }
       const failure = voiceProviderFailure(error);
       return voiceActivationView(await change(id, old => old.claim?.token === token ? { ...old, ...(failure ? { providerFailure: failure } : {}), state: error?.code === "dispatch_not_authorized" ? "needs_review" : "uncertain", claim: null, reasonCode: error?.code === "dispatch_not_authorized" ? "workspace_changed" : "provider_result_unconfirmed" } : null), await strictRead("clients", row.slug));
     }

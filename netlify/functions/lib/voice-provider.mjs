@@ -7,6 +7,10 @@ import { REQUEST_HUMAN } from "./managed-voice-handoff.mjs";
 import { createHmac } from "node:crypto";
 
 const uuid = value => typeof value === "string" && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
+// Only this actual adapter can certify that its current mutation never reached
+// fetch. An error code alone, or a failure after fetch began, is not that proof.
+const undispatchedMutations = new WeakMap();
+export const voiceMutationWasNotDispatched=(error,intent)=>!!intent&&undispatchedMutations.get(error)===JSON.stringify(intent);
 const pn = value => /^PN[a-f0-9]{32}$/i.test(value || "");
 const label = (kind, correlation) => `mc-${kind}-${correlation.slice(0, 30)}`;
 const includes = (actual, expected) => Array.isArray(expected) ? Array.isArray(actual) && actual.length === expected.length && expected.every((value, i) => includes(actual[i], value)) : expected && typeof expected === "object" ? actual && typeof actual === "object" && Object.entries(expected).every(([key, value]) => includes(actual[key], value)) : actual === expected;
@@ -69,13 +73,14 @@ export function managedAssistantBody(c, { correlationId, inputRevision, policy, 
 }
 export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null, maintenanceAllowed = null }) {
   const allowed = () => { if (executionAllowed() !== true) throw new Error("Voice execution is disabled"); };
-  async function request(origin, path, method = "GET", body, maintenanceArgs = null) {
+  async function request(origin, path, method = "GET", body, maintenanceArgs = null, beforeMutationDispatch = null) {
     const maintenance = executionAllowed()!==true && origin==='vapi' && !body && ['GET','DELETE'].includes(method) && (method==='GET'&&/^\/(assistant|phone-number)(?:\/[a-f0-9-]{36}|\?limit=1000)$/.test(path)||method==='DELETE'&&/^\/(assistant|phone-number)\/[a-f0-9-]{36}$/.test(path)) && typeof maintenanceAllowed==='function' && await maintenanceAllowed({origin,path,method,args:maintenanceArgs})===true;
     if(!maintenance)allowed(); const remaining = Math.min(5000, deadlineAt === null ? Infinity : deadlineAt - Date.now());
     if (remaining <= 0) throw new Error("Voice operation deadline reached");
     const vapi = origin === "vapi", account = process.env.TWILIO_ACCOUNT_SID;
     if (!vapi && !/^AC[a-f0-9]{32}$/i.test(account || "")) throw new Error("Invalid Twilio account");
     const auth = vapi ? `Bearer ${process.env.VAPI_API_KEY || ""}` : "Basic " + Buffer.from(`${process.env.TWILIO_API_KEY || account}:${process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN || ""}`).toString("base64");
+    if(['POST','PATCH'].includes(method)&&beforeMutationDispatch)beforeMutationDispatch();
     const response = await fetch((vapi ? "https://api.vapi.ai" : `https://api.twilio.com/2010-04-01/Accounts/${account}`) + path, { method, headers: { Authorization: auth, ...(body ? { "Content-Type": vapi ? "application/json" : "application/x-www-form-urlencoded" } : {}) },
       ...(body ? { body: vapi ? JSON.stringify(body) : new URLSearchParams(body).toString() } : {}), signal: AbortSignal.timeout(remaining), redirect: "error" });
     if (response.status === 404 && ["GET", "DELETE"].includes(method)) return null;
@@ -83,6 +88,7 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
     return response.status === 204 ? {} : response.json();
   }
   async function authorize(fn) { allowed(); if (typeof fn !== "function" || await fn() !== true) { const err = new Error("Voice dispatch no longer authorized"); err.code = "dispatch_not_authorized"; throw err; } }
+  async function mutation(args,work){let dispatched=false;try{return await work(()=>{dispatched=true;});}catch(error){if(!dispatched&&error?.code==='dispatch_not_authorized'&&args.dispatchIntent)undispatchedMutations.set(error,JSON.stringify(args.dispatchIntent));throw error;}}
   function assistantReceipt(value, args) {
     if (!uuid(value?.id) || value.metadata?.mcVoiceCorrelation !== args.correlationId) throw new Error("Assistant correlation mismatch");
     return { id: value.id, correlationId: args.correlationId, inputRevision: value.metadata?.mcVoiceRevision || null };
@@ -176,12 +182,12 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
       return { callSid: receipt.sid, status: "accepted" };
       } catch(error) { if (!dispatched) error.code='handoff_not_dispatched'; throw error; }
     },
-    async createAssistant(args) { await authorize(args.authorizeDispatch); return assistantReceipt(await request("vapi", "/assistant", "POST", managedAssistantBody(args.client, args)), args); },
+    async createAssistant(args) { return mutation(args,async dispatched=>{await authorize(args.authorizeDispatch); return assistantReceipt(await request("vapi", "/assistant", "POST", managedAssistantBody(args.client, args),null,dispatched), args);}); },
     async lookupAssistant(args) { return lookup("assistant", args); },
     async updateAssistant(args) {
-      if (!uuid(args.resourceId)) throw new Error("Invalid assistant receipt");
+      return mutation(args,async dispatched=>{if (!uuid(args.resourceId)) throw new Error("Invalid assistant receipt");
       const before = await lookup("assistant", args); if (before.status !== "found") throw new Error("Assistant unavailable");
-      await authorize(args.authorizeDispatch); const body = managedAssistantBody(args.client, args); return assistantReceipt(await request("vapi", `/assistant/${args.resourceId}`, "PATCH", body), args);
+      await authorize(args.authorizeDispatch); const body = managedAssistantBody(args.client, args); return assistantReceipt(await request("vapi", `/assistant/${args.resourceId}`, "PATCH", body,null,dispatched), args);});
     },
     async verifyAssistant(args) {
       const found = await lookup("assistant", args); if (found.status !== "found") return { confirmed: false };
@@ -192,14 +198,14 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
       const { messages: expectedMessages, ...expectedModel } = expected.model;
       return { confirmed: actual.metadata?.mcVoiceRevision === args.inputRevision && includes(actual.model, expectedModel) && includes(actual.server, expected.server) && actual.maxDurationSeconds === expected.maxDurationSeconds, resource: found.resource };
     },
-    async importNumber(args) { await authorize(args.authorizeDispatch); return importedReceipt(await request("vapi", "/phone-number", "POST", { provider: "twilio", number: args.number.number, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
-      smsEnabled: false, name: label("phone", args.correlationId), server: managedVoiceServer(args.site) }), args); },
+    async importNumber(args) { return mutation(args,async dispatched=>{await authorize(args.authorizeDispatch); return importedReceipt(await request("vapi", "/phone-number", "POST", { provider: "twilio", number: args.number.number, twilioAccountSid: process.env.TWILIO_ACCOUNT_SID, twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
+      smsEnabled: false, name: label("phone", args.correlationId), server: managedVoiceServer(args.site) },null,dispatched), args);}); },
     async lookupNumber(args) { return lookup("phone", args); },
     readImportedRoute: importedRoute,
-    async configureRouting(args) { const before = await readTwilioNumber(args); if (before.trunk_sid) throw new Error("A SIP trunk owns this number's routing"); await verifyIndependentFallback(args); await authorize(args.authorizeDispatch); await request("twilio", `/IncomingPhoneNumbers/${args.number.id}.json`, "POST", routeFields(args)); const after = await readTwilioNumber(args);
+    async configureRouting(args) { return mutation(args,async dispatched=>{const before = await readTwilioNumber(args); if (before.trunk_sid) throw new Error("A SIP trunk owns this number's routing"); await verifyIndependentFallback(args); await authorize(args.authorizeDispatch); await request("twilio", `/IncomingPhoneNumbers/${args.number.id}.json`, "POST", routeFields(args),null,dispatched); const after = await readTwilioNumber(args);
       // Import and routing must never take over the messaging settings.
       if (before.sms_url !== after.sms_url || before.sms_application_sid !== after.sms_application_sid || before.sms_fallback_url !== after.sms_fallback_url) throw new Error("Messaging configuration changed unexpectedly");
-      return verifyRoute(args); },
+      return verifyRoute(args);}); },
     verifyRouting: verifyRoute,
     async detachRouting(args) {
       await readTwilioNumber(args); await authorize(args.authorizeDispatch);

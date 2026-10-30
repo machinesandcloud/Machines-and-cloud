@@ -342,6 +342,55 @@ async function suite(mode) {
   });
 }
 await suite("memory"); await suite("sdk");
+// The real SDK writes the attempt marker before the last funding check. A
+// known pre-dispatch hold must be resumable, while older/attempted work is not.
+const mutationField=phase=>({assistant:'assistantCreateStartedAt',import:'importStartedAt',routing:'routingStartedAt'})[phase];
+async function latePaidFixture(phase,suffix){
+  process.env.MC_MEMORY_STORE='0';const c=await client('sdk','known-hold-'+suffix),e=engine(),req=await request(e,c);
+  if(phase!=='assistant')await e.run(req.id);if(phase==='routing'){await e.run(req.id);await e.run(req.id);}
+  const funding=paidFixture(c,{end:Math.floor(clock/1000)+1});await store.put('workspace_billing',funding.key,funding.row);
+  return {c,e,req,funding,field:mutationField(phase)};
+}
+async function afterMarker(f,action){
+  const original=globalThis.fetch;let hit=false;
+  globalThis.fetch=async(input,init={})=>{const url=new URL(String(input)),body=url.origin==='https://voice-blobs.invalid'&&String(init.method||'GET').toUpperCase()==='PUT'?JSON.parse(init.body):null;const response=await original(input,init);if(!hit&&body?.id===f.req.id&&body[f.field]){hit=true;await action(body);}return response;};
+  try{const view=await f.e.run(f.req.id);assert.equal(hit,true);return view;}finally{globalThis.fetch=original;}
+}
+const mutationsSince=at=>result.requests.slice(at).filter(v=>['POST','PATCH'].includes(v.method));
+for(const phase of ['assistant','import','routing'])await check('SDK: late unpaid '+phase+' marker has durable zero-dispatch receipt and renews the same operation',async()=>{
+  const f=await latePaidFixture(phase,phase),prior=result.requests.length;
+  const held=await afterMarker(f,()=>{clock=f.funding.row.paidPeriod.end*1000;});const row=await rowFor(f.c);
+  assert.equal(held.state,'waiting_platform');assert.equal(row.reasonCode,'paid_service_unconfirmed');assert.equal(row[f.field],null);assert.equal(row.pendingMutationDispatch,null);assert.equal(mutationsSince(prior).length,0);
+  const proof=row.knownNoDispatch.at(-1);assert.equal(proof.mutationDispatched,false);assert.equal(proof.operationId,f.req.id);assert.equal(proof.field,f.field);assert.equal(proof.generation,row.generation);assert.equal(proof.tenantIdentity,row.tenantIdentity);assert.match(proof.claimToken,/^[a-f0-9]{32}$/);assert.ok(proof.markerAt);
+  const renewed=paidFixture(f.c,{end:Math.floor(clock/1000)+864000});await store.put('workspace_billing',renewed.key,renewed.row);assert.notEqual((await f.e.run(f.req.id)).state,'uncertain');assert.equal((await rowFor(f.c)).id,f.req.id);assert.equal(mutationsSince(prior).length,1);
+});
+await check('SDK: actual adapter authorization after its routing GET certifies zero mutation dispatch',async()=>{
+  const f=await latePaidFixture('routing','adapter'),prior=result.requests.length;let expired=false;
+  beforeResponse=async req=>{const saved=await rowFor(f.c);if(!expired&&req.method==='GET'&&req.url.origin==='https://api.twilio.com'&&saved.routingStartedAt){expired=true;clock=f.funding.row.paidPeriod.end*1000;}};
+  assert.equal((await f.e.run(f.req.id)).state,'waiting_platform');assert.equal(expired,true);assert.equal(mutationsSince(prior).length,0);const row=await rowFor(f.c);assert.equal(row.routingStartedAt,null);assert.equal(row.knownNoDispatch.at(-1).mutationDispatched,false);
+});
+for(const fence of ['generation','claim','marker','tenant','number','late-receipt','expired-claim'])await check('SDK: changed '+fence+' cannot clear a claimed create marker from a late hold',async()=>{
+  const f=await latePaidFixture('assistant',fence),prior=result.requests.length;let marker;
+  await afterMarker(f,async body=>{clock=f.funding.row.paidPeriod.end*1000;marker=body[f.field];if(fence==='expired-claim'){clock+=61000;return;}await store.atomicUpdate('voice_activation_intents',f.req.id,old=>({value:{...old,...({generation:{generation:old.generation+1},claim:{claim:{token:'f'.repeat(32),until:new Date(clock+60000).toISOString()}},marker:{[f.field]:'2020-01-01T00:00:00.000Z'},tenant:{tenantIdentity:'f'.repeat(64)},number:{number:{...old.number,id:'PN'+'f'.repeat(32)}},'late-receipt':{lateReceipts:[{assistant:{id:uuid('late-resource')}}]}}[fence])}}));});
+  const row=await read('voice_activation_intents',f.req.id);assert.equal(row[f.field],fence==='marker'?'2020-01-01T00:00:00.000Z':marker);assert.equal((row.knownNoDispatch||[]).length,0);assert.equal(mutationsSince(prior).length,0);
+});
+for(const fence of ['pause','cancel','revision'])await check('SDK: late '+fence+' remains a stopped/reviewed flow without a fictitious create',async()=>{
+  const f=await latePaidFixture('assistant',fence),prior=result.requests.length;
+  const held=await afterMarker(f,async()=>{if(fence==='cancel')return f.e.cancel(f.c,{actor:{role:'owner',email:f.c.owner.email},expectedRevision:configurationRevision(f.c)});await store.atomicUpdate('clients',f.c.slug,old=>({value:fence==='pause'?{...old,status:'paused'}:{...old,business:{...old.business,name:'Changed after marker'}}}));});
+  const row=await rowFor(f.c);assert.equal(row[f.field],null);assert.equal(row.knownNoDispatch.at(-1).mutationDispatched,false);assert.equal(held.state,fence==='pause'?'suspended':fence==='cancel'?'cleanup_pending':'needs_review');assert.equal(mutationsSince(prior).length,0);if(fence==='cancel'){assert.equal((await f.e.run(f.req.id)).state,'cancelled');assert.equal(mutationsSince(prior).length,0);}
+});
+await check('SDK: delayed authority reads cannot consume a known-zero-dispatch witness after its claim expires',async()=>{
+  const f=await latePaidFixture('assistant','late-witness'),transport=globalThis.fetch,prior=result.requests.length;let marked=false,voiceReads=0,delayed=false,leaseEnd;
+  globalThis.fetch=async(input,init={})=>{const url=new URL(String(input)),method=String(init.method||'GET').toUpperCase(),body=url.origin==='https://voice-blobs.invalid'&&method==='PUT'?JSON.parse(init.body):null,response=await transport(input,init);if(!marked&&body?.id===f.req.id&&body.assistantCreateStartedAt){marked=true;clock=f.funding.row.paidPeriod.end*1000;leaseEnd=Date.parse(body.claim.until);}else if(marked&&method==='GET'&&decodeURIComponent(url.pathname).endsWith('/'+f.req.id))voiceReads++;else if(marked&&voiceReads>=2&&!delayed&&method==='GET'&&decodeURIComponent(url.pathname).endsWith('/site:clients/'+f.c.slug)){delayed=true;clock=leaseEnd+1;}return response;};
+  try{await f.e.run(f.req.id);}finally{globalThis.fetch=transport;}
+  const row=await rowFor(f.c);assert.equal(delayed,true);assert.ok(row.assistantCreateStartedAt);assert.equal((row.knownNoDispatch||[]).length,0);assert.equal(mutationsSince(prior).length,0);
+});
+await check('SDK: actual attempted assistant POST with a lost coded response retains its marker and never blindly repeats',async()=>{
+  const f=await latePaidFixture('assistant','attempted'),prior=result.requests.length;
+  beforeResponse=async req=>{if(req.method==='POST'&&req.url.pathname==='/assistant')throw Object.assign(new Error('Lost after actual POST'),{code:'dispatch_not_authorized'});};
+  await f.e.run(f.req.id);beforeResponse=null;const original=await rowFor(f.c);assert.ok(original.assistantCreateStartedAt);assert.equal((original.knownNoDispatch||[]).length,0);assert.equal(mutationsSince(prior).length,1);
+  clock=f.funding.row.paidPeriod.end*1000;await f.e.run(f.req.id);const renewed=paidFixture(f.c,{end:Math.floor(clock/1000)+864000});await store.put('workspace_billing',renewed.key,renewed.row);await f.e.run(f.req.id);assert.equal((await rowFor(f.c)).assistantCreateStartedAt,original.assistantCreateStartedAt);assert.equal(mutationsSince(prior).filter(v=>v.path==='/assistant').length,1);
+});
 await check('TwiML Bin protocol rejects missing AccountSid400 and missing/bad/double-counted GET signatures401',async()=>{
   const base=process.env.VOICE_FALLBACK_TWIML_URL,url=base+'?AccountSid='+account;
   assert.equal(twimlBinFixture(base,{method:'GET',redirect:'error'}).status,400);
