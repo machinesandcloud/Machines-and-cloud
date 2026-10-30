@@ -15,7 +15,7 @@ const api = await import('../netlify/functions/lib/thumbtack-api.mjs');
 assert.equal(calls.length, 0, 'Import must not request a provider');
 const accessToken = 'SYNTHETIC_ACCESS_CANARY', clientSecret = 'SYNTHETIC_CLIENT_CANARY', refreshToken = 'SYNTHETIC_REFRESH_CANARY';
 const client = { clientId: 'synthetic-client', clientSecret, tokenAuthMethod: 'client_secret_post' };
-const exchange = { ...client, redirectURI: 'https://machinesandcloud.com/api/thumbtack-oauth', code: 'synthetic-code', expectedState: 'synthetic-state-123', responseState: 'synthetic-state-123' };
+const exchange = { ...client, redirectURI: 'https://machinesandcloud.com/api/thumbtack/connect', code: 'synthetic-code', expectedState: 'synthetic-state-123', responseState: 'synthetic-state-123' };
 const webhookURL = 'https://machinesandcloud.com/api/thumbtack?c=synthetic-air&t=' + 'a'.repeat(64) + '&g=' + 'b'.repeat(32);
 const business = { businessID: '111', name: 'Synthetic Air', access_token: accessToken };
 const negotiation = { negotiationID: '222', status: 'Open', business, category: { categoryID: '444', name: 'AC Repair' }, customer: { customerID: '555', displayName: 'Customer', location: { city: 'Houston', state: 'TX', zipCode: '77057' }, refresh_token: refreshToken }, details: [{ question: 'Need', answer: 'AC not cooling' }], createTime: '2026-10-24T00:00:00Z' };
@@ -135,6 +135,28 @@ try {
   });
   await group('Slow response body is bounded by the same five-second deadline and never repeats POST', async () => {
     respond = () => new Response(new ReadableStream({ start() {}, cancel() {} }), { headers: { 'Content-Type': 'application/json' } }); const before = Date.now(); await rejects(() => api.sendThumbtackMessage({ accessToken, negotiationID: '222', text: 'Hello' }), 'provider_timeout', 'unknown', 1); assert.ok(Date.now() - before < 6500);
+  });
+  await group('Staging OAuth uses only its fixed authorization/token hosts and actual library', async () => {
+    const environment='staging',redirectURI='https://machinesandcloud.com/api/thumbtack/staging-connect', start=new URL(api.thumbtackAuthorizationURL({...client,environment,redirectURI,state:exchange.expectedState,scopes:['supply::fixture','offline_access']}));
+    assert.equal(start.origin+start.pathname,'https://staging-auth.thumbtack.com/oauth2/auth');assert.equal(start.searchParams.get('redirect_uri'),redirectURI);
+    respond=(url,options)=>{assert.equal(url,'https://staging-auth.thumbtack.com/oauth2/token');return json({access_token:accessToken,refresh_token:refreshToken,expires_in:3600,token_type:'Bearer'});};
+    await api.exchangeThumbtackCode({...exchange,environment,redirectURI});await api.refreshThumbtackToken({...client,refreshToken,environment});
+  });
+  await group('OAuth redirect paths are exact and cannot cross production/staging or another HTTPS host', async () => {
+    const paths={production:'https://machinesandcloud.com/api/thumbtack/connect',staging:'https://machinesandcloud.com/api/thumbtack/staging-connect'};
+    for(const environment of Object.keys(paths))for(const redirectURI of [paths[environment==='production'?'staging':'production'],'https://foreign.invalid/api/thumbtack/connect',paths[environment]+'?environment='+environment]){
+      const before=calls.length;assert.throws(()=>api.thumbtackAuthorizationURL({...client,environment,redirectURI,state:exchange.expectedState,scopes:['supply::fixture','offline_access']}),e=>e.code==='invalid_redirect_uri');await rejects(()=>api.exchangeThumbtackCode({...exchange,environment,redirectURI}),'invalid_redirect_uri','not_sent');assert.equal(calls.length,before);
+    }
+  });
+  await group('All staging native endpoints retain their V4 path, receipt and bounded-response contract', async () => {
+    const context={accessToken,environment:'staging'};
+    respond=(url,options)=>{assert.equal(new URL(url).origin,'https://staging-api.thumbtack.com');assert.equal(new URL(url).pathname.startsWith('/api/v4/'),true);if(url.endsWith('/businesses'))return json({data:[business]});if(url.endsWith('/messages'))return json(options.method==='POST'?message:{data:[message]});if(url.endsWith('/negotiations/222'))return json(negotiation);if(url.endsWith('/negotiations'))return json({data:[negotiation]});if(url.endsWith('/webhooks'))return json(options.method==='POST'?webhook:{data:[webhook]});return json({...webhook,enabled:options.method==='PUT'?JSON.parse(options.body).enabled:false});};
+    await api.thumbtackBusinesses(context);await api.thumbtackNegotiation({...context,negotiationID:'222'});await api.thumbtackNegotiations({...context,businessID:'111'});assert.equal((await api.thumbtackMessages({...context,negotiationID:'222'})).complete,false);await api.sendThumbtackMessage({...context,negotiationID:'222',text:'Staging reply'});await api.thumbtackWebhooks({...context,businessID:'111'});await api.thumbtackWebhook({...context,businessID:'111',webhookID:webhook.webhookID});await api.createThumbtackWebhook({...context,businessID:'111',webhookURL,username:'test-user',password:'test-password-123'});await api.enableThumbtackWebhook({...context,businessID:'111',webhookID:webhook.webhookID,enabled:false});
+  });
+  await group('Unknown environments and a changed durable binding fail before transport', async () => {
+    for(const environment of ['development','https://staging-api.thumbtack.com','production@evil.invalid',null,{}]){const before=calls.length;await assert.rejects(()=>api.thumbtackBusinesses({accessToken,environment}));assert.equal(calls.length,before);}
+    await rejects(()=>api.sendThumbtackMessage({accessToken,environment:'staging',negotiationID:'222',text:'Never sent',authorize:async()=>false}),'connection_binding_changed','not_sent');
+    await rejects(()=>api.exchangeThumbtackCode({...exchange,environment:'staging',redirectURI:'https://machinesandcloud.com/api/thumbtack/staging-connect',authorize:async()=>false}),'connection_binding_changed','not_sent');
   });
 } catch (error) { failure = error; }
 finally { globalThis.fetch = originalFetch; }

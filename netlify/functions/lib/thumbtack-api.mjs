@@ -4,11 +4,8 @@
 // and /docs/pro-integrations/{businesses,negotiations,messages}. Scopes and the token
 // authentication method must come from the provisioned partner configuration.
 import * as oauth from 'oauth4webapi';
+import { thumbtackEndpoints, thumbtackRedirectURI } from './thumbtack-environment.mjs';
 
-const API = 'https://api.thumbtack.com/api/v4/';
-const AUTH = 'https://auth.thumbtack.com/oauth2/auth';
-const TOKEN = 'https://auth.thumbtack.com/oauth2/token';
-const AS = Object.freeze({ issuer: 'https://auth.thumbtack.com', authorization_endpoint: AUTH, token_endpoint: TOKEN });
 const TIMEOUT_MS = 5000, RESPONSE_BYTES = 262144, REQUEST_BYTES = 16384;
 const WEBHOOK_EVENTS = Object.freeze(['MessageCreatedV4', 'NegotiationCreatedV4']);
 
@@ -57,15 +54,18 @@ function mutationOutcome(status) {
 
 // Read the full bounded response before returning, so a slow body is covered by the
 // same deadline. Never expose a provider's body, WWW-Authenticate text or fetch error.
-async function oneRequest(url, options, mutation = false) {
-  if (url !== TOKEN && !url.startsWith(API)) fail('provider_url_rejected');
+async function oneRequest(url, options, mutation = false, { environment = 'production', authorize } = {}) {
+  let endpoints; try { endpoints = thumbtackEndpoints(environment); } catch { fail('provider_url_rejected'); }
+  if (url !== endpoints.token_endpoint && !url.startsWith(endpoints.api)) fail('provider_url_rejected');
   const target = new URL(url);
   if (target.username || target.password || target.hash || target.protocol !== 'https:' || target.port ||
-      (target.origin !== 'https://api.thumbtack.com' && target.origin !== 'https://auth.thumbtack.com')) fail('provider_url_rejected');
+      ![new URL(endpoints.api).origin,new URL(endpoints.token_endpoint).origin].includes(target.origin)) fail('provider_url_rejected');
   if (options.body && Buffer.byteLength(String(options.body), 'utf8') > REQUEST_BYTES) fail('request_too_large');
   const controller = new AbortController(); let timer, reader;
   const deadline = new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new ThumbtackAPIError('provider_timeout', { outcome: mutation ? 'unknown' : 'unavailable' })); }, TIMEOUT_MS); });
   const perform = async () => {
+    if (authorize !== undefined && (typeof authorize !== 'function' || await authorize() !== true)) fail('connection_binding_changed');
+    if (controller.signal.aborted) fail('provider_timeout', {outcome: mutation ? 'unknown' : 'unavailable'});
     const response = await fetch(target.href, { ...options, redirect: 'error', cache: 'no-store', credentials: 'omit', signal: controller.signal });
     const status = response.status;
     if (status >= 300 && status <= 399) fail('provider_redirect_rejected', { status, outcome: mutation ? 'unknown' : 'unavailable' });
@@ -93,9 +93,10 @@ function decode(response, mutation) {
   if (!plain(data)) fail('provider_invalid_response', { status: response.status, outcome: mutation ? 'unknown' : 'unavailable' });
   return data;
 }
-async function api(path, { accessToken, method = 'GET', body } = {}) {
+async function api(path, { accessToken, method = 'GET', body, environment = 'production', authorize } = {}) {
+  let endpoints; try { endpoints = thumbtackEndpoints(environment); } catch { fail('provider_url_rejected'); }
   const token = credential(accessToken), mutation = method !== 'GET';
-  const response = await oneRequest(API + path, { method, headers: { Authorization: 'Bearer ' + token, Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }, mutation);
+  const response = await oneRequest(endpoints.api + path, { method, headers: { Authorization: 'Bearer ' + token, Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }, mutation, {environment,authorize});
   return { data: decode(response, mutation), status: response.status };
 }
 function responseFailure(status = null, mutation = false) { fail('provider_invalid_response', { status, outcome: mutation ? 'unknown' : 'unavailable' }); }
@@ -131,16 +132,18 @@ function listResult(result, project) {
   return { data: result.data.data.map(row => project(row, result.status)), pagination, complete: false };
 }
 
-export function thumbtackAuthorizationURL({ clientId, redirectURI, state, scopes }) {
-  credential(clientId); httpsURI(redirectURI); string(state, 512, 'invalid_oauth_state', 8);
-  const url = new URL(AUTH); url.search = new URLSearchParams({ client_id: clientId, redirect_uri: redirectURI, response_type: 'code', state, audience: 'urn:partner-api', scope: scopesList(scopes) }).toString(); return url.href;
+export function thumbtackAuthorizationURL({ clientId, redirectURI, state, scopes, environment = 'production' }) {
+  let endpoints; try { endpoints = thumbtackEndpoints(environment); } catch { fail('provider_url_rejected'); }
+  credential(clientId); httpsURI(redirectURI); if (redirectURI !== thumbtackRedirectURI(environment)) fail('invalid_redirect_uri'); string(state, 512, 'invalid_oauth_state', 8);
+  const url = new URL(endpoints.authorization_endpoint); url.search = new URLSearchParams({ client_id: clientId, redirect_uri: redirectURI, response_type: 'code', state, audience: 'urn:partner-api', scope: scopesList(scopes) }).toString(); return url.href;
 }
-async function tokens({ clientId, clientSecret, tokenAuthMethod }, run) {
+async function tokens({ clientId, clientSecret, tokenAuthMethod, environment = 'production', authorize }, run) {
+  let endpoints; try { endpoints = thumbtackEndpoints(environment); } catch { fail('provider_url_rejected'); }
   const auth = authentication(clientId, clientSecret, tokenAuthMethod), client = { client_id: clientId };
   let capturedStatus = null;
   const options = { [oauth.customFetch]: async (url, request) => {
-    if (String(url) !== TOKEN) fail('provider_url_rejected');
-    const response = await oneRequest(TOKEN, { method: 'POST', headers: request.headers, body: request.body }, true); capturedStatus = response.status;
+    if (String(url) !== endpoints.token_endpoint) fail('provider_url_rejected');
+    const response = await oneRequest(endpoints.token_endpoint, { method: 'POST', headers: request.headers, body: request.body }, true, {environment,authorize}); capturedStatus = response.status;
     // A token/rotating refresh may have been consumed even if its receipt is malformed.
     if (!response.ok) fail('provider_http_error', { status: response.status, outcome: mutationOutcome(response.status) });
     return new Response(response.bytes, { status: response.status, headers: { 'Content-Type': response.contentType } });
@@ -152,25 +155,27 @@ async function tokens({ clientId, clientSecret, tokenAuthMethod }, run) {
     return { access_token: result.access_token, refresh_token: result.refresh_token, token_type: 'Bearer', expires_in: result.expires_in, ...(typeof result.scope === 'string' ? { scope: string(result.scope, 4096) } : {}) };
   } catch (error) { if (error instanceof ThumbtackAPIError) { if (capturedStatus !== null && error.outcome === 'not_sent') responseFailure(capturedStatus, true); throw error; } if (capturedStatus !== null) responseFailure(capturedStatus, true); fail('provider_oauth_error', { outcome: 'unknown' }); }
 }
-export async function exchangeThumbtackCode({ clientId, clientSecret, redirectURI, code, expectedState, responseState, tokenAuthMethod }) {
-  httpsURI(redirectURI); string(code, 8192, 'invalid_authorization_code'); string(expectedState, 512, 'invalid_oauth_state', 8); string(responseState, 512, 'invalid_oauth_state', 8);
+export async function exchangeThumbtackCode({ clientId, clientSecret, redirectURI, code, expectedState, responseState, tokenAuthMethod, environment = 'production', authorize }) {
+  let AS; try { AS = thumbtackEndpoints(environment); } catch { fail('provider_url_rejected'); }
+  httpsURI(redirectURI); if (redirectURI !== thumbtackRedirectURI(environment)) fail('invalid_redirect_uri'); string(code, 8192, 'invalid_authorization_code'); string(expectedState, 512, 'invalid_oauth_state', 8); string(responseState, 512, 'invalid_oauth_state', 8);
   if (responseState !== expectedState) fail('oauth_state_mismatch');
   credential(clientId);
   const client = { client_id: clientId }; let params;
   try { params = oauth.validateAuthResponse(AS, client, new URLSearchParams({ code, state: responseState }), expectedState); } catch { fail('invalid_authorization_response'); }
-  return tokens({ clientId, clientSecret, tokenAuthMethod }, async (oauthClient, auth, options) => oauth.processAuthorizationCodeResponse(AS, oauthClient, await oauth.authorizationCodeGrantRequest(AS, oauthClient, auth, params, redirectURI, oauth.nopkce, options)));
+  return tokens({ clientId, clientSecret, tokenAuthMethod, environment, authorize }, async (oauthClient, auth, options) => oauth.processAuthorizationCodeResponse(AS, oauthClient, await oauth.authorizationCodeGrantRequest(AS, oauthClient, auth, params, redirectURI, oauth.nopkce, options)));
 }
-export async function refreshThumbtackToken({ clientId, clientSecret, refreshToken, tokenAuthMethod }) {
+export async function refreshThumbtackToken({ clientId, clientSecret, refreshToken, tokenAuthMethod, environment = 'production', authorize }) {
+  let AS; try { AS = thumbtackEndpoints(environment); } catch { fail('provider_url_rejected'); }
   credential(refreshToken);
-  return tokens({ clientId, clientSecret, tokenAuthMethod }, async (client, auth, options) => oauth.processRefreshTokenResponse(AS, client, await oauth.refreshTokenGrantRequest(AS, client, auth, refreshToken, options)));
+  return tokens({ clientId, clientSecret, tokenAuthMethod, environment, authorize }, async (client, auth, options) => oauth.processRefreshTokenResponse(AS, client, await oauth.refreshTokenGrantRequest(AS, client, auth, refreshToken, options)));
 }
-export async function thumbtackBusinesses({ accessToken }) { return listResult(await api('businesses', { accessToken }), businessRow); }
-export async function thumbtackNegotiation({ accessToken, negotiationID }) { const result = await api('negotiations/' + id(negotiationID), { accessToken }); const row = negotiationRow(result.data, result.status); if (row.negotiationID !== negotiationID) responseFailure(result.status); return row; }
-export async function thumbtackNegotiations({ accessToken, businessID }) { const result = listResult(await api('businesses/' + id(businessID) + '/negotiations', { accessToken }), negotiationRow); if (result.data.some(row => row.business.businessID !== businessID)) responseFailure(); return result; }
-export async function thumbtackMessages({ accessToken, negotiationID }) { const result = listResult(await api('negotiations/' + id(negotiationID) + '/messages', { accessToken }), messageRow); if (result.data.some(row => row.negotiationID !== negotiationID)) responseFailure(); return result; }
-export async function sendThumbtackMessage({ accessToken, negotiationID, text }) {
+export async function thumbtackBusinesses({ accessToken, environment, authorize }) { return listResult(await api('businesses', { accessToken, environment, authorize }), businessRow); }
+export async function thumbtackNegotiation({ accessToken, negotiationID, environment, authorize }) { const result = await api('negotiations/' + id(negotiationID), { accessToken, environment, authorize }); const row = negotiationRow(result.data, result.status); if (row.negotiationID !== negotiationID) responseFailure(result.status); return row; }
+export async function thumbtackNegotiations({ accessToken, businessID, environment, authorize }) { const result = listResult(await api('businesses/' + id(businessID) + '/negotiations', { accessToken, environment, authorize }), negotiationRow); if (result.data.some(row => row.business.businessID !== businessID)) responseFailure(); return result; }
+export async function thumbtackMessages({ accessToken, negotiationID, environment, authorize }) { const result = listResult(await api('negotiations/' + id(negotiationID) + '/messages', { accessToken, environment, authorize }), messageRow); if (result.data.some(row => row.negotiationID !== negotiationID)) responseFailure(); return result; }
+export async function sendThumbtackMessage({ accessToken, negotiationID, text, environment, authorize }) {
   id(negotiationID); if (typeof text !== 'string' || !text.trim() || Buffer.byteLength(text, 'utf8') > 8000 || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(text)) fail('invalid_message');
-  const result = await api('negotiations/' + negotiationID + '/messages', { accessToken, method: 'POST', body: { text } });
+  const result = await api('negotiations/' + negotiationID + '/messages', { accessToken, environment, authorize, method: 'POST', body: { text } });
   // POST examples document only the request. Accept an explicit matching message
   // receipt, never infer it from 2xx; otherwise the durable caller must reconcile.
   if (typeof result.data.messageID !== 'string' || !/^\d{1,32}$/.test(result.data.messageID) || result.data.negotiationID !== negotiationID) responseFailure(result.status, true);
@@ -180,23 +185,23 @@ function webhookRow(row, status, mutation = false) {
   if (!plain(row) || typeof row.webhookID !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(row.webhookID) || !/^\d{1,32}$/.test(row.businessID || '') || typeof row.webhookURL !== 'string' || row.webhookURL.length > 2048 || typeof row.enabled !== 'boolean' || typeof row.authType !== 'string' || row.authType.length > 100 || !Array.isArray(row.eventTypes) || row.eventTypes.length > 100 || row.eventTypes.some(event => typeof event !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(event))) responseFailure(status, mutation);
   return { webhookID: row.webhookID, businessID: row.businessID, webhookURL: row.webhookURL, enabled: row.enabled, authType: row.authType, eventTypes: [...row.eventTypes] };
 }
-export async function thumbtackWebhooks({ accessToken, businessID }) {
-  id(businessID); const result = listResult(await api('businesses/' + businessID + '/webhooks', { accessToken }), webhookRow); if (result.data.some(row => row.businessID !== businessID)) responseFailure(); return result;
+export async function thumbtackWebhooks({ accessToken, businessID, environment, authorize }) {
+  id(businessID); const result = listResult(await api('businesses/' + businessID + '/webhooks', { accessToken, environment, authorize }), webhookRow); if (result.data.some(row => row.businessID !== businessID)) responseFailure(); return result;
 }
-export async function thumbtackWebhook({ accessToken, businessID, webhookID }) {
+export async function thumbtackWebhook({ accessToken, businessID, webhookID, environment, authorize }) {
   id(businessID); if (typeof webhookID !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(webhookID)) fail('invalid_webhook_id');
-  const result = await api('businesses/' + businessID + '/webhooks/' + webhookID, { accessToken });
+  const result = await api('businesses/' + businessID + '/webhooks/' + webhookID, { accessToken, environment, authorize });
   const row = webhookRow(result.data, result.status); if (row.businessID !== businessID || row.webhookID !== webhookID) responseFailure(result.status); return row;
 }
-export async function createThumbtackWebhook({ accessToken, businessID, webhookURL, username, password }) {
+export async function createThumbtackWebhook({ accessToken, businessID, webhookURL, username, password, environment, authorize }) {
   id(businessID); webhookURI(webhookURL); string(username, 128, 'invalid_webhook_credentials'); string(password, 256, 'invalid_webhook_credentials', 12); if (username.includes(':')) fail('invalid_webhook_credentials');
-  const result = await api('businesses/' + businessID + '/webhooks', { accessToken, method: 'POST', body: { webhookURL, eventTypes: [...WEBHOOK_EVENTS], enabled: false, auth: { username, password } } });
+  const result = await api('businesses/' + businessID + '/webhooks', { accessToken, environment, authorize, method: 'POST', body: { webhookURL, eventTypes: [...WEBHOOK_EVENTS], enabled: false, auth: { username, password } } });
   const row = webhookRow(result.data, result.status, true);
   if (row.businessID !== businessID || row.webhookURL !== webhookURL || row.enabled !== false || row.authType !== 'Basic' || row.eventTypes.length !== 2 || new Set(row.eventTypes).size !== 2 || row.eventTypes.some(event => !WEBHOOK_EVENTS.includes(event))) responseFailure(result.status, true);
   return row;
 }
-export async function enableThumbtackWebhook({ accessToken, businessID, webhookID, enabled = true }) {
+export async function enableThumbtackWebhook({ accessToken, businessID, webhookID, enabled = true, environment, authorize }) {
   id(businessID); if (typeof webhookID !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(webhookID) || typeof enabled !== 'boolean') fail('invalid_webhook_id');
-  const result = await api('businesses/' + businessID + '/webhooks/' + webhookID, { accessToken, method: 'PUT', body: { enabled } });
+  const result = await api('businesses/' + businessID + '/webhooks/' + webhookID, { accessToken, environment, authorize, method: 'PUT', body: { enabled } });
   const row = webhookRow(result.data, result.status, true); if (row.businessID !== businessID || row.webhookID !== webhookID || row.enabled !== enabled) responseFailure(result.status, true); return row;
 }
