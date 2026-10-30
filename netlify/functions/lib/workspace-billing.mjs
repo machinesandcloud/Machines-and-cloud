@@ -421,7 +421,9 @@ export async function recoverWorkspaceBilling({limit=3,deadlineAt=Date.now()+REC
             if(row.testProof?.cleanup?.state==='complete')return;
             if(c.status==='cancelled'){await queueWorkspaceStopBilling(c);row=await strictRead(STORE,recordKey);}
             if(row.cancellation&&row.cancellation.state!=='complete')await recoverCancellation(c);
-            else if(row.checkout&&(['pending','uncertain','complete'].includes(row.checkout.state)||row.stopRequestedAt&&row.checkout.state==='open'))await reconcile(c);
+            // A received Checkout URL does not mean its later payment/expiry webhook
+            // arrived. Re-read that same open Session in this bounded wave too.
+            else if(row.checkout&&['pending','uncertain','open','complete'].includes(row.checkout.state))await reconcile(c);
             await confirmProofCleanup(c);
             await assertCurrent();
           });
