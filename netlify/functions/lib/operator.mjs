@@ -19,6 +19,7 @@ import { parseWorkspacePatch, WorkspaceEditError } from './workspace-edit.mjs';
 import { workspaceTenant, belongsToWorkspace } from './workspace-identity.mjs';
 import { calendarExecutionPolicy } from './calendar-execution.mjs';
 import { workspaceBillingConfiguration } from './workspace-billing.mjs';
+import {voiceRejectionReview,recordVoiceCreateRejection} from './voice-provider-evidence.mjs';
 import {supportReportViews,supportReportIssues,changeSupportReport} from './support-reports.mjs';
 
 export class OperatorError extends Error {
@@ -98,6 +99,7 @@ export async function customerView(c, detail = false) {
   // Raw lead setup contains a provider endpoint and shared secret. Operators
   // receive the same allowlisted journey facts as owners, never that setup DTO.
   const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, leadSources, issues, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
+  if (detail && selfService) row.voiceRejectionReview=await voiceRejectionReview(c);
   if (detail) {
     for (const operation of operations) {
       const raw = await strictRead('workspace_operations', operation.id);
@@ -143,6 +145,14 @@ function validatedPatch(patch) {
   }
 }
 export async function supportAction(session, body) {
+  if(body?.action==='record_voice_rejection'){
+    await requireCurrentOperator(session);
+    if(!/^[a-z0-9-]{1,40}$/.test(body.slug||'')||!/^[a-f0-9]{64}$/.test(body.expectedRevision||''))throw new OperatorError('invalid_request','Choose the exact customer and current revision.');
+    const c=await strictRead('clients',body.slug);if(!c||!isSelfServiceClient(c))throw new OperatorError('not_found','Customer not found.',404);
+    const result=await recordVoiceCreateRejection(c,body,{actor:session.email,authorize:()=>requireCurrentOperator(session),expectedManagementRevision:body.expectedRevision,currentManagementRevision:managementRevision});
+    try{return {...result,customer:await customerView(await strictRead('clients',c.slug),true)};}catch{return {...result,saved:true,refreshRequired:true,customer:null};}
+  }
+
   if(['acknowledge_report','resolve_report'].includes(body?.action)){
     if(!/^[a-z0-9-]{1,40}$/.test(body.slug||''))throw new OperatorError('invalid_request','Choose a customer report.');
     const c=await strictRead('clients',body.slug);if(!c||!isSelfServiceClient(c))throw new OperatorError('not_found','This customer report was not found.',404);

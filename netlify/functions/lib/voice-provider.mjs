@@ -24,6 +24,11 @@ function vapiPropertySchema(schema) {
   if (!schema || typeof schema !== "object" || Array.isArray(schema)) throw new Error("Invalid voice tool schema");
   const value = {};
   for (const key of ["type", "description", "pattern", "format", "required", "enum", "title"]) if (Object.hasOwn(schema, key)) value[key] = structuredClone(schema[key]);
+  if (schema.type === "integer" && Array.isArray(schema.enum)) {
+    const values = schema.enum;
+    if (!values.length || !values.every((n, i) => Number.isSafeInteger(n) && (!i || n === values[i - 1] + 1))) throw new Error("Unsupported integer voice enum");
+    delete value.enum; value.minimum = values[0]; value.maximum = values.at(-1);
+  }
   if (schema.items) value.items = vapiPropertySchema(schema.items);
   if (schema.properties) value.properties = Object.fromEntries(Object.entries(schema.properties).map(([key, child]) => [key, vapiPropertySchema(child)]));
   return value;

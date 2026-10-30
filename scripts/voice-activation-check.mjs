@@ -92,6 +92,7 @@ async function suite(mode) {
   });
   await check(name("Vapi function parameters serialize only supported DTO keys without weakening internal schemas"),async()=>{
     const c=await client(mode,'dto'),body=managedAssistantBody(c,{correlationId:hash(c.slug),inputRevision:configurationRevision(c),policy,site:origin});
+    const days=body.model.tools.find(t=>t.function.name==='get_availability').function.parameters.properties.days;assert.deepEqual(days,{type:'integer',description:'Number of consecutive dates to check, from 1 to 14',minimum:1,maximum:14});
     assert.equal(body.model.tools.length,4);for(const tool of body.model.tools){assert.deepEqual(Object.keys(tool.function.parameters).sort(),['properties','required','type']);assert.equal(JSON.stringify(tool.function.parameters).includes('additionalProperties'),false);}
     const schema={type:'object',properties:{nested:{type:'object',additionalProperties:false,properties:{value:{type:'string',minLength:1}},required:['value']}},required:['nested'],additionalProperties:false},before=structuredClone(schema),parameters=managedVoiceToolParameters(schema);assert.deepEqual(schema,before);assert.equal(parameters.properties.nested.additionalProperties,undefined);assert.deepEqual(parameters.properties.nested.required,['value']);
   });

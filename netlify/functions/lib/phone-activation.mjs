@@ -143,6 +143,8 @@ async function voiceCancellationContext(c, voice, {allowNumberUse=false,allowRel
   return {...context,voiceOperationId:voice.id,voiceGeneration:voice.generation,voicePolicyDigest:voice.policyDigest,voiceAuthorityDigest:hash(JSON.stringify(voice.authority)),voiceCancellationAt:voice.cancelRequestedAt};
 }
 export const voiceNumberCancellationContext=(c,voice)=>voiceCancellationContext(c,voice);
+// Read-only retained lineage for reviewed rejected creates; no provider access.
+export const voiceRejectedCreateCancellationContext=(c,voice)=>voiceCancellationContext(c,voice,{allowReleased:true});
 export const voiceCleanupMaintenanceContext=(c,voice)=>voiceCancellationContext(c,voice,{allowNumberUse:true,allowReleased:true,requireCredential:true});
 // A number-use fence is not an assistant absence/cleanup receipt. Verify it
 // independently before clearing only this exact dependent service's PN claim.

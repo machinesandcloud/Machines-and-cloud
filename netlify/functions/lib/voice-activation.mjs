@@ -7,6 +7,7 @@ import { configurationRevision, isSupportedSelfServiceClient, managedServiceRule
 import { serviceLifecycle as life, serviceLifecycleMatches } from './service-lifecycle.mjs';
 import { getAcquiredPhoneResource, claimPhoneResourceDependency, clearPhoneResourceDependency, getPhoneResourceLifecycle, phoneServiceOnboardingActive, phoneServiceOnboardingCancellationRequested, voiceHasNumberUse, voiceNumberCancellationContext, releaseFencedVoiceNumberDependency, voiceCleanupMaintenanceContext } from "./phone-activation.mjs";
 import { createManagedVoiceProvider, managedAssistantBody, voiceProviderFailure } from "./voice-provider.mjs";
+import { confirmedVoiceCreateRejection } from "./voice-provider-evidence.mjs";
 import { requestManagedHuman, handleManagedHumanCallback } from './managed-voice-handoff.mjs';
 
 export class VoiceActivationError extends Error { constructor(code, message, status = 409) { super(message); this.code = code; this.status = status; } }
@@ -129,7 +130,8 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
   async function cleanup(row, c) {
     if (row.cleanupConfirmedAt) { if (row.number) await clearDependency(c, { kind: "voice", operationId: row.id, cleanupConfirmed: true }); await atomicUpdate(QUEUE, KEY, value => { const queue = queueValue(value), intents = { ...queue.intents }; delete intents[row.id]; return { value: { ...queue, intents } }; }); return voiceActivationView(row, c); }
     const maintenance = await voiceNumberCancellationContext(c, row), providerMaintenance = cleanupMaintenance && !!await voiceCleanupMaintenanceContext(c,row);
-    if (!enabled() && !maintenance && !providerMaintenance) return voiceActivationView(await change(row.id, old => ({ ...old, state: old.assistantCreateStartedAt && !old.assistant ? "cleanup_uncertain" : "cleanup_pending", reasonCode: "product_gate_closed" })), c);
+    const rejectedCreate = await confirmedVoiceCreateRejection(c,row);
+    if (!enabled() && !maintenance && !providerMaintenance && !rejectedCreate) return voiceActivationView(await change(row.id, old => ({ ...old, state: old.assistantCreateStartedAt && !old.assistant ? "cleanup_uncertain" : "cleanup_pending", reasonCode: "product_gate_closed" })), c);
     if (row.claim && Date.parse(row.claim.until) > Date.now()) return voiceActivationView(row, c);
     const token = randomBytes(16).toString("hex");
     row = await change(row.id, old => old.claim && Date.parse(old.claim.until) > Date.now() ? null : { ...old, claim: { token, until: new Date(Date.now() + 60000).toISOString() }, state: "cleanup_pending" });
@@ -144,6 +146,14 @@ function voiceEngine({ provider, policy: rawPolicy, gate = false, acquiredNumber
       return { ...old, numberUseFenced: { ...context, at: iso() } };
     });
     if (row.numberUseFenced) await releaseFencedVoiceNumberDependency(c, row.id);
+    if (rejectedCreate) {
+      row = await change(row.id, async old => old.claim?.token === token && Date.parse(old.claim.until)>Date.now() && await confirmedVoiceCreateRejection(c,old) ? { ...old, state:"cancelled", cleanupConfirmedAt:iso(), claim:null, reasonCode:null } : null);
+      if (row.cleanupConfirmedAt) {
+        if (row.number) await clearDependency(c,{kind:"voice",operationId:row.id,cleanupConfirmed:true});
+        await atomicUpdate(QUEUE,KEY,value=>{const queue=queueValue(value),intents={...queue.intents};delete intents[row.id];return {value:{...queue,intents}};});
+      }
+      return voiceActivationView(row,c);
+    }
     if (!enabled() && !providerMaintenance) {
       if (!row.assistantCreateStartedAt && !row.assistant && !voiceHasNumberUse(row)) {
         row = await change(row.id, old => old.claim?.token === token && !old.assistantCreateStartedAt && !old.assistant && !voiceHasNumberUse(old) ? { ...old, state: "cancelled", cleanupConfirmedAt: iso(), claim: null, reasonCode: null } : null);
@@ -286,7 +296,7 @@ async function recoverVoiceNumberFences({limit=1,deadlineAt=Date.now()+15000}={}
   if ((await strictRead("health","brake"))?.on===true) return {processed:0};
   const ids=await atomicUpdate(QUEUE,KEY,value=>{const queue=queueValue(value),keys=Object.keys(queue.intents).filter(id=>queue.intents[id]?.cancelRequestedAt).sort();if(!keys.length)return {result:[]};let start=keys.findIndex(id=>id>(queue.cursor||""));if(start<0)start=0;const chosen=[...keys.slice(start),...keys.slice(0,start)].slice(0,limit);return {value:{...queue,cursor:chosen.at(-1)},result:chosen};});
   let processed=0;
-  for(const id of ids){if(Date.now()>=deadlineAt)break;const row=await strictRead(STORE,id),c=row&&await strictRead("clients",row.slug);if(!c||!row.cancelRequestedAt)continue;try{const policy=validatePolicy(row.policy);if(digest(policy)!==row.policyDigest||!await voiceNumberCancellationContext(c,row)&&!await voiceCleanupMaintenanceContext(c,row))continue;
+  for(const id of ids){if(Date.now()>=deadlineAt)break;const row=await strictRead(STORE,id),c=row&&await strictRead("clients",row.slug);if(!c||!row.cancelRequestedAt)continue;try{const policy=validatePolicy(row.policy);if(digest(policy)!==row.policyDigest||!await voiceNumberCancellationContext(c,row)&&!await voiceCleanupMaintenanceContext(c,row)&&!await confirmedVoiceCreateRejection(c,row))continue;
       const maintenanceAllowed=async({origin,path,method,args})=>{
         const latest=await strictRead(STORE,id);
         if(origin!=="vapi"||!args||args.maintenanceOnly!==true||latest?.generation!==row.generation||latest.claim?.token!==args.maintenanceClaimToken||!(Date.parse(latest.claim.until)>Date.now())||!await voiceCleanupMaintenanceContext(c,latest)||!(Date.parse(latest.claim.until)>Date.now()))return false;
