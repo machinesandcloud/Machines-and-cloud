@@ -1,3 +1,4 @@
+import { assertPaidServiceAuthority, PaidServiceAuthorityError } from './paid-service-authority.mjs';
 // Durable, source-reconciled Google Calendar delivery for verified customer workspaces.
 import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate, list, checkCalendarBookingWindow } from "./store.mjs";
@@ -78,13 +79,14 @@ function assertOwned(job, event) {
   if (!Number.isInteger(remoteVersion) || remoteVersion < 1) throw new CalendarError("event_ownership_conflict", "The calendar event version could not be confirmed.");
   return remoteVersion;
 }
+function paymentError(error){return error instanceof PaidServiceAuthorityError?new CalendarError(error.code,error.code==='paid_service_unconfirmed'?'Check payment status in Account to resume this saved visit. No new Calendar change was sent.':error.message,503):error;}
 async function requestGoogle(job, connection, token, method, eventId, body, etag, deadline) {
   const suffix = eventId ? `/${encodeURIComponent(eventId)}` : "";
   const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(connection.targetId)}/events${suffix}${method === "GET" ? "" : "?sendUpdates=none"}`;
   let response;
   const client = await strictRead('clients', job.slug);
   try { response = await guardedCalendarFetch(client, ({ GET:'calendarRead',POST:'eventCreate',PATCH:'eventUpdate',DELETE:'eventDelete' })[method], url, { method, headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}), ...(etag ? { "If-Match": etag } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(Math.max(1, deadline - Date.now())) }, { targetId: connection.targetId, bookingId: job.bookingId, deadline, authorize: async () => { const current = await latestJob(job); return calendarDeliveryEnabled() && current.connectionId === connection.connectionId; } }); }
-  catch (error) { if (error.code?.startsWith('calendar_')) throw new CalendarError(error.code, error.message, 503); throw new CalendarError("delivery_uncertain", "Google did not confirm the change. The next attempt will check the same event reference before writing.", 503); }
+  catch (error) { if(error instanceof PaidServiceAuthorityError)throw paymentError(error); if (error.code?.startsWith('calendar_')) throw new CalendarError(error.code, error.message, 503); throw new CalendarError("delivery_uncertain", "Google did not confirm the change. The next attempt will check the same event reference before writing.", 503); }
   const data = await response.json().catch(() => ({}));
   return { response, data };
 }
@@ -145,19 +147,21 @@ async function reconcile(job, deadline) {
     if(!await checkCalendarBookingWindow(client,job.desired.date,job.desired.window,job.bookingId,{accessToken:token,deadline}))throw new CalendarError('calendar_conflict','A conflicting calendar appointment appeared. Your saved visit is retained; no Google event was created. Calendar delivery will check again.',503);
     connection = await latestJob(job);
     const createToken = randomBytes(16).toString("hex");
-    await atomicUpdate("calendar_deliveries", job.storageKey, row => {
+    await atomicUpdate("calendar_deliveries", job.storageKey, async row => {
       if (!row || row.version !== job.version || row.claim?.token !== job.claim.token) throw new CalendarError("superseded", "A newer saved visit will be synced instead.");
       if (row.createAttempt) throw new CalendarError(row.createAttempt.state === "observed" || row.receipt ? "remote_event_deleted" : "creation_unconfirmed", row.createAttempt.state === "observed" || row.receipt ? "The previously observed calendar event is missing. Its reference is retained for review." : "An earlier calendar creation is unconfirmed. The same reference will be checked; no second event will be created.", 503);
+      // A known payment hold must not become evidence of an uncertain create.
+      try{await assertPaidServiceAuthority(client,'calendar');}catch(error){throw paymentError(error);}
       return { value: { ...row, createAttempt: { token: createToken, version: job.version, state: "sending", startedAt: stamp() } } };
     });
     let inserted;
     try { inserted = await requestGoogle(job, connection, token, "POST", null, { id: job.eventId, ...body }, null, deadline); }
     catch (error) {
-      if (error.code === "calendar_budget_exhausted") {
+      if (["calendar_budget_exhausted","paid_service_unconfirmed","workspace_inactive"].includes(error.code)) {
         // Reservation rejects before fetch. Remove only this invocation's
         // undispatched marker; a prior or actually dispatched create stays retained.
         await atomicUpdate("calendar_deliveries", job.storageKey, row => {
-          if (row?.createAttempt?.token !== createToken || row.createAttempt.state !== "sending") return {};
+          if (row?.createAttempt?.token !== createToken || row.createAttempt.state !== "sending" || row.version!==job.version || row.sourceRevision!==job.sourceRevision || row.claim?.token!==job.claim.token || row.createAttempt.version!==job.version) return {};
           const value = { ...row }; delete value.createAttempt; return { value };
         });
       } else await recordCreateState(job, createToken, "uncertain");
@@ -208,22 +212,22 @@ async function processJob(key, deadline) {
   let result, failure;
   try { result = await reconcile(job, deadline); await latestJob(job); }
   catch (error) { failure = error instanceof CalendarError ? error : error.code?.startsWith('calendar_') ? new CalendarError(error.code, error.message, 503) : new CalendarError("storage_or_provider_unavailable", "Calendar work could not be confirmed. The same event reference is retained.", 503); }
-  const conflictWait = failure?.code === "calendar_conflict";
+  const conflictWait = failure?.code === "calendar_conflict",paymentWait=failure?.code==="paid_service_unconfirmed"||failure?.code==="workspace_inactive";
   const budgetWait = failure?.code === "calendar_budget_exhausted" && calendarExecutionPolicy()?.mode === "self_service";
   await atomicUpdate("calendar_deliveries", key, row => {
     if (!row || row.version !== job.version || row.claim?.token !== token) return {};
     const permanent = failure && ["event_ownership_conflict", "event_etag_missing", "remote_event_deleted", "calendar_target_changed", "invalid_booking"].includes(failure.code);
     const waiting = failure && ["reconnect_required", "workspace_changed", "calendar_consent_required"].includes(failure.code);
     const superseded = failure?.code === "superseded";
-    const state = !failure ? (result.cancelled ? "cancelled" : "synced") : budgetWait || conflictWait ? "queued" : permanent || row.attempts >= 5 ? "needs_attention" : waiting ? "waiting_connection" : "retry";
-    // Daily admission waits and observed schedule conflicts are not failed provider operations.
+    const state = !failure ? (result.cancelled ? "cancelled" : "synced") : budgetWait || conflictWait || paymentWait ? "queued" : permanent || row.attempts >= 5 ? "needs_attention" : waiting ? "waiting_connection" : "retry";
+    // Known payment/admission waits and observed schedule conflicts are not failed provider operations.
     // Conflicts recheck on the ordinary worker after five minutes, without exhausting
     // the failure limit while the other appointment remains on the calendar. Every physical
     // request remains debited in the execution ledger; earlier failures and
     // unknown create evidence keep their existing retry count and receipts.
-    return { value: { ...row, state, attempts: budgetWait || conflictWait ? Math.max(0, row.attempts - 1) : row.attempts, claim: null, updatedAt: stamp(), completedAt: failure ? null : stamp(), reasonCode: failure?.code || null, detail: failure?.message || (result.cancelled ? "Calendar event cancellation is confirmed. Your workspace record is retained." : "Saved visit is confirmed in your Google calendar."), nextAttemptAt: budgetWait ? nextUtcDay() : conflictWait ? new Date(Date.now()+300000).toISOString() : failure && !permanent && !waiting ? new Date(Date.now() + (superseded ? 1000 : Math.min(3600000, 60000 * 2 ** (row.attempts - 1)))).toISOString() : null, ...(!failure && result ? { receipt: { version: row.version, sourceRevision: row.sourceRevision, eventId: row.eventId, confirmedAt: stamp(), action: result.cancelled ? "cancel" : "sync" } } : {}) } };
+    return { value: { ...row, state, attempts: budgetWait || conflictWait || paymentWait ? Math.max(0, row.attempts - 1) : row.attempts, claim: null, updatedAt: stamp(), completedAt: failure ? null : stamp(), reasonCode: failure?.code || null, detail: failure?.message || (result.cancelled ? "Calendar event cancellation is confirmed. Your workspace record is retained." : "Saved visit is confirmed in your Google calendar."), nextAttemptAt: budgetWait ? nextUtcDay() : paymentWait ? new Date(Date.now()+60000).toISOString() : conflictWait ? new Date(Date.now()+300000).toISOString() : failure && !permanent && !waiting ? new Date(Date.now() + (superseded ? 1000 : Math.min(3600000, 60000 * 2 ** (row.attempts - 1)))).toISOString() : null, ...(!failure && result ? { receipt: { version: row.version, sourceRevision: row.sourceRevision, eventId: row.eventId, confirmedAt: stamp(), action: result.cancelled ? "cancel" : "sync" } } : {}) } };
   });
-  return { ok: !failure || budgetWait, state: failure?.code || "confirmed" };
+  return { ok: !failure || budgetWait || paymentWait, state: failure?.code || "confirmed" };
 }
 async function discover(limit, deadline = Infinity) {
   const keys = await list("bookings", ""), cursor = await strictRead("calendar_scan", "bookings:v1");
