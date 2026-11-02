@@ -110,7 +110,7 @@ await check('A daily update allowance waits until UTC reset without spending pro
   await f.store.put('bookings',`${item.client.slug}/${row.id}`,{...row,date:'2027-02-05'});await all();
   const key=f.delivery.calendarDeliveryKey(item.client,row.id),waiting=await f.store.get('calendar_deliveries',key),reset=new Date(Date.now());reset.setUTCHours(24,0,0,0);
   assert.equal(waiting.state,'queued');assert.equal(waiting.reasonCode,'calendar_budget_exhausted');assert.equal(waiting.attempts,0);assert.equal(waiting.nextAttemptAt,reset.toISOString());
-  const before=f.requests.length;for(let n=0;n<6;n++){f.advance(60000);await all();}assert.equal(f.requests.length,before);
+  const before=f.requests.length;for(let n=0;n<6;n++){f.advance(Math.min(60000,Math.max(0,reset.getTime()-Date.now()-1)));await all();}assert.ok(Date.now()<reset.getTime());assert.equal(f.requests.length,before);
   f.advance(reset.getTime()-Date.now());await all();
   const saved=await f.store.get('calendar_deliveries',key);assert.equal(saved.state,'synced');assert.equal(saved.eventId,waiting.eventId);
   const remote=f.events.get(`calendar-update-budget@google.fixture.test/${saved.eventId}`);assert.match(remote.start.dateTime,/2027-02-05/);
