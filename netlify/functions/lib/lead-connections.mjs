@@ -24,6 +24,7 @@ function rowFor(client, source, row) {
   if (!Object.hasOwn(providers, source)) fail('invalid_lead_source', 'Choose a supported lead source.', 400);
   if (!row) return null;
   if (row.version !== 1 || row.slug !== client.slug || row.tenantIdentity !== workspaceTenant(client) || row.source !== source || !token(row.generation) || !Array.isArray(row.pending) || row.pending.length > MAX_PENDING || !Array.isArray(row.receipts) || row.receipts.length > MAX_RECEIPTS || !Array.isArray(row.operations) || row.operations.length > MAX_OPERATIONS || !['awaiting_provider','receiving','disconnected','partner_access_required'].includes(row.state)) fail('lead_connection_unavailable', 'This lead connection could not be read. Your saved requests are kept.', 503);
+  if(row.deliveryMode!==undefined&&(source!=='thumbtack'||!['native','self_serve'].includes(row.deliveryMode))||row.deliveryMode==='self_serve'&&(row.native||row.providerBusinessId||row.state!=='disconnected'&&!/^[a-f0-9]{64}$/.test(row.secret||'')))fail('lead_connection_unavailable','This lead connection could not be read. Your saved requests are kept.',503);
   return row;
 }
 async function current(client, mutation = false) {
@@ -41,6 +42,10 @@ async function owner(client, session, mutation = false) {
 export { owner as leadConnectionOwner, current as currentLeadWorkspace, keyFor as leadConnectionKey, rowFor as leadConnectionRow, numeric as leadProviderId };
 function projection(client, source, saved) {
   const row = rowFor(client, source, saved), provider = providers[source];
+  if(source==='thumbtack'&&row?.deliveryMode==='self_serve'){
+    const configured=row.state!=='disconnected',received=configured&&row.state==='receiving'&&Number.isFinite(Date.parse(row.lastReceivedAt))&&Date.parse(row.lastReceivedAt)<=Date.now();
+    return {source,label:provider.label,deliveryMode:'self_serve',selfServeAvailable:true,state:row.state,generation:row.generation,providerBusinessId:'',integrationEmail:row.integrationEmail,lastOperationId:row.lastOperationId,createdAt:row.createdAt,updatedAt:row.updatedAt,lastReceivedAt:received?row.lastReceivedAt:null,receivedCount:row.receipts.length,pendingCount:row.pending.length,notification:{received,count:row.receipts.length,lastAt:received?row.lastReceivedAt:null,deliveryVerified:false},capabilities:{receiveLeadNotifications:configured,receiveLeads:false,receiveMessages:false,sendNativeReplies:false},setup:{endpoint:configured?`${(process.env.URL||'https://machinesandcloud.com').replace(/\/$/,'')}/api/thumbtack/self-serve?c=${encodeURIComponent(client.slug)}&t=${workspaceTenant(client)}&g=${row.generation}`:null,headerName:'X-MC-Thumbtack-Key',secret:configured?row.secret:null,providerURL:'https://www.thumbtack.com/pro/webhooks/list',instructions:['In Thumbtack, create a webhook for your business with this endpoint and Custom Header name and value.','Select Lead details only. Leave Messages and Reviews off.','Notifications appear in Inbox with their Thumbtack lead reference. Open Thumbtack for customer details and replies. Full lead delivery, native replies and AI are not verified by this notification.']},reason:!configured?'New notifications are blocked here. Pause or delete the webhook in Thumbtack too; earlier notifications remain in Inbox.':row.pending.length?'An authenticated notification is being saved to Inbox. The same saved notification will be checked again automatically.':received?'An authenticated Thumbtack notification was saved to Inbox. Its lead details and live or test status have not been verified.':'Your notification endpoint is prepared. No notification has been received yet.'};
+  }
   if(DISCOVERY_LEAD_SOURCES.includes(source)){const operation=row?.operations.find(item=>item.id===row.lastOperationId&&item.operation==='prepare'),request=operation&&row.state!=='disconnected'?{id:operation.id,state:'waiting_platform',owner:'machines_and_cloud',requestedAt:operation.at,providerJobStarted:false}:null;return {source,label:provider.label,state:row?.state==='disconnected'?'disconnected':request?'setup_requested':'not_connected',generation:row?.generation||null,providerBusinessId:row?.providerBusinessId||'',integrationEmail:row?.integrationEmail||'',lastOperationId:row?.lastOperationId||null,setupRequest:request,capabilities:{receiveLeads:false,receiveMessages:false,sendNativeReplies:false},setup:{providerURL:provider.url,instructions:[]},reason:request?'Your setup request is saved for Machines & Cloud. Account eligibility and a supported delivery route must be confirmed before account permission or costs are requested.':'Review the provider requirements and request setup. This option does not yet connect an account or deliver inquiries.'};}
   const configured = !!row && row.state !== 'disconnected';
   const requestSent=source==='angi'&&configured&&Number.isFinite(Date.parse(row?.requestSent?.reportedAt))&&Date.parse(row.requestSent.reportedAt)<=Date.now()?{reportedAt:row.requestSent.reportedAt,source:'owner_report',deliveryVerified:false}:null;
@@ -59,18 +64,19 @@ export async function leadConnectionsView(client) {
   const out = {};
   for (const source of Object.keys(providers)) {
     const saved=await strictRead(KIND,keyFor(client,source));out[source]=projection(client,source,saved);
-    if(source==='thumbtack'){const {thumbtackConnectionView}=await import('./thumbtack-connection.mjs');out[source]=thumbtackConnectionView(client,saved,out[source]);}
+    if(source==='thumbtack'&&saved?.deliveryMode!=='self_serve'){const {thumbtackConnectionView}=await import('./thumbtack-connection.mjs');out[source]={...thumbtackConnectionView(client,saved,out[source]),deliveryMode:'native',selfServeAvailable:true};}
   }
   await assertCurrentWorkspace(client); return out;
 }
 function parseAction(body) {
-  if (!plain(body) || body.action !== 'lead_connection' || Object.keys(body).some(key => !['action','source','operation','operationId','expectedGeneration','providerBusinessId','integrationEmail'].includes(key)) || !Object.hasOwn(providers, body.source) || !['prepare','rotate','disconnect','report_request_sent'].includes(body.operation) || body.operation==='report_request_sent'&&(body.source!=='angi'||Object.keys(body).some(key=>['providerBusinessId','integrationEmail'].includes(key))) || !token(body.operationId) || !(body.expectedGeneration === null || token(body.expectedGeneration))) fail('invalid_lead_connection', 'Refresh your connections before saving this change.', 400);
+  if (!plain(body) || body.action !== 'lead_connection' || Object.keys(body).some(key => !['action','source','operation','operationId','expectedGeneration','providerBusinessId','integrationEmail','deliveryMode'].includes(key)) || body.deliveryMode!==undefined&&(body.source!=='thumbtack'||!['native','self_serve'].includes(body.deliveryMode)) || !Object.hasOwn(providers, body.source) || !['prepare','rotate','disconnect','report_request_sent'].includes(body.operation) || body.operation==='report_request_sent'&&(body.source!=='angi'||Object.keys(body).some(key=>['providerBusinessId','integrationEmail'].includes(key))) || !token(body.operationId) || !(body.expectedGeneration === null || token(body.expectedGeneration))) fail('invalid_lead_connection', 'Refresh your connections before saving this change.', 400);
+  if(body.deliveryMode==='self_serve'&&body.providerBusinessId)fail('invalid_provider_business','Choose the business in Thumbtack when installing this notification endpoint.',400,'providerBusinessId');
   if(DISCOVERY_LEAD_SOURCES.includes(body.source)&&(body.operation==='rotate'||body.providerBusinessId!==undefined&&body.providerBusinessId!==''))fail('invalid_lead_connection','This option saves a setup request. It does not issue provider credentials or keys.',400);
   if (!['disconnect','report_request_sent'].includes(body.operation)) {
     if (body.source==='angi'&&!numeric(body.providerBusinessId) || body.source==='thumbtack'&&body.providerBusinessId!==''&&body.providerBusinessId!==undefined&&(!numeric(body.providerBusinessId)||String(body.providerBusinessId).length>32)) fail('invalid_provider_business', 'Enter the business ID from your lead-platform account.', 400, 'providerBusinessId');
     if (!normalizeAccountEmail(body.integrationEmail)) fail('invalid_integration_email', 'Enter a valid email for this connection.', 400, 'integrationEmail');
   }
-  return { action: body.action, source: body.source, operation: body.operation, operationId: body.operationId, expectedGeneration: body.expectedGeneration, ...(['disconnect','report_request_sent'].includes(body.operation) ? {} : { providerBusinessId: numeric(body.providerBusinessId)||'', integrationEmail: normalizeAccountEmail(body.integrationEmail) }) };
+  return { action: body.action, source: body.source, operation: body.operation, operationId: body.operationId, expectedGeneration: body.expectedGeneration, ...(body.deliveryMode?{deliveryMode:body.deliveryMode}:{}), ...(['disconnect','report_request_sent'].includes(body.operation) ? {} : { providerBusinessId: numeric(body.providerBusinessId)||'', integrationEmail: normalizeAccountEmail(body.integrationEmail) }) };
 }
 export async function changeLeadConnection(client, session, body, { authorizationStart = false } = {}) {
   const input = parseAction(body), operationDigest = digest(input), at = stamp();
@@ -82,13 +88,17 @@ export async function changeLeadConnection(client, session, body, { authorizatio
     if (receipt) { if (receipt.digest !== operationDigest) fail('operation_conflict', 'That action identifier belongs to a different connection change.'); if (authorizationStart && (row.authorizationStart?.operationId !== input.operationId || row.authorizationStart?.generation !== row.generation)) fail('lead_connection_changed', 'This authorization belongs to an earlier connection. Refresh before reconnecting.'); return {}; }
     if ((row?.generation || null) !== input.expectedGeneration) fail('lead_connection_changed', 'This connection changed. Check its latest setup before saving.');
     if ((row?.operations.length || 0) >= MAX_OPERATIONS) fail('lead_connection_history_full', 'This connection history needs support review before another change.');
+    if(authorizationStart&&row?.deliveryMode==='self_serve')fail('native_disconnect_required','Disconnect notifications here before starting a native Thumbtack connection.');
+    if(input.operation==='rotate'&&row?.deliveryMode!==input.deliveryMode&&input.deliveryMode!==undefined)fail('lead_connection_changed','Disconnect the existing delivery method before choosing another.');
+    if(input.source==='thumbtack'&&input.operation==='prepare'&&row?.pending.length&&((row.deliveryMode||'native')!==(input.deliveryMode||'native')))fail('lead_receipt_uncertain','The same accepted notification must finish saving before changing delivery methods.',503);
     if(input.operation==='report_request_sent'){if(!row||row.state==='disconnected'||!row.secret||!row.providerBusinessId||!row.integrationEmail)fail('lead_connection_missing','Prepare the current Angi connection before reporting its setup request.');const next={...row,requestSent:row.requestSent||{reportedAt:at},updatedAt:at,lastOperationId:input.operationId,operations:[...row.operations,{id:input.operationId,digest:operationDigest,operation:input.operation,at}]};return {value:next};}
     if(DISCOVERY_LEAD_SOURCES.includes(input.source)&&input.operation==='prepare'&&row&&row.state!=='disconnected')fail('lead_connection_exists','Your setup request is already saved. Check its status or cancel it before making a replacement request.');
-    if(input.source==='thumbtack'&&row?.native?.webhookID&&input.operation!=='disconnect')fail('native_disconnect_required','Disconnect the existing Thumbtack connection before changing its business.');
+    if(input.source==='thumbtack'&&(row?.native?.webhookID||input.deliveryMode==='self_serve'&&row?.native)&&input.operation!=='disconnect')fail('native_disconnect_required','Disconnect the existing Thumbtack connection before changing its business.');
     if (input.operation === 'prepare' && row && !['disconnected','partner_access_required'].includes(row.state)) fail('lead_connection_exists', 'This connection is already prepared. Rotate its key to replace the setup.');
     if (input.operation === 'disconnect' && !row) fail('lead_connection_missing', 'There is no saved connection to disconnect.');
     if (input.operation === 'rotate' && !row) fail('lead_connection_missing', 'Prepare this connection before rotating its key.');
-    const next = input.operation === 'disconnect' ? { ...row, state: 'disconnected', secret: null, generation, ...(row.native?{native:{...row.native,status:row.native.webhookID?'disconnect_pending':'disconnected',disconnectRequestedAt:at}}:{}) } : { version: 1, slug: client.slug, tenantIdentity: workspaceTenant(client), source: input.source, state: input.source === 'angi' ? 'awaiting_provider' : 'partner_access_required', generation, secret: input.source === 'angi' ? secret : null, providerBusinessId: input.providerBusinessId, integrationEmail: input.integrationEmail, pending: row?.pending || [], receipts: row?.receipts || [], operations: row?.operations || [], createdAt: row?.createdAt || at, lastReceivedAt: null };
+    const selfServe=input.source==='thumbtack'&&(input.deliveryMode==='self_serve'||input.operation==='rotate'&&row?.deliveryMode==='self_serve');
+    const next = input.operation === 'disconnect' ? { ...row, state: 'disconnected', secret: null, generation, ...(row.native?{native:{...row.native,status:row.native.webhookID?'disconnect_pending':'disconnected',disconnectRequestedAt:at}}:{}) } : { version: 1, slug: client.slug, tenantIdentity: workspaceTenant(client), source: input.source, ...(input.source==='thumbtack'?{deliveryMode:selfServe?'self_serve':'native'}:{}), state: input.source === 'angi'||selfServe ? 'awaiting_provider' : 'partner_access_required', generation, secret: input.source === 'angi'||selfServe ? secret : null, providerBusinessId: selfServe?'':input.providerBusinessId, integrationEmail: input.integrationEmail, pending: row?.pending || [], receipts: row?.receipts || [], operations: row?.operations || [], createdAt: row?.createdAt || at, lastReceivedAt: null };
     next.updatedAt = at; next.lastOperationId = input.operationId;
     if (authorizationStart) next.authorizationStart = { operationId: input.operationId, generation };
     next.operations = [...next.operations, { id: input.operationId, digest: operationDigest, operation: input.operation, at }];
@@ -173,6 +183,37 @@ export async function receiveManagedAngi(req, client) {
   const saved = await finishAccepted(client,'angi',pending);
   return {status:'success',id:saved.id,duplicate,texted:false};
 }
+// The self-serve documentation publishes data.negotiationID, but not a complete
+// event/customer schema or test discriminator. Retain only that documented lead
+// reference: this is a partial notification, never a mapped/verified lead or an
+// authorization for API reads, native replies, model dispatch or other contact.
+export async function receiveThumbtackNotification(req,client){
+  const url=new URL(req.url),tenant=workspaceTenant(client),generation=url.searchParams.get('g'),supplied=req.headers.get('x-mc-thumbtack-key')||'';
+  if(url.pathname!=='/api/thumbtack/self-serve'||url.searchParams.get('t')!==tenant||!token(generation)||[...url.searchParams.keys()].length!==3||[...url.searchParams.keys()].some(key=>!['c','t','g'].includes(key)))fail('forbidden','This notification endpoint is not current.',403);
+  let row=rowFor(client,'thumbtack',await strictRead(KIND,keyFor(client,'thumbtack')));
+  const authorized=value=>value?.deliveryMode==='self_serve'&&value.state!=='disconnected'&&value.generation===generation&&safeEqual(value.secret,supplied);
+  if(!authorized(row))fail('forbidden','This notification credential is not current.',403);
+  if(!/^application\/json(?:\s*;|$)/i.test(req.headers.get('content-type')||''))fail('invalid_notification','Use application/json.',415);
+  const length=req.headers.get('content-length');if(length&&(!/^\d+$/.test(length)||Number(length)>32768))fail('notification_too_large','The notification exceeds the supported size.',413);
+  const reader=req.body?.getReader();if(!reader)fail('invalid_notification','A JSON notification is required.',400);
+  let size=0,chunks=[];for(;;){const part=await reader.read();if(part.done)break;size+=part.value.byteLength;if(size>32768){await reader.cancel();fail('notification_too_large','The notification exceeds the supported size.',413);}chunks.push(Buffer.from(part.value));}
+  let body;try{body=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{fail('invalid_notification','Send valid JSON.',400);}
+  if(!plain(body)||!plain(body.data)||typeof body.data.negotiationID!=='string'||body.data.negotiationID.length<1||body.data.negotiationID.length>128||body.data.negotiationID.trim()!==body.data.negotiationID||/[\u0000-\u001f\u007f]/.test(body.data.negotiationID))fail('unsupported_notification','The documented data.negotiationID lead reference is required. No customer details were imported.',422);
+  const externalId=body.data.negotiationID,at=stamp(),id=digest(['thumbtack-notification-v1',tenant,externalId]).slice(0,40),payloadDigest=digest({negotiationID:externalId});
+  const record={id,slug:client.slug,tenantIdentity:tenant,createdAt:at,customer_name:'Thumbtack lead notification',phone:'',email:'',address:'',issue:'Lead reference '+externalId+'. Open Thumbtack for customer details and replies.',reason:'lead',urgency:'this_week',wanted:'',language:'en',unsure:'',nobook_reason:'none',channel:'thumbtack',contact:'thumbtack:'+externalId,source:'thumbtack',sourceId:externalId,status:'open',outcome:'needs_action',customerType:'unknown',platform:{source:'thumbtack',label:'Thumbtack',deliveryMode:'self_serve',notificationOnly:true,externalLeadId:externalId,replyMethod:'vendor_app',replyUrl:'https://www.thumbtack.com/pro-inbox/',replyInstructions:'Open Thumbtack and find lead reference '+externalId+'. Customer details, message history and live or test status have not been verified here. Reply in Thumbtack.',context:{notificationOnly:true,historyComplete:false,messages:[]}},platformPayloadDigest:payloadDigest,platformAcceptedGeneration:generation};
+  const pending={id,generation,acceptedAt:at,record};let duplicate=false,acceptedRecord=record;
+  await atomicUpdate(KIND,keyFor(client,'thumbtack'),async raw=>{
+    const value=await current(client,true);row=rowFor(client,'thumbtack',raw);
+    if(!['testing','live'].includes(value.status)||!authorized(row))fail('forbidden','This workspace is not accepting new notifications.',403);
+    const existing=row.pending.find(item=>item.id===id);
+    if(existing){if(existing.record.platformPayloadDigest!==payloadDigest)fail('lead_payload_conflict','This notification reference has different pending content.');duplicate=true;acceptedRecord=existing.record;return {};}
+    if(row.receipts.includes(id)){const saved=await strictRead('leads',`${client.slug}/${id}`);if(!saved||!belongsToWorkspace(client,saved)||saved.platformPayloadDigest!==payloadDigest)fail('lead_payload_conflict','This notification reference could not be confirmed.');duplicate=true;return {value:{...row,state:'receiving',lastReceivedAt:at,updatedAt:at}};}
+    if(row.pending.length>=MAX_PENDING||row.pending.length+row.receipts.length>=MAX_RECEIPTS)fail('lead_connection_full','The connection has reached its retained-notification limit.',503);
+    return{value:{...row,pending:[...row.pending,pending],updatedAt:at}};
+  });
+  const saved=await finishAccepted(client,'thumbtack',{...pending,record:acceptedRecord});
+  return {status:'success',id:saved.id,duplicate,notificationOnly:true,deliveryVerified:false,texted:false};
+}
 // Local projections only: no model, email, SMS or vendor request. Pending acceptance precedes
 // the record write, so ordinary scheduled retries finish the same deterministic record.
 export async function recoverLeadConnections({limit = 40} = {}) {
@@ -180,8 +221,11 @@ export async function recoverLeadConnections({limit = 40} = {}) {
   let examined=0,recovered=0,failed=0;
   for(const slug of await list('clients','')){
     const client=await strictRead('clients',slug);if(!supportedWorkspace(client))continue;
-    const row=rowFor(client,'angi',await strictRead(KIND,keyFor(client,'angi')));
-    for(const pending of row?.pending||[]){if(examined>=limit)return {examined,recovered,failed,limited:true};examined++;try{await finishAccepted(client,'angi',pending);recovered++;}catch{failed++;}}
+    for(const source of ['angi','thumbtack']){
+      const row=rowFor(client,source,await strictRead(KIND,keyFor(client,source)));
+      if(source==='thumbtack'&&row?.deliveryMode!=='self_serve')continue;
+      for(const pending of row?.pending||[]){if(examined>=limit)return {examined,recovered,failed,limited:true};examined++;try{await finishAccepted(client,source,pending);recovered++;}catch{failed++;}}
+    }
   }
   return {examined,recovered,failed,limited:false};
 }

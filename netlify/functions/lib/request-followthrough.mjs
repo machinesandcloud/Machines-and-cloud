@@ -80,7 +80,7 @@ export async function readRequestFollowthrough(client, session, id, operationId 
   const latest = await source(client, id), result = view(client, latest, row, operationId);
   await authority(client, session); await assertCurrentWorkspace(client);
   const {readRequestAutomation}=await import('./request-followup.mjs');const automation=await readRequestAutomation(client,id);if(automation)result.automaticFollowup=automation;
-  if(latest.platform?.source==='thumbtack'){
+  if(latest.platform?.source==='thumbtack'&&latest.platform.replyMethod==='native'){
     const {thumbtackReplyView}=await import('./thumbtack-connection.mjs');const replies=await thumbtackReplyView(client,id),nativeReply=operationId?replies.find(reply=>reply.id===operationId):replies.at(-1);
     const connection=(await import('./lead-connections.mjs')).leadConnectionsView;const native=(await connection(client)).thumbtack;
     result.platformConversation={messages:(latest.platform.context?.messages||[]).map(message=>({id:message.messageID,from:message.from,text:message.text,sentAt:message.sentAt,hasAttachments:message.hasAttachments,actor:replies.find(reply=>reply.providerMessageID===message.messageID)?.actor||null})),complete:latest.platform.context?.historyComplete===true,unavailableReason:latest.platform.context?.historyComplete===true?null:'Recent messages are shown. Earlier history and attachments may need to be opened in Thumbtack.'};
