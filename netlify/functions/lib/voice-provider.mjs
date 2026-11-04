@@ -169,6 +169,21 @@ export function createManagedVoiceProvider({ executionAllowed, deadlineAt = null
     return { confirmed: true, numberId: number.sid, phoneNumberId: imported.resource.id, vapiUrl: vapiUrl(args.savedVapiUrl), fallbackConfigured: true, checkedAt: new Date().toISOString() };
   }
   return {
+    async setCallTimeLimit({callSid,from,to,parentCallSid=null,timeLimit,authorizeDispatch}) {
+      let dispatched=false;
+      try {
+        if (!/^CA[a-f0-9]{32}$/i.test(callSid||'') || !Number.isInteger(timeLimit) || timeLimit<1 || timeLimit>900 || parentCallSid!==null&&!/^CA[a-f0-9]{32}$/i.test(parentCallSid)) throw new Error('Invalid bounded call');
+        const identity=value=>value && value.sid===callSid && value.account_sid===process.env.TWILIO_ACCOUNT_SID && value.from===from && value.to===to && (parentCallSid?value.parent_call_sid===parentCallSid&&value.direction==='outbound-dial'&&value.status==='in-progress':value.direction==='inbound'&&['ringing','in-progress'].includes(value.status));
+        const path=`/Calls/${callSid}.json`,before=await request('twilio',path);
+        if(!identity(before))throw new Error('Bounded call identity unavailable');
+        await authorize(authorizeDispatch);
+        const receipt=await request('twilio',path,'POST',{TimeLimit:String(timeLimit)},null,()=>{dispatched=true;});
+        // Twilio's Call response does not echo time_limit. This is the exact
+        // update acknowledgement, never an independent limit readback.
+        if(!identity(receipt))throw new Error('Bounded call acknowledgement unavailable');
+        return {callSid,accountSid:receipt.account_sid,status:'applied',seconds:timeLimit};
+      } catch(error) { if(!dispatched)error.code='call_limit_not_dispatched';throw error; }
+    },
     async redirectCall({ call, callbackUrl, authorizeDispatch }) {
       let dispatched=false;
       try {

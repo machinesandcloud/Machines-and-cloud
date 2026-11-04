@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { fakeClient } from "./fake-model.mjs";
 
 export const MODEL = "claude-opus-5-5";
+export const MANAGED_TEXT_MODEL = "claude-haiku-5-5";
 export const MAX_MESSAGES = 20;
 export const MAX_CHARS = 1500;
 const MAX_ITERATIONS = 3;
@@ -67,7 +68,8 @@ export function toApiMessages(stored) {
  * execTool(name, input) -> { content: string, is_error?: boolean, event?: object }
  * Returns { reply, events }.
  */
-export async function runAgent({ system, tools, messages, onText, execTool, maxTokens = 2000, effort = "low", dropToolPreamble = false, adaptiveThinking = false, maxIterations = MAX_ITERATIONS, requireComplete = false, includeUsage = false, maxRetries = 1, exhaustedReply, modelFetch, outputFormat, toolChoice, stopAfterTools, withholdToolText = false }) {
+export async function runAgent({ system, tools, messages, onText, execTool, maxTokens = 2000, effort = "low", dropToolPreamble = false, adaptiveThinking = false, maxIterations = MAX_ITERATIONS, requireComplete = false, includeUsage = false, maxRetries = 1, exhaustedReply, modelFetch, outputFormat, toolChoice, stopAfterTools, withholdToolText = false, model = MODEL }) {
+  if (![MODEL, MANAGED_TEXT_MODEL].includes(model) || model === MANAGED_TEXT_MODEL && (adaptiveThinking || !modelFetch || maxRetries !== 0 || maxTokens > 800 || maxIterations > 3)) throw new Error('Invalid managed text model contract');
   const client = makeClient({ maxRetries, modelFetch });
   const events = [];
   const usage = { requests: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
@@ -75,12 +77,12 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
   let reply = "";
   for (let i = 0; i < maxIterations; i++) {
     const stream = client.beta.messages.stream({
-      model: MODEL,
+      model,
       max_tokens: maxTokens,
       ...(!modelFetch ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
       output_config: { effort, ...(outputFormat ? { format: outputFormat } : {}) },
       ...(toolChoice ? { tool_choice: typeof toolChoice === 'function' ? toolChoice({ iteration: i }) : toolChoice } : {}),
-      ...(adaptiveThinking ? { thinking: { type: "adaptive" } } : {}),
+      ...(adaptiveThinking ? { thinking: { type: "adaptive" } } : model === MANAGED_TEXT_MODEL ? { thinking: { type: 'disabled' } } : {}),
       system: [{ type: "text", text: dropToolPreamble ? `${system}\n\n${DELIVERY_CONTRACT}` : system, cache_control: { type: "ephemeral" } }],
       tools,
       messages,

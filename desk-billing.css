@@ -3,3 +3,15 @@
 #workspaceBilling .billing-provider { margin:14px 0 0; font-size:12px; color:var(--ui-muted); gap:12px; }
 #workspaceBilling .billing-provider img.brand-mark--wide { width:48px; height:20px; }
 #workspaceBilling .billing-provider.brand-lockup{display:flex;margin-top:16px;}
+
+#billingLimits{white-space:pre-line}
+.billing-capacity{margin:24px 0;border-block:1px solid var(--mc-line);padding:20px 0}
+.billing-capacity h4{margin:0 0 8px;font-size:16px}
+.billing-capacity-row{display:grid;grid-template-columns:minmax(130px,1fr) 2fr;align-items:start;gap:16px;padding:16px 0;border-bottom:1px solid var(--mc-line)}
+.billing-capacity-row:last-child{border-bottom:0}
+.billing-capacity-row h5{margin:0;font-size:14px;line-height:1.5;font-weight:600}
+.billing-capacity-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0}
+.billing-capacity-metrics dt{font-size:12px;color:var(--ui-muted)}
+.billing-capacity-metrics dd{margin:4px 0 0;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#billingCapacityNote{font-size:12px;line-height:1.6;margin:12px 0 0}
+@media(max-width:600px){.billing-capacity-row{grid-template-columns:1fr;gap:12px}.billing-capacity-metrics{gap:12px}}

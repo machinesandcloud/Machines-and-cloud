@@ -1,6 +1,6 @@
 // Independent integration QA: real HTTP handlers, signed Twilio payloads, installed SDK CAS.
 import assert from "node:assert/strict";
-import {paidFixture} from "./paid-service-test-fixtures.mjs";
+import {paidFixture,paidHash} from "./paid-service-test-fixtures.mjs";
 import { createHash, createHmac, createCipheriv, randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
@@ -20,6 +20,8 @@ const offer = { version: "qa_sms_v1", scope: "a2p_customer_care", currency: "USD
 const deny = () => { throw new Error("QA external networking blocked"); }; net.connect = net.createConnection = http.get = http.request = https.get = https.request = deny; syncBuiltinESMExports();
 const blobs = new Map(), messages = new Map(), resources = new Map(), emails = new Map(); let etag = 0, faultKind = null, serial = 0, sendStatus = "sent", modelBarrier = null;
 let webBookingInput=null;
+const paidModelRequests=[];
+let paidModelAction=null;
 function bookingSSE(tool) {
   const packets=[],emit=data=>packets.push(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
   emit({type:'message_start',message:{id:'offline-consent-model',type:'message',role:'assistant',content:[],model:'offline-protocol',stop_reason:null,stop_sequence:null,usage:{input_tokens:10,output_tokens:0}}});
@@ -31,6 +33,10 @@ function bookingSSE(tool) {
 const resourceKey = (origin, path) => origin + path;
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
+  if(url.origin==='https://api.anthropic.com'&&url.pathname==='/v1/messages') {
+    const body=JSON.parse(init.body);assert.equal(body.model,'claude-haiku-5-5');assert.equal(body.max_tokens,800);assert.deepEqual(body.thinking,{type:'disabled'});assert.equal(body.fallbacks,undefined);assert.equal(body.betas,undefined);
+    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(null);
+  }
   if(url.origin==='https://consent-model.invalid' && url.pathname==='/v1/messages' && webBookingInput){const body=JSON.parse(init.body);return bookingSSE(Array.isArray(body.messages.at(-1).content)?null:webBookingInput);}
   if (url.origin === "https://sms-integration-blobs.invalid") {
     const [, fixtureSite, kind, ...parts] = url.pathname.split("/").map(decodeURIComponent), key = parts.join("/"), name = kind + "/" + key; assert.equal(fixtureSite, "sms-integration-site");
@@ -81,6 +87,19 @@ async function fixture(name, { state = "ready", status = "live" } = {}) {
 function inbound(f, body, overrides = {}) { const sid = "SM" + hash("inbound:" + ++serial).slice(0, 32), data = { sid, account_sid: account, direction: "inbound", messaging_service_sid: f.row.resources.service.sid, from: caller, to: f.number, body, status: "received", date_created: stamp(), ...overrides }; messages.set(sid, data); return { AccountSid: account, MessageSid: sid, MessagingServiceSid: f.row.resources.service.sid, From: data.from, To: data.to, Body: body }; }
 function signed(fields, { path = "/api/managed-sms", badSignature = false, append = "" } = {}) { const url = site + path, payload = url + Object.keys(fields).sort().map(key => key + fields[key]).join(""), signature = badSignature ? "not-a-signature" : createHmac("sha1", auth).update(payload).digest("base64"); return new Request(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-twilio-signature": signature }, body: new URLSearchParams(fields).toString() + append }); }
 const inboundKey = (f, fields) => `${f.c.slug}/${f.tenant}/${fields.MessageSid}`;
+const capacityUsage=await import('../netlify/functions/lib/usage.mjs');
+async function fundCapacity(f,limits={voiceMinutes:3,smsSegments:10,aiAnswers:2}) {
+  const paid=paidFixture(f.c,{end:Math.floor(clock/1000)+86400});
+  const offer=paid.row.checkout.offer;offer.plans.starter.capacity={version:1,period:'paid_invoice',limits};const {digest,...body}=offer;offer.digest=paidHash(body);paid.row.paidPeriod.offerDigest=offer.digest;
+  await store.put('workspace_billing',paid.key,paid.row);return paid;
+}
+async function driveDelivery(id,condition,turns=12){for(let i=0;i<turns;i++){await delivery.runManagedDelivery({limit:25,discoveryLimit:50});const row=await strictRead('managed_deliveries',id);if(condition(row))return row;}throw Error('Ordinary delivery did not reach expected state');}
+async function replyJob(f){return (await store.listJSON('managed_deliveries',f.c.slug+'/')).find(j=>j.channel==='sms'&&j.purpose==='reply');}
+async function receipt(f,job,status,segments) {
+  Object.assign(messages.get(job.providerId),{status,num_segments:segments});
+  const fields={AccountSid:account,MessageSid:job.providerId,From:job.from,To:job.to,MessageStatus:status};
+  assert.equal((await httpHandler(signed(fields,{path:'/api/managed-sms/status?job='+encodeURIComponent(job.id)}))).status,204);
+}
 await check("invalid signatures/accounts/duplicate fields/provider identities are rejected before consent or queue", async () => {
   const f = await fixture("auth"), fields = inbound(f, "Hello"); assert.equal((await httpHandler(signed(fields, { badSignature: true }))).status, 403); assert.equal((await httpHandler(signed({ ...fields, AccountSid: "AC" + "f".repeat(32) }))).status, 403); assert.equal((await httpHandler(signed(fields, { append: "&Body=Other" }))).status, 403);
   messages.get(fields.MessageSid).account_sid = "AC" + "f".repeat(32); assert.equal((await httpHandler(signed(fields))).status, 403); assert.equal(await consent.managedSMSConsent(f.c, caller), null); assert.equal(await strictRead("managed_sms_inbound", inboundKey(f, fields)), null);
@@ -285,5 +304,65 @@ await check('seven-day allowance wait can renew one owner-approved setup text wi
   const correctedResponse=await request({...body,expectedRevision:correctedRevision,expectedProbeNonce:registration.probe.nonce});assert.equal(correctedResponse.status,202,await correctedResponse.clone().text());registration=await strictRead('messaging_activation',f.row.id);assert.equal(registration.probeHistory.length,2);assert.equal(registration.probe.to,f.c.owner.phone);
   const nextPolicy={...savedPolicy,version:'qa_upper_bound_probe_renewal'};process.env.MANAGED_SMS_BUDGET_POLICY_JSON=JSON.stringify(nextPolicy);process.env.MANAGED_SMS_BUDGET_APPROVED_VERSION=nextPolicy.version;
   for(let i=0;i<5;i++)await delivery.runManagedDelivery({limit:25,discoveryLimit:25});assert.equal(sends().length,1,JSON.stringify({jobs:await store.listJSON('managed_deliveries',f.c.slug+'/'),brake:await strictRead('health','brake')}));assert.equal(sends()[0].to,f.c.owner.phone);assert.ok(sends()[0].body.includes(registration.probe.nonce));assert.equal((await strictRead('managed_deliveries',queued)).providerId,undefined);assert.equal((await strictRead('managed_deliveries',unknown)).state,'uncertain');assert.equal((await strictRead('managed_deliveries',unknown)).attempts,1);
+});
+process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT='500';
+await check('funded real SMS/model/delivery handlers reserve one logical answer, settle carrier facts once and isolate exhausted units',async()=>{
+  const f=await fixture('capacity-units'),paid=await fundCapacity(f,{voiceMinutes:3,smsSegments:4,aiAnswers:1}),fields=inbound(f,'When do you close?');
+  process.env.MC_FAKE_MODEL='0';process.env.ANTHROPIC_API_KEY='offline-capacity-model';
+  try {
+    assert.equal((await httpHandler(signed(fields))).status,200);const before=paidModelRequests.length;assert.equal((await processManagedSMS(inboundKey(f,fields))).ok,true);assert.equal(paidModelRequests.length,before+1);
+    let job=await replyJob(f);assert.ok(job.paidAnswerCapacity);let usage=await capacityUsage.paidUsageStatus(f.c);assert.equal(usage.units.aiAnswers.held,1);assert.equal(usage.units.aiAnswers.used,0);
+    job=await driveDelivery(job.id,j=>!!j?.providerId);const sends=report.providerSends;
+    await receipt(f,job,'delivered','0');usage=await capacityUsage.paidUsageStatus(f.c);assert.ok(usage.units.smsSegments.held>0);assert.equal(usage.units.aiAnswers.used,1);assert.equal(usage.units.smsSegments.used,0);
+    await receipt(f,job,'delivered','1');await receipt(f,job,'delivered','1');usage=await capacityUsage.paidUsageStatus(f.c);assert.equal(usage.units.smsSegments.used,1);assert.equal(usage.units.smsSegments.held,0);assert.equal(usage.units.aiAnswers.used,1);assert.equal(report.providerSends,sends);
+    const next=inbound(f,'Can you help with another question?');await httpHandler(signed(next));const held=await processManagedSMS(inboundKey(f,next));assert.equal(held.reasonCode,'paid_capacity_exhausted');assert.equal(paidModelRequests.length,before+1);assert.equal((await strictRead('managed_sms_inbound',inboundKey(f,next))).attempts,0);
+    const history=await managedSMSConversations(f.c),waiting=history[0].messages.find(m=>m.content===next.Body);assert.match(waiting.processingDetail,/AI text replies.*used or reserved/);assert.equal(waiting.processingAction,'account');
+    const voice=await capacityUsage.reservePaidUsage(f.c,{service:'voice',unit:'voiceMinutes',operationId:'separate-voice',payloadDigest:hash('voice'),quantity:1});assert.ok(voice);assert.equal((await capacityUsage.paidUsageStatus(f.c)).units.voiceMinutes.held,1);
+    const stopped=inbound(f,'STOP');assert.match(await (await httpHandler(signed(stopped))).text(),/texts stopped/);assert.equal(report.providerSends,sends);
+  } finally {process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelAction=null;}
+});
+await check('actual carrier segment correction retains debt and pending facts recover ordinarily without another send',async()=>{
+  const f=await fixture('capacity-segments');await fundCapacity(f,{voiceMinutes:3,smsSegments:2,aiAnswers:2});const fields=inbound(f,'Hello');await httpHandler(signed(fields));
+  const id=await delivery.queueManagedMessage(f.c,{eventId:'capacity-direct',channel:'sms',purpose:'reply',to:caller,body:'Short reply.'});let job=await driveDelivery(id,j=>!!j?.providerId);const sends=report.providerSends;
+  await receipt(f,job,'delivered','0');assert.equal((await capacityUsage.paidUsageStatus(f.c)).units.smsSegments.held,1);
+  Object.assign(messages.get(job.providerId),{status:'delivered',num_segments:'3'});clock+=300001;
+  await driveDelivery(id,j=>j?.paidSMSSettled===true);let usage=await capacityUsage.paidUsageStatus(f.c);assert.equal(usage.units.smsSegments.used,3);assert.equal(usage.units.smsSegments.held,0);assert.equal(usage.units.smsSegments.overdrawn,true);assert.equal(report.providerSends,sends);
+  const next=await delivery.queueManagedMessage(f.c,{eventId:'capacity-debt',channel:'sms',purpose:'reply',to:caller,body:'One more.'});await driveDelivery(next,j=>j?.reasonCode==='paid_capacity_exhausted');assert.equal(report.providerSends,sends);
+});
+await check('known unsent SMS resumes same job after paid renewal while old unknown stays in its original period',async()=>{
+  const f=await fixture('capacity-renewal'),paid=await fundCapacity(f,{voiceMinutes:3,smsSegments:1,aiAnswers:2}),fields=inbound(f,'Hello');await httpHandler(signed(fields));
+  const id=await delivery.queueManagedMessage(f.c,{eventId:'capacity-renew-old',channel:'sms',purpose:'reply',to:caller,body:'First reply.'});const sent=await driveDelivery(id,j=>!!j?.providerId);await receipt(f,sent,'delivered','1');
+  const unknown=await capacityUsage.reservePaidUsage(f.c,{service:'voice',unit:'voiceMinutes',operationId:'old-unknown',payloadDigest:hash('oldunknown'),quantity:1});await capacityUsage.attemptPaidUsage(f.c,unknown,{attemptId:'old-provider-attempt'},{service:'voice',unit:'voiceMinutes',operationId:'old-unknown',payloadDigest:hash('oldunknown'),quantity:1});
+  const pending=await delivery.queueManagedMessage(f.c,{eventId:'capacity-renew-pending',channel:'sms',purpose:'reply',to:caller,body:'Waiting reply.'});await driveDelivery(pending,j=>j?.reasonCode==='paid_capacity_exhausted');const sends=report.providerSends;
+  clock=paid.row.paidPeriod.end*1000;paid.row.paidPeriod={...paid.row.paidPeriod,invoiceId:'in_next_capacity',start:Math.floor(clock/1000),end:Math.floor(clock/1000)+86400,confirmedAt:stamp()};await store.put('workspace_billing',paid.key,paid.row);
+  // Re-establish only the customer's ordinary reply authority; invoice capacity
+  // and the same durable outbox identity survive this later incoming message.
+  await httpHandler(signed(inbound(f,'Please continue')));const resumed=await driveDelivery(pending,j=>!!j?.providerId);assert.equal(resumed.id,pending);assert.equal(report.providerSends,sends+1);assert.notEqual(resumed.paidSMSCapacity.periodId,sent.paidSMSCapacity.periodId);
+  const ledger=await strictRead('usage',capacityUsage.paidUsageKey(f.c));assert.equal(ledger.operations[unknown.id].current.state,'attempted');assert.equal(ledger.operations[unknown.id].current.periodId,unknown.periodId);
+});
+await check('zero funded AI units stop before model and deterministic recipient controls remain usable',async()=>{
+  const f=await fixture('capacity-zero');await fundCapacity(f,{voiceMinutes:3,smsSegments:4,aiAnswers:0});const fields=inbound(f,'Please help');await httpHandler(signed(fields));const before=paidModelRequests.length;
+  process.env.MC_FAKE_MODEL='0';process.env.ANTHROPIC_API_KEY='offline-capacity-model';
+  try {assert.equal((await processManagedSMS(inboundKey(f,fields))).reasonCode,'paid_capacity_exhausted');assert.equal(paidModelRequests.length,before);const control=inbound(f,'APPOINTMENTS');await httpHandler(signed(control));
+    // The earlier ordinary message keeps contact order. A separate customer's
+    // explicit control bypasses AI without bypassing carrier segment funding.
+    const other={...inbound(f,'APPOINTMENTS'),From:'+17135550888'};messages.get(other.MessageSid).from=other.From;await httpHandler(signed(other));assert.equal((await processManagedSMS(inboundKey(f,other))).ok,true);assert.equal(paidModelRequests.length,before);const row=await strictRead('managed_sms_inbound',inboundKey(f,other));assert.equal(row.paidAnswerCapacity,undefined);assert.ok(row.reply);
+  }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;}
+});
+await check('unknown model result remains held in its original period and cannot restart after renewal',async()=>{
+  const f=await fixture('capacity-model-unknown'),paid=await fundCapacity(f),fields=inbound(f,'Question with a lost answer');await httpHandler(signed(fields));
+  process.env.MC_FAKE_MODEL='0';process.env.ANTHROPIC_API_KEY='offline-capacity-model';paidModelAction=async()=>{throw Error('Synthetic lost model response');};
+  try {
+    const before=paidModelRequests.length;assert.equal((await processManagedSMS(inboundKey(f,fields))).reasonCode,'processing_failed');assert.equal(paidModelRequests.length,before+1);const old=await strictRead('managed_sms_inbound',inboundKey(f,fields));assert.equal(old.paidAnswerWireStarted,true);assert.ok(old.paidAnswerCapacity);assert.equal(old.reply,undefined);
+    clock=paid.row.paidPeriod.end*1000;paid.row.paidPeriod={...paid.row.paidPeriod,invoiceId:'in_after_model_unknown',start:Math.floor(clock/1000),end:Math.floor(clock/1000)+86400,confirmedAt:stamp()};await store.put('workspace_billing',paid.key,paid.row);await httpHandler(signed(inbound(f,'Any update?')));paidModelAction=null;
+    assert.equal((await processManagedSMS(old.id)).reasonCode,'paid_capacity_previous_answer_unconfirmed');assert.equal(paidModelRequests.length,before+1);const ledger=await strictRead('usage',capacityUsage.paidUsageKey(f.c));assert.equal(ledger.operations[old.paidAnswerCapacity.id].current.periodId,old.paidAnswerCapacity.periodId);assert.equal(ledger.operations[old.paidAnswerCapacity.id].current.state,'attempted');
+  }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelAction=null;}
+});
+await check('unused old-period carrier reservation is released before ordinary renewal dispatch',async()=>{
+  const f=await fixture('capacity-unsent-period'),paid=await fundCapacity(f),fields=inbound(f,'Hello');await httpHandler(signed(fields));
+  const id=await delivery.queueManagedMessage(f.c,{eventId:'capacity-unused',channel:'sms',purpose:'reply',to:caller,body:'Preserved reply.'}),binding={number:f.number,serviceSid:f.row.resources.service.sid},job=await strictRead('managed_deliveries',id),expected=(await import('../netlify/functions/lib/managed-paid-usage.mjs')).paidSMSExpected(job,binding),old=await capacityUsage.reservePaidUsage(f.c,expected);
+  await store.atomicUpdate('managed_deliveries',id,row=>({value:{...row,paidSMSCapacity:old,paidSMSBinding:binding,from:binding.number,serviceSid:binding.serviceSid}}));
+  clock=paid.row.paidPeriod.end*1000;paid.row.paidPeriod={...paid.row.paidPeriod,invoiceId:'in_after_unused',start:Math.floor(clock/1000),end:Math.floor(clock/1000)+86400,confirmedAt:stamp()};await store.put('workspace_billing',paid.key,paid.row);await httpHandler(signed(inbound(f,'Continue')));const sends=report.providerSends;
+  const sent=await driveDelivery(id,j=>!!j?.providerId);assert.equal(report.providerSends,sends+1);assert.equal(sent.paidSMSCapacity.generation,old.generation+1);assert.notEqual(sent.paidSMSCapacity.periodId,old.periodId);const ledger=await strictRead('usage',capacityUsage.paidUsageKey(f.c));assert.equal(ledger.operations[old.id].prior[0].state,'released');
 });
 report.after = hashes(); report.sourceStable = JSON.stringify(report.before) === JSON.stringify(report.after); report.passed = report.checks.filter(row => row.pass).length; report.total = report.checks.length; report.ok = report.passed === report.total && report.blocked.length === 0 && report.sourceStable; if (output) writeFileSync(output, JSON.stringify(report, null, 2) + "\n"); console.log(JSON.stringify(report)); if (!report.ok) process.exitCode = 1;

@@ -1,4 +1,5 @@
 import { paidServiceAuthority } from './paid-service-authority.mjs';
+import { paidUsageStatus } from './usage.mjs';
 import { voiceActivationStatus } from "./voice-activation.mjs";
 import { messagingActivationStatus } from "./messaging-activation.mjs";
 import { calendarConnectionView } from "./calendar-connection.mjs";
@@ -9,6 +10,22 @@ import { setupReadiness } from "./setup.mjs";
 import { buildConnectionJourney } from "./connection-journey.mjs";
 import { managedResourceAdmissionPolicy } from "./managed-resource-admission.mjs";
 import { workspaceTenant } from "./workspace-identity.mjs";
+
+// Operational allowance is separate from saved provider/verification facts.
+// This read projection never grants admission or changes a delivery journal.
+export function serviceUsageAllowanceView(id,service,usage) {
+  const op=service?.operation;
+  if(!['voice','sms'].includes(id)||service.paymentRequired!==false||service.platformReady!==true||!op||op.cancellationRequested||!['ready','active'].includes(op.state)||!usage?.metered||!usage.funded||!usage.allowed)return service;
+  if(id==='voice'&&(!service.active&&!op.ready||op.evidence?.lastFailureAt&&(!op.evidence.successfulCallAt||Date.parse(op.evidence.lastFailureAt)>=Date.parse(op.evidence.successfulCallAt))))return service;
+  if(id==='sms'&&!service.active)return service; // Fixed-owner setup verification keeps its own authority.
+  const units=usage.units||{},unit=id==='voice'?'voiceMinutes':usage.unconfirmed||units.smsSegments?.remaining===0?'smsSegments':units.aiAnswers?.remaining===0?'aiAnswers':null;
+  if(!unit||!usage.unconfirmed&&units[unit]?.remaining!==0)return service;
+  const view=units[unit],scope=unit==='voiceMinutes'?'new_calls':unit==='smsSegments'?'outgoing_texts':'ai_replies',partial=scope==='ai_replies';
+  const periodEnd=usage.period?.end?new Date(usage.period.end*1000).toISOString():usage.periodEnd||null;
+  const usageAllowance={state:usage.unconfirmed?'unconfirmed':'reached',unit,scope,paid:true,periodEnd,...(view?{limit:view.limit,used:view.used,held:view.held,remaining:view.remaining}:{})};
+  const detail=usage.unconfirmed?'Your connection is saved. Its current allowance needs a check in Account.':id==='voice'?'Phone is connected. Your call allowance has been reached; new calls are paused.':partial?'Text messaging is connected. Your AI reply allowance has been reached; other eligible texts can continue.':'Text messaging is connected. Your outgoing text allowance has been reached; incoming messages and saved conversations are kept.';
+  return {...service,providerActive:service.active===true,active:partial?service.active:false,usageAllowance,...(id==='sms'?{aiRepliesPaused:true}:{}),detail,operation:{...op,active:partial?op.active:false,detail}};
+}
 
 // Configuration readiness is not resource admission or delivered service. Keep a
 // platform problem separate from the facts and permissions a customer can supply.
@@ -22,7 +39,7 @@ export function servicePlatformReadiness(c, services, plan) {
     const legacy=plan?.legacySetup===true&&plan.numberReady===true&&service?.available===true;
     const numberReady=plan?.numberReady===true||!!op?.number;
     let reasonCode=null;
-    if(!service?.active){
+    if(!service?.active&&!service?.providerActive){
       if(service?.platformReady===false||service?.available!==true&&!op)reasonCode='service_configuration_required';
       else if(op?.state==='waiting_platform'||accepted&&plan.operation.state==='waiting_platform')reasonCode='recorded_setup_waiting_platform';
       else if(!op&&!scoped&&!legacy&&!accepted)reasonCode='service_offer_required';
@@ -51,16 +68,29 @@ export async function serviceConnections(c) {
   // Keep unknown/cleanup and platform gates authoritative, and preserve the
   // independently authorized fixed-owner SMS setup probe before verification.
   const paymentChecks=[];
+  const paymentFacts=new Map();
   if(['testing','live'].includes(c.status)){
     if(voice.platformReady===true&&voice.operation&&!voice.operation.cancellationRequested&&(voice.active||voice.operation.ready===true||voice.operation.state==='waiting_platform'&&voice.operation.reasonCode==='paid_service_unconfirmed'))paymentChecks.push(['voice',voice]);
     if(messaging.platformReady===true&&messaging.operation&&!messaging.operation.cancellationRequested&&(messaging.active||messaging.operation.state==='waiting_platform'&&messaging.operation.reasonCode==='paid_service_unconfirmed'))paymentChecks.push(['sms',messaging]);
     if(calendar.connected&&!calendar.reconnectRequired&&calendarDelivery.enabled&&(!calendarDelivery.verification?.attention||calendarDelivery.verification?.paymentHoldOnly===true))paymentChecks.push(['calendar',calendarDelivery]);
   }
-  await Promise.all(paymentChecks.map(async([id,service])=>{const payment=await paidServiceAuthority(c,id);if(payment.enrolled&&payment.reasonCode==='paid_service_unconfirmed'){
+  const projectPayment=(id,service,payment)=>{paymentFacts.set(id,payment);if(payment.enrolled&&payment.reasonCode==='paid_service_unconfirmed'){
     service.paymentRequired=true;
     if(id==='calendar'){service.enabled=false;calendar.detail='Google access is saved. Payment for new Calendar delivery needs confirmation.';}
     else {service.active=false;service.detail='Your connection is retained. Payment for new service needs confirmation.';service.operation={...service.operation,active:false,...(id==='voice'?{ready:false}:{}),detail:service.detail};}
-  }else if(payment.allowed)service.paymentRequired=false;}));
+  }else if(payment.allowed)service.paymentRequired=false;};
+  await Promise.all(paymentChecks.map(async([id,service])=>projectPayment(id,service,await paidServiceAuthority(c,id))));
+  let usageIds=paymentChecks.filter(([id])=>id!=='calendar'&&paymentFacts.get(id)?.enrolled&&paymentFacts.get(id)?.paid&&paymentFacts.get(id)?.allowed);
+  if(usageIds.length){
+    let usage;try{usage=await paidUsageStatus(c);}catch{
+      // A failed usage read does not turn confirmed payment into unpaid, or
+      // make the owner lose workspace access. Reconfirm the financial fact.
+      await Promise.all(usageIds.map(async([id,service])=>projectPayment(id,service,await paidServiceAuthority(c,id))));
+      usageIds=usageIds.filter(([id])=>paymentFacts.get(id)?.enrolled&&paymentFacts.get(id)?.paid&&paymentFacts.get(id)?.allowed);
+      usage={metered:true,funded:true,allowed:true,unconfirmed:true};
+    }
+    for(const [id,service]of usageIds)Object.assign(service,serviceUsageAllowanceView(id,service,{...usage,...(usage?.unconfirmed?{periodEnd:paymentFacts.get(id).periodEnd}:{})}));
+  }
   const delivery=await managedDeliveryView(c,{activationProbe:messaging.operation});
   if(messaging.operation?.customerAction==='reply_to_setup_text'){
     const probeDelivery=delivery.activationProbe,accepted=probeDelivery?.outboundAccepted===true;

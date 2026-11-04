@@ -6,12 +6,15 @@ import { atomicUpdate, list } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { isSupportedSelfServiceClient, configurationRevision, setupReadiness } from './setup.mjs';
 import { workspaceTenant } from './workspace-identity.mjs';
-import { serviceConnections } from './service-connections.mjs';
+import { voiceActivationStatus } from './voice-activation.mjs';
+import { messagingActivationStatus } from './messaging-activation.mjs';
+import { calendarConnectionView } from './calendar-connection.mjs';
+import { calendarDeliveryView } from './calendar-delivery.mjs';
 import { managedSMSBudgetPolicy } from './managed-sms-budget.mjs';
 import { accessSite } from './access.mjs';
 import { billingTestAdmissionPolicy, billingTestAdmits, billingTestMaintenanceAdmits } from './billing-test-admission.mjs';
 import { workspaceBillingWebhookSecret } from './billing.mjs';
-import { paidContract, paidPeriodMatches, paidPeriodFunding } from './paid-service-authority.mjs';
+import { paidContract, paidPeriodMatches, paidPeriodFunding, validPaidCapacity } from './paid-service-authority.mjs';
 
 const STORE='workspace_billing', REVIEWS='workspace_billing_reviews', EVENTS='workspace_billing_events';
 const RECOVERY_CURSOR='workspace_billing_cursor', RECOVERY_WAVE_MS=240000, RECOVERY_RECORD_MS=45000;
@@ -126,7 +129,7 @@ function approvedOffer(){
     if(!exact(offer,['version','stripeAccountId','currency','terms','plans'])||!/^[a-z0-9_-]{1,80}$/.test(offer.version||'')||process.env.WORKSPACE_BILLING_APPROVED_VERSION!==offer.version||!id(offer.stripeAccountId,'acct_')||offer.currency!=='usd'||!exact(offer.terms,['version','text','url'])||!/^[a-z0-9_-]{1,80}$/.test(offer.terms.version||'')||typeof offer.terms.text!=='string'||offer.terms.text.length<100||offer.terms.text.length>20000)throw Error();
     const url=new URL(offer.terms.url);if(url.origin!==accessSite()||url.protocol!=='https:'||url.username||url.password||url.hash)throw Error();
     if(!exact(offer.plans,['starter','growth']))throw Error();
-    for(const [plan,choice]of Object.entries(offer.plans))if(!exact(choice,['amountCents','priceId','services','limits','limitsDescription'])||choice.amountCents!==prices[plan]||!id(choice.priceId,'price_')||!Array.isArray(choice.services)||!choice.services.length||new Set(choice.services).size!==choice.services.length||choice.services.some(service=>!channels.includes(service))||typeof choice.limitsDescription!=='string'||choice.limitsDescription.length<40||choice.limitsDescription.length>3000||!exact(choice.limits,['webRepliesPerDay','practiceRepliesPerDay','voiceCallsPerDay','voiceReservedMinutesPerDay','maxCallSeconds','smsExposureMessages','smsExposureSegments','smsExposureCostMicros'])||Object.values(choice.limits).some(value=>!Number.isSafeInteger(value)||value<0))throw Error();
+    for(const [plan,choice]of Object.entries(offer.plans))if(!exact(choice,['amountCents','priceId','services','limits','limitsDescription',...(Object.hasOwn(choice||{},'capacity')?['capacity']:[])])||Object.hasOwn(choice||{},'capacity')&&!validPaidCapacity(choice.capacity)||choice.amountCents!==prices[plan]||!id(choice.priceId,'price_')||!Array.isArray(choice.services)||!choice.services.length||new Set(choice.services).size!==choice.services.length||choice.services.some(service=>!channels.includes(service))||typeof choice.limitsDescription!=='string'||choice.limitsDescription.length<40||choice.limitsDescription.length>3000||!exact(choice.limits,['webRepliesPerDay','practiceRepliesPerDay','voiceCallsPerDay','voiceReservedMinutesPerDay','maxCallSeconds','smsExposureMessages','smsExposureSegments','smsExposureCostMicros'])||Object.values(choice.limits).some(value=>!Number.isSafeInteger(value)||value<0))throw Error();
     return {...offer,digest:hash(offer)};
   }catch{return null;}
 }
@@ -176,20 +179,25 @@ function operating(c){if(!['testing','live'].includes(c.status))fail('service_no
 async function ready(c,choice){
   operating(c);
   const desired=c.onboarding?.desiredChannels||['web'];if(!Array.isArray(desired)||!desired.length||new Set(desired).size!==desired.length||desired.some(service=>!channels.includes(service)||!choice.services.includes(service)))fail('service_scope_changed','Choose an offer that covers every connection you requested.');
-  const connections=await serviceConnections(c),web=setupReadiness(c).channels.web;
-  const states={web:c.status==='live'&&web.ready&&web.active,voice:connections.voice.active,sms:connections.messaging.active,calendar:connections.calendar.connected&&connections.calendarDelivery.enabled};
+  // Checkout requires verified connection prerequisites. The dashboard's
+  // serviceConnections overlay also enforces CURRENT paid dispatch authority;
+  // using that overlay here makes a pending first payment block its own checkout.
+  // These read-only status functions retain platform, tenant, lifecycle, rules,
+  // carrier/route and permission checks. They grant no provider dispatch.
+  const [voice,messaging,calendar,calendarDelivery]=await Promise.all([voiceActivationStatus(c),messagingActivationStatus(c),calendarConnectionView(c),calendarDeliveryView(c)]),web=setupReadiness(c).channels.web;
+  const states={web:c.status==='live'&&web.ready&&web.active,voice:voice.active,sms:messaging.active,calendar:calendar.connected&&calendarDelivery.enabled};
   if(desired.some(service=>states[service]!==true))fail('service_not_ready','Finish connecting and checking the services in this offer before starting paid service.');
   const actual=serviceLimits(c);for(const field of Object.keys(actual)){const relevant=field.startsWith('voice')||field==='maxCallSeconds'?'voice':field.startsWith('sms')?'sms':'web';if(desired.includes(relevant)&&choice.limits[field]!==actual[field])fail('billing_limits_changed','Service limits changed. Review the updated offer before continuing.');}
   return [...desired];
 }
 async function verifyPrice(offer,plan){const choice=offer.plans[plan],price=await stripe('prices/'+choice.priceId);if(price.id!==choice.priceId||price.active!==true||price.currency!=='usd'||price.unit_amount!==choice.amountCents||price.type!=='recurring'||price.recurring?.interval!=='month'||price.recurring?.interval_count!==1||price.recurring?.usage_type!=='licensed'||price.billing_scheme!=='per_unit'||price.livemode!==mode()||price.tax_behavior!=='inclusive')fail('billing_price_changed','The payment price no longer matches the reviewed monthly offer. No checkout was started.');return choice;}
-const quoteView=(offer,plan,services=offer.plans[plan].services)=>({version:offer.version,digest:offer.digest,plan,name:names[plan],amountCents:prices[plan],currency:'usd',interval:'month',services,limits:offer.plans[plan].limits,limitsDescription:offer.plans[plan].limitsDescription,terms:offer.terms,livemode:mode(),additionalUsageCharges:false,trialDays:0});
+const quoteView=(offer,plan,services=offer.plans[plan].services)=>({version:offer.version,digest:offer.digest,plan,name:names[plan],amountCents:prices[plan],currency:'usd',interval:'month',services,limits:offer.plans[plan].limits,limitsDescription:offer.plans[plan].limitsDescription,terms:offer.terms,livemode:mode(),additionalUsageCharges:false,trialDays:0,...(Object.hasOwn(offer.plans[plan],'capacity')?{capacity:structuredClone(offer.plans[plan].capacity)}:{})});
 function view(row,offer=null,c=null){const attempt=row?.checkout;return {...(row?.livemode===true&&c?{serviceFunding:paidPeriodFunding(row,c)}:{}),status:row?.subscription?.status||'none',plan:row?.subscription?.plan||null,services:row?.subscription?.services||[],name:names[row?.subscription?.plan]||null,currentPeriodEnd:row?.subscription?.currentPeriodEnd||null,cancelAtPeriodEnd:row?.subscription?.cancelAtPeriodEnd===true,cancellationState:row?.cancellation?.state||null,checkout:attempt?{requestId:attempt.requestId,state:attempt.state,expiresAt:attempt.expiresAt||null,url:attempt.state==='open'&&Date.parse(attempt.expiresAt)>Date.now()&&purchasesEnabled(c,offer)&&offer?.digest===attempt.offer.digest&&!row.stopRequestedAt?attempt.url:null}:null,portalAvailable:!!row?.customerId&&!!row?.subscription?.id&&portalEnabled(row,c),offerAvailable:!!offer&&purchasesEnabled(c,offer)&&(!row?.testProof||row.testProof.state==='open'),availablePlans:offer&&planMetadataVisible(c,offer)?Object.keys(offer.plans).map(plan=>({id:plan,name:names[plan],amountCents:prices[plan],currency:'usd'})):[],livemode:row?.livemode??null};}
 function proofView(row){
   const proof=row?.testProof;if(!proof)return null;
   return {phaseId:proof.phaseId,state:proof.state,closedAt:proof.closedAt||null,closeOperationId:proof.closeOperationId||null,mode:'TEST',stripeAccountId:row.stripeAccountId,tenantIdentity:row.tenant,policyDigest:proof.policyDigest,offerDigest:proof.policy.offerDigest,expiresAt:proof.expiresAt,maxAttempts:proof.maxAttempts,cleanupReserve:proof.cleanupReserve,spent:proof.attempts.length,ordinaryRemaining:Math.max(0,proof.maxAttempts-proof.cleanupReserve-proof.attempts.length),totalRemaining:Math.max(0,proof.maxAttempts-proof.attempts.length),checkoutId:row.checkout?.sessionId||null,subscriptionId:row.subscription?.id||null,customerId:row.customerId||null,invoiceId:proof.invoiceId||null,cleanup:proof.cleanup?{operationId:proof.cleanup.operationId,state:proof.cleanup.state,confirmedAt:proof.cleanup.confirmedAt||null}:null,receipts:proof.receipts||[],...(proof.policy.predecessor?{predecessor:proof.policy.predecessor,priorPhases:(row.history||[]).filter(item=>item.testProof).map(item=>({phaseId:item.testProof.phaseId,policyDigest:item.testProof.policyDigest,state:item.testProof.state,closedAt:item.testProof.closedAt,spent:item.testProof.attempts.length,checkoutId:item.checkout?.sessionId||null,receipts:item.testProof.receipts||[]}))}:{})};
 }
-export async function workspaceBillingStatus(c){const row=await strictRead(STORE,key(c));return {...view(row,approvedOffer(),c),...(row?.testProof?{testProof:proofView(row)}:{})};}
+export async function workspaceBillingStatus(c){const row=await strictRead(STORE,key(c));const capacity=row?.livemode===true&&Object.hasOwn(row.checkout?.offer?.plans?.[row.checkout?.plan]||{},'capacity')?await (await import('./usage.mjs')).paidUsageStatus(c):null;return {...view(row,approvedOffer(),c),...(capacity?{capacity}:{}),...(row?.testProof?{testProof:proofView(row)}:{})};}
 export async function beginWorkspaceBillingProof(c,actor,body){
   if(!exact(body,['action','phaseId','plan'])||!Object.hasOwn(prices,body.plan))fail('invalid_billing_request','Select the bound internal payment test.',400);
   const current=await ownerCurrent(c,actor),offer=approvedOffer(),phase=runtimeTestPhase(current,offer,{newAdmission:true});

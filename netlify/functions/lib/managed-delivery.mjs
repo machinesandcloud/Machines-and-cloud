@@ -9,12 +9,16 @@ import { arrivalInstant } from "./service-time.mjs";
 import { reserveManagedSMS, assertManagedSMSReservation, managedSMSBudgetPolicy, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
 import { reserveManagedEmail, assertManagedEmailReservation, assertManagedEmailDispatchPolicy, managedEmailBudgetPolicy, ManagedEmailBudgetError } from './managed-email-budget.mjs';
 import { selfServiceAIProofPolicy } from './self-service-ai.mjs';
+import { reservePaidUsage, assertPaidUsage, attemptPaidUsage, settlePaidUsage, PaidUsageError } from './usage.mjs';
+import { paidUsageDigest, paidSMSExpected, paidSMSReceiptSegments, paidAnswerForDelivery, paidAnswerDeliveryExpected, paidDeliveryPending, settlePaidDelivery } from './managed-paid-usage.mjs';
 const hash = s => createHash("sha256").update(s).digest("hex");
 const stamp = () => new Date().toISOString();
 const STORE = "managed_deliveries";
 const INDEX = "managed_delivery_pending";
 const messageId = (c,channel,eventId) => `${c.slug}/${hash(`${deliveryTenant(c)}:${channel}:${eventId}`)}`;
 const canonical = value => value && typeof value === "object" ? Array.isArray(value) ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key => [key,canonical(value[key])])) : value;
+const undispatchedSMS = new WeakMap();
+const paidDispatchIdentity = job => paidUsageDigest({ id: job.id, tenant: job.tenant, digest: job.digest, attemptStartedAt: job.attemptStartedAt, from: job.from, serviceSid: job.serviceSid });
 export const managedDeliveryEnabled = () => process.env.SERVICE_DELIVERY_ENABLED === "true" && (process.env.SERVICE_WORKER_KEY || "").length>=32;
 // A deployed internal AI proof also narrows this worker, before discovery or
 // receipt recovery. Netlify freezes these settings per deployment; cleanup must
@@ -70,7 +74,8 @@ export async function queueManagedMessage(c, { eventId, channel, purpose, to, bo
   if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe", "followup_consent_ask", "quote_followup", "request_followup"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
   if (channel === "email" && !["owner_booking", "owner_lead"].includes(purpose)) throw new Error("Unsupported email purpose");
   const id = messageId(c,channel,eventId);
-  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}) }, digest = hash(JSON.stringify(canonical(payload)));
+  const answer = channel === 'sms' ? await paidAnswerForDelivery(c, eventId, to, body) : {};
+  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
   const identity = hash(JSON.stringify(canonical({ ...payload, body: null })));
   const previous=await strictRead(STORE,id);
   if(previous && previous.digest!==digest && !(preserveSnapshot && previous.identity===identity))throw new Error("Delivery identity already used");
@@ -90,7 +95,7 @@ async function indexPending(job) {
   if (!job) return;
   await atomicUpdate(INDEX,"active",value=>{
     const entries={...(value?.entries || {})},failures={...(value?.failures || {})};
-    if (terminal(job.state)) delete entries[job.id];
+    if (terminal(job.state) && !paidDeliveryPending(job)) delete entries[job.id];
     else { if (!entries[job.id] && Object.keys(entries).length>=500) throw new Error("Delivery queue is full"); entries[job.id]={dueAt:job.dueAt,createdAt:job.createdAt,snapshot:entries[job.id]?.snapshot || job}; }
     if(["failed","uncertain"].includes(job.state) || job.receiptCheckFailedAt && Date.now()-(Date.parse(job.lastCheckedAt || job.acceptedAt || job.attemptStartedAt || job.createdAt) || 0)>25*60000)failures[job.id]={state:job.receiptCheckFailedAt?"receipt_unavailable":job.state,at:job.receiptCheckFailedAt || job.updatedAt};
     else if(["delivered","superseded","expired"].includes(job.state) || job.state==="suppressed" && !job.attemptStartedAt || job.receiptVerifiedAt && Date.parse(job.receiptVerifiedAt)>=Date.parse(failures[job.id]?.at || ""))delete failures[job.id];
@@ -130,6 +135,58 @@ async function change(id, updater) {
   const result=await atomicUpdate(STORE, id, row => { const next = updater(row); if(!next)return {result:row}; const updated={...next,updatedAt:stamp()}; return {value:updated,result:updated}; });
   await indexPending(result); return result;
 }
+async function reconcilePaidDelivery(job, c = null) {
+  if (!paidDeliveryPending(job)) return job;
+  c ||= await strictRead('clients', job.slug);
+  if (!c || deliveryTenant(c) !== job.tenant) return job;
+  let flags;
+  if (job.paidNotDispatched && !job.providerId) {
+    flags = {};
+    if (job.paidSMSCapacity && !job.paidSMSSettled) {
+      const result = await releasePaidSend(c, job, job.reasonCode || 'authority_changed');
+      if (result?.receiptState === 'released') flags.paidSMSSettled = true;
+    }
+    if (job.paidAnswerCapacity && !job.paidAnswerSettled && terminal(job.state)) {
+      await settlePaidUsage(c, job.paidAnswerCapacity, { outcome: 'confirmed', quantity: 0, proofId: paidUsageDigest({ kind: 'answer_not_sent', id: job.id, generation: job.paidAnswerCapacity.generation }) }, await paidAnswerDeliveryExpected(c, job));
+      flags.paidAnswerSettled = true;
+    }
+  } else flags = await settlePaidDelivery(c, job);
+  if (!Object.keys(flags).length) return job;
+  return change(job.id, row => {
+    if (row.providerId !== job.providerId || paidUsageDigest(row.paidReceiptFacts) !== paidUsageDigest(job.paidReceiptFacts) || paidUsageDigest(row.paidSMSCapacity) !== paidUsageDigest(job.paidSMSCapacity) || paidUsageDigest(row.paidAnswerCapacity) !== paidUsageDigest(job.paidAnswerCapacity)) return null;
+    if (row.paidNotDispatched && flags.paidSMSSettled && !terminal(row.state)) return { ...row, paidSMSCapacity: null, paidSMSSettled: false, paidSendAttemptId: null, paidNotDispatched: false, attemptStartedAt: null, claim: null, attempts: Math.max(0, row.attempts - (row.attemptStartedAt ? 1 : 0)), state: 'waiting_platform', paidAccountingReason: null };
+    return { ...row, ...flags, paidAccountingReason: null };
+  });
+}
+async function retainPaidReceipt(job, receipt, c) {
+  if (!job.paidSMSCapacity && !job.paidAnswerCapacity) return job;
+  const incomingSegments = paidSMSReceiptSegments(receipt.segments);
+  const saved = await change(job.id, row => {
+    if (row.providerId !== receipt.id) return null;
+    const prior = row.paidReceiptFacts;
+    const segments = Math.max(paidSMSReceiptSegments(prior?.segments) || 0, incomingSegments || 0) || null;
+    const status = prior?.status === 'delivered' ? 'delivered' : receipt.status;
+    const facts = { providerId: receipt.id, status, segments };
+    return { ...row, paidReceiptFacts: facts,
+      ...(segments !== null && segments > (paidSMSReceiptSegments(prior?.segments) || 0) ? { paidSMSSettled: false } : {}),
+      ...(status === 'delivered' && prior?.status !== 'delivered' ? { paidAnswerSettled: false, state: 'delivered', deliveredAt: row.deliveredAt || stamp(), reasonCode: null } : {}),
+      paidReceiptNextCheckAt: segments === null && ['delivered','failed','undelivered','canceled'].includes(status) ? new Date(Date.now() + 300000).toISOString() : null };
+  });
+  return reconcilePaidDelivery(saved, c);
+}
+async function releasePaidSend(c, job, reason) {
+  if (!job.paidSMSCapacity) return;
+  const expected = paidSMSExpected(job, job.paidSMSBinding || job), attemptId = paidUsageDigest({ kind: 'sms_send', id: job.id });
+  const fact = { outcome: 'not_dispatched', quantity: 0, attemptId, proofId: paidUsageDigest({ kind: 'known_no_sms_dispatch', id: job.id, generation: job.paidSMSCapacity.generation, reason }) };
+  try { return await settlePaidUsage(c, job.paidSMSCapacity, fact, expected); }
+  catch (error) { if (!(error instanceof PaidUsageError) || error.code !== 'paid_capacity_proof_conflict') throw error; }
+  await attemptPaidUsage(c, job.paidSMSCapacity, { attemptId }, expected);
+  return settlePaidUsage(c, job.paidSMSCapacity, fact, expected);
+}
+async function stopPaidBeforeSend(job, c, reason, state = 'suppressed') {
+  const stopped = await change(job.id, row => row.providerId ? null : { ...row, state, reasonCode: reason, ...(row.paidSMSCapacity || row.paidAnswerCapacity ? { paidNotDispatched: true } : {}) });
+  return reconcilePaidDelivery(stopped, c);
+}
 function inQuietHours() {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(new Date());
   const hour = Number(parts.find(x => x.type === "hour").value), sunday = parts.find(x => x.type === "weekday").value === "Sun";
@@ -149,6 +206,16 @@ async function probeFor(c, job) {
   const { pendingMessagingProbe } = await import("./messaging-activation.mjs");
   const probe = await pendingMessagingProbe(c);
   return probe && probe.operationId === job.probe?.operationId && probe.nonce === job.probe.nonce && probe.to === job.to && probe.body === job.body ? probe : null;
+}
+async function assertPaidSMS(c,job) {
+  // The existing, owner-approved fixed-recipient setup probe has its own
+  // acquisition/registration and upper-bound allowance. A purpose string is
+  // insufficient: recheck the current exact expiring intent at dispatch.
+  if(job.purpose==='activation_probe') {
+    if(!await probeFor(c,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
+    return null;
+  }
+  return assertPaidUsage(c,job.paidSMSCapacity||null,paidSMSExpected(job));
 }
 async function jobSender(c, job) {
   if (job.purpose === "activation_probe") { const probe = await probeFor(c, job); return probe ? { number:probe.from,serviceSid:probe.serviceSid } : null; }
@@ -181,6 +248,8 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
         if (!response.ok || typeof data.id !== "string") throw new Error("Email result unconfirmed");
         return { id: data.id, status: "accepted" };
       }
+      let smsWireStarted = false;
+      try {
       const sender = await jobSender(c,job);
       if (!sender) throw new Error("SMS sender not ready");
       if(sender.number!==job.from || sender.serviceSid!==job.serviceSid) throw new Error("SMS sender changed before dispatch");
@@ -193,9 +262,15 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
         const {reserveRequestFollowup}=await import('./request-followup.mjs');
         if(!await inspectSource(job,c)||!await mayDeliverManagedSMS(c,job.to,job.purpose,job)||!await reserveRequestFollowup(c,job)||!await inspectSource(job,c)||!await mayDeliverManagedSMS(c,job.to,job.purpose,job)||!managedDeliveryEnabled()||managedSMSBudgetPolicy()?.digest!==job.smsBudget?.policyDigest)throw new ManagedSMSBudgetError('followup_authority_changed','This follow-up changed before sending. Check its saved request.');
       }
+      await assertPaidSMS(c,job);
+      smsWireStarted = true;
       const { response, data } = await request(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, { method: "POST", headers: { Authorization: "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ To: job.to, From: sender.number, MessagingServiceSid: sender.serviceSid, Body: job.body, StatusCallback: url.href }) });
       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
+      } catch (error) {
+        if (!smsWireStarted && error && typeof error === 'object') undispatchedSMS.set(error, paidDispatchIdentity(job));
+        throw error;
+      }
     },
     async status(job, proofReceipt = null) {
       if (!job.providerId) return null;
@@ -209,7 +284,7 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
       }
       const created=Date.parse(data.date_created), started=Date.parse(job.attemptStartedAt);
       if (data.sid!==job.providerId || data.account_sid!==sid || data.direction!=="outbound-api" || data.messaging_service_sid!==job.serviceSid || data.to !== job.to || !job.from || data.from !== job.from || data.body !== job.body || !Number.isFinite(created) || !Number.isFinite(started) || created<started-5000 || created>Date.now()+300000) throw new Error("SMS receipt mismatch");
-      return { id: data.sid, status: data.status,sentAt:data.date_created };
+      return { id: data.sid, status: data.status,sentAt:data.date_created, segments: paidSMSReceiptSegments(data.num_segments) };
     }
   };
 }
@@ -220,12 +295,15 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     if (scope && (!scope.ready || typeof id !== 'string' || !id.startsWith(scope.slug+'/'))) return null;
     let job = await strictRead(STORE, id);
     if (!proofJobAllowed(scope,job)) return job;
-    if (!job || terminal(job.state)) return job;
+    if (!job) return job;
+    if (paidDeliveryPending(job)) job = await reconcilePaidDelivery(job);
+    if (terminal(job.state) && !paidDeliveryPending(job)) return job;
     if (!gate()) return job;
     const c = await strictRead("clients", job.slug);
     if (!c || !isSupportedSelfServiceClient(c) || deliveryTenant(c) !== job.tenant) return change(id, row => ({ ...row, state: row.attemptStartedAt?"uncertain":"suppressed", reasonCode: "workspace_changed" }));
-    if (["cancelled", "archived"].includes(c.status) && !job.attemptStartedAt) return change(id, row => ({ ...row, state: "suppressed", reasonCode: "workspace_closed" }));
+    if (["cancelled", "archived"].includes(c.status) && !job.attemptStartedAt) return stopPaidBeforeSend(job,c,'workspace_closed');
     if (job.providerId) {
+      if (terminal(job.state) && Date.parse(job.paidReceiptNextCheckAt || '') > Date.now()) return job;
       const proofReceipt = await reserveProofReceiptRead(job);
       if (proofReceipt && !proofReceipt.reserved) return job;
       assertProofPolicy(proofReceipt?.scope);
@@ -239,7 +317,8 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
         const { saveManagedConsentAsk } = await import('./managed-consent.mjs');
         await saveManagedConsentAsk(c, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt, senderNumber: job.from, messagingServiceSid: job.serviceSid });
       }
-      return change(id, row => terminal(row.state) || row.providerId !== receipt.id ? null : ({ ...row, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", lastCheckedAt: stamp(),receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),reasonCode:null, ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+      const saved = await change(id, row => terminal(row.state) || row.providerId !== receipt.id ? null : ({ ...row, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", lastCheckedAt: stamp(),receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),reasonCode:null, ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+      return retainPaidReceipt(saved, receipt, c);
     }
     if (job.attemptStartedAt) {
       // The same SMS POST is never repeated after an unknown result. Email's real provider
@@ -248,20 +327,20 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       return change(id, row => ({ ...row, state: "uncertain", reasonCode: "provider_receipt_missing" }));
     }
     if (!gate() || (c.status !== "live" && !await testingDeliveryAuthorized(c,job))) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: c.status !== "live" ? "workspace_not_live" : "delivery_gate_closed" }));
-    if (!await inspectSource(job, c)) return change(id, row => ({ ...row, state: "superseded", reasonCode: "record_changed" }));
+    if (!await inspectSource(job, c)) return stopPaidBeforeSend(job,c,'record_changed','superseded');
     if(job.source && ["confirmation","reminder_24h","reminder_1h"].includes(job.purpose)) {
       const record=await strictRead(job.source.kind,`${c.slug}/${job.source.id}`);
-      if(record?.date && record?.window && arrivalInstant(record.date,record.window)<=Date.now())return change(id,row=>({...row,state:"expired",reasonCode:"arrival_window_started"}));
+      if(record?.date && record?.window && arrivalInstant(record.date,record.window)<=Date.now())return stopPaidBeforeSend(job,c,'arrival_window_started','expired');
     }
     if (Date.parse(job.dueAt) > Date.now()) return job;
     if (job.channel === "email" && job.to !== c.owner.email) return change(id, row => ({ ...row, state: "superseded", reasonCode: "owner_changed" }));
-    let smsBudget=null,emailBudget=null;
+    let smsBudget=null,emailBudget=null,paidSMSCapacity=null,smsBinding=null;
     if (job.channel === 'email') {
       try { emailBudget = await reserveManagedEmail(c, job); }
       catch(error) { return change(id,row=>row.attemptStartedAt?null:{...row,state:'waiting_platform',reasonCode:error instanceof ManagedEmailBudgetError?error.code:'email_budget_storage_unavailable',detail:error instanceof ManagedEmailBudgetError?error.message:'Your request is saved. Owner notifications are waiting for their approved sending allowance.'}); }
     }
     if (job.channel === "sms") {
-      const binding=await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c));
+      const binding=await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c)); smsBinding=binding;
       if(job.followup){const {requestFollowupBlocker}=await import('./request-followup.mjs'),block=await requestFollowupBlocker(c,job);if(block)return change(id,row=>({...row,state:'waiting_platform',reasonCode:block.code,detail:block.message}));}
       if (!binding) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: "sms_not_ready" }));
       if (job.purpose !== "activation_probe" && !await mayDeliverManagedSMS(c, job.to, job.purpose, job)) return change(id, row => ({ ...row, state: "waiting_consent", reasonCode: "consent_required" }));
@@ -269,19 +348,22 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       if (job.source && !await inspectSource(job, c)) return job;
       try { smsBudget=await reserveManagedSMS(c,{...job,from:binding.number,serviceSid:binding.serviceSid}); }
       catch(error) { return change(id,row=>row.attemptStartedAt?null:{...row,state:"waiting_platform",reasonCode:error instanceof ManagedSMSBudgetError?error.code:"sms_budget_storage_unavailable",detail:error instanceof ManagedSMSBudgetError?error.message:"Texting is waiting for its platform sending allowance to be confirmed. Your message remains saved."}); }
+      try { if(job.purpose==='activation_probe')await assertPaidSMS(c,job);else paidSMSCapacity=await reservePaidUsage(c,paidSMSExpected(job,binding)); }
+      catch(error) { if (!(error instanceof PaidUsageError)) throw error; return change(id,row=>row.attemptStartedAt?null:{...row,state:'waiting_platform',reasonCode:error.code,detail:error.message}); }
     }
     const token = randomBytes(16).toString("hex");
-    job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", detail:null, ...(smsBudget?{smsBudget}:{}), ...(emailBudget?{emailBudget}:{}), attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
+    job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", detail:null, ...(smsBudget?{smsBudget}:{}), ...(emailBudget?{emailBudget}:{}), ...(paidSMSCapacity?{paidSMSCapacity,paidSMSBinding:{number:smsBinding.number,serviceSid:smsBinding.serviceSid},from:smsBinding.number,serviceSid:smsBinding.serviceSid}:{}), attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (job.claim?.token !== token) return job;
     // Reread lifecycle, source and consent after acquiring the exclusive send claim.
     const latest = await strictRead("clients", c.slug);
-    if (!latest || (latest.status !== "live" && !await testingDeliveryAuthorized(latest,job)) || deliveryTenant(latest) !== job.tenant || !gate() || !await inspectSource(job, latest) || (job.channel === "sms" && !(job.purpose === "activation_probe" ? await probeFor(latest,job) : await mayDeliverManagedSMS(latest, job.to, job.purpose, job)))) return change(id, row => ({ ...row, state: "suppressed", reasonCode: "authority_changed" }));
+    if (!latest || (latest.status !== "live" && !await testingDeliveryAuthorized(latest,job)) || deliveryTenant(latest) !== job.tenant || !gate() || !await inspectSource(job, latest) || (job.channel === "sms" && !(job.purpose === "activation_probe" ? await probeFor(latest,job) : await mayDeliverManagedSMS(latest, job.to, job.purpose, job)))) return stopPaidBeforeSend(job, c, 'authority_changed');
     if(job.channel==="sms") {
       const binding=await (job.purpose==="activation_probe"?jobSender(latest,job):sender(latest));
-      if(!binding)return change(id,row=>({...row,state:"suppressed",reasonCode:"sender_changed"}));
+      if(!binding || job.paidSMSBinding && (binding.number !== job.paidSMSBinding.number || binding.serviceSid !== job.paidSMSBinding.serviceSid))return stopPaidBeforeSend(job, latest, 'sender_changed');
       job=await change(id,row=>row.claim?.token===token?{...row,from:binding.number,serviceSid:binding.serviceSid}:null);
       if(job.claim?.token!==token)return job;
     }
+    let providerInvoked = false;
     try {
       if(job.channel==='sms')await assertManagedSMSReservation(latest,job,job.smsBudget);
       if(job.channel==='email')await assertManagedEmailReservation(latest,job,job.emailBudget);
@@ -292,6 +374,16 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       }
       if(job.purpose==='activation_probe'&&!await probeFor(latest,job))throw new ManagedSMSBudgetError('sms_probe_authority_changed','This setup check changed. Refresh texting setup before requesting another check.');
       if(job.followup){const {reserveRequestFollowup}=await import('./request-followup.mjs');if(!await inspectSource(job,latest)||!await mayDeliverManagedSMS(latest,job.to,job.purpose,job)||!await reserveRequestFollowup(latest,job))throw new ManagedSMSBudgetError('followup_authority_changed','This follow-up changed before sending. Check its saved request.');}
+      if (job.channel === 'sms') {
+        const expected = paidSMSExpected(job), attemptId = paidUsageDigest({ kind: 'sms_send', id: job.id });
+        await assertPaidSMS(latest,job);
+        if (job.paidSMSCapacity) {
+          await attemptPaidUsage(latest, job.paidSMSCapacity, { attemptId }, expected);
+          job = await change(id, row => row.claim?.token === token ? { ...row, paidSendAttemptId: attemptId, paidNotDispatched: false } : null);
+          if (job.claim?.token !== token) return job;
+        }
+      }
+      providerInvoked = true;
       const receipt = await provider.send(job, latest);
       if (!receipt?.id) throw new Error("Missing receipt");
       const saved = await change(id, row => row.providerId || terminal(row.state) || row.claim?.token !== token ? null : { ...row, state: "accepted", providerId: receipt.id, from: receipt.from || null, serviceSid: receipt.serviceSid || null, acceptedAt: stamp(), claim: null, reasonCode: null });
@@ -299,9 +391,26 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       if (job.consentAsk && job.channel === "sms") { const { saveManagedConsentAsk } = await import("./managed-consent.mjs"); await saveManagedConsentAsk(latest, job.to, { wording: job.body, messageSid: receipt.id,sentAt:receipt.sentAt,senderNumber:saved.from,messagingServiceSid:saved.serviceSid }); }
       return saved;
     } catch(error) {
+      if (error instanceof PaidUsageError) {
+        const notSent = !providerInvoked || undispatchedSMS.get(error) === paidDispatchIdentity(job);
+        if (!notSent) return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'uncertain',claim:null,reasonCode:'provider_result_unconfirmed'}:null);
+        const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,reasonCode:error.code,detail:error.message,...(row.paidSMSCapacity?{paidNotDispatched:true}:{attemptStartedAt:null,attempts:Math.max(0,row.attempts-1)})}:null);
+        return reconcilePaidDelivery(blocked,latest);
+      }
       // Budget assertions reject before transport. Keep their conservative
       // reservation, but allow a later approved policy to resume the saved job.
-      if(error instanceof ManagedSMSBudgetError || error instanceof ManagedEmailBudgetError)return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
+      if(error instanceof ManagedSMSBudgetError || error instanceof ManagedEmailBudgetError) {
+        if (job.paidSMSCapacity) {
+          if (providerInvoked && undispatchedSMS.get(error) !== paidDispatchIdentity(job)) return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'uncertain',claim:null,reasonCode:'provider_result_unconfirmed'}:null);
+          const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,paidNotDispatched:true,reasonCode:error.code,detail:error.message}:null);
+          return reconcilePaidDelivery(blocked,latest);
+        }
+        return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
+      }
+      if (job.paidSMSCapacity && (!providerInvoked || undispatchedSMS.get(error) === paidDispatchIdentity(job))) {
+        const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,paidNotDispatched:true,reasonCode:'sms_preflight_unavailable'}:null);
+        return reconcilePaidDelivery(blocked,latest);
+      }
       return change(id, row => !row.providerId && !terminal(row.state) && row.claim?.token === token ? { ...row, state: "uncertain", claim: null, reasonCode: "provider_result_unconfirmed" } : null);
     }
   }
@@ -324,7 +433,8 @@ export async function recordManagedSMSReceipt(id, fields) {
   if(sender.number!==job.from || sender.serviceSid!==job.serviceSid)return false;
   const receipt = await providerAdapter().status({ ...job, providerId: fields.MessageSid });
   if (!receipt || receipt.id !== fields.MessageSid) return false;
-  await change(id, row => terminal(row.state) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+  const saved = await change(id, row => terminal(row.state) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+  await retainPaidReceipt(saved, receipt, c);
   if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(c,job,{...receipt,from:job.from,serviceSid:job.serviceSid});}
   if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt,senderNumber:job.from,messagingServiceSid:job.serviceSid});}
   return true;
@@ -377,7 +487,14 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
   let processed = 0;
   // Rebuild missing index entries after a crash between durable intent and queue projection.
   let partialRepair=false;
-  for (const key of await fairPage(STORE,cursorKey("index_repair"),50,prefix)) { if(Date.now()>=deadline){partialRepair=true;break;} const row=await strictRead(STORE,key); if(proofJobAllowed(scope,row))await indexPending(row); }
+  for (const key of await fairPage(STORE,cursorKey("index_repair"),50,prefix)) {
+    if(Date.now()>=deadline){partialRepair=true;break;}
+    const row=await strictRead(STORE,key);
+    if(proofJobAllowed(scope,row)) {
+      try { await indexPending(paidDeliveryPending(row) ? await reconcilePaidDelivery(row) : row); }
+      catch { errors.push('delivery_accounting_unavailable'); }
+    }
+  }
   const pending=await strictRead(INDEX,"active"), keys=Object.keys(pending?.entries || {}).filter(key=>!scope || key.startsWith(prefix) && proofJobAllowed(scope,pending.entries[key]?.snapshot)).sort();
   const dueKeys=keys.filter(key=>!Number.isFinite(Date.parse(pending.entries[key].dueAt)) || Date.parse(pending.entries[key].dueAt)<=Date.now());
   const pendingCursor = scope ? (await strictRead('managed_delivery_cursors',cursorKey('pending')))?.key || '' : pending?.cursor || '';
@@ -391,7 +508,7 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
       let before=await strictRead(STORE,key);
       if(!before && pending.entries[key]?.snapshot && proofJobAllowed(scope,pending.entries[key].snapshot))before=await atomicUpdate(STORE,key,row=>row?{result:row}:{value:pending.entries[key].snapshot,result:pending.entries[key].snapshot});
       if(!proofJobAllowed(scope,before))continue;
-      if (!before || terminal(before.state)) { if (before) await indexPending(before); continue; }
+      if (!before || terminal(before.state) && !paidDeliveryPending(before)) { if (before) await indexPending(before); continue; }
       if (!before.providerId && Date.parse(before.dueAt)>Date.now()) continue;
       const result = await engine({deadlineAt:deadline}).run(key);
       if (result?.attempts>before.attempts || result?.lastCheckedAt!==before.lastCheckedAt) processed++;

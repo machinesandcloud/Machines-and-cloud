@@ -94,6 +94,7 @@
   }
   function action(row) { return row.nextAction || row.action || { kind: 'wait', label: 'Checking setup status' }; }
   function paymentHold(row) { return row?.activation?.reasonCode==='paid_service_unconfirmed'&&action(row).kind==='route'&&action(row).target==='account'; }
+  function usageHold(row) { var value=row?.usageAllowance;return ['voice','sms'].includes(row?.id)&&value?.paid===true&&['reached','unconfirmed'].includes(value.state)&&['voiceMinutes','smsSegments','aiAnswers'].includes(value.unit)?value:null; }
   function openAccount() { endTask();pageRoute(selected,pageScreen==='intro'?'intro':pageScreen,true);history.pushState(history.state,'',location.pathname+location.search+'#account');document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'account'}})); }
   function needsServiceInformation(id) {
     if(id==='calendar')return false; // Google selects the actual account during permission review.
@@ -172,6 +173,7 @@
     if(['cancellation_pending','cancel_pending','cleanup_pending','cleanup_uncertain'].includes(row.status))return 'Checking cleanup';
     if(row.status==='paused')return 'Paused';
     if(row.status==='not_selected'||!row.requested&&!row.retained)return 'Not selected';
+    var usage=usageHold(row);if(usage)return usage.state==='unconfirmed'?'Usage needs checking':usage.unit==='voiceMinutes'?'Connected; call allowance reached':usage.unit==='smsSegments'?'Connected; text allowance reached':'Connected; AI reply allowance reached';
     if(row.verification?.working===true)return 'Delivery verified';
     if(platformHold(row))return 'Setup needs our help';
     if(needsServiceInformation(row.id))return 'Your details needed';
@@ -370,10 +372,10 @@
   }
   window.MCConnectorPages={progress:pageProgress};
   function pageShell(row,step,index,total,body,footer) {
-    var label=row.label||labels[row.id],position=pageProgress(row.id,pageScreen),stopped=stoppedConnection(row);index=position.index;total=position.total;
+    var label=row.label||labels[row.id],position=pageProgress(row.id,pageScreen),stopped=stoppedConnection(row),usage=usageHold(row);index=position.index;total=position.total;
     return '<section class="connector-page setup-guide-current direct-connection-task" data-connector="'+row.id+'" data-connector-step="'+esc(pageScreen)+'" aria-labelledby="setupGuideStageTitle">'+
       '<div class="connector-page-top"><button type="button" id="connectorAllServices" class="connection-guide-link">← All connections</button><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(label)+'</span></span></div>'+
-      (stopped?'<div class="connector-page-progress"><span id="connectorStepCount">'+esc(stopped.status)+'</span></div>':'<div class="connector-page-progress"><span id="connectorStepCount">'+(pageScreen==='complete'?'Connection verified':pageScreen==='connection-review'?'Connection review':pageScreen==='intro'?'Let’s connect '+esc(label):'Step '+Math.min(index+1,total)+' of '+total)+'</span><div class="connector-progress-track" role="progressbar" aria-label="'+esc(label)+' setup" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(pageScreen==='complete'?total:Math.min(index,total))+'"><span style="width:'+((pageScreen==='complete'?total:Math.min(index,total))/total*100)+'%"></span></div></div>')+
+      (stopped||usage?'<div class="connector-page-progress"><span id="connectorStepCount">'+esc(stopped?stopped.status:'Connection retained')+'</span></div>':'<div class="connector-page-progress"><span id="connectorStepCount">'+(pageScreen==='complete'?'Connection verified':pageScreen==='connection-review'?'Connection review':pageScreen==='intro'?'Let’s connect '+esc(label):'Step '+Math.min(index+1,total)+' of '+total)+'</span><div class="connector-progress-track" role="progressbar" aria-label="'+esc(label)+' setup" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(pageScreen==='complete'?total:Math.min(index,total))+'"><span style="width:'+((pageScreen==='complete'?total:Math.min(index,total))/total*100)+'%"></span></div></div>')+
       '<div class="connector-page-body">'+body+'</div>'+ (footer?'<footer class="connector-page-footer">'+footer+'</footer>':'')+'</section>';
   }
   function renderOverview(items) {
@@ -399,7 +401,7 @@
     if(pageScreen==='overview'){renderOverview(items);return;}
     var row=items.find(function(item){return item.id===selected;});if(!row){pageRoute(null,null,true);renderOverview(items);return;}
     host.dataset.connectorView='step';host.dataset.guideSelectedService=selected;
-    var stopped=stoppedConnection(row);if(stopped&&pageScreen!=='intro')pageRoute(selected,'intro',true);
+    var stopped=stoppedConnection(row),usage=usageHold(row);if(stopped&&pageScreen!=='intro')pageRoute(selected,'intro',true);
     var steps=Array.isArray(row.guide?.steps)?row.guide.steps:[],next=action(row),nextIndex=currentStep(row,steps),canonical=steps[nextIndex]||{id:'connection',label:labels[selected],detail:row.nextStep};
     var verified=row.verification?.working===true,closed=['cancelled','archived','paused'].includes(data.client.status),total=steps.length+1,index=nextIndex;
     if(pageScreen==='complete'&&(!verified||!connectionNotices[selected]?.confirmed||!connectionNotices[selected]?.working||connectionNotices[selected]?.error)){pageScreen='connection-check';pageRoute(selected,'connection-check',true);}
@@ -416,6 +418,9 @@
       if(stopped.updatedAt)body+='<p class="connector-evidence-time">Last saved update: '+esc(checkedTime(stopped.updatedAt))+'</p>';
       if(connectionNotices[selected])body+='<p class="connection-verification-notice" role="status"'+(connectionNotices[selected].error?' data-error="true"':'')+'>'+esc(connectionNotices[selected].text)+'</p>';
       footer='<a class="connection-guide-link" href="mailto:support@machinesandcloud.com">Contact support</a>'+(stopped.pending?'<button type="button" id="setupGuideCheckConnection" class="connection-guide-link"'+(connectionCheck?' disabled':'')+'>'+(connectionCheck?'Checking…':'Check cleanup status')+'</button>':'')+'<button type="button" id="connectorStoppedAccount" class="btn-pill btn-pill-blue btn-sm">Open Account</button>';
+    } else if(usage) {
+      body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(serviceStatus(row))+'</h4><p class="connector-page-description" id="connectorUsageHold">'+esc(row.nextStep||'Your saved usage needs checking. Review the allowance in Account.')+'</p><p class="muted">Your saved connection checks and customer records are kept.</p>';
+      footer='<button type="button" id="setupGuideRefresh" class="connection-guide-link">Check usage</button><button type="button" id="connectorUsageAccount" class="btn-pill btn-pill-blue btn-sm">Review usage in Account</button>';
     } else if(paymentHold(row)) {
       body='<h4 id="setupGuideStageTitle" tabindex="-1">Payment needs confirmation</h4><p class="connector-page-description" id="connectorPaymentHold">'+esc(row.nextStep)+'</p>';
       footer=back+exit+'<button type="button" id="setupGuideContinue" class="btn-pill btn-pill-blue btn-sm">Check payment in Account</button>';
@@ -457,17 +462,17 @@
       if(/^details-\d(?:-\d)?$/.test(pageScreen)){body='<h4 id="setupGuideStageTitle" tabindex="-1">'+(intakeOpeningErrors[selected]?'Your saved details couldn’t be opened':'Opening your saved details…')+'</h4>';if(intakeOpeningErrors[selected])footer=back+exit+'<button type="button" id="setupGuideDetails" class="btn-pill btn-pill-blue btn-sm">Try opening details again</button>';}
     }
     host.innerHTML='<h3 id="setupGuideTitle" class="sr-only">'+esc(labels[selected])+' setup</h3>'+pageShell(row,step,index,total,body,footer);
-    if(!stopped&&window.MCServiceIntake)window.MCServiceIntake.mount(host.querySelector('.connector-page'),selected,data);
+    if(!stopped&&!usage&&window.MCServiceIntake)window.MCServiceIntake.mount(host.querySelector('.connector-page'),selected,data);
     if(!stopped&&next.kind==='connection'&&['show_phone_steps','show_text_steps'].includes(next.target)&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)){
       var original=$('serviceConnections')?.querySelector(next.target==='show_phone_steps'?'#phoneRoutingSteps':'#textConnectionSteps');
       if(original){var instructions=original.cloneNode(true);instructions.removeAttribute('id');instructions.className='connector-focused-instructions';instructions.querySelectorAll('[id]').forEach(function(node){node.removeAttribute('id');});instructions.querySelectorAll('h4,[data-connection="cancel_voice"],[data-connection="cancel_sms"]').forEach(function(node){node.remove();});host.querySelector('.connector-page-body').appendChild(instructions);}
     }
     if(!stopped&&selected==='web'&&!hold&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&!needsServiceInformation(selected)&&next.kind==='route'&&next.target==='setup'&&websiteTaskCard){host.querySelector('.connector-page-body').appendChild(websiteTaskCard);host.querySelector('.connector-page').classList.add('has-website-task');if(!host.querySelector('#connectorReviewOpen')){var help=document.createElement('p');help.innerHTML='<button type="button" id="connectorReviewOpen" class="connection-guide-link">Get help with this connection</button>';host.querySelector('.connector-page-body').appendChild(help);}websiteTaskActive=true;}
     if(!stopped&&['thumbtack','angi'].includes(selected)&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&next.kind==='lead'&&autoLeadKey!==selected+'/'+pageScreen){autoLeadKey=selected+'/'+pageScreen;queueMicrotask(function(){if(current()&&selected===row.id&&pageScreen===step.id&&!$('leadSourceDialog')?.open)executeAction(row);});}
-    if(!stopped&&pageScreen==='connection-check'&&autoCheckKey!==selected){autoCheckKey=selected;queueMicrotask(function(){if(current()&&pageScreen==='connection-check')checkConnection(selected,true);});}
-    if(!stopped&&/^details-\d(?:-\d)?$/.test(pageScreen)&&!intakeOpeningErrors[selected]&&!restoringPage&&window.MCServiceIntake&&!$('serviceIntakeWorkbench')){restoringPage=true;window.MCServiceIntake.open(selected,false,false,Number(pageScreen.split('-')[1]),Number(pageScreen.split('-')[2]||0)).finally(function(){restoringPage=false;});}
+    if(!stopped&&!usage&&pageScreen==='connection-check'&&autoCheckKey!==selected){autoCheckKey=selected;queueMicrotask(function(){if(current()&&pageScreen==='connection-check')checkConnection(selected,true);});}
+    if(!stopped&&!usage&&/^details-\d(?:-\d)?$/.test(pageScreen)&&!intakeOpeningErrors[selected]&&!restoringPage&&window.MCServiceIntake&&!$('serviceIntakeWorkbench')){restoringPage=true;window.MCServiceIntake.open(selected,false,false,Number(pageScreen.split('-')[1]),Number(pageScreen.split('-')[2]||0)).finally(function(){restoringPage=false;});}
   }
-  function goToCurrent(row,replace) { if(!row)return;var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];pageRoute(row.id,row.verification?.working?'connection-check':paymentHold(row)?'payment':row.activation?.reasonCode==='saved_setup_waiting_check'?'setup-check':needsServiceInformation(row.id)?'details-0':step?.id||'connection',replace);autoLeadKey=null;render();focusStage(); }
+  function goToCurrent(row,replace) { if(!row)return;var steps=row.guide?.steps||[],step=steps[currentStep(row,steps)];pageRoute(row.id,usageHold(row)?'intro':row.verification?.working?'connection-check':paymentHold(row)?'payment':row.activation?.reasonCode==='saved_setup_waiting_check'?'setup-check':needsServiceInformation(row.id)?'details-0':step?.id||'connection',replace);autoLeadKey=null;render();focusStage(); }
   function restorePage(){if(!current())return;autoLeadKey=null;autoCheckKey=null;var incoming=routeParts();if(incoming&&['connection-check','complete'].includes(incoming.screen))delete connectionNotices[incoming.service];returnWebsiteTask();document.querySelectorAll('#leadSourceDialog[open],#connectionDialog[open]').forEach(function(dialog){dialog.close();});var route=routeParts();if(window.MCServiceIntake?.isOpen(selected))window.MCServiceIntake.close();endTask();if(route){selected=route.service;pageScreen=route.screen;manualSelection=true;}else{selected=null;pageScreen='overview';manualSelection=false;}render();}
   window.addEventListener('hashchange',function(){if(location.hash==='#setup'||location.hash.startsWith('#setup/'))restorePage();});
   document.addEventListener('mc:connector-intake-step',function(event){if(!current()||event.detail?.service!==selected)return;pageRoute(selected,'details-'+event.detail.step+(event.detail.installStage!=null?'-'+event.detail.installStage:''),restoringPage);});
@@ -495,10 +500,11 @@
     if(event.target.closest('#connectorReviewOpen')){pageRoute(selected,'connection-review');render();focusStage();return;}
     if(event.target.closest('#connectorHoldDetails')&&window.MCServiceIntake){endTask();pageRoute(selected,'details-0');render();focusStage();return;}
     if(event.target.closest('#connectorStoppedAccount')){endTask();pageRoute(selected,'intro',true);history.pushState(history.state,'',location.pathname+location.search+'#account');document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'account'}}));return;}
+    if(event.target.closest('#connectorUsageAccount')&&usageHold(pageRow)){openAccount();return;}
     if(event.target.closest('#connectorStart')||event.target.closest('#connectorResume')){goToCurrent(pageRow);return;}
     if(event.target.closest('#connectorCheckPage')){pageRoute(selected,'connection-check');render();focusStage();return;}
-    if(event.target.closest('#connectorFinish')&&pageRow?.verification?.working&&!connectionCheck&&connectionNotices[selected]?.confirmed&&connectionNotices[selected]?.working&&!connectionNotices[selected]?.error){pageRoute(selected,'complete');render();focusStage();return;}
-    if(event.target.closest('#connectorUse')&&pageRow?.verification?.working){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:selected==='calendar'?'availability':'leads'}}));return;}
+    if(event.target.closest('#connectorFinish')&&!usageHold(pageRow)&&pageRow?.verification?.working&&!connectionCheck&&connectionNotices[selected]?.confirmed&&connectionNotices[selected]?.working&&!connectionNotices[selected]?.error){pageRoute(selected,'complete');render();focusStage();return;}
+    if(event.target.closest('#connectorUse')&&!usageHold(pageRow)&&pageRow?.verification?.working){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:selected==='calendar'?'availability':'leads'}}));return;}
     if(event.target.closest('#connectorBack')){if(history.state?.mcConnectorPage?.slug===data.client.slug&&location.hash!=='#setup'){history.back();return;}if(pageScreen==='connection-check'||pageScreen==='complete'){pageRoute(selected,pageScreen==='complete'?'connection-check':'intro');render();focusStage();}else{pageRoute(selected,'intro');render();focusStage();}return;}
     if(event.target.closest('#setupGuideOpenInbox')){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'leads'}}));return;}
     var stepButton=event.target.closest('button[data-guide-step]');

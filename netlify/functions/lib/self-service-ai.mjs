@@ -146,9 +146,10 @@ async function projectProofAllowance(c, allowance) {
   try { selected=await proofSelection(c);if(!selected)return allowance;await proofAuthority(c,selected.p);const row=proofLedger(selected.row,selected.p),logical=Math.max(0,selected.p.limits.logical-Object.keys(row.logical).length),physical=Math.max(0,selected.p.limits.physical-Object.keys(row.physical).length),remaining=physical>0?logical:0;return {...allowance,private:{...allowance.private,remaining:Math.min(allowance.private.remaining,remaining)},web:{...allowance.web,remaining:Math.min(allowance.web.remaining,remaining)},available:allowance.available&&remaining>0}; }
   catch(error) { if(!(error instanceof AIProofError))throw error;return {...allowance,private:{...allowance.private,remaining:0},web:{...allowance.web,remaining:0},available:false}; }
 }
-export async function selfServiceAIModelFetch(c, receipt, {service='web',mode='web'}={}) {
+export async function selfServiceAIModelFetch(c, receipt, {service='web',mode='web',onDispatch}={}) {
+  if(onDispatch!==undefined&&typeof onDispatch!=='function')throw new Error('Invalid model dispatch observer');
   const proof=await proofTurn(c,receipt),transport=globalThis.fetch;
-  if(!proof){if(mode==='private'||service==='web')return undefined;return async(input,init={})=>{await assertPaidServiceAuthority(c,service);return transport(input,init);};}
+  if(!proof){if(mode==='private'||service==='web')return undefined;return async(input,init={})=>{await assertPaidServiceAuthority(c,service);if(onDispatch)onDispatch();return transport(input,init);};}
   return async (input, init={}) => {
     if(mode!=='private'&&service!=='web')await assertPaidServiceAuthority(c,service);
     const selected=await proofTurn(c,receipt),p=selected?.p;if(!p)proofFail('ai_proof_binding_missing');
@@ -161,6 +162,7 @@ export async function selfServiceAIModelFetch(c, receipt, {service='web',mode='w
     await proofAuthority(c,p,receipt);
     if(selfServiceAIProofPolicy()?.digest!==p.digest)proofFail('ai_proof_policy_changed');
     if(mode!=='private'&&service!=='web')await assertPaidServiceAuthority(c,service);
+    if(onDispatch)onDispatch();
     return transport(input,{...init,redirect:'error'});
   };
 }

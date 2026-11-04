@@ -7,9 +7,12 @@ import { managedDeliveryEnabled, managedDeliveryProofScope, queueManagedMessage,
 import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, pendingMessagingProbe, recordMessagingProbe } from "./messaging-activation.mjs";
 import { getAcquiredPhoneResource } from "./phone-activation.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
-import { runAgent } from "./agent.mjs";
+import { runAgent, MANAGED_TEXT_MODEL } from "./agent.mjs";
 import { reserveAIRequest, selfServiceAIModelFetch } from "./self-service-ai.mjs";
 import { dispatchManagedVoiceTool } from "./managed-actions.mjs";
+import { reservePaidUsage, assertPaidUsage, attemptPaidUsage, settlePaidUsage, PaidUsageError } from './usage.mjs';
+import { paidUsageDigest, paidAnswerExpected } from './managed-paid-usage.mjs';
+import { houstonToday, normalizeBookingDate } from './availability.mjs';
 const hash = value => createHash("sha256").update(value).digest("hex");
 const stamp = () => new Date().toISOString();
 export function serviceWorkerAuthorized(req) {
@@ -71,6 +74,23 @@ export async function handleManagedSMS(req) {
   } catch { return new Response("Message handling unavailable",{status:503}); }
 }
 async function updateInbound(id, updater) { return atomicUpdate("managed_sms_inbound",id,row=>{const next=updater(row);return next?{value:{...next,updatedAt:stamp()},result:next}:{result:row};}); }
+async function releaseUnusedAnswer(c, job) {
+  if (!job.paidAnswerCapacity || job.paidAnswerGenerated) return job;
+  const negative=job.paidAnswerNoDispatch;
+  if(job.paidAnswerWireStarted&&!negative)return job;
+  const expected = paidAnswerExpected(job), attemptId = negative?.attemptId || paidUsageDigest({kind:'answer_not_started',id:job.id,generation:job.paidAnswerCapacity.generation});
+  const fact = {outcome:'not_dispatched',quantity:0,attemptId,proofId:negative?.proofId || paidUsageDigest({kind:'answer_not_started',id:job.id,generation:job.paidAnswerCapacity.generation})};
+  let result;
+  try { result=await settlePaidUsage(c,job.paidAnswerCapacity,fact,expected); }
+  catch(error) {
+    if (!(error instanceof PaidUsageError) || error.code!=='paid_capacity_proof_conflict') throw error;
+    await attemptPaidUsage(c,job.paidAnswerCapacity,{attemptId},expected);
+    result=await settlePaidUsage(c,job.paidAnswerCapacity,fact,expected);
+  }
+  if(result?.receiptState!=='released')return job;
+  return updateInbound(job.id,row=>!row.paidAnswerWireStarted&&!row.paidAnswerGenerated&&paidUsageDigest(row.paidAnswerCapacity)===paidUsageDigest(job.paidAnswerCapacity)?{...row,paidAnswerCapacity:null,paidAnswerNoDispatch:false}:null);
+}
+const capacityWaiting = reason => typeof reason==='string' && reason.startsWith('paid_capacity_');
 async function appendHistoryOnce(key,job,reply) {
   return atomicUpdate("managed_sms_history",key,row=>{
     if(row?.seen?.[job.messageSid])return {};
@@ -101,10 +121,12 @@ export async function processManagedSMS(id) {
   const lockKey=`${c.slug}/${job.tenant}/${job.from}`, token=randomBytes(16).toString("hex");
   const locked=await atomicUpdate("managed_sms_locks",lockKey,row=>row && Date.parse(row.until)>Date.now()?{result:false}:{value:{token,until:new Date(Date.now()+180000).toISOString()},result:true});
   if (!locked) return {ok:true,busy:true};
+  let paidModelBlock = null;
   try {
     job=await updateInbound(id,row=>row.claim && Date.parse(row.claim.until)>Date.now()?null:({...row,state:"running",reasonCode:null,attempts:row.attempts+1,claim:{token,until:new Date(Date.now()+180000).toISOString()}}));
     if (job.claim?.token!==token) return {ok:true,busy:true};
     if (job.attempts>3) { await updateInbound(id,row=>({...row,state:"failed",reasonCode:"retry_limit",claim:null})); return {ok:false,reasonCode:"retry_limit"}; }
+    if(job.paidAnswerNoDispatch)job=await releaseUnusedAnswer(c,job);
     const freshAuthority=async()=>{
       const [current,lock,record,permission]=await Promise.all([strictRead("clients",c.slug),strictRead("managed_sms_locks",lockKey),strictRead("managed_sms_inbound",id),managedSMSConsent(c,job.from)]);
       return managedDeliveryEnabled() && ["testing","live"].includes(current?.status) && deliveryTenant(current)===job.tenant && lock?.token===token && Date.parse(lock.until)>Date.now() && record?.claim?.token===token && !permission?.suppressed && !!await messagingSender(current);
@@ -133,7 +155,26 @@ export async function processManagedSMS(id) {
       await updateInbound(id,row=>row.claim?.token===token?{...row,state:"completed",claim:null,completedAt:stamp()}:null);
       return {ok:true,recovered:true};
     }
+    // One logical answer spans every bounded model/tool turn and worker retry.
+    // Its unit is consumed only by the verified delivery of that saved answer.
+    if (job.paidAnswerCapacity) {
+      try { await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job)); }
+      catch(error) {
+        if (!(error instanceof PaidUsageError) || error.code!=='paid_capacity_period_changed') throw error;
+        if(job.paidAnswerWireStarted) {
+          await updateInbound(id,row=>row.claim?.token===token?{...row,state:'failed',claim:null,reasonCode:'paid_capacity_previous_answer_unconfirmed'}:null);
+          return {ok:false,reasonCode:'paid_capacity_previous_answer_unconfirmed'};
+        }
+        job=await releaseUnusedAnswer(c,job);
+      }
+    }
+    const capacity=await reservePaidUsage(c,paidAnswerExpected(job));
+    if(capacity) {
+      job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,paidAnswerCapacity:capacity}:null);
+      if(job.claim?.token!==token)return {ok:true,busy:true};
+    }
     const allowance=await reserveAIRequest(c,"web",{service:"sms"}); if (!allowance.allowed) {
+      job=await releaseUnusedAnswer(c,job);
       const reply=`${c.business.name}: I cannot complete this reply right now. Please contact ${c.phone?.businessNumber || c.owner.email}. The shop can review your message in its workspace.`;
       if(!await freshAuthority())return {ok:true,suppressed:true};
       await updateInbound(id,row=>row.claim?.token===token?{...row,reply,replyPurpose:"reply",reasonCode:"ai_daily_limit"}:null);
@@ -143,9 +184,37 @@ export async function processManagedSMS(id) {
       try{await dispatchManagedDeliveryWave();}catch{/* Scheduled recovery retains this reply. */}
       return {ok:true,limited:true};
     }
-    let mutationIndex=0, booked=false;
-    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach.",tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:1200,maxRetries:0,requireComplete:true,modelFetch:await selfServiceAIModelFetch(c,allowance.proof,{service:"sms"}),execTool:async(name,input)=>{
+    let mutationIndex=0, booked=false, physicalAttempt=0;
+    let modelWireInvoked=false;
+    const baseFetch=await selfServiceAIModelFetch(c,allowance.proof,{service:'sms',...(capacity?{onDispatch:()=>{modelWireInvoked=true;}}:{})}), deadline=Date.now()+75000;
+    const modelFetch=capacity?async(input,init={})=>{
+      const priorWireStarted=!!job.paidAnswerWireStarted;
+      let auditAttempt=null;modelWireInvoked=false;
+      try {
+        if(Date.now()>=deadline || !await freshAuthority())throw new PaidUsageError('paid_capacity_authority_changed');
+        await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
+        auditAttempt=paidUsageDigest({kind:'answer_model',id,workerAttempt:job.attempts,physicalAttempt:++physicalAttempt});
+        await attemptPaidUsage(c,job.paidAnswerCapacity,{attemptId:auditAttempt},paidAnswerExpected(job));
+        job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,paidAnswerWireStarted:true}:null);
+        if(job.claim?.token!==token || !await freshAuthority())throw new PaidUsageError('paid_capacity_authority_changed');
+        await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
+        const signal=AbortSignal.any([...(init.signal?[init.signal]:[]),AbortSignal.timeout(Math.max(1,Math.min(25000,deadline-Date.now())))]);
+        return await baseFetch(input,{...init,signal,redirect:'error'});
+      } catch(error) {
+        if(error instanceof PaidUsageError || error instanceof PaidServiceAuthorityError)paidModelBlock=error;
+        if(!modelWireInvoked&&auditAttempt) {
+          const proofId=paidUsageDigest({kind:'answer_model_not_dispatched',id,generation:job.paidAnswerCapacity.generation,attemptId:auditAttempt});
+          job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,paidAnswerWireStarted:priorWireStarted,paidAnswerNoDispatch:{attemptId:auditAttempt,proofId}}:null);
+        }
+        throw error;
+      }
+    }:baseFetch;
+    const received=Date.parse(job.providerDate), receivedDay=capacity&&Number.isFinite(received)?houstonToday(new Date(received)):null;
+    const receivedContext=receivedDay?`\nThe current customer message was received on ${receivedDay} in Houston. Interpret this message's relative days (today, tomorrow or a weekday) from that received date. Use absolute YYYY-MM-DD dates in tools. Availability is checked at processing time; do not move an old request to a different day or promise a past window. If its requested timing has passed, ask for a new preference.`:'';
+    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+receivedContext,tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),execTool:async(name,input)=>{
       if (!await freshAuthority()) throw new Error("Channel authority changed");
+      if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
+      if(receivedDay&&['get_availability','book_visit'].includes(name)&&typeof input?.date==='string')input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
       const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`;
       const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms"});
       if (name==="book_visit" && content.startsWith("Visit saved")) booked=true;
@@ -153,17 +222,22 @@ export async function processManagedSMS(id) {
     }});
     if (!await freshAuthority()) { await updateInbound(id,row=>({...row,state:"suppressed",claim:null,reasonCode:"authority_changed"})); return {ok:true,suppressed:true}; }
     const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c):"");
-    const planned=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:ask?"consent_ask":"reply"}:null);
+    const planned=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:ask?"consent_ask":"reply",...(capacity?{paidAnswerGenerated:true}:{} )}:null);
     if (planned.claim?.token!==token || !planned.reply) return {ok:true,busy:true};
     await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:planned.replyPurpose,to:job.from,body:planned.reply,consentAsk:planned.replyPurpose==="consent_ask"});
     try { await dispatchManagedDeliveryWave(); } catch { /* Scheduled recovery retains this reply. */ }
     await appendHistoryOnce(historyKey,job,planned.reply);
     await updateInbound(id,row=>row.claim?.token===token?{...row,state:"completed",claim:null,completedAt:stamp()}:null);
     return {ok:true};
-  } catch(error) { const paidHold=error instanceof PaidServiceAuthorityError;await updateInbound(id,row=>row.claim?.token===token?{...row,state:paidHold?"queued":row.attempts>=3?"failed":"queued",attempts:paidHold?Math.max(0,row.attempts-1):row.attempts,claim:null,reasonCode:paidHold?error.code:"processing_failed"}:null); return {ok:paidHold,...(paidHold?{waiting:true}:{}),reasonCode:paidHold?error.code:"processing_failed"}; }
+  } catch(error) {
+    const block=paidModelBlock || error, paidHold=block instanceof PaidServiceAuthorityError || block instanceof PaidUsageError;
+    if(paidHold && job.paidAnswerCapacity && !job.paidAnswerWireStarted)job=await releaseUnusedAnswer(c,job);
+    await updateInbound(id,row=>row.claim?.token===token?{...row,state:paidHold?'queued':row.attempts>=3?'failed':'queued',attempts:paidHold?Math.max(0,row.attempts-1):row.attempts,claim:null,reasonCode:paidHold?block.code:'processing_failed'}:null);
+    return {ok:paidHold,...(paidHold?{waiting:true}:{}),reasonCode:paidHold?block.code:'processing_failed'};
+  }
   finally {
     await atomicUpdate("managed_sms_locks",lockKey,row=>row?.token===token?{value:{...row,until:stamp(),token:null}}:{});
-    const pending=(await Promise.all((await list("managed_sms_inbound",`${c.slug}/${job.tenant}/`)).map(key=>strictRead("managed_sms_inbound",key)))).filter(row=>row?.from===job.from&&row.kind==="conversation"&&row.state==="queued"&&row.reasonCode!=="paid_service_unconfirmed").sort((a,b)=>Date.parse(a.providerDate)-Date.parse(b.providerDate)||a.id.localeCompare(b.id));
+    const pending=(await Promise.all((await list("managed_sms_inbound",`${c.slug}/${job.tenant}/`)).map(key=>strictRead("managed_sms_inbound",key)))).filter(row=>row?.from===job.from&&row.kind==="conversation"&&row.state==="queued"&&row.reasonCode!=="paid_service_unconfirmed"&&!capacityWaiting(row.reasonCode)).sort((a,b)=>Date.parse(a.providerDate)-Date.parse(b.providerDate)||a.id.localeCompare(b.id));
     if(pending[0])try{await dispatchServiceWorker("managed-sms-background",{id:pending[0].id});}catch{/* Scheduled dispatch retries this durable message. */}
   }
 }

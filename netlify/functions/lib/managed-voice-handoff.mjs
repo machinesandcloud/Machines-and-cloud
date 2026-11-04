@@ -33,7 +33,7 @@ function result(handoff,input) {
   const changed=!!input && (JSON.stringify(details(input))!==JSON.stringify(handoff.details) || input.connection!==handoff.connection);
   return {requestSaved:true,reference:handoff.leadId,savedDetails:handoff.details,changedDetailsSaved:changed?false:null,connection:handoff.connection,transferStatus:handoff.state,humanAccepted:!!handoff.acceptedAt,connectionConfirmed:handoff.state==='connected',callbackTimeConfirmed:false,message:changed?'This call already has a request with the saved details returned here. The changed details or connection choice were not saved. Do not claim a correction or a new transfer; ask the caller to contact the shop directly to change this request.':handoff.state==='callback_only'?'Callback request saved. No live transfer was attempted and no callback time is confirmed.':handoff.state==='control_accepted'?'The provider accepted call control. The call may move to the connection attempt. Ringing and human acceptance are not confirmed.':handoff.state==='connected'?'Provider reports the accepted destination was connected. This does not establish completed service.':'Request saved. A live connection is not confirmed. Do not start a replacement transfer or promise a callback time.'};
 }
-export async function requestManagedHuman({row,call,input,site,current,reserve,redirectCall}) {
+export async function requestManagedHuman({row,call,input,site,current,reserve,redirectCall,paid}) {
   if (!input || Object.keys(input).some(key=>!Object.hasOwn(REQUEST_HUMAN.input_schema.properties,key)) || !['callback','live_transfer'].includes(input.connection) || input.caller_agreed !== true || !['en','es',undefined].includes(input.language) || !['routine','emergency',undefined].includes(input.urgency) || !['customer_name','phone','issue','address','wanted'].every(key=>input[key]===undefined || typeof input[key]==='string' && input[key].length<=1000) || !input.customer_name?.trim() || !input.issue?.trim() || !phone(input.phone)) throw new Error('Confirm the caller request and callback details first');
   const snapshot = await current(); if (!snapshot) throw new Error('Call changed');
   if (call.handoff) return result(call.handoff,input);
@@ -71,13 +71,14 @@ export async function requestManagedHuman({row,call,input,site,current,reserve,r
   // never gives a second tool ID permission to update or dial the call again.
   try {
     const latest=await current(); if (!latest || JSON.stringify(destinations(latest.c,row,call))!==JSON.stringify(routes)) throw new Error('Authority changed');
-    await redirectCall({call,callbackUrl:urlFor(site,row,call.twilioCallSid,'handoff'),authorizeDispatch:async()=>!!await current()});
+    if(paid&&!await paid.parent()){const error=new Error('Funded call unavailable');error.code='handoff_not_dispatched';throw error;}
+    await redirectCall({call,callbackUrl:urlFor(site,row,call.twilioCallSid,'handoff'),authorizeDispatch:async()=>!!await current()&&(!paid||await paid.parent())});
     await atomicUpdate(CALLS,key,old=>bound(old,row) && old.handoff?.id===action && old.handoff.state==='control_uncertain'?{value:{...old,handoff:{...old.handoff,state:'control_accepted',controlAcceptedAt:iso()}}}:{});
   } catch(error) { if (error.code==='handoff_not_dispatched') await atomicUpdate(CALLS,key,old=>bound(old,row) && old.handoff?.id===action && old.handoff.state==='control_uncertain'?{value:{...old,handoff:{...old.handoff,state:'not_attempted'}}}:{}); /* Signed downstream callbacks can reconcile a lost update response. */ }
   return result((await strictRead(CALLS,key)).handoff,input);
 }
 
-export async function handleManagedHumanCallback({row,params,url,site,current,reserve}) {
+export async function handleManagedHumanCallback({row,params,url,site,current,reserve,paid}) {
   const parent=url.searchParams.get('p'), leg=Number(url.searchParams.get('leg')), kind=url.searchParams.get('kind'), key=keyFor(row,parent);
   if (!sid(parent) || !['0','1'].includes(url.searchParams.get('leg'))) return rejected();
   let call=await strictRead(CALLS,key), h=call?.handoff;
@@ -98,6 +99,8 @@ export async function handleManagedHumanCallback({row,params,url,site,current,re
       return {value:{...old,handoff:{...old.handoff,legs:{...old.handoff.legs,[leg]:{...l,childSid:params.CallSid,screenedAt:l.screenedAt||iso()}}}},result:true};
     });
     if (!childBound) return rejected();
+    try{if(paid&&(!await paid.parent()||!await paid.screen(leg,params.CallSid)))return xml('<Hangup/>');}catch{return xml('<Hangup/>');}
+    if((await strictRead(CALLS,key))?.handoff?.legs?.[leg]?.outcome)return xml('<Hangup/>');
     if (kind==='handoff-screen') {
       const state=await active(), lead=await strictRead('leads',`${row.slug}/${h.leadId}`);
       if (!state || !belongsToWorkspace(state.c,lead) || lead.managedActionId!==h.id) return xml('<Hangup/>');
@@ -126,6 +129,7 @@ export async function handleManagedHumanCallback({row,params,url,site,current,re
       return {value:{...old,handoff:{...old.handoff,state:outcome.status,legs:{...old.handoff.legs,[leg]:{...prior,childSid:outcome.childSid,outcome}}}},result:outcome};
     });
     if (!saved) return rejected();
+    if(paid)await paid.terminal(leg,{status:params.DialCallStatus,duration:params.DialCallDuration,providerId:params.DialCallSid||null});
     if (saved.status==='connected') return xml('<Hangup/>');
     if (saved.status!=='not_connected' || leg!==0 || !h.destinations[1]) return recover();
     // Only a known unsuccessful first leg can emit the distinct backup leg.
@@ -137,15 +141,32 @@ export async function handleManagedHumanCallback({row,params,url,site,current,re
 
   async function emit(index) {
     const latest=await active(); if (!latest || latest.call.handoff.legs[index] || index>0 && latest.call.handoff.acceptedAt) return recover();
-    const allowed=await reserve(row,parent,index===0?'handoff-primary':'handoff-backup');
     const expiresAt=new Date(Math.min(Date.parse(h.expiresAt),Date.now()+(row.policy.maxDurationSeconds+30)*1000)).toISOString();
     const claimed=await atomicUpdate(CALLS,key,old=>{
       if (!bound(old,row) || old.handoff?.id!==h.id || old.handoff.legs[index] || index>0 && old.handoff.acceptedAt) return {result:false};
-      return {value:{...old,handoff:{...old.handoff,state:allowed?'dial_uncertain':'limit_reached',legs:{...old.handoff.legs,[index]:{destination:h.destinations[index],admitted:allowed,expiresAt,emittedAt:allowed?iso():null}}}},result:allowed};
+      return {value:{...old,handoff:{...old.handoff,state:'funding_pending',legs:{...old.handoff.legs,[index]:{destination:h.destinations[index],admitted:false,expiresAt,emittedAt:null}}}},result:true};
     });
     if (!claimed) return recover();
-    const final=await active(), remaining=Math.min(row.policy.maxDurationSeconds,Math.floor((Date.parse(expiresAt)-Date.now())/1000)-30);
-    if (!final || remaining<1 || index>0 && final.call.handoff.acceptedAt) return recover();
+    let allowed=false,remaining=0;
+    try{
+      allowed=await reserve(row,parent,index===0?'handoff-primary':'handoff-backup');
+      if(allowed&&paid)allowed=await paid.parent();
+      const parentRemaining=paid?await paid.remaining():null;
+      remaining=Math.min(row.policy.maxDurationSeconds,Math.floor((Date.parse(expiresAt)-Date.now())/1000)-30,parentRemaining===null?Infinity:parentRemaining);
+      if(allowed&&remaining>0&&paid)allowed=await paid.prepare(index,remaining,h.destinations[index]);
+    }catch{allowed=false;}
+    const final=await active();
+    if(!allowed||!final||remaining<1||index>0&&final.call.handoff.acceptedAt){
+      await atomicUpdate(CALLS,key,old=>bound(old,row)&&old.handoff?.id===h.id&&old.handoff.legs[index]&&!old.handoff.legs[index].emittedAt?{value:{...old,handoff:{...old.handoff,state:'limit_reached',legs:{...old.handoff.legs,[index]:{...old.handoff.legs[index],notEmittedAt:iso()}}}}}:{});
+      if(paid){try{await paid.noEmission(index);}catch{}}
+      return recover();
+    }
+    const emitted=await atomicUpdate(CALLS,key,old=>bound(old,row)&&old.handoff?.id===h.id&&old.handoff.legs[index]&&!old.handoff.legs[index].emittedAt?{value:{...old,handoff:{...old.handoff,state:'dial_uncertain',legs:{...old.handoff.legs,[index]:{...old.handoff.legs[index],admitted:true,emittedAt:iso()}}}},result:true}:{result:false});
+    if(!emitted)return recover();
+    try{if(!await active()||paid&&(!await paid.parent()||!await paid.prepare(index,remaining,h.destinations[index])))throw new Error('Call changed before emission');}catch{
+      await atomicUpdate(CALLS,key,old=>bound(old,row)&&old.handoff?.id===h.id&&!old.handoff.legs[index]?.outcome?{value:{...old,handoff:{...old.handoff,legs:{...old.handoff.legs,[index]:{...old.handoff.legs[index],notEmittedAt:iso()}}}}}:{});
+      if(paid){try{await paid.noEmission(index);}catch{}}return recover();
+    }
     const es=h.language==='es';
     return xml(`<Say${es?' language="es-MX"':''}>${es?'Intentaremos conectarle con una persona. Si nadie acepta, su solicitud quedará guardada.':'We will try to connect you with a person. If nobody accepts, your request stays saved.'}</Say><Dial callerId="${escape(row.number.number)}" answerOnBridge="true" timeout="25" timeLimit="${remaining}" action="${escape(urlFor(site,row,parent,'handoff-status',index))}" method="POST"><Number url="${escape(urlFor(site,row,parent,'handoff-screen',index))}" method="POST">${escape(h.destinations[index])}</Number></Dial>`);
   }

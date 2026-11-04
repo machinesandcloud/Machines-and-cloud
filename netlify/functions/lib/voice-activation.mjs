@@ -2,7 +2,8 @@ import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 // Durable managed voice setup. Vapi creation, import and Twilio routing each
 // have a stored intent and separately retained resource/readback receipt.
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { atomicUpdate } from "./store.mjs";
+import { atomicUpdate, list } from "./store.mjs";
+import { reservePaidUsage, assertPaidUsage, assertPaidUsageContinuation, attemptPaidUsage, settlePaidUsage, paidUsageStatus, PaidUsageError } from './usage.mjs';
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from "./setup.mjs";
 import { serviceLifecycle as life, serviceLifecycleMatches } from './service-lifecycle.mjs';
@@ -386,11 +387,12 @@ export async function runVoiceActivationWave({ deadlineAt = Date.now() + 240000 
   }
 }
 export async function dispatchVoiceActivationWave() {
+  const paidUsageRecovery=await recoverPaidVoiceReceipts();
   const pending = await pendingVoiceWork(), enabled = productionPolicy().enabled;
-  if (!enabled || !pending.pending || (await strictRead("health", "brake"))?.on === true) {const maintenance=!enabled?await recoverVoiceNumberFences({limit:1,deadlineAt:Date.now()+15000}):{processed:0};return { ok: pending.pending === 0, enabled, processed: maintenance.processed, dispatched: false, ...pending, reasonCode: pending.pending ? "product_gate_closed" : null };}
+  if (!enabled || !pending.pending || (await strictRead("health", "brake"))?.on === true) {const maintenance=!enabled?await recoverVoiceNumberFences({limit:1,deadlineAt:Date.now()+15000}):{processed:0};return { ok: pending.pending === 0&&paidUsageRecovery.ok, enabled, processed: maintenance.processed, dispatched: false, ...pending, paidUsageRecovery, reasonCode: !paidUsageRecovery.ok?'paid_voice_receipt_recovery_unavailable':pending.pending ? "product_gate_closed" : null };}
   const response = await fetch(siteUrl() + "/api/voice-activation-background", { method: "POST", headers: { "Content-Type": "application/json", "x-service-worker-key": process.env.SERVICE_WORKER_KEY }, body: "{}", signal: AbortSignal.timeout(5000), redirect: "error" });
   if (!response.ok) throw new Error("Voice continuation dispatch unavailable");
-  return { ok: true, enabled: true, processed: 0, dispatched: true, ...pending };
+  return { ok: paidUsageRecovery.ok, enabled: true, processed: 0, dispatched: true, ...pending, paidUsageRecovery };
 }
 
 // Both providers' events are authenticated before any tenant resolution. The
@@ -422,6 +424,134 @@ async function serving(row) {
 const unavailable = () => "<Say>We could not connect you on this line. Please try calling the shop again during business hours.</Say><Hangup/>";
 const safeCaller = (c, row, from) => validNumber(from) && from !== row.number?.number && from !== c?.phone?.businessNumber;
 const currentCall = (call, row, params) => call && call.operationId === row.id && call.generation === row.generation && call.number === params.To && call.from === params.From;
+const paidVoiceBound = (call,row) => call && call.operationId===row.id && Number.isSafeInteger(call.generation) && call.generation>=1 && call.generation<=row.generation && call.number===row.number?.number;
+function paidVoiceExpected(row,call,purpose,leg) {
+  if(!paidVoiceBound(call,row)||!['parent','fallback','handoff0','handoff1'].includes(purpose)||!Number.isInteger(leg?.seconds)||leg.seconds<1||leg.seconds>900)throw new Error('Paid call binding changed');
+  return {service:'voice',unit:'voiceMinutes',operationId:'voice:'+hash(JSON.stringify([row.id,call.twilioCallSid,purpose])),payloadDigest:hash(JSON.stringify([1,row.tenantIdentity,row.id,call.generation,call.twilioCallSid,call.from,call.number,purpose,leg.seconds,leg.destination||null])),quantity:Math.ceil(leg.seconds/60)};
+}
+async function reservePaidVoiceLeg(row,c,key,purpose,seconds,destination=null) {
+  let call=await strictRead(CALLS,key);if(!paidVoiceBound(call,row))throw new Error('Paid call changed');
+  if(call.paidLegs?.[purpose])return call.paidLegs[purpose];
+  const proposed={seconds,destination,attemptId:'voice-'+purpose},expected=paidVoiceExpected(row,call,purpose,proposed),receipt=await reservePaidUsage(c,expected);
+  return atomicUpdate(CALLS,key,old=>{
+    if(!paidVoiceBound(old,row)||old.twilioCallSid!==call.twilioCallSid)throw new Error('Paid call changed');
+    const prior=old.paidLegs?.[purpose];if(prior){if(JSON.stringify(prior.receipt)!==JSON.stringify(receipt))throw new Error('Paid call receipt changed');return {result:prior};}
+    const leg={...proposed,receipt,at:iso()};return {value:{...old,paidLegs:{...old.paidLegs,[purpose]:leg}},result:leg};
+  });
+}
+function paidParentRemaining(call) {
+  if(!call.paidLegs?.parent?.receipt)return null;
+  return Math.max(0,Math.min(call.paidLimit?.seconds||0,Math.floor((Date.parse(call.paidLimit?.expiresAt)-Date.now())/1000)));
+}
+async function assertPaidVoiceParent(row,c,key) {
+  const call=await strictRead(CALLS,key),leg=call?.paidLegs?.parent;
+  if(!leg)return false;if(leg.receipt===null)return true;
+  if(call.endReportAt||['completed','busy','failed','no-answer','canceled'].includes(call.twilioStatus))return false;
+  if(call.paidLimit?.status!=='applied'||call.paidLimit.callSid!==call.twilioCallSid||call.paidLimit.seconds!==leg.seconds||paidParentRemaining(call)<1)return false;
+  await assertPaidUsageContinuation(c,leg.receipt,paidVoiceExpected(row,call,'parent',leg),call.twilioCallSid);return true;
+}
+async function applyPaidVoiceLimit(row,c,key,purpose,providerId,current) {
+  let call=await strictRead(CALLS,key),leg=call?.paidLegs?.[purpose];if(!leg)return false;if(leg.receipt===null)return true;
+  const limit=purpose==='parent'?call.paidLimit:leg.limit;
+  if(limit)return limit.status==='applied'&&limit.callSid===providerId&&(purpose!=='parent'||await assertPaidVoiceParent(row,c,key));
+  const expected=paidVoiceExpected(row,call,purpose,leg);
+  await attemptPaidUsage(c,leg.receipt,{attemptId:leg.attemptId,providerId},expected);
+  const started=purpose==='parent'?Math.min(Date.now(),Date.parse(call.createdAt)):Date.now();
+  if(!Number.isFinite(started))return false;
+  const marker={status:'pending',callSid:providerId,seconds:leg.seconds,at:iso(),expiresAt:new Date(started+leg.seconds*1000).toISOString()};
+  const claimed=await atomicUpdate(CALLS,key,old=>{
+    const found=old?.paidLegs?.[purpose];if(!paidVoiceBound(old,row)||!found||JSON.stringify(found.receipt)!==JSON.stringify(leg.receipt))throw new Error('Paid call changed');
+    if(purpose==='parent'?old.paidLimit:found.limit)return {result:false};
+    return {value:purpose==='parent'?{...old,paidLimit:marker}:{...old,paidLegs:{...old.paidLegs,[purpose]:{...found,limit:marker}}},result:true};
+  });
+  if(!claimed)return false;
+  try{
+    const provider=createManagedVoiceProvider({executionAllowed:()=>productionPolicy().enabled});
+    const ack=await provider.setCallTimeLimit({callSid:providerId,from:purpose==='parent'?call.from:call.number,to:purpose==='parent'?call.number:leg.destination,parentCallSid:purpose==='parent'?null:call.twilioCallSid,timeLimit:leg.seconds,authorizeDispatch:async()=>{
+      if(!await current())return false;const latest=await strictRead(CALLS,key),saved=latest?.paidLegs?.[purpose],pending=purpose==='parent'?latest?.paidLimit:saved?.limit;
+      if(!saved||latest.endReportAt||['completed','busy','failed','no-answer','canceled'].includes(latest.twilioStatus)||purpose.startsWith('handoff')&&latest.handoff?.legs?.[purpose.slice(-1)]?.outcome||pending?.status!=='pending'||pending.callSid!==providerId||JSON.stringify(saved.receipt)!==JSON.stringify(leg.receipt))return false;
+      await assertPaidUsage(c,saved.receipt,paidVoiceExpected(row,latest,purpose,saved));return true;
+    }});
+    const saved=await atomicUpdate(CALLS,key,old=>{
+      const l=old?.paidLegs?.[purpose],pending=purpose==='parent'?old?.paidLimit:l?.limit;if(!paidVoiceBound(old,row)||pending?.status!=='pending'||pending.callSid!==ack.callSid||ack.seconds!==leg.seconds)return {result:false};
+      const applied={...pending,status:'applied',acknowledgedAt:iso()};return {value:purpose==='parent'?{...old,paidLimit:applied}:{...old,paidLegs:{...old.paidLegs,[purpose]:{...l,limit:applied}}},result:true};
+    });
+    return saved&&!!await current();
+  }catch{
+    await atomicUpdate(CALLS,key,old=>{const l=old?.paidLegs?.[purpose],pending=purpose==='parent'?old?.paidLimit:l?.limit;if(!paidVoiceBound(old,row)||pending?.status!=='pending'||pending.callSid!==providerId)return {};const unknown={...pending,status:'unknown',unknownAt:iso()};return {value:purpose==='parent'?{...old,paidLimit:unknown}:{...old,paidLegs:{...old.paidLegs,[purpose]:{...l,limit:unknown}}}};});
+    return false;
+  }
+}
+async function fundPaidVoiceParent(row,c,key,current) {
+  const call=await strictRead(CALLS,key);let seconds=call?.paidLegs?.parent?.seconds||row.policy.maxDurationSeconds;
+  if(!call?.paidLegs?.parent){
+    const status=await paidUsageStatus(c);
+    if(status.metered){
+      if(!status.allowed)await assertPaidServiceAuthority(c,'voice');
+      const remaining=status.units?.voiceMinutes?.remaining;
+      if(!Number.isSafeInteger(remaining)||remaining<1)throw new PaidUsageError(remaining===0?'paid_capacity_exhausted':'paid_capacity_unavailable');
+      seconds=Math.min(seconds,remaining*60);
+    }
+  }
+  const leg=await reservePaidVoiceLeg(row,c,key,'parent',seconds);
+  return leg.receipt===null||await applyPaidVoiceLimit(row,c,key,'parent',(await strictRead(CALLS,key)).twilioCallSid,current);
+}
+async function fundPaidVoiceChild(row,c,key,purpose,seconds,destination) {
+  const leg=await reservePaidVoiceLeg(row,c,key,purpose,seconds,destination);if(leg.receipt===null)return true;
+  const call=await strictRead(CALLS,key),expected=paidVoiceExpected(row,call,purpose,leg);
+  await attemptPaidUsage(c,leg.receipt,{attemptId:leg.attemptId},expected);await assertPaidUsage(c,leg.receipt,expected);return true;
+}
+async function paidVoiceNoEmission(row,c,key,purpose) {
+  const call=await strictRead(CALLS,key),leg=call?.paidLegs?.[purpose];if(!leg?.receipt)return;
+  const source=purpose==='fallback'?call.fallbackAttempt:call.handoff?.legs?.[purpose.slice(-1)];
+  if(!source?.notEmittedAt||source.childSid||purpose==='fallback'&&call.fallbackOutcome?.callSid)throw new Error('Call emission is not known absent');
+  const expected=paidVoiceExpected(row,call,purpose,leg),fact={outcome:'not_dispatched',quantity:0,proofId:hash(JSON.stringify([key,purpose,'not_emitted',leg.attemptId])),attemptId:leg.attemptId};
+  let result;try{result=await settlePaidUsage(c,leg.receipt,fact,expected);}catch(error){if(error.code!=='paid_capacity_proof_conflict')throw error;await attemptPaidUsage(c,leg.receipt,{attemptId:leg.attemptId},expected);result=await settlePaidUsage(c,leg.receipt,fact,expected);}
+  if(['released','settled'].includes(result?.receiptState))await atomicUpdate(CALLS,key,old=>old?.paidLegs?.[purpose]?.receipt?.generation===leg.receipt.generation?{value:{...old,paidLegs:{...old.paidLegs,[purpose]:{...old.paidLegs[purpose],knownNoEmission:true}}}}:{});
+}
+async function settlePaidVoiceFacts(row,c,key,purpose) {
+  const call=await strictRead(CALLS,key),leg=call?.paidLegs?.[purpose],fact=leg?.terminalFacts;if(!leg?.receipt||!fact||leg.settledProof===fact.proofId)return false;
+  await settlePaidUsage(c,leg.receipt,{outcome:'confirmed',quantity:fact.quantity,proofId:fact.proofId,...(fact.providerId?{providerId:fact.providerId}:{})},paidVoiceExpected(row,call,purpose,leg));
+  await atomicUpdate(CALLS,key,old=>old?.paidLegs?.[purpose]?.terminalFacts?.proofId===fact.proofId?{value:{...old,paidLegs:{...old.paidLegs,[purpose]:{...old.paidLegs[purpose],settledProof:fact.proofId}}}}:{});return true;
+}
+async function retainPaidVoiceTerminal(row,c,key,purpose,{status,duration,providerId}) {
+  if(!['completed','busy','failed','no-answer','canceled'].includes(status))return;
+  const validDuration=typeof duration==='string'&&/^(0|[1-9]\d{0,9})$/.test(duration)&&Number.isSafeInteger(Number(duration));
+  await atomicUpdate(CALLS,key,old=>{
+    const leg=old?.paidLegs?.[purpose];if(!paidVoiceBound(old,row)||!leg?.receipt)return {};
+    if(!validDuration||Number(duration)>60000000000||Number(duration)>0&&!/^CA[a-f0-9]{32}$/i.test(providerId||''))return {value:{...old,paidLegs:{...old.paidLegs,[purpose]:{...leg,durationUnknown:true}}}};
+    const seconds=Number(duration),fact={version:1,status,seconds,quantity:Math.ceil(seconds/60),providerId:providerId||null,proofId:hash(JSON.stringify([key,purpose,providerId||null,status,seconds]))};
+    if(leg.terminalFacts?.quantity>fact.quantity)return {value:{...old,paidLegs:{...old.paidLegs,[purpose]:{...leg,terminalConflict:true}}}};
+    return {value:{...old,paidLegs:{...old.paidLegs,[purpose]:{...leg,terminalFacts:fact,durationUnknown:false}}}};
+  });
+  try{await settlePaidVoiceFacts(row,c,key,purpose);}catch{/* Source facts remain for the ordinary storage-only recovery. */}
+}
+function paidHandoff(row,key,current) {
+  return {
+    async parent(){const state=await current();return !!state&&await fundPaidVoiceParent(row,state.c,key,current);},
+    async remaining(){return paidParentRemaining(await strictRead(CALLS,key));},
+    async prepare(index,seconds,destination){const state=await current();return !!state&&await fundPaidVoiceChild(row,state.c,key,'handoff'+index,seconds,destination);},
+    async screen(index,providerId){const state=await current();return !!state&&await assertPaidVoiceParent(row,state.c,key)&&await applyPaidVoiceLimit(row,state.c,key,'handoff'+index,providerId,current);},
+    async terminal(index,fact){const c=await strictRead('clients',row.slug);if(c)await retainPaidVoiceTerminal(row,c,key,'handoff'+index,fact);},
+    async noEmission(index){const c=await strictRead('clients',row.slug);if(c)await paidVoiceNoEmission(row,c,key,'handoff'+index);},
+  };
+}
+export async function recoverPaidVoiceReceipts({limit=5,deadlineAt=Date.now()+10000}={}) {
+  if(!Number.isInteger(limit)||limit<1||limit>5||!Number.isFinite(deadlineAt)||deadlineAt<=Date.now())throw new Error('Choose bounded paid call recovery');
+  const keys=await list(CALLS),selected=await atomicUpdate('health','paidVoiceUsage:cursor',old=>{
+    if(old&&(!Number.isInteger(old.version)||old.version!==1||typeof old.cursor!=='string'))throw new Error('Paid call recovery cursor unavailable');
+    if(!keys.length)return {result:[]};let start=keys.findIndex(key=>key>(old?.cursor||''));if(start<0)start=0;const selected=[...keys.slice(start),...keys.slice(0,start)].slice(0,limit);
+    return {value:{version:1,cursor:selected.at(-1)},result:selected};
+  });
+  let settled=0,failed=0;
+  for(const key of selected){if(Date.now()>=deadlineAt)break;try{const call=await strictRead(CALLS,key);if(!call?.paidLegs)continue;const row=await strictRead(STORE,call.operationId),c=row&&await strictRead('clients',row.slug);if(!c||!paidVoiceBound(call,row)||tenant(c)!==row.tenantIdentity)continue;
+    for(const [purpose,leg]of Object.entries(call.paidLegs)){if(!leg.receipt)continue;const source=purpose==='fallback'?call.fallbackAttempt:purpose.startsWith('handoff')?call.handoff?.legs?.[purpose.slice(-1)]:null;
+      if(source?.notEmittedAt&&!leg.knownNoEmission){await paidVoiceNoEmission(row,c,key,purpose);settled++;}
+      else if(leg.terminalFacts&&leg.settledProof!==leg.terminalFacts.proofId){if(await settlePaidVoiceFacts(row,c,key,purpose))settled++;}
+    }
+  }catch{failed++;}}
+  return {ok:failed===0,inspected:selected.length,settled,failed};
+}
 function fallback(c, row, from, allowed, timeLimit, forwardedFrom = []) {
   const cell = allowed && safeCaller(c, row, from) ? safeFallback(c || {}) : null;
   // An action takes control of the original call; trailing verbs cannot play.
@@ -440,7 +570,8 @@ export async function handleManagedVoiceWebhook(req) {
   const row = await callbackRow(url.searchParams.get("o"));
   if (humanKind) {
     if (!row || params.AccountSid !== process.env.TWILIO_ACCOUNT_SID) return json({error:'call_mismatch'},403);
-    return handleManagedHumanCallback({row,params,url,site:siteUrl(),reserve:reserveVoiceBudget,current:async()=>{const latest=await callbackRow(row.callbackToken);if (!latest || latest.generation!==row.generation) return null;const state=await serving(latest);return state.valid?state:null;}});
+    const current=async()=>{const latest=await callbackRow(row.callbackToken);if (!latest || latest.generation!==row.generation) return null;const state=await serving(latest);return state.valid?state:null;};
+    return handleManagedHumanCallback({row,params,url,site:siteUrl(),reserve:reserveVoiceBudget,current,paid:paidHandoff(row,row.slug+'/'+url.searchParams.get('p'),current)});
   }
   if (!row || params.AccountSid !== process.env.TWILIO_ACCOUNT_SID || !/^CA[a-f0-9]{32}$/i.test(params.CallSid || "") || params.To !== row.number?.number) return json({ error: "call_mismatch" }, 403);
   const { c, valid, fallbackAllowed } = await serving(row), callKey = row.slug + "/" + params.CallSid;
@@ -456,6 +587,7 @@ export async function handleManagedVoiceWebhook(req) {
     });
     if (!saved) return json({ error: "call_mismatch" }, 403);
     await atomicUpdate("managed_voice_call_index", params.CallSid, prior => prior && prior.operationId !== row.id ? (() => { throw new Error("Voice call index conflict"); })() : { value: { operationId: row.id, slug: row.slug, generation: row.generation } });
+    try{if(!await fundPaidVoiceParent(row,c,callKey,async()=>{const latest=await callbackRow(row.callbackToken),state=latest&&await serving(latest);return latest?.generation===row.generation&&state?.valid?state:null;}))return xml('<Hangup/>');}catch{return xml('<Hangup/>');}
     await change(row.id, old => old.generation === row.generation ? { ...old, evidence: { ...old.evidence, inboundAt: iso(), ...(forwardingMatches ? { forwardedAt: iso() } : {}) } } : null);
     return xml(`<Redirect method="POST">${esc(row.importedRoute.vapiUrl)}</Redirect>`);
   }
@@ -468,14 +600,18 @@ export async function handleManagedVoiceWebhook(req) {
       return { value, result: value };
     });
   }
-  if (!currentCall(call, row, params)) return json({ error: "call_mismatch" }, 403);
+  const receiptOnly=['status','dial-status'].includes(kind);
+  const historicalPaidReceipt=receiptOnly&&!!call?.paidLegs?.[kind==='status'?'parent':'fallback']?.receipt&&paidVoiceBound(call,row)&&call.number===params.To&&call.from===params.From;
+  if (!currentCall(call,row,params)&&!historicalPaidReceipt) return json({ error: "call_mismatch" }, 403);
   if (kind === "fallback") {
+    try{if(!await fundPaidVoiceParent(row,c,callKey,async()=>{const latest=await callbackRow(row.callbackToken),state=latest&&await serving(latest);return latest?.generation===row.generation&&state?.fallbackAllowed?state:null;}))return xml('<Hangup/>');}catch{return xml('<Hangup/>');}
+    call=await strictRead(CALLS,callKey);
     if (call.handoff?.connection==='live_transfer') return xml(unavailable());
     if (call.fallbackOutcome) return xml(call.fallbackOutcome.status === "completed" ? "<Hangup/>" : unavailable());
     // Returning TwiML has an uncertain delivery boundary too. Once its one
     // attempt is retained, do not return another paid Dial without a receipt.
     if (call.fallbackAttempt) return xml(unavailable());
-    const knownForwarding = [params.ForwardedFrom, call.forwardedFrom], twiml = fallback(c, row, params.From, fallbackAllowed, row.policy.maxDurationSeconds, knownForwarding), dialing = twiml.startsWith("<Dial");
+    const fundedRemaining=paidParentRemaining(call),knownForwarding = [params.ForwardedFrom, call.forwardedFrom], twiml = fallback(c, row, params.From, fallbackAllowed, fundedRemaining===null?row.policy.maxDurationSeconds:Math.min(row.policy.maxDurationSeconds,fundedRemaining), knownForwarding), dialing = twiml.startsWith("<Dial");
     let admission = call.fallbackAdmission;
     if (dialing && !admission) {
       // A fallback is a distinct paid leg, not free use of an AI reservation.
@@ -492,11 +628,15 @@ export async function handleManagedVoiceWebhook(req) {
     if (dialing && (admission?.status !== "admitted" || Date.parse(admission.expiresAt) <= Date.now())) return xml(unavailable());
     const saved = await atomicUpdate(CALLS, callKey, old => currentCall(old, row, params) && old.handoff?.connection!=='live_transfer' && !old.fallbackAttempt && !old.fallbackOutcome ? { value: { ...old, fallbackAttempt: { id: hash(row.id + ":" + params.CallSid + ":fallback"), at: iso(), destination: dialing ? safeFallback(c) : null } }, result: true } : { result: false });
     if (!saved) return xml(unavailable());
+    if(dialing){try{if(!await fundPaidVoiceChild(row,c,callKey,'fallback',fundedRemaining===null?row.policy.maxDurationSeconds:Math.min(row.policy.maxDurationSeconds,fundedRemaining),safeFallback(c)))throw new Error('Paid child unavailable');}catch{await atomicUpdate(CALLS,callKey,old=>currentCall(old,row,params)&&old.fallbackAttempt&&!old.fallbackOutcome?{value:{...old,fallbackAttempt:{...old.fallbackAttempt,notEmittedAt:iso()}}}:{});try{await paidVoiceNoEmission(row,c,callKey,'fallback');}catch{}return xml('<Hangup/>');}}
     await change(row.id, old => old.generation === row.generation && old.tenantIdentity === row.tenantIdentity ? { ...old, evidence: { ...old.evidence, fallbackObservedAt: iso(), lastFailureAt: iso() } } : null);
     // Never route an old caller to a replacement owner's phone after a save.
     const latest = await callbackRow(row.callbackToken), latestCall = await strictRead(CALLS, callKey), current = latest && await serving(latest);
-    const remaining = admission ? Math.min(row.policy.maxDurationSeconds, Math.floor((Date.parse(admission.expiresAt) - Date.now()) / 1000) - 30) : 0;
-    return xml(latest?.generation === row.generation && current?.fallbackAllowed && currentCall(latestCall, latest, params) && !latestCall.fallbackOutcome && (!dialing || remaining > 0) ? fallback(current.c, latest, params.From, true, remaining, [params.ForwardedFrom, latestCall.forwardedFrom]) : unavailable());
+    const parentRemaining=paidParentRemaining(latestCall),remaining = admission ? Math.min(row.policy.maxDurationSeconds, Math.floor((Date.parse(admission.expiresAt) - Date.now()) / 1000) - 30,parentRemaining===null?Infinity:parentRemaining) : 0;
+    let ready=latest?.generation === row.generation && current?.fallbackAllowed && currentCall(latestCall, latest, params) && !latestCall.fallbackOutcome && (!dialing || remaining > 0);
+    if(ready&&dialing){try{ready=await assertPaidVoiceParent(row,current.c,callKey)&&await fundPaidVoiceChild(row,current.c,callKey,'fallback',remaining,safeFallback(current.c));}catch{ready=false;}}
+    if(!ready&&dialing){await atomicUpdate(CALLS,callKey,old=>currentCall(old,row,params)&&old.fallbackAttempt&&!old.fallbackOutcome?{value:{...old,fallbackAttempt:{...old.fallbackAttempt,notEmittedAt:iso()}}}:{});try{await paidVoiceNoEmission(row,c,callKey,'fallback');}catch{}}
+    return xml(ready?fallback(current.c, latest, params.From, true, remaining, [params.ForwardedFrom, latestCall.forwardedFrom]):unavailable());
   }
   if (kind === "dial-status") {
     if (!call.fallbackAttempt?.destination || params.DialCallSid && !/^CA[a-f0-9]{32}$/i.test(params.DialCallSid)) return json({ error: "call_mismatch" }, 403);
@@ -504,16 +644,18 @@ export async function handleManagedVoiceWebhook(req) {
     // This route dials a phone, not a conference. A connection is not human acceptance.
     const status = ["completed", "busy", "no-answer", "failed", "canceled"].includes(reported) && !(reported === "completed" && (!params.DialCallSid || params.DialBridged === "false")) ? reported : "unknown";
     const outcome = await atomicUpdate(CALLS, callKey, old => {
-      if (!currentCall(old, row, params) || !old.fallbackAttempt?.destination) return { result: null };
+      if (!paidVoiceBound(old,row)||old.number!==params.To||old.from!==params.From||!old.fallbackAttempt?.destination) return { result: null };
       if (old.fallbackOutcome) return { result: old.fallbackOutcome.callSid && params.DialCallSid && old.fallbackOutcome.callSid !== params.DialCallSid ? null : old.fallbackOutcome };
       const value = { status, reportedStatus: reported || null, callSid: params.DialCallSid || null, bridged: params.DialBridged === "true" ? true : params.DialBridged === "false" ? false : null, at: iso() };
       return { value: { ...old, fallbackOutcome: value, twilioStatus: params.CallStatus || null, statusAt: iso() }, result: value };
     });
     if (!outcome) return json({ error: "call_mismatch" }, 403);
-    await change(row.id, old => old.generation === row.generation && old.tenantIdentity === row.tenantIdentity ? { ...old, evidence: { ...old.evidence, fallbackDialStatus: outcome.status, fallbackDialAt: outcome.at, ...(outcome.status === "completed" ? { fallbackAnsweredAt: outcome.at } : { lastFailureAt: outcome.at }) } } : null);
+    await retainPaidVoiceTerminal(row,c,callKey,'fallback',{status:reported,duration:params.DialCallDuration,providerId:params.DialCallSid||null});
+    await change(row.id, old => old.generation === call.generation && old.tenantIdentity === row.tenantIdentity ? { ...old, evidence: { ...old.evidence, fallbackDialStatus: outcome.status, fallbackDialAt: outcome.at, ...(outcome.status === "completed" ? { fallbackAnsweredAt: outcome.at } : { lastFailureAt: outcome.at }) } } : null);
     return xml(outcome.status === "completed" ? "<Hangup/>" : unavailable());
   }
   await atomicUpdate(CALLS, callKey, old => old ? { value: { ...old, twilioStatus: params.CallStatus || params.DialCallStatus || null, statusAt: iso() } } : {});
+  await retainPaidVoiceTerminal(row,c,callKey,'parent',{status:params.CallStatus,duration:params.CallDuration,providerId:params.CallSid});
   return json({ ok: true });
 }
 function callSid(message) { return message.call?.transport?.provider === "twilio" ? message.call.transport.callSid : message.call?.phoneCallProvider === "twilio" ? message.call.phoneCallProviderId : null; }
@@ -561,6 +703,7 @@ export async function handleManagedVapiWebhook(req, { dispatchTool } = {}) {
   if (m.type === "assistant-request") {
     if (!valid) return json({ error: "This line is not accepting AI calls right now. Please contact the shop directly." });
     if (call.endReportAt) return json({ error: "This call has already ended." });
+    try{if(!await fundPaidVoiceParent(row,c,callKey,async()=>{const fresh=await strictRead(STORE,row.id),state=fresh&&await serving(fresh);return fresh?.generation===row.generation&&state?.valid?state:null;}))return json({error:'This line cannot accept this call right now.'});}catch{return json({error:'This line cannot accept this call right now.'});}
     const bound = await atomicUpdate(CALLS, callKey, old => old && (!old.vapiCallId || old.vapiCallId === vapiCallId) ? { value: { ...old, vapiCallId, assistantRevision: row.inputRevision, assistantRequestedAt: iso() }, result: true } : { result: false });
     if (!bound) return json({ error: "call_mismatch" }, 403);
     if (!await reserveVoiceBudget(row, sid)) return json({ error: "This line has reached its phone usage limit. Please contact the shop directly." });
@@ -586,7 +729,9 @@ export async function handleManagedVapiWebhook(req, { dispatchTool } = {}) {
       // Dispatcher must persist stable effects keyed by call+toolCallId. It
       // returns explicit saved/confirmed delivery statuses, not optimistic text.
       try { const currentRow = await strictRead(STORE, row.id), [latest, currentCall] = await Promise.all([serving(currentRow), strictRead(CALLS, callKey)]); if (!latest.valid || currentRow.generation !== row.generation || !currentCall || currentCall.endReportAt || ["completed", "busy", "failed", "no-answer", "canceled"].includes(currentCall.twilioStatus) || currentCall.vapiCallId !== vapiCallId || currentCall.generation !== currentRow.generation) throw new Error("Workspace or call changed");
-        const result = name==='request_human' ? await requestManagedHuman({row:currentRow,call:currentCall,input,site:siteUrl(),reserve:reserveVoiceBudget,redirectCall:args=>createManagedVoiceProvider({executionAllowed:()=>productionPolicy().enabled}).redirectCall(args),current:async()=>{const saved=await strictRead(STORE,row.id),active=await strictRead(CALLS,callKey);if (!saved || saved.generation!==row.generation || !active || active.endReportAt || active.vapiCallId!==vapiCallId || ['completed','busy','failed','no-answer','canceled'].includes(active.twilioStatus)) return null;const state=await serving(saved);return state.valid?state:null;}}) : await dispatchTool({ client: latest.c, callId: vapiCallId, toolCallId: id, name, input, caller: call.from, operationId: row.id }); results.push({ toolCallId: id, result: typeof result === "string" ? result : JSON.stringify(result) }); }
+        const currentVoice=async()=>{const saved=await strictRead(STORE,row.id),active=await strictRead(CALLS,callKey);if (!saved || saved.generation!==row.generation || !active || active.endReportAt || active.vapiCallId!==vapiCallId || ['completed','busy','failed','no-answer','canceled'].includes(active.twilioStatus)) return null;const state=await serving(saved);return state.valid?state:null;};
+        if(!await assertPaidVoiceParent(currentRow,latest.c,callKey))throw new Error('Paid parent unavailable');
+        const result = name==='request_human' ? await requestManagedHuman({row:currentRow,call:currentCall,input,site:siteUrl(),reserve:reserveVoiceBudget,redirectCall:args=>createManagedVoiceProvider({executionAllowed:()=>productionPolicy().enabled}).redirectCall(args),current:currentVoice,paid:paidHandoff(currentRow,callKey,currentVoice)}) : await dispatchTool({ client: latest.c, callId: vapiCallId, toolCallId: id, name, input, caller: call.from, operationId: row.id }); results.push({ toolCallId: id, result: typeof result === "string" ? result : JSON.stringify(result) }); }
       catch { results.push({ toolCallId: id, error: "This request could not be confirmed. Do not claim it was booked or delivered." }); }
     }
     return json({ results });
