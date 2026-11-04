@@ -282,14 +282,20 @@ export async function bookVisit(c, input, ctx = {}) {
     if (taken.reason === "full") await logEvent(c, "window_full", { date: taken.availability?.from || normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity });
     return { full: true, reason: taken.reason, message: taken.availability ? fullMessage(c, esc(input.date), esc(input.window), taken.availability, taken.reason) : taken.message || fullMessage(c, esc(input.date), esc(input.window)) };
   }
-  const b = await (stable ? createRecordOnce : addRecord)("bookings", c.slug, {
+  let b;
+  try { b = await (stable ? createRecordOnce : addRecord)("bookings", c.slug, {
     id: bookingId,
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     date: taken.date, dateSaid: esc(input.date), window: taken.window, urgency: input.urgency, language: input.language, notes: esc(input.notes), unsure: esc(input.unsure),
     channel: ctx.channel || "web", contact: ctx.contact || '', status: "booked", outcome: "booked", customerType: type,
     ...(ctx.websiteSetupCheck ? { websiteSetupCheck: { ...ctx.websiteSetupCheck } } : {}),
     ...(portalOnly ? { delivery: { mode: "portal_only", ownerContactConfirmed: false, tenantIdentity: deliveryTenant(c) }, ...(stable ? { managedActionId: ctx.managedActionId } : {}) } : {}),
-  });
+  }, { client: c, capacityClaim: taken }); }
+  catch (error) {
+    if (!(error instanceof AvailabilityInputError)) throw error;
+    await finishBookingWindow(c, bookingId, { ...taken, slot: taken.previous[0] || '', release: !taken.previous.length });
+    return { full: true, reason: error.code, message: 'Nothing was booked. ' + error.message };
+  }
   let canFinish = true;
   try {
     await addToIndex("bookings", c, b.phone, b.id);
@@ -631,7 +637,7 @@ export async function rescheduleVisit(c, b, date, window) {
   if (claim.full) return { full: true, reason: claim.reason, message: claim.availability ? fullMessage(c, nd, nw, claim.availability, claim.reason) : claim.message || fullMessage(c, nd, nw) };
   const old = when(b);
   const moved = { ...b, date: claim.date, window: claim.window, status: "booked", confirmedAt: null };
-  await saveRecord("bookings", moved, { capacityClaim: claim });
+  try { await saveRecord("bookings", moved, { capacityClaim: claim }); } catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; return { full: true, reason: error.code, message: "Your original visit is unchanged. " + error.message }; }
   Object.assign(b, moved);
   let canFinish = true;
   try {

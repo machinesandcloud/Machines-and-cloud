@@ -3,6 +3,7 @@
 import { ACK_MINUTES, normalizeHours, normalizeEmergencies, emergency247 } from './config.mjs';
 import { parseHours } from './config.mjs';
 import { createHash } from 'node:crypto';
+import { normalizeAppointmentHours, validateAppointmentConfiguration } from './availability.mjs';
 import { preserveWebsiteOriginRevision } from './setup.mjs';
 
 const own = (value, key) => Object.hasOwn(value || {}, key);
@@ -12,14 +13,14 @@ const editable = {
   business: ['name', 'website', 'trade', 'city', 'serviceArea', 'notServed', 'hours', 'afterHours', 'spanish', 'licenses', 'googlePlaceId', 'reviewLink', 'payLink'],
   owner: ['name', 'phone', 'backupPhone'], phone: ['businessNumber', 'transferTo', 'handoffEnabled', 'forwarding', 'carrier'],
   widget: ['greeting', 'allowedOrigins'], digest: ['text'],
-  rules: ['never', 'handoff', 'emergencies', 'ackMinutes', 'callbackHours', 'callbackAfterHours', 'windowCapacity', 'consentAsk', 'emergency247', 'hours', 'bypass', 'avgTicket'],
+  rules: ['never', 'handoff', 'emergencies', 'ackMinutes', 'callbackHours', 'callbackAfterHours', 'windowCapacity', 'consentAsk', 'emergency247', 'hours', 'bypass', 'avgTicket', 'appointmentHours'],
 };
 const canonical = value => Array.isArray(value) ? value.map(canonical) : plain(value) ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 // Editing concurrency is separate from the revision that certifies a reviewed/live-tested desk.
 export function workspaceEditRevision(client) {
   const facts = Object.fromEntries(['services', 'fees', 'windows', 'faq', 'summary', 'plan', 'software'].map(key => [key, client[key] ?? null]));
   facts.workspace = [client.slug, client.ownerKey, client.owner?.email];
-  for (const [group, fields] of Object.entries(editable)) facts[group] = Object.fromEntries(fields.map(key => [key, client[group]?.[key] ?? null]));
+  for (const [group, fields] of Object.entries(editable)) facts[group] = Object.fromEntries(fields.filter(key => key !== 'appointmentHours' || own(client[group], key)).map(key => [key, client[group]?.[key] ?? null]));
   return createHash('sha256').update(JSON.stringify(canonical(facts))).digest('hex');
 }
 export class WorkspaceEditError extends Error {
@@ -130,7 +131,7 @@ export function parseWorkspacePatch(input, { operator = false } = {}) {
     rules: object({
       never: list(20), handoff: list(20), emergencies: object({ tier0: list(20), tier1: list(20), tier2: text(200), script: text(500, false, true) }),
       ackMinutes: choice(ACK_MINUTES), callbackHours: text(80), callbackAfterHours: text(80), windowCapacity: number(1, 20, true),
-      consentAsk: bool, emergency247: bool, hours, bypass: list(20, 40, (value, path) => { const result = phone(value, path); if (result === '') bad(path, 'Remove the empty phone-number row.'); return result; }),
+      consentAsk: bool, emergency247: bool, hours, appointmentHours: (value, path) => { try { return normalizeAppointmentHours(value); } catch { bad(path, 'Choose business hours or valid custom appointment hours for every day.'); } }, bypass: list(20, 40, (value, path) => { const result = phone(value, path); if (result === '') bad(path, 'Remove the empty phone-number row.'); return result; }),
       avgTicket: (value, path) => typeof value === 'string' && !value.trim() ? 0 : Math.round(number(0, 1000000)(value, path)),
     }),
     plan: choice(['starter', 'growth', 'pro']), software: text(30),
@@ -149,6 +150,10 @@ export function applyWorkspacePatch(current, patch) {
   else if (own(patch.business, 'hours')) value.rules = { ...value.rules, hours: parseHours(value.business.hours) };
   if (own(patch.rules, 'emergencies')) value.rules.emergencies = normalizeEmergencies({ ...normalizeEmergencies(current.rules?.emergencies, value.business?.trade), ...patch.rules.emergencies }, value.business?.trade);
   if (own(patch.business, 'hours') && !own(patch.rules, 'emergency247')) value.rules = { ...value.rules, emergency247: emergency247(value.business.hours) };
+  if (own(value.rules, 'appointmentHours') && (own(patch.rules, 'appointmentHours') || own(patch.rules, 'hours') || own(patch.business, 'hours') || own(patch, 'windows'))) {
+    try { validateAppointmentConfiguration(value); }
+    catch (error) { throw new WorkspaceEditError({ [error.code === 'invalid_appointment_hours' ? 'rules.appointmentHours' : 'windows']: error.message }); }
+  }
   return own(patch.widget, 'allowedOrigins') ? preserveWebsiteOriginRevision(current, value) : value;
 }
 

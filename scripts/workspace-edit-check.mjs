@@ -34,6 +34,22 @@ async function call(body, bearer = token, method = 'PUT') {
 }
 await store.put('access_sessions', accessHash(token), { email: c.owner.email, scope: 'onboarding', status: 'active', expiresAt: new Date(Date.now() + 3600000).toISOString() });
 
+await check('Explicit appointment adoption validates shape; unrelated legacy saves never adopt it', async () => {
+  await reset(); let out=await call({...revision(c),summary:'A retained legacy edit'});assert.equal(out.status,200);assert.equal(Object.hasOwn((await read()).rules,'appointmentHours'),false);
+  for(const appointmentHours of [null,{version:2,mode:'business'},{version:1,mode:'custom',hours:{}},{version:1,mode:'business',extra:true}]){await reset();out=await call({...revision(c),rules:{appointmentHours}});assert.equal(out.status,422);assert.deepEqual(await read(),c);}
+  await reset();out=await call({...revision(c),rules:{appointmentHours:{version:1,mode:'business'}}});assert.equal(out.status,200);assert.deepEqual((await read()).rules.appointmentHours,{version:1,mode:'business'});
+});
+await check('Follow-hours edits require a whole fitting window; custom all-closed and Saturday stay exact', async () => {
+  await reset();let out=await call({...revision(c),rules:{appointmentHours:{version:1,mode:'business'}}});assert.equal(out.status,200);let saved=await read();out=await call({...revision(saved),rules:{hours:parseHours('Mon-Fri 9am-4pm')}});assert.equal(out.status,422);assert.ok(out.body.fieldErrors.windows);assert.deepEqual(await read(),saved);
+  out=await call({...revision(saved),rules:{hours:parseHours('Mon-Fri 9am-4pm')},windows:['9 to 12']});assert.equal(out.status,200);saved=await read();assert.equal(saved.rules.appointmentHours.mode,'business');
+  const hours=Object.fromEntries(['mon','tue','wed','thu','fri','sat','sun'].map(day=>[day,null]));out=await call({...revision(saved),rules:{appointmentHours:{version:1,mode:'custom',hours}}});assert.equal(out.status,200);saved=await read();assert.deepEqual(saved.rules.appointmentHours.hours,hours);
+  hours.sat={open:'09:00',close:'16:00'};out=await call({...revision(saved),rules:{appointmentHours:{version:1,mode:'custom',hours}}});assert.equal(out.status,200);saved=await read();out=await call({...revision(saved),rules:{hours:parseHours('Mon-Fri 8am-5pm')}});assert.equal(out.status,200);assert.deepEqual((await read()).rules.appointmentHours.hours,hours);
+});
+await check('Legacy owner-key adoption is saved and strict, while unrelated legacy edits never adopt hours',async()=>{
+  const legacy=structuredClone(c);delete legacy.onboarding;await store.saveClient(legacy);const put=async body=>{const r=await handler(new Request(process.env.URL+'/api/client?c='+legacy.slug+'&k='+legacy.ownerKey,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}));return {status:r.status,body:await r.json()};};
+  assert.equal((await put({summary:'Unrelated legacy edit'})).status,200);assert.equal(Object.hasOwn((await read()).rules,'appointmentHours'),false);assert.equal((await put({rules:{appointmentHours:{version:1,mode:'business'}}})).status,200);assert.deepEqual((await read()).rules.appointmentHours,{version:1,mode:'business'});let saved=await read();const out=await put({rules:{appointmentHours:{version:7,mode:'business'}}});assert.equal(out.status,422);assert.deepEqual(await read(),saved);
+  const closed=await put({business:{hours:'Mon 8am-5pm'}});assert.equal(closed.status,200);saved=await read();assert.equal(saved.rules.hours.tue,null);assert.deepEqual((await store.getAvailability(legacy,'2031-11-04',1)).openings[0].windows,[]);
+});
 await check('Owner reads both revision tokens without receiving the owner key', async () => {
   await reset(); const response = await call(null, token, 'GET');
   assert.equal(response.status, 200); assert.equal(response.body.editRevision, workspaceEditRevision(c));

@@ -3,7 +3,7 @@
 import { getStore } from "@netlify/blobs";
 import { randomBytes, createHash } from "node:crypto";
 import { normalizeDate } from "./calendar.mjs";
-import { canonicalWindow, listedWindows, listedWindow, requestedDate, addDays, isoDateValid, isElapsedWindow, AvailabilityInputError } from "./availability.mjs";
+import { canonicalWindow, listedWindows, listedWindow, requestedDate, addDays, isoDateValid, isElapsedWindow, appointmentSchedule, appointmentWindowAllowed, appointmentWindowRange, assertAppointmentWindow, AvailabilityInputError } from "./availability.mjs";
 import { workspaceTenant, supportedWorkspace, belongsToWorkspace, WorkspaceIdentityError } from './workspace-identity.mjs';
 export { canonicalWindow } from "./availability.mjs";
 
@@ -355,16 +355,28 @@ export async function listWorkspaceRecords(client, kind, limit = 100) {
   await assertCurrentWorkspace(client);
   return { records, listing: { source: 'tenant_index', limit, incomplete: !!locator.incomplete || !!locator.retentionIncomplete || locator.ids.length > limit || records.length !== ids.length } };
 }
-export async function addRecord(kind, slug, data) {
+// Legacy callers historically use snapshots. Once appointment hours are explicitly
+// adopted, that one contract must use the latest saved profile too, without migration.
+async function currentAppointmentWorkspace(client) {
+  const checked = await assertCurrentWorkspace(client);
+  if (Object.hasOwn(client || {}, 'onboarding')) return checked;
+  const current = await atomicUpdate('clients', client.slug, row => ({ result: row }));
+  if (!Object.hasOwn(client.rules || {}, 'appointmentHours') && !Object.hasOwn(current?.rules || {}, 'appointmentHours')) return client;
+  if (!current || Object.hasOwn(current, 'onboarding') || !client.ownerKey || current.ownerKey !== client.ownerKey || current.owner?.email !== client.owner?.email) throw new WorkspaceIdentityError();
+  return current;
+}
+export async function addRecord(kind, slug, data, admission = {}) {
   const rec = { id: id(5), slug, createdAt: now(), ...data };
   await indexWorkspaceRecord(kind, rec);
-  await put(kind, `${slug}/${rec.id}`, rec);
+  if (kind === 'bookings' && admission.capacityClaim) await atomicUpdate(kind, `${slug}/${rec.id}`, async current => { if (current) throw new Error('Booking identity already exists'); await assertAppointmentClaim(admission.client, admission.capacityClaim); return { value: rec, result: rec }; });
+  else await put(kind, `${slug}/${rec.id}`, rec);
   return rec;
 }
-export async function createRecordOnce(kind, slug, data) {
+export async function createRecordOnce(kind, slug, data, admission = {}) {
   await indexWorkspaceRecord(kind, { slug, ...data });
-  return atomicUpdate(kind, `${slug}/${data.id}`, current => {
+  return atomicUpdate(kind, `${slug}/${data.id}`, async current => {
     if (current) return { result: current };
+    if (kind === 'bookings' && admission.capacityClaim) await assertAppointmentClaim(admission.client, admission.capacityClaim);
     const rec = { slug, createdAt: now(), ...data };
     return { value: rec, result: rec };
   });
@@ -382,6 +394,14 @@ export async function finishStableBookingWindow(target, bookingId, mutationId) {
   });
 }
 export const getRecord = (kind, slug, recId) => get(kind, `${slug}/${recId}`);
+// An already committed record or an exact owned same-slot claim is historical authority.
+// A new/moved record must still fit the latest schedule when its local write is admitted.
+async function assertAppointmentClaim(client, claim) {
+  const latest = await currentAppointmentWorkspace(client);
+  if ((claim.previous || []).includes(claim.slot)) return;
+  if (!listedWindow(latest, claim.window)) throw new AvailabilityInputError('invalid_window', 'Your saved arrival windows changed. Check availability again.');
+  assertAppointmentWindow(latest, claim.date, claim.window);
+}
 export async function saveRecord(kind, rec, { capacityClaim } = {}) {
   await indexWorkspaceRecord(kind, rec);
   if (kind !== 'bookings') return put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
@@ -401,6 +421,8 @@ export async function saveRecord(kind, rec, { capacityClaim } = {}) {
     if (state?.mutations?.[rec.id] !== claim.token) throw new Error('Booking mutation ownership lost');
     return {};
   });
+  try { if (owned && ACTIVE_BOOKINGS.has(rec.status)) await assertAppointmentClaim(target, claim); }
+  catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; await finishBookingWindow(target, rec.id, { ...claim, slot: claim.previous[0] || '', release: !claim.previous.length }); throw error; }
   await assertCurrentWorkspace(target);
   const saved = await put(kind, `${rec.slug}/${rec.id}`, { ...rec, updatedAt: now() });
   if (!owned) await finishBookingWindow(target, rec.id, claim);
@@ -462,11 +484,12 @@ function blockViews(state) {
 function openingsFromState(c, state, date, days, calendar = null, occupied = null, excludeBookingId = null) {
   const dates = Array.from({ length: days }, (_, n) => addDays(date, n)).filter(isoDateValid);
   return { timezone: "America/Chicago", from: date, days: dates.length, openings: dates.map((day) => {
-    return { date: day, windows: listedWindows(c).filter((window) => !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && (calendar?occupied(c,state,calendar,day,window,excludeBookingId):excludeBookingId?Object.entries(state.reservations).filter(([id,slots])=>id!==excludeBookingId&&slots.includes(bookingSlot(day,window))).length:reservedCount(state, bookingSlot(day, window))) < capacityLimit(c)) };
+    return { date: day, windows: listedWindows(c).filter((window) => appointmentWindowAllowed(c, day, window) && !isElapsedWindow(day, window) && !blockedWindow(state, day, window) && (calendar?occupied(c,state,calendar,day,window,excludeBookingId):excludeBookingId?Object.entries(state.reservations).filter(([id,slots])=>id!==excludeBookingId&&slots.includes(bookingSlot(day,window))).length:reservedCount(state, bookingSlot(day, window))) < capacityLimit(c)) };
   }),...(calendar?{calendar:{checkedAt:new Date(calendar.checkedAt).toISOString(),freshForSeconds:60,scope:'Connected owned Google calendar and saved workspace reservations'}}:{}) };
 }
 export async function getAvailability(c, date, days, { excludeBookingId = null } = {}) {
-  await assertCurrentWorkspace(c);
+  c = await currentAppointmentWorkspace(c);
+  appointmentSchedule(c);
   const from = requestedDate(date);
   if (!Number.isInteger(days) || days < 1 || days > 14) throw new AvailabilityInputError("invalid_days", "Check from 1 to 14 consecutive dates.");
   if (!isoDateValid(addDays(from, days - 1))) throw new AvailabilityInputError("invalid_days", "The entire checked range must use real YYYY-MM-DD dates.");
@@ -474,7 +497,9 @@ export async function getAvailability(c, date, days, { excludeBookingId = null }
   return atomicUpdate("index", capacityKey(c), async (current) => {
     const state = validateCapacity(c, current) || await initialCapacity(c);
     await assertCalendarBusyProjection(c,calendar);
-    return { ...(!current ? { value: state } : {}), result: openingsFromState(c, state, from, days,calendar,calendarOccupiedCount,excludeBookingId) };
+    const latest = await currentAppointmentWorkspace(c);
+    appointmentSchedule(latest);
+    return { ...(!current ? { value: state } : {}), result: openingsFromState(latest, state, from, days,calendar,calendarOccupiedCount,excludeBookingId) };
   });
 }
 // Used immediately before Calendar create/move, with the same local capacity
@@ -482,7 +507,7 @@ export async function getAvailability(c, date, days, { excludeBookingId = null }
 export async function checkCalendarBookingWindow(c,date,window,bookingId,{accessToken,deadline}={}) {
   await assertCurrentWorkspace(c);
   const {calendarBusyProjection,assertCalendarBusyProjection,calendarOccupiedCount}=await import('./calendar-busy.mjs'),calendar=await calendarBusyProjection(c,date,1,{fresh:true,accessToken,deadline});
-  return atomicUpdate('index',capacityKey(c),async current=>{const state=validateCapacity(c,current)||await initialCapacity(c);await assertCalendarBusyProjection(c,calendar,{fresh:true});return {...(!current?{value:state}:{}),result:!calendar||calendarOccupiedCount(c,state,calendar,date,window,bookingId)<capacityLimit(c)};});
+  return atomicUpdate('index',capacityKey(c),async current=>{const state=validateCapacity(c,current)||await initialCapacity(c);await assertCalendarBusyProjection(c,calendar,{fresh:true});const latest=await currentAppointmentWorkspace(c),owned=(state.reservations[bookingId]||[]).includes(bookingSlot(date,window));return {...(!current?{value:state}:{}),result:(owned||appointmentWindowAllowed(latest,date,window))&&(!calendar||calendarOccupiedCount(c,state,calendar,date,window,bookingId)<capacityLimit(c))};});
 }
 // Browsing a calendar does not initialize capacity or certify free windows.
 // Existing blocks live in this exact tenant state; absent state has no blocks.
@@ -532,16 +557,29 @@ export async function bookingWindowTaken(c, date, window) {
   });
 }
 export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false, mutationId = null } = {}) {
-  await assertCurrentWorkspace(c);
+  c = await currentAppointmentWorkspace(c);
   if (mutationId !== null && !/^[a-f0-9]{64}$/.test(mutationId)) throw new Error("Invalid booking mutation identity");
+  // Replay the exact already-admitted immutable claim before revalidating a new schedule.
+  // A changed label/list or midnight must not strand its committed-outcome recovery.
+  if (mutationId) {
+    const prior = await atomicUpdate('index', capacityKey(c), state => {
+      if (state) validateCapacity(c, state);
+      const claim = state?.stableClaims?.[bookingId];
+      if (state?.mutations?.[bookingId] === mutationId && claim?.token === mutationId && claim.date === normalizeDate(date) && canonicalWindow(claim.window) === canonicalWindow(window)) return { result: claim };
+      return { result: null };
+    });
+    if (prior) return prior;
+  }
   let targetDate = date, targetWindow = window;
   if (!requireExisting) {
     try { targetDate = requestedDate(date); }
     catch (err) { if (!(err instanceof AvailabilityInputError)) throw err; return { full: true, reason: err.code, message: `Nothing was booked. ${err.message}` }; }
+    if (Object.hasOwn(c.rules || {}, 'appointmentHours') && appointmentWindowRange(window)?.requiresPeriod) return { full: true, reason: 'invalid_appointment_window', message: 'Nothing was booked. Add am or pm to make each arrival time clear, such as 6 am to 8 am.' };
     targetWindow = listedWindow(c, window);
     if (!targetWindow) return { full: true, reason: "invalid_window", message: "Nothing was booked. That is not a listed arrival window. Check availability for a listed window." };
   }
-  const slot = bookingSlot(targetDate, targetWindow), capacity = capacityLimit(c), token = mutationId || id(12);
+  const slot = bookingSlot(targetDate, targetWindow), token = mutationId || id(12);
+  let capacity = capacityLimit(c);
   let calendar=null,calendarTools;
   if(!requireExisting) {
     calendarTools=await import('./calendar-busy.mjs');
@@ -562,6 +600,13 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
     if (requireExisting && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
     if (from && (previous.length !== 1 || previous[0] !== bookingSlot(from.date, from.window))) throw new Error("Booking changed during reschedule; reload it and retry");
     if (!from && previous.length && !previous.includes(slot)) throw new Error("Booking changed; reload it before saving");
+    if (!requireExisting && !previous.includes(slot)) {
+      const latest = await currentAppointmentWorkspace(c);
+      try { assertAppointmentWindow(latest, targetDate, targetWindow); }
+      catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; return { result: { full: true, reason: error.code, message: 'Nothing was booked. ' + error.message } }; }
+      if (!listedWindow(latest, targetWindow)) return { result: { full: true, reason: 'invalid_window', message: 'Nothing was booked. Your saved arrival windows changed. Check availability again.' } };
+      c = latest; capacity = capacityLimit(c);
+    }
     if(!requireExisting){
       try{await calendarTools.assertCalendarBusyProjection(c,calendar,{fresh:true});}
       catch(error){if(!String(error.code||'').startsWith('calendar_'))throw error;return {result:{full:true,reason:'calendar_unavailable',message:'Nothing was booked. Calendar availability changed. Offer an owner callback or check again.'}};}

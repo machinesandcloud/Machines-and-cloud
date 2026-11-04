@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { getAccessSession, accessOriginAllowed, accessSite } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail, findVerifiedAccount, ensureVerifiedAccount, AccountError } from "./lib/accounts.mjs";
 import { setupReadiness, isSelfServiceClient, isSupportedSelfServiceClient } from "./lib/setup.mjs";
+import { normalizeAppointmentHours, validateAppointmentConfiguration, appointmentHoursTable } from './lib/availability.mjs';
 import { INTAKE_GOALS, INTAKE_CHANNELS } from "./lib/intake.mjs";
 
 export const config = { path: "/api/onboard" };
@@ -94,6 +95,19 @@ async function handle(req) {
     emergencies: normalizeEmergencies({ ...(b.tier0 !== undefined ? { tier0: b.tier0 } : {}), ...(b.tier1 !== undefined ? { tier1: b.tier1 } : {}), script: s(b.emergencies, 500) }, bz.trade),
     emergency247: emergency247(bz.hours),
     hours: normalizeHours(typeof b.hoursTable === "string" ? (() => { try { return JSON.parse(b.hoursTable); } catch { return null; } })() : b.hoursTable) || parseHours(bz.hours) || null };
+  try {
+    let custom = b.appointmentHoursTable;
+    if (b.appointmentHoursMode === 'custom' && typeof custom === 'string') custom = JSON.parse(custom);
+    const mode = b.appointmentHoursMode === undefined ? 'business' : b.appointmentHoursMode;
+    c.rules.appointmentHours = normalizeAppointmentHours({ version: 1, mode, ...(mode === 'custom' ? { hours: custom } : {}) });
+    // Validate supplied structured office hours rather than normalizing malformed rows away.
+    if (b.hoursTable !== undefined) {
+      const supplied = typeof b.hoursTable === 'string' ? JSON.parse(b.hoursTable) : b.hoursTable;
+      const exact = appointmentHoursTable(supplied);
+      c.rules.hours = exact;
+    }
+    validateAppointmentConfiguration(c);
+  } catch (error) { return json({ error: 'invalid_appointment_hours', field: error.code === 'invalid_appointment_window' || error.code === 'appointment_windows_outside_hours' ? 'windows' : 'appointmentHoursMode', message: error.message || 'Review your appointment hours and arrival windows.' }, 400); }
   c.faq = lines(b.faq, 40).map((line) => { const i = line.indexOf("?"); return i > 0 ? { q: line.slice(0, i + 1).trim(), a: line.slice(i + 1).trim() } : { q: line, a: "" }; }).filter((x) => x.a);
   c.leadSources = arr(b.leadSources, 10);
   c.software = s(b.software, 30) || "google";

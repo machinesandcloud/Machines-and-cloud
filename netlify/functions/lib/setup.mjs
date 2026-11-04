@@ -1,4 +1,5 @@
 // Derived owner readiness. Tutorial clicks and provider keys cannot certify a channel.
+import { validateAppointmentConfiguration } from './availability.mjs';
 import { createHash } from "node:crypto";
 import { loopCheck } from "./config.mjs";
 import { workspaceTenant } from './workspace-identity.mjs';
@@ -42,6 +43,7 @@ export function businessReviewRequirements(c) {
   if (!c.business?.serviceArea?.length) fieldErrors["business.serviceArea"] = "Add the places your business serves.";
   if (!c.rules?.hours) fieldErrors["rules.hours"] = "Add your business hours.";
   if (!c.windows?.length) fieldErrors.windows = "Add an arrival window customers can request.";
+  if (Object.hasOwn(c.rules || {}, 'appointmentHours')) { try { validateAppointmentConfiguration(c); } catch (error) { fieldErrors[error.code === 'invalid_appointment_hours' ? 'rules.appointmentHours' : 'windows'] = error.message; } }
   const missingRules = Object.keys(fieldErrors).length > 0;
   if (!/^\+1\d{10}$/.test(c.owner?.phone || "")) fieldErrors["owner.phone"] = "Add a valid US callback cell number.";
   const unsafeRoute = loopCheck(c);

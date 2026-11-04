@@ -7,7 +7,7 @@ import { configurationRevision, isSupportedSelfServiceClient } from './setup.mjs
 import { e164 } from './send.mjs';
 import { belongsToWorkspace } from './workspace-identity.mjs';
 import { deliveryTenant } from './managed-consent.mjs';
-import { requestedDate, listedWindow, isElapsedWindow, canonicalWindow, AvailabilityInputError } from './availability.mjs';
+import { requestedDate, listedWindow, isElapsedWindow, canonicalWindow, assertAppointmentWindow, AvailabilityInputError } from './availability.mjs';
 import { queueCalendarBooking } from './calendar-delivery.mjs';
 import { queueManagedRecord } from './managed-delivery.mjs';
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -118,6 +118,10 @@ export async function changeOwnerVisit(client, session, originalBody) {
       try { requestedDate(body.date, { isoOnly: true }); } catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; throw new OwnerVisitError(error.code, error.message, 400, 'date'); }
       if (!listedWindow(current, body.window)) throw new OwnerVisitError('invalid_window', 'Choose one of your saved arrival windows.', 400, 'window');
       if (isElapsedWindow(body.date, body.window)) throw new OwnerVisitError('elapsed', 'Choose a future arrival window.', 400, 'window');
+      const existing = creating ? null : await strictRead('bookings', `${client.slug}/${body.visitId}`);
+      if (!existing || existing.date !== body.date || canonicalWindow(existing.window) !== canonicalWindow(body.window)) {
+        try { assertAppointmentWindow(current, body.date, body.window); } catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; throw new OwnerVisitError(error.code, error.message, 409, 'window'); }
+      }
     }
     operation = await atomicUpdate(OPERATIONS, key, row => {
       if (row && row.digest !== digest) throw new OwnerVisitError('submission_conflict', 'This submission was already used for a different change.');

@@ -43,13 +43,53 @@
   // Structured hours: seven rows, prefilled from the hours sentence (same parser as the server, simplified).
   var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], DI = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   function clock(str, isClose) { var m = String(str).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/i); if (!m) return null; var h = +m[1], mi = +(m[2] || 0), ap = (m[3] || '').toLowerCase(); if (ap.charAt(0) === 'p' && h < 12) h += 12; else if (ap.charAt(0) === 'a' && h === 12) h = 0; else if (!ap) { if (isClose && h <= 9) h += 12; else if (!isClose && h < 5) h += 12; } return (h < 10 ? '0' : '') + h + ':' + (mi < 10 ? '0' : '') + mi; }
-  function parseHours(str) { var out = {}, any = false; String(str || '').split(/[,;\n]+/).forEach(function (part) { var t = part.trim().toLowerCase().replace(/\./g, ''); var dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun)[a-z]*)?\s*:?\s*(.*)$/); if (!dm) return; var a = DI[dm[1]], b = dm[2] ? DI[dm[2]] : a, days = [], i = a; for (var k = 0; k < 7; k++) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; i = (i + 1) % 7; } if (/closed/.test(dm[3])) { days.forEach(function (d) { out[d] = null; }); any = true; return; } var tm = dm[3].match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/); if (!tm) return; var o = clock(tm[1], false), c = clock(tm[2], true); if (!o || !c) return; days.forEach(function (d) { out[d] = { open: o, close: c }; }); any = true; }); if (!any) return null; DAYS.forEach(function (d) { if (out[d] === undefined) out[d] = null; }); return out; }
+  function parseHours(str) { var out = {}, any = false; if (/^\s*(?:24\s*[/x]\s*7|24\s*hours)(?:\s*(?:a day|daily|every day))?\s*$/i.test(String(str || ''))) { DAYS.forEach(function (day) { out[day] = { open: '00:00', close: '24:00' }; }); return out; } String(str || '').split(/[,;\n]+/).forEach(function (part) { var t = part.trim().toLowerCase().replace(/\./g, ''); var dm = t.match(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*(?:\s*(?:to|-|–|through|thru)\s*(mon|tue|wed|thu|fri|sat|sun)[a-z]*)?\s*:?\s*(.*)$/); if (!dm) return; var a = DI[dm[1]], b = dm[2] ? DI[dm[2]] : a, days = [], i = a; for (var k = 0; k < 7; k++) { days.push(DAYS[(i + 6) % 7]); if (i === b) break; i = (i + 1) % 7; } if (/closed/.test(dm[3])) { days.forEach(function (d) { out[d] = null; }); any = true; return; } var tm = dm[3].match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)\s*(?:to|-|–|until)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p)?)/); if (!tm) return; var o = clock(tm[1], false), c = clock(tm[2], true); if (!o || !c) return; days.forEach(function (d) { out[d] = { open: o, close: c }; }); any = true; }); if (!any) return null; DAYS.forEach(function (d) { if (out[d] === undefined) out[d] = null; }); return out; }
   var hoursRows = document.getElementById('hoursRows'), hoursTouched = false;
   hoursRows.innerHTML = DAYS.map(function (d) { var day = d.charAt(0).toUpperCase() + d.slice(1); return '<div class="hours-row"><span>' + day + '</span><input type="time" aria-label="' + day + ' opening time" data-d="' + d + '" data-k="open"><span>to</span><input type="time" aria-label="' + day + ' closing time" data-d="' + d + '" data-k="close"></div>'; }).join('');
   hoursRows.addEventListener('input', function () { hoursTouched = true; if (!form.elements.hours.value.trim()) form.elements.hours.value = 'Custom weekly hours'; });
-  function fillHours() { if (hoursTouched) return; var h = parseHours(form.elements['hours'].value); hoursRows.querySelectorAll('input').forEach(function (inp) { var v = h && h[inp.dataset.d]; inp.value = v ? v[inp.dataset.k] : ''; }); }
+  function fillBusinessTable(table) { hoursRows.querySelectorAll('input').forEach(function (field) { var value = table && table[field.dataset.d]?.[field.dataset.k] || ''; field.value = value === '24:00' && field.dataset.k === 'close' ? '00:00' : value; }); }
+  function fillHours() { if (!hoursTouched) fillBusinessTable(parseHours(form.elements.hours.value)); }
   form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
-  function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c } : null; }); return t; }
+  function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c === '00:00' ? '24:00' : c } : null; }); return t; }
+  var appointmentMode = document.getElementById('appointmentHoursMode'), appointmentRows = document.getElementById('appointmentHoursRows'), appointmentSeeded = false;
+  appointmentRows.innerHTML = DAYS.map(function (day) { var label = day.charAt(0).toUpperCase() + day.slice(1); return '<div class="hours-row"><span>' + label + '</span><input class="form-input" type="time" id="appointment-' + day + '-open" aria-label="' + label + ' appointment start time" data-d="' + day + '" data-k="open" disabled><span>to</span><input class="form-input" type="time" id="appointment-' + day + '-close" aria-label="' + label + ' appointment end time" data-d="' + day + '" data-k="close" disabled></div>'; }).join('');
+  function readAppointmentTable() { var table = {}; DAYS.forEach(function (day) { var open = appointmentRows.querySelector('[data-d="' + day + '"][data-k="open"]').value, close = appointmentRows.querySelector('[data-d="' + day + '"][data-k="close"]').value.trim(); table[day] = open || close ? { open: open, close: open && close === '00:00' ? '24:00' : close } : null; }); return table; }
+  function fillAppointmentTable(table) { appointmentRows.querySelectorAll('input').forEach(function (field) { var value = table && table[field.dataset.d]?.[field.dataset.k] || ''; field.value = value === '24:00' && field.dataset.k === 'close' ? '00:00' : value; }); }
+  function appointmentTable() { return appointmentMode.value === 'custom' ? readAppointmentTable() : hoursTable(); }
+  function appointmentClock(value) { if (value === '24:00' || value === '00:00') return 'midnight'; var parts = value.split(':'), hour = Number(parts[0]); return (hour % 12 || 12) + (parts[1] === '00' ? '' : ':' + parts[1]) + (hour < 12 ? 'am' : 'pm'); }
+  function appointmentSummary() {
+    var table = appointmentTable(), open = DAYS.filter(function (day) { return !!table[day]; }), groups = [];
+    if (open.some(function (day) { var row = table[day]; return !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(row.open) || !/^(?:(?:[01]\d|2[0-3]):[0-5]\d|24:00)$/.test(row.close) || row.close <= row.open; })) { document.getElementById('appointmentHoursSummary').textContent = 'Finish both times for each appointment day, or leave both blank for no appointments.'; return; }
+    DAYS.forEach(function (day, index) { var row = table[day], previous = groups[groups.length - 1]; if (!row) return; if (previous && previous.end === index - 1 && previous.open === row.open && previous.close === row.close) previous.end = index; else groups.push({ start: index, end: index, open: row.open, close: row.close }); });
+    function label(index) { return DAYS[index].charAt(0).toUpperCase() + DAYS[index].slice(1); }
+    var summary = groups.map(function (group) { return label(group.start) + (group.start === group.end ? '' : '–' + label(group.end)) + ', ' + (group.open === '00:00' && group.close === '24:00' ? '24 hours' : appointmentClock(group.open) + '–' + appointmentClock(group.close)); }).join('; ');
+    document.getElementById('appointmentHoursSummary').textContent = !open.length ? (appointmentMode.value === 'custom' ? 'All days are closed for appointments. No visit windows will be offered.' : 'Add your business hours in the previous step. Visits will use those days and times.') : (appointmentMode.value === 'business' ? 'Using your business hours: ' : 'Appointments: ') + summary + '.' + (open.length < 7 ? ' Other days are unavailable.' : '');
+  }
+  function updateAppointmentHours(seed) {
+    var custom = appointmentMode.value === 'custom';
+    if (custom && seed && !appointmentSeeded) { fillAppointmentTable(hoursTable()); appointmentSeeded = true; }
+    document.getElementById('appointmentHoursCustom').hidden = !custom;
+    appointmentRows.querySelectorAll('input').forEach(function (field) { field.disabled = !custom; if (!custom) setFieldError(field, ''); });
+    appointmentSummary();
+  }
+  appointmentMode.addEventListener('change', function () { updateAppointmentHours(true); });
+  appointmentRows.addEventListener('input', function () { appointmentSeeded = true; appointmentSummary(); });
+  hoursRows.addEventListener('input', appointmentSummary); form.elements.hours.addEventListener('input', appointmentSummary);
+  function appointmentWindow(value) {
+    var match = value.trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?\s*(?:to|[-–—])\s*(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?$/);
+    if (!match) return null;
+    var parts = [[match[1], match[2], match[3]], [match[4], match[5], match[6]]];
+    if (parts.some(function (part) { return Number(part[1] || 0) > 59 || (part[2] ? Number(part[0]) < 1 || Number(part[0]) > 12 : Number(part[0]) > 24 || Number(part[0]) === 24 && Number(part[1] || 0) !== 0); })) return null;
+    function minutes(part) { return (part[2] ? Number(part[0]) % 12 + (/^p/.test(part[2]) ? 12 : 0) : Number(part[0])) * 60 + Number(part[1] || 0); }
+    var start = minutes(parts[0]), end = minutes(parts[1]); if (!match[3] && start < 420) start += 720; if (!match[6] && end <= start) end += 720;
+    var literalStart = !parts[0][2] && (parts[0][1] !== undefined || /^0\d$/.test(parts[0][0]) || Number(parts[0][0]) === 0) ? minutes(parts[0]) : start;
+    var literalEnd = !parts[1][2] && (parts[1][1] !== undefined || /^0\d$/.test(parts[1][0]) || Number(parts[1][0]) === 0) ? minutes(parts[1]) : end;
+    if (literalEnd === 0 && literalStart > 0) literalEnd = 1440;
+    if (literalStart !== start || literalEnd !== end) return null;
+    return start >= 0 && end > start && end <= 1440 ? [start, end] : null;
+  }
+  function clockMinutes(value) { var parts = value.split(':').map(Number); return parts[0] * 60 + parts[1]; }
+  updateAppointmentHours(false);
   var fwdSel = form.elements['forwarding']; function fwdUI() { if (fwdSel && document.getElementById('transferRow')) document.getElementById('transferRow').style.display = fwdSel.value === 'all' ? 'grid' : 'none'; } if (fwdSel) fwdSel.addEventListener('change', fwdUI); fwdUI();
   form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { selectPlan(r.value); }); });
   var accessGeneration = 0, session = null, revision = 0, saving = null, saveAgain = false, dirty = false, restoring = false, saveTimer = null;
@@ -125,6 +165,7 @@
     var progress=document.getElementById('onboardProgress');if(progress){progress.max=steps.length;progress.value=i+1;progress.textContent=(i+1)+' of '+steps.length;}
     back.style.visibility = i ? 'visible' : 'hidden'; next.textContent = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue'; setErrorSummary('');
     if (frame) { window.scrollTo({ top: 0, behavior: 'instant' }); steps[i].querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
+    appointmentSummary();
   }
   var connectionDescriptions = {
     web: {label:'Website chat',summary:'First answers and clear customer requests',automation:'Use your services, fees and business details to answer website questions and gather customer requests.',owner:'Review the answers, try a customer question and add the chat to your website.',ready:'Complete the review, practice conversation and website check, then activate chat in your workspace.'},
@@ -156,6 +197,7 @@
   updatePhoneSetup(); updateConnectionPreview();
   function collect() {
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
+    document.getElementById('appointmentHoursTable').value = appointmentSeeded ? JSON.stringify(readAppointmentTable()) : '';
     var fields = {}; new FormData(form).forEach(function (value, key) {
       if (key === 'botfield' || key === 'email') return;
       if (key === 'leadSources' || key === 'desiredChannels') (fields[key] = fields[key] || []).push(value); else fields[key] = value;
@@ -205,7 +247,10 @@
     });
     var savedPlan = fields.plan;
     selectPlan(PLAN_IDS.indexOf(savedPlan) >= 0 || savedPlan === 'pro' ? savedPlan : retiredPlanHint ? 'pro' : form.elements.plan.value);
-    if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = true; hoursRows.querySelectorAll('input').forEach(function (field) { field.value = hours[field.dataset.d]?.[field.dataset.k] || ''; }); } catch (error) { fillHours(); } } else fillHours();
+    if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = true; fillBusinessTable(hours); } catch (error) { fillHours(); } } else fillHours();
+    appointmentMode.value = fields.appointmentHoursMode === 'custom' ? 'custom' : 'business'; appointmentSeeded = false;
+    if (fields.appointmentHoursTable) { try { fillAppointmentTable(JSON.parse(fields.appointmentHoursTable)); appointmentSeeded = true; } catch (error) { fillAppointmentTable(null); } } else fillAppointmentTable(null);
+    updateAppointmentHours(appointmentMode.value === 'custom');
     touched.t0 = !!fields.tier0; touched.t1 = !!fields.tier1; restoreTrade(fields.trade); fillTiers(); fwdUI();
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
     restoring = false; dirty = false;
@@ -364,7 +409,7 @@
     try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
     if (generation !== accessGeneration) return;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
   function setErrorSummary(message) {
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
@@ -372,6 +417,11 @@
   function fieldMessage(field) {
     if (field.disabled) return '';
     var value = field.value.trim();
+    if (field.closest('#appointmentHoursRows')) {
+      var day = field.dataset.d, row = readAppointmentTable()[day];
+      if (row && (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(row.open) || !/^(?:(?:[01]\d|2[0-3]):[0-5]\d|24:00)$/.test(row.close) || row.close <= row.open)) return 'Add both appointment times. Use a later closing time, or leave both blank for no appointments.';
+      return '';
+    }
     if (field.required && !value) {
       return { name: 'Enter your name.', email: 'Confirm your email to continue.', phone: 'Enter your contact cell, including the area code.', business: 'Enter your business name.', businessNumber: 'Enter the business number your customers call.', trade: 'Choose your trade.', customTrade: 'Enter your trade.', services: 'Add at least one service your business offers.', serviceArea: 'Add a town, neighborhood or ZIP code you serve.', hours: 'Add your business hours, or enter them under Review each day.', windows: 'Add at least one arrival window you offer.' }[field.name] || 'Fill in this field.';
     }
@@ -384,6 +434,14 @@
       var table = hoursTable(), any = DAYS.some(function (day) { return !!table[day]; });
       var partial = DAYS.some(function (day) { var row = hoursRows.querySelectorAll('[data-d="' + day + '"]'); return !!row[0].value !== !!row[1].value; });
       if (partial || !any && !/(?:24\s*[/x]\s*7|24\s*hours)/i.test(value)) return 'Use hours such as Mon–Fri 8am–5pm, or finish the opening and closing times under Review each day.';
+    }
+    if (field.name === 'windows' && value) {
+      var offered = value.split(/[\n,;]+/).map(function (item) { return item.trim(); }).filter(Boolean), table = appointmentTable(), openDays = DAYS.filter(function (day) { return !!table[day]; });
+      for (var w = 0; w < offered.length; w++) {
+        var range = appointmentWindow(offered[w]);
+        if (!range) return 'Use a time range with am or pm, such as 8 am to 12 pm.';
+        if (openDays.length && !openDays.some(function (day) { return range[0] >= clockMinutes(table[day].open) && range[1] <= clockMinutes(table[day].close); })) return 'The window “' + offered[w] + '” falls outside your appointment hours. Adjust the window or choose different appointment hours above.';
+      }
     }
     if (value && !field.checkValidity()) return field.type === 'url' ? 'Enter a full website address, such as https://yourbusiness.com, or leave this blank.' : 'Check this field and try again.';
     return '';
@@ -436,7 +494,8 @@
   }
   function revealFieldError(path, message) {
     var names = { 'owner.name': 'name', 'owner.email': 'email', 'owner.phone': 'phone', 'business.name': 'business', 'business.website': 'website', 'phone.businessNumber': 'businessNumber' };
-    var name = names[path] || String(path).split('.').pop(), field = form.elements[name];
+    var appointmentPath = /^(?:rules\.)?appointmentHours/.test(path), name = appointmentPath ? 'appointmentHoursMode' : names[path] || String(path).split('.').pop(), field = form.elements[name];
+    if (appointmentPath && appointmentMode.value === 'custom') { var parts = String(path).split('.'), day = parts.find(function (part) { return DAYS.indexOf(part) >= 0; }); field = day ? appointmentRows.querySelector('[data-d="' + day + '"][data-k="' + (parts[parts.length - 1] === 'close' ? 'close' : 'open') + '"]') : appointmentMode; }
     if (name === 'trade' && tradeSelect.value === 'other') field = customTrade;
     if (!field || field.nodeType !== 1) return false;
     var step = steps.indexOf(field.closest('fieldset'));

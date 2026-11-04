@@ -7,7 +7,7 @@ import { getAIAllowance } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { setupReadiness, configurationRevision, isSelfServiceClient, isSupportedSelfServiceClient } from "./lib/setup.mjs";
-import { AvailabilityInputError } from "./lib/availability.mjs";
+import { AvailabilityInputError, normalizeAppointmentHours, validateAppointmentConfiguration } from "./lib/availability.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
@@ -73,7 +73,9 @@ async function updateWorkspace(c, body, ownsCurrent) {
     if (!ownsCurrent(current) || !isSupportedSelfServiceClient(current)) return { result: null };
     if (["cancelled", "archived"].includes(current.status)) return { result: { closed: true } };
     if (configurationRevision(current) !== expectedRevision || workspaceEditRevision(current) !== expectedEditRevision || workspacePatchConflicts(c, current, patch)) return { result: { conflict: true } };
-    const value = applyWorkspacePatch(current, patch), loop = loopCheck(value);
+    let value;
+    try { value = applyWorkspacePatch(current, patch); } catch (error) { if (!(error instanceof WorkspaceEditError)) throw error; return { result: { invalid: { error: error.code, message: error.message, fieldErrors: error.fieldErrors, status: error.status } } }; }
+    const loop = loopCheck(value);
     if (loop) return { result: { loop } };
     if (JSON.stringify(value) === JSON.stringify(current)) return { result: { client: current } };
     value.updatedAt = at;
@@ -82,6 +84,7 @@ async function updateWorkspace(c, body, ownsCurrent) {
   if (!result) return json({ error: "forbidden" }, 403);
   if (result.closed) return json({ error: "workspace_closed", message: "This workspace is closed. Its saved records remain available to export." }, 409);
   if (result.conflict) return json({ error: "configuration_changed", message: "Saved details changed. Check the latest version before saving your edits." }, 409);
+  if (result.invalid) { const { status, ...problem } = result.invalid; return json(problem, status); }
   if (result.loop) return json({ error: "loop", ...result.loop, fieldErrors: { [result.loop.field]: result.loop.message } }, 400);
   return json({ ok: true, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), editRevision: workspaceEditRevision(result.client) }, 200, { "Cache-Control": "no-store" });
 }
@@ -266,6 +269,17 @@ async function handle(req) {
       hours: b.rules.hours !== undefined ? (normalizeHours(b.rules.hours) || (typeof b.rules.hours === "string" ? parseHours(b.rules.hours) : null)) : (c.rules.hours || null),
       bypass: b.rules.bypass !== undefined ? [...new Set(arr(b.rules.bypass, 20).map((n) => e164(n)).filter(Boolean))].slice(0, 20) : (c.rules.bypass || []),
     };
+    try {
+      if (Object.hasOwn(b.rules || {}, 'appointmentHours')) c.rules.appointmentHours = normalizeAppointmentHours(b.rules.appointmentHours);
+      if (Object.hasOwn(c.rules || {}, 'appointmentHours') && (Object.hasOwn(b.rules || {}, 'appointmentHours') || Object.hasOwn(b.rules || {}, 'hours') || Object.hasOwn(b.business || {}, 'hours') || Object.hasOwn(b, 'windows'))) {
+        if (Object.hasOwn(b.business || {}, 'hours') && !Object.hasOwn(b.rules || {}, 'hours')) c.rules.hours = parseHours(c.business.hours);
+        validateAppointmentConfiguration(c);
+      }
+    } catch (error) {
+      if (!(error instanceof AvailabilityInputError)) throw error;
+      const field = error.code === 'invalid_appointment_hours' ? 'rules.appointmentHours' : 'windows';
+      return json({ error: 'invalid_fields', message: error.message, fieldErrors: { [field]: error.message } }, 422);
+    }
     if (b.digest) c.digest = { ...(c.digest || {}), ...(b.digest.text !== undefined ? { text: !!b.digest.text } : {}) };
     if (b.faq) c.faq = (Array.isArray(b.faq) ? b.faq : []).map((x) => ({ q: s(x.q, 200), a: s(x.a, 600) })).filter((x) => x.q && x.a).slice(0, 40);
     if (b.summary !== undefined) c.summary = s(b.summary, 2000);
