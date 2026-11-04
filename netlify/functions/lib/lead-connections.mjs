@@ -216,16 +216,67 @@ export async function receiveThumbtackNotification(req,client){
 }
 // Local projections only: no model, email, SMS or vendor request. Pending acceptance precedes
 // the record write, so ordinary scheduled retries finish the same deterministic record.
+const RECOVERY_CURSOR = 'leadIntake:recoveryCursor', RECOVERY_CLIENTS = 50, RECOVERY_PER_TENANT = 20, RECOVERY_PER_SOURCE = 10;
+function recoveryCursor(row) {
+  if (row === null) return {version:1,slug:'',wave:0};
+  if (!plain(row) || Object.keys(row).sort().join(',') !== 'slug,version,wave' || row.version !== 1 || typeof row.slug !== 'string' || row.slug.length > 200 || /[\x00-\x1f\x7f/\\]/.test(row.slug) || !Number.isSafeInteger(row.wave) || row.wave < 1) throw new Error('Lead intake recovery cursor is unavailable.');
+  return row;
+}
+async function rotateFailedPending(client,source,pending) {
+  await atomicUpdate(KIND,keyFor(client,source),async raw=>{
+    await current(client);const row=rowFor(client,source,raw),index=row?.pending.findIndex(item=>item.id===pending.id);
+    if(index===undefined||index<0)return {};
+    const retained=row.pending[index];
+    if(digest(retained)!==digest(pending))fail('lead_receipt_uncertain','The accepted request needs its original saved content checked.',503);
+    if(index===row.pending.length-1)return {};
+    // Scheduling order changes only. Keep the original accepted record, receipt,
+    // generation and timestamps; a failed save never becomes delivery evidence.
+    return {value:{...row,pending:[...row.pending.slice(0,index),...row.pending.slice(index+1),retained]}};
+  });
+}
+async function recoverySources(client,rows) {
+  const sources=['angi','thumbtack'];
+  if(!rows.angi?.pending.length||rows.thumbtack?.deliveryMode!=='self_serve'||!rows.thumbtack.pending.length)return sources;
+  const first=await atomicUpdate('health','leadIntake:sourceCursor:'+workspaceTenant(client),async raw=>{
+    await current(client);
+    if(raw!==null&&(!plain(raw)||Object.keys(raw).sort().join(',')!=='nextSource,version'||raw.version!==1||!sources.includes(raw.nextSource)))throw new Error('Lead intake source cursor is unavailable.');
+    const next=raw?.nextSource||'angi';return {value:{version:1,nextSource:next==='angi'?'thumbtack':'angi'},result:next};
+  });
+  return first==='angi'?sources:[...sources].reverse();
+}
 export async function recoverLeadConnections({limit = 40} = {}) {
   if(!Number.isInteger(limit)||limit<1||limit>100)throw new Error('Invalid lead recovery limit');
-  let examined=0,recovered=0,failed=0;
-  for(const slug of await list('clients','')){
-    const client=await strictRead('clients',slug);if(!supportedWorkspace(client))continue;
-    for(const source of ['angi','thumbtack']){
-      const row=rowFor(client,source,await strictRead(KIND,keyFor(client,source)));
+  let examined=0,recovered=0,failed=0,unavailable=0,visited=0,limited=false,cursorUnavailable=false;
+  const result=()=>({ok:failed===0&&unavailable===0,examined,recovered,failed,unavailable,visited,limited,reasonCode:cursorUnavailable?'lead_intake_cursor_unavailable':unavailable?'lead_intake_history_unavailable':failed?'lead_intake_recovery_unconfirmed':null});
+  let slugs;
+  try{slugs=(await list('clients','')).sort();}catch{unavailable++;return result();}
+  try{await atomicUpdate('health',RECOVERY_CURSOR,raw=>{const cursor=recoveryCursor(raw);if(cursor.wave===Number.MAX_SAFE_INTEGER)throw new Error('Lead intake recovery cursor is unavailable.');const value={...cursor,wave:cursor.wave+1};return {value,result:value.wave};});}
+  catch{unavailable++;cursorUnavailable=true;return result();}
+  const seen=new Set(),perTenant=Math.min(limit,RECOVERY_PER_TENANT),perSource=Math.min(RECOVERY_PER_SOURCE,Math.max(1,Math.ceil(perTenant/2)));
+  while(visited<Math.min(RECOVERY_CLIENTS,slugs.length)&&examined<limit){
+    let slug;
+    try{slug=await atomicUpdate('health',RECOVERY_CURSOR,raw=>{const cursor=recoveryCursor(raw),next=slugs.find(item=>item>cursor.slug)||slugs[0];return {value:{...cursor,slug:next},result:next};});}
+    catch{unavailable++;cursorUnavailable=true;break;}
+    visited++;if(seen.has(slug))continue;seen.add(slug);
+    let client;try{client=await strictRead('clients',slug);}catch{unavailable++;continue;}
+    if(!supportedWorkspace(client))continue;
+    if(client.slug!==slug){unavailable++;continue;}
+    const rows={};
+    for(const source of ['angi','thumbtack'])try{rows[source]=rowFor(client,source,await strictRead(KIND,keyFor(client,source)));}catch{unavailable++;}
+    let sources;try{sources=await recoverySources(client,rows);}catch{unavailable++;cursorUnavailable=true;continue;}
+    let tenantAttempts=0;
+    for(const source of sources){
+      const row=rows[source];
       if(source==='thumbtack'&&row?.deliveryMode!=='self_serve')continue;
-      for(const pending of row?.pending||[]){if(examined>=limit)return {examined,recovered,failed,limited:true};examined++;try{await finishAccepted(client,source,pending);recovered++;}catch{failed++;}}
+      let sourceAttempts=0;
+      for(const pending of row?.pending||[]){
+        if(examined>=limit||tenantAttempts>=perTenant||sourceAttempts>=perSource){limited=true;break;}
+        examined++;tenantAttempts++;sourceAttempts++;
+        try{await finishAccepted(client,source,pending);recovered++;}
+        catch{failed++;try{await rotateFailedPending(client,source,pending);}catch{unavailable++;}}
+      }
     }
   }
-  return {examined,recovered,failed,limited:false};
+  if(visited<slugs.length||examined>=limit)limited=true;
+  return result();
 }
