@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Delivery board · Machines & Cloud</title><link rel="stylesheet" href="/board.css"><script type="module" src="/board.js"></script></head>
+<body>
+<a class="skip" href="#main">Skip to tasks</a>
+<div class="shell">
+  <aside class="sidebar"><a class="brand" href="/" aria-label="Machines and Cloud delivery board"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 25 11 7h6l-7 18Zm10 0 7-18h3l6 18h-7l-3-9-3 9Z"/></svg><span>Machines & Cloud</span></a>
+    <nav aria-label="Teams"><h2>Teams</h2><div id="team-nav"></div></nav>
+    <div class="sidebar-foot"><strong>CTO + specialist teams</strong><p id="capacity">Four active agents maximum.</p><p>Work runs in the Codex session. This board shows recorded task progress.</p></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span>Engineering delivery</span><div class="sync"><span id="connection" role="status">Connecting…</span><button id="refresh" class="icon-button" aria-label="Refresh task records"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-2l2 2M4 17l2 2a7 7 0 0 0 12-2"/></svg></button></div></header>
+    <main id="main" tabindex="-1">
+      <div class="page-heading"><div><h1>Delivery board</h1><p>One view of the work, the blockers and the evidence.</p></div><span id="production" class="production"></span></div>
+      <div id="error" class="error" role="alert" hidden></div>
+      <div class="toolbar"><div class="tabs" role="group" aria-label="View"><button data-view="board" aria-pressed="true">Board</button><button data-view="teams" aria-pressed="false">Teams</button><button data-view="activity" aria-pressed="false">Activity</button></div><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only">Search tasks</span><input id="search" type="search" placeholder="Search tasks, owners…"></label><label class="mobile-team"><span class="sr-only">Team</span><select id="team-select"></select></label></div>
+      <div class="board-note" id="board-note"><span id="scope-label">All teams</span><span>Complete = verified at the card’s stated scope. Release status is separate.</span></div>
+      <div id="content" aria-busy="true"><div class="loading">Loading the team’s task records…</div></div>
+      <p id="update-announcement" class="sr-only" aria-live="polite"></p>
+      <footer><span id="source-time">Waiting for task records</span><span>Cards move when the recorded status changes.</span></footer>
+    </main>
+  </div>
+</div>
+</body></html>
