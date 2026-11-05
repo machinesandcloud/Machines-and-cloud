@@ -142,9 +142,16 @@
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
       var response = await fetch(API_BASE + path, { method: method || 'GET', headers: headers, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal });
+      if (response.status === 401) {
+        var expired = new Error('Your sign-in expired. Request a new link; your saved answers are kept.'); expired.code = 'sign_in_required'; expired.status = 401;
+        if (generation === accessGeneration) {
+          accessGeneration++; clearTimeout(saveTimer); saveAgain = false;
+          setSession(null); signInFailure(expired);
+        }
+        throw expired;
+      }
       var data = await response.json();
       if (!response.ok) {
-        if (response.status === 401 && generation === accessGeneration) { setSession(null); gateOnly('Your sign-in expired. Request a new link; your saved answers are kept.'); }
         var failure = new Error(data.message || 'We could not confirm that request. Please try again.'); failure.code = data.error; failure.status = response.status; failure.field = data.field; throw failure;
       }
       return data;

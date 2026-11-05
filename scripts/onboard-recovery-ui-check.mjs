@@ -64,9 +64,74 @@ try {
   check('Unknown server field keeps the current step with a readable error', await step(4).isVisible() && /correct the saved callback/.test(await page.locator('#err').innerText()));
   await page.screenshot({ path: output.slice(0, -5) + '.png', fullPage: true });
 } finally {
+  await checkAuthRecovery();
   report.sourceAfter = hashes(); check('Recovery source remained stable during verification', JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter));
   check('No browser page errors', report.pageErrors.length === 0, report.pageErrors);
   report.summary = { passed: report.checks.filter(c => c.pass).length, failed: report.checks.filter(c => !c.pass).length, total: report.checks.length };
   writeFileSync(output, JSON.stringify(report, null, 2) + '\n'); await browser.close();
 }
 console.log(JSON.stringify(report.summary)); if (report.summary.failed) process.exitCode = 1;
+
+async function checkAuthRecovery() {
+  for (const width of [390, 1440]) for (const mode of ['html401', 'empty401', 'json401', 'bootstrap401', 'submit401', 'validation422', 'network', 'stale401']) {
+    const auth = await browser.newContext({ viewport: { width, height: 900 } });
+    const saved = { name: 'Recovery Owner', business: 'Saved Recovery Service', phone: '7135550100', trade: 'HVAC', services: 'AC repair', serviceArea: 'Houston', hours: 'Mon to Fri 8 am to 5 pm', windows: '8 to 12\n12 to 5', desiredChannels: ['web'], plan: 'starter' };
+    const calls = []; let rejected = false, reentered = false, held, holdReady;
+    const ready = new Promise(resolve => { holdReady = resolve; });
+    await auth.addInitScript(() => sessionStorage.setItem('mc-onboarding-session-v1', 'expired-fixture-session'));
+    const dto = () => ({ email: 'recovery@example.test', draft: { fields: saved, step: 0, revision: 7 }, marketing: { preference: false } });
+    await auth.route('**/*', async route => {
+      const req = route.request(), url = new URL(req.url());
+      if (url.origin !== base) { report.blockedExternal.push(url.origin); return route.abort('blockedbyclient'); }
+      if (url.pathname.startsWith('/api/')) {
+        const body = req.method() === 'GET' ? null : req.postDataJSON(); calls.push({ path: url.pathname, method: req.method(), action: body?.action });
+        if (url.pathname === '/api/access' && body?.action === 'exchange') { reentered = true; return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ session: 'fresh-fixture-session' }) }); }
+        const target = url.pathname === '/api/access' && req.method() === (mode === 'bootstrap401' ? 'GET' : 'PUT') && mode !== 'submit401' || mode === 'submit401' && url.pathname === '/api/onboard';
+        if (target && !rejected) {
+          rejected = true;
+          if (mode === 'network') return route.abort('connectionfailed');
+          if (mode === 'validation422') return route.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ error: 'invalid_fields', field: 'phone', message: 'Please review this phone number.' }) });
+          if (mode === 'stale401') { held = route; holdReady(); return; }
+          return route.fulfill({ status: 401, contentType: mode === 'json401' ? 'application/json' : 'text/html', body: mode === 'json401' ? '{"error":"sign_in_required","message":"Sign in to continue."}' : mode === 'empty401' ? '' : '<!doctype html><h1>Unauthorized</h1>' });
+        }
+        if (url.pathname === '/api/access') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(dto()) });
+        return route.fulfill({ status: 403, contentType: 'application/json', body: '{}' });
+      }
+      const file = resolve(root, decodeURIComponent(url.pathname.slice(1)));
+      if (!file.startsWith(root + '/') || !existsSync(file) || statSync(file).isDirectory()) return route.fulfill({ status: 404, body: '' });
+      return route.fulfill({ status: 200, contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' })[extname(file)] || 'application/octet-stream', body: readFileSync(file) });
+    });
+    const p = await auth.newPage(); p.on('pageerror', e => report.pageErrors.push(e.message));
+    try {
+      await p.goto(base + '/onboard.html');
+      if (mode !== 'bootstrap401') {
+        await p.locator('#ob').waitFor({ state: 'visible' });
+        if (mode === 'submit401') {
+          for (let n = 2; n <= 4; n++) { await p.locator('#next').click(); await p.locator('fieldset[data-step="' + n + '"]').waitFor({ state: 'visible' }); await p.waitForFunction(() => !document.querySelector('#next').disabled); }
+          await p.locator('#next').click();
+        } else await p.locator('#phone').fill('7135550101');
+      }
+      if (mode === 'stale401') {
+        await ready;
+        await p.evaluate(() => { location.hash = 'verify=' + 'a'.repeat(64); });
+        await p.waitForFunction(() => sessionStorage.getItem('mc-onboarding-session-v1') === 'fresh-fixture-session' && !document.querySelector('#ob').hidden);
+        await held.fulfill({ status: 401, contentType: 'text/html', body: '<!doctype html>Expired old request' });
+        await p.waitForTimeout(100);
+        check('Stale 401 cannot clear a newer signed-in context at ' + width, await p.locator('#ob').isVisible() && await p.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1') === 'fresh-fixture-session'));
+      } else {
+        await p.waitForFunction(() => !document.querySelector('#access-gate').hidden || /still on this page/.test(document.querySelector('#draft-status').textContent));
+        const state = await p.evaluate(() => ({ form: !document.querySelector('#ob').hidden, gate: !document.querySelector('#access-gate').hidden, credential: sessionStorage.getItem('mc-onboarding-session-v1'), phone: document.querySelector('#phone').value, error: document.querySelector('#access-status').textContent + document.querySelector('#draft-status').textContent, requestForm: !document.querySelector('#access-form').hidden }));
+        if (mode === 'validation422' || mode === 'network') check(mode + ' retains entered work and signed-in form at ' + width, state.form && !state.gate && state.credential === 'expired-fixture-session' && state.phone === '7135550101');
+        else {
+          check(mode + ' clears credential and shows usable sign-in instead of private form at ' + width, !state.form && state.gate && !state.credential && state.requestForm && !/Unexpected token|Unexpected end|not valid JSON/.test(state.error));
+          await p.screenshot({ path: output.slice(0, -5) + '-' + mode + '-' + width + '.png' });
+          await p.evaluate(() => { location.hash = 'verify=' + 'b'.repeat(64); });
+          await p.waitForFunction(() => sessionStorage.getItem('mc-onboarding-session-v1') === 'fresh-fixture-session' && !document.querySelector('#ob').hidden);
+          check(mode + ' ordinary verified return restores the authoritative draft at ' + width, await p.locator('#phone').inputValue() === saved.phone && await p.locator('#business').inputValue() === saved.business);
+        }
+      }
+      check(mode + ' sends no sign-in email or provider request at ' + width, !calls.some(c => c.action === 'request_link') && calls.every(c => ['/api/access', '/api/onboard'].includes(c.path)));
+    } catch (error) { check(mode + ' completes focused auth journey at ' + width, false, error.message); }
+    finally { await auth.close(); }
+  }
+}
