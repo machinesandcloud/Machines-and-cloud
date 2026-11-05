@@ -89,6 +89,51 @@ assert.equal(ordinaryChunks.join(""), ordinary.reply);
 assert.equal(requests[0].system[0].text, "Ordinary streaming mode.");
 assert.equal(requests[1].messages.at(-1).content[0].content, "Done.");
 
+// Missing adapter output is an unknown action outcome, never synthetic success.
+const invalidResults = [undefined, null, {}, [], { content: '' }, { content: '   ' },
+  { content: 7 }, { content: ['saved'] }, { content: 'Saved', is_error: 'false' },
+  { event: { type: 'booking', id: 'must-not-escape' } }];
+for (const [index, invalid] of invalidResults.entries()) {
+  queue = [{ tools: [tool(`invalid_result_${index}`)] }, { text: ['The result needs checking.'] }]; requests = [];
+  let calls=0;
+  const out = await runAgent({ system: 'Report only verified tool outcomes.', tools, messages: [{ role: 'user', content: 'Synthetic request' }], dropToolPreamble: true, execTool: async () => {calls++;return invalid;} });
+  const seen=requests[1].messages.at(-1).content[0];
+  assert.equal(seen.is_error,true,`invalid tool result ${index} must not be reported as success`);
+  assert.equal(typeof seen.content,'string');
+  assert.match(seen.content,/unconfirmed/i);
+  assert.match(seen.content,/do not repeat/i);
+  assert.doesNotMatch(seen.content,/^Done\./);
+  assert.deepEqual(out.events,[], 'invalid results must not publish a success event');
+  assert.equal(calls,1,'the agent boundary must not retry an uncertain action');
+}
+
+queue = [{ tools: [tool('thrown_after_unknown_write')] }, { text: ['The result needs checking.'] }]; requests = [];
+let thrownCalls=0;
+const thrown = await runAgent({system:'Report verified outcomes.',tools,messages:[{role:'user',content:'Synthetic request'}],dropToolPreamble:true,execTool:async()=>{thrownCalls++;throw new Error('Offline fixture: acknowledgement lost');}});
+assert.equal(requests[1].messages.at(-1).content[0].is_error,true);
+assert.match(requests[1].messages.at(-1).content[0].content,/unconfirmed/i);
+assert.match(requests[1].messages.at(-1).content[0].content,/do not repeat/i);
+assert.doesNotMatch(requests[1].messages.at(-1).content[0].content,/action did not complete/);
+assert.equal(thrownCalls,1);assert.deepEqual(thrown.events,[]);
+
+// A model can ignore the warning: identical unknown actions still must not dispatch again.
+queue = [
+  { tools: [{...tool('unknown_first'),input:{phone:'7135550142',issue:'Offline fixture'}}] },
+  { tools: [{...tool('unknown_replay'),input:{issue:'Offline fixture',phone:'7135550142'}}] },
+  { text: ['The original result needs checking.'] },
+]; requests=[];let unknownCalls=0;
+const replay = await runAgent({system:'Report verified outcomes.',tools,messages:[{role:'user',content:'Synthetic request'}],dropToolPreamble:true,execTool:async()=>{unknownCalls++;return undefined;}});
+assert.equal(unknownCalls,1,'same unknown action must not dispatch again, including reordered input keys');
+assert.equal(requests[2].messages.at(-1).content[0].is_error,true);assert.deepEqual(replay.events,[]);
+
+queue = [{tools:[tool('same_batch_one'),tool('same_batch_two')]},{text:['The original result needs checking.']}];requests=[];let sameBatchCalls=0;
+await runAgent({system:'Report verified outcomes.',tools,messages:[{role:'user',content:'Synthetic request'}],dropToolPreamble:true,execTool:async()=>{sameBatchCalls++;throw new Error('Offline fixture: acknowledgement lost');}});
+assert.equal(sameBatchCalls,1,'unknown duplicates in one model turn must not dispatch twice');
+
+queue=[{tools:[tool('unknown_handoff')]},{tools:[{id:'different_read',name:'get_availability',input:{date:'2030-01-07'}}]},{text:['The handoff is unconfirmed; availability was checked.']}];requests=[];const distinctCalls=[];
+await runAgent({system:'Report verified outcomes.',tools,messages:[{role:'user',content:'Synthetic request'}],dropToolPreamble:true,execTool:async name=>{distinctCalls.push(name);return name==='get_availability'?{content:'The availability read completed.'}:undefined;}});
+assert.deepEqual(distinctCalls,['notify_owner','get_availability'],'a different read remains available after the unknown action');
+
 const c = newClient({ slug: "offline-delivery", ownerKey: "offline-owner", owner: { name: "Dana", email: "owner@example.com" }, business: { name: "Offline desk", trade: "HVAC" } });
 for (const channel of ["sms", "test", "web", "voice"]) {
   const prompt = buildSystemPrompt(c, channel);
