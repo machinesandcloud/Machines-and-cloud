@@ -158,7 +158,7 @@ function project(dto: JsonObject, config: Configuration): SafeSnapshot {
     'voice.routing.forwardingMode':'New number or existing business line', 'voice.routing.businessNumber':'Existing business line',
     'voice.routing.carrier':'Business phone provider', 'voice.routing.forwarding':'When to answer calls', 'voice.routing.ownerPhone':'Contact cell',
     'calendar.preferences.accountEmail':'Google account preference (optional)',
-    'sms.business.legalName':'Registered business name','sms.business.ein':'Business EIN','sms.business.businessType':'Business type',
+    'sms.business.legalName':'Registered business name','sms.business.ein':'Business EIN','sms.business.businessType':'Business type','sms.business.businessIndustry':'Business industry',
     'sms.business.street':'Business street address','sms.business.city':'Business city','sms.business.state':'Business state',
     'sms.business.zip':'Business ZIP code','sms.business.website':'Business website',
     'sms.representative.firstName':'Representative first name','sms.representative.lastName':'Representative last name',

@@ -2,7 +2,7 @@ import './network-block.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ServiceInformation } from '../dist/service-information.js';
-import { OwnerAccess, readConfiguration } from '../dist/workspace.js';
+import { OwnerAccess, WorkspaceReader, readConfiguration } from '../dist/workspace.js';
 import { environment, bearer, slug, privateStrings, fixture, jsonResponse } from './fixtures.mjs';
 import { physicalAttempts } from './network-block.mjs';
 const config=readConfiguration(environment),token='a'.repeat(64),nextToken='b'.repeat(64);
@@ -12,6 +12,24 @@ function dto(overrides={}){const value=fixture();value.serviceIntake={available:
 function saved(current,body){const value=structuredClone(current);value.serviceIntake.token=nextToken;value.serviceIntake.lastSubmissionId=body.submissionId;Object.assign(value.serviceIntake[body.service][body.section],body.fields);value.setup.connectionJourney.channels.find(row=>row.id===body.service).requested=true;value.intake={state:'saved',submissionId:body.submissionId};return value;}
 const subject=(transport,now)=>new ServiceInformation(new OwnerAccess(config,transport,50),now);
 function clean(value){const text=JSON.stringify(value);for(const secret of [...privateStrings,bearer,token,nextToken,'retained-private-domain','private-retained@example.com','+12815550111','+17135550129'])assert.equal(text.includes(secret),false,secret);}
+
+test('missing SMS business industry stays explicit metadata in the secure workspace',async()=>{
+ const value=dto({sms:{canSave:true,complete:false,missingFields:['sms.business.businessIndustry'],business:{businessIndustry:''}}});
+ const snapshot=await new WorkspaceReader(config,async()=>jsonResponse(value)).snapshot();
+ const info=snapshot.services.find(row=>row.id==='sms').information;
+ assert.deepEqual(info.missingFields,['sms.business.businessIndustry']);
+ const industry=info.fields.find(field=>field.id==='sms.business.businessIndustry');
+ assert.ok(industry);assert.equal(industry.label,'Business industry');assert.equal(industry.required,true);assert.equal(industry.provided,false);assert.equal(industry.inputKey,null);
+ assert.equal(info.entry,'secure_workspace');assert.equal(info.canSave,false);assert.equal(info.complete,false);assert.equal(info.needsReview,false);assert.equal(info.fields.every(field=>field.provided),false);clean(snapshot);
+});
+
+test('complete SMS business industry projects presence without registration values or write rights',async()=>{
+ const value=dto({sms:{canSave:true,complete:true,missingFields:[],business:{businessIndustry:'PROFESSIONAL_SERVICES',ein:'fixture-private-ein'}}});
+ const snapshot=await new WorkspaceReader(config,async()=>jsonResponse(value)).snapshot();
+ const info=snapshot.services.find(row=>row.id==='sms').information,industry=info.fields.find(field=>field.id==='sms.business.businessIndustry');
+ assert.ok(industry);assert.equal(industry.provided,true);assert.equal(industry.inputKey,null);assert.deepEqual(info.missingFields,[]);assert.equal(info.complete,true);assert.equal(info.needsReview,false);assert.equal(info.canSave,false);assert.equal(info.entry,'secure_workspace');
+ for(const privateValue of ['PROFESSIONAL_SERVICES','fixture-private-ein'])assert.equal(JSON.stringify(snapshot).includes(privateValue),false);clean(snapshot);
+});
 
 test('preview is fixed owner read; proposed contacts masked, retained values absent',async()=>{const calls=[],info=subject(async(url,init)=>{calls.push({url:String(url),init});return jsonResponse(dto());});const preview=await info.preview(voice);assert.equal(calls.length,1);assert.equal(calls[0].init.method,'GET');assert.equal(calls[0].url,`https://machinesandcloud.com/api/client?c=${slug}&setup_assistance=1`);assert.equal(calls[0].init.headers.Authorization,`Bearer ${bearer}`);assert.equal(preview.state,'preview');for(const phone of ['(281) 555-0134','713-555-0142','+12815550134','+17135550142'])assert.equal(JSON.stringify(preview).includes(phone),false);const email=await info.preview({serviceId:'calendar',fields:{accountEmail:'Proposed-Person@business.com'}});assert.equal(email.changedFields[0].value,'Email address provided');clean(preview);clean(email);});
 
