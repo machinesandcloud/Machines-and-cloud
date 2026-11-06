@@ -7,7 +7,8 @@ import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, c
 import { sendSMS, e164, optedOut } from "./lib/send.mjs";
 
 export default async (req) => {
-  if (process.env.ADMIN_KEY && req.headers.get("x-admin-key") !== process.env.ADMIN_KEY) return new Response("forbidden", { status: 403 });
+  const key = process.env.ADMIN_KEY;
+  if (!key || req.headers.get("x-admin-key") !== key) return new Response("forbidden", { status: 403 });
   let body; try { body = await req.json(); } catch { return new Response("bad", { status: 400 }); }
   const c = await getClient(body?.slug || "");
   const from = e164(body?.from || "");

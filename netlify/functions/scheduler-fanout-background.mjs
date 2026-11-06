@@ -3,7 +3,8 @@
 import { fanout, KINDS } from "./lib/fanout.mjs";
 
 export default async (req) => {
-  if (process.env.ADMIN_KEY && req.headers.get("x-admin-key") !== process.env.ADMIN_KEY) return new Response("forbidden", { status: 403 });
+  const key = process.env.ADMIN_KEY;
+  if (!key || req.headers.get("x-admin-key") !== key) return new Response("forbidden", { status: 403 });
   let body; try { body = await req.json(); } catch { return new Response("bad", { status: 400 }); }
   const kind = String(body?.kind || "");
   if (!KINDS.includes(kind)) return new Response("unknown kind", { status: 400 });
