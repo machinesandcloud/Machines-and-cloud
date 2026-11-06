@@ -48,13 +48,18 @@
     try {
       var response = await fetch(base + '/api/manage' + (query || ''), { method: method || 'GET', headers: headers, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal, cache: 'no-store', credentials: 'same-origin' });
       if (current !== generation || token !== session) throw Object.assign(new Error('This request belongs to a previous sign-in.'), { stale: true });
+      if (response.status === 401 || response.status === 403) {
+        var accessError = new Error('Your operator access is unavailable. Sign in to the admin portal again with an authorized email.');
+        accessError.status = response.status; accessError.code = 'operator_access_unavailable';
+        if (token) clearPrivate(accessError.message);
+        throw accessError;
+      }
       if (format === 'csv' && response.ok) return await response.blob();
       var result = await response.json();
       if (current !== generation || token !== session) throw Object.assign(new Error('This request belongs to a previous sign-in.'), { stale: true });
       if (!response.ok || result.ok === false || result.error) {
-        var error = new Error(result.message || (response.status === 409 ? 'This account changed while you were working. Refresh it, review the latest state and try again.' : response.status === 401 || response.status === 403 ? 'Your operator access is unavailable. Sign in again with an authorized email.' : 'We could not confirm this request. Please try again.'));
+        var error = new Error(result.message || (response.status === 409 ? 'This account changed while you were working. Refresh it, review the latest state and try again.' : 'We could not confirm this request. Please try again.'));
         error.status = response.status; error.code = result.error;
-        if (token && (response.status === 401 || response.status === 403)) clearPrivate(error.message);
         throw error;
       }
       return result;

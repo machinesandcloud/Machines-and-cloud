@@ -8,12 +8,13 @@ if(!process.argv.includes('--output')||!/^scratchpad\/[a-z0-9-]+\.json$/.test(ou
 const prefix=output.slice(0,-5),base='http://127.0.0.1:8894',email='independent-operator@example.test';
 for(const key of Object.keys(process.env))if(/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_|STEVE_)/.test(key))delete process.env[key];
 Object.assign(process.env,{MC_MEMORY_STORE:'1',MC_FAKE_MODEL:'1',NODE_ENV:'test',URL:base,PUBLIC_SITE_URL:base,ADMIN_EMAILS:email});
-const files=['admin.html','admin.js','admin.css','netlify/functions/manage.mjs','netlify/functions/lib/operator.mjs','netlify/functions/lib/access.mjs'];
+const assets=['admin.html','admin.js','admin.css','product-ui.css','design-system.css','brand-marks.js'];
+const files=[...assets,'netlify/functions/manage.mjs','netlify/functions/lib/operator.mjs','netlify/functions/lib/access.mjs'];
 const hash=x=>createHash('sha256').update(x).digest('hex'),hashes=()=>Object.fromEntries(files.map(file=>[file,hash(readFileSync(file))]));
 const report={at:new Date().toISOString(),mode:'independent browser actual management handler; memory; every browser request intercepted; no email/model/provider',sourceBefore:hashes(),checks:[],requests:[],blocked:[],pageErrors:[],screenshots:[]};
 globalThis.fetch=async input=>{report.blocked.push(String(input));throw new Error('Physical networking disabled');};
 const store=await import('../netlify/functions/lib/store.mjs'),access=await import('../netlify/functions/lib/access.mjs'),config=await import('../netlify/functions/lib/config.mjs'),manage=(await import('../netlify/functions/manage.mjs')).default;
-let serial=0,hold=null;
+let serial=0,hold=null,authBodyFault=null;
 const check=(name,pass,detail)=>{report.checks.push({name,pass:!!pass,...(detail===undefined?{}:{detail})});assert.ok(pass,name);};
 const session=async(scope='operator')=>{const token=hash('independent-browser-'+ ++serial);await store.put('access_sessions',access.accessHash(token),{scope,email,status:'active',createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+3600000).toISOString()});return token;};
 async function customer(slug,name,supported=true){const c=config.newClient({slug,ownerKey:'CANARY-'+slug,owner:{name:'Owner '+name,email:slug+'@example.test',phone:'+17135550142'},business:{name,trade:'HVAC',city:'Houston',serviceArea:['Katy'],hours:'Mon-Fri 8am-5pm'}});if(supported)c.onboarding={version:1,verifiedEmail:c.owner.email,desiredChannels:['web']};c.services=['AC repair'];c.windows=['8 to 12'];c.build={status:'built',source:'owner_answers'};c.status='testing';await store.put('clients',slug,c);return c;}
@@ -27,9 +28,10 @@ await context.route('**/*',async route=>{
   const body=request.method()==='POST'?request.postData():null,response=await manage(new Request(url,{method:request.method(),headers:request.headers(),...(body?{body}:{})}),{ip:'192.0.2.'+ ++serial});
   report.requests.push({method:request.method(),query:url.search,action:body?JSON.parse(body).action:null,status:response.status});
   if(hold&&hold.query===url.search&&request.method()==='GET'){const gate=hold;hold=null;gate.reached();await gate.release;}
+  if(authBodyFault&&[401,403].includes(response.status))return route.fulfill({status:authBodyFault.status,contentType:authBodyFault.html?'text/html':'text/plain',body:authBodyFault.html?'<!doctype html><title>Access expired</title>':''});
   try{return await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});}catch(error){if(!/Target|closed|intercept|Invalid|canceled/i.test(error.message))throw error;return;}
  }
- const file=url.pathname.slice(1);if(!files.slice(0,3).includes(file))return route.fulfill({status:404,body:''});return route.fulfill({status:200,contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html',body:readFileSync(file)});
+ const file=url.pathname.slice(1);if((!assets.includes(file)&&!/^assets\/[a-zA-Z0-9_./-]+$/.test(file))||!existsSync(file))return route.fulfill({status:404,body:''});return route.fulfill({status:200,contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.png')?'image/png':file.endsWith('.svg')?'image/svg+xml':'text/html',body:readFileSync(file)});
 });
 async function openWith(token){await page.goto('about:blank');await page.goto(base+'/admin.html');await page.evaluate(value=>{sessionStorage.setItem('mc-operator-session-v1',value);sessionStorage.setItem('mc_admin_key','obsolete-shared-key');},token);await page.reload();}
 async function choose(slug){await page.locator('[data-view=customers]').click();await page.locator('#customers [data-customer="'+slug+'"]').click();await page.locator('#detailTitle').waitFor();}
@@ -47,6 +49,18 @@ try{
  await page.locator('[data-view=customers]').click();let reachedLogout,releaseLogout;const waitingLogout=new Promise(r=>{reachedLogout=r;}),gateLogout=new Promise(r=>{releaseLogout=r;});hold={query:'?c='+a.slug,reached:reachedLogout,release:gateLogout};await page.locator('#customers [data-customer="'+a.slug+'"]').click();await waitingLogout;await page.locator('#signOut').click();await page.locator('#login:not([hidden])').waitFor();releaseLogout();await page.waitForTimeout(100);check('Late authorized response after signout cannot repopulate private DOM',!/(Independent Air|Independent Plumbing|New customer-owned service)/.test(await page.locator('body').innerText())&&await page.locator('#app').isHidden());
  check('Signout revokes server authority', (await store.get('access_sessions',access.accessHash(token))).status==='revoked');
  const removed=await session();await openWith(removed);await page.locator('#app:not([hidden])').waitFor();process.env.ADMIN_EMAILS='different@example.test';await page.locator('#refreshAll').click();await page.locator('#login:not([hidden])').waitFor();check('Allowlist revocation clears existing private view on next actual read',await page.evaluate(()=>sessionStorage.getItem('mc-operator-session-v1'))===null&&!(await page.locator('body').innerText()).includes(a.business.name));
+ process.env.ADMIN_EMAILS=email;
+ for(const fault of [{status:401,html:true},{status:401,html:false},{status:403,html:true},{status:403,html:false}]){
+  const expired=await session();await openWith(expired);await page.locator('#app:not([hidden])').waitFor();await choose(a.slug);
+  check('Customer details were loaded before '+fault.status+' '+(fault.html?'HTML':'empty')+' recovery',(await page.locator('#customerDetail').innerText()).includes(a.business.name));
+  await page.evaluate(()=>sessionStorage.setItem('mc-support-action-pending-v1',JSON.stringify({sessionTag:'fixture',body:{slug:'independent-air',action:'acknowledge_report'}})));
+  const record=await store.get('access_sessions',access.accessHash(expired));await store.put('access_sessions',access.accessHash(expired),{...record,status:'revoked'});authBodyFault=fault;
+  await page.locator('#refreshAll').click();await page.locator('#login:not([hidden])').waitFor();
+  const state=await page.evaluate(()=>({hidden:document.getElementById('app').hidden,token:sessionStorage.getItem('mc-operator-session-v1'),support:sessionStorage.getItem('mc-support-action-pending-v1'),privateText:document.getElementById('app').textContent,message:document.getElementById('loginStatus').textContent}));
+  check('Denied '+fault.status+' '+(fault.html?'HTML':'empty')+' clears private DOM and both cached authorities',state.hidden&&state.token===null&&state.support===null&&!state.privateText.includes(a.business.name)&&!state.privateText.includes(b.business.name));
+  check('Denied '+fault.status+' '+(fault.html?'HTML':'empty')+' gives sign-in recovery without a parser error',/Sign in to the admin portal/.test(state.message)&&!/JSON|Unexpected token|Unexpected end/i.test(state.message));
+  authBodyFault=null;
+ }
  check('No external requests or browser exceptions',report.blocked.length===0&&report.pageErrors.length===0,{blocked:report.blocked,pageErrors:report.pageErrors});
 }catch(error){report.failure=error.stack;report.checks.push({name:'Uncaught independent browser failure',pass:false,detail:error.message});}
 finally{report.sourceAfter=hashes();check('Runtime source stayed stable',JSON.stringify(report.sourceBefore)===JSON.stringify(report.sourceAfter));report.summary={passed:report.checks.filter(x=>x.pass).length,failed:report.checks.filter(x=>!x.pass).length};writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});await browser.close();console.log(JSON.stringify({output,...report.summary}));if(report.failure)console.log(report.failure);if(report.summary.failed)process.exitCode=1;}
