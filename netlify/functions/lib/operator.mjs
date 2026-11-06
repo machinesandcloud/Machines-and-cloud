@@ -1,3 +1,4 @@
+import { privateEncryptionAvailable } from './private-encryption.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { normalizeAccountEmail, strictRead } from './accounts.mjs';
 import { getAccessSession } from './access.mjs';
@@ -40,7 +41,7 @@ export function operatorProviderStates() {
     sms: channel('Text messaging', env.MESSAGING_ACTIVATION_ENABLED === 'true' && env.SERVICE_DELIVERY_ENABLED === 'true', env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_PRIMARY_PROFILE_SID),
     calendar: env.CALENDAR_CONNECTION_ENABLED !== 'true'
       ? { label: 'Google Calendar', status: 'disabled', detail: 'Calendar connections are disabled by platform configuration.' }
-      : !calendar || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.CALENDAR_TOKEN_ENCRYPTION_KEY
+      : !calendar || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !privateEncryptionAvailable('calendar',env)
         ? { label: 'Google Calendar', status: 'needs_attention', detail: 'The connection setting is on, but a current execution policy and complete OAuth/encryption configuration are required.' }
         : { label: 'Google Calendar', status: 'configured', detail: env.CALENDAR_SELF_SERVICE_ENABLED === 'true' ? 'Self-service Calendar policy is configured. Each customer grants access; event delivery and current limits are checked separately.' : 'A controlled Calendar policy is configured. Only its selected workspace and operations are eligible; this is not general customer activation.' },
     billing: workspaceBillingConfiguration(),

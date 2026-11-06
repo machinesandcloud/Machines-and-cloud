@@ -52,4 +52,22 @@ await check('Real lead save, report and later intake readbacks preserve the comp
   assert.deepEqual(intakeSaved.body.websiteInstallation,beforeIntake.body.websiteInstallation);assert.deepEqual(intakeSaved.body.setup.connectionPreparation,beforeIntake.body.setup.connectionPreparation);
 });
 
+await check('Actual owner draft survives rotation and a normal save adopts the active ID without read-side migration',async()=>{
+ const old=process.env.PLATFORM_DATA_ENCRYPTION_KEY;try{
+  await save('sms','business',business);const before=await read();assert.equal(before.management.serviceIntake.data.version,1);
+  process.env.PLATFORM_DATA_ENCRYPTION_KEYRING_JSON=JSON.stringify({version:1,activeKeyId:'new',legacyKeyId:'old',keys:[{id:'old',key:old},{id:'new',key:Buffer.alloc(32,31).toString('base64')}]});delete process.env.PLATFORM_DATA_ENCRYPTION_KEY;
+  const full=await call(null,'GET','&service_intake=1');assert.equal(full.status,200);assert.equal(full.body.serviceIntake.sms.business.ein,business.ein);assert.deepEqual(await read(),before);
+  assert.equal((await save('calendar','preferences',{accountEmail:'calendar@example.test'})).r.status,200);const current=await read();assert.equal(current.management.serviceIntake.data.version,2);assert.equal(current.management.serviceIntake.data.keyId,'new');assert.equal((await call(null,'GET','&service_intake=1')).body.serviceIntake.sms.business.ein,business.ein);
+  current.management.serviceIntake.data.keyId='unknown';await store.put('clients',current.slug,current);const result=await call(null,'GET','&service_intake=1');assert.equal(result.body.serviceIntake.reasonCode,'private_storage_unavailable');assert.deepEqual(await read(),current);
+ }finally{delete process.env.PLATFORM_DATA_ENCRYPTION_KEYRING_JSON;process.env.PLATFORM_DATA_ENCRYPTION_KEY=old;}
+});
+for(const kind of ['service_onboarding_intents','messaging_activation'])await check(kind+' version2 accepted registration retains the actual secure owner prefill',async()=>{
+ const old=process.env.PLATFORM_DATA_ENCRYPTION_KEY;try{
+  const {sealPrivate}=await import('../netlify/functions/lib/private-encryption.mjs'),{workspaceTenant}=await import('../netlify/functions/lib/workspace-identity.mjs'),c=await read(),messaging=kind==='messaging_activation',id=c.slug+'/'+createHash('sha256').update((messaging?'messaging-v1:':'service-onboarding-v1:')+workspaceTenant(c)).digest('hex');
+  process.env.PLATFORM_DATA_ENCRYPTION_KEYRING_JSON=JSON.stringify({version:1,activeKeyId:'new',legacyKeyId:'old',keys:[{id:'old',key:old},{id:'new',key:Buffer.alloc(32,31).toString('base64')}]});
+  const legal={...business,representative},privateData=sealPrivate(JSON.stringify(messaging?{legal}:legal),{family:'platform',purpose:messaging?'messaging-registration':'service-onboarding',aad:id,legacyAAD:id,legacyFormat:messaging?'registration':'privateData'}),row={id,tenantIdentity:workspaceTenant(c),requestedChannels:['sms'],privateData};await store.put(kind,id,row);
+  const full=await call(null,'GET','&service_intake=1');assert.equal(full.status,200);assert.equal(full.body.serviceIntake.sms.business.ein,business.ein);assert.equal(full.body.serviceIntake.reasonCode,null);assert.deepEqual(await store.get(kind,id),row);assert.equal((await serviceIntakeView(c)).sms.business.ein,'');
+ }finally{delete process.env.PLATFORM_DATA_ENCRYPTION_KEYRING_JSON;process.env.PLATFORM_DATA_ENCRYPTION_KEY=old;}
+});
+await import('./private-encryption-check.mjs');
 assert.equal(physicalAttempts,0);console.log(JSON.stringify({passed:checks.filter(x=>x.pass).length,total:checks.length,physicalAttempts,checks},null,2));if(checks.some(x=>!x.pass))process.exitCode=1;

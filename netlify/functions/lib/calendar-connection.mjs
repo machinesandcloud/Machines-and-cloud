@@ -1,6 +1,7 @@
+import { privateEncryptionAvailable, sealPrivate, openPrivate } from './private-encryption.mjs';
 import { serviceIntakeCalendarHint } from './service-intake.mjs';
 // Customer-authorized Google Calendar. Secrets never enter a client DTO or redirect.
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { accessSite } from "./access.mjs";
@@ -15,24 +16,12 @@ const hash = value => createHash("sha256").update(value).digest("hex");
 export const calendarTenantIdentity = client => hash(JSON.stringify([client.slug, client.ownerKey, normalizeAccountEmail(client.owner?.email)]));
 const at = () => new Date().toISOString();
 const hex = value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
-const secretKey = () => {
-  const text = process.env.CALENDAR_TOKEN_ENCRYPTION_KEY || "", key = Buffer.from(text, "base64");
-  return key.length === 32 && key.toString("base64") === text ? key : null;
-};
-export const calendarConnectionEnabled = () => process.env.CALENDAR_CONNECTION_ENABLED === "true" && !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET && !!secretKey() && !!calendarExecutionPolicy();
+export const calendarConnectionEnabled = () => process.env.CALENDAR_CONNECTION_ENABLED === "true" && !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET && privateEncryptionAvailable('calendar') && !!calendarExecutionPolicy();
 const enabled = () => { if (!calendarConnectionEnabled()) throw new CalendarError("calendar_unavailable", "Calendar connection is not available yet.", 503); };
 async function execution(check) { try { return await check(); } catch (error) { if (error.code?.startsWith('calendar_')) throw new CalendarError(error.code, error.message, 503); throw error; } }
-const seal = (value, aad) => {
-  const iv = randomBytes(12), cipher = createCipheriv("aes-256-gcm", secretKey(), iv);
-  cipher.setAAD(Buffer.from(aad));
-  const data = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
-  return { iv: iv.toString("base64"), data: data.toString("base64"), tag: cipher.getAuthTag().toString("base64") };
-};
-const unseal = (value, aad) => {
-  const decipher = createDecipheriv("aes-256-gcm", secretKey(), Buffer.from(value.iv, "base64"));
-  decipher.setAAD(Buffer.from(aad)); decipher.setAuthTag(Buffer.from(value.tag, "base64"));
-  return Buffer.concat([decipher.update(Buffer.from(value.data, "base64")), decipher.final()]).toString("utf8");
-};
+const encryptionContext = (client, purpose, legacyAAD) => ({ family:'calendar', purpose, aad:JSON.stringify([calendarTenantIdentity(client),legacyAAD]), legacyAAD, legacyFormat:'calendar' });
+const seal = (value, client, purpose, aad) => sealPrivate(value,encryptionContext(client,purpose,aad));
+const unseal = (value, client, purpose, aad) => openPrivate(value,encryptionContext(client,purpose,aad));
 async function owner(client, session) {
   if (!isSupportedSelfServiceClient(client) || !session?.sessionHash || session.scope !== "onboarding" || client.owner?.email?.toLowerCase() !== session.email?.toLowerCase()) throw new CalendarError("forbidden", "Sign in to your own workspace.", 403);
   const saved = await strictRead("access_sessions", session.sessionHash);
@@ -59,7 +48,7 @@ export async function startCalendarConnection(client, session, input = {}) {
   const epoch = await atomicUpdate("calendar_connections", client.slug, row => { const base = row?.tenantIdentity === calendarTenantIdentity(client) ? row : { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), status: "not_connected" }; const next = { ...base, grantEpoch: (base.grantEpoch || 0) + 1, updatedAt: createdAt }; return { value: next, result: next.grantEpoch }; });
   await atomicUpdate("calendar_oauth", hash(state), row => {
     if (row) throw new Error("Calendar state collision");
-    return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, executionPolicyDigest:calendarExecutionPolicy().digest, email: session.email, sessionHash: session.sessionHash, availabilityConsentVersion:CALENDAR_AVAILABILITY_CONSENT_VERSION, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
+    return { value: { slug: client.slug, tenantIdentity: calendarTenantIdentity(client), googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, executionPolicyDigest:calendarExecutionPolicy().digest, email: session.email, sessionHash: session.sessionHash, availabilityConsentVersion:CALENDAR_AVAILABILITY_CONSENT_VERSION, epoch, lifecycleVersion: client.operationLifecycleVersion || 0, verifier: seal(verifier, client, "calendar-oauth", `state:${hash(state)}`), state: "pending", createdAt, expiresAt } };
   });
   const params = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID, redirect_uri: `${accessSite()}/api/google/callback`, response_type: "code", scope: "https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly", access_type: "offline", prompt: "consent", state, code_challenge: createHash("sha256").update(verifier).digest("base64url"), code_challenge_method: "S256" });
   const hint=await serviceIntakeCalendarHint(client);if(hint)params.set('login_hint',hint);
@@ -94,7 +83,7 @@ export async function completeCalendarConnection(client, session, input) {
   });
   if (!claim) throw new CalendarError("invalid_state", "This calendar link expired, was already used, or belongs to another sign-in. Connect again.", 410);
   if (input.error) return { ok: true, denied: true, calendar: await calendarConnectionView(client) };
-  const verifier = unseal(claim.verifier, `state:${key}`);
+  const verifier = unseal(claim.verifier, client, "calendar-oauth", `state:${key}`);
   const authority = async () => { await owner(client, session); const saved = await strictRead('calendar_connections', client.slug), policy = calendarExecutionPolicy(); return saved?.grantEpoch === claim.epoch && saved?.tenantIdentity === claim.tenantIdentity && claim.googleClientIdHash === policy?.googleClientIdHash && claim.executionPolicyDigest === policy?.digest; };
   const token = await googleJson(client, 'tokenExchange', "https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ code: input.code, client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: `${accessSite()}/api/google/callback`, grant_type: "authorization_code", code_verifier: verifier }).toString() }, undefined, { authorize: authority });
   if (!token.response.ok || typeof token.data.refresh_token !== "string" || !token.data.refresh_token || typeof token.data.access_token !== "string") throw new CalendarError("authorization_failed", "Google did not grant ongoing Calendar access. Connect again and allow Calendar access.");
@@ -107,7 +96,7 @@ export async function completeCalendarConnection(client, session, input) {
   const connectionId = randomBytes(16).toString("hex"), connectedAt = at();
   await atomicUpdate("calendar_connections", client.slug, row => {
     if (!row || row.tenantIdentity !== claim.tenantIdentity || row.grantEpoch !== claim.epoch) throw new CalendarError("connection_changed", "Calendar setup changed. Connect again.");
-    return { value: { ...row, connectionId, googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, status: "connected", availabilityConsentVersion:claim.availabilityConsentVersion, availabilityConsentedAt:claim.createdAt, targetId: calendar.data.id, targetHash: hash(calendar.data.id), label: "Google Calendar", connectedAt, disconnectedAt: null, refresh: seal(token.data.refresh_token, `${client.slug}:${connectionId}`), updatedAt: connectedAt } };
+    return { value: { ...row, connectionId, googleClientIdHash:calendarExecutionPolicy().googleClientIdHash, status: "connected", availabilityConsentVersion:claim.availabilityConsentVersion, availabilityConsentedAt:claim.createdAt, targetId: calendar.data.id, targetHash: hash(calendar.data.id), label: "Google Calendar", connectedAt, disconnectedAt: null, refresh: seal(token.data.refresh_token, client, "calendar-refresh", `${client.slug}:${connectionId}`), updatedAt: connectedAt } };
   });
   return { ok: true, calendar: await calendarConnectionView(client) };
 }
@@ -126,8 +115,8 @@ export async function googleAccessToken(slug, connectionId, { deadline = Date.no
   enabled();
   const row = await getCalendarConnection(slug);
   if (!row || row.connectionId !== connectionId) throw new CalendarError("reconnect_required", "Reconnect your calendar to resume saved work.");
-  const refreshToken = unseal(row.refresh, `${slug}:${connectionId}`);
   const client = await strictRead('clients', slug);
+  const refreshToken = unseal(row.refresh, client, "calendar-refresh", `${slug}:${connectionId}`);
   const authorize = async () => { const current = await getCalendarConnection(slug); const c = await strictRead('clients', slug); return current?.connectionId === connectionId && current?.targetId === row.targetId && ['testing','live'].includes(c?.status); };
   const { response, data } = await googleJson(client, 'tokenRefresh', "https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ refresh_token: refreshToken, client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, grant_type: "refresh_token" }).toString() }, deadline, { targetId: row.targetId, authorize });
   if (!response.ok || typeof data.access_token !== "string") {

@@ -1,5 +1,6 @@
+import { privateEncryptionAvailable, sealPrivate, openPrivate } from './private-encryption.mjs';
 // Owner-only connection information drafts. Saving never grants service or financial authority.
-import {createHash,randomBytes,createCipheriv,createDecipheriv} from 'node:crypto';
+import {createHash,randomBytes} from 'node:crypto';
 import {isIP} from 'node:net';
 import {atomicUpdate,list} from './store.mjs';
 import {strictRead,normalizeAccountEmail} from './accounts.mjs';
@@ -22,13 +23,14 @@ const modes=['forward_business_line','use_new_number'],carriers=['att','verizon'
 const positions=['CEO','General_Manager','CFO','VP','Director','Other'];
 export class ServiceIntakeError extends Error {constructor(code,message,status=409,fieldErrors){super(message);this.code=code;this.status=status;if(fieldErrors)this.fieldErrors=fieldErrors;}}
 const fail=(code,message,status,fields)=>{throw new ServiceIntakeError(code,message,status,fields);};
-function key(){const text=process.env.PLATFORM_DATA_ENCRYPTION_KEY||process.env.CALENDAR_TOKEN_ENCRYPTION_KEY||'',value=Buffer.from(text,'base64');return value.length===32&&value.toString('base64')===text?value:null;}
-function encrypt(c,data){const k=key();if(!k)fail('private_storage_unavailable','Secure connection storage is being prepared. Your existing setup is kept.',503);const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',k,iv);cipher.setAAD(Buffer.from('service-intake:'+workspaceTenant(c)));return {version:1,iv:iv.toString('base64'),ciphertext:Buffer.concat([cipher.update(JSON.stringify(data),'utf8'),cipher.final()]).toString('base64'),tag:cipher.getAuthTag().toString('base64')};}
-function decrypt(c,record){if(!record)return {};try{const k=key();if(!k||record.version!==1)throw Error();const decipher=createDecipheriv('aes-256-gcm',k,Buffer.from(record.iv,'base64'));decipher.setAAD(Buffer.from('service-intake:'+workspaceTenant(c)));decipher.setAuthTag(Buffer.from(record.tag,'base64'));const data=JSON.parse(Buffer.concat([decipher.update(Buffer.from(record.ciphertext,'base64')),decipher.final()]).toString('utf8'));if(!plain(data))throw Error();return data;}catch{fail('private_storage_unavailable','Saved connection information could not be opened safely. Existing approvals are kept.',503);}}
+const key=()=>privateEncryptionAvailable('platform');
+const encryptionContext = c => {const aad='service-intake:'+workspaceTenant(c);return {family:'platform',purpose:'service-intake',aad,legacyAAD:aad,legacyFormat:'privateData'};};
+function encrypt(c,data){return sealPrivate(JSON.stringify(data),encryptionContext(c));}
+function decrypt(c,record){if(!record)return {};try{const data=JSON.parse(openPrivate(record,encryptionContext(c)));if(!plain(data))throw Error();return data;}catch{fail('private_storage_unavailable','Saved connection information could not be opened safely. Existing approvals are kept.',503);}}
 async function acceptedRegistration(c){
  const tenant=workspaceTenant(c),sources=[['service_onboarding_intents','service-onboarding-v1:'],['messaging_activation','messaging-v1:']];
  for(const [store,prefix] of sources){const id=c.slug+'/'+createHash('sha256').update(prefix+tenant).digest('hex'),row=await strictRead(store,id);if(!row?.privateData)continue;if(row.tenantIdentity!==tenant||row.id!==id)fail('private_storage_unavailable','Saved registration information needs a secure identity check.',503);
-  try{const k=key();if(!k||row.privateData.version!==1)throw Error();const encodedNonce=store==='messaging_activation'?row.privateData.nonce:row.privateData.iv;if(typeof encodedNonce!=='string')throw Error();const nonce=Buffer.from(encodedNonce,'base64');if(nonce.length!==12||nonce.toString('base64')!==encodedNonce)throw Error();const decipher=createDecipheriv('aes-256-gcm',k,nonce);decipher.setAAD(Buffer.from(id));decipher.setAuthTag(Buffer.from(row.privateData.tag,'base64'));const decoded=JSON.parse(Buffer.concat([decipher.update(Buffer.from(row.privateData.ciphertext,'base64')),decipher.final()]).toString('utf8'));return normalizeMessagingRegistration(decoded.legal||decoded,{allowMissingIndustry:true});}catch{fail('private_storage_unavailable','Saved registration information could not be opened safely.',503);}
+  try{const registration=store==='messaging_activation',decoded=JSON.parse(openPrivate(row.privateData,{family:'platform',purpose:registration?'messaging-registration':'service-onboarding',aad:id,legacyAAD:id,legacyFormat:registration?'registration':'privateData'}));return normalizeMessagingRegistration(decoded.legal||decoded,{allowMissingIndustry:true});}catch{fail('private_storage_unavailable','Saved registration information could not be opened safely.',503);}
  }
  return null;
 }

@@ -1,6 +1,7 @@
+import { privateEncryptionAvailable, sealPrivate, openPrivate } from './private-encryption.mjs';
 import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 // Durable customer-specific US texting registration and proof. No execution is enabled by default.
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
 import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from "./setup.mjs";
@@ -52,13 +53,10 @@ const details = {
   cancelled: "Texting has been disconnected and recorded sender cleanup is confirmed. Business registration and consent records are retained.",
 };
 
-function encryptionKey() {
-  const encoded = process.env.PLATFORM_DATA_ENCRYPTION_KEY || process.env.CALENDAR_TOKEN_ENCRYPTION_KEY || "";
-  if (!/^[A-Za-z0-9+/]{43}=$/.test(encoded) || Buffer.from(encoded, "base64").length !== 32) throw new MessagingActivationError("private_storage_unavailable", "Secure registration storage is not configured.", 503);
-  return Buffer.from(encoded, "base64");
-}
-function seal(value, identity) { const nonce = randomBytes(12), cipher = createCipheriv("aes-256-gcm", encryptionKey(), nonce); cipher.setAAD(Buffer.from(identity)); const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value), "utf8"), cipher.final()]).toString("base64"); return { version: 1, nonce: nonce.toString("base64"), ciphertext, tag: cipher.getAuthTag().toString("base64") }; }
-function unseal(value, identity) { if (value?.version !== 1) throw new Error("Unknown private registration format"); const decipher = createDecipheriv("aes-256-gcm", encryptionKey(), Buffer.from(value.nonce, "base64")); decipher.setAAD(Buffer.from(identity)); decipher.setAuthTag(Buffer.from(value.tag, "base64")); return JSON.parse(Buffer.concat([decipher.update(Buffer.from(value.ciphertext, "base64")), decipher.final()]).toString("utf8")); }
+function encryptionKey() { if(!privateEncryptionAvailable('platform'))throw new MessagingActivationError('private_storage_unavailable','Secure registration storage is not configured.',503); }
+const encryptionContext = identity => ({family:'platform',purpose:'messaging-registration',aad:identity,legacyAAD:identity,legacyFormat:'registration'});
+function seal(value,identity){return sealPrivate(JSON.stringify(value),encryptionContext(identity));}
+function unseal(value,identity){return JSON.parse(openPrivate(value,encryptionContext(identity)));}
 function validOffer(value, { allowExpired = false } = {}) {
   const fields = ["brandRegistrationCents", "campaignRegistrationCents", "campaignMonthlyCents", "resubmissionCents"];
   if (!value || !/^[a-z0-9_-]{1,80}$/.test(value.version || "") || value.scope !== "a2p_customer_care" || value.currency !== "USD" || value.country !== "US" || !Number.isFinite(Date.parse(value.expiresAt)) || (!allowExpired && Date.parse(value.expiresAt) <= Date.now()) || !fields.every(key => Number.isSafeInteger(value[key]) && value[key] >= 0 && value[key] <= 100000) || ![0, 1].includes(value.maxResubmissions) || !["usageDisclosure", "authorityText"].every(key => typeof value[key] === "string" && value[key].length >= 20 && value[key].length <= 1500) || !/^https:\/\//.test(value.feeScheduleUrl || "")) throw new MessagingActivationError("invalid_offer", "Complete registration costs, ongoing usage terms and authority wording must be approved before texting setup.", 400);

@@ -295,6 +295,15 @@ await check("production exports bind exact owned number, gate probes, recheck cu
   await sms.cancelMessagingActivation(f.c, row.id, f.body()); assert.equal((await sms.continueMessagingActivation(f.c)).state, "cancelled"); assert.equal(await sms.messagingSender(f.c), null); assert.equal((await sms.messagingCleanupStatus(f.c)).blocksRelease, false);
   for (const name of Object.keys(process.env)) if (/^(MESSAGING_|SERVICE_)/.test(name)) delete process.env[name];
 });
+await check('Actual messaging worker opens old registration under retained key and new requests select active ID',async()=>{
+ const scalar=process.env.PLATFORM_DATA_ENCRYPTION_KEY;try{
+  const f=await fixture('prod','key-rotation-old'),row=await f.engine.request(f.c,f.body()),before=(await strictRead('messaging_activation',row.id)).privateData;assert.equal(before.version,1);
+  process.env.PLATFORM_DATA_ENCRYPTION_KEYRING_JSON=JSON.stringify({version:1,activeKeyId:'new',legacyKeyId:'old',keys:[{id:'old',key:scalar},{id:'new',key:Buffer.alloc(32,37).toString('base64')}]});delete process.env.PLATFORM_DATA_ENCRYPTION_KEY;
+  await f.engine.run(row.id);assert.deepEqual((await strictRead('messaging_activation',row.id)).privateData,before);
+  const g=await fixture('prod','key-rotation-new'),fresh=await g.engine.request(g.c,g.body()),saved=await strictRead('messaging_activation',fresh.id);assert.equal(saved.privateData.version,2);assert.equal(saved.privateData.keyId,'new');
+  const changed={...saved,privateData:{...saved.privateData,keyId:'unknown'}},writes=result.providerWrites.length;await store.put('messaging_activation',saved.id,changed);await g.engine.run(saved.id);assert.equal(result.providerWrites.length,writes);assert.deepEqual((await strictRead('messaging_activation',saved.id)).privateData,changed.privateData);
+ }finally{delete process.env.PLATFORM_DATA_ENCRYPTION_KEYRING_JSON;process.env.PLATFORM_DATA_ENCRYPTION_KEY=scalar;}
+});
 await check("production gate, encrypted storage requirement and scheduler default stay closed", async () => { process.env.MC_MEMORY_STORE = "1"; const f = await fixture("prod", "off"); await assert.rejects(() => sms.requestMessagingActivation(f.c, f.body()), error => error.code === "messaging_setup_unavailable"); const worker = await import("../netlify/functions/messaging-activation-scheduler.mjs"); assert.equal(worker.config.schedule, "*/10 * * * *"); const receipt = await worker.runMessagingActivationRecovery(); assert.equal(receipt.enabled, false); assert.equal(receipt.processed, 0); assert.equal(receipt.ok, false); delete process.env.PLATFORM_DATA_ENCRYPTION_KEY; await assert.rejects(() => f.engine.request(f.c, f.body()), error => error.code === "private_storage_unavailable"); });
 await check("adapter cannot execute a raw call with product gate closed", async () => { const adapter = createTwilioMessagingAdapter({ executionAllowed: () => false }), before = result.providerWrites.length; await assert.rejects(() => adapter.preflight({ number: { sid: "PN" + "9".repeat(32) } })); assert.equal(result.providerWrites.length, before); });
   // Quiet-hour clocks and account ledgers require a fresh process, not a reset

@@ -1,6 +1,7 @@
+import { privateEncryptionAvailable, sealPrivate, openPrivate } from './private-encryption.mjs';
 // One customer acceptance, followed by durable handoff to the existing service engines.
 // This coordinator does not buy numbers, file registrations, call providers or certify delivery.
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { atomicUpdate } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { configurationRevision, isSupportedSelfServiceClient, managedServiceRulesReviewed } from './setup.mjs';
@@ -36,20 +37,9 @@ const details = {
   cancellation_pending: 'Cancellation is saved. Existing service requests and any recorded resources are being disconnected.',
   cancelled: 'Cancellation is confirmed for the recorded service requests. Your business records are retained.',
 };
-function keyBytes() {
-  const text = process.env.PLATFORM_DATA_ENCRYPTION_KEY || process.env.CALENDAR_TOKEN_ENCRYPTION_KEY || '', key = Buffer.from(text, 'base64');
-  return key.length === 32 && key.toString('base64') === text ? key : null;
-}
-function seal(value, id) {
-  const key = keyBytes(); if (!key) throw new ServiceOnboardingError('private_storage_unavailable', 'Secure registration storage is not available yet.', 503);
-  const iv = randomBytes(12), cipher = createCipheriv('aes-256-gcm', key, iv); cipher.setAAD(Buffer.from(id));
-  return { version: 1, iv: iv.toString('base64'), ciphertext: Buffer.concat([cipher.update(JSON.stringify(value), 'utf8'), cipher.final()]).toString('base64'), tag: cipher.getAuthTag().toString('base64') };
-}
-function unseal(value, id) {
-  const key = keyBytes(); if (!key || value?.version !== 1) throw new ServiceOnboardingError('private_storage_unavailable', 'Saved registration information could not be opened safely.', 503);
-  const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(value.iv, 'base64')); decipher.setAAD(Buffer.from(id)); decipher.setAuthTag(Buffer.from(value.tag, 'base64'));
-  return JSON.parse(Buffer.concat([decipher.update(Buffer.from(value.ciphertext, 'base64')), decipher.final()]).toString('utf8'));
-}
+const encryptionContext = id => ({family:'platform',purpose:'service-onboarding',aad:id,legacyAAD:id,legacyFormat:'privateData'});
+function seal(value,id){if(!privateEncryptionAvailable('platform'))throw new ServiceOnboardingError('private_storage_unavailable','Secure registration storage is not available yet.',503);return sealPrivate(JSON.stringify(value),encryptionContext(id));}
+function unseal(value,id){return JSON.parse(openPrivate(value,encryptionContext(id)));}
 function queueValue(value) {
   if (!value) return { version: 1, intents: {}, cursor: '' };
   if (value.version !== 1 || !value.intents || typeof value.intents !== 'object' || Array.isArray(value.intents) || typeof value.cursor !== 'string') throw new Error('Service setup queue unavailable');
@@ -83,7 +73,7 @@ function quote(c, status, requested = channels(c), prior = null) {
   const numberAccepted = !!prior?.offer?.number && !prior.cancelRequestedAt;
   const available = requested.length > 0 && (numberAccepted || status.number.available === true && !!status.number.offer) &&
     (!requested.includes('voice') || status.voice.available === true && !!status.voice.offer) &&
-    (!requested.includes('sms') || status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && !!keyBytes());
+    (!requested.includes('sms') || status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && privateEncryptionAvailable('platform'));
   if (!available) return null;
   const offer = { number: numberAccepted ? prior.offer.number : status.number.offer, voice: requested.includes('voice') ? status.voice.offer : null, messaging: requested.includes('sms') ? status.messaging.offer : null, program: requested.includes('sms') ? status.messaging.program : null };
   return { ...offer, scopeChannels:[...requested], numberCostAlreadyAccepted:numberAccepted, digest: digest({ requestedChannels: requested, number: offer.number.digest, numberCostAlreadyAccepted:numberAccepted, voice: offer.voice?.digest || null, messaging: offer.messaging?.digest || null, program: offer.program?.digest || null }) };
@@ -106,7 +96,7 @@ const started = row => Object.values(row.steps || {}).some(step => step?.started
 const authorizedChannels = row => row?.requestedChannels || [];
 const desiredChannels = row => row?.desiredChannels || row?.requestedChannels || [];
 const channelSet = values => ['voice','sms'].filter(channel => values.includes(channel));
-function channelReady(kind, status) { return kind === 'voice' ? status.voice.available === true && !!status.voice.offer : status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && !!keyBytes(); }
+function channelReady(kind, status) { return kind === 'voice' ? status.voice.available === true && !!status.voice.offer : status.messaging.available === true && !!status.messaging.offer && !!status.messaging.program && privateEncryptionAvailable('platform'); }
 function acceptanceReceipt(row, submissionId) { return (row?.admissions || []).find(receipt => receipt.submissionId === submissionId.toLowerCase()); }
 // Read-only recovery for one owner approval whose HTTP response was lost.
 // Queue admission is itself durable; inspecting it must not repair or dispatch it.
