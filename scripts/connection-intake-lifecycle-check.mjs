@@ -13,14 +13,14 @@ function instrumentation(source,hook){assert.ok(source.trimEnd().endsWith('})();
 async function atBoundary(promise,name){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Missing expected async boundary: '+name)),3000);})]);}finally{clearTimeout(timer);}}
 async function exerciseBody(source,guide,method,change){
  const continueReplacement=change==='session-then-new';if(continueReplacement)change='session';
- let release,enteredResolve;const entered=new Promise(r=>enteredResolve=r),body=new Promise(r=>release=r),listeners=new Map(),events=[],fetches=[];
+ let release,enteredResolve,reportResolve;const reportSeen=new Promise(r=>reportResolve=r),entered=new Promise(r=>enteredResolve=r),body=new Promise(r=>release=r),listeners=new Map(),events=[],fetches=[];
  const nodes={setupGuide:new Node(),portalContent:new Node(),deskSignOut:new Node()},values=new Map([['mc-onboarding-session-v1','original-session']]);
  const doc={body:{dataset:{workspaceState:'ready',activePage:'setup'}},activeElement:null,getElementById:id=>nodes[id]||null,querySelector:()=>null,querySelectorAll:()=>[],createElement:()=>new Node(),addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);},dispatchEvent(event){events.push({type:event.type,detail:event.detail});for(const fn of listeners.get(event.type)||[])fn(event);return!event.defaultPrevented;}};
  const response=view('OLD_BODY');response.ok=true;response.serviceIntake.lastSubmissionId='a'.repeat(32);
  let delayed=true,privateOpenCount=0;
  const context={document:doc,CustomEvent:Event,MutationObserver:class{observe(){}disconnect(){}},URLSearchParams,AbortController,TextEncoder,crypto:crypto.webcrypto,setTimeout,clearTimeout,requestAnimationFrame:fn=>fn(),queueMicrotask,location:{search:'?c=synthetic-workspace',pathname:'/desk.html',hash:''},history:{pushState(){},replaceState(){}},matchMedia:()=>({matches:true,addEventListener(){}}),sessionStorage:{getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},console:{log(){}},async fetch(url,options={}){
    const payload=options.body?JSON.parse(options.body):null;fetches.push({kind:payload?.action||String(url).includes('service_intake=1')?'private_or_action':'workspace_get',action:payload?.action||null,authorization:options.headers?.Authorization||null});
-   if(payload?.action==='report_connection')return{ok:true,status:200,async json(){return{ok:true,connectionAssistance:{calendar:{status:'reported',reference:'MC-SYNTHETIC',operationIds:[payload.operationId]}}};}};
+   if(payload?.action==='report_connection'){reportResolve();return{ok:true,status:200,async json(){return{ok:true,connectionAssistance:{calendar:{status:'reported',reference:'MC-SYNTHETIC',operationIds:[payload.operationId]}}};}};}
    if(method==='open'&&String(url).includes('service_intake=1')&&++privateOpenCount>1)return{ok:true,status:200,async json(){return view('NEW_SECOND_OPEN');}};
    if(change==='unknown-then-reconcile'&&payload){throw Error('synthetic_unknown');}
    return{ok:true,status:200,async json(){if(delayed){delayed=false;enteredResolve();return body;}if(continueReplacement){const next=view('NEW_SESSION_SAVE');next.ok=true;next.serviceIntake.lastSubmissionId='b'.repeat(32);return next;}return response;}};
@@ -46,7 +46,8 @@ async function exerciseBody(source,guide,method,change){
  }
  release(response);await promise;
  if(continueReplacement){const fresh=state();fresh.attempt.body.submissionId='b'.repeat(32);context.__intakeProbe.replace(fresh);await context.__intakeProbe.send('calendar');}
- for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
+ // Automatic review continues asynchronously after the save event. Observe its fetch boundary.
+ if(events.some(e=>e.type==='mc:connection-details-saved'))await atBoundary(reportSeen,'automatic report dispatch');
  const current=context.__intakeProbe.data();
  return{method,change,staleBodyProjected:current?.serviceIntake?.token==='OLD_BODY',currentToken:current?.serviceIntake?.token,acceptedSaveEvents:events.filter(e=>e.type==='mc:connection-details-saved').length,openedEvents:events.filter(e=>e.type==='mc:connector-intake-open-state'&&e.detail?.state==='opened').length,automaticReportDispatches:fetches.filter(e=>e.action==='report_connection').length,automaticUnderReplacementSession:fetches.some(e=>e.action==='report_connection'&&e.authorization==='Bearer replacement-session'),fetches:fetches.length};
 }
