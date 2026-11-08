@@ -136,6 +136,29 @@ async function suite(backend){
  privateResponse=await onboard(request(`/api/onboard?c=${c.slug}&k=${c.ownerKey}`,null,null,'GET'));assert.equal(privateResponse.status,401);privateResponse=await onboard(request(`/api/onboard?c=${c.slug}`,null,foreignSession,'GET'));assert.equal(privateResponse.status,403);groups++;
  process.env.MC_FAKE_MODEL='1';
  if(backend==='sdk'){
+  // Revoke access while the real export is waiting on a private record read.
+  // The completed response must check current authority, not only its initial session.
+  for (const kind of ['bookings','leads','conversations','customers']) for (const changed of ['revoked','expired','foreign']) {
+   const target=fresh(`export-${kind}-${changed}`);await store.put('clients',target.slug,target);
+   const token=await ownerToken(target),sessionKey=access.accessHash(token),original=await store.get('access_sessions',sessionKey);
+   const tenantIdentity=(await import('../netlify/functions/lib/workspace-identity.mjs')).workspaceTenant(target);
+   const marker='Private export boundary fixture',recordKind=kind==='leads'?'leads':kind==='conversations'?'conversations':'bookings';
+   let recordKey;
+   if(recordKind==='conversations') {recordKey=store.convKey(target,'call','export-fixture');await store.put('conversations',recordKey,{tenantIdentity,channel:'call',contact:'export-fixture',messages:[{role:'user',content:marker,at:new Date().toISOString()}]});}
+   else {const row=await store.addRecord(recordKind,target.slug,{tenantIdentity,customer_name:marker,phone:'+17135550142',status:recordKind==='bookings'?'confirmed':'open',channel:'web',issue:marker,date:'2026-11-10',window:'8 to 12'});recordKey=target.slug+'/'+row.id;}
+   let reached,release;const entered=new Promise(resolve=>{reached=resolve;}),gate=new Promise(resolve=>{release=resolve;});
+   heldRead={kind:'site:'+recordKind,key:recordKey,reached,release:gate};
+   const pending=clientAPI(request(ownerPath(target)+'&export='+kind,null,token,'GET'));
+   await entered;
+   await store.put('access_sessions',sessionKey,{...original,...(changed==='revoked'?{status:'revoked'}:changed==='expired'?{expiresAt:new Date(Date.now()-1).toISOString()}:{email:'replacement-owner@example.invalid'})});
+   release();const deniedExport=await pending,deniedText=await deniedExport.text();
+   if(changed==='foreign')assert.ok([401,403].includes(deniedExport.status),kind+' must reject changed owner access');
+   else assert.equal(deniedExport.status,401,kind+' must recheck '+changed+' access');
+   assert.doesNotMatch(deniedText,new RegExp(marker));assert.equal(deniedExport.headers.get('content-disposition'),null);assert.equal(deniedExport.headers.get('cache-control'),'no-store');
+   await store.put('access_sessions',sessionKey,original);
+   const retry=await clientAPI(request(ownerPath(target)+'&export='+kind,null,token,'GET'));
+   assert.equal(retry.status,200);assert.match(retry.headers.get('content-type'),/^text\/csv/);assert.match(await retry.text(),new RegExp(marker));groups++;
+  }
   for (const sameField of [true,false]) {
    c=fresh(sameField?'stale-legal':'preserve-calendar');await store.put('clients',c.slug,c);
    let reached, release;const entered=new Promise(resolve=>{reached=resolve;}),gate=new Promise(resolve=>{release=resolve;});
@@ -171,5 +194,6 @@ assert.equal((await sendSMS({client:legacy,to:'+17135550141',body:'Legacy fixtur
 assert.equal((await placeCall({client:legacy,to:'+17135550141',say:'Legacy fixture only'})).ok,true);
 providerFixture=false;assert.equal(stubbedLegacyRequests.length,2);groups++;
 await store.put('clients',legacy.slug,legacy);const legacyResponse=await clientAPI(request(`/api/client?c=${legacy.slug}&k=${legacy.ownerKey}`,null,null,'GET'));assert.equal(legacyResponse.status,200);assert.equal((await legacyResponse.json()).client.ownerKey,legacy.ownerKey);groups++;
+const legacyExport=await clientAPI(request(`/api/client?c=${legacy.slug}&k=${legacy.ownerKey}&export=bookings`,null,null,'GET'));assert.equal(legacyExport.status,200);assert.match(legacyExport.headers.get('content-type'),/^text\/csv/);groups++;
 assert.equal(unexpected,0);assert.ok(conflicts>0);
 console.log(JSON.stringify({ok:true,groups,backends:['memory','installed @netlify/blobs protocol double'],casConflicts:conflicts,outboundProviderModelRequests:unexpected,stubbedLegacyRequests:stubbedLegacyRequests.length,limitations:'No actual email, model, provider, deployed Blobs or hosted acceptance; legacy unmarked service behavior retained.'},null,2));

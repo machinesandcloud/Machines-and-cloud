@@ -195,7 +195,7 @@ async function handle(req) {
       return json({ ...publicView(c), ...(selfService ? { webAvailable: web.ready && web.active && aiAllowance.available } : {}) }, 200, selfService ? { ...CORS(origin), "Cache-Control": "no-store", "Netlify-CDN-Cache-Control": "no-store", Vary: "Origin, Authorization" } : { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
     }
     const exp = url.searchParams.get("export");
-    if (exp) return exportCSV(c, exp, session);
+    if (exp) return exportCSV(c, exp, session, req);
     const aiAllowance = selfService ? await getAIAllowance(c) : null;
     let availabilityBlocks;
     try { availabilityBlocks = await getAvailabilityBlocks(c); }
@@ -583,7 +583,7 @@ async function recordsForExport(c,kind,limit){
   if(isSelfServiceClient(c)&&page.listing.incomplete)throw Object.assign(new Error('A complete history export is not available yet. Some saved records need reconciliation; contact support before exporting.'),{code:'history_incomplete'});
   return page.records;
 }
-async function exportCSV(c, what, session) {
+async function exportCSV(c, what, session, req) {
   const today = new Date().toISOString().slice(0, 10);
   let header, rows;
   if (what === "bookings") {
@@ -631,6 +631,11 @@ async function exportCSV(c, what, session) {
       return [first, last, phone, "", a.street, a.city, a.state, a.zip, `${x.issues.slice(-1)[0] || ""}${x.refs.length ? " (refs " + x.refs.join(", ") + ")" : ""}`, "Other", "front desk"];
     });
   } else return json({ error: "unknown_export" }, 400);
-  await assertCurrentWorkspace(c);
+  const current = await assertCurrentWorkspace(c);
+  if (isSelfServiceClient(c)) {
+    const active = await getAccessSession(req);
+    if (!active || active.sessionHash !== session?.sessionHash) return json({ error: 'verification_required' }, 401, { 'Cache-Control': 'no-store' });
+    if (normalizeAccountEmail(active.email) !== normalizeAccountEmail(current.owner?.email)) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
+  }
   return new Response(csv(header, rows), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${c.slug}-${what}-${today}.csv"`, "Cache-Control": "no-store" } });
 }
