@@ -41,6 +41,23 @@
     $('app').hidden = true; $('login').hidden = false; $('loginStatus').textContent = message || ''; $('verifyPanel').hidden = !verifyToken; $('loginForm').hidden = !!verifyToken;
   }
   function toast(message) { clearTimeout(toastTimer); $('toast').textContent = message; $('toast').hidden = false; toastTimer = setTimeout(function () { $('toast').hidden = true; }, 4500); }
+  function savedActionMessage(name) {
+    return name === 'record_voice_rejection' ? 'Evidence recorded. The saved cancellation result is shown on this account; service and health are not overridden.'
+      : name === 'acknowledge_report' ? 'Report acknowledged. The customer can see it is under review.'
+      : name === 'resolve_report' ? 'Resolution saved in the customer’s workspace.'
+      : name === 'save_note' ? 'Internal note saved.'
+      : name === 'reconcile_services' ? 'Service-check request saved. Its receipt shows whether checks were dispatched; delivery is confirmed separately.'
+      : name === 'update_rules' ? 'Corrected answers saved. Review and test are required before using changed rules.'
+      : name === 'rebuild_workspace' || name === 'retry_operation' ? 'Refresh request saved. Check Background work for its result.'
+      : 'Change saved. Current service status is shown on the account.';
+  }
+  function showSavedRefreshFailure(snapshot) {
+    if (!data || selected !== snapshot.slug || view !== 'customers') return;
+    renderDetail(false);
+    var notice = document.createElement('section'); notice.className = 'panel';
+    notice.innerHTML = '<h2 id="savedTitle" tabindex="-1">Change saved</h2><p class="notice success">' + esc(savedActionMessage(snapshot.name)) + '</p><p class="muted">The latest account details could not be refreshed. The saved result is retained below. Refresh to check the current account before making another change.</p><button class="btn primary" type="button" id="refreshCustomerDetail">Refresh customer details</button>';
+    $('customerDetail').prepend(notice); $('savedTitle').focus();
+  }
   async function request(method, body, query, format) {
     var current = generation, token = session, controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     controllers.add(controller);
@@ -259,8 +276,8 @@
   async function loadDetail(slug, focus) {
     var current = generation, version = ++detailVersion, previous = currentCustomer(); selected = slug; selectedRecord = previous && previous.slug === slug ? previous : null; navigate('customers', false);
     if (!selectedRecord) { $('customerList').hidden = true; $('customerDetail').hidden = false; $('customerDetail').innerHTML = '<p class="notice" role="status">Loading customer details…</p>'; }
-    try { var result = await request('GET', undefined, '?c=' + encodeURIComponent(slug)); if (current !== generation || version !== detailVersion || selected !== slug) return; if (!result.customer || result.customer.slug !== slug) throw new Error('The customer response was incomplete. Refresh and try again.'); selectedRecord = result.customer; var index = data.customers.findIndex(function (customer) { return customer.slug === slug; }); if (index >= 0) data.customers[index] = result.customer; renderDetail(focus); }
-    catch (error) { if (current !== generation || version !== detailVersion || error.stale) return; if (selectedRecord) { renderDetail(false); var warning = document.createElement('p'); warning.className = 'notice error'; warning.textContent = 'Could not refresh this account. The details below may be out of date. ' + error.message; $('customerDetail').prepend(warning); } else { $('customerDetail').innerHTML = '<p class="notice error">' + esc(error.message) + '</p><button class="btn" type="button" id="backCustomers">← All customers</button>'; } }
+    try { var result = await request('GET', undefined, '?c=' + encodeURIComponent(slug)); if (current !== generation || version !== detailVersion || selected !== slug) return; if (!result.customer || result.customer.slug !== slug) throw new Error('The customer response was incomplete. Refresh and try again.'); selectedRecord = result.customer; var index = data.customers.findIndex(function (customer) { return customer.slug === slug; }); if (index >= 0) data.customers[index] = result.customer; renderDetail(focus); return true; }
+    catch (error) { if (current !== generation || version !== detailVersion || error.stale) return; if (selectedRecord) { renderDetail(false); var warning = document.createElement('div'); warning.className = 'notice error'; warning.innerHTML = '<p>' + esc('Could not refresh this account. The details below may be out of date. ' + error.message) + '</p><button class="btn small" type="button" id="refreshCustomerDetail">Refresh customer details</button>'; $('customerDetail').prepend(warning); } else { $('customerDetail').innerHTML = '<p class="notice error">' + esc(error.message) + '</p><button class="btn" type="button" id="backCustomers">← All customers</button>'; } return false; }
   }
   function selectCustomer(slug,reportId) { if (!data || !array(data.customers).some(function (customer) { return customer.slug === slug; })) return; return loadDetail(slug, !reportId).then(function(){if(selected===slug && reportId)focusSupportReport(reportId);}); }
   document.addEventListener('click', function (event) {
@@ -311,12 +328,13 @@
     var reportAction=['acknowledge_report','resolve_report'].includes(action.name);
     if(reportAction){body.reportId=action.reportId;body.expectedReportRevision=action.expectedReportRevision;body.operationId=action.operationId;if(action.name==='resolve_report'){body.resolution=$('actionResolution').value.trim();if(body.resolution.length<10){$('actionStatus').textContent='Add a clear resolution of at least 10 characters for the customer.';$('actionResolution').focus();return;}}if(action.savedBody)body=action.savedBody;else action.savedBody=structuredClone(body);snapshot=Object.assign({},action);}
 
-    var reportSaved=false;
+    var changeSaved=false;
     busy = true; $('actionSubmit').disabled = true; $('actionCancel').disabled = true; $('actionStatus').textContent = 'Saving…';
     try {
       if(reportAction){pendingSupportAction=body;await storeSupportAction(body);if(current!==generation)return;}
       var result = await request('POST', body); if (current !== generation) return;
-      if(reportAction){reportSaved=true;pendingSupportAction=null;await storeSupportAction(null);if(current!==generation)return;renderPendingSupport();}
+      changeSaved=true;
+      if(reportAction){pendingSupportAction=null;await storeSupportAction(null);if(current!==generation)return;renderPendingSupport();}
       $('actionDialog').close(); action = null; selected = snapshot.slug;
       if (result.refreshRequired === true) {
         selectedRecord = null; detailVersion++; data.customers = array(data.customers).filter(function (customer) { return customer.slug !== snapshot.slug; });
@@ -324,12 +342,18 @@
         $('appStatus').textContent = 'Your change was saved. Refresh this account to confirm its current state before making another change.'; $('appStatus').className = 'notice'; $('appStatus').hidden = false; $('savedTitle').focus(); return;
       }
       if (result.customer && result.customer.slug === snapshot.slug) selectedRecord = result.customer;
-      await loadData(); if (current === generation) await loadDetail(snapshot.slug, false);
-      if (current === generation) { renderDetail(false); if(snapshot.reportId)focusSupportReport(snapshot.reportId); toast(snapshot.name==='record_voice_rejection'?'Evidence recorded. The saved cancellation result is shown on this account; service and health are not overridden.':snapshot.name==='acknowledge_report'?'Report acknowledged. The customer can see it is under review.':snapshot.name==='resolve_report'?'Resolution saved in the customer’s workspace.':snapshot.name === 'save_note' ? 'Internal note saved.' : snapshot.name === 'reconcile_services' ? 'Service-check request saved. Its receipt shows whether checks were dispatched; delivery is confirmed separately.' : snapshot.name === 'update_rules' ? 'Corrected answers saved. Review and test are required before using changed rules.' : snapshot.name === 'rebuild_workspace' || snapshot.name === 'retry_operation' ? 'Refresh request saved. Check Background work for its result.' : 'Change saved. Current service status is shown on the account.'); }
+      renderDetail(false); toast(savedActionMessage(snapshot.name));
+      await loadData();
+      if (current === generation && selected === snapshot.slug && view === 'customers') {
+        var detailConfirmed = await loadDetail(snapshot.slug, false);
+        if (current !== generation || selected !== snapshot.slug || view !== 'customers') return;
+        if (detailConfirmed === false) { showSavedRefreshFailure(snapshot); return; }
+        if(snapshot.reportId)focusSupportReport(snapshot.reportId); toast(savedActionMessage(snapshot.name));
+      }
     } catch (error) {
       if (current !== generation || error.stale) return;
+      if(changeSaved){showSavedRefreshFailure(snapshot);return;}
       if(snapshot.name==='record_voice_rejection' && (!error.status || error.status>=500)){if(action)action.uncertain=true;$('voiceEvidenceRefresh').hidden=false;$('actionStatus').textContent='The result is unconfirmed; the evidence may already be recorded. Check its saved receipt before retrying.';return;}
-      if(reportAction && reportSaved){toast('The support change is saved. Refresh customer details to see its current status.');return;}
       if(reportAction){
         if(error.status && error.status<500){pendingSupportAction=null;await storeSupportAction(null);if(current!==generation)return;renderPendingSupport();if(action)action.savedBody=null;}
         else{if(action)action.uncertain=true;$('actionReason').readOnly=true;$('actionResolution').readOnly=true;$('actionCheck').hidden=false;$('actionStatus').textContent='The result is not confirmed. Your saved details are kept. Check the report before retrying the same change.';renderPendingSupport();return;}

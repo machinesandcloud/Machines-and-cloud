@@ -9,8 +9,8 @@ if (!process.argv.includes('--output') || !/^scratchpad\/[a-z0-9-]+\.json$/.test
 const prefix = output.slice(0, -5), base = 'http://127.0.0.1:8894', email = 'save-feedback-operator@example.test';
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_|STEVE_)/.test(key)) delete process.env[key];
 Object.assign(process.env, { MC_MEMORY_STORE: '1', MC_FAKE_MODEL: '1', NODE_ENV: 'test', URL: base, PUBLIC_SITE_URL: base, ADMIN_EMAILS: email });
-const assets = ['admin.html', 'admin.js', 'admin.css', 'product-ui.css', 'assets/logo-dark.png', 'assets/logo.png', 'assets/favicon.png'];
-const files = [...assets, 'scripts/admin-save-feedback-check.mjs', 'netlify/functions/manage.mjs', 'netlify/functions/lib/operator.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/lib/store.mjs'];
+const assets = ['admin.html', 'admin.js', 'admin.css', 'product-ui.css', 'design-system.css', 'brand-marks.js', 'assets/logo-dark.png', 'assets/logo.png', 'assets/favicon.png'];
+const files = [...assets, 'scripts/experience-admin-check.mjs', 'netlify/functions/manage.mjs', 'netlify/functions/lib/operator.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/lib/store.mjs'];
 const hash = value => createHash('sha256').update(value).digest('hex');
 const hashes = () => Object.fromEntries(files.map(file => [file, hash(readFileSync(file))]));
 const report = { at: new Date().toISOString(), mode: 'actual management handler and local browser; memory; no external HTTP, email, model or provider', sourceBefore: hashes(), checks: [], requests: [], blocked: [], pageErrors: [], screenshots: [] };
@@ -35,7 +35,8 @@ await context.route('**/*', async route => {
     const body = request.method() === 'POST' ? JSON.parse(request.postData()) : null;
     let response;
     if (request.method() === 'GET' && readFault && (readFault === 'overview' ? !url.search : url.search === '?c=' + c.slug)) {
-      readFault = null; response = new Response(JSON.stringify({ error: 'unavailable', message: 'Injected account readback unavailable.' }), { status: 503 });
+      const denied = readFault === 'denied_detail'; readFault = null;
+      response = new Response(JSON.stringify({ error: denied ? 'unauthorized' : 'unavailable', message: denied ? 'Injected operator access expired.' : 'Injected account readback unavailable.' }), { status: denied ? 401 : 503 });
     } else if (body && fault === 'post_rejected') {
       fault = null; response = new Response(JSON.stringify({ error: 'unavailable', message: 'Injected save unavailable; no change accepted.' }), { status: 503 });
     } else {
@@ -43,7 +44,7 @@ await context.route('**/*', async route => {
       if (body && response.ok && fault) {
         const active = fault; fault = null;
         if (active === 'post_receipt_lost') response = new Response(JSON.stringify({ error: 'unknown', message: 'Injected saved receipt lost; result not confirmed.' }), { status: 503 });
-        else if (active === 'overview' || active === 'detail') readFault = active;
+        else if (active === 'overview' || active === 'detail' || active === 'denied_detail') readFault = active;
         else if (active === 'hold_overview') hold.armed = true;
       }
     }
@@ -66,4 +67,71 @@ async function focused() { return page.evaluate(() => ({ tag: document.activeEle
 try {
  await page.goto(base+'/admin.html');await page.evaluate(t=>sessionStorage.setItem('mc-operator-session-v1',t),token);await page.reload();await page.locator('#app:not([hidden])').waitFor();
  for(const width of [320,390,1440]){await page.setViewportSize({width,height:950});for(const view of ['overview','customers','issues','system']){await page.locator('[data-view="'+view+'"]').click();await shot(view+'-'+width);check(view+' fits '+width,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}}
+ await attempt('confirmed save survives a failed overview refresh', async () => {
+   await page.setViewportSize({width:390,height:950});
+   const note = 'Saved note with unavailable account refresh';
+   await startNote(note); fault = 'overview';
+   await page.locator('#actionSubmit').click();
+   await page.waitForFunction(() => document.querySelector('#appStatus').textContent.includes('Could not refresh'));
+   check('note is retained by the actual handler before readback failure', (await store.get('clients', c.slug)).management.notes.some(row => row.text === note));
+   await shot('saved-note-refresh-failure-390');
+   check('confirmed note remains visible when overview refresh fails', await page.locator('#customerDetail').innerText().then(text => text.includes(note)));
+   check('saved result has a focused read-only recovery action', await page.locator('#savedTitle').evaluate(node => node === document.activeElement) && await page.locator('#refreshCustomerDetail').isVisible());
+   const before = posts();
+   await page.locator('#refreshCustomerDetail').click();
+   await page.locator('#savedTitle').waitFor({state:'detached'});
+   check('read-only recovery shows one saved note without another mutation', posts() === before && (await store.get('clients', c.slug)).management.notes.filter(row => row.text === note).length === 1 && await page.locator('#customerDetail').innerText().then(text => text.includes(note)));
+ });
+ await attempt('confirmed save survives a failed detail refresh', async () => {
+   const note = 'Saved note with unavailable detail refresh';
+   await startNote(note); fault = 'detail'; await page.locator('#actionSubmit').click();
+   await page.locator('#savedTitle').waitFor();
+   check('detail readback failure keeps confirmed note and saved status', await page.locator('#customerDetail').innerText().then(text => text.includes(note) && text.includes('Internal note saved.')));
+   for (const width of [320,390,768,1024,1440]) {
+     await page.setViewportSize({width,height:950});
+     check('saved result and recovery fit '+width, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1) && await page.locator('#refreshCustomerDetail').isVisible());
+     if ([390,1440].includes(width)) await shot('saved-note-detail-failure-'+width);
+   }
+   const before = posts(); readFault = 'detail';
+   await page.locator('#refreshCustomerDetail').click();
+   await page.locator('#customerDetail .notice.error').waitFor();
+   check('another failed read retains note and read-only recovery', posts() === before && await page.locator('#refreshCustomerDetail').isVisible() && await page.locator('#customerDetail').innerText().then(text => text.includes(note)));
+   await page.locator('#refreshCustomerDetail').click();
+   await page.locator('#customerDetail .notice.error').waitFor({state:'detached'});
+   check('detail recovery does not repeat the saved change', posts() === before && (await store.get('clients', c.slug)).management.notes.filter(row => row.text === note).length === 1);
+ });
+ await attempt('rejected save keeps the draft without claiming success', async () => {
+   const note = 'Rejected note stays in the editor';
+   await startNote(note); fault = 'post_rejected'; await page.locator('#actionSubmit').click();
+   await page.locator('#actionStatus').filter({hasText:'no change accepted'}).waitFor();
+   check('rejected action keeps editable work and no saved result', await page.locator('#actionDialog').evaluate(node => node.open) && await page.locator('#actionNote').inputValue() === note && await page.locator('#savedTitle').count() === 0 && !(await store.get('clients', c.slug)).management.notes.some(row => row.text === note));
+   await page.locator('#actionCancel').click();
+ });
+ await attempt('lost mutation receipt remains unconfirmed until a read', async () => {
+   const note = 'Saved note with a lost mutation receipt';
+   await startNote(note); fault = 'post_receipt_lost'; const before = posts(); await page.locator('#actionSubmit').click();
+   await page.locator('#actionStatus').filter({hasText:'result not confirmed'}).waitFor();
+   check('lost receipt is not labelled saved or automatically retried', posts() === before + 1 && await page.locator('#actionDialog').evaluate(node => node.open) && await page.locator('#actionNote').inputValue() === note && await page.locator('#savedTitle').count() === 0);
+   await page.locator('#actionCancel').click(); await page.locator('#refreshAll').click();
+   await page.waitForFunction(text => document.querySelector('#customerDetail').textContent.includes(text), note);
+   check('ordinary refresh confirms the lost receipt without another write', posts() === before + 1 && (await store.get('clients', c.slug)).management.notes.filter(row => row.text === note).length === 1);
+ });
+ await attempt('slow readback preserves the saved result and later selection', async () => {
+   const note = 'Saved note before a slow overview refresh';
+   let reached, release; const pending = new Promise(resolve => reached = resolve); const gate = new Promise(resolve => release = resolve);
+   hold = {reached,release:gate,armed:false};
+   try {
+     await startNote(note); fault = 'hold_overview'; const before = posts(); await page.locator('#actionSubmit').click(); await pending;
+     check('confirmed result is visible before a slow readback finishes', await page.locator('#customerDetail').innerText().then(text => text.includes(note)) && await page.locator('#toast').innerText().then(text => text.includes('Internal note saved.')));
+     await select(other.slug); release(); await page.waitForFunction(() => !document.querySelector('#refreshAll').disabled);
+     check('late refresh does not reopen the prior customer or repeat the action', posts() === before + 1 && await page.locator('#detailTitle').innerText().then(text => text === other.business.name));
+   } finally { release(); hold = null; }
+ });
+ await attempt('readback access denial clears the confirmed private projection', async () => {
+   await startNote('Private note cleared when operator access expires'); fault = 'denied_detail'; await page.locator('#actionSubmit').click();
+   await page.locator('#login:not([hidden])').waitFor();
+   check('late saved feedback cannot restore data after access denial', await page.locator('#customerDetail').innerText() === '' && await page.locator('#savedTitle').count() === 0 && await page.evaluate(() => !sessionStorage.getItem('mc-operator-session-v1')));
+ });
+ check('browser and handler made no external requests', report.blocked.length === 0);
+ check('changed journey has no browser errors', report.pageErrors.length === 0);
 } finally {report.sourceAfter=hashes();report.sourceStable=JSON.stringify(report.sourceBefore)===JSON.stringify(report.sourceAfter);report.summary={passed:report.checks.filter(c=>c.pass).length,failed:report.checks.filter(c=>!c.pass).length};writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});await browser.close();console.log(JSON.stringify({output,...report.summary,sourceStable:report.sourceStable}));}
