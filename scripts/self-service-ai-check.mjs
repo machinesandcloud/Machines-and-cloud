@@ -11,11 +11,11 @@ Object.assign(process.env,{MC_MEMORY_STORE:'1',MC_FAKE_MODEL:'1',NODE_ENV:'test'
 const RealDate=Date;let clock=RealDate.parse('2030-06-10T15:00:00Z');
 globalThis.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}};
 const blobs=new Map();let etag=0,conflicts=0,unexpected=0,fault=null,hold=null,modelMode='success',modelRequests=0;
-const writes=[];
+const writes=[];let modelTool=null;
 function modelResponse(){
  const events=[];const emit=data=>events.push(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
  emit({type:'message_start',message:{id:'offline-model',type:'message',role:'assistant',content:[],model:'claude-opus-5-5',stop_reason:null,stop_sequence:null,usage:{input_tokens:10,output_tokens:0}}});
- emit({type:'content_block_start',index:0,content_block:{type:'text',text:''}});emit({type:'content_block_delta',index:0,delta:{type:'text_delta',text:'The shop can confirm those details directly.'}});emit({type:'content_block_stop',index:0});emit({type:'message_delta',delta:{stop_reason:'end_turn',stop_sequence:null},usage:{output_tokens:10}});emit({type:'message_stop'});
+ if(modelTool){emit({type:'content_block_start',index:0,content_block:{type:'tool_use',id:'offline-typed-check',name:'notify_owner',input:{}}});emit({type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:JSON.stringify(modelTool)}});}else{emit({type:'content_block_start',index:0,content_block:{type:'text',text:''}});emit({type:'content_block_delta',index:0,delta:{type:'text_delta',text:'The shop can confirm those details directly.'}});}emit({type:'content_block_stop',index:0});emit({type:'message_delta',delta:{stop_reason:modelTool?'tool_use':'end_turn',stop_sequence:null},usage:{output_tokens:10}});emit({type:'message_stop'});
  return new Response(events.join(''),{headers:{'content-type':'text/event-stream'}});
 }
 globalThis.fetch=async(input,init={})=>{
@@ -83,6 +83,24 @@ async function suite(backend){
   check('sdk: midnight is recomputed inside an actual CAS retry',()=>{assert.equal(reserved.allowed,true);assert.equal(rolled.day,'2030-06-11');assert.equal(rolled.used,1);assert.ok(conflicts>beforeConflicts);});
   await reset();await session(c);modelRequests=0;const priorTests=await store.list('owner_tests',c.slug+'/'),priorWrites=writes.length;fault={kind:'site:'+KIND,key:KEY,method:'GET',mode:'reject'};response=await callChat(c,token);check('sdk: unreadable budget fails before SDK/history',()=>{assert.equal(response.status,503);assert.equal(modelRequests,0);assert.equal(writes.length,priorWrites);});fault=null;assert.deepEqual(await store.list('owner_tests',c.slug+'/'),priorTests);
   fault={kind:'site:'+KIND,key:KEY,method:'PUT',mode:'commit'};response=await callChat(c,token);check('sdk: ambiguous committed reservation is retained without model call',()=>{assert.equal(response.status,503);assert.equal(modelRequests,0);});fault=null;assert.equal((await getAIAllowance(c)).private.used,1);assert.deepEqual(await store.list('owner_tests',c.slug+'/'),priorTests);
+ }
+ // The actual public handler uses the current typed tool and saved canonical
+ // record; no second model round, and a lost browser ACK reuses the same turn.
+ for(const language of ['en','es']){
+  await reset();const current=tenant('typed-'+language);await store.saveClient(current);
+  const {flagLead}=await import('../netlify/functions/lib/desk.mjs');
+  const original=await flagLead(current,{customer_name:'Fixture',phone:'+17135550815',address:'Fixture address',issue:'Original callback',reason:'wants_call',wanted:'Original preference',urgency:'flexible',language,nobook_reason:'none',unsure:''},{channel:'web',contact:'original'});
+  modelTool={customer_name:'Fixture',phone:original.phone,address:'Corrected fixture address',issue:'Check original outcome only',reason:'status_check',wanted:'Review original preference',urgency:'flexible',language,nobook_reason:'none',unsure:'Original outcome is unknown'};
+  modelMode='success';process.env.MC_FAKE_MODEL='0';const before=modelRequests;
+  const body={client:current.slug,channel:'web',contact:'typed-'+language,turnId:'a'.repeat(32),messages:[{role:'user',content:'Check my original request; do not repeat it.'}]};
+  try{
+   const response=await chat(req('/api/chat',body));const out=await response.json();assert.equal(response.status,200);assert.equal(modelRequests,before+1);assert.equal(out.events.length,1);
+   assert.match(out.reply,language==='es'?/resultado de la solicitud original/:/original outcome/);
+   const checkRow=await store.get('leads',`${current.slug}/${out.events[0].id}`);assert.notEqual(checkRow.id,original.id);assert.equal(checkRow.reason,'status_check');assert.equal(checkRow.outcome,'took_message');assert.deepEqual(await store.get('leads',`${current.slug}/${original.id}`),original);
+   const savedCount=(await store.listJSON('leads',current.slug+'/')).length;
+   const replay=await chat(req('/api/chat',{...body,recoverTurn:true}));assert.equal(replay.status,200);assert.deepEqual(await replay.json(),out);assert.equal(modelRequests,before+1);assert.equal((await store.listJSON('leads',current.slug+'/')).length,savedCount);
+   check(backend+': '+language+' typed web save and lost-browser-ACK recovery keep original unchanged',()=>{});
+  }finally{modelTool=null;process.env.MC_FAKE_MODEL='1';}
  }
  await reset();process.env.MC_FAKE_MODEL='0';const legacy={...tenant('legacy'),onboarding:undefined};await store.saveClient(legacy);response=await chat(req('/api/chat',{client:legacy.slug,key:legacy.ownerKey,contact:'legacy',messages:[{role:'user',content:'What do you repair?'}]}));check(backend+': legacy client remains outside new budget',()=>assert.equal(response.status,200));response=await chat(req('/api/chat',{persona:'bayou-air',messages:[{role:'user',content:'What do you repair?'}]}));check(backend+': homepage practice remains outside new budget',()=>assert.equal(response.status,200));assert.equal(await store.get(KIND,KEY),null);
  process.env.MC_FAKE_MODEL='1';

@@ -17,6 +17,7 @@ import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
 import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordContext, noteWebsiteRecord, finishWebsiteTurn, failWebsiteTurn, WebsiteInstallationError, exactWebsiteOrigin } from './lib/website-installation.mjs';
 
 import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
+import { savedPortalAcknowledgment } from "./lib/self-service-ack.mjs";
 import { appointmentTextInvitation } from './lib/appointment-texts.mjs';
 
 export const config = { path: "/api/chat" };
@@ -167,6 +168,12 @@ export default async (req, context) => {
     const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY].map(tool => !isSelfServiceClient(c) ? tool : {
       ...tool, description: tool.name === "book_visit" ? "Save a visit in the shop portal after the customer accepts a real available window. Connected services may process it separately; this result does not confirm text, calendar or owner-contact delivery." : tool.name === "notify_owner" ? "Save a callback, handoff or emergency request in the shop portal. Separate contact delivery and human response or timing are not confirmed by this result." : tool.description,
     });
+    let savedActionCount = 0, savedCheckReply = null;
+    const rememberSave = (name, record, input) => {
+      if (!isSelfServiceClient(c)) return;
+      savedActionCount++;
+      if (name === 'notify_owner' && input.reason === 'status_check' && record.reason === input.reason) savedCheckReply = savedPortalAcknowledgment(name, record);
+    };
     const execTool = async (name, input) => {
       await fence();
       await validateWebsiteTurn(websiteContext);
@@ -174,14 +181,14 @@ export default async (req, context) => {
       const kind = name === 'book_visit' ? 'bookings' : 'leads';
       const proofActionId = isSelfServiceClient(c) && ['book_visit','notify_owner'].includes(name) ? await reserveAIProofMutation(c, aiProof, name, input, { contact, ...(websiteContext ? { setupActionId:websiteActionId(websiteContext,kind) } : {}) }) : null;
       const recordOptions = kind => ({ channel, contact, ...websiteRecordContext(websiteContext), ...(websiteContext ? { managedActionId: websiteActionId(websiteContext, kind) } : proofActionId ? { managedActionId:proofActionId } : {}), ...(isSelfServiceClient(c) ? { onSavedRecord: (recordKind, record) => noteWebsiteRecord(c, recordKind, record, { context: websiteContext, origin, contact }) } : {}) });
-      if (name === "book_visit") { const b = await bookVisit(c, input, recordOptions('bookings')); if (b.full) return { content: b.message }; const appointmentTexts = await appointmentTextInvitation(c, b); return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly. ${appointmentTexts ? 'An optional appointment-text invitation will appear beside your final reply. Do not claim texting consent or delivery.' : ''}` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id, ...(appointmentTexts ? { appointmentTexts } : {}) } }; }
-      if (name === "notify_owner") { const l = await flagLead(c, input, recordOptions('leads')); const followupTexts=channel==='web'&&!websiteContext?await(await import('./lib/request-followup.mjs')).requestFollowupInvitation(c,l):null; return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.${followupTexts?' An optional one-message follow-up invitation will appear beside your final reply; it does not give permission or schedule a text.':''}` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason, ...(followupTexts?{followupTexts}:{}) } }; }
+      if (name === "book_visit") { const b = await bookVisit(c, input, recordOptions('bookings')); if (b.full) return { content: b.message }; rememberSave(name,b,input); const appointmentTexts = await appointmentTextInvitation(c, b); return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly. ${appointmentTexts ? 'An optional appointment-text invitation will appear beside your final reply. Do not claim texting consent or delivery.' : ''}` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id, ...(appointmentTexts ? { appointmentTexts } : {}) } }; }
+      if (name === "notify_owner") { const l = await flagLead(c, input, recordOptions('leads')); rememberSave(name,l,input); const followupTexts=channel==='web'&&!websiteContext?await(await import('./lib/request-followup.mjs')).requestFollowupInvitation(c,l):null; return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.${followupTexts?' An optional one-message follow-up invitation will appear beside your final reply; it does not give permission or schedule a text.':''}` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason, ...(followupTexts?{followupTexts}:{}) } }; }
       return { content: "Unknown tool.", is_error: true };
     };
     const finish = async (out) => {
       await fence();
       // Record what the tools did inside the stored turn, so later turns know it already happened.
-      const done = (out.events || []).map((e) => e.type === "booking" ? `[Done: ${isSelfServiceClient(c) ? "visit saved in portal" : "visit booked"}, ref ${e.id}]` : e.type === "lead" ? `[Done: ${isSelfServiceClient(c) ? "request saved in portal, human contact unconfirmed" : "owner notified"}, ref ${e.id}]` : "").filter(Boolean).join(" ");
+      const done = (out.events || []).map((e) => e.type === "booking" ? `[Done: ${isSelfServiceClient(c) ? "visit saved in portal" : "visit booked"}, ref ${e.id}]` : e.type === "lead" ? `[Done: ${isSelfServiceClient(c) ? e.reason === "status_check" ? "status-check request saved in portal, original outcome and human contact unconfirmed" : "request saved in portal, human contact unconfirmed" : "owner notified"}, ref ${e.id}]` : "").filter(Boolean).join(" ");
       conv.messages.push({ role: "assistant", content: done ? out.reply + "\n" + done : out.reply, at: new Date().toISOString() });
       await saveConversation(conv, { output: { reply: out.reply, events: out.events || [] } });
       await fence();
@@ -193,7 +200,16 @@ export default async (req, context) => {
       try {
         await fence();
         const modelFetch = isSelfServiceClient(c) ? await selfServiceAIModelFetch(c, aiProof) : undefined;
-        return await finish(await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true, modelFetch }));
+        let terminalCheckReply = null;
+        const stopAfterTools = isSelfServiceClient(c) ? async ({toolUses,results}) => {
+          if (savedActionCount !== 1 || !savedCheckReply || toolUses.length !== 1 || toolUses[0].name !== 'notify_owner' || toolUses[0].input.reason !== 'status_check' || results.some(result => result.is_error)) return false;
+          await fence(); await validateWebsiteTurn(websiteContext);
+          terminalCheckReply = savedCheckReply;
+          if (onText) onText(terminalCheckReply);
+          return true;
+        } : undefined;
+        const out = await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true, modelFetch, stopAfterTools });
+        return await finish(terminalCheckReply ? {...out,reply:terminalCheckReply} : out);
       } catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} throw error; }
     };
     if (wantStream) return ndjsonResponse(run, cors(origin));

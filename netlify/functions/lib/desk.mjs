@@ -137,7 +137,7 @@ export const template = (type, rec) => (lang(rec) === "es" ? TEMPLATES_ES : TEMP
 export const str = (key, rec) => STRINGS[lang(rec)][key];
 
 const OUTCOME = { booked: "BOOKED", needs_action: "NEEDS ACTION", took_message: "TOOK MESSAGE", wants_call: "WANTS A CALL", spam: "SPAM", rescheduled: "RESCHEDULED", cancel_request: "NEEDS ACTION" };
-const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action", emergency: "needs_action", question: "took_message", wants_call: "wants_call", spam: "spam" }[reason] || "needs_action");
+const outcomeFor = (reason) => ({ lead: "needs_action", handoff: "needs_action", emergency: "needs_action", question: "took_message", status_check: "took_message", wants_call: "wants_call", spam: "spam" }[reason] || "needs_action");
 
 // "Existing customer" means a visit that happened: marked done or paid, or dated before today and
 // not cancelled. Leads, spam records, and future bookings do not count.
@@ -329,10 +329,10 @@ export async function bookVisit(c, input, ctx = {}) {
 
 // A repeat notify_owner for the same customer within 30 minutes updates the open lead instead of
 // opening a second one (and a second escalation chain).
-async function recentOpenLead(c, phone, contact) {
+async function recentOpenLead(c, phone, contact, reason) {
   const cutoff = Date.now() - 30 * 60 * 1000;
   const pool = phone ? await recordsFor("leads", c, phone) : await workspaceRows(c,"leads",60);
-  const leads = pool.filter((l) => !l.websiteSetupCheck && l.status === "open" && new Date(l.createdAt).getTime() > cutoff && belongsToWorkspace(c,l));
+  const leads = pool.filter((l) => !l.websiteSetupCheck && l.status === "open" && (l.reason === "status_check") === (reason === "status_check") && new Date(l.createdAt).getTime() > cutoff && belongsToWorkspace(c,l));
   return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
 }
 
@@ -395,12 +395,12 @@ export async function flagLead(c, input, ctx = {}) {
     const existing = await strictRead("leads", `${c.slug}/${ctx.managedActionId.slice(0,32)}`);
     if (existing) { if (existing.managedActionId !== ctx.managedActionId || !belongsToWorkspace(c,existing)) throw new Error("Lead identity mismatch"); await savedRecordEvidence(ctx, 'leads', existing); await queueSavedDelivery(c, existing, "leads"); return existing; }
   }
-  const prior = stable || reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact);
+  const prior = stable || reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact, reason);
   if (prior) {
     const changed = [];
     for (const k of ["customer_name", "phone", "address", "issue", "wanted", "unsure"]) { const v = k === "phone" ? phone : esc(input[k]); if (v && v !== prior[k]) { prior[k] = v; changed.push(k); } }
     const ct = await customerType(c, prior.phone); if (ct !== prior.customerType) { prior.customerType = ct; changed.push("customer"); }
-    const escalate = (reason === "emergency" || input.urgency === "emergency") && prior.urgency !== "emergency";
+    const escalate = reason !== "status_check" && (reason === "emergency" || input.urgency === "emergency") && prior.urgency !== "emergency";
     if (escalate) { prior.urgency = "emergency"; prior.reason = "emergency"; prior.outcome = "needs_action"; changed.push("urgency"); }
     if (reason === "wants_call" && prior.reason !== "wants_call") { prior.reason = "wants_call"; prior.outcome = "wants_call"; changed.push("reason"); await trackCallback(c, prior); }
     if (input.nobook_reason && input.nobook_reason !== "none" && input.nobook_reason !== prior.nobook_reason) prior.nobook_reason = input.nobook_reason;
@@ -415,7 +415,7 @@ export async function flagLead(c, input, ctx = {}) {
     if (!portalOnly) {
       if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
       const waiting = (await workspaceRows(c,"alerts",100)).some((a) => a.leadId === prior.id && a.status === "waiting");
-      if (!waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
+      if (reason !== "status_check" && !waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
     }
     await logEvent(c, "lead_updated", { id: prior.id, changed, channel: ctx.channel });
     return prior;
@@ -435,7 +435,7 @@ export async function flagLead(c, input, ctx = {}) {
   if (!portalOnly && reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
     await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
-    const urgent = reason === "emergency" || reason === "wants_call" || input.urgency === "emergency";
+    const urgent = reason !== "status_check" && (reason === "emergency" || reason === "wants_call" || input.urgency === "emergency");
     if (urgent) await openAlert(c, l, reason === "wants_call" ? "wants_call" : "emergency");
     if (PLANS[c.plan]?.followUp && l.phone && reason === "lead") {
       await scheduleFollowUp(c, new Date(Date.now() + 4 * H), "lead_chase", { leadId: l.id, n: 1 });

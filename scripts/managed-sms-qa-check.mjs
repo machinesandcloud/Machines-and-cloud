@@ -21,11 +21,11 @@ const deny = () => { throw new Error("QA external networking blocked"); }; net.c
 const blobs = new Map(), messages = new Map(), resources = new Map(), emails = new Map(); let etag = 0, faultKind = null, serial = 0, sendStatus = "sent", modelBarrier = null;
 let webBookingInput=null;
 const paidModelRequests=[];
-let paidModelAction=null;
-function bookingSSE(tool) {
+let paidModelAction=null,paidModelTool=null;
+function bookingSSE(tool,name="book_visit") {
   const packets=[],emit=data=>packets.push(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
   emit({type:'message_start',message:{id:'offline-consent-model',type:'message',role:'assistant',content:[],model:'offline-protocol',stop_reason:null,stop_sequence:null,usage:{input_tokens:10,output_tokens:0}}});
-  if(tool){emit({type:'content_block_start',index:0,content_block:{type:'tool_use',id:'offline-booking-tool',name:'book_visit',input:{}}});emit({type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:JSON.stringify(tool)}});}
+  if(tool){emit({type:'content_block_start',index:0,content_block:{type:'tool_use',id:'offline-booking-tool',name,input:{}}});emit({type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:JSON.stringify(tool)}});}
   else{emit({type:'content_block_start',index:0,content_block:{type:'text',text:''}});emit({type:'content_block_delta',index:0,delta:{type:'text_delta',text:'Your visit is saved in the shop portal. The shop confirms arrival details directly.'}});}
   emit({type:'content_block_stop',index:0});emit({type:'message_delta',delta:{stop_reason:tool?'tool_use':'end_turn',stop_sequence:null},usage:{output_tokens:10}});emit({type:'message_stop'});
   return new Response(packets.join(''),{headers:{'content-type':'text/event-stream'}});
@@ -35,7 +35,7 @@ globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
   if(url.origin==='https://api.anthropic.com'&&url.pathname==='/v1/messages') {
     const body=JSON.parse(init.body);assert.equal(body.model,'claude-haiku-5-5');assert.equal(body.max_tokens,800);assert.deepEqual(body.thinking,{type:'disabled'});assert.equal(body.fallbacks,undefined);assert.equal(body.betas,undefined);
-    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(null);
+    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(paidModelTool?.input||null,paidModelTool?.name||"book_visit");
   }
   if(url.origin==='https://consent-model.invalid' && url.pathname==='/v1/messages' && webBookingInput){const body=JSON.parse(init.body);return bookingSSE(Array.isArray(body.messages.at(-1).content)?null:webBookingInput);}
   if (url.origin === "https://sms-integration-blobs.invalid") {
@@ -348,6 +348,24 @@ await check('zero funded AI units stop before model and deterministic recipient 
     // explicit control bypasses AI without bypassing carrier segment funding.
     const other={...inbound(f,'APPOINTMENTS'),From:'+17135550888'};messages.get(other.MessageSid).from=other.From;await httpHandler(signed(other));assert.equal((await processManagedSMS(inboundKey(f,other))).ok,true);assert.equal(paidModelRequests.length,before);const row=await strictRead('managed_sms_inbound',inboundKey(f,other));assert.equal(row.paidAnswerCapacity,undefined);assert.ok(row.reply);
   }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;}
+});
+await check('funded SMS uses typed canonical check and replay preserves original callback/one model/one reply',async()=>{
+  const {flagLead}=await import('../netlify/functions/lib/desk.mjs');
+  for(const language of ['en','es']){
+    const f=await fixture('typed-check-'+language);await fundCapacity(f);
+    const original=await flagLead(f.c,{customer_name:'Fixture',phone:caller,address:'Fixture address',issue:'Original callback',reason:'wants_call',wanted:'Original timing',urgency:'flexible',language,nobook_reason:'none',unsure:''},{channel:'sms',contact:caller});
+    const fields=inbound(f,'Check the original request; do not repeat it.');await httpHandler(signed(fields));
+    const before=paidModelRequests.length;
+    paidModelTool={name:'notify_owner',input:{customer_name:'Fixture',phone:caller,address:'Corrected fixture address',issue:'Review original outcome',reason:'status_check',wanted:'Review original timing',urgency:'flexible',language,nobook_reason:'none',unsure:'Original outcome unknown'}};
+    process.env.MC_FAKE_MODEL='0';process.env.ANTHROPIC_API_KEY='offline-capacity-model';
+    try{
+      const id=inboundKey(f,fields);const outcome=await processManagedSMS(id);assert.equal(outcome.ok,true);assert.equal(paidModelRequests.length,before+1);
+      const row=await strictRead('managed_sms_inbound',id);assert.match(row.reply,language==='es'?/resultado de la solicitud original/:/original outcome/);
+      const leads=await store.listJSON('leads',f.c.slug+'/');const checks=leads.filter(record=>record.reason==='status_check');assert.equal(checks.length,1);assert.notEqual(checks[0].id,original.id);assert.equal(checks[0].outcome,'took_message');assert.deepEqual(await strictRead('leads',`${f.c.slug}/${original.id}`),original);
+      const jobsBefore=await store.list('managed_deliveries',f.c.slug+'/');await processManagedSMS(id);assert.equal(paidModelRequests.length,before+1);assert.deepEqual(await store.list('managed_deliveries',f.c.slug+'/'),jobsBefore);
+      const usage=await capacityUsage.paidUsageStatus(f.c);assert.equal(usage.units.aiAnswers.held,1);assert.equal(usage.units.aiAnswers.used,0);
+    }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;}
+  }
 });
 await check('unknown model result remains held in its original period and cannot restart after renewal',async()=>{
   const f=await fixture('capacity-model-unknown'),paid=await fundCapacity(f),fields=inbound(f,'Question with a lost answer');await httpHandler(signed(fields));

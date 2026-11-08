@@ -50,7 +50,7 @@ export function ownerTestTool(client, name, input) {
       return { content: `TEST ONLY: visit preview saved, ref ${event.id}. No actual appointment, capacity reservation, calendar event, reminder, text or owner notification was created. Describe what would happen in the test, not an action that really happened.`, event };
     }
     if (name === "notify_owner") {
-      const reasons = ["lead", "handoff", "emergency", "question", "wants_call", "spam"];
+      const reasons = ["lead", "handoff", "emergency", "question", "status_check", "wants_call", "spam"];
       if (!reasons.includes(input?.reason)) return { content: "Choose a valid test handoff reason.", is_error: true };
       const data = {
         customer_name: clean(input?.customer_name, 120), phone: previewPhone(input?.phone),

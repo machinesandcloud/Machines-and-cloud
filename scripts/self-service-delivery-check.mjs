@@ -88,6 +88,53 @@ check(() => assert.deepEqual(retainedAlert, beforeAlert));
 const skippedCallback = await runCallbackCheck(c, { data: { leadId: callback.id } });
 check(() => assert.equal(skippedCallback, "channel_not_active"));
 check(() => assert.equal(outbound.length, 0));
+// Current typed-status contract: a check is not the uncertain original callback.
+const { NOTIFY_OWNER, buildSystemPrompt } = await import("../netlify/functions/lib/config.mjs");
+const { savedPortalAcknowledgment } = await import("../netlify/functions/lib/self-service-ack.mjs");
+const { dispatchManagedVoiceTool } = await import("../netlify/functions/lib/managed-actions.mjs");
+const { ownerTestTool } = await import("../netlify/functions/lib/owner-test.mjs");
+check(()=>assert.ok(NOTIFY_OWNER.input_schema.properties.reason.enum.includes('status_check')));
+const baseCallback=await flagLead(c,{...input,phone:'+17135550814',reason:'wants_call',wanted:'Original timing'},{channel:'web',contact:'status-original'});
+const typedInput={...input,phone:baseCallback.phone,reason:'status_check',wanted:'Check original request only',issue:'Original callback outcome is unknown',urgency:'flexible',language:'en',nobook_reason:'none'};
+const original=structuredClone(baseCallback);
+const statusCheck=await flagLead(c,typedInput,{channel:'web',contact:'check-original'});
+check(()=>assert.notEqual(statusCheck.id,baseCallback.id));
+check(()=>assert.equal(statusCheck.reason,'status_check'));
+check(()=>assert.equal(statusCheck.outcome,'took_message'));
+const unchangedOriginal=await get('leads',`${c.slug}/${baseCallback.id}`);
+check(()=>assert.deepEqual(unchangedOriginal,original));
+const repeated=await flagLead(c,{...typedInput,wanted:'Corrected review preference'},{channel:'web',contact:'check-original'});
+check(()=>assert.equal(repeated.id,statusCheck.id));
+const callbackAgain=await flagLead(c,{...typedInput,reason:'wants_call',wanted:original.wanted,issue:original.issue},{channel:'web',contact:'status-original'});
+check(()=>assert.equal(callbackAgain.id,baseCallback.id));
+check(()=>assert.equal((savedPortalAcknowledgment('notify_owner',statusCheck)||'').includes('original outcome'),true));
+check(()=>assert.match(savedPortalAcknowledgment('notify_owner',{...statusCheck,language:'es'}),/resultado de la solicitud original/));
+for(const altered of [{reason:'question'},{outcome:'needs_action'},{status:'closed'},{urgency:'emergency'},{delivery:{mode:'legacy'}},{language:'bad'}])check(()=>assert.equal(savedPortalAcknowledgment('notify_owner',{...statusCheck,...altered}),null));
+check(()=>assert.equal(ownerTestTool(c,'notify_owner',typedInput).is_error,undefined));
+const rendered=buildSystemPrompt(c,'web');
+check(()=>assert.match(rendered,/unknown, lost or timed-out outcome/));
+check(()=>assert.match(rendered,/do not say the owner will be alerted right away/));
+// Actual action dispatcher: preserve its string API, committed identity and
+// authoritative canonical-record callback across lost observer acknowledgments.
+const operation={client:c,callId:'SM'+'f'.repeat(32),toolCallId:'mutation_0',name:'notify_owner',input:typedInput,caller:typedInput.phone,channel:'sms'};
+let observed=0,committedId=null;
+await assert.rejects(dispatchManagedVoiceTool({...operation,onSavedRecord:(_name,record)=>{observed++;committedId=record.id;throw Error('Synthetic observer ACK lost');}}),/Synthetic observer ACK lost/);
+const afterCommitCount=(await listRecords('leads',c.slug)).length;
+const content=await dispatchManagedVoiceTool({...operation,onSavedRecord:(name,record)=>{observed++;assert.equal(name,'notify_owner');assert.equal(record.id,committedId);assert.equal(record.reason,'status_check');assert.ok(savedPortalAcknowledgment(name,record));}});
+check(()=>assert.equal(typeof content,'string'));
+check(()=>assert.equal(observed,2));
+check(()=>assert.equal((content||'').includes('Request saved'),true));
+const afterReplayCount=(await listRecords('leads',c.slug)).length;
+check(()=>assert.equal(afterReplayCount,afterCommitCount));
+const committed=await get('leads',`${c.slug}/${committedId}`);
+await put('leads',`${c.slug}/${committedId}`,{...committed,managedActionId:'0'.repeat(64)});
+let foreignCallback=0;
+await assert.rejects(dispatchManagedVoiceTool({...operation,onSavedRecord:()=>{foreignCallback++;}}),/saved record unconfirmed/);
+check(()=>assert.equal(foreignCallback,0));
+await put('leads',`${c.slug}/${committedId}`,committed);
+check(()=>assert.equal(outbound.length,0));
+
+
 // Legacy shop behavior remains: real booking tools still create reminder/consent intents
 // and invoke the intercepted sender adapters. No actual network is possible in this process.
 const legacy = { ...c, slug: "qa-legacy-delivery", calendar: { provider: "none" } };
