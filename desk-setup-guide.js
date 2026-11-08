@@ -130,14 +130,14 @@
       '<p id="connectionReviewStatus" class="connection-verification-notice" role="status" aria-live="polite"'+(state.error?' data-error="true"':'')+'>'+esc(state.pending?(state.reading?'Checking your saved review…':'Sending your connection review…'):state.notice)+'</p>'+
       '<button type="button" id="connectorRequestReview" class="'+(continueAvailable?'connection-guide-link':'btn-pill btn-pill-blue btn-sm')+'"'+(state.pending?' disabled':'')+'>'+esc(state.pending?(state.reading?'Checking review…':'Sending request…'):state.uncertain&&!state.checked?'Check saved request':open?'Check review status':state.attempt?'Send saved request':report?'Request another review':'Request connection review')+'</button>';
   }
-  async function requestConnectionReview() {
+  async function requestConnectionReview(automatic) {
     if(!current()||!labels[selected])return;var id=selected,row=rows().find(function(item){return item.id===id;});if(stoppedConnection(row))return;
     var state=assistanceState(id),session=preparationSession(),slug=data.client.slug,generation=assistanceGeneration;if(state.pending||!session)return;
-    state.pending=true;state.reading=state.uncertain&&!state.checked||!!assistanceReport(id)&&assistanceReport(id).status!=='resolved';state.error=false;render();
+    state.pending=true;state.reading=state.uncertain&&!state.checked||!!assistanceReport(id)&&(automatic||assistanceReport(id).status!=='resolved');state.error=false;render();
     var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},15000);assistanceControllers.add(controller);
     try {
       await restoreAssistance(id,session,slug,state);if(generation!==assistanceGeneration||!current()||session!==preparationSession()||data.client.slug!==slug)return;
-      var report=assistanceReport(id),read=state.uncertain&&!state.checked||report&&report.status!=='resolved';state.reading=!!read;render();
+      var report=assistanceReport(id),read=state.uncertain&&!state.checked||report&&(automatic||report.status!=='resolved');state.reading=!!read;render();
       if(!read&&!state.attempt){state.attempt={action:'report_connection',service:id,operationId:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(byte){return byte.toString(16).padStart(2,'0');}).join(''),expectedReportRevision:report?.revision||null};await rememberAssistance(id,state,session,slug);}
       var response=await fetch(apiBase+'/api/client?c='+encodeURIComponent(slug),read?{headers:{Authorization:'Bearer '+session},cache:'no-store',signal:controller.signal}:{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session},body:JSON.stringify(state.attempt),signal:controller.signal});
       if(generation!==assistanceGeneration||!current()||session!==preparationSession()||data.client.slug!==slug)return;
@@ -152,6 +152,14 @@
       document.dispatchEvent(new CustomEvent('mc:desk-refresh',{detail:{soft:true}}));
     } catch(error) {if(generation===assistanceGeneration&&current()&&session===preparationSession()&&data.client.slug===slug){state.error=true;state.uncertain=!!state.attempt;state.checked=false;state.notice=['Your saved review changed. Check the latest status before requesting another review.','The request could not be confirmed. Your connection details are kept.','The saved review could not be confirmed.'].includes(error.message)?error.message:state.attempt?'The response was interrupted. Your request may already be saved. Check its status before sending it again.':'The saved review status could not be checked. Your reference and connection details are kept. Check again.';}}
     finally {clearTimeout(timer);assistanceControllers.delete(controller);if(generation===assistanceGeneration){state.pending=false;if(current())render();}}
+  }
+  // Only explicit setup intents call this; rendering and returning visits never submit a review.
+  function requestSavedConnectionReview(row) {
+    if(!current()||paymentHold(row)||usageHold(row))return false;var id=row?.id,intake=data?.serviceIntake?.[id];
+    if(!['voice','sms','calendar'].includes(id)||!platformHold(row)||!(id==='calendar'?intake?.preferences?.accountEmail:intake?.complete===true))return false;
+    endTask();selected=id;manualSelection=true;guideManual=false;window.MCServiceIntake?.close();
+    pageRoute(id,'connection-review');document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup',connectionHash:location.hash}}));render();focusStage();
+    requestConnectionReview(true);return true;
   }
   function clearAssistance(){assistanceGeneration++;assistanceControllers.forEach(function(controller){controller.abort();});assistanceControllers.clear();assistance={};}
   function holdActions() { return '<button type="button" id="setupGuideCheckConnection" class="connection-guide-link"'+(connectionCheck?' disabled':'')+'>'+(connectionCheck?'Checking availability…':'Check availability again')+'</button>'; }
@@ -323,7 +331,7 @@
   }
   function returnToGuide(){if(!guideTask||!current())return;var id=guideTask.service;endTask();selected=id;manualSelection=true;guideManual=false;var row=rows().find(function(item){return item.id===id;});goToCurrent(row,true);document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup',connectionHash:location.hash}}));coach.hidden=true;document.dispatchEvent(new CustomEvent('mc:desk-refresh'));}
   function executeAction(row){
-    if(!row||stoppedConnection(row))return;var next=action(row);
+    if(!row||stoppedConnection(row))return;if(requestSavedConnectionReview(row))return;var next=action(row);
     selected=row.id;manualSelection=true;guideManual=false;
     if(row.verification?.working){goToCurrent(row);document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup',connectionHash:location.hash}}));return;}
     if(paymentHold(row)){openAccount();return;}
@@ -523,8 +531,9 @@
     if (!event.target.closest('#setupGuideContinue') || ['cancelled', 'archived', 'paused'].includes(data.client.status)) return;
     executeAction(row);
   });
+  document.addEventListener('mc:connection-details-saved',function(event){if(!current()||selected!==event.detail?.service)return;var row=rows().find(function(item){return item.id===event.detail.service;});if(requestSavedConnectionReview(row))event.preventDefault();});
   document.addEventListener('mc:service-intake-saved',function(event){if(!current()||!labels[event.detail?.service])return;intakeSaved[event.detail.service]=true;if(/^details-/.test(pageScreen)&&!window.MCServiceIntake?.isOpen(event.detail.service)){var row=rows().find(function(item){return item.id===event.detail.service;});goToCurrent(row,true);}else render();});
-  document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;var row=rows().find(function(item){return item.id===selected;});goToCurrent(row,true);if(row&&action(row).kind!=='wait')executeAction(row);else focusStage();});
+  document.addEventListener('mc:guide-do-next',function(event){if(!current()||!labels[event.detail?.service])return;endTask();selected=event.detail.service;manualSelection=true;guideManual=false;var row=rows().find(function(item){return item.id===selected;});if(requestSavedConnectionReview(row))return;goToCurrent(row,true);if(row&&action(row).kind!=='wait')executeAction(row);else focusStage();});
   document.addEventListener('mc:connection-selected',function(event){if(!current()||!labels[event.detail?.service])return;selected=event.detail.service;manualSelection=true;guideManual=false;render();if(event.detail.confirmed){var row=rows().find(function(item){return item.id===selected;});if(row&&!needsServiceInformation(selected)&&action(row).kind!=='wait')executeAction(row);else if(row&&needsServiceInformation(selected)&&window.MCServiceIntake)window.MCServiceIntake.open(selected);else focusStage();}else{var note=document.createElement('p');note.className='preparation-status';note.setAttribute('role','alert');note.textContent='Your service choice could not be confirmed. Your saved setup is kept. Try connecting again.';host.querySelector('.setup-guide-current')?.prepend(note);}});
   document.addEventListener('mc:guide-select',function(event){if(!labels[event.detail?.service]||!current())return;endTask();selected=event.detail.service;manualSelection=true;var row=rows().find(function(item){return item.id===selected;});goToCurrent(row,true);});
   document.addEventListener('mc:desk', function (event) { var previousRow=rows().find(function(item){return item.id===selected;}),previousSteps=previousRow?.guide?.steps||[],previousCurrent=previousSteps[currentStep(previousRow||{},previousSteps)]?.id;data = event.detail;var updatedRow=rows().find(function(item){return item.id===selected;});if(updatedRow&&!['overview','intro','connection-check','complete','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)){var nextSteps=updatedRow.guide?.steps||[],nextCurrent=nextSteps[currentStep(updatedRow,nextSteps)]?.id;if(updatedRow.verification?.working){pageRoute(selected,'connection-check',true);if(guideTask&&['know','test','availability'].includes(document.body.dataset.activePage))document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup',connectionHash:location.hash}}));}else if(pageScreen===previousCurrent&&nextCurrent&&nextCurrent!==previousCurrent)pageRoute(selected,nextCurrent,true);}observePreparation();renderHomeProgress();if(!pageRestored){pageRestored=true;var route=routeParts();if(route){selected=route.service;pageScreen=route.screen;manualSelection=true;}}if(guideTask){var currentRow=rows().find(function(item){return item.id===guideTask.service;});if(currentRow&&currentRow.verification?.working)pageScreen='connection-check';}render();assistTask(); });
