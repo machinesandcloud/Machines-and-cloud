@@ -204,6 +204,9 @@ export default async (req, context) => {
         const stopAfterTools = isSelfServiceClient(c) ? async ({toolUses,results}) => {
           if (savedActionCount !== 1 || !savedCheckReply || toolUses.length !== 1 || toolUses[0].name !== 'notify_owner' || toolUses[0].input.reason !== 'status_check' || results.some(result => result.is_error)) return false;
           await fence(); await validateWebsiteTurn(websiteContext);
+          // Revalidate the already-admitted proof without dispatching or debiting.
+          // A canonical reply must not bypass the guard of the omitted model round.
+          await selfServiceAIModelFetch(c, aiProof);
           terminalCheckReply = savedCheckReply;
           if (onText) onText(terminalCheckReply);
           return true;

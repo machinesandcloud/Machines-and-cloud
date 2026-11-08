@@ -217,6 +217,7 @@ export async function processManagedSMS(id) {
       if(savedActionCount!==1||!savedCheckReply||toolUses.length!==1||toolUses[0].name!=='notify_owner'||toolUses[0].input.reason!=='status_check'||results.some(result=>result.is_error))return false;
       if(!await freshAuthority())throw new Error("Channel authority changed");
       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
+      await selfServiceAIModelFetch(c,allowance.proof,{service:"sms"});
       terminalCheckReply=savedCheckReply;return true;
     },execTool:async(name,input)=>{
       if (!await freshAuthority()) throw new Error("Channel authority changed");

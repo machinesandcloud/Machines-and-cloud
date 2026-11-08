@@ -132,6 +132,20 @@ let foreignCallback=0;
 await assert.rejects(dispatchManagedVoiceTool({...operation,onSavedRecord:()=>{foreignCallback++;}}),/saved record unconfirmed/);
 check(()=>assert.equal(foreignCallback,0));
 await put('leads',`${c.slug}/${committedId}`,committed);
+const actionKey=`${c.slug}/${committed.managedActionId}`,actionRow=await get('managed_actions',actionKey);
+await put('managed_actions',actionKey,{...actionRow,name:'book_visit'});
+await assert.rejects(dispatchManagedVoiceTool({...operation,onSavedRecord:()=>{foreignCallback++;}}),/same action ID/);
+check(()=>assert.equal(foreignCallback,0));
+await put('managed_actions',actionKey,actionRow);
+// A definitive no-save is a separate persisted outcome, not a missing save.
+const fullOperation={client:c,callId:'SM'+'e'.repeat(32),toolCallId:'mutation_0',name:'book_visit',input:{...input,date:'2099-01-08',window:'8 to 12'},caller:input.phone,channel:'sms',onSavedRecord:()=>{throw Error('No-save must not report a saved record');}};
+const bookingsBeforeFull=(await listRecords('bookings',c.slug)).length;
+const fullResult=await dispatchManagedVoiceTool(fullOperation);
+check(()=>assert.match(fullResult,/Nothing was booked/));
+const fullReplay=await dispatchManagedVoiceTool(fullOperation);
+check(()=>assert.equal(fullReplay,fullResult));
+const bookingsAfterFull=(await listRecords('bookings',c.slug)).length;
+check(()=>assert.equal(bookingsAfterFull,bookingsBeforeFull));
 check(()=>assert.equal(outbound.length,0));
 
 

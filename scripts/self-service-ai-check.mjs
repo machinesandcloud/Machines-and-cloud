@@ -11,7 +11,7 @@ Object.assign(process.env,{MC_MEMORY_STORE:'1',MC_FAKE_MODEL:'1',NODE_ENV:'test'
 const RealDate=Date;let clock=RealDate.parse('2030-06-10T15:00:00Z');
 globalThis.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}};
 const blobs=new Map();let etag=0,conflicts=0,unexpected=0,fault=null,hold=null,modelMode='success',modelRequests=0;
-const writes=[];let modelTool=null;
+const writes=[];let modelTool=null,withdrawStatusProof=false;
 function modelResponse(){
  const events=[];const emit=data=>events.push(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
  emit({type:'message_start',message:{id:'offline-model',type:'message',role:'assistant',content:[],model:'claude-opus-5-5',stop_reason:null,stop_sequence:null,usage:{input_tokens:10,output_tokens:0}}});
@@ -20,7 +20,7 @@ function modelResponse(){
 }
 globalThis.fetch=async(input,init={})=>{
  const url=new URL(typeof input==='string'||input instanceof URL?input:input.url);
- if(url.origin==='https://ai-model.invalid'&&url.pathname==='/v1/messages'){modelRequests++;return modelMode==='success'?modelResponse():Response.json({type:'error',error:{type:'api_error',message:'Offline injected model failure'}},{status:500});}
+ if((url.origin==='https://ai-model.invalid'||url.origin==='https://api.anthropic.com'&&process.env.MC_SELF_SERVICE_AI_PROOF_POLICY_JSON)&&url.pathname==='/v1/messages'){modelRequests++;return modelMode==='success'?modelResponse():Response.json({type:'error',error:{type:'api_error',message:'Offline injected model failure'}},{status:500});}
  if(url.origin!=='https://ai-blobs.invalid'){unexpected++;return deny();}
  const[,site,kind,...parts]=url.pathname.split('/').map(decodeURIComponent);assert.equal(site,'offline-site');const key=parts.join('/'),name=kind+'/'+key,method=String(init.method||'GET').toUpperCase();
  let hit=fault&&fault.kind===kind&&fault.key===key&&fault.method===method?fault:null;
@@ -33,6 +33,7 @@ globalThis.fetch=async(input,init={})=>{
  assert.equal(method,'PUT');const headers=new Headers(init.headers);current=blobs.get(name);
  if((headers.get('if-none-match')==='*'&&current)||(headers.has('if-match')&&headers.get('if-match')!==current?.etag)){conflicts++;return new Response(null,{status:412});}
  const tag=String(++etag);blobs.set(name,{value:init.body,etag:tag});writes.push({kind,key});
+ if(withdrawStatusProof&&kind==='site:leads'&&JSON.parse(init.body).reason==='status_check'){withdrawStatusProof=false;delete process.env.MC_SELF_SERVICE_AI_PROOF_POLICY_JSON;}
  if(hit){hit.mode='reject';throw new TypeError('Offline committed write lost its response before retry rejection');}
  return new Response(null,{headers:{etag:tag}});
 };
@@ -101,6 +102,22 @@ async function suite(backend){
    const replay=await chat(req('/api/chat',{...body,recoverTurn:true}));assert.equal(replay.status,200);assert.deepEqual(await replay.json(),out);assert.equal(modelRequests,before+1);assert.equal((await store.listJSON('leads',current.slug+'/')).length,savedCount);
    check(backend+': '+language+' typed web save and lost-browser-ACK recovery keep original unchanged',()=>{});
   }finally{modelTool=null;process.env.MC_FAKE_MODEL='1';}
+ }
+ if(backend==='sdk'){
+  await reset();const current=tenant('proof-withdrawal');current.onboarding.verifiedEmail=current.owner.email;await store.saveClient(current);
+  const {workspaceTenant}=await import('../netlify/functions/lib/workspace-identity.mjs');
+  const policy={version:'offline_status_v1',phaseId:'offline_status_withdrawal',expiresAt:new Date(clock+3600000).toISOString(),tenant:{slug:current.slug,identity:workspaceTenant(current),emailHash:createHash('sha256').update(current.owner.email).digest('hex')},model:'claude-opus-5-5',maxOutputTokens:1500,maxRequestBytes:120000,limits:{logical:1,physical:3,ordinaryMutations:1,setupMutations:0}};
+  Object.assign(process.env,{MC_SELF_SERVICE_AI_PROOF_APPROVED_VERSION:policy.version,MC_SELF_SERVICE_AI_PROOF_SLUG:current.slug,MC_SELF_SERVICE_AI_PROOF_POLICY_JSON:JSON.stringify(policy),ANTHROPIC_BASE_URL:'https://api.anthropic.com',MC_FAKE_MODEL:'0'});
+  modelTool={customer_name:'Fixture',phone:'+17135550817',address:'Fixture address',issue:'Check original callback',reason:'status_check',wanted:'Review only',urgency:'flexible',language:'en',nobook_reason:'none',unsure:'Original outcome unknown'};
+  const body={client:current.slug,channel:'web',contact:'proof-withdrawal',turnId:'b'.repeat(32),messages:[{role:'user',content:'Please check the original request without repeating it.'}]};
+  const before=modelRequests;withdrawStatusProof=true;
+  try{
+   const response=await chat(req('/api/chat',body));const output=await response.json();assert.ok(response.status>=400);assert.equal(output.reply,undefined);assert.equal(modelRequests,before+1);
+   assert.equal((await store.listJSON('leads',current.slug+'/')).length,1);
+   const proof=await store.get('self_service_ai_proofs',current.slug);assert.equal(Object.keys(proof.logical).length,1);assert.equal(Object.keys(proof.physical).length,1);assert.equal(Object.keys(proof.mutations).length,1);
+   const replay=await chat(req('/api/chat',{...body,recoverTurn:true}));assert.ok(replay.status>=400);assert.equal(modelRequests,before+1);assert.equal((await store.listJSON('leads',current.slug+'/')).length,1);
+   check('sdk: proof withdrawal after real save blocks canonical ACK without new inference/debit/replay',()=>{});
+  }finally{modelTool=null;withdrawStatusProof=false;for(const key of ['MC_SELF_SERVICE_AI_PROOF_APPROVED_VERSION','MC_SELF_SERVICE_AI_PROOF_SLUG','MC_SELF_SERVICE_AI_PROOF_POLICY_JSON'])delete process.env[key];process.env.ANTHROPIC_BASE_URL='https://ai-model.invalid';process.env.MC_FAKE_MODEL='1';}
  }
  await reset();process.env.MC_FAKE_MODEL='0';const legacy={...tenant('legacy'),onboarding:undefined};await store.saveClient(legacy);response=await chat(req('/api/chat',{client:legacy.slug,key:legacy.ownerKey,contact:'legacy',messages:[{role:'user',content:'What do you repair?'}]}));check(backend+': legacy client remains outside new budget',()=>assert.equal(response.status,200));response=await chat(req('/api/chat',{persona:'bayou-air',messages:[{role:'user',content:'What do you repair?'}]}));check(backend+': homepage practice remains outside new budget',()=>assert.equal(response.status,200));assert.equal(await store.get(KIND,KEY),null);
  process.env.MC_FAKE_MODEL='1';

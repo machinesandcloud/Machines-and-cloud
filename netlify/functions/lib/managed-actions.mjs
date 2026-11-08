@@ -27,13 +27,13 @@ export async function dispatchManagedVoiceTool({ client, callId, toolCallId, nam
     await onSavedRecord(name, record);
   };
   const claim = await atomicUpdate("managed_actions", key, row => {
-    if (row && (row.digest !== digest || row.tenant !== deliveryTenant(c))) throw new Error("The same action ID cannot be reused for different details");
-    if (row?.state === "completed") return { result: { result: row.result, recordId: row.recordId } };
+    if (row && (row.digest !== digest || row.tenant !== deliveryTenant(c) || row.name !== name)) throw new Error("The same action ID cannot be reused for different details");
+    if (row?.state === "completed") return { result: { result: row.result, recordId: row.recordId, saveOutcome: row.saveOutcome } };
     if (row?.claim && Date.parse(row.claim.until) > Date.now()) return { result: { busy: true } };
     const next = { ...(row || {}), id: actionId, slug: c.slug, tenant: deliveryTenant(c), name, digest, state: "running", input: args, createdAt: row?.createdAt || new Date().toISOString(), claim: { token, until: new Date(Date.now() + 60000).toISOString() } };
     return { value: next, result: { acquired: true } };
   });
-  if (claim.result !== undefined) { await reportSavedRecord(claim.recordId); return claim.result; }
+  if (claim.result !== undefined) { if (!(name === "book_visit" && claim.saveOutcome === "not_saved" && claim.recordId === null)) await reportSavedRecord(claim.recordId); return claim.result; }
   if (!claim.acquired) throw new Error("That request is already being saved. Retry this same action shortly; do not create a replacement.");
   const context = { channel, contact: caller || callId, managedActionId: actionId };
   const result = name === "book_visit" ? await bookVisit(c, args, context) : await flagLead(c, args, context);
@@ -41,7 +41,7 @@ export async function dispatchManagedVoiceTool({ client, callId, toolCallId, nam
   const text = result.full ? result.message : name === "book_visit" ? `Visit saved, reference ${result.id}. The shop has the details in its workspace and confirms arrival details directly. Do not claim a message was delivered or a calendar changed.${appointmentTextVoiceInstruction(invitation)}` : `Request saved, reference ${result.id}. The shop can review it in its workspace. A callback time has not been confirmed. Do not claim anyone was texted or dispatched.`;
   await atomicUpdate("managed_actions", key, row => {
     if (!row || row.claim?.token !== token) throw new Error("Action receipt ownership changed");
-    return { value: { ...row, state: "completed", claim: null, recordId: result.id || null, result: text, completedAt: new Date().toISOString() } };
+    return { value: { ...row, state: "completed", claim: null, recordId: result.id || null, saveOutcome: result.full === true ? "not_saved" : "saved", result: text, completedAt: new Date().toISOString() } };
   });
   if (!result.full) await reportSavedRecord(result.id);
   return text;
