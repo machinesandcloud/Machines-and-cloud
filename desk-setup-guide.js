@@ -139,6 +139,7 @@
       await restoreAssistance(id,session,slug,state);if(generation!==assistanceGeneration||!current()||session!==preparationSession()||data.client.slug!==slug)return;
       var report=assistanceReport(id),read=state.uncertain&&!state.checked||report&&(automatic||report.status!=='resolved');state.reading=!!read;render();
       if(!read&&!state.attempt){state.attempt={action:'report_connection',service:id,operationId:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(byte){return byte.toString(16).padStart(2,'0');}).join(''),expectedReportRevision:report?.revision||null};await rememberAssistance(id,state,session,slug);}
+      if(generation!==assistanceGeneration||!current()||session!==preparationSession()||data.client.slug!==slug)return;
       var response=await fetch(apiBase+'/api/client?c='+encodeURIComponent(slug),read?{headers:{Authorization:'Bearer '+session},cache:'no-store',signal:controller.signal}:{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session},body:JSON.stringify(state.attempt),signal:controller.signal});
       if(generation!==assistanceGeneration||!current()||session!==preparationSession()||data.client.slug!==slug)return;
       if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}
