@@ -43,10 +43,14 @@
   });
   document.addEventListener('mc:desk-route',function(event){if(!leaving && pageCopy[event.detail?.tab])routeTo(event.detail.tab,event.detail.connectionHash);});
   async function apiRequest(method, body) {
+    var requestGeneration = portalGeneration, requestSession = ownerSession, requestKey = key;
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
       var response = await fetch(API, { method: method || 'GET', headers: ownerHeaders(), body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal });
-      if(response.status===401||response.status===403){var denied=new Error('Your session expired. Sign in by email to reopen your workspace.');denied.status=response.status;throw denied;}
+      if(response.status===401||response.status===403){
+        if(!leaving&&requestGeneration===portalGeneration&&requestSession===ownerSession&&requestKey===key)document.dispatchEvent(new CustomEvent('mc:session-expired'));
+        var denied=new Error('Your session expired. Sign in by email to reopen your workspace.');denied.status=response.status;throw denied;
+      }
       var result = await response.json();
       if (!response.ok || result.error || result.ok === false) {
         var message = result.message || (result.error === 'not_ready' ? 'Finish the setup checklist before activating website chat.' : result.error === 'configuration_changed' ? 'Your rules changed in another tab. Refresh and review the current version.' : response.status === 401 || response.status === 403 ? 'This private link is invalid or expired. Sign in by email to recover your workspace.' : 'We could not confirm that change. Please retry.');
