@@ -1,20 +1,25 @@
 // Shared call/SMS mutation dispatcher. One provider event + tool ID owns one immutable action.
 import { createHash, randomBytes } from "node:crypto";
-import { atomicUpdate, getAvailability } from "./store.mjs";
+import { atomicUpdate } from "./store.mjs";
 import { strictRead } from "./accounts.mjs";
 import { deliveryTenant } from "./managed-consent.mjs";
 import { isSupportedSelfServiceClient, configurationRevision } from "./setup.mjs";
-import { bookVisit, flagLead } from "./desk.mjs";
+import { availabilityToolResult, bookVisit, flagLead } from "./desk.mjs";
 import { belongsToWorkspace } from "./workspace-identity.mjs";
 import { appointmentTextInvitation, appointmentTextVoiceInstruction } from './appointment-texts.mjs';
 const hash = value => createHash("sha256").update(value).digest("hex");
 const canonical = value => value && typeof value === "object" ? Array.isArray(value) ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
-export async function dispatchManagedVoiceTool({ client, callId, toolCallId, name, input, caller = "", channel = "call", onSavedRecord }) {
+export async function dispatchManagedVoiceTool({ client, callId, toolCallId, name, input, caller = "", channel = "call", onSavedRecord, onAvailabilityResult }) {
   if (onSavedRecord !== undefined && typeof onSavedRecord !== "function") throw new Error("Invalid service action observer");
+  if (onAvailabilityResult !== undefined && typeof onAvailabilityResult !== "function") throw new Error("Invalid availability result observer");
   if (!client || !["call", "sms"].includes(channel) || !/^[a-zA-Z0-9_-]{1,120}$/.test(callId || "") || !/^[a-zA-Z0-9_-]{1,160}$/.test(toolCallId || "") || !input || typeof input !== "object" || Array.isArray(input) || JSON.stringify(input).length > 8000) throw new Error("Invalid service action");
   const c = await strictRead("clients", client.slug);
   if (!c || !isSupportedSelfServiceClient(c) || deliveryTenant(client) !== deliveryTenant(c) || !["testing", "live"].includes(c.status) || configurationRevision(client) !== configurationRevision(c)) throw new Error("The shop setup changed. No new action was taken.");
-  if (name === "get_availability") return JSON.stringify(await getAvailability(c, input.date, input.days));
+  if (name === "get_availability") {
+    const result = await availabilityToolResult(c, input);
+    if (onAvailabilityResult) await onAvailabilityResult(result);
+    return result.content;
+  }
   if (!["book_visit", "notify_owner"].includes(name)) throw new Error("Unknown front desk action");
   const actionId = hash(JSON.stringify([deliveryTenant(c), channel, callId, toolCallId])), key = `${c.slug}/${actionId}`;
   const args = { ...input, phone: /^\+1[2-9]\d{9}$/.test(input.phone || "") ? input.phone : /^\+1[2-9]\d{9}$/.test(caller) ? caller : "" };

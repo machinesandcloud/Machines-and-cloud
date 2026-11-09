@@ -224,13 +224,14 @@ export async function processManagedSMS(id) {
       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
       if(receivedDay&&['get_availability','book_visit'].includes(name)&&typeof input?.date==='string')input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
       const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`;
-      const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms",onSavedRecord:(action,record)=>{
+      let availabilityError=false;
+      const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms",onAvailabilityResult:result=>{availabilityError=result.is_error===true;},onSavedRecord:(action,record)=>{
         savedActionCount++;
         if(action==='book_visit'&&['en','es'].includes(record.language))savedBookingLanguage=record.language;
         if(action==='notify_owner'&&input.reason==='status_check'&&record.reason===input.reason)savedCheckReply=savedPortalAcknowledgment(action,record);
       }});
       if (name==="book_visit" && content.startsWith("Visit saved")) booked=true;
-      return {content};
+      return {content,...(availabilityError?{is_error:true}:{})};
     }});
     if (!await freshAuthority()) { await updateInbound(id,row=>({...row,state:"suppressed",claim:null,reasonCode:"authority_changed"})); return {ok:true,suppressed:true}; }
     const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(terminalCheckReply || out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c,savedBookingLanguage||'en'):"");

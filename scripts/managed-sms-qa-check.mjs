@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import net from "node:net"; import http from "node:http"; import https from "node:https";
 const outputIndex = process.argv.indexOf("--output"), output = outputIndex < 0 ? null : process.argv[outputIndex + 1];
+const availabilityOnly = process.argv.includes('--availability-only');
 if (output && (!/^scratchpad\/[a-z0-9-]+\.json$/.test(output) || existsSync(output))) throw new Error("Use a new receipt path");
 const hash = value => createHash("sha256").update(value).digest("hex");
 const sources = ["scripts/managed-sms-qa-check.mjs", "embed.js", "netlify/functions/chat.mjs", "netlify/functions/lib/appointment-texts.mjs", "netlify/functions/lib/managed-actions.mjs", "netlify/functions/lib/messaging-program.mjs", "netlify/functions/policy.mjs", "netlify/functions/lib/managed-sms.mjs", "netlify/functions/managed-sms.mjs", "netlify/functions/managed-sms-background.mjs", "netlify/functions/lib/managed-delivery.mjs", "netlify/functions/lib/managed-consent.mjs", "netlify/functions/lib/managed-history.mjs", "netlify/functions/client.mjs"];
@@ -22,11 +23,12 @@ const blobs = new Map(), messages = new Map(), resources = new Map(), emails = n
 let webBookingInput=null;
 const paidModelRequests=[];
 let paidModelAction=null,paidModelTool=null;
-function bookingSSE(tool,name="book_visit") {
+let calendarProbe=null;
+function bookingSSE(tool,name="book_visit",reply='Your visit is saved in the shop portal. The shop confirms arrival details directly.') {
   const packets=[],emit=data=>packets.push(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
   emit({type:'message_start',message:{id:'offline-consent-model',type:'message',role:'assistant',content:[],model:'offline-protocol',stop_reason:null,stop_sequence:null,usage:{input_tokens:10,output_tokens:0}}});
   if(tool){emit({type:'content_block_start',index:0,content_block:{type:'tool_use',id:'offline-booking-tool',name,input:{}}});emit({type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:JSON.stringify(tool)}});}
-  else{emit({type:'content_block_start',index:0,content_block:{type:'text',text:''}});emit({type:'content_block_delta',index:0,delta:{type:'text_delta',text:'Your visit is saved in the shop portal. The shop confirms arrival details directly.'}});}
+  else{emit({type:'content_block_start',index:0,content_block:{type:'text',text:''}});emit({type:'content_block_delta',index:0,delta:{type:'text_delta',text:reply}});}
   emit({type:'content_block_stop',index:0});emit({type:'message_delta',delta:{stop_reason:tool?'tool_use':'end_turn',stop_sequence:null},usage:{output_tokens:10}});emit({type:'message_stop'});
   return new Response(packets.join(''),{headers:{'content-type':'text/event-stream'}});
 }
@@ -35,7 +37,16 @@ globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
   if(url.origin==='https://api.anthropic.com'&&url.pathname==='/v1/messages') {
     const body=JSON.parse(init.body);assert.equal(body.model,'claude-haiku-5-5');assert.equal(body.max_tokens,800);assert.deepEqual(body.thinking,{type:'disabled'});assert.equal(body.fallbacks,undefined);assert.equal(body.betas,undefined);
-    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(paidModelTool?.once&&body.messages.some(m=>Array.isArray(m.content)&&m.content.some(b=>b.type==='tool_result'))?null:paidModelTool?.input||null,paidModelTool?.name||"book_visit");
+    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(paidModelTool?.once&&body.messages.some(m=>Array.isArray(m.content)&&m.content.some(b=>b.type==='tool_result'))?null:paidModelTool?.input||null,paidModelTool?.name||"book_visit",paidModelTool?.reply);
+  }
+  if(calendarProbe&&url.origin==='https://oauth2.googleapis.com'&&url.pathname==='/token')return Response.json({refresh_token:'offline-calendar-refresh',access_token:'offline-calendar-access',scope:'https://www.googleapis.com/auth/calendar.events.owned https://www.googleapis.com/auth/calendar.calendars.readonly'});
+  if(calendarProbe&&url.origin==='https://www.googleapis.com'){
+    assert.equal(method,'GET');
+    if(url.pathname==='/calendar/v3/calendars/primary')return Response.json({id:calendarProbe.target});
+    assert.equal(url.pathname,`/calendar/v3/calendars/${encodeURIComponent(calendarProbe.target)}/events`);
+    calendarProbe.reads++;
+    assert.equal(new Date(url.searchParams.get('timeMin')).toISOString().slice(0,10),calendarProbe.date);
+    return calendarProbe.failed?Response.json({error:{code:503,message:'PRIVATE_SYNTHETIC_PROVIDER_DETAIL'}},{status:503}):Response.json({timeZone:'America/Chicago',items:[]});
   }
   if(url.origin==='https://consent-model.invalid' && url.pathname==='/v1/messages' && webBookingInput){const body=JSON.parse(init.body);return bookingSSE(Array.isArray(body.messages.at(-1).content)?null:webBookingInput);}
   if (url.origin === "https://sms-integration-blobs.invalid") {
@@ -63,7 +74,7 @@ const store = await import("../netlify/functions/lib/store.mjs"), { strictRead }
 const sms = await import("../netlify/functions/lib/messaging-activation.mjs"), { messagingCorrelationLabel } = await import("../netlify/functions/lib/messaging-provider.mjs"), consent = await import("../netlify/functions/lib/managed-consent.mjs"), delivery = await import("../netlify/functions/lib/managed-delivery.mjs");
 const { managedSMSConversations } = await import("../netlify/functions/lib/managed-history.mjs");
 const httpHandler = (await import("../netlify/functions/managed-sms.mjs")).default, background = (await import("../netlify/functions/managed-sms-background.mjs")).default, { processManagedSMS } = await import("../netlify/functions/lib/managed-sms.mjs"), clientHandler = (await import("../netlify/functions/client.mjs")).default;
-async function check(name, fn) { try { await fn(); report.checks.push({ name, pass: true }); } catch (error) { faultKind = null; report.checks.push({ name, pass: false, error: error.message, stack: error.stack }); } }
+async function check(name, fn) { if(availabilityOnly&&!name.startsWith('availability contract:'))return;try { await fn(); report.checks.push({ name, pass: true }); } catch (error) { faultKind = null; report.checks.push({ name, pass: false, error: error.message, stack: error.stack }); } }
 function encrypt(value, id) { const nonce = randomBytes(12), cipher = createCipheriv("aes-256-gcm", secretKey, nonce); cipher.setAAD(Buffer.from(id)); const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value)), cipher.final()]); return { version: 1, nonce: nonce.toString("base64"), ciphertext: ciphertext.toString("base64"), tag: cipher.getAuthTag().toString("base64") }; }
 const budgetTenants=[];
 async function fixture(name, { state = "ready", status = "live" } = {}) {
@@ -366,6 +377,56 @@ await check('funded SMS uses typed canonical check and replay preserves original
       const usage=await capacityUsage.paidUsageStatus(f.c);assert.equal(usage.units.aiAnswers.held,1);assert.equal(usage.units.aiAnswers.used,0);
     }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;}
   }
+});
+await check('availability contract: funded SMS preserves typed Calendar failures, successful openings and once-only replay',async()=>{
+  const execution=await import('../netlify/functions/lib/calendar-execution.mjs'),connection=await import('../netlify/functions/lib/calendar-connection.mjs');
+  const names=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','CALENDAR_CONNECTION_ENABLED','CALENDAR_DELIVERY_ENABLED','CALENDAR_TOKEN_ENCRYPTION_KEY','CALENDAR_EXECUTION_POLICY_JSON','CALENDAR_EXECUTION_APPROVED_VERSION'],prior=Object.fromEntries(names.map(name=>[name,process.env[name]]));
+  try{
+    Object.assign(process.env,{GOOGLE_CLIENT_ID:'offline-availability-client',GOOGLE_CLIENT_SECRET:'offline-availability-secret',CALENDAR_CONNECTION_ENABLED:'true',CALENDAR_DELIVERY_ENABLED:'true',CALENDAR_TOKEN_ENCRYPTION_KEY:Buffer.alloc(32,19).toString('base64')});
+    for(const failed of [true,false]){
+      const f=await fixture('availability-'+(failed?'failed':'open'));
+      f.c.onboarding.desiredChannels=['sms','calendar'];const revision=configurationRevision(f.c);f.c.setupProof={reviewedRevision:revision,testedRevision:revision,testMode:'live'};await store.put('clients',f.c.slug,f.c);
+      // Keep the already-bound sender on the same final saved configuration.
+      f.row.inputRevision=revision;await store.put('messaging_activation',f.row.id,f.row);await fundCapacity(f);
+      const receivedDay=(await import('../netlify/functions/lib/availability.mjs')).houstonToday(new Date(clock)),date=(await import('../netlify/functions/lib/availability.mjs')).addDays(receivedDay,1);
+      calendarProbe={failed,date,target:'availability-'+hash(f.c.slug).slice(0,16),reads:0};
+      const census=await execution.calendarExecutionCensus(f.c),version='availability_'+hash(f.c.slug).slice(0,16);assert.equal(census.clean,true);
+      process.env.CALENDAR_EXECUTION_APPROVED_VERSION=version;process.env.CALENDAR_EXECUTION_POLICY_JSON=JSON.stringify({version,censusMode:'clean_initial',expiresAt:new Date(clock+86400000).toISOString(),tenant:{slug:f.c.slug,identity:execution.calendarExecutionIdentity(f.c)},googleClientIdHash:hash(process.env.GOOGLE_CLIENT_ID),targetIdHash:hash(calendarProbe.target),censusDigest:census.digest,bookingIds:['availability-proof'],limits:Object.fromEntries(['oauthStart','tokenExchange','tokenRefresh','calendarRead','eventCreate','eventUpdate','eventDelete','workerDispatch','totalRequests'].map(action=>[action,20]))});
+      const sessionHash=hash('availability-session:'+f.c.slug),session={sessionHash,email:f.c.owner.email,scope:'onboarding',status:'active',expiresAt:new Date(clock+3600000).toISOString()};await store.put('access_sessions',sessionHash,session);
+      const start=await connection.startCalendarConnection(f.c,session,{availabilityConsentVersion:connection.CALENDAR_AVAILABILITY_CONSENT_VERSION});await connection.completeCalendarConnection(f.c,session,{state:new URL(start.authorizationUrl).searchParams.get('state'),code:'offline-availability-code'});
+      const expected=failed?null:await store.getAvailability(f.c,date,1);calendarProbe.reads=0;clock+=61000;
+      paidModelTool={name:'get_availability',once:true,input:{date:'tomorrow',days:1},reply:failed?'I could not check availability. I can take a request for an owner callback.':'The checked openings are available to review; nothing was booked.'};
+      process.env.MC_FAKE_MODEL='0';process.env.ANTHROPIC_API_KEY='offline-availability-model';
+      const fields=inbound(f,'Please check tomorrow.'),id=inboundKey(f,fields),before=paidModelRequests.length,sends=report.providerSends;
+      assert.equal((await httpHandler(signed(fields))).status,200);assert.equal((await processManagedSMS(id)).ok,true);
+      const requests=paidModelRequests.slice(before),results=requests.at(-1).messages.flatMap(message=>Array.isArray(message.content)?message.content:[]).filter(block=>block.type==='tool_result');
+      assert.equal(requests.length,2);assert.equal(results.length,1);assert.equal(calendarProbe.reads,1);assert.equal(results[0].is_error,failed);
+      report.availabilityObserved??=[];report.availabilityObserved.push({failed,is_error:results[0].is_error,reads:calendarProbe.reads,toolContentSHA256:hash(results[0].content),genericUnconfirmed:results[0].content.startsWith("The action's outcome is unconfirmed")});
+      const typed=JSON.parse(results[0].content.split('\n\n')[0]);
+      if(failed){assert.deepEqual(Object.keys(typed).sort(),['error','message']);assert.equal(typed.error,'availability_unavailable');assert.match(typed.message,/Do not say there are no openings or promise a window/);assert.match(typed.message,/owner callback/);assert.equal(results[0].content.includes('PRIVATE_SYNTHETIC_PROVIDER_DETAIL'),false);}
+      else{delete typed.calendar.checkedAt;delete expected.calendar.checkedAt;assert.deepEqual(typed,expected);}
+      assert.equal((await store.listJSON('bookings',f.c.slug+'/')).length,0);assert.equal((await store.listJSON('managed_actions',f.c.slug+'/')).length,0);assert.equal((await store.listJSON('leads',f.c.slug+'/')).length,0);assert.equal(report.providerSends,sends);
+      const saved=await strictRead('managed_sms_inbound',id);assert.equal(saved.state,'completed');assert.equal(saved.reply,paidModelTool.reply);assert.equal((await processManagedSMS(id)).skipped,true);assert.equal(paidModelRequests.length,before+2);assert.equal(calendarProbe.reads,1);
+      report.availabilityResults??=[];report.availabilityResults.push({failed,typedError:typed.error||null,is_error:results[0].is_error,reads:calendarProbe.reads,modelRequests:requests.length,bookingCount:0,replaySkipped:true});
+      process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;calendarProbe=null;
+    }
+  }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;calendarProbe=null;for(const name of names){if(prior[name]===undefined)delete process.env[name];else process.env[name]=prior[name];}}
+});
+await check('availability contract: dispatcher fences reject stale configuration and foreign tenant before typed read observation',async()=>{
+  const {dispatchManagedVoiceTool}=await import('../netlify/functions/lib/managed-actions.mjs'),f=await fixture('availability-fences');let observed=0;
+  const args={client:f.c,callId:'availability-fence',toolCallId:'availability',channel:'sms',name:'get_availability',input:{date:'2026-10-24',days:1},onAvailabilityResult:()=>{observed++;}};
+  const current={...f.c,rules:{...f.c.rules,windowCapacity:2}};await store.put('clients',f.c.slug,current);
+  await assert.rejects(()=>dispatchManagedVoiceTool(args),/shop setup changed/);assert.equal(observed,0);
+  await store.put('clients',f.c.slug,{...f.c,ownerKey:'different-tenant'});await assert.rejects(()=>dispatchManagedVoiceTool(args),/shop setup changed/);assert.equal(observed,0);
+  await store.put('clients',f.c.slug,f.c);const result=await dispatchManagedVoiceTool({...args,input:{date:'not-a-date',days:1},onAvailabilityResult:value=>{observed++;assert.equal(value.is_error,true);assert.equal(JSON.parse(value.content).error,'invalid_date');}});assert.equal(observed,1);assert.equal(JSON.parse(result).error,'invalid_date');
+});
+await check('availability contract: voice keeps successful JSON and mutation string contracts with once-only saved requests',async()=>{
+  const {dispatchManagedVoiceTool}=await import('../netlify/functions/lib/managed-actions.mjs'),f=await fixture('availability-voice');let observed=0;
+  const args={client:f.c,callId:'availability-voice',toolCallId:'availability',channel:'call',name:'get_availability',input:{date:'2026-10-24',days:1}};
+  assert.equal(await dispatchManagedVoiceTool(args),JSON.stringify(await store.getAvailability(f.c,args.input.date,args.input.days)));
+  await assert.rejects(()=>dispatchManagedVoiceTool({...args,onAvailabilityResult:true}),/Invalid availability result observer/);
+  const mutation={...args,toolCallId:'save-request',name:'notify_owner',input:{customer_name:'Fixture',phone:caller,address:'Fixture address',issue:'Callback request',reason:'wants_call',wanted:'Tomorrow morning',urgency:'flexible',language:'en',nobook_reason:'none',unsure:''},onAvailabilityResult:()=>{observed++;}};
+  const saved=await dispatchManagedVoiceTool(mutation);assert.equal(typeof saved,'string');assert.match(saved,/Request saved/);assert.equal(await dispatchManagedVoiceTool(mutation),saved);assert.equal(observed,0);assert.equal((await store.listJSON('leads',f.c.slug+'/')).length,1);
 });
 await check('canonical saved booking language selects consent footer without inferred permission or sends',async()=>{
   for(const language of ['en','es']){
