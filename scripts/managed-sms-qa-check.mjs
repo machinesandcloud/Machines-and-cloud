@@ -35,7 +35,7 @@ globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
   if(url.origin==='https://api.anthropic.com'&&url.pathname==='/v1/messages') {
     const body=JSON.parse(init.body);assert.equal(body.model,'claude-haiku-5-5');assert.equal(body.max_tokens,800);assert.deepEqual(body.thinking,{type:'disabled'});assert.equal(body.fallbacks,undefined);assert.equal(body.betas,undefined);
-    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(paidModelTool?.input||null,paidModelTool?.name||"book_visit");
+    paidModelRequests.push(body);if(paidModelAction)await paidModelAction();return bookingSSE(paidModelTool?.once&&body.messages.some(m=>Array.isArray(m.content)&&m.content.some(b=>b.type==='tool_result'))?null:paidModelTool?.input||null,paidModelTool?.name||"book_visit");
   }
   if(url.origin==='https://consent-model.invalid' && url.pathname==='/v1/messages' && webBookingInput){const body=JSON.parse(init.body);return bookingSSE(Array.isArray(body.messages.at(-1).content)?null:webBookingInput);}
   if (url.origin === "https://sms-integration-blobs.invalid") {
@@ -364,6 +364,28 @@ await check('funded SMS uses typed canonical check and replay preserves original
       const leads=await store.listJSON('leads',f.c.slug+'/');const checks=leads.filter(record=>record.reason==='status_check');assert.equal(checks.length,1);assert.notEqual(checks[0].id,original.id);assert.equal(checks[0].outcome,'took_message');assert.deepEqual(await strictRead('leads',`${f.c.slug}/${original.id}`),original);
       const jobsBefore=await store.list('managed_deliveries',f.c.slug+'/');await processManagedSMS(id);assert.equal(paidModelRequests.length,before+1);assert.deepEqual(await store.list('managed_deliveries',f.c.slug+'/'),jobsBefore);
       const usage=await capacityUsage.paidUsageStatus(f.c);assert.equal(usage.units.aiAnswers.held,1);assert.equal(usage.units.aiAnswers.used,0);
+    }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;}
+  }
+});
+await check('canonical saved booking language selects consent footer without inferred permission or sends',async()=>{
+  for(const language of ['en','es']){
+    const f=await fixture('booking-footer-'+language);await fundCapacity(f);
+    const available=await store.getAvailability(f.c,new Date(clock+86400000).toISOString().slice(0,10),14),opening=available.openings.find(day=>day.windows.length);
+    assert.ok(opening);
+    paidModelTool={name:'book_visit',once:true,input:{customer_name:'Fixture Customer',phone:caller,address:'123 Fixture St',issue:'Repair fixture sink',date:opening.date,window:opening.windows[0],urgency:'flexible',language,notes:'Synthetic appointment request',unsure:''}};
+    process.env.MC_FAKE_MODEL='0';process.env.ANTHROPIC_API_KEY='offline-footer-model';
+    try{
+      const fields=inbound(f,'Please save this fixture visit.'),id=inboundKey(f,fields),beforeRequests=paidModelRequests.length,beforeSends=report.providerSends;
+      assert.equal((await httpHandler(signed(fields))).status,200);assert.equal((await processManagedSMS(id)).ok,true);
+      const bookings=await store.listJSON('bookings',f.c.slug+'/');assert.equal(bookings.length,1);assert.equal(bookings[0].language,language);
+      const job=(await store.listJSON('managed_deliveries',f.c.slug+'/')).find(row=>row.channel==='sms'&&row.purpose==='consent_ask');assert.ok(job);
+      // The model prose is deliberately English for both languages: the canonical
+      // saved booking, not generated prose, selects the server-authored question.
+      assert.ok(job.body.startsWith('Your visit is saved in the shop portal.'));
+      assert.ok(job.body.endsWith(consent.managedAppointmentConsentQuestion(f.c,language)));
+      if(language==='es')assert.equal(job.body.endsWith(consent.managedAppointmentConsentQuestion(f.c,'en')),false);
+      const permission=await consent.managedSMSConsent(f.c,caller);assert.equal(permission.transactional,false);assert.equal(permission.pendingAsk,null);assert.equal(job.providerId,undefined);assert.equal(report.providerSends,beforeSends);
+      const sent=paidModelRequests.length;assert.equal(sent,beforeRequests+2);assert.equal((await processManagedSMS(id)).skipped,true);assert.equal(paidModelRequests.length,sent);assert.equal((await store.listJSON('bookings',f.c.slug+'/')).length,1);assert.equal((await store.listJSON('managed_deliveries',f.c.slug+'/')).filter(row=>row.channel==='sms'&&row.purpose==='consent_ask').length,1);
     }finally{process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;}
   }
 });

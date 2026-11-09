@@ -212,7 +212,7 @@ export async function processManagedSMS(id) {
     }:baseFetch;
     const received=Date.parse(job.providerDate), receivedDay=capacity&&Number.isFinite(received)?houstonToday(new Date(received)):null;
     const receivedContext=receivedDay?`\nThe current customer message was received on ${receivedDay} in Houston. Interpret this message's relative days (today, tomorrow or a weekday) from that received date. Use absolute YYYY-MM-DD dates in tools. Availability is checked at processing time; do not move an old request to a different day or promise a past window. If its requested timing has passed, ask for a new preference.`:'';
-    let savedActionCount=0,savedCheckReply=null,terminalCheckReply=null;
+    let savedActionCount=0,savedCheckReply=null,terminalCheckReply=null,savedBookingLanguage=null;
     const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+receivedContext,tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
       if(savedActionCount!==1||!savedCheckReply||toolUses.length!==1||toolUses[0].name!=='notify_owner'||toolUses[0].input.reason!=='status_check'||results.some(result=>result.is_error))return false;
       if(!await freshAuthority())throw new Error("Channel authority changed");
@@ -226,13 +226,14 @@ export async function processManagedSMS(id) {
       const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`;
       const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms",onSavedRecord:(action,record)=>{
         savedActionCount++;
+        if(action==='book_visit'&&['en','es'].includes(record.language))savedBookingLanguage=record.language;
         if(action==='notify_owner'&&input.reason==='status_check'&&record.reason===input.reason)savedCheckReply=savedPortalAcknowledgment(action,record);
       }});
       if (name==="book_visit" && content.startsWith("Visit saved")) booked=true;
       return {content};
     }});
     if (!await freshAuthority()) { await updateInbound(id,row=>({...row,state:"suppressed",claim:null,reasonCode:"authority_changed"})); return {ok:true,suppressed:true}; }
-    const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(terminalCheckReply || out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c):"");
+    const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(terminalCheckReply || out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c,savedBookingLanguage||'en'):"");
     const planned=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:ask?"consent_ask":"reply",...(capacity?{paidAnswerGenerated:true}:{} )}:null);
     if (planned.claim?.token!==token || !planned.reply) return {ok:true,busy:true};
     await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:planned.replyPurpose,to:job.from,body:planned.reply,consentAsk:planned.replyPurpose==="consent_ask"});
