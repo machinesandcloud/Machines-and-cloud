@@ -163,7 +163,7 @@ export default async (req, context) => {
     if (websiteContext) conv.websiteSetupCheck = { checkId: websiteContext.checkId, origin };
     const last = incoming[incoming.length - 1];
     conv.messages.push({ role: "user", content: last.content, at: new Date().toISOString() });
-    const history = toApiMessages(conv.messages.slice(-40));
+    const history = toApiMessages(conv.messages.slice(-40), 40);
     const system = buildSystemPrompt(c, channel);
     const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY].map(tool => !isSelfServiceClient(c) ? tool : {
       ...tool, description: tool.name === "book_visit" ? "Save a visit in the shop portal after the customer accepts a real available window. Connected services may process it separately; this result does not confirm text, calendar or owner-contact delivery." : tool.name === "notify_owner" ? "Save a callback, handoff or emergency request in the shop portal. Separate contact delivery and human response or timing are not confirmed by this result." : tool.description,

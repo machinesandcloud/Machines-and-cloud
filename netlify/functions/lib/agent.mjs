@@ -53,8 +53,10 @@ export function sanitizeMessages(raw) {
   return out;
 }
 
-// Turns a stored conversation (alternating turns may be broken by system lines) into valid API messages.
-export function toApiMessages(stored) {
+// Stored history may opt into up to40 messages; public input and other callers keep20.
+// Alternating turns may be broken by stored system lines.
+export function toApiMessages(stored, maxMessages = MAX_MESSAGES) {
+  if (!Number.isSafeInteger(maxMessages) || maxMessages < 1 || maxMessages > 40) throw new RangeError("Invalid stored-history limit");
   const out = [];
   for (const m of stored) {
     if (m.role !== "user" && m.role !== "assistant") continue;
@@ -64,7 +66,7 @@ export function toApiMessages(stored) {
     else out.push({ role: m.role, content });
   }
   while (out.length && out[0].role !== "user") out.shift();
-  return out.slice(-MAX_MESSAGES);
+  return out.slice(-maxMessages);
 }
 
 /**
