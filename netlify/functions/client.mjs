@@ -235,7 +235,13 @@ async function handle(req) {
       policy: policyUrls(c.slug, site), dataPolicy: DATA_POLICY, ackMinutesOptions: ACK_MINUTES,
       site,
     };
-    await assertCurrentWorkspace(c);return json(ownerResponse);
+    const current = await assertCurrentWorkspace(c);
+    if (selfService) {
+      const active = await getAccessSession(req);
+      if (!active || active.sessionHash !== session?.sessionHash) return json({ error: 'verification_required' }, 401, { 'Cache-Control': 'no-store' });
+      if (normalizeAccountEmail(active.email) !== normalizeAccountEmail(current.owner?.email)) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
+    }
+    return json(ownerResponse);
   }
   if (!isOwner) return json({ error: "forbidden" }, 403);
 

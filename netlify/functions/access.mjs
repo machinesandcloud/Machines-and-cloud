@@ -1,5 +1,6 @@
 import { AccessError, accessOriginAllowed, requestAccessLink, exchangeAccessToken, getAccessSession, getAccessState, saveAccessDraft, revokeAccessSession } from "./lib/access.mjs";
 import { IntakeError, attachIntake } from "./lib/intake.mjs";
+import { normalizeAccountEmail } from "./lib/accounts.mjs";
 export const config = { path: "/api/access" };
 const reply = (body, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
 
@@ -11,7 +12,11 @@ export default async (req, context) => {
   try {
     if (req.method === "GET") {
       const session = await getAccessSession(req);
-      return session ? reply(await getAccessState(session)) : reply({ error: "sign_in_required", message: "Sign in to continue." }, 401);
+      if (!session) return reply({ error: "sign_in_required", message: "Sign in to continue." }, 401);
+      const state = await getAccessState(session);
+      const active = await getAccessSession(req);
+      if (!active || active.sessionHash !== session.sessionHash || normalizeAccountEmail(active.email) !== normalizeAccountEmail(session.email)) return reply({ error: "sign_in_required", message: "Sign in to continue." }, 401);
+      return reply(state);
     }
     const raw = await req.text();
     if (raw.length > (req.method === "PUT" ? 26000 : 1024)) return reply({ error: "invalid_request" }, 413);

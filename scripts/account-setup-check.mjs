@@ -49,6 +49,7 @@ const clientAPI=(await import('../netlify/functions/client.mjs')).default;
 const build=(await import('../netlify/functions/onboard-build-background.mjs')).default;
 const google=(await import('../netlify/functions/google.mjs')).default;
 const billing=(await import('../netlify/functions/billing.mjs')).default;
+const workspaceBillingAPI=(await import('../netlify/functions/workspace-billing.mjs')).default;
 const provision=(await import('../netlify/functions/provision-background.mjs')).default;
 const { ndjsonResponse }=await import('../netlify/functions/lib/agent.mjs');
 const { sendSMS,placeCall }=await import('../netlify/functions/lib/send.mjs');
@@ -135,6 +136,97 @@ async function suite(backend){
  privateResponse=await clientAPI(request(ownerPath(c),{action:'pause'},ownerSession));assert.equal(privateResponse.status,401);privateResponse=await clientAPI(request(ownerPath(c),{summary:'Revoked write',expectedRevision:setup.configurationRevision(c)},ownerSession,'PUT'));assert.equal(privateResponse.status,401);groups++;
  privateResponse=await onboard(request(`/api/onboard?c=${c.slug}&k=${c.ownerKey}`,null,null,'GET'));assert.equal(privateResponse.status,401);privateResponse=await onboard(request(`/api/onboard?c=${c.slug}`,null,foreignSession,'GET'));assert.equal(privateResponse.status,403);groups++;
  process.env.MC_FAKE_MODEL='1';
+ if(backend==='memory'){
+  // Interleave an ordinary owner JSON read after initial authorization, while the
+  // actual private-record decode with a session change. Tenant identity alone
+  // cannot establish that the session still authorizes the completed response.
+  for (const changed of ['active','revoked','expired','session_owner','current_owner','tenant']) {
+   const slug='json-read-'+changed.replace('_','-')+'-'+(++serial),email=slug+'@example.invalid';
+   const target=newClient({slug,ownerKey:'offline-json-owner-'+serial,owner:{name:'Owner',email,phone:'+17135550142'},business:{name:'Offline Air',trade:'HVAC',city:'Houston'}});target.onboarding={version:1,verifiedEmail:email,desiredChannels:['web']};target.status='testing';await store.put('clients',target.slug,target);
+   const token=await ownerToken(target),sessionKey=access.accessHash(token),original=await store.get('access_sessions',sessionKey);
+   const {workspaceTenant}=await import('../netlify/functions/lib/workspace-identity.mjs');
+   const marker='Private owner JSON boundary fixture',tenantIdentity=workspaceTenant(target);
+   const row=await store.addRecord('bookings',target.slug,{tenantIdentity,customer_name:marker,phone:'+17135550142',status:'confirmed',channel:'web',issue:marker,date:'2026-11-10',window:'8 to 12'});
+   const parse=JSON.parse;let reached=false,authorizationReads=0,persistedChange;
+   JSON.parse=function(text,...args){
+    const value=parse(text,...args);
+    if(value?.scope==='onboarding'&&value.email===original.email&&value.status==='active')authorizationReads++;
+    if(!reached&&value?.id===row.id&&value.customer_name===marker){
+     reached=true;assert.ok(authorizationReads>0,'Initial authorization must precede the private decode');
+     if(changed==='revoked')persistedChange=store.put('access_sessions',sessionKey,{...original,status:'revoked'});
+     if(changed==='expired')persistedChange=store.put('access_sessions',sessionKey,{...original,expiresAt:new Date(Date.now()-1).toISOString()});
+     if(changed==='session_owner')persistedChange=store.put('access_sessions',sessionKey,{...original,email:'replacement-session@example.invalid'});
+     if(changed==='current_owner')persistedChange=store.put('clients',target.slug,{...target,owner:{...target.owner,email:'replacement-owner@example.invalid'}});
+     if(changed==='tenant')persistedChange=store.put('clients',target.slug,{...target,ownerKey:target.ownerKey+'-replacement'});
+    }
+    return value;
+   };
+   let response;try{response=await clientAPI(request(ownerPath(target),null,token,'GET'));}finally{JSON.parse=parse;}
+   if(persistedChange)await persistedChange;
+   if(!reached){const view=await response.clone().json();throw new Error('Owner JSON record was not decoded: '+changed+' '+response.status+' '+view.error);}
+   const text=await response.text();
+   if(changed==='active'){
+    assert.equal(response.status,200);assert.match(text,new RegExp(marker));assert.equal(JSON.parse(text).bookings.length,1);
+   }else{
+    assert.equal(response.status,['tenant','current_owner'].includes(changed)?503:['revoked','expired'].includes(changed)?401:403);
+    assert.doesNotMatch(text,new RegExp(marker));assert.deepEqual(Object.keys(JSON.parse(text)).sort(),['tenant','current_owner'].includes(changed)?['error','message']:['error']);
+    assert.equal(response.headers.get('content-disposition'),null);
+   }
+   assert.equal(response.headers.get('cache-control'),'no-store');
+   if(['active','revoked','expired','session_owner'].includes(changed))assert.deepEqual(await accounts.strictRead('clients',target.slug),target);
+   if(!['tenant','current_owner'].includes(changed))assert.equal(workspaceTenant(await accounts.strictRead('clients',target.slug)),tenantIdentity);
+   await store.put('clients',target.slug,target);
+   const restoredToken=changed==='revoked'?await session(target.owner.email):token;
+   if(changed!=='revoked')await store.put('access_sessions',sessionKey,original);
+   const restored=await clientAPI(request(ownerPath(target),null,restoredToken,'GET'));assert.equal(restored.status,200);assert.match(await restored.text(),new RegExp(marker));
+   if(changed==='revoked')assert.equal((await store.get('access_sessions',sessionKey)).status,'revoked');groups++;
+  }
+  // Empty owner views still work, and anonymous widget reads never gain the
+  // private owner projection or records. Legacy owner-key controls remain below.
+  {
+   const target=fresh('owner-json-empty');await store.put('clients',target.slug,target);
+   const owner=await clientAPI(request(ownerPath(target),null,await ownerToken(target),'GET')),view=await owner.json();
+   assert.equal(owner.status,200);assert.deepEqual(view.bookings,[]);assert.deepEqual(view.leads,[]);assert.deepEqual(view.conversations,[]);
+   const publicResponse=await clientAPI(request(ownerPath(target),null,null,'GET')),publicView=await publicResponse.json();
+   assert.equal(publicResponse.status,200);for(const field of ['client','bookings','leads','conversations','ownerKey','setup'])assert.equal(Object.hasOwn(publicView,field),false);
+   assert.equal(publicResponse.headers.get('cache-control'),'no-store');groups++;
+  }
+  // These GET projections also await private storage after initial session
+  // authorization. Keep fresh-link exchange and every mutation path untouched.
+  for(const endpoint of ['access','billing'])for(const changed of ['active','revoked','expired','email','scope',...(endpoint==='billing'?['owner','tenant']:[])]){
+   const slug='private-get-'+endpoint+'-'+changed+'-'+(++serial),email=slug+'@example.invalid';
+   const target=newClient({slug,ownerKey:'offline-private-owner-'+serial,owner:{name:'Owner',email,phone:'+17135550142'},business:{name:'Offline Air',trade:'HVAC',city:'Houston'}});target.onboarding={version:1,verifiedEmail:email,desiredChannels:['web']};target.status='testing';await store.put('clients',slug,target);
+   const token=await session(email),sessionKey=access.accessHash(token),original=await store.get('access_sessions',sessionKey),{workspaceTenant}=await import('../netlify/functions/lib/workspace-identity.mjs'),tenant=workspaceTenant(target);
+   const marker=endpoint==='access'?'Private draft temporal fixture':'2031-01-15T08:12:34.000Z',subscription='sub_temporal_'+serial;
+   if(endpoint==='access')await store.put('onboarding_drafts',access.accessHash(email),{fields:{business:marker},step:2,revision:1});
+   else await store.put('workspace_billing',slug+'/'+tenant,{slug,tenant,livemode:false,subscription:{id:subscription,status:'past_due',plan:'starter',services:['web'],currentPeriodEnd:marker}});
+   const parse=JSON.parse;let reached=false,authorizationReads=0,persistedChange;
+   JSON.parse=function(text,...args){
+    const value=parse(text,...args);if(value?.scope==='onboarding'&&value.email===email&&value.status==='active')authorizationReads++;
+    if(!reached&&(endpoint==='access'?value?.fields?.business===marker:value?.subscription?.id===subscription)){
+     reached=true;assert.ok(authorizationReads>0);
+     if(changed==='revoked')persistedChange=store.put('access_sessions',sessionKey,{...original,status:'revoked'});
+     if(changed==='expired')persistedChange=store.put('access_sessions',sessionKey,{...original,expiresAt:new Date(Date.now()-1).toISOString()});
+     if(changed==='email')persistedChange=store.put('access_sessions',sessionKey,{...original,email:'replacement-session@example.invalid'});
+     if(changed==='scope')persistedChange=store.put('access_sessions',sessionKey,{...original,scope:'operator'});
+     if(changed==='owner')persistedChange=store.put('clients',slug,{...target,owner:{...target.owner,email:'replacement-owner@example.invalid'}});
+     if(changed==='tenant')persistedChange=store.put('clients',slug,{...target,ownerKey:target.ownerKey+'-replacement'});
+    }
+    return value;
+   };
+   const handler=endpoint==='access'?accessAPI:workspaceBillingAPI,path=endpoint==='access'?'/api/access':'/api/workspace-billing?c='+slug;
+   let response;try{response=await handler(request(path,null,token,'GET'));}finally{JSON.parse=parse;}
+   if(persistedChange)await persistedChange;
+   assert.equal(reached,true);const text=await response.text();assert.equal(response.headers.get('cache-control'),'no-store');
+   if(changed==='active'){assert.equal(response.status,200);assert.match(text,new RegExp(marker));}
+   else {assert.equal(response.status,['owner','tenant'].includes(changed)?403:401);assert.doesNotMatch(text,new RegExp(marker));for(const field of ['draft','billing','email','existing'])assert.equal(Object.hasOwn(JSON.parse(text),field),false);}
+   if(!['owner','tenant'].includes(changed))assert.deepEqual(await accounts.strictRead('clients',slug),target);
+   await store.put('clients',slug,target);
+   const restoredToken=changed==='revoked'?await session(email):token;if(changed!=='revoked')await store.put('access_sessions',sessionKey,original);
+   const restored=await handler(request(path,null,restoredToken,'GET'));assert.equal(restored.status,200);assert.match(await restored.text(),new RegExp(marker));
+   if(changed==='revoked')assert.equal((await store.get('access_sessions',sessionKey)).status,'revoked');groups++;
+  }
+ }
  if(backend==='sdk'){
   // Revoke access while the real export is waiting on a private record read.
   // The completed response must check current authority, not only its initial session.

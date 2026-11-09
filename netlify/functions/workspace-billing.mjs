@@ -1,6 +1,7 @@
 import { getAccessSession, accessOriginAllowed } from './lib/access.mjs';
 import { strictRead, normalizeAccountEmail } from './lib/accounts.mjs';
 import { isSupportedSelfServiceClient } from './lib/setup.mjs';
+import { workspaceTenant } from './lib/workspace-identity.mjs';
 import { workspaceBillingStatus, reviewWorkspaceBilling, startWorkspaceCheckout, refreshWorkspaceBilling, cancelWorkspaceRenewal, openWorkspaceBillingPortal, beginWorkspaceBillingProof, cleanupWorkspaceBillingProof, closeWorkspaceBillingProof, WorkspaceBillingError } from './lib/workspace-billing.mjs';
 export const config={path:'/api/workspace-billing'};
 const json=(value,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','Netlify-CDN-Cache-Control':'no-store'}});
@@ -11,7 +12,13 @@ export default async req=>{
     const session=await getAccessSession(req);if(!session)return json({error:'verification_required',message:'Sign in by email to manage billing.'},401);
     const url=new URL(req.url);if([...url.searchParams.keys()].some(name=>name!=='c'))return json({error:'invalid_billing_request'},400);
     const c=await strictRead('clients',url.searchParams.get('c')||'');if(!isSupportedSelfServiceClient(c)||normalizeAccountEmail(c.owner?.email)!==normalizeAccountEmail(session.email))return json({error:'forbidden'},403);
-    if(req.method==='GET')return json({ok:true,billing:await workspaceBillingStatus(c)});
+    if(req.method==='GET'){
+      const billing=await workspaceBillingStatus(c);
+      const [current,active]=await Promise.all([strictRead('clients',c.slug),getAccessSession(req)]);
+      if(!active||active.sessionHash!==session.sessionHash||normalizeAccountEmail(active.email)!==normalizeAccountEmail(session.email))return json({error:'verification_required',message:'Sign in by email to manage billing.'},401);
+      if(!isSupportedSelfServiceClient(current)||workspaceTenant(current)!==workspaceTenant(c)||normalizeAccountEmail(current.owner?.email)!==normalizeAccountEmail(active.email))return json({error:'forbidden'},403);
+      return json({ok:true,billing});
+    }
     const raw=await req.text();if(raw.length>4000)return json({error:'invalid_billing_request'},400);let body;try{body=JSON.parse(raw);}catch{return json({error:'invalid_billing_request'},400);}
     const handlers={review:reviewWorkspaceBilling,checkout:startWorkspaceCheckout,refresh:refreshWorkspaceBilling,cancel_renewal:cancelWorkspaceRenewal,portal:openWorkspaceBillingPortal,proof_begin:beginWorkspaceBillingProof,proof_cleanup:cleanupWorkspaceBillingProof,proof_close:closeWorkspaceBillingProof},handler=handlers[body?.action];if(!handler)return json({error:'invalid_billing_request'},400);
     const result=await handler(c,session,body);return json({ok:true,...(body.action==='review'?{review:result}:body.action==='portal'?{portal:result}:{billing:result})});
