@@ -422,7 +422,8 @@ await check('availability contract: dispatcher fences reject stale configuration
 });
 await check('availability contract: voice keeps successful JSON and mutation string contracts with once-only saved requests',async()=>{
   const {dispatchManagedVoiceTool}=await import('../netlify/functions/lib/managed-actions.mjs'),f=await fixture('availability-voice');let observed=0;
-  const args={client:f.c,callId:'availability-voice',toolCallId:'availability',channel:'call',name:'get_availability',input:{date:'2026-10-24',days:1}};
+  const {addDays,houstonToday}=await import('../netlify/functions/lib/availability.mjs');
+  const args={client:f.c,callId:'availability-voice',toolCallId:'availability',channel:'call',name:'get_availability',input:{date:addDays(houstonToday(),1),days:1}};
   assert.equal(await dispatchManagedVoiceTool(args),JSON.stringify(await store.getAvailability(f.c,args.input.date,args.input.days)));
   await assert.rejects(()=>dispatchManagedVoiceTool({...args,onAvailabilityResult:true}),/Invalid availability result observer/);
   const mutation={...args,toolCallId:'save-request',name:'notify_owner',input:{customer_name:'Fixture',phone:caller,address:'Fixture address',issue:'Callback request',reason:'wants_call',wanted:'Tomorrow morning',urgency:'flexible',language:'en',nobook_reason:'none',unsure:''},onAvailabilityResult:()=>{observed++;}};
