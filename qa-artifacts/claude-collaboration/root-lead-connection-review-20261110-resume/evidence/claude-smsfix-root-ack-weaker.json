@@ -1,0 +1,761 @@
+{
+  "check": "smsfix-correct",
+  "at": "2026-11-10T23:24:41.790Z",
+  "head": "b54122a846c5513b732ade8aa638c8a037a56bf0",
+  "base": "161cf80e",
+  "serveRev": null,
+  "serveFile": {
+    "rel": "desk-connections.js",
+    "path": "/tmp/mc-root-lead-connection-review-20261110-sms/scratchpad/root-connections-conservative-variant.js",
+    "sha256": "3a856eb4319804315634600d4a90da7efcb9616dde9fe379855123f6f353a9e1"
+  },
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "qualifications": "Self-service workspace with a synthetic acquired number and a real texting registration row moved to needs_action (carrier correction requested, issue on the EIN). Actual /api/client handler, memory store, fake model, synthetic open gates, no provider transport. Lost responses: route.abort after the handler committed.",
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-connections.js": "f710b9c16c25b70abe341857bb5103499b25c01fcb259d3c04e7e50c5e1d7072",
+    "desk-service-intake.js": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/service-intake.mjs": "648756c7228c3daa07bad0eaa03a6a4e2f5ebad770ddd9195e7e3337e6037b6d",
+    "netlify/functions/lib/messaging-activation.mjs": "f93701fd56ae611e10ddbce65d568ed95ee44c89e334e7222a85153b632818cd",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs": "96c06eb7cafab18180b5ba7191b86b3b4a76f09990b5099dd9e9320d9fbc3493",
+    "qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs": "5bcf4bb8b662ec7a5cb3071e00d475849bd6ce5ca2a3c62a5d7b4728625857b7"
+  },
+  "served": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "desk-connections.css": "7d71db802dfe27002da0034a14ef625fe67f8eb0b252c069a2b79109eeceaf41",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk-guide-visuals.css": "9fbde03b2113789d00930ef862ab37162ecdad461dba459a1917da5d56e0a293",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-calendar.css": "fa3b4383ba86b9fe0f5556a9db063f7a96989a19cb25f95360f73dfeada075e4",
+    "desk-service-intake.css": "5f72fd9a462719190bc7f33bd39c99b869c89058db94a855e547712f03e50494",
+    "brand-marks.js": "0ad46b72e9f5a42174df67cff8e361ce47adf414a01dde615feb0ddc4d60b8aa",
+    "desk-connections.js": "3a856eb4319804315634600d4a90da7efcb9616dde9fe379855123f6f353a9e1",
+    "desk-billing.js": "a2e3a33c7ae0ad4808ed8a403b7785207817bf4f5481d82fe9c0becd1b77732f",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "desk-calendar.js": "fadc233f1f8df7603cf88a0d506dbcd214679cbcb64f1fbec0ab4fe7ebaf3bd6",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-activity.js": "392726f8270f77a61ece66401f08586e6bb6a8860a91eac8e564af2d9850db15",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "desk-manual-guide.js": "c8cf8f6f3e03ccdad6d1427672289d5307220c615e6893dd35e8d3c51bc63dc4",
+    "desk-website-install.js": "cd4212527b7cd33d630cb06fcd474d41da9da1beaccc220277c4976359a6631f",
+    "desk-lead-sources.js": "d9c09539110f5b58aba041bb8e3fe53af10aadbd4dbfd7b9a6dda3902aabdc0f",
+    "desk-guide-visuals.js": "c4fe4a632aa15501050c8a52391a2358db2b2856137d2a4e2a542fa2eea576d0",
+    "desk-service-intake.js": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "design-system.css": "7f4c532dc9c52e03f0dc8a01ab88e03a6d708b75308fdc9bc1a53e0766129c8a"
+  },
+  "servedVsBase": {
+    "desk.html": true,
+    "styles.css": true,
+    "desk-connections.css": true,
+    "desk-billing.css": true,
+    "desk-lead-sources.css": true,
+    "desk-setup-guide.css": true,
+    "desk-guide-visuals.css": true,
+    "product-ui.css": true,
+    "desk.css": true,
+    "desk-calendar.css": true,
+    "desk-service-intake.css": true,
+    "brand-marks.js": true,
+    "desk-connections.js": false,
+    "desk-billing.js": true,
+    "desk.js": true,
+    "desk-visits.js": true,
+    "desk-calendar.js": true,
+    "desk-requests.js": true,
+    "desk-activity.js": true,
+    "desk-conversations.js": true,
+    "desk-manual-guide.js": true,
+    "desk-website-install.js": true,
+    "desk-lead-sources.js": true,
+    "desk-guide-visuals.js": true,
+    "desk-service-intake.js": true,
+    "desk-setup-guide.js": true,
+    "design-system.css": true
+  },
+  "checks": [
+    {
+      "name": "root SMS correction from another tab cannot confirm the failed submission 390",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: another submission must not confirm this one\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs:86:9\n    at async check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:11)\n    at async file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs:69:33"
+    },
+    {
+      "name": "root SMS correction from another tab cannot confirm the failed submission 1440",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: another submission must not confirm this one\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs:86:9\n    at async check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:11)\n    at async file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs:69:33"
+    },
+    {
+      "name": "root SMS needs_action without issues still opens a usable correction form 390",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root SMS needs_action without issues still opens a usable correction form 1440",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root actual voice request acknowledgment confirms saved 390",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root actual voice request lost reply remains unknown 390",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root actual voice request acknowledgment confirms saved 1440",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root actual voice request lost reply remains unknown 1440",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors; served bytes are the worktree bytes; only desk-connections.js differs from 161cf80e",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: [\"http://127.0.0.1:8921/api/voice-activation-background\",\"http://127.0.0.1:8921/api/voice-activation-background\",\"http://127.0.0.1:8921/api/voice-activation-background\",\"http://127.0.0.1:8921/api/voice-activation-background\"]\n\n4 !== 0\n\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:157:14\n    at check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:17)\n    at Object.finish (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:156:11)\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs:121:9"
+    }
+  ],
+  "observations": [
+    {
+      "case": "other SMS correction 390",
+      "status": "Your change is saved. Its current status is shown above.",
+      "storedStreet": "900 Other Tab Avenue",
+      "intendedStreet": "700 Intended Change Road",
+      "ownerPost": "aborted-before-handler",
+      "submissionRevision": 2
+    },
+    {
+      "case": "other SMS correction 1440",
+      "status": "Your change is saved. Its current status is shown above.",
+      "storedStreet": "900 Other Tab Avenue",
+      "intendedStreet": "700 Intended Change Road",
+      "ownerPost": "aborted-before-handler",
+      "submissionRevision": 2
+    }
+  ],
+  "requests": [
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353082954,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353083013,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353083076,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353083111,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1&service_intake=1",
+      "method": "GET",
+      "at": 1794353083200,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "POST",
+      "action": "correct_messaging_activation",
+      "at": 1794353083401,
+      "body": {
+        "action": "correct_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "89cf1b8a5beb81f1d8d48573bdb2dff1",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "f274e416d0bbcac7ab0bf21b7a7a50c258efb07afe5fc89597c4addb4c597dfe",
+        "programDigest": "db9bf2e1b4e110f4d017f1e150d1d00cae090719f0247524c10a59dff552b6a5",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "921234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Change Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        },
+        "operationId": "smsfix-correct-1/14839ec6f55f732eaa86ab26a7bfc8b6bb1920a0fdf5c5ef2202447dbc27b9cc",
+        "expectedSubmissionRevision": 1
+      },
+      "fixture": "aborted-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353083441,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353083460,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353083617,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353083663,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353083720,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353083744,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2&service_intake=1",
+      "method": "GET",
+      "at": 1794353083827,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "POST",
+      "action": "correct_messaging_activation",
+      "at": 1794353084017,
+      "body": {
+        "action": "correct_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "732ffd6494b094903ecc4bfb2a5ebb27",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "f274e416d0bbcac7ab0bf21b7a7a50c258efb07afe5fc89597c4addb4c597dfe",
+        "programDigest": "eae2ac2a0ada0cf09106e9a1865f1635389f675a294298a954f31dd041974691",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "921234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Change Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        },
+        "operationId": "smsfix-correct-2/9d27fe8b19c02e5b438224c0774f5f7b4c52b23610eee87ea7c36d9c8b9b5222",
+        "expectedSubmissionRevision": 1
+      },
+      "fixture": "aborted-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353084058,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353084077,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353084262,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353084309,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353084363,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353084387,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3&service_intake=1",
+      "method": "GET",
+      "at": 1794353084456,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353084568,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353084615,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353084669,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353084692,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4&service_intake=1",
+      "method": "GET",
+      "at": 1794353084764,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353084903,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353084949,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353085000,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353085023,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "at": 1794353085092,
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "e96af8a04b47e8e0ac6572bcb04f8a3309c3b4592d38ee15aa618bfb860d8267",
+        "forwardingMode": "use_new_number"
+      },
+      "status": 202,
+      "response": {}
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353085157,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353085173,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353085318,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353085361,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353085426,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353085446,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "at": 1794353085509,
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "e96af8a04b47e8e0ac6572bcb04f8a3309c3b4592d38ee15aa618bfb860d8267",
+        "forwardingMode": "use_new_number"
+      },
+      "status": 202,
+      "response": {},
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353085591,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353085609,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-7",
+      "method": "GET",
+      "at": 1794353085764,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-7",
+      "method": "GET",
+      "at": 1794353085809,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-7",
+      "method": "GET",
+      "at": 1794353085861,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-7",
+      "method": "GET",
+      "at": 1794353085883,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-7",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "at": 1794353085958,
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "e96af8a04b47e8e0ac6572bcb04f8a3309c3b4592d38ee15aa618bfb860d8267",
+        "forwardingMode": "use_new_number"
+      },
+      "status": 202,
+      "response": {}
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-7",
+      "method": "GET",
+      "at": 1794353086021,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-7",
+      "method": "GET",
+      "at": 1794353086039,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-8",
+      "method": "GET",
+      "at": 1794353086189,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-8",
+      "method": "GET",
+      "at": 1794353086236,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-8",
+      "method": "GET",
+      "at": 1794353086300,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-8",
+      "method": "GET",
+      "at": 1794353086334,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-8",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "at": 1794353086401,
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "e96af8a04b47e8e0ac6572bcb04f8a3309c3b4592d38ee15aa618bfb860d8267",
+        "forwardingMode": "use_new_number"
+      },
+      "status": 202,
+      "response": {},
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-8",
+      "method": "GET",
+      "at": 1794353086484,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-8",
+      "method": "GET",
+      "at": 1794353086501,
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 4,
+  "physicalAttempts": [
+    "http://127.0.0.1:8921/api/voice-activation-background",
+    "http://127.0.0.1:8921/api/voice-activation-background",
+    "http://127.0.0.1:8921/api/voice-activation-background",
+    "http://127.0.0.1:8921/api/voice-activation-background"
+  ],
+  "screenshots": [
+    "scratchpad/claude-smsfix-root-ack-weaker-root-other-correction-390.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-failure-1.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-other-correction-1440.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-failure-2.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-no-issues-390.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-no-issues-1440.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-voice-ack-390.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-voice-lost-390.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-voice-ack-1440.png",
+    "scratchpad/claude-smsfix-root-ack-weaker-root-voice-lost-1440.png"
+  ],
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-connections.js": "f710b9c16c25b70abe341857bb5103499b25c01fcb259d3c04e7e50c5e1d7072",
+    "desk-service-intake.js": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/service-intake.mjs": "648756c7228c3daa07bad0eaa03a6a4e2f5ebad770ddd9195e7e3337e6037b6d",
+    "netlify/functions/lib/messaging-activation.mjs": "f93701fd56ae611e10ddbce65d568ed95ee44c89e334e7222a85153b632818cd",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-evidence-probe.mjs": "96c06eb7cafab18180b5ba7191b86b3b4a76f09990b5099dd9e9320d9fbc3493",
+    "qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs": "5bcf4bb8b662ec7a5cb3071e00d475849bd6ce5ca2a3c62a5d7b4728625857b7"
+  },
+  "sourceStable": true,
+  "servedAllBase": false,
+  "servedChangedFromBase": [
+    {
+      "file": "desk-connections.js",
+      "sha256": "3a856eb4319804315634600d4a90da7efcb9616dde9fe379855123f6f353a9e1"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 3,
+    "total": 9,
+    "physicalNetwork": 4,
+    "pageErrors": 0,
+    "servedAllBase": false,
+    "servedChangedFromBase": [
+      {
+        "file": "desk-connections.js",
+        "sha256": "3a856eb4319804315634600d4a90da7efcb9616dde9fe379855123f6f353a9e1"
+      }
+    ]
+  }
+}

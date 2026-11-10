@@ -399,11 +399,12 @@
       case 'cancel_messaging_activation':return !!sms&&sms.id===fields.operationId&&(sms.cancellationRequested===true||sms.state==='cancelled');
       case 'disconnect_calendar':return c.calendar?.status==='disconnected';
       case 'complete_calendar_connection':return !fields.error&&c.calendar?.connected===true;
-      // A re-request rewrites the existing intent (new updatedAt) with the submitted forwarding mode; an unchanged
-      // intent is not evidence that this request arrived.
-      case 'request_voice_activation':return !!voice&&voice.forwardingMode===fields.forwardingMode&&(!held.before.voice||!!voice.updatedAt&&voice.updatedAt!==held.before.voiceUpdatedAt);
-      case 'request_messaging_activation':return !!sms&&(!held.before.sms||!!sms.updatedAt&&sms.updatedAt!==held.before.smsUpdatedAt);
-      case 'correct_messaging_activation':return !!sms&&Number.isInteger(sms.submissionRevision)&&sms.submissionRevision!==fields.expectedSubmissionRevision;
+      // These views expose no receipt matching this submission. Workers can advance updatedAt, and another owner
+      // request can advance submissionRevision; neither proves the held request was accepted. A received ok:true
+      // reply still confirms its own request above. After a lost reply, keep the outcome unknown.
+      case 'request_voice_activation':
+      case 'request_messaging_activation':
+      case 'correct_messaging_activation':return false;
       case 'renew_messaging_probe':return !!sms?.probe?.nonce&&sms.probe.nonce!==fields.expectedProbeNonce;
       case 'pause':return latest.client?.status==='paused';
       case 'resume_services':return held.before.status==='paused'&&!!latest.client?.status&&latest.client.status!=='paused';
@@ -414,9 +415,7 @@
   document.addEventListener('mc:connection-readback-retry',function(){readMutationStatus();});
   async function request(action, fields) {
     if (busy || !data) return; if (mutationReadback) { readMutationStatus(); return; } if (savedSetupReadback) { readSavedSetup(); return; } busy = true; var expectedGeneration = generation, approvalDispatched = false, sent = false, opener = document.activeElement;
-    // Snapshot what the GET exposes before the write, so a re-request of an existing intent can be confirmed by change.
-    var voiceBefore=data.connections?.voice?.operation,smsBefore=data.connections?.messaging?.operation;
-    var before={voice:!!voiceBefore,voiceUpdatedAt:voiceBefore?.updatedAt||null,sms:!!smsBefore,smsUpdatedAt:smsBefore?.updatedAt||null,status:data.client?.status};
+    var before={status:data.client?.status};
     var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},20000);
     message.textContent = action === 'complete_calendar_connection' ? (fields.error ? 'Confirming your calendar choice…' : 'Connecting your Google Calendar…') : 'Saving your connection…'; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     try {
