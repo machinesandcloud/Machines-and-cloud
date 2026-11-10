@@ -1,0 +1,975 @@
+{
+  "at": "2026-11-10T09:16:01.014Z",
+  "mode": "Actual /api/client + /api/access in-process; /api/workspace-billing context.route fixture mirroring handler shapes; memory store; fake model; provider env deleted; physical transport denied; Stripe navigations stubbed",
+  "billingSource": "desk-billing.js",
+  "servedBillingSha256": [
+    "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed"
+  ],
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-billing.js": "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs": "eee8422b318c1870e82256f285b6043078949e53dcafb2ed64513c5d86dac378"
+  },
+  "checks": [
+    {
+      "name": "actual handler offline: GET reads status none with no offer; review/portal refuse with 503 billing_unavailable",
+      "pass": true,
+      "ms": 5
+    },
+    {
+      "name": "guard: open Billing, free workspace, review and start checkout by keyboard; Stripe navigation intercepted (390)",
+      "pass": true,
+      "ms": 241
+    },
+    {
+      "name": "guard: double click on checkout sends one request; lost checkout keeps the exact \"may already be saved\" wording and state (390)",
+      "pass": true,
+      "ms": 349
+    },
+    {
+      "name": "guard: portal JSON 4xx shows the server message with focus (390)",
+      "pass": true,
+      "ms": 147
+    },
+    {
+      "name": "guard: cancel renewal by keyboard; status claims the end only after the server confirms (390)",
+      "pass": true,
+      "ms": 167
+    },
+    {
+      "name": "status read: non-JSON 5xx on open reads couldn’t confirm, offers status check, then recovers (390)",
+      "pass": true,
+      "ms": 196
+    },
+    {
+      "name": "status check: abort before the handler reads couldn’t confirm with focus; state kept (390)",
+      "pass": true,
+      "ms": 167
+    },
+    {
+      "name": "checkout: lost after commit, then status check aborts, then succeeds; one checkout, saved URL offered, never paid (390)",
+      "pass": true,
+      "ms": 212
+    },
+    {
+      "name": "review: non-JSON 5xx reads couldn’t confirm with focus and status check; retry reviews (390)",
+      "pass": true,
+      "ms": 265
+    },
+    {
+      "name": "portal: lost after commit reads couldn’t confirm; retry reuses the requestId and opens the intercepted portal once (390)",
+      "pass": true,
+      "ms": 239
+    },
+    {
+      "name": "portal: non-JSON 5xx reads couldn’t confirm with focus, no navigation (390)",
+      "pass": true,
+      "ms": 200
+    },
+    {
+      "name": "portal: slow reply past the 15 s timeout, with double click, reads couldn’t confirm; one request, no navigation (390)",
+      "pass": true,
+      "ms": 17158
+    },
+    {
+      "name": "cancel renewal: lost after commit keeps exact wording; status check non-JSON 5xx reads couldn’t confirm; then server confirms (390)",
+      "pass": true,
+      "ms": 336
+    },
+    {
+      "name": "storage blocked after load: status check and desk refresh keep working with the loaded session (390)",
+      "pass": true,
+      "ms": 2194
+    },
+    {
+      "name": "storage mismatch sticks: a different stored session sends nothing and stays stopped after restore (390)",
+      "pass": true,
+      "ms": 1778
+    },
+    {
+      "name": "storage blocked then session expiry (401) clears billing for good (390)",
+      "pass": true,
+      "ms": 817
+    },
+    {
+      "name": "guard: storage blocked then sign-out clears billing (390)",
+      "pass": true,
+      "ms": 819
+    },
+    {
+      "name": "guard: open Billing, free workspace, review and start checkout by keyboard; Stripe navigation intercepted (1440)",
+      "pass": true,
+      "ms": 184
+    },
+    {
+      "name": "guard: double click on checkout sends one request; lost checkout keeps the exact \"may already be saved\" wording and state (1440)",
+      "pass": true,
+      "ms": 332
+    },
+    {
+      "name": "guard: portal JSON 4xx shows the server message with focus (1440)",
+      "pass": true,
+      "ms": 158
+    },
+    {
+      "name": "guard: cancel renewal by keyboard; status claims the end only after the server confirms (1440)",
+      "pass": true,
+      "ms": 199
+    },
+    {
+      "name": "status read: non-JSON 5xx on open reads couldn’t confirm, offers status check, then recovers (1440)",
+      "pass": true,
+      "ms": 196
+    },
+    {
+      "name": "status check: abort before the handler reads couldn’t confirm with focus; state kept (1440)",
+      "pass": true,
+      "ms": 159
+    },
+    {
+      "name": "checkout: lost after commit, then status check aborts, then succeeds; one checkout, saved URL offered, never paid (1440)",
+      "pass": true,
+      "ms": 238
+    },
+    {
+      "name": "review: non-JSON 5xx reads couldn’t confirm with focus and status check; retry reviews (1440)",
+      "pass": true,
+      "ms": 268
+    },
+    {
+      "name": "portal: lost after commit reads couldn’t confirm; retry reuses the requestId and opens the intercepted portal once (1440)",
+      "pass": true,
+      "ms": 240
+    },
+    {
+      "name": "portal: non-JSON 5xx reads couldn’t confirm with focus, no navigation (1440)",
+      "pass": true,
+      "ms": 187
+    },
+    {
+      "name": "portal: slow reply past the 15 s timeout, with double click, reads couldn’t confirm; one request, no navigation (1440)",
+      "pass": true,
+      "ms": 17160
+    },
+    {
+      "name": "cancel renewal: lost after commit keeps exact wording; status check non-JSON 5xx reads couldn’t confirm; then server confirms (1440)",
+      "pass": true,
+      "ms": 333
+    },
+    {
+      "name": "storage blocked after load: status check and desk refresh keep working with the loaded session (1440)",
+      "pass": true,
+      "ms": 2172
+    },
+    {
+      "name": "storage mismatch sticks: a different stored session sends nothing and stays stopped after restore (1440)",
+      "pass": true,
+      "ms": 1816
+    },
+    {
+      "name": "storage blocked then session expiry (401) clears billing for good (1440)",
+      "pass": true,
+      "ms": 832
+    },
+    {
+      "name": "guard: storage blocked then sign-out clears billing (1440)",
+      "pass": true,
+      "ms": 817
+    },
+    {
+      "name": "hygiene: no physical, forbidden or non-fixture Stripe requests and no page errors",
+      "pass": true
+    },
+    {
+      "name": "source unchanged during the run",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-billing-fix-2-checkout-lost-390.png",
+    "scratchpad/claude-billing-fix-2-read-503-390.png",
+    "scratchpad/claude-billing-fix-2-checkout-recovered-390.png",
+    "scratchpad/claude-billing-fix-2-portal-lost-390.png",
+    "scratchpad/claude-billing-fix-2-cancel-confirmed-390.png",
+    "scratchpad/claude-billing-fix-2-checkout-lost-1440.png",
+    "scratchpad/claude-billing-fix-2-read-503-1440.png",
+    "scratchpad/claude-billing-fix-2-checkout-recovered-1440.png",
+    "scratchpad/claude-billing-fix-2-portal-lost-1440.png",
+    "scratchpad/claude-billing-fix-2-cancel-confirmed-1440.png"
+  ],
+  "requests": [
+    {
+      "slug": "bill-ui-2-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "6d54a32540fbedff458bfaf9619b5de4",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "0e6375dbce7fac4c1bf2f90fd422dfc8",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-4-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-4-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "81a2a2723f6f222c0dda2f4c0aeaeaa2",
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "dbc32373c5b1edea58dfcdd45de2bdad",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-6-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-6-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-7-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-7-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "7ddbc69e02901d0163e397febb425fc7",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "ba29da950d787f075eab72302efb8187",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "ba29da950d787f075eab72302efb8187",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "aba144b69f13817928fa7e417951bd13",
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-12-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-12-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "37bf1c77d934a9dd6dbf6eca8d6edb5a",
+      "auth": "owner",
+      "fault": "slow",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "08936defd2aab7448b847b33f643d8c5",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-15-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-16-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-16-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-17-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "41110e6186e8ede603c9e57b151cdf2d",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-19-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-19-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-19-1440",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "7631ce9353b72416b0854c30631150ea",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-20-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-20-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "7c4e92ee8d9ea9f962488480e9559f59",
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-21-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-21-1440",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "9690a8601116e8f9f5a0ba74f5f7a972",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-21-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-22-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-22-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-23-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-23-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "9b510133969e610252e4fb4f577139b7",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-25-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-25-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-25-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-26-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-26-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "d00c4f14b96974e56c51b071378eb428",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-26-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "d00c4f14b96974e56c51b071378eb428",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-27-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-27-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "a26148618d87155cf43364bfac79c390",
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-28-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-28-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "a91a1b090f2329eada2c8160581e35e5",
+      "auth": "owner",
+      "fault": "slow",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "b215fcfbc2283729c38482f47f379f55",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-30-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-30-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-30-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-31-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-32-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-32-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-33-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    }
+  ],
+  "stripeNavigations": [
+    {
+      "slug": "bill-ui-2-390",
+      "href": "https://checkout.stripe.com/c/pay/cs_test_fixturebillui2390",
+      "navigation": true
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "href": "https://billing.stripe.com/p/session/test_fixturebillui10390",
+      "navigation": true
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "href": "https://checkout.stripe.com/c/pay/cs_test_fixturebillui181440",
+      "navigation": true
+    },
+    {
+      "slug": "bill-ui-26-1440",
+      "href": "https://billing.stripe.com/p/session/test_fixturebillui261440",
+      "navigation": true
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "actualHandlerOffline": {
+    "get": {
+      "status": 200,
+      "billing": {
+        "status": "none",
+        "plan": null,
+        "services": [],
+        "name": null,
+        "currentPeriodEnd": null,
+        "cancelAtPeriodEnd": false,
+        "cancellationState": null,
+        "checkout": null,
+        "portalAvailable": false,
+        "offerAvailable": false,
+        "availablePlans": [],
+        "livemode": null
+      }
+    },
+    "review": {
+      "status": 409,
+      "body": {
+        "error": "configuration_changed",
+        "message": "Your saved setup changed. Review it before continuing."
+      }
+    },
+    "portal": {
+      "status": 409,
+      "body": {
+        "error": "billing_portal_unavailable",
+        "message": "Payment details become available after your subscription is confirmed."
+      }
+    }
+  },
+  "syntheticProbeErrors": [
+    {
+      "slug": "bill-ui-16-390",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    },
+    {
+      "slug": "bill-ui-17-390",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    },
+    {
+      "slug": "bill-ui-32-1440",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    },
+    {
+      "slug": "bill-ui-33-1440",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    }
+  ],
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-billing.js": "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs": "eee8422b318c1870e82256f285b6043078949e53dcafb2ed64513c5d86dac378"
+  },
+  "passed": 35,
+  "total": 35,
+  "durationMs": 51148
+}

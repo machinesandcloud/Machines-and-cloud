@@ -1,0 +1,1273 @@
+{
+  "at": "2026-11-10T09:23:48.638Z",
+  "mode": "Actual /api/client + /api/access in-process; /api/workspace-billing context.route fixture mirroring handler shapes; memory store; fake model; provider env deleted; physical transport denied; Stripe navigations stubbed",
+  "billingSource": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/qa/desk-billing.base.js",
+  "servedBillingSha256": [
+    "a2e3a33c7ae0ad4808ed8a403b7785207817bf4f5481d82fe9c0becd1b77732f"
+  ],
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-billing.js": "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs": "eee8422b318c1870e82256f285b6043078949e53dcafb2ed64513c5d86dac378"
+  },
+  "checks": [
+    {
+      "name": "actual handler offline: GET reads status none with no offer; review/portal refuse with 503 billing_unavailable",
+      "pass": true,
+      "ms": 8
+    },
+    {
+      "name": "guard: open Billing, free workspace, review and start checkout by keyboard; Stripe navigation intercepted (390)",
+      "pass": true,
+      "ms": 304
+    },
+    {
+      "name": "guard: double click on checkout sends one request; lost checkout keeps the exact \"may already be saved\" wording and state (390)",
+      "pass": true,
+      "ms": 385
+    },
+    {
+      "name": "guard: portal JSON 4xx shows the server message with focus (390)",
+      "pass": true,
+      "ms": 192
+    },
+    {
+      "name": "guard: cancel renewal by keyboard; status claims the end only after the server confirms (390)",
+      "pass": true,
+      "ms": 226
+    },
+    {
+      "name": "status read: non-JSON 5xx on open reads couldn’t confirm, offers status check, then recovers (390)",
+      "pass": false,
+      "ms": 153,
+      "error": "AssertionError [ERR_ASSERTION]: Raw: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:244:44\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:240:3",
+      "state": {
+        "status": "Checking saved status",
+        "summary": "Checking this workspace’s plan and billing.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-6.png"
+    },
+    {
+      "name": "status check: abort before the handler reads couldn’t confirm with focus; state kept (390)",
+      "pass": false,
+      "ms": 152,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at refresh abort 390: Failed to fetch\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:252:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:248:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Failed to fetch",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-7.png"
+    },
+    {
+      "name": "checkout: lost after commit, then status check aborts, then succeeds; one checkout, saved URL offered, never paid (390)",
+      "pass": false,
+      "ms": 215,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at checkout-then-refresh-abort 390: Failed to fetch\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:260:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:254:3",
+      "state": {
+        "status": "No subscription started",
+        "summary": "Your checkout request is saved. Check payment status before starting another.",
+        "message": "Failed to fetch",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-8.png"
+    },
+    {
+      "name": "review: non-JSON 5xx reads couldn’t confirm with focus and status check; retry reviews (390)",
+      "pass": false,
+      "ms": 174,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at review 503 390: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:270:5\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:266:3",
+      "state": {
+        "status": "No subscription started",
+        "summary": "Your workspace is free to prepare. You review the full paid offer before entering payment details.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingOfferForm"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-9.png"
+    },
+    {
+      "name": "portal: lost after commit reads couldn’t confirm; retry reuses the requestId and opens the intercepted portal once (390)",
+      "pass": false,
+      "ms": 166,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at portal lost 390: Failed to fetch\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:277:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:273:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Failed to fetch",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-10.png"
+    },
+    {
+      "name": "portal: non-JSON 5xx reads couldn’t confirm with focus, no navigation (390)",
+      "pass": false,
+      "ms": 216,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at portal 503 390: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:286:5\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:282:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-11.png"
+    },
+    {
+      "name": "portal: slow reply past the 15 s timeout, with double click, reads couldn’t confirm; one request, no navigation (390)",
+      "pass": false,
+      "ms": 17185,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at portal slow 390: signal is aborted without reason\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:295:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:288:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "signal is aborted without reason",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-12.png"
+    },
+    {
+      "name": "cancel renewal: lost after commit keeps exact wording; status check non-JSON 5xx reads couldn’t confirm; then server confirms (390)",
+      "pass": false,
+      "ms": 272,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at cancel-then-refresh-503 390: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:304:9\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:297:3",
+      "state": {
+        "status": "Renewal cancellation pending",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-13.png"
+    },
+    {
+      "name": "storage blocked after load: status check and desk refresh keep working with the loaded session (390)",
+      "pass": false,
+      "ms": 8957,
+      "error": "page.waitForFunction: Timeout 8000ms exceeded.\n    at waitMessage (/private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:164:40)\n    at /private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:316:74\n    at async check (/private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:311:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Checking payment status…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-14.png"
+    },
+    {
+      "name": "storage mismatch sticks: a different stored session sends nothing and stays stopped after restore (390)",
+      "pass": false,
+      "ms": 995,
+      "error": "AssertionError [ERR_ASSERTION]: No request carries a foreign session\n\n1 !== 0\n\n    at file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:325:12\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:320:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Checking payment status…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-15.png"
+    },
+    {
+      "name": "storage blocked then session expiry (401) clears billing for good (390)",
+      "pass": false,
+      "ms": 8161,
+      "error": "page.waitForFunction: Timeout 8000ms exceeded.\n    at /private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:336:16\n    at async check (/private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:330:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Checking payment status…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-16.png"
+    },
+    {
+      "name": "guard: storage blocked then sign-out clears billing (390)",
+      "pass": true,
+      "ms": 837
+    },
+    {
+      "name": "guard: open Billing, free workspace, review and start checkout by keyboard; Stripe navigation intercepted (1440)",
+      "pass": true,
+      "ms": 200
+    },
+    {
+      "name": "guard: double click on checkout sends one request; lost checkout keeps the exact \"may already be saved\" wording and state (1440)",
+      "pass": true,
+      "ms": 338
+    },
+    {
+      "name": "guard: portal JSON 4xx shows the server message with focus (1440)",
+      "pass": true,
+      "ms": 151
+    },
+    {
+      "name": "guard: cancel renewal by keyboard; status claims the end only after the server confirms (1440)",
+      "pass": true,
+      "ms": 180
+    },
+    {
+      "name": "status read: non-JSON 5xx on open reads couldn’t confirm, offers status check, then recovers (1440)",
+      "pass": false,
+      "ms": 149,
+      "error": "AssertionError [ERR_ASSERTION]: Raw: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:244:44\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:240:3",
+      "state": {
+        "status": "Checking saved status",
+        "summary": "Checking this workspace’s plan and billing.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-22.png"
+    },
+    {
+      "name": "status check: abort before the handler reads couldn’t confirm with focus; state kept (1440)",
+      "pass": false,
+      "ms": 181,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at refresh abort 1440: Failed to fetch\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:252:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:248:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Failed to fetch",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-23.png"
+    },
+    {
+      "name": "checkout: lost after commit, then status check aborts, then succeeds; one checkout, saved URL offered, never paid (1440)",
+      "pass": false,
+      "ms": 231,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at checkout-then-refresh-abort 1440: Failed to fetch\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:260:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:254:3",
+      "state": {
+        "status": "No subscription started",
+        "summary": "Your checkout request is saved. Check payment status before starting another.",
+        "message": "Failed to fetch",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-24.png"
+    },
+    {
+      "name": "review: non-JSON 5xx reads couldn’t confirm with focus and status check; retry reviews (1440)",
+      "pass": false,
+      "ms": 159,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at review 503 1440: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:270:5\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:266:3",
+      "state": {
+        "status": "No subscription started",
+        "summary": "Your workspace is free to prepare. You review the full paid offer before entering payment details.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingOfferForm"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-25.png"
+    },
+    {
+      "name": "portal: lost after commit reads couldn’t confirm; retry reuses the requestId and opens the intercepted portal once (1440)",
+      "pass": false,
+      "ms": 145,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at portal lost 1440: Failed to fetch\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:277:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:273:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Failed to fetch",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-26.png"
+    },
+    {
+      "name": "portal: non-JSON 5xx reads couldn’t confirm with focus, no navigation (1440)",
+      "pass": false,
+      "ms": 184,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at portal 503 1440: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:286:5\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:282:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-27.png"
+    },
+    {
+      "name": "portal: slow reply past the 15 s timeout, with double click, reads couldn’t confirm; one request, no navigation (1440)",
+      "pass": false,
+      "ms": 17161,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at portal slow 1440: signal is aborted without reason\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:295:15\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:288:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "signal is aborted without reason",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-28.png"
+    },
+    {
+      "name": "cancel renewal: lost after commit keeps exact wording; status check non-JSON 5xx reads couldn’t confirm; then server confirms (1440)",
+      "pass": false,
+      "ms": 243,
+      "error": "AssertionError [ERR_ASSERTION]: Raw error at cancel-then-refresh-503 1440: Unexpected token '<', \"<!doctype \"... is not valid JSON\n    at assertUnknown (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:171:10)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:304:9\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:297:3",
+      "state": {
+        "status": "Renewal cancellation pending",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "error": "true",
+        "focus": "billingMessage",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-29.png"
+    },
+    {
+      "name": "storage blocked after load: status check and desk refresh keep working with the loaded session (1440)",
+      "pass": false,
+      "ms": 8957,
+      "error": "page.waitForFunction: Timeout 8000ms exceeded.\n    at waitMessage (/private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:164:40)\n    at /private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:316:74\n    at async check (/private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:311:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Checking payment status…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-30.png"
+    },
+    {
+      "name": "storage mismatch sticks: a different stored session sends nothing and stays stopped after restore (1440)",
+      "pass": false,
+      "ms": 1010,
+      "error": "AssertionError [ERR_ASSERTION]: No request carries a foreign session\n\n1 !== 0\n\n    at file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:325:12\n    at async check (file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:320:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Checking payment status…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-31.png"
+    },
+    {
+      "name": "storage blocked then session expiry (401) clears billing for good (1440)",
+      "pass": false,
+      "ms": 8158,
+      "error": "page.waitForFunction: Timeout 8000ms exceeded.\n    at /private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:336:16\n    at async check (/private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:154:9)\n    at async file:///private/tmp/mc-claude-billing-20261110/qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs:330:3",
+      "state": {
+        "status": "Subscription active",
+        "summary": "Coverage · Current period ends Dec 10, 2026.",
+        "message": "Checking payment status…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingRefresh",
+          "billingPortal",
+          "billingEnd"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "screenshot": "scratchpad/claude-billing-qa-base-failure-32.png"
+    },
+    {
+      "name": "guard: storage blocked then sign-out clears billing (1440)",
+      "pass": true,
+      "ms": 790
+    },
+    {
+      "name": "hygiene: no physical, forbidden or non-fixture Stripe requests and no page errors",
+      "pass": true
+    },
+    {
+      "name": "source unchanged during the run",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-billing-qa-base-checkout-lost-390.png",
+    "scratchpad/claude-billing-qa-base-failure-6.png",
+    "scratchpad/claude-billing-qa-base-failure-7.png",
+    "scratchpad/claude-billing-qa-base-failure-8.png",
+    "scratchpad/claude-billing-qa-base-failure-9.png",
+    "scratchpad/claude-billing-qa-base-failure-10.png",
+    "scratchpad/claude-billing-qa-base-failure-11.png",
+    "scratchpad/claude-billing-qa-base-failure-12.png",
+    "scratchpad/claude-billing-qa-base-failure-13.png",
+    "scratchpad/claude-billing-qa-base-failure-14.png",
+    "scratchpad/claude-billing-qa-base-failure-15.png",
+    "scratchpad/claude-billing-qa-base-failure-16.png",
+    "scratchpad/claude-billing-qa-base-checkout-lost-1440.png",
+    "scratchpad/claude-billing-qa-base-failure-22.png",
+    "scratchpad/claude-billing-qa-base-failure-23.png",
+    "scratchpad/claude-billing-qa-base-failure-24.png",
+    "scratchpad/claude-billing-qa-base-failure-25.png",
+    "scratchpad/claude-billing-qa-base-failure-26.png",
+    "scratchpad/claude-billing-qa-base-failure-27.png",
+    "scratchpad/claude-billing-qa-base-failure-28.png",
+    "scratchpad/claude-billing-qa-base-failure-29.png",
+    "scratchpad/claude-billing-qa-base-failure-30.png",
+    "scratchpad/claude-billing-qa-base-failure-31.png",
+    "scratchpad/claude-billing-qa-base-failure-32.png"
+  ],
+  "requests": [
+    {
+      "slug": "bill-ui-2-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "2f74a6ce5d2b04951d894fbcd45d0fc0",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "8e2678cab643289452e835fd2f6bb08a",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-4-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-4-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "614c530a7a2e0f2ebb19c624eb1dfcfc",
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "b2c093afb6fbaef62ef757cb4cfd3428",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-6-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-7-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-7-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "9291f1885888bd0f846bf9b8cda312c2",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "db893a31fc459266a0d4253a10c304dd",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "eb4e399236f40113c6d13a92cf86b531",
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-12-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-12-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "a45ccb3b2d401c6bcbc24963ac65fde2",
+      "auth": "owner",
+      "fault": "slow",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "2d01ae482fbfea4acb39eb286a78e1ce",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "other",
+      "status": 401
+    },
+    {
+      "slug": "bill-ui-15-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-15-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "other",
+      "status": 401
+    },
+    {
+      "slug": "bill-ui-16-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-16-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "other",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-17-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "4a6930456aed6e1a02ce1084430e04a8",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-19-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-19-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-19-1440",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "8a068010131464002e11848c52e8d3d5",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-20-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-20-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "80dc51b3ed94d0934fd509981381765d",
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-21-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-21-1440",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "bfd185f837091dc09c3c78dac3080afe",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-21-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-22-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-23-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-23-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "5d0b00459a22801b9e6649775b624f2a",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-24-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "abort-before"
+    },
+    {
+      "slug": "bill-ui-25-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-25-1440",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-26-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-26-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "6380275c6201b90ceffd4c2bb8c3f32c",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-27-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-27-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "5c554921588ef5b3bf21d3b2783fed4e",
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-28-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-28-1440",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "78733ecf0712835bff0b1c68bb0e3b8e",
+      "auth": "owner",
+      "fault": "slow",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "POST",
+      "action": "cancel_renewal",
+      "requestId": "ddeece15354759bc7ea428e823bcb25f",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-29-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "html-503"
+    },
+    {
+      "slug": "bill-ui-30-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-30-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "other",
+      "status": 401
+    },
+    {
+      "slug": "bill-ui-31-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-31-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "other",
+      "status": 401
+    },
+    {
+      "slug": "bill-ui-32-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-32-1440",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "other",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-33-1440",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    }
+  ],
+  "stripeNavigations": [
+    {
+      "slug": "bill-ui-2-390",
+      "href": "https://checkout.stripe.com/c/pay/cs_test_fixturebillui2390",
+      "navigation": true
+    },
+    {
+      "slug": "bill-ui-18-1440",
+      "href": "https://checkout.stripe.com/c/pay/cs_test_fixturebillui181440",
+      "navigation": true
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "actualHandlerOffline": {
+    "get": {
+      "status": 200,
+      "billing": {
+        "status": "none",
+        "plan": null,
+        "services": [],
+        "name": null,
+        "currentPeriodEnd": null,
+        "cancelAtPeriodEnd": false,
+        "cancellationState": null,
+        "checkout": null,
+        "portalAvailable": false,
+        "offerAvailable": false,
+        "availablePlans": [],
+        "livemode": null
+      }
+    },
+    "review": {
+      "status": 409,
+      "body": {
+        "error": "configuration_changed",
+        "message": "Your saved setup changed. Review it before continuing."
+      }
+    },
+    "portal": {
+      "status": 409,
+      "body": {
+        "error": "billing_portal_unavailable",
+        "message": "Payment details become available after your subscription is confirmed."
+      }
+    }
+  },
+  "syntheticProbeErrors": [
+    {
+      "slug": "bill-ui-17-390",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    },
+    {
+      "slug": "bill-ui-33-1440",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    }
+  ],
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-billing.js": "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs": "eee8422b318c1870e82256f285b6043078949e53dcafb2ed64513c5d86dac378"
+  },
+  "passed": 13,
+  "total": 35,
+  "durationMs": 78157
+}
