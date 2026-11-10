@@ -12,6 +12,36 @@
   // An interrupted, unreadable or server-error reply is an unknown outcome: say so and offer the saved status check.
   var unknownText={read:'We couldn’t confirm your billing status. Nothing was changed here. Check payment status to try again.',refresh:'We couldn’t confirm your billing status. Nothing was changed here. Check payment status to try again.',review:'We couldn’t confirm your monthly offer. Nothing was charged. Check payment status, then review the offer again.',portal:'We couldn’t confirm the secure payment link, so payment details were not opened. Check payment status, then open payment details again.'};
   function unknown(code){return Object.assign(new Error(unknownText.read),{uncertain:true,code:code||'billing_response_unconfirmed'});}
+  function isRecord(value){return value!==null&&typeof value==='object'&&!Array.isArray(value);}
+  // Require the fields consumed by the renderer before replacing the last confirmed snapshot.
+  function isBillingView(value){
+    return isRecord(value)&&typeof value.status==='string'&&value.status.length>0
+      &&(!Object.prototype.hasOwnProperty.call(value,'availablePlans')
+        ||Array.isArray(value.availablePlans)&&value.availablePlans.every(function(plan){
+          return isRecord(plan)&&typeof plan.id==='string'&&typeof plan.name==='string'
+            &&Number.isSafeInteger(plan.amountCents)&&plan.amountCents>=0;
+        }));
+  }
+  function isOfferReview(value){
+    var offer=value?.offer,terms=offer?.terms;
+    return isRecord(value)
+      &&typeof value.reviewId==='string'&&value.reviewId.length>0
+      &&typeof value.expiresAt==='string'&&Number.isFinite(Date.parse(value.expiresAt))
+      &&isRecord(offer)&&typeof offer.name==='string'
+      &&Number.isSafeInteger(offer.amountCents)&&offer.amountCents>=0
+      &&Array.isArray(offer.services)&&offer.services.length>0
+      &&offer.services.every(function(service){return typeof service==='string';})
+      &&typeof offer.limitsDescription==='string'
+      &&isRecord(terms)&&typeof terms.text==='string'&&typeof terms.url==='string'
+      &&typeof offer.livemode==='boolean';
+  }
+  function validSuccessPayload(body,result){
+    var action=body?.action;
+    if(!action||['refresh','checkout','cancel_renewal'].includes(action))return isBillingView(result.billing);
+    if(action==='review')return isOfferReview(result.review);
+    if(action==='portal')return isRecord(result.portal)&&typeof result.portal.url==='string';
+    return true;
+  }
   function valid(generation,token){return generation===epoch&&token===session()&&currentToken===token&&root.isConnected;}
   function note(text,error){$('billingMessage').textContent=text;$('billingMessage').dataset.error=error?'true':'false';}
   function money(cents){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(cents/100);}
@@ -39,7 +69,7 @@
   }
   function clearSnapshot(){state=null;review=null;$('billingCancel').close();['billingTerms','billingReviewTitle','billingScope','billingLimits','billingMessage','billingCapacityPeriod','billingCapacityState','billingCancelDetail'].forEach(function(id){$(id).textContent='';});$('billingTermsLink').removeAttribute('href');$('billingAgree').checked=false;$('billingCapacity').hidden=true;$('billingCapacityRows').replaceChildren();$('billingOfferForm').hidden=true;$('billingReview').hidden=true;['billingContinue','billingPortal','billingEnd'].forEach(function(id){$(id).hidden=true;});$('billingContinue').href='#';$('billingRefresh').hidden=false;$('billingStatus').textContent='Checking saved status';$('billingSummary').textContent='Checking this workspace’s plan and billing.';}
   function controls(){root.setAttribute('aria-busy',busy?'true':'false');root.querySelectorAll('button,input,select').forEach(function(el){el.disabled=busy;});$('billingKeep').disabled=busy;$('billingEndConfirm').disabled=busy;}
-  async function request(body){var token=session(),generation=epoch,controller=new AbortController(),timeout;if(!token||token!==currentToken)throw Object.assign(new Error('Sign in again to manage billing. Nothing was sent.'),{notSent:true});timeout=setTimeout(function(){controller.abort();},15000);try{var response;try{response=await fetch(base+'/api/workspace-billing?c='+encodeURIComponent(data.client.slug),{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:controller.signal});}catch{if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});throw unknown('billing_response_interrupted');}if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));throw Object.assign(new Error('Sign in again to manage billing.'),{stale:true});}var result;try{result=await response.json();}catch{if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});throw unknown('billing_response_unreadable');}if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});if(response.status>=500||!response.ok&&response.status<400||!result||typeof result!=='object'||Array.isArray(result))throw unknown(result?.error);if(!response.ok||result.error)throw Object.assign(new Error(result.message||'Billing could not be confirmed. Check its saved status before trying again.'),{code:result.error});return result;}finally{clearTimeout(timeout);}}
+  async function request(body){var token=session(),generation=epoch,controller=new AbortController(),timeout;if(!token||token!==currentToken)throw Object.assign(new Error('Sign in again to manage billing. Nothing was sent.'),{notSent:true});timeout=setTimeout(function(){controller.abort();},15000);try{var response;try{response=await fetch(base+'/api/workspace-billing?c='+encodeURIComponent(data.client.slug),{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:controller.signal});}catch{if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});throw unknown('billing_response_interrupted');}if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));throw Object.assign(new Error('Sign in again to manage billing.'),{stale:true});}var result;try{result=await response.json();}catch{if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});throw unknown('billing_response_unreadable');}if(!valid(generation,token))throw Object.assign(new Error('This billing view changed.'),{stale:true});if(response.status>=500||!response.ok&&response.status<400||!result||typeof result!=='object'||Array.isArray(result))throw unknown(result?.error);if(!response.ok||result.error)throw Object.assign(new Error(result.message||'Billing could not be confirmed. Check its saved status before trying again.'),{code:result.error});if(!validSuccessPayload(body,result))throw unknown('billing_response_shape_unconfirmed');return result;}finally{clearTimeout(timeout);}}
   function render(){
     if(!state)return;
     var subscribed=state.status!=='none'&&!['canceled','incomplete_expired'].includes(state.status),renewalWaiting=cancelUncertain||['pending','uncertain'].includes(state.cancellationState),waiting=checkoutUncertain||state.checkout&&['pending','uncertain'].includes(state.checkout.state),fundingWaiting=state.livemode===true&&subscribed&&state.serviceFunding?.paid===false;
