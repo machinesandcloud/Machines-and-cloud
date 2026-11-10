@@ -16,7 +16,7 @@ if (existsSync(output)) throw new Error('Refusing to overwrite retained QA evide
 const prefix = output.slice(0, -5);
 process.env.MC_MEMORY_STORE = '1'; process.env.MC_FAKE_MODEL = '1'; process.env.URL = base;
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_)/.test(key)) delete process.env[key];
-const report = { at: new Date().toISOString(), mode: 'actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network', checks: [], scenarios: [], requests: [], blockedBrowser: [], forbiddenApi: [], blockedServer: [], pageErrors: [], screenshots: [] };
+const report = { at: new Date().toISOString(), mode: 'actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network', checks: [], scenarios: [], requests: [], blockedBrowser: [], forbiddenApi: [], blockedServer: [], pageErrors: [], screenshots: [], servedOnboardJs: [] };
 globalThis.fetch = async input => { const url = new URL(String(input?.url || input)); report.blockedServer.push({ origin: url.origin, pathname: url.pathname }); throw new Error('QA physical transport denied'); };
 const store = await import('../../netlify/functions/lib/store.mjs');
 const { accessHash } = await import('../../netlify/functions/lib/access.mjs');
@@ -57,6 +57,7 @@ async function newContext(width, row, session) {
     if (relative.split(/[\\/]/).some(part => part.startsWith('.'))) return route.fulfill({ status: 404, body: 'blocked' });
     const path = resolve(root, relative);
     if (!path.startsWith(root + '/') || !existsSync(path) || statSync(path).isDirectory()) return route.fulfill({ status: 404, body: 'not found' });
+    if (relative === 'onboard.js') { const served = createHash('sha256').update(readFileSync(path)).digest('hex'); if (!report.servedOnboardJs.includes(served)) report.servedOnboardJs.push(served); }
     return route.fulfill({ status: 200, contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
   });
   return context;
@@ -85,11 +86,14 @@ async function toStep3(page, row) {
   await page.locator('#business').fill(row.business); await page.locator('#trade').selectOption('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#serviceArea').fill('Katy'); await page.locator('#spanish').selectOption('no'); await page.locator('#hours').fill('Mon to Fri 7 to 6'); await advance(page, 2);
 }
 async function toStep4(page, row) { await toStep3(page, row); await page.locator('#windows').fill('8 to 12\n12 to 5'); await advance(page, 3); }
+const UNKNOWN = /couldn.t confirm whether your (?:latest )?(?:changes|answers) were saved/i, OVERCLAIM = /couldn.t be saved|couldn.t save/i;
+const nextSave = async page => { await page.waitForFunction(() => /^Saved\.|another tab|confirm whether/.test(document.getElementById('draft-status').textContent) && !/^Saving/.test(document.getElementById('draft-status').textContent), null, { timeout: 15000 }); return page.locator('#draft-status').innerText(); };
+const serverDraft = async session => { const response = await handlers['/api/access'](new Request(base + '/api/access', { headers: { authorization: 'Bearer ' + session, origin: base } }), { ip: '192.0.2.250' }); return (await response.json()).draft; };
 const workspacesFor = async email => { const out = []; for (const slug of await store.list('clients', '')) { const client = await store.getClient(slug); if (client?.owner?.email === email) out.push(slug); } return out; };
 const errorState = page => page.evaluate(() => ({ err: document.getElementById('err').hidden ? '' : document.getElementById('err').innerText, button: document.getElementById('next').textContent, buttonEnabled: !document.getElementById('next').disabled, step4: document.querySelector('fieldset[data-step="4"]').classList.contains('on'), done: document.getElementById('done').classList.contains('on'), focusOnError: document.activeElement === document.getElementById('err'), notes: document.getElementById('notes')?.value }));
 
 const scenarios = [];
-for (const width of [1440, 390]) scenarios.push(['create-lost-after-handler', width], ['create-lost-before-handler', width], ['autosave-lost', width], ['reopen-lost', width], ['advance-save-lost', width], ['edit-after-lost-create', width], ['autosave-502', width]);
+for (const width of [1440, 390]) scenarios.push(['create-lost-after-handler', width], ['create-lost-before-handler', width], ['autosave-lost', width], ['reopen-lost', width], ['advance-save-lost', width], ['edit-after-lost-create', width], ['autosave-502', width], ['autosave-lost-after-handler', width]);
 for (const [kind, width] of scenarios) {
   const row = { id: kind + '-' + width, kind, width, business: `Create QA ${kind} ${width}`, events: [], overflow: [], pageErrors: [] }; report.scenarios.push(row);
   const email = `qa-create-${kind}-${width}@example.test`, contexts = [];
@@ -127,6 +131,7 @@ for (const [kind, width] of scenarios) {
       await shot(page, row.id + '-error');
       check(`${row.id}: lost save after advancing names only the button on the page`, row.lostState.step4 && row.lostState.err.includes(row.lostState.button.trim()) && row.visibleButtons.includes(row.lostState.button.trim()) && !row.visibleButtons.includes('Save and continue') && !row.lostState.err.includes('Save and continue'), { err: row.lostState.err, visibleButtons: row.visibleButtons });
       check(`${row.id}: lost save after advancing shows no raw text or em dash and keeps the answers`, !RAW.test(row.lostState.err) && !/—/.test(row.lostState.err) && /still on this page/.test(row.lostState.err), row.lostState.err);
+      check(`${row.id}: lost save after advancing says the outcome is unknown, not that it failed`, UNKNOWN.test(row.lostState.err) && !OVERCLAIM.test(row.lostState.err), row.lostState.err);
       check(`${row.id}: no workspace is created by the lost save`, (await workspacesFor(email)).length === 0);
     } else if (kind === 'edit-after-lost-create') {
       await toStep4(page, row); await page.locator('#notes').fill('Original notes');
@@ -146,19 +151,24 @@ for (const [kind, width] of scenarios) {
       await page.locator('#draft-status').filter({ hasText: /still on this page/ }).waitFor();
       row.statusText = await page.locator('#draft-status').innerText(); row.overflow.push(['autosave', await overflow(page)]);
       await shot(page, row.id + '-error');
-      check(`${row.id}: a server 502 during autosave does not blame the owner's connection`, !/connection/i.test(row.statusText) && /right now/i.test(row.statusText) && /still on this page/.test(row.statusText) && !RAW.test(row.statusText) && !/—/.test(row.statusText), row.statusText);
-      await page.locator('#phone').fill('7135550101'); await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor();
-      check(`${row.id}: the next change saves the kept answers`, await page.locator('#name').inputValue() === 'Create QA Owner');
-    } else if (kind === 'autosave-lost') {
-      row.fault = { path: '/api/access', method: 'PUT', when: 'before', remaining: 1 };
+      check(`${row.id}: a server 502 during autosave does not blame the owner's connection`, !/connection/i.test(row.statusText) && /still on this page/.test(row.statusText) && !RAW.test(row.statusText) && !/—/.test(row.statusText), row.statusText);
+      check(`${row.id}: a server 502 during autosave says the outcome is unknown, not that it failed`, UNKNOWN.test(row.statusText) && !OVERCLAIM.test(row.statusText), row.statusText);
+      await page.locator('#phone').fill('7135550101'); row.nextStatus = await nextSave(page);
+      check(`${row.id}: the next change saves the kept answers`, /^Saved\./.test(row.nextStatus) && (await serverDraft(session)).fields.name === 'Create QA Owner', row.nextStatus);
+    } else if (kind === 'autosave-lost' || kind === 'autosave-lost-after-handler') {
+      row.fault = { path: '/api/access', method: 'PUT', when: kind === 'autosave-lost' ? 'before' : 'after', remaining: 1 };
       await page.locator('#name').fill('Create QA Owner');
       await page.locator('#draft-status').filter({ hasText: /still on this page/ }).waitFor();
       row.statusText = await page.locator('#draft-status').innerText(); row.overflow.push(['autosave', await overflow(page)]);
       await shot(page, row.id + '-error');
       check(`${row.id}: lost autosave shows no raw browser error text and keeps the answers`, !RAW.test(row.statusText) && /still on this page/.test(row.statusText) && await page.locator('#name').inputValue() === 'Create QA Owner', row.statusText);
       check(`${row.id}: lost autosave copy has no em dash`, !/—/.test(row.statusText), row.statusText);
-      await page.locator('#phone').fill('7135550101'); await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor();
-      check(`${row.id}: the next change saves the kept answers`, true);
+      check(`${row.id}: lost autosave says the outcome is unknown, not that it failed`, UNKNOWN.test(row.statusText) && !OVERCLAIM.test(row.statusText), row.statusText);
+      row.draftAfterLoss = await serverDraft(session);
+      check(`${row.id}: the server state matches where the save was lost`, (row.draftAfterLoss.fields?.name === 'Create QA Owner') === (row.fault.when === 'after'), { revision: row.draftAfterLoss.revision, name: row.draftAfterLoss.fields?.name ?? null });
+      await page.locator('#phone').fill('7135550101'); row.nextStatus = await nextSave(page);
+      row.draftAfterNext = await serverDraft(session);
+      check(`${row.id}: the next autosave succeeds and keeps both answers`, /^Saved\./.test(row.nextStatus) && row.draftAfterNext.fields.name === 'Create QA Owner' && row.draftAfterNext.fields.phone === '7135550101', { status: row.nextStatus, revision: row.draftAfterNext.revision });
     } else {
       await context.close(); row.fault = { path: '/api/access', method: 'GET', when: 'before', remaining: 1 };
       context = await newContext(width, row, session); contexts.push(context); page = await openPage(context, row);
@@ -183,6 +193,7 @@ check('No browser request left the fixture origin', report.blockedBrowser.length
 check('No forbidden API route was requested', report.forbiddenApi.length === 0, report.forbiddenApi);
 check('No physical server transport was attempted', report.blockedServer.length === 0, report.blockedServer);
 report.sourceAfter = hashes();
+check('Exactly one onboard.js was served, and it is the pinned source', report.servedOnboardJs.length === 1 && report.servedOnboardJs[0] === report.sourceBefore['onboard.js'], report.servedOnboardJs);
 check('Source stayed stable throughout the check', JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter));
 report.summary = { checks: report.checks.length, passed: report.checks.filter(c => c.pass).length, failed: report.checks.filter(c => !c.pass).length };
 report.failed = report.checks.filter(c => !c.pass).map(c => ({ name: c.name, detail: c.detail }));

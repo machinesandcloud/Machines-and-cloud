@@ -15,7 +15,7 @@ if (existsSync(output)) throw new Error('Refusing to overwrite retained QA evide
 const prefix = output.slice(0, -5);
 process.env.MC_MEMORY_STORE = '1'; process.env.MC_FAKE_MODEL = '1'; process.env.URL = base;
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_)/.test(key)) delete process.env[key];
-const report = { at: new Date().toISOString(), mode: 'actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network', checks: [], scenarios: [], requests: [], blockedBrowser: [], forbiddenApi: [], blockedServer: [], pageErrors: [], screenshots: [] };
+const report = { at: new Date().toISOString(), mode: 'actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network', checks: [], scenarios: [], requests: [], blockedBrowser: [], forbiddenApi: [], blockedServer: [], pageErrors: [], screenshots: [], servedOnboardJs: [] };
 globalThis.fetch = async input => { const url = new URL(String(input?.url || input)); report.blockedServer.push({ origin: url.origin, pathname: url.pathname }); throw new Error('QA physical transport denied'); };
 const store = await import('../../netlify/functions/lib/store.mjs');
 const { accessHash } = await import('../../netlify/functions/lib/access.mjs');
@@ -53,6 +53,7 @@ async function newContext(width, session) {
     if (relative.split(/[\\/]/).some(part => part.startsWith('.'))) return route.fulfill({ status: 404, body: 'blocked' });
     const path = resolve(root, relative);
     if (!path.startsWith(root + '/') || !existsSync(path) || statSync(path).isDirectory()) return route.fulfill({ status: 404, body: 'not found' });
+    if (relative === 'onboard.js') { const served = createHash('sha256').update(readFileSync(path)).digest('hex'); if (!report.servedOnboardJs.includes(served)) report.servedOnboardJs.push(served); }
     return route.fulfill({ status: 200, contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
   });
   return context;
@@ -116,6 +117,7 @@ const scenarios = [];
 for (const width of [1440, 390, 320]) scenarios.push(['main-reload', width]);
 for (const width of [1440, 390]) scenarios.push(['return-visit', width], ['custom-survives', width], ['custom-text-survives', width], ['control-no-reload', width], ['retyped-after-reload', width]);
 scenarios.push(['overnight-retyped', 390]);
+for (const width of [1440, 390]) scenarios.push(['cleared-rows', width]);
 for (const [kind, width] of scenarios) {
   const row = { id: kind + '-' + width, kind, width, business: `Hours QA ${kind} ${width}`, events: [], overflow: [], pageErrors: [] }; report.scenarios.push(row);
   const email = `qa-hours-${kind}-${width}@example.test`, contexts = [];
@@ -144,6 +146,23 @@ for (const [kind, width] of scenarios) {
       check(`${row.id}: text-derived table is restored after reload`, JSON.stringify(row.tableAfterReload) === JSON.stringify(rowsOf(firstSpec)), row.tableAfterReload);
       await page.locator('#hours').fill(''); await page.locator('#hours').fill('Mon to Fri 8 to 5'); row.events.push('retyped Mon to Fri 8 to 5');
       await finish(page, row, session, { mon: ['08:00', '17:00'], tue: ['08:00', '17:00'], wed: ['08:00', '17:00'], thu: ['08:00', '17:00'], fri: ['08:00', '17:00'], sat: null, sun: null });
+    } else if (kind === 'cleared-rows') {
+      // The owner types hours, then clears every open day by hand. That explicit choice must survive reload.
+      const closed = Object.fromEntries(DAYS.map(d => [d, null]));
+      await fillStep1(page, row);
+      const toStep2 = await advance(page, 1); if (!toStep2.advanced) throw new Error('Step 1 did not advance');
+      await fillStep2(page, row, TEXT);
+      await editRows(page, DAYS.filter(d => WEEK[d]).map(d => [d, '', '']));
+      for (let n = 0; n < 60; n++) { row.draftBeforeReload = await savedDraft(session); if (row.draftBeforeReload.hoursText === TEXT && DAYS.every(d => row.draftBeforeReload.hoursTable?.[d] === null)) break; await page.waitForTimeout(250); }
+      await savedStatus(page);
+      check(`${row.id}: cleared rows were autosaved next to the typed text`, row.draftBeforeReload.hoursText === TEXT && DAYS.every(d => row.draftBeforeReload.hoursTable?.[d] === null), row.draftBeforeReload);
+      await page.reload(); row.events.push('reloaded after clearing every row'); await page.locator('#ob').waitFor({ state: 'visible' }); await onStep(page, 2); await settled(page);
+      row.tableAfterReload = await table(page);
+      check(`${row.id}: cleared rows stay cleared after reload`, JSON.stringify(row.tableAfterReload) === JSON.stringify(rowsOf(closed)), row.tableAfterReload);
+      row.overflow.push(['step2', await overflow(page)]);
+      const result = await advance(page, 2); row.step2Result = result;
+      check(`${row.id}: step 2 still guides the owner with the hours message`, !result.advanced && /Use hours such as/.test(result.hoursError), result);
+      await shot(page, row.id + '-guided');
     } else if (kind === 'control-no-reload') {
       await fillStep1(page, row);
       const toStep2 = await advance(page, 1); if (!toStep2.advanced) throw new Error('Step 1 did not advance');
@@ -181,6 +200,7 @@ check('No forbidden API route was requested', report.forbiddenApi.length === 0, 
 check('No physical server transport was attempted', report.blockedServer.length === 0, report.blockedServer);
 check('Every sign-in link went to the fake mailbox only', report.requests.filter(r => r.action === 'request_link').every(r => r.status < 300));
 report.sourceAfter = hashes();
+check('Exactly one onboard.js was served, and it is the pinned source', report.servedOnboardJs.length === 1 && report.servedOnboardJs[0] === report.sourceBefore['onboard.js'], report.servedOnboardJs);
 check('Source stayed stable throughout the check', JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter));
 report.summary = { checks: report.checks.length, passed: report.checks.filter(c => c.pass).length, failed: report.checks.filter(c => !c.pass).length };
 report.failed = report.checks.filter(c => !c.pass).map(c => ({ name: c.name, detail: c.detail }));

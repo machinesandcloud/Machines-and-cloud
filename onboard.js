@@ -51,9 +51,10 @@
   function fillHours() { if (!hoursTouched) fillBusinessTable(parseHours(form.elements.hours.value)); }
   form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
   function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c === '00:00' ? '24:00' : c } : null; }); return t; }
-  // A saved table is the owner's own edit only when it has an open day and differs from what the hours text produces.
+  // A saved table is the owner's own edit only when it differs from what the hours text produces. An all-closed table next to
+  // empty or unparsed text (an early autosave) matches; one next to text that opens days is an explicit choice to close them.
   function sameHours(a, b) { var close = function (row) { return row.close === '00:00' ? '24:00' : row.close; }; return DAYS.every(function (d) { var x = a && a[d] || null, y = b && b[d] || null; return !x === !y && (!x || x.open === y.open && close(x) === close(y)); }); }
-  function customHours(table) { return !!table && typeof table === 'object' && DAYS.some(function (d) { return !!table[d]; }) && !sameHours(table, parseHours(form.elements.hours.value)); }
+  function customHours(table) { return !!table && typeof table === 'object' && !sameHours(table, parseHours(form.elements.hours.value)); }
   var appointmentMode = document.getElementById('appointmentHoursMode'), appointmentRows = document.getElementById('appointmentHoursRows'), appointmentSeeded = false;
   appointmentRows.innerHTML = DAYS.map(function (day) { var label = day.charAt(0).toUpperCase() + day.slice(1); return '<div class="hours-row"><span>' + label + '</span><input class="form-input" type="time" id="appointment-' + day + '-open" aria-label="' + label + ' appointment start time" data-d="' + day + '" data-k="open" disabled><span>to</span><input class="form-input" type="time" id="appointment-' + day + '-close" aria-label="' + label + ' appointment end time" data-d="' + day + '" data-k="close" disabled></div>'; }).join('');
   function readAppointmentTable() { var table = {}; DAYS.forEach(function (day) { var open = appointmentRows.querySelector('[data-d="' + day + '"][data-k="open"]').value, close = appointmentRows.querySelector('[data-d="' + day + '"][data-k="close"]').value.trim(); table[day] = open || close ? { open: open, close: open && close === '00:00' ? '24:00' : close } : null; }); return table; }
@@ -95,7 +96,7 @@
   updateAppointmentHours(false);
   var fwdSel = form.elements['forwarding']; function fwdUI() { if (fwdSel && document.getElementById('transferRow')) document.getElementById('transferRow').style.display = fwdSel.value === 'all' ? 'grid' : 'none'; } if (fwdSel) fwdSel.addEventListener('change', fwdUI); fwdUI();
   form.querySelectorAll('.plans-pick input').forEach(function (r) { r.addEventListener('change', function () { selectPlan(r.value); }); });
-  var accessGeneration = 0, session = null, revision = 0, saving = null, saveAgain = false, dirty = false, restoring = false, saveTimer = null;
+  var accessGeneration = 0, session = null, revision = 0, lostSave = null, saving = null, saveAgain = false, dirty = false, restoring = false, saveTimer = null;
   var gate = document.getElementById('access-gate'), gateStatus = document.getElementById('access-status'), accessForm = document.getElementById('access-form');
   var accessEmail = document.getElementById('access-email'), accessSend = document.getElementById('access-send'), accessConfirmation = document.getElementById('access-confirmation');
   var accessResend = document.getElementById('access-resend'), accessChangeEmail = document.getElementById('access-change-email');
@@ -228,18 +229,26 @@
     var saveBody = { fields: snapshot, step: step, revision: revision };
     if (preferenceVersion > marketingSavedVersion) saveBody.marketingConsent = marketingField.checked;
     draftStatus.textContent = 'Saving your answers…'; draftStatus.hidden = false;
-    var pending = request('/api/access', 'PUT', saveBody).then(function (result) {
+    // A save whose reply was lost may still have landed. Adopt its revision only when the saved draft is exactly that save; any other change still meets the conflict check.
+    var unconfirmed = lostSave, confirm = unconfirmed ? request('/api/access').then(function (state) { if (generation !== accessGeneration) return; lostSave = null; var d = state.draft; if (d && d.revision === unconfirmed.revision + 1 && d.step === unconfirmed.step && sameFields(d.fields, unconfirmed.fields)) revision = d.revision; saveBody.revision = revision; }) : Promise.resolve();
+    var pending = confirm.then(function () { if (generation === accessGeneration) return request('/api/access', 'PUT', saveBody); }).then(function (result) {
       if (generation !== accessGeneration) return;
       revision = result.draft.revision;
       if (!result.marketingPending && Object.prototype.hasOwnProperty.call(saveBody, 'marketingConsent')) marketingSavedVersion = preferenceVersion;
       dirty = JSON.stringify(collect()) !== JSON.stringify(snapshot) || i !== step || marketingVersion !== preferenceVersion;
       draftStatus.textContent = result.marketingPending ? 'Your answers are saved. Your email preference could not be confirmed; it will retry when you save or continue.' : 'Saved. You can leave and continue later.';
-    }).catch(function (error) { if (generation !== accessGeneration) return; dirty = true; draftStatus.textContent = (error.code === 'connection' ? 'Your latest changes couldn’t be saved. Check your connection.' : error.code === 'unavailable' ? 'Machines & Cloud couldn’t save your changes right now.' : error.message) + ' Your changes are still on this page.'; throw error; });
+    }).catch(function (error) {
+      if (generation !== accessGeneration) return; dirty = true;
+      // A lost reply or a non-JSON server error leaves the outcome unknown; only a readable server answer is a definite failure.
+      var unknown = error.code === 'connection' || error.code === 'unavailable'; if (unknown && !lostSave) lostSave = { fields: snapshot, step: step, revision: saveBody.revision };
+      draftStatus.textContent = unknown ? 'We couldn’t confirm whether your changes were saved.' + (error.code === 'connection' ? ' Check your connection.' : '') + ' They’re still on this page.' : error.message + ' Your changes are still on this page.'; throw error;
+    });
     saving = pending;
     try { await pending; } finally { if (saving === pending) saving = null; }
     if (generation !== accessGeneration) return;
     if (saveAgain || dirty) { saveAgain = false; return saveDraft(); }
   }
+  function sameFields(a, b) { var keys = Object.keys(a || {}); return keys.length === Object.keys(b || {}).length && keys.every(function (key) { return JSON.stringify(a[key]) === JSON.stringify(b[key]); }); }
   function scheduleSave() {
     if (!session || restoring) return;
     dirty = true; draftStatus.textContent = 'Changes not saved yet.'; clearTimeout(saveTimer);
@@ -303,7 +312,7 @@
     document.getElementById('access-identity').textContent = 'Signed in as ' + state.email; document.getElementById('access-signed-in').hidden = false;
     gate.hidden = true;
     if (state.existing) { openExistingWorkspace(state.existing); return; }
-    revision = state.draft.revision || 0; restore(state.draft.fields || {});
+    revision = state.draft.revision || 0; lostSave = null; restore(state.draft.fields || {});
     marketingField.checked = !!(state.marketing && state.marketing.preference === true); marketingVersion = 0; marketingSavedVersion = 0;
     form.hidden = false; document.querySelector('.ob-steps').hidden = false; draftStatus.hidden = false;
     document.body.dataset.setupState = 'questions';
@@ -422,7 +431,7 @@
     try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
     if (generation !== accessGeneration) return;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; lostSave = null; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
   function setErrorSummary(message) {
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
@@ -545,7 +554,7 @@
       // The create call is safe to repeat: the server returns the workspace already made for this email, with the answers it first received.
       // Name the button shown now; a lost save after advancing leaves the page on the next step.
       var lost = error.code === 'connection' || error.code === 'unavailable', button = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue';
-      var message = !lost ? error.message : creating ? 'We couldn’t confirm that your workspace was created. Your answers are saved, and it may already be ready. Select Create my workspace again. If it was created, you’ll get that same workspace, not a second one. Changes you make now may not reach it, but you can update details in your workspace.' : 'We couldn’t save your latest answers' + (error.code === 'connection' ? '. Check your connection.' : ' right now.') + ' They’re still on this page and will save when you select ' + button + '.';
+      var message = !lost ? error.message : creating ? 'We couldn’t confirm that your workspace was created. Your answers are saved, and it may already be ready. Select Create my workspace again. If it was created, you’ll get that same workspace, not a second one. Changes you make now may not reach it, but you can update details in your workspace.' : 'We couldn’t confirm whether your latest answers were saved.' + (error.code === 'connection' ? ' Check your connection.' : '') + ' They’re still on this page and will save when you select ' + button + '.';
       var hasField = error.field && revealFieldError(error.field, message);
       setErrorSummary(hasField ? 'Check the highlighted field to continue.' : message);
       if (!hasField) focusError(err);
@@ -555,7 +564,7 @@
     if (verificationAttempt && verificationAttempt.token === token) return;
     accessGeneration++; clearTimeout(saveTimer); verifiedToken = token;
     resetEmailConfirmation(false);
-    saving = null; saveAgain = false; dirty = false; revision = 0; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); updateTrade(false); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
+    saving = null; saveAgain = false; dirty = false; revision = 0; lostSave = null; marketingVersion = 0; marketingSavedVersion = 0; form.reset(); updateTrade(false); clearValidation(); choosePlan(); hoursTouched = false; touched.t0 = false; touched.t1 = false; fillTiers(); fillHours(); show(0, false); verifyButton.disabled = false; next.disabled = false; back.disabled = false;
     updatePhoneSetup();
     setSession(null); gateOnly('Checking your secure sign-in link…');
     accessForm.hidden = true; verifyButton.hidden = true;
