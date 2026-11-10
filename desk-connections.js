@@ -68,6 +68,53 @@
   function button(action, label) { return '<button type="button" class="btn-pill btn-pill-blue btn-sm" data-connection="' + action + '">' + (/calendar/.test(action) ? brandMark('calendar') : '') + esc(label) + '</button>'; }
   function money(cents) { return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(cents / 100); }
   function labelState(value) { return String(value || 'not active').replace(/_/g, ' '); }
+  // Carrier correction: operation.issues is [{code, field}] (messaging-activation.mjs view()). Fields are the form's own
+  // names or the provider attribute names the registration was filed under (messaging-provider.mjs:24-28). Anything
+  // else is listed as reported and never attached to a form field. "email" is never attached: the representative
+  // (messaging-provider.mjs:26) and the profile and trust-product filings (:23, :36, notifyEmail, platform-controlled)
+  // all carry an email attribute, and an issue's field name does not say which one the carrier meant.
+  // Lookups use own properties only, so names such as "constructor" are never read from Object.prototype.
+  function smsOwn(map,key){return Object.prototype.hasOwnProperty.call(map,key)?map[key]:undefined;}
+  var SMS_ISSUE_LABELS={legalName:'Legal business name',ein:'EIN',businessType:'Business type',businessIndustry:'Business industry',street:'Registered street address',street2:'Suite or unit',city:'City',state:'State abbreviation',zip:'ZIP code',website:'Public business website',firstName:'First name',lastName:'Last name',email:'Work email',phone:'US mobile number',title:'Job title',jobPosition:'Position'};
+  var SMS_ISSUE_FIELDS={legalname:'legalName',businessname:'legalName',customername:'legalName',ein:'ein',businessregistrationnumber:'ein',businesstype:'businessType',businessindustry:'businessIndustry',street:'street',street2:'street2',streetsecondary:'street2',city:'city',state:'state',region:'state',zip:'zip',postalcode:'zip',website:'website',websiteurl:'website',firstname:'firstName',lastname:'lastName',phone:'phone',phonenumber:'phone',title:'title',businesstitle:'title',jobposition:'jobPosition'};
+  var SMS_ISSUE_AREAS={email:'Email (registration contact or your representative’s work email)',business:'Business details (no single field named)',business_and_consent:'Business details or consent information (no single field named)',program:'Texting program and consent process'};
+  var SMS_ISSUE_REASONS={invalid:'The carrier marked this detail as invalid.',business_industry_required:'Choose the industry that accurately describes this business.',business_program_changed:'Your saved business rules changed after this registration was filed.',customer_care_usecase_unavailable:'The customer-care texting use is not available for this registration.',provider_registration_rejected:'The carrier rejected the registration without naming a specific detail.'};
+  function smsIssueReason(code){code=String(code||'');return smsOwn(SMS_ISSUE_REASONS,code)||(code?'The carrier reported reason code '+code+'.':'The carrier did not give a reason.');}
+  function smsCorrectionIssues(operation){
+    var mapped=Object.create(null),order=[],other=[];
+    (Array.isArray(operation&&operation.issues)?operation.issues:[]).forEach(function(item){
+      var raw=String(item&&item.field||''),key=raw.toLowerCase().replace(/[\s_-]/g,''),name=smsOwn(SMS_ISSUE_FIELDS,key),reason=smsIssueReason(item&&item.code);
+      if(name){if(!mapped[name]){mapped[name]=[];order.push(name);}if(mapped[name].indexOf(reason)<0)mapped[name].push(reason);return;}
+      var label=smsOwn(SMS_ISSUE_AREAS,key)||smsOwn(SMS_ISSUE_AREAS,raw)||(raw?'“'+raw+'” (not a field on this form)':'A detail the carrier did not name'),known=other.find(function(entry){return entry.label===label;});
+      if(known){if(known.reasons.indexOf(reason)<0)known.reasons.push(reason);}else other.push({label:label,reasons:[reason]});
+    });
+    return {fields:order.map(function(name){return {name:name,label:SMS_ISSUE_LABELS[name],reasons:mapped[name]};}),other:other};
+  }
+  function smsCorrectionsLeft(sms){var revision=Number(sms.operation&&sms.operation.submissionRevision),limit=(sms.offer||{}).maxResubmissions;return Number.isSafeInteger(limit)&&Number.isSafeInteger(revision)?limit-(revision-1):null;}
+  function smsCorrectionSummary(sms){
+    var operation=sms.operation,terms=sms.offer||{},found=smsCorrectionIssues(operation),count=found.fields.length+found.other.length,box='margin:0 0 18px;padding:14px 16px;border:1px solid #e8bcb8;border-radius:8px;background:#fff4f2;color:#7a2a24';
+    var left=smsCorrectionsLeft(sms),closed=left!==null&&left<1;
+    var list=found.fields.map(function(item){if(closed)return '<li><strong>'+esc(item.label)+'</strong>: '+esc(item.reasons.join(' '))+'</li>';return '<li><a href="#smsIssueField-'+item.name+'" data-sms-issue-field="'+item.name+'" style="color:#7a2a24;font-weight:600;text-decoration:underline">'+esc(item.label)+'</a>: '+esc(item.reasons.join(' '))+'</li>';}).concat(found.other.map(function(item){return '<li>'+esc(item.label)+': '+esc(item.reasons.join(' '))+'</li>';})).join('');
+    var heading=count?'The carrier asked you to correct '+(count===1?'this detail':'these '+count+' details'):'The carrier asked for a correction without naming a detail';
+    var note=closed?'':found.other.length?'<p style="margin:8px 0 0">Items without a link don’t match one field on this form. Review the related details below.</p>':count?'':'<p style="margin:8px 0 0">Check every registration detail below.</p>';
+    var once=left===1?'<p style="margin:8px 0 0"><strong>This is your one allowed correction.</strong> After you save it, this registration can’t be corrected again here, so check every detail before you save.</p>':left!==null&&left<1?'<p style="margin:8px 0 0"><strong>The current texting terms allow no further corrections to this registration.</strong> The details below are shown for reference and can’t be changed or resubmitted here. For help with this registration, email <a href="mailto:support@machinesandcloud.com" style="color:#7a2a24;text-decoration:underline">support@machinesandcloud.com</a>.</p>':'';
+    return '<section id="smsIssueSummary" tabindex="-1" aria-labelledby="smsIssueSummaryTitle" style="'+box+'"><h3 id="smsIssueSummaryTitle" style="margin:0 0 8px;font-size:16px;color:#7a2a24">'+esc(heading)+'</h3>'+(list?'<ul style="margin:0;padding-left:20px;line-height:1.6">'+list+'</ul>':'')+note+once+'</section>';
+  }
+  // After the form renders: mark each flagged field and link it to the carrier's reason; the summary links focus fields.
+  function markSmsCorrection(sms){
+    var form=$('connectionForm'),summary=$('smsIssueSummary');if(!form||!summary)return;
+    // No correction left: the server refuses any save (messaging-activation.mjs:138), so the form is read-only and has no save.
+    if(smsCorrectionsLeft(sms)!==null&&smsCorrectionsLeft(sms)<1){form.dataset.smsCorrectionClosed='true';form.querySelectorAll('input,select').forEach(function(control){if(control.tagName==='SELECT'||control.type==='checkbox')control.disabled=true;else control.readOnly=true;control.required=false;});var save=form.querySelector('button[type=submit]');if(save)save.remove();}
+    smsCorrectionIssues(sms.operation).fields.forEach(function(item){
+      var input=form.querySelector('[name="'+item.name+'"]');if(!input)return;
+      var note=document.createElement('p'),id='smsIssue-'+item.name;note.id=id;note.dataset.smsIssue=item.name;note.style.cssText='margin:6px 0 0;color:#aa2438;font-size:.88rem';note.textContent='Carrier flagged: '+item.reasons.join(' ');
+      input.id='smsIssueField-'+item.name;input.setAttribute('aria-invalid','true');input.setAttribute('aria-describedby',[input.getAttribute('aria-describedby'),id].filter(Boolean).join(' '));input.style.borderColor='#aa2438';input.style.boxShadow='0 0 0 1px #aa2438';
+      var label=input.closest('label');(label||input).insertAdjacentElement('afterend',note);
+    });
+    summary.addEventListener('click',function(event){var link=event.target.closest('[data-sms-issue-field]');if(!link)return;event.preventDefault();var input=form.querySelector('[name="'+link.dataset.smsIssueField+'"]');if(input){input.focus({preventScroll:true});input.scrollIntoView({block:'center'});}});
+    // Open on the summary unless a held, unconfirmed change already owns focus (review() shows that state).
+    if(!(mutationReadback?.unknown&&mutationReadback.generation===generation)){dialog.scrollTop=0;summary.focus({preventScroll:true});}
+  }
   var reviewLegalDraft=null,privateReviewAction=null;
   function registrationFields(client, editable) {
     var draft=data&&data.serviceIntake&&data.serviceIntake.sms;reviewLegalDraft=null;
@@ -506,14 +553,17 @@
     }
     if (action !== 'review_sms') return;
     var sms = c.messaging, terms = sms.offer, client = data.client, legal = client.business.legal || {};
-    var content = '<p>Mobile carriers require your registered business details. We prepare and track the application for you.</p><p>Brand filing: ' + money(terms.brandRegistrationCents) + '. Campaign filing: ' + money(terms.campaignRegistrationCents) + '. Campaign registration: ' + money(terms.campaignMonthlyCents) + ' monthly.</p><p>' + esc(terms.usageDisclosure) + '</p><details><summary>Review your texts and consent process</summary><p>' + esc(sms.program.description) + '</p><p>' + esc(sms.program.messageFlow) + '</p>' + sms.program.messageSamples.map(function (sample) { return '<p>' + esc(sample) + '</p>'; }).join('') + '</details>' + registrationFields(client,!!sms.operation) + check('authority',terms.authorityText) + check('costs','I accept the filing fees, recurring campaign costs and usage terms shown above.') + check('accuracy','These legal details are accurate and I am authorized to register this business.') + check('consumerConsent','My business will obtain and record customer agreement before appointment texts. Customers can book without texting consent.') + check('testConsent','Send a setup verification text to my saved owner mobile number. I will reply to confirm delivery.');
+    var correcting = !!sms.operation && (sms.operation.customerAction === 'correct_registration' || sms.operation.state === 'needs_action');
+    var content = (correcting ? smsCorrectionSummary(sms) : '') + '<p>Mobile carriers require your registered business details. We prepare and track the application for you.</p><p>Brand filing: ' + money(terms.brandRegistrationCents) + '. Campaign filing: ' + money(terms.campaignRegistrationCents) + '. Campaign registration: ' + money(terms.campaignMonthlyCents) + ' monthly.</p><p>' + esc(terms.usageDisclosure) + '</p><details><summary>Review your texts and consent process</summary><p>' + esc(sms.program.description) + '</p><p>' + esc(sms.program.messageFlow) + '</p>' + sms.program.messageSamples.map(function (sample) { return '<p>' + esc(sample) + '</p>'; }).join('') + '</details>' + registrationFields(client,!!sms.operation) + check('authority',terms.authorityText) + check('costs','I accept the filing fees, recurring campaign costs and usage terms shown above.') + check('accuracy','These legal details are accurate and I am authorized to register this business.') + check('consumerConsent','My business will obtain and record customer agreement before appointment texts. Customers can book without texting consent.') + check('testConsent','Send a setup verification text to my saved owner mobile number. I will reply to confirm delivery.');
     review('Set up customer texting',content,sms.operation ? 'Save corrected details' : 'Submit texting setup',function (form) {
+      if (correcting && smsCorrectionsLeft(sms) !== null && smsCorrectionsLeft(sms) < 1) return;
       var details = registrationDetails(form);
       var random = new Uint8Array(16); crypto.getRandomValues(random);
       var body = { expectedRevision:revision, submissionId:Array.from(random).map(function (byte) { return byte.toString(16).padStart(2,'0'); }).join(''), offerVersion:terms.version, offerDigest:terms.digest, programDigest:sms.program.digest, acceptedCosts:true, authority:true, attestLegalAccuracy:true, attestConsent:true, testPhoneConsent:true, legal:details };
       if (sms.operation) { body.operationId = sms.operation.id; body.expectedSubmissionRevision = sms.operation.submissionRevision; }
       request(sms.operation ? 'correct_messaging_activation' : 'request_messaging_activation',body);
     });
+    if (correcting) markSmsCorrection(sms);
   }
   // Native Tab scrolling may put a connection control behind the fixed mobile
   // navigation. After that scroll settles, keep the actual focused control clear.
