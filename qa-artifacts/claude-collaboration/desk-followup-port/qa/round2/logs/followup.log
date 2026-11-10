@@ -1,0 +1,26 @@
+PASS 1. lost-after "Numbers that always ring through" typed as (713) 555-0144 is confirmed saved, not "changed while it was checked"
+PASS 1. lost-after price line with no amount "Diagnostic $89" is confirmed saved and reads back as typed
+PASS 1. lost-after Tier 0 alone is still confirmed saved
+PASS 1. lost-after Tier 0 while another tab writes the emergency script is not "saved" and does not adopt the script
+PASS 1. a late-committing ring-through save is recognised by Check latest as already saved
+PASS 1440px 2. Back closes the open request with the typed note kept, Forward reopens it, Back/Forward move between pages, Back from the first page leaves
+PASS 1440px 2. unsaved Business details survive Back and Forward
+PASS 390px 2. Back closes the open request with the typed note kept, Forward reopens it, Back/Forward move between pages, Back from the first page leaves
+PASS 390px 2. unsaved Business details survive Back and Forward
+PASS 1440px 2b. Back with a visit dialog open keeps Availability, the dialog and its typed name, and restores #availability; after Close, Back returns to Home
+PASS 1440px 2b. Back with a support dialog open keeps Conversations, the dialog and its typed note, and restores #convs; after Close, Back returns to Inbox
+PASS 390px 2b. Back with a visit dialog open keeps Availability, the dialog and its typed name, and restores #availability; after Close, Back returns to Home
+PASS 390px 2b. Back with a support dialog open keeps Conversations, the dialog and its typed note, and restores #convs; after Close, Back returns to Inbox
+PASS 1440px 2b. Forward with a visit dialog open does not route either
+PASS 1440px 2c. saving Business details on a live website chat still warns that website chat is unavailable and offers Review business details
+PASS 390px 2c. saving Business details on a live website chat still warns that website chat is unavailable and offers Review business details
+PASS 1440px 3. a signed-out tab at #setup/voice/intro returns there after a fresh sign-in, once
+PASS 390px 3. a signed-out tab at #setup/voice/intro returns there after a fresh sign-in, once
+PASS 3. stale, foreign or unknown stored routes are ignored and the owner lands on Home
+PASS 390px 3./4b. session expiry keeps the place and shows a calm signed-out heading; sign-in link keeps signin=1
+PASS 390px 4b. after Sign out the heading reads Signed out, not Unable to open workspace
+PASS 1440px 4a. a block saved behind a lost response is confirmed from a read-only re-fetch and listed
+PASS 390px 4a. a block saved behind a lost response is confirmed from a read-only re-fetch and listed
+PASS 390px 4a. when the re-fetch is lost too, Reload availability is offered and confirms the block
+PASS No physical transport, forbidden destinations or page errors
+{"passed":25,"failed":0,"failing":[]} {"desk.js":["0e040d76b4e37c630b165cd14ee4084dcd2dc4f5d076c124413064f349a059a9"],"desk.html":["e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113"],"desk.css":["f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790"]}

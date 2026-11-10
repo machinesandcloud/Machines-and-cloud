@@ -1,0 +1,17 @@
+PASS N0 environment: Navigation API present
+FAIL N1 every tab via its nav button: one entry each, URL/state/title/heading/focus right after routeTo; Back then Forward across all restore page+title with no extra entries: Back url step 1
+FAIL N2 calendar date/view params land on the Availability entry, not the page left; later calendar changes replace (no new entries); Back/Forward keep params per entry: params written onto the Leads entry: /desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#leads
+PASS N3 deep links: #availability with calendar params, #setup/sms (normalized), #know; no extra entries on load; Back leaves to the public page
+PASS N4 connector sub-route through mc:desk-route connectionHash: one entry, hash normalized to /intro, Back returns to the prior page
+PASS N5 typed hash change (#know) routes with the browser entry only (routeTo replaces, no second entry); Back returns
+PASS N6 re-sign-in return route: session expiry on Availability with params stores #availability; sign-in returns there
+PASS N7 Quick tour: one tour entry; tour steps route without entries; Back closes tour on the origin page with its URL
+PASS M1 no dialog open: replaceState (another module cleaning a param) and a same-URL replace are never cancelled
+PASS M2 held dialog open on its own entry: replaceState of the held entry is allowed and updates the hold; push (hash link) inside the dialog not cancelled, dialog held
+FAIL M3 Back window (held entry not current): replaceState is cancelled (intended); cross-document location.replace in that window: informational: replace in Back window not cancelled {"before":"/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#today","after":"/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month&qa=window#today","same":false}
+PASS M4 listener inert after the held dialog closes: replaceState in a Back/traverse of a normal page is not cancelled
+PASS I1 user alternates Back/Forward 8 times at human speed (180ms) with a held dialog: no oscillation, settles held
+PASS I2 user closes the dialog mid-retry (Back then Escape 20ms later): page matches URL, no further movement, timer cleared
+PASS I3 cap: traversals refused by the browser: at most 12 traverseTo calls, then the 250ms re-check keeps polling while the dialog is open (informational), stops on close
+PASS No physical transport, forbidden destinations or page errors
+{"passed":13,"failed":3,"failing":["N1 every tab via its nav button: one entry each, URL/state/title/heading/focus right after routeTo; Back then Forward across all restore page+title with no extra entries","N2 calendar date/view params land on the Availability entry, not the page left; later calendar changes replace (no new entries); Back/Forward keep params per entry","M3 Back window (held entry not current): replaceState is cancelled (intended); cross-document location.replace in that window: informational"]} {"desk.js":["0e040d76"],"desk.html":["e6e75e9c"],"desk.css":["f8d00746"]}

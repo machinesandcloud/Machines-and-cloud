@@ -1,0 +1,121 @@
+{
+  "base": "dfb0ae7846e66871d849c67566bf9d3b475f46ae",
+  "sourceBatch": "42e3ab4d..0e818f9b",
+  "revision": "round 3: hold races (R2, R6, R11, R12) after re-QA accept-with-notes",
+  "engine": "Google Chrome stable via Playwright channel:chrome, headless, Playwright temp profile; lead-source-reconnect-ui-check.mjs only: bundled chrome-headless-shell 1223 (that check takes executablePath only)",
+  "product": {
+    "desk.js": "8edb2f514314d1ccc47606136cf1be872258bfa8ad7df2d53dd52a99d1587281",
+    "desk.html": "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113",
+    "desk.css": "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790",
+    "onboard.js": "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab",
+    "onboard.html": "0e4b2a766f2b70c41930a635c5433f5c284168ec48ea5dbab82a6815bcf450ca",
+    "onboard.css": "b24b7abd16708d492425120b577c06e997cf478912f727c0154e152850e3bee9"
+  },
+  "checks": {
+    "desk-a11y-ui-check.mjs": "cea17eabd9b3408ae54ec6babf7c982014d5bf7fd99b216c4e6dcd478f91e50f",
+    "desk-followup-ui-check.mjs": "fa973f040f1d29ecf4a306a365a7f63a0e973cfd3f09359abd96de0f16b8e94a",
+    "modal-back-ui-check.mjs": "737d0836aadc8f8eb72100d5f59a819b2186a82214e948a40c6c892f0e59aa28",
+    "onboard-a11y-ui-check.mjs": "428d4ea99773bee1e493fc1123490b4e0fbe11ac290af1d64029d79dd4034ff6",
+    "onboard-followup-ui-check.mjs": "1796ee1d4c1d324f816933d984015b9eda4afd972ff04b8612e20277b1bae9bd",
+    "qa/modal-probe-desk.mjs": "4c635f1ae8ab96639173cb9f960b53d9a9becc19da4e09a1a8736c8aaece681e",
+    "qa/modal-probe-thumbtack.mjs": "099394d4dea3f7efba71713a2915ccc534630b51feb80debd7b096ed4e66e0de",
+    "qa/round2/hold-race-probe.mjs": "8d907228bb58a2f73113160e18ade7d7df70b11675fc0e9b256fa9f500e0819e",
+    "thumbtack-back-ui-check.mjs": "8d0295cf4118f184d7fd17b668f84fd66d6e46a7779dab6e333f96c619bc845b"
+  },
+  "variants": {
+    "variants/prefix-modal/desk.js (ported batch, no hold)": "27c39720190b26f8631b61a77e9e5a4f3151ebd4f5d341493a061844354c908b",
+    "variants/port-c20d9e82/desk.js (first port, rejected)": "c20d9e82db9924e17a36d9b72ca9df09a11f6063229e230343858361807eb856",
+    "variants/port-0e040d76/desk.js (round-2 port, accept with notes)": "0e040d76b4e37c630b165cd14ee4084dcd2dc4f5d076c124413064f349a059a9"
+  },
+  "superseded": [
+    "receipts/superseded-c20d9e82/",
+    "receipts/superseded-0e040d76/"
+  ],
+  "receipts": {
+    "receipts/final/claude-connector-pages-r3-thumbtack.json": {
+      "passed": 4,
+      "total": 4,
+      "sha256": "629ed24ba24560ebd53f2e7e49eb07f8af951ad1547a9eaba4ca0368eef67d4a"
+    },
+    "receipts/final/claude-connector-pages-r3.json": {
+      "passed": 55,
+      "total": 55,
+      "sha256": "3e1f92583aaa779dd7aa32d15ee50b9f3c890925ed77eaa8bdfc89c64eea7ac9"
+    },
+    "receipts/final/claude-daily-port-r3.json": {
+      "passed": 12,
+      "total": 12,
+      "sha256": "38577547856358a646d89838cece0317b999e629929847709cc89352fa088fe2"
+    },
+    "receipts/final/claude-port-r3-desk-a11y.json": {
+      "passed": 47,
+      "total": 47,
+      "sha256": "68da054aab162658265886b31ec5306dc3ec4a109c12fe8286d520654e34ae5a"
+    },
+    "receipts/final/claude-port-r3-desk-followup.json": {
+      "passed": 25,
+      "total": 25,
+      "sha256": "8a75a442539eb916d7b3e53bc7da86339bfd97b715ce3f2ae297f15c607dbdd7"
+    },
+    "receipts/final/claude-port-r3-modal-desk.json": {
+      "passed": 12,
+      "total": 12,
+      "sha256": "6616f59e33d03035bc067fea70bcd744fc36aa2426834f0b65a7dfeeca72fa1b"
+    },
+    "receipts/final/claude-port-r3-race-1.json": {
+      "passed": 14,
+      "total": 14,
+      "sha256": "c5654f383580d6c5b200b015595ac7f721a6883ca3cc6dfdc521eb4f4fcef860"
+    },
+    "receipts/final/claude-port-r3-race-2.json": {
+      "passed": 14,
+      "total": 14,
+      "sha256": "ee19fd32fc427425a7317126cd7abf35eeb392db784b52d36dc1831e70c06ba7"
+    },
+    "receipts/final/claude-port-r3-race-3.json": {
+      "passed": 14,
+      "total": 14,
+      "sha256": "b33174257f8191928b4b9a16c9acd8989647d2bda9cf82ff4727a75b4c5a01b2"
+    },
+    "receipts/final/claude-port-r3-race-nonav.json": {
+      "passed": 11,
+      "total": 14,
+      "sha256": "29b76024f6b18b43480d9e6c7e7b1432c95b2e1e54faeb02779211e8b17d4f14"
+    },
+    "receipts/final/claude-port-r3-request-followthrough.json": {
+      "passed": 12,
+      "total": 12,
+      "sha256": "c0007f2265b160da5bb608af16249c1b808469d0a24bc42668899ed9f5bb3d90"
+    },
+    "receipts/final/claude-reconnect-r3.json": {
+      "passed": 34,
+      "total": 34,
+      "sha256": "a27174f53c842c7d417a85af74c280724523f052a5c5ea5cb7ebd07690feec70"
+    },
+    "receipts/final/claude-save-port-r3.json": {
+      "passed": 29,
+      "total": 29,
+      "sha256": "fed27370ef1b23b9cc40e392bca2008e98efa261810449e5e63875d115d290c4"
+    },
+    "receipts/final/variants/claude-port-r3-desk-followup-0e04.json": {
+      "passed": 25,
+      "total": 25,
+      "sha256": "5f0e3bc86f12cfe084e72905a31192d7c8bb443e7d04c91b590f616b6eebe66e"
+    },
+    "receipts/final/variants/claude-port-r3-modal-back-0e04.json": {
+      "passed": 9,
+      "total": 12,
+      "sha256": "f94bcb81c9c38e7764767952c75080469e37fc593f633cbc0ea1f3503fd277ae"
+    },
+    "receipts/final/variants/claude-port-r3-race-0e04.json": {
+      "passed": 9,
+      "total": 14,
+      "sha256": "e1ed76643e4a3acedb1006ce698bf0658f447c18f3f9d9912f31ba7514b016a1"
+    },
+    "receipts/final/variants/claude-port-r3-race-nonav-0e04.json": {
+      "passed": 11,
+      "total": 14,
+      "sha256": "6d061dbff80efd83a156fb4e95a6b76f2844511550857b8b0455ad7598bbabe7"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+PASS P1 repeated Back x6 with visit dialog open: no storm, bounded history, dialog/page/URL held, then normal Back
+PASS P2 visit dialog closed by Escape, then Back routes normally (recorded address cleared)
+PASS P3 Forward x3 with visit dialog open: no route, bounded pushes
+PASS P4 nested: request dialog open, visit dialog opened over it; Back holds both; after visit close, one Back closes only the request and stays on Inbox
+PASS P5 tour: Back while the Quick tour is open still closes the tour (guideDialog excluded from hold), no push storm
+PASS P6 real hand-off: request -> Read saved conversation (request closes, conversation opens); Back holds conversation on Inbox; after close, Back goes to Home
+PASS P7 cfgWebNext on a live website chat: after save, button shown once, not auto-focused; click routes and focuses target exactly once
+PASS No physical transport, forbidden destinations or page errors
+{"passed":8,"failed":0,"failing":[]}

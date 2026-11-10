@@ -1,0 +1,2368 @@
+{
+  "at": "2026-11-10T08:23:15.795Z",
+  "mode": "actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network",
+  "checks": [
+    {
+      "name": "finish-keyboard-1440: focus leaves BODY and lands on the \"Your workspace is ready\" heading",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      }
+    },
+    {
+      "name": "finish-keyboard-1440: the focused heading is visible and on screen",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      }
+    },
+    {
+      "name": "finish-keyboard-1440: the done screen has exactly one visible h1, and it is the ready heading",
+      "pass": true,
+      "detail": [
+        "Your workspace is ready"
+      ]
+    },
+    {
+      "name": "finish-keyboard-1440: the accessibility tree names a level-1 ready heading",
+      "pass": true,
+      "detail": "- heading \"Your workspace is ready\" [level=1]\n- paragraph: Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.\n- paragraph: Your front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.\n- link \"Continue my connections\":\n  - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#setup\n- paragraph:\n  - link \"Open workspace overview\":\n    - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#today"
+    },
+    {
+      "name": "finish-keyboard-1440: #goPortal keeps \"Continue my connections\" and its #setup destination",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      }
+    },
+    {
+      "name": "finish-keyboard-1440: Tab from the heading reaches Continue my connections",
+      "pass": true,
+      "detail": "goPortal"
+    },
+    {
+      "name": "finish-keyboard-1440: finishing makes no autosave chatter in live regions",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "finish-keyboard-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "done",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "finish-keyboard-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "typing-1440: no live-region write on keystrokes (\"Changes not saved yet.\" or \"Saving\")",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "typing-1440: every live-region write is a settled save outcome",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "typing-1440: typing two fields announces at most one outcome per settled save (2)",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "typing-1440: the final save is announced",
+      "pass": true,
+      "detail": {
+        "t": 4549,
+        "id": "draft-announce",
+        "text": "Saved. You can leave and continue later."
+      }
+    },
+    {
+      "name": "typing-1440: the visible status still shows progress and the saved result",
+      "pass": true,
+      "detail": {
+        "finalVisible": "Saved. You can leave and continue later.",
+        "sample": [
+          "Changes not saved yet.",
+          "Saving your answers…",
+          "Saved. You can leave and continue later."
+        ]
+      }
+    },
+    {
+      "name": "typing-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "typed",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "typing-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "step-change-1440: one step change makes at most one live announcement",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "step-change-1440: the step change announces no \"Saving\" chatter",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "step-change-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "step2",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "step-change-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-save-1440: an unknown save outcome is announced exactly once",
+      "pass": true,
+      "detail": [
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+      ]
+    },
+    {
+      "name": "lost-save-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "lost",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-save-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "conflict-1440: a definite save failure is announced exactly once",
+      "pass": true,
+      "detail": [
+        "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+      ]
+    },
+    {
+      "name": "conflict-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "conflict",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "conflict-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "finish-keyboard-390: focus leaves BODY and lands on the \"Your workspace is ready\" heading",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      }
+    },
+    {
+      "name": "finish-keyboard-390: the focused heading is visible and on screen",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      }
+    },
+    {
+      "name": "finish-keyboard-390: the done screen has exactly one visible h1, and it is the ready heading",
+      "pass": true,
+      "detail": [
+        "Your workspace is ready"
+      ]
+    },
+    {
+      "name": "finish-keyboard-390: the accessibility tree names a level-1 ready heading",
+      "pass": true,
+      "detail": "- heading \"Your workspace is ready\" [level=1]\n- paragraph: Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.\n- paragraph: Your front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.\n- link \"Continue my connections\":\n  - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#setup\n- paragraph:\n  - link \"Open workspace overview\":\n    - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#today"
+    },
+    {
+      "name": "finish-keyboard-390: #goPortal keeps \"Continue my connections\" and its #setup destination",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      }
+    },
+    {
+      "name": "finish-keyboard-390: Tab from the heading reaches Continue my connections",
+      "pass": true,
+      "detail": "goPortal"
+    },
+    {
+      "name": "finish-keyboard-390: finishing makes no autosave chatter in live regions",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "finish-keyboard-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "done",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "finish-keyboard-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "typing-390: no live-region write on keystrokes (\"Changes not saved yet.\" or \"Saving\")",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "typing-390: every live-region write is a settled save outcome",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "typing-390: typing two fields announces at most one outcome per settled save (2)",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "typing-390: the final save is announced",
+      "pass": true,
+      "detail": {
+        "t": 4456,
+        "id": "draft-announce",
+        "text": "Saved. You can leave and continue later."
+      }
+    },
+    {
+      "name": "typing-390: the visible status still shows progress and the saved result",
+      "pass": true,
+      "detail": {
+        "finalVisible": "Saved. You can leave and continue later.",
+        "sample": [
+          "Changes not saved yet.",
+          "Saving your answers…",
+          "Saved. You can leave and continue later."
+        ]
+      }
+    },
+    {
+      "name": "typing-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "typed",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "typing-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "step-change-390: one step change makes at most one live announcement",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "step-change-390: the step change announces no \"Saving\" chatter",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "step-change-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "step2",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "step-change-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-save-390: an unknown save outcome is announced exactly once",
+      "pass": true,
+      "detail": [
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+      ]
+    },
+    {
+      "name": "lost-save-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "lost",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-save-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "conflict-390: a definite save failure is announced exactly once",
+      "pass": true,
+      "detail": [
+        "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+      ]
+    },
+    {
+      "name": "conflict-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "conflict",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "conflict-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stale-after-error-same-task-1440: the step-save failure is announced",
+      "pass": true,
+      "detail": [
+        {
+          "t": 1478,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-1440: no older \"Saved\" announcement follows the error",
+      "pass": true,
+      "detail": [
+        "err: We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-1440: the error summary is the last announcement (nothing queued earlier speaks after it)",
+      "pass": true,
+      "detail": [
+        "1478 err: We couldn’t confirm whether your latest answers we"
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stale-after-error-after-settle-1440: the step-save failure is announced",
+      "pass": true,
+      "detail": [
+        {
+          "t": 1424,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-1440: no older \"Saved\" announcement follows the error",
+      "pass": true,
+      "detail": [
+        "err: We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-1440: the error summary is the last announcement (nothing queued earlier speaks after it)",
+      "pass": true,
+      "detail": [
+        "1424 err: We couldn’t confirm whether your latest answers we"
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "repeat-saved-1440: a second \"Saved\" in a row is not re-announced",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later.",
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "repeat-saved-1440: a failure is always announced, and the next success is announced after it",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later.",
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "repeat-saved-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "repeat-saved-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stale-after-error-same-task-390: the step-save failure is announced",
+      "pass": true,
+      "detail": [
+        {
+          "t": 1469,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-390: no older \"Saved\" announcement follows the error",
+      "pass": true,
+      "detail": [
+        "err: We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-390: the error summary is the last announcement (nothing queued earlier speaks after it)",
+      "pass": true,
+      "detail": [
+        "1469 err: We couldn’t confirm whether your latest answers we"
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "stale-after-error-same-task-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stale-after-error-after-settle-390: the step-save failure is announced",
+      "pass": true,
+      "detail": [
+        {
+          "t": 1493,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-390: no older \"Saved\" announcement follows the error",
+      "pass": true,
+      "detail": [
+        "err: We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-390: the error summary is the last announcement (nothing queued earlier speaks after it)",
+      "pass": true,
+      "detail": [
+        "1493 err: We couldn’t confirm whether your latest answers we"
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "stale-after-error-after-settle-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "repeat-saved-390: a second \"Saved\" in a row is not re-announced",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later.",
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "repeat-saved-390: a failure is always announced, and the next success is announced after it",
+      "pass": true,
+      "detail": [
+        "Saved. You can leave and continue later.",
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "name": "repeat-saved-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "repeat-saved-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "fresh-load-focus-1440: a fresh load forces no focus and the skip link is the first Tab stop",
+      "pass": true,
+      "detail": {
+        "focus": "BODY",
+        "firstTab": "Skip to setup"
+      }
+    },
+    {
+      "name": "fresh-load-focus-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "verified-focus-1440: when the form opens after the sign-in link, focus is on the current step heading",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Start with your details.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 1 of 4",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      }
+    },
+    {
+      "name": "verified-focus-1440: the step heading carries its position (Step 1 of 4)",
+      "pass": true,
+      "detail": "Step 1 of 4"
+    },
+    {
+      "name": "verified-focus-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "opened",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "verified-focus-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "restore-focus-1440: after a restore, focus is on the restored step heading",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Tell us about your shop.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 2 of 4",
+        "stepTitle": "Tell us about your shop.",
+        "stepLabel": "Step 2 of 4"
+      }
+    },
+    {
+      "name": "restore-focus-1440: the restored step heading carries its position (Step 2 of 4)",
+      "pass": true,
+      "detail": "Step 2 of 4"
+    },
+    {
+      "name": "restore-focus-1440: Tab from the heading continues into the page, not back to the top",
+      "pass": true,
+      "detail": "access-sign-out"
+    },
+    {
+      "name": "restore-focus-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "restored",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "restore-focus-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no-focus-steal-1440: focus the owner placed while the form was loading is left alone",
+      "pass": true,
+      "detail": {
+        "chosen": "Back to site ↗",
+        "focus": {
+          "tag": "A",
+          "id": "",
+          "text": "Back to site ↗",
+          "tabindex": null,
+          "visible": true,
+          "inView": true,
+          "described": "",
+          "stepTitle": "Start with your details.",
+          "stepLabel": "Step 1 of 4"
+        }
+      }
+    },
+    {
+      "name": "no-focus-steal-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "opened",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "no-focus-steal-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "fresh-load-focus-390: a fresh load forces no focus and the skip link is the first Tab stop",
+      "pass": true,
+      "detail": {
+        "focus": "BODY",
+        "firstTab": "Skip to setup"
+      }
+    },
+    {
+      "name": "fresh-load-focus-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "verified-focus-390: when the form opens after the sign-in link, focus is on the current step heading",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Start with your details.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 1 of 4",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      }
+    },
+    {
+      "name": "verified-focus-390: the step heading carries its position (Step 1 of 4)",
+      "pass": true,
+      "detail": "Step 1 of 4"
+    },
+    {
+      "name": "verified-focus-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "opened",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "verified-focus-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "restore-focus-390: after a restore, focus is on the restored step heading",
+      "pass": true,
+      "detail": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Tell us about your shop.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 2 of 4",
+        "stepTitle": "Tell us about your shop.",
+        "stepLabel": "Step 2 of 4"
+      }
+    },
+    {
+      "name": "restore-focus-390: the restored step heading carries its position (Step 2 of 4)",
+      "pass": true,
+      "detail": "Step 2 of 4"
+    },
+    {
+      "name": "restore-focus-390: Tab from the heading continues into the page, not back to the top",
+      "pass": true,
+      "detail": "access-sign-out"
+    },
+    {
+      "name": "restore-focus-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "restored",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "restore-focus-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no-focus-steal-390: focus the owner placed while the form was loading is left alone",
+      "pass": true,
+      "detail": {
+        "chosen": "Back to site ↗",
+        "focus": {
+          "tag": "A",
+          "id": "",
+          "text": "Back to site ↗",
+          "tabindex": null,
+          "visible": true,
+          "inView": true,
+          "described": "",
+          "stepTitle": "Start with your details.",
+          "stepLabel": "Step 1 of 4"
+        }
+      }
+    },
+    {
+      "name": "no-focus-steal-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "opened",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "no-focus-steal-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No browser request left the fixture origin",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No forbidden API route was requested",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No physical server transport was attempted",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Exactly one onboard.js was served, and it is the pinned source",
+      "pass": true,
+      "detail": {
+        "served": [
+          "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab"
+        ],
+        "expected": null
+      }
+    },
+    {
+      "name": "Source stayed stable throughout the check",
+      "pass": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "finish-keyboard-1440",
+      "kind": "finish-keyboard",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "done",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "done": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      },
+      "live": [],
+      "snapshot": "- heading \"Your workspace is ready\" [level=1]\n- paragraph: Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.\n- paragraph: Your front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.\n- link \"Continue my connections\":\n  - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#setup\n- paragraph:\n  - link \"Open workspace overview\":\n    - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-1440-8500#today",
+      "nextTab": "goPortal"
+    },
+    {
+      "id": "typing-1440",
+      "kind": "typing",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "typed",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "live": [
+        {
+          "t": 4549,
+          "id": "draft-announce",
+          "text": "Saved. You can leave and continue later."
+        }
+      ],
+      "visible": [
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Saving your answers…",
+        "Saved. You can leave and continue later."
+      ],
+      "finalVisible": "Saved. You can leave and continue later."
+    },
+    {
+      "id": "step-change-1440",
+      "kind": "step-change",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "step2",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "live": []
+    },
+    {
+      "id": "lost-save-1440",
+      "kind": "lost-save",
+      "width": 1440,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "lost",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropPut": false,
+      "live": [
+        {
+          "t": 2136,
+          "id": "draft-announce",
+          "text": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+        }
+      ]
+    },
+    {
+      "id": "conflict-1440",
+      "kind": "conflict",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "conflict",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "otherTab": 200,
+      "live": [
+        {
+          "t": 2129,
+          "id": "draft-announce",
+          "text": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+        }
+      ]
+    },
+    {
+      "id": "finish-keyboard-390",
+      "kind": "finish-keyboard",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "done",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "done": {
+        "tag": "H1",
+        "id": "done-title",
+        "text": "Your workspace is ready",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "h1s": [
+          "Your workspace is ready"
+        ],
+        "goPortal": "Continue my connections",
+        "goHref": "http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#setup",
+        "buildStatus": "Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission."
+      },
+      "live": [],
+      "snapshot": "- heading \"Your workspace is ready\" [level=1]\n- paragraph: Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.\n- paragraph: Your front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.\n- link \"Continue my connections\":\n  - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#setup\n- paragraph:\n  - link \"Open workspace overview\":\n    - /url: http://127.0.0.1:8897/desk.html?c=a11y-air-390-89a9#today",
+      "nextTab": "goPortal"
+    },
+    {
+      "id": "typing-390",
+      "kind": "typing",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "typed",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "live": [
+        {
+          "t": 4456,
+          "id": "draft-announce",
+          "text": "Saved. You can leave and continue later."
+        }
+      ],
+      "visible": [
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Changes not saved yet.",
+        "Saving your answers…",
+        "Saved. You can leave and continue later."
+      ],
+      "finalVisible": "Saved. You can leave and continue later."
+    },
+    {
+      "id": "step-change-390",
+      "kind": "step-change",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "step2",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "live": []
+    },
+    {
+      "id": "lost-save-390",
+      "kind": "lost-save",
+      "width": 390,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "lost",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropPut": false,
+      "live": [
+        {
+          "t": 2134,
+          "id": "draft-announce",
+          "text": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+        }
+      ]
+    },
+    {
+      "id": "conflict-390",
+      "kind": "conflict",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "conflict",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "otherTab": 200,
+      "live": [
+        {
+          "t": 2199,
+          "id": "draft-announce",
+          "text": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+        }
+      ]
+    },
+    {
+      "id": "stale-after-error-same-task-1440",
+      "kind": "stale-after-error-same-task",
+      "width": 1440,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropNthPut": 0,
+      "dropPut": false,
+      "live": [
+        {
+          "t": 1478,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ],
+      "pressedAt": 1472
+    },
+    {
+      "id": "stale-after-error-after-settle-1440",
+      "kind": "stale-after-error-after-settle",
+      "width": 1440,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropNthPut": 0,
+      "dropPut": false,
+      "live": [
+        {
+          "t": 1424,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ],
+      "pressedAt": 1420
+    },
+    {
+      "id": "repeat-saved-1440",
+      "kind": "repeat-saved",
+      "width": 1440,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "after",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropPut": false,
+      "live": [
+        "Saved. You can leave and continue later.",
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "id": "stale-after-error-same-task-390",
+      "kind": "stale-after-error-same-task",
+      "width": 390,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropNthPut": 0,
+      "dropPut": false,
+      "live": [
+        {
+          "t": 1469,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ],
+      "pressedAt": 1464
+    },
+    {
+      "id": "stale-after-error-after-settle-390",
+      "kind": "stale-after-error-after-settle",
+      "width": 390,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropNthPut": 0,
+      "dropPut": false,
+      "live": [
+        {
+          "t": 1493,
+          "id": "err",
+          "text": "We couldn’t confirm whether your latest answers were saved. Check your connection. They’re still on this page and will save when you select Save and continue."
+        }
+      ],
+      "pressedAt": 1485
+    },
+    {
+      "id": "repeat-saved-390",
+      "kind": "repeat-saved",
+      "width": 390,
+      "events": [
+        "PUT lost before the handler ran"
+      ],
+      "overflow": [
+        [
+          "after",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropPut": false,
+      "live": [
+        "Saved. You can leave and continue later.",
+        "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+        "Saved. You can leave and continue later."
+      ]
+    },
+    {
+      "id": "fresh-load-focus-1440",
+      "kind": "fresh-load-focus",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "gate",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "focus": {
+        "tag": "BODY",
+        "id": "",
+        "text": "Skip to setup\n\n  \n    \n      Your front desk\n      A front desk that knows your ",
+        "tabindex": null,
+        "visible": true,
+        "inView": true,
+        "described": "",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      },
+      "firstTab": "Skip to setup"
+    },
+    {
+      "id": "verified-focus-1440",
+      "kind": "verified-focus",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "opened",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "focus": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Start with your details.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 1 of 4",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      }
+    },
+    {
+      "id": "restore-focus-1440",
+      "kind": "restore-focus",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "restored",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "focus": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Tell us about your shop.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 2 of 4",
+        "stepTitle": "Tell us about your shop.",
+        "stepLabel": "Step 2 of 4"
+      },
+      "nextTab": "access-sign-out"
+    },
+    {
+      "id": "no-focus-steal-1440",
+      "kind": "no-focus-steal",
+      "width": 1440,
+      "events": [],
+      "overflow": [
+        [
+          "opened",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "delayGet": 0,
+      "chosen": "Back to site ↗",
+      "focus": {
+        "tag": "A",
+        "id": "",
+        "text": "Back to site ↗",
+        "tabindex": null,
+        "visible": true,
+        "inView": true,
+        "described": "",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      }
+    },
+    {
+      "id": "fresh-load-focus-390",
+      "kind": "fresh-load-focus",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "gate",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "focus": {
+        "tag": "BODY",
+        "id": "",
+        "text": "Skip to setup\n\n  \n    \n      Your front desk\n      A front desk that knows your ",
+        "tabindex": null,
+        "visible": true,
+        "inView": true,
+        "described": "",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      },
+      "firstTab": "Skip to setup"
+    },
+    {
+      "id": "verified-focus-390",
+      "kind": "verified-focus",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "opened",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "focus": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Start with your details.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 1 of 4",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      }
+    },
+    {
+      "id": "restore-focus-390",
+      "kind": "restore-focus",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "restored",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "focus": {
+        "tag": "H1",
+        "id": "setup-context-title",
+        "text": "Tell us about your shop.",
+        "tabindex": "-1",
+        "visible": true,
+        "inView": true,
+        "described": "Step 2 of 4",
+        "stepTitle": "Tell us about your shop.",
+        "stepLabel": "Step 2 of 4"
+      },
+      "nextTab": "access-sign-out"
+    },
+    {
+      "id": "no-focus-steal-390",
+      "kind": "no-focus-steal",
+      "width": 390,
+      "events": [],
+      "overflow": [
+        [
+          "opened",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "delayGet": 0,
+      "chosen": "Back to site ↗",
+      "focus": {
+        "tag": "A",
+        "id": "",
+        "text": "Back to site ↗",
+        "tabindex": null,
+        "visible": true,
+        "inView": true,
+        "described": "",
+        "stepTitle": "Start with your details.",
+        "stepLabel": "Step 1 of 4"
+      }
+    }
+  ],
+  "requests": [
+    {
+      "id": "finish-keyboard-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-1440",
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 200
+    },
+    {
+      "id": "typing-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "typing-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "typing-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "typing-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "step-change-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "lost-save-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "lost-save-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "lost-save-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "lost-save-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "conflict-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "conflict-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "conflict-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "conflict-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "finish-keyboard-390",
+      "method": "POST",
+      "path": "/api/onboard",
+      "status": 200
+    },
+    {
+      "id": "typing-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "typing-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "typing-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "typing-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "step-change-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "step-change-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "lost-save-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "lost-save-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "lost-save-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "lost-save-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "conflict-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "conflict-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "conflict-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "conflict-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "stale-after-error-same-task-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "stale-after-error-same-task-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "stale-after-error-after-settle-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "stale-after-error-after-settle-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-after-settle-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-after-settle-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-after-settle-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "stale-after-error-same-task-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-same-task-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "stale-after-error-after-settle-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "stale-after-error-after-settle-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-after-settle-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-after-settle-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "stale-after-error-after-settle-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "before"
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "repeat-saved-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "verified-focus-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "verified-focus-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "verified-focus-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "no-focus-steal-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "no-focus-steal-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "no-focus-steal-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "no-focus-steal-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "verified-focus-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "verified-focus-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "verified-focus-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "restore-focus-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "no-focus-steal-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 202
+    },
+    {
+      "id": "no-focus-steal-390",
+      "method": "POST",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "no-focus-steal-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "no-focus-steal-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [],
+  "forbiddenApi": [],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/claude-port-onboard-a11y-final-finish-keyboard-1440-done.png",
+    "scratchpad/claude-port-onboard-a11y-final-finish-keyboard-390-done.png",
+    "scratchpad/claude-port-onboard-a11y-final-typing-390.png",
+    "scratchpad/claude-port-onboard-a11y-final-lost-save-390.png",
+    "scratchpad/claude-port-onboard-a11y-final-stale-after-error-same-task-390.png",
+    "scratchpad/claude-port-onboard-a11y-final-stale-after-error-after-settle-390.png",
+    "scratchpad/claude-port-onboard-a11y-final-verified-focus-390.png",
+    "scratchpad/claude-port-onboard-a11y-final-restore-focus-390.png"
+  ],
+  "servedOnboardJs": [
+    "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab"
+  ],
+  "sourceBefore": {
+    "onboard.html": "0e4b2a766f2b70c41930a635c5433f5c284168ec48ea5dbab82a6815bcf450ca",
+    "onboard.js": "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab",
+    "onboard.css": "b24b7abd16708d492425120b577c06e997cf478912f727c0154e152850e3bee9",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "sourceAfter": {
+    "onboard.html": "0e4b2a766f2b70c41930a635c5433f5c284168ec48ea5dbab82a6815bcf450ca",
+    "onboard.js": "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab",
+    "onboard.css": "b24b7abd16708d492425120b577c06e997cf478912f727c0154e152850e3bee9",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "summary": {
+    "checks": 113,
+    "passed": 113,
+    "failed": 0
+  },
+  "failed": []
+}

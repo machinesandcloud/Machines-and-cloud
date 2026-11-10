@@ -55,7 +55,7 @@
         <div class="desk-practice-prompts"><span>Try a question</span><button type="button" data-practice-prompt="I need help with a repair. What information do you need?">A repair request</button><button type="button" data-practice-prompt="What areas do you serve?">Service area</button><button type="button" data-practice-prompt="Hola, necesito ayuda con una reparación. ¿Hablan español?">En español</button></div><div class="chat"><div class="m" id="msgs" role="log" aria-label="Practice conversation" aria-live="polite" aria-relevant="additions" aria-busy="false"></div><p id="chatStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p><form id="chatForm"><textarea id="chatIn" aria-label="Practice customer message" rows="1" placeholder="Ask your front desk a question…"></textarea><button type="submit" class="btn-pill btn-pill-blue btn-sm">Send</button></form></div>
         <p class="muted" style="margin-top:8px"><button type="button" class="btn-pill btn-pill-dark btn-sm" id="newChat">New customer</button></p>
       </div>
-      <div class="card2 desk-practice-result"><h3>What you’d receive</h3><p class="muted">A preview of the details your desk would collect. Practice results stay separate from customer leads and bookings.</p><div id="testPreview" role="status" aria-live="polite">Send a practice message to see the result here.</div>
+      <div class="card2 desk-practice-result"><h3>What you’d receive</h3><p class="muted">A preview of the details your desk would collect. Practice results stay separate from customer leads and bookings.</p><div id="testPreview">Send a practice message to see the result here.</div>
         <details class="desk-details desk-practice-notes"><summary>Service activity &amp; setup notes</summary><h3 style="margin-top:18px">Recent service activity</h3><div id="liveEvents" class="muted">No service activity yet.</div><h3 style="margin-top:18px">Draft notes</h3><div id="missing" class="muted"></div></details></div>
     </div>
   </section>
@@ -81,6 +81,7 @@
         <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="availabilitySubmit">Block time</button>
       </form>
       <p id="availabilityMessage" class="muted availability-message" role="status" aria-live="polite"></p>
+      <button type="button" class="btn-pill btn-pill-dark btn-sm" id="availabilityReload" hidden>Reload availability</button>
       <button type="button" class="btn-pill btn-pill-dark btn-sm" id="availabilityBackToCalendar" hidden>View on calendar</button>
       <h3 style="margin-top:20px">Blocked time</h3>
       <div id="availabilityBlocks" class="muted">Loading availability…</div>

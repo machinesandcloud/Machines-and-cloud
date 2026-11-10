@@ -1,0 +1,904 @@
+{
+  "at": "2026-11-10T09:17:51.190Z",
+  "browser": "channel:chrome",
+  "deskDir": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/port-0e04",
+  "served": {
+    "desk.js": [
+      "0e040d76b4e37c630b165cd14ee4084dcd2dc4f5d076c124413064f349a059a9"
+    ],
+    "desk.html": [
+      "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113"
+    ],
+    "desk.css": [
+      "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session and request; actual local /api/client and /api/access handlers; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "checkSha256": "737d0836aadc8f8eb72100d5f59a819b2186a82214e948a40c6c892f0e59aa28",
+  "checks": [
+    {
+      "name": "P1 repeated Back x6 with visit dialog open: no storm, bounded history, dialog/page/URL held, then normal Back",
+      "pass": true
+    },
+    {
+      "name": "P2 visit dialog closed by Escape, then Back routes normally (recorded address cleared)",
+      "pass": true
+    },
+    {
+      "name": "P3 Forward x3 with visit dialog open: no route, bounded pushes",
+      "pass": true
+    },
+    {
+      "name": "P4 nested: request dialog open, visit dialog opened over it; Back holds both; after visit close, one Back closes only the request and stays on Inbox",
+      "pass": true
+    },
+    {
+      "name": "P5 tour: Back while the Quick tour is open still closes the tour (guideDialog excluded from hold), no push storm",
+      "pass": true
+    },
+    {
+      "name": "P6 real hand-off: request -> Read saved conversation (request closes, conversation opens); Back holds conversation on Inbox; after close, Back goes to Home",
+      "pass": true
+    },
+    {
+      "name": "P7 cfgWebNext on a live website chat: after save, button shown once, not auto-focused; click routes and focuses target exactly once",
+      "pass": true
+    },
+    {
+      "name": "Round-2 R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R2 back x3 URL not restored: http://127.0.0.1:8921/desk.html?c=followup-8#leads\n+ actual - expected\n\n+ 'http://127.0.0.1:8921/desk.html?c=followup-8#leads'\n- 'http://127.0.0.1:8921/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability'\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:129:191)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:222:5\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:86:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:218:3"
+    },
+    {
+      "name": "Round-2 R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R6 URL not restored: http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today\n+ actual - expected\n\n+ 'http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today'\n- 'http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability'\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:129:191)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:240:5\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:86:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:224:3"
+    },
+    {
+      "name": "Round-2 R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R11 URL not restored: http://127.0.0.1:8921/desk.html?c=followup-10#leads\n+ actual - expected\n\n+ 'http://127.0.0.1:8921/desk.html?c=followup-10#leads'\n- 'http://127.0.0.1:8921/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability'\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:129:191)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:250:134\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:86:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/modal-back-ui-check.mjs:245:3"
+    },
+    {
+      "name": "Round-2 R12 human-speed double Back (120ms apart) while the page is busy for 400ms: held on the opening entry",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 400
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "probe": [
+    {
+      "P1": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-1&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ]
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-1&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ]
+        }
+      }
+    },
+    {
+      "P1after": {
+        "url": "http://127.0.0.1:8921/desk.html?c=followup-1&calendar_date=2026-11-10&calendar_view=month#today",
+        "hash": "#today",
+        "page": "today",
+        "len": 5,
+        "push": 0,
+        "state": {
+          "mcDeskPage": "today"
+        },
+        "open": []
+      }
+    },
+    {
+      "P2": {
+        "url": "http://127.0.0.1:8921/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#today",
+        "hash": "#today",
+        "page": "today",
+        "len": 4,
+        "push": 0,
+        "state": {
+          "mcDeskPage": "today"
+        },
+        "open": []
+      }
+    },
+    {
+      "P3": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#today",
+          "hash": "#today",
+          "page": "today",
+          "len": 4,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "today"
+          },
+          "open": [
+            "visitDialog"
+          ]
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#today",
+          "hash": "#today",
+          "page": "today",
+          "len": 4,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "today"
+          },
+          "open": [
+            "visitDialog"
+          ]
+        }
+      }
+    },
+    {
+      "P4": {
+        "sReq": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "state": {
+            "mcRequestDialog": "2e9ffe72bf"
+          },
+          "open": [
+            "requestDialog"
+          ]
+        },
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcRequestDialog": "2e9ffe72bf"
+          },
+          "open": [
+            "requestDialog",
+            "visitDialog"
+          ]
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcRequestDialog": "2e9ffe72bf"
+          },
+          "open": [
+            "requestDialog",
+            "visitDialog"
+          ]
+        }
+      }
+    },
+    {
+      "P4after": {
+        "url": "http://127.0.0.1:8921/desk.html?c=followup-4#leads",
+        "hash": "#leads",
+        "page": "leads",
+        "len": 5,
+        "push": 0,
+        "state": {
+          "mcDeskPage": "leads"
+        },
+        "open": []
+      }
+    },
+    {
+      "P5": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-5#today",
+          "hash": "#today",
+          "page": "today",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcTour": true
+          },
+          "open": [
+            "guideDialog"
+          ]
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-5#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "leads"
+          },
+          "open": []
+        }
+      }
+    },
+    {
+      "P6": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-6#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "leads"
+          },
+          "open": [
+            "conversationDialog"
+          ]
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-6#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "push": 0,
+          "state": {
+            "mcDeskPage": "leads"
+          },
+          "open": [
+            "conversationDialog"
+          ]
+        }
+      }
+    },
+    {
+      "P6after": {
+        "url": "http://127.0.0.1:8921/desk.html?c=followup-6#today",
+        "hash": "#today",
+        "page": "today",
+        "len": 5,
+        "push": 0,
+        "state": {
+          "mcDeskPage": "today"
+        },
+        "open": []
+      }
+    },
+    {
+      "P7after": {
+        "count": 1,
+        "active": "saveCfg",
+        "label": "Review business details",
+        "msg": "All changes saved. Website chat is unavailable. Review these changes and complete a private test before customers can use them.",
+        "msgRole": "status",
+        "btnLive": null
+      }
+    },
+    {
+      "P7nav": {
+        "page": "know",
+        "active": "reviewRules",
+        "focus": [
+          "cfgWebNext",
+          "pageTitle",
+          "reviewRules"
+        ],
+        "hash": "#know"
+      }
+    },
+    {
+      "R2": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-8",
+            "/desk.html?c=followup-8#leads",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-8#leads",
+          "hash": "#leads",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [
+            1
+          ],
+          "pop": 4,
+          "index": 1,
+          "entries": [
+            "/desk.html?c=followup-8",
+            "/desk.html?c=followup-8#leads",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "leads"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s2": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 5,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R6": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-9",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today",
+          "hash": "#today",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [
+            1,
+            -1
+          ],
+          "pop": 3,
+          "index": 1,
+          "entries": [
+            "/desk.html?c=followup-9",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "today"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "late": {
+          "at": "http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today",
+          "after": "http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today"
+        },
+        "entries": [
+          "/desk.html?c=followup-9",
+          "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#today",
+          "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+        ]
+      }
+    },
+    {
+      "R11": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-10",
+            "/desk.html?c=followup-10#leads",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-10#leads",
+          "hash": "#leads",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [
+            1
+          ],
+          "pop": 2,
+          "index": 1,
+          "entries": [
+            "/desk.html?c=followup-10",
+            "/desk.html?c=followup-10#leads",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "leads"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R12": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-11",
+            "/desk.html?c=followup-11#leads",
+            "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [
+            1
+          ],
+          "pop": 2,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-11",
+            "/desk.html?c=followup-11#leads",
+            "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-port-r3-modal-back-0e04-failure-8.png",
+    "scratchpad/claude-port-r3-modal-back-0e04-failure-9.png",
+    "scratchpad/claude-port-r3-modal-back-0e04-failure-10.png"
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 3,
+    "failing": [
+      "Round-2 R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry",
+      "Round-2 R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)",
+      "Round-2 R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page"
+    ]
+  }
+}
