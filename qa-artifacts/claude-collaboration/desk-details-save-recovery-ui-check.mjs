@@ -35,13 +35,13 @@ const handlers = { '/api/client': (await import(lib('netlify/functions/client.mj
 const browser = await playwright.chromium.launch({ ...(process.env.MC_PLAYWRIGHT_EXECUTABLE ? { executablePath: process.env.MC_PLAYWRIGHT_EXECUTABLE } : { channel: 'chrome' }), headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run', '--host-resolver-rules=MAP * ~NOTFOUND'] });
 const contexts = []; let serial = 0;
 
-async function fixture(viewport) {
+async function fixture(viewport, options = {}) {
   const slug = 'details-save-' + ++serial, token = sha(slug), c = newClient({ slug, ownerKey: 'PRIVATE-FIXTURE-' + serial, owner: { name: 'Alex Fixture', email: slug + '@example.test', phone: '+17135550198' }, business: { name: 'Fixture Details Shop', trade: 'HVAC', serviceArea: ['Katy'], hours: 'Mon-Fri 8am-5pm' } });
-  Object.assign(c, { onboarding: { version: 1, verifiedEmail: c.owner.email, desiredChannels: ['web', 'voice'] }, services: ['AC repair'], windows: ['8 to 12', '12 to 5'], status: 'testing', build: { status: 'built', source: 'owner_answers' } }); c.rules.hours = parseHours('Mon-Fri 8am-5pm'); c.phone.businessNumber = '';
+  Object.assign(c, { onboarding: { version: 1, verifiedEmail: c.owner.email, desiredChannels: ['web', 'voice'] }, services: ['AC repair'], windows: ['8 to 12', '12 to 5'], status: 'testing', build: { status: 'built', source: 'owner_answers' } }); c.rules.hours = parseHours('Mon-Fri 8am-5pm'); c.phone.businessNumber = ''; if (options.legacy) delete c.onboarding;
   await store.put('clients', slug, c); await store.put('access_sessions', accessHash(token), { scope: 'onboarding', status: 'active', email: c.owner.email, expiresAt: new Date(Date.now() + 3600000).toISOString() });
   const context = await browser.newContext({ viewport, serviceWorkers: 'block', reducedMotion: 'reduce' }); contexts.push(context); context.setDefaultTimeout(8000);
   await context.addInitScript(({ origin, slug, token }) => { if (location.origin !== origin) return; sessionStorage.setItem('mc-onboarding-session-v1', token); localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen'); }, { origin, slug, token });
-  const state = { requests: [], putFault: null };
+  const state = { requests: [], putFault: null, getHook: null };
   await context.routeWebSocket('**/*', socket => socket.close());
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
@@ -52,6 +52,7 @@ async function fixture(viewport) {
       const item = { slug, path: url.pathname, method, action, at: state.requests.length }; state.requests.push(item); report.requests.push(item);
       // Lost before the handler: the save never reaches the backend.
       if (method === 'PUT' && state.putFault === 'before') { state.putFault = null; item.fixture = 'lost-before-handler'; item.status = 'aborted'; return route.abort('failed'); }
+      if (method === 'GET' && url.pathname === '/api/client' && state.getHook) { const hook = state.getHook; state.getHook = null; await hook(); }
       const response = await handlers[url.pathname](new Request(url, { method, headers: request.headers(), ...(body ? { body: JSON.stringify(body) } : {}) }), { ip: '192.0.2.71' }); item.status = response.status;
       const buffer = Buffer.from(await response.arrayBuffer());
       // Lost after the handler: the backend saved it, the browser never sees the response.
@@ -64,7 +65,8 @@ async function fixture(viewport) {
     return route.fulfill({ contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.jpg': 'image/jpeg' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
   });
   const page = await context.newPage(); page.on('pageerror', error => report.pageErrors.push(error.message));
-  await page.goto(origin + '/desk.html?c=' + slug + '#account'); await page.waitForFunction(() => document.body.dataset.workspaceState === 'ready');
+  await page.goto(origin + '/desk.html?c=' + slug + (options.legacy ? '&k=' + encodeURIComponent(c.ownerKey) : '') + '#account'); await page.waitForFunction(() => document.body.dataset.workspaceState === 'ready');
+  if (options.legacy) return { page, c, state, context, width: viewport.width };
   await page.evaluate(() => document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: 'know' } })));
   await page.evaluate(() => { document.getElementById('contactDetails').open = true; });
   await page.locator('#phoneBusinessNumber').waitFor({ state: 'visible' });
@@ -82,6 +84,25 @@ async function saveAfter(x, count) { await x.page.locator('#saveCfg').click(); f
 async function noRawTransport(page) { const text = await page.locator('body').innerText(); assert.doesNotMatch(text, /Failed to fetch|NetworkError|Load failed|TypeError|signal is aborted/i, 'Raw transport error text reached the owner'); }
 const saveState = page => page.locator('#cfg').getAttribute('data-save-state');
 const saveMsg = page => page.locator('#saveMsg').innerText();
+async function setField(page, name, value) { await page.evaluate(n => { document.querySelector('#cfg [name="' + n + '"]').closest('details').open = true; }, name); const field = page.locator('#cfg [name="' + name + '"]').first(); await field.scrollIntoViewIfNeeded(); await field.fill(value); }
+const fieldValue = (page, name) => page.locator('#cfg [name="' + name + '"]').first().inputValue();
+const acctSettled = page => page.waitForFunction(() => { const f = document.getElementById('acct'); return f.getAttribute('aria-busy') === 'false' && f.dataset.saveState !== 'saving' && !/Checking/.test(document.getElementById('acctMsg').textContent); });
+async function acctSave(x, count) { await x.page.locator('#saveAcct').click(); for (let i = 0; i < 100 && puts(x).length < count; i++) await x.page.waitForTimeout(50); assert.equal(puts(x).length, count, 'PUT count'); await acctSettled(x.page); }
+// The average job value form is the legacy (pre-onboarding) workspace's Reporting preferences.
+async function toAccount(x) { await x.page.evaluate(() => { document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: 'account' } })); document.getElementById('accountReporting').open = true; }); await x.page.locator('#avgTicket').waitFor({ state: 'visible' }); await x.page.waitForFunction(() => document.getElementById('acct').dataset.saveState === 'saved'); }
+const acctMsg = page => page.locator('#acctMsg').innerText();
+// Lost after the server wrote it: confirmed, and the page shows the stored canonical value rather than the typed one.
+async function canonicalSaved(x, name, typed, canonical, storedCheck, shotName) {
+  await setField(x.page, name, typed); x.state.putFault = 'after'; await saveAfter(x, 1);
+  assert.equal(puts(x)[0].status, 200, 'handler saved it'); storedCheck(await stored(x));
+  await noRawTransport(x.page);
+  assert.ok(['saved', 'incomplete'].includes(await saveState(x.page)), 'save state ' + await saveState(x.page) + ': ' + await saveMsg(x.page));
+  assert.doesNotMatch(await saveMsg(x.page), /not saved|changed elsewhere|could not/i);
+  assert.equal(await x.page.locator('#cfgConflictPanel').isVisible(), false, 'no conflict panel');
+  assert.equal(await fieldValue(x.page, name), canonical, 'canonical stored value shown');
+  await noHorizontalScroll(x.page); if (shotName) { await x.page.locator('#cfg [name="' + name + '"]').first().scrollIntoViewIfNeeded(); await shot(x.page, shotName); }
+  await setField(x.page, 'owner.name', 'Alex Fixture Next'); await saveAfter(x, 2); assert.equal(puts(x)[1].status, 200, 'next save accepted, not 409');
+}
 async function concurrentWrite(x, number) { await store.atomicUpdate('clients', x.c.slug, c => ({ value: { ...c, phone: { ...c.phone, businessNumber: number }, updatedAt: new Date().toISOString() } })); }
 
 try {
@@ -140,6 +161,40 @@ try {
       await x.page.locator('#contactDetails input[name="owner.name"]').fill('Alex Fixture Sr');
       await saveAfter(x, 2); assert.equal(puts(x)[1].status, 200, 'next save accepted');
     });
+    await check(w + 'px lost-after price line is confirmed and shows the stored price', async () => {
+      const x = await fixture(viewport);
+      await canonicalSaved(x, 'fees', 'Diagnostic - $89', 'Diagnostic: $89', c => assert.deepEqual(c.fees.map(f => [f.label, f.amount]), [['Diagnostic', '$89']]), 'price-confirmed-' + w);
+    });
+    await check(w + 'px whitespace-only edit lost before the server reports not saved and keeps the text', async () => {
+      const x = await fixture(viewport);
+      await setField(x.page, 'services', 'AC  repair'); x.state.putFault = 'before'; await saveAfter(x, 1);
+      assert.deepEqual((await stored(x)).services, ['AC repair'], 'nothing was written');
+      await noRawTransport(x.page);
+      assert.match(await saveMsg(x.page), /not saved/i); assert.doesNotMatch(await saveMsg(x.page), /All changes saved|Saved as a draft/);
+      assert.equal(await fieldValue(x.page, 'services'), 'AC  repair', 'owner text kept');
+      assert.equal(await x.page.locator('#cfgConflictPanel').isVisible(), false);
+      await x.page.locator('#saveMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'whitespace-not-saved-' + w);
+    });
+    await check(w + 'px average job value lost after the server is confirmed by re-reading', async () => {
+      const x = await fixture(viewport, { legacy: true }); await toAccount(x);
+      await x.page.locator('#avgTicket').fill('350'); x.state.putFault = 'after'; await acctSave(x, 1);
+      assert.equal(puts(x)[0].status, 200); assert.equal(String((await stored(x)).rules.avgTicket), '350');
+      await noRawTransport(x.page);
+      assert.equal(await x.page.locator('#acct').getAttribute('data-save-state'), 'saved', await acctMsg(x.page)); assert.match(await acctMsg(x.page), /All changes saved/);
+      assert.equal(await x.page.locator('#acctConflictPanel').isVisible(), false);
+      await noHorizontalScroll(x.page); await x.page.locator('#acctMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'acct-confirmed-' + w);
+      await x.page.locator('#avgTicket').fill('375'); await acctSave(x, 2); assert.equal(puts(x)[1].status, 200, 'next save accepted, not 409');
+    });
+    await check(w + 'px average job value lost before the server reports not saved and keeps the value', async () => {
+      const x = await fixture(viewport, { legacy: true }); await toAccount(x);
+      await x.page.locator('#avgTicket').fill('350'); x.state.putFault = 'before'; await acctSave(x, 1);
+      assert.ok(!(await stored(x)).rules.avgTicket, 'nothing was written');
+      await noRawTransport(x.page);
+      assert.match(await acctMsg(x.page), /not saved/i); assert.equal(await x.page.locator('#avgTicket').inputValue(), '350');
+      assert.equal(await x.page.locator('#acctConflictPanel').isVisible(), false); assert.equal(await x.page.locator('#saveAcct').isDisabled(), false);
+      await noHorizontalScroll(x.page); await x.page.locator('#acctMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'acct-not-saved-' + w);
+      await acctSave(x, 2); assert.equal(puts(x)[1].status, 200); assert.equal(String((await stored(x)).rules.avgTicket), '350');
+    });
     await check(w + 'px a real concurrent change still shows a conflict with both values', async () => {
       const x = await fixture(viewport);
       await x.page.locator('#phoneBusinessNumber').fill('(713) 555-0110');
@@ -157,6 +212,29 @@ try {
       await noHorizontalScroll(x.page); await x.page.locator('#cfgConflictPanel').scrollIntoViewIfNeeded(); await shot(x.page, 'real-conflict-' + w);
     });
   }
+  const vp = { width: 1440, height: 900 };
+  await check('1440px lost-after FAQ line is confirmed and shows the stored question and answer', async () => {
+    const x = await fixture(vp);
+    await canonicalSaved(x, 'faq', 'Do you serve Katy?Yes we do', 'Do you serve Katy? Yes we do', c => assert.deepEqual(c.faq, [{ q: 'Do you serve Katy?', a: 'Yes we do' }]));
+  });
+  await check('1440px lost-after allowed website with a trailing slash is confirmed and shows the stored address', async () => {
+    const x = await fixture(vp);
+    await canonicalSaved(x, 'widget.allowedOrigins', 'https://shop.example/', 'https://shop.example', c => assert.deepEqual(c.widget.allowedOrigins, ['https://shop.example']));
+  });
+  await check('1440px lost-before save plus another write reports not saved and shows a conflict', async () => {
+    const x = await fixture(vp);
+    await setField(x.page, 'services', 'AC repair\nZoning'); x.state.putFault = 'before'; x.state.getHook = () => concurrentWrite(x, '+17135550177'); await saveAfter(x, 1);
+    assert.equal(await saveState(x.page), 'conflict'); assert.match(await saveMsg(x.page), /not saved/i); assert.equal(await fieldValue(x.page, 'services'), 'AC repair\nZoning');
+    assert.deepEqual((await stored(x)).services, ['AC repair']);
+  });
+  await check('1440px lost-after save plus another write keeps the edits for review without claiming either outcome', async () => {
+    const x = await fixture(vp);
+    await setField(x.page, 'services', 'AC repair\nZoning'); x.state.putFault = 'after'; x.state.getHook = () => concurrentWrite(x, '+17135550177'); await saveAfter(x, 1);
+    assert.deepEqual((await stored(x)).services, ['AC repair', 'Zoning']);
+    assert.equal(await saveState(x.page), 'conflict'); assert.doesNotMatch(await saveMsg(x.page), /not saved|All changes saved/i, await saveMsg(x.page));
+    await x.page.locator('#cfgCheckLatest').click(); await settled(x.page);
+    const rows = await x.page.locator('#cfgConflictFields').innerText(); assert.match(rows, /Existing business line/); assert.doesNotMatch(rows, /Services/);
+  });
   await check('No physical transport, forbidden destinations or page errors', async () => { assert.equal(report.physicalNetwork, 0); assert.deepEqual(report.forbidden, []); assert.deepEqual(report.pageErrors, []); });
 } finally {
   await browser.close(); report.sourceAfter = hashes(); report.sourceStable = JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter);

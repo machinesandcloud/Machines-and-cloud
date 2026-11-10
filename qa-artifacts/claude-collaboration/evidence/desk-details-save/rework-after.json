@@ -1,0 +1,947 @@
+{
+  "at": "2026-11-10T03:46:40.458Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "deskSource": "desk.js",
+  "qualifications": "Synthetic workspace and session; actual local /api/client and /api/access handlers and browser assets; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler runs. No model/provider/email/OAuth/purchase/deployment performed.",
+  "sourceBefore": {
+    "desk.js": "77d7d27f4d19b914e23d507a786a2695164007c3aff61e67c11e8111dae9ba51",
+    "qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs": "fead2e2ac3cd21dc03f693ec2370d4e74566a68e122a6805d2f0a94ffde48fed"
+  },
+  "checks": [
+    {
+      "name": "1440px lost response after the save is confirmed by re-reading the saved workspace",
+      "pass": true
+    },
+    {
+      "name": "1440px lost response before the save reports not saved and keeps the edits",
+      "pass": true
+    },
+    {
+      "name": "1440px a phone-format-only difference from the latest saved version is not a conflict",
+      "pass": true
+    },
+    {
+      "name": "1440px lost-after price line is confirmed and shows the stored price",
+      "pass": true
+    },
+    {
+      "name": "1440px whitespace-only edit lost before the server reports not saved and keeps the text",
+      "pass": true
+    },
+    {
+      "name": "1440px average job value lost after the server is confirmed by re-reading",
+      "pass": true
+    },
+    {
+      "name": "1440px average job value lost before the server reports not saved and keeps the value",
+      "pass": true
+    },
+    {
+      "name": "1440px a real concurrent change still shows a conflict with both values",
+      "pass": true
+    },
+    {
+      "name": "390px lost response after the save is confirmed by re-reading the saved workspace",
+      "pass": true
+    },
+    {
+      "name": "390px lost response before the save reports not saved and keeps the edits",
+      "pass": true
+    },
+    {
+      "name": "390px a phone-format-only difference from the latest saved version is not a conflict",
+      "pass": true
+    },
+    {
+      "name": "390px lost-after price line is confirmed and shows the stored price",
+      "pass": true
+    },
+    {
+      "name": "390px whitespace-only edit lost before the server reports not saved and keeps the text",
+      "pass": true
+    },
+    {
+      "name": "390px average job value lost after the server is confirmed by re-reading",
+      "pass": true
+    },
+    {
+      "name": "390px average job value lost before the server reports not saved and keeps the value",
+      "pass": true
+    },
+    {
+      "name": "390px a real concurrent change still shows a conflict with both values",
+      "pass": true
+    },
+    {
+      "name": "1440px lost-after FAQ line is confirmed and shows the stored question and answer",
+      "pass": true
+    },
+    {
+      "name": "1440px lost-after allowed website with a trailing slash is confirmed and shows the stored address",
+      "pass": true
+    },
+    {
+      "name": "1440px lost-before save plus another write reports not saved and shows a conflict",
+      "pass": true
+    },
+    {
+      "name": "1440px lost-after save plus another write keeps the edits for review without claiming either outcome",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 7,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-6",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-6",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-6",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 2,
+      "status": 200
+    },
+    {
+      "slug": "details-save-6",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-7",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-7",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-7",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 2,
+      "status": 200
+    },
+    {
+      "slug": "details-save-7",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 7,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 2,
+      "status": 200
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-15",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-15",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-15",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 2,
+      "status": 200
+    },
+    {
+      "slug": "details-save-15",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-16",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-16",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-16",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 6,
+      "status": 200
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/claude-save-r3-after-confirmed-1440.png",
+    "scratchpad/claude-save-r3-after-not-saved-1440.png",
+    "scratchpad/claude-save-r3-after-equivalent-1440.png",
+    "scratchpad/claude-save-r3-after-price-confirmed-1440.png",
+    "scratchpad/claude-save-r3-after-whitespace-not-saved-1440.png",
+    "scratchpad/claude-save-r3-after-acct-confirmed-1440.png",
+    "scratchpad/claude-save-r3-after-acct-not-saved-1440.png",
+    "scratchpad/claude-save-r3-after-real-conflict-1440.png",
+    "scratchpad/claude-save-r3-after-confirmed-390.png",
+    "scratchpad/claude-save-r3-after-not-saved-390.png",
+    "scratchpad/claude-save-r3-after-equivalent-390.png",
+    "scratchpad/claude-save-r3-after-price-confirmed-390.png",
+    "scratchpad/claude-save-r3-after-whitespace-not-saved-390.png",
+    "scratchpad/claude-save-r3-after-acct-confirmed-390.png",
+    "scratchpad/claude-save-r3-after-acct-not-saved-390.png",
+    "scratchpad/claude-save-r3-after-real-conflict-390.png"
+  ],
+  "sourceAfter": {
+    "desk.js": "77d7d27f4d19b914e23d507a786a2695164007c3aff61e67c11e8111dae9ba51",
+    "qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs": "fead2e2ac3cd21dc03f693ec2370d4e74566a68e122a6805d2f0a94ffde48fed"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}
