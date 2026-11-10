@@ -8,7 +8,10 @@
 //   - Thumbtack lead notifications: Set up, local notification, Disconnect, Set up again, reload, new notification.
 //   - Thumbtack partner path (production-origin trick, synthetic partner placeholders, Thumbtack sign-in intercepted
 //     by route): authorize, Disconnect, Set up again through the partner account step to a second authorization.
-//   - A cancelled workspace keeps a disconnected Angi row and a prepared Thumbtack row stopped as before.
+//   - Cancelled, archived and paused workspaces keep a disconnected Angi row and a prepared Thumbtack row stopped.
+//   - A disconnected Thumbtack row whose webhook is still saved (disconnect_pending or a stuck refreshing, partner ready
+//     or not) never offers a write the server refuses: Contact support, or the renew-permission sign-in that succeeds.
+//   - The owner moving focus during a review request, a lead save or Check saved status keeps it there.
 //   - Focus and status: lost lead-source response focuses Check saved status; Check shows "Checking…" feedback and
 //     focus never lands on body during or after; server field error focuses the field.
 //   - Angi business ID: a non-digit value is refused on the page with a digits hint and focus on the field.
@@ -243,7 +246,7 @@ for (const [width, height] of WIDTHS) {
     assert.equal((await dto(x)).leads.filter(l => l.source === 'thumbtack').length, 2, 'Earlier and new notifications are in Inbox');
   });
 
-  await check(`cancelled workspace: disconnected Angi and prepared Thumbtack stay stopped (${width})`, async () => {
+  for (const workspace of ['cancelled', 'archived', 'paused']) await check(`${workspace} workspace: disconnected Angi and prepared Thumbtack stay stopped (${width})`, async () => {
     const x = await seed(width);
     const prep = await ownerPost(x, { action: 'lead_connection', source: 'angi', operation: 'prepare', expectedGeneration: null, operationId: opId(), providerBusinessId: '55501234', integrationEmail: x.c.owner.email });
     assert.equal(prep.status, 200, JSON.stringify(prep.body));
@@ -251,18 +254,19 @@ for (const [width, height] of WIDTHS) {
     assert.equal(off.status, 200, JSON.stringify(off.body));
     const tt = await ownerPost(x, { action: 'lead_connection', source: 'thumbtack', operation: 'prepare', deliveryMode: 'self_serve', expectedGeneration: null, operationId: opId(), providerBusinessId: '', integrationEmail: x.c.owner.email });
     assert.equal(tt.status, 200, JSON.stringify(tt.body));
-    await store.atomicUpdate('clients', x.slug, current => ({ value: { ...current, status: 'cancelled', cancelledAt: new Date().toISOString() } }));
+    await store.atomicUpdate('clients', x.slug, current => ({ value: { ...current, status: workspace, ...(workspace === 'paused' ? { pausedAt: new Date().toISOString(), pausedFrom: 'testing' } : { cancelledAt: new Date().toISOString() }) } }));
     await open(x, { height }); const { page } = x;
+    const label = workspace === 'paused' ? 'Paused' : 'Stopped';
     for (const id of ['angi', 'thumbtack']) {
-      assert.equal(await rowStatus(page, id), 'Stopped', id + ' row stays Stopped in a cancelled workspace');
+      assert.equal(await rowStatus(page, id), label, id + ' row stays ' + label + ' in a ' + workspace + ' workspace');
       await openRow(page, id);
-      const st = await snapshot(page); report.observations.push({ where: 'cancelled ' + id + ' ' + width, state: st });
-      assert.match(st.heading, /is stopped$/);
+      const st = await snapshot(page); report.observations.push({ where: workspace + ' ' + id + ' ' + width, state: st });
+      assert.match(st.heading, workspace === 'paused' ? /is paused$/ : /is stopped$/);
       const controls = await pageControls(page);
-      assert.ok(controls.includes('Open Account') && !controls.includes('Set up again'), 'Cancelled stays stopped: ' + JSON.stringify(controls));
-      await shot(page, 'cancelled-' + id + '-' + width);
+      assert.ok(controls.includes('Open Account') && !controls.includes('Set up again') && !controls.some(c => /Renew permission/.test(c)), workspace + ' stays stopped: ' + JSON.stringify(controls));
+      await shot(page, workspace + '-' + id + '-' + width);
     }
-    assert.equal(posts(x).length, 0, 'No write from the cancelled workspace page');
+    assert.equal(posts(x).length, 0, 'No write from the ' + workspace + ' workspace page');
   });
 
   await check(`focus: lost Angi save focuses Check saved status; Check shows feedback and focus stays visible (${width})`, async () => {
@@ -330,8 +334,19 @@ for (const [width, height] of WIDTHS) {
     // 41 digits: still the server's limit (1 to 40 digits) on the page.
     await page.fill('#leadSourceBusiness', '1'.repeat(41)); await page.locator('#leadSourcePrepare').click(); await page.waitForTimeout(150);
     assert.equal(posts(x, r => r.action === 'lead_connection').length, 0, '41 digits refused before saving');
+    // Digits from other scripts are not the server's 0-9; the page names the digits it needs and sends nothing.
+    for (const value of ['١٢٣٤٥', '１２３４５', '१२३४५', '\u200b12345']) {
+      await page.fill('#leadSourceBusiness', value); await page.locator('#leadSourcePrepare').click(); await page.waitForTimeout(120);
+      assert.equal(posts(x, r => r.action === 'lead_connection').length, 0, JSON.stringify(value) + ' refused before saving');
+      const text = await page.locator('#leadSourceBusinessError').textContent();
+      if (value[0] !== '\u200b') assert.match(text, /0 to 9/, 'Error for ' + JSON.stringify(value) + ' names the digits 0 to 9: ' + text);
+      assert.equal((await focusNow(page)).id, 'leadSourceBusiness');
+      const server = await ownerPost(await seed(width), { action: 'lead_connection', source: 'angi', operation: 'prepare', expectedGeneration: null, operationId: opId(), providerBusinessId: value.trim(), integrationEmail: 'qa@example.test' });
+      assert.equal(server.status, 400, 'Server agrees ' + JSON.stringify(value) + ' is refused');
+    }
     // A browser-valid email the server refuses (no dot in the domain) returns a server field error.
-    await page.fill('#leadSourceBusiness', ' 55501234 '); await page.fill('#leadSourceEmail', 'owner@localhost');
+    // Unicode whitespace around ASCII digits (ideographic space, no-break space) is trimmed as the page sends it.
+    await page.fill('#leadSourceBusiness', '\u300055501234\u00a0'); await page.fill('#leadSourceEmail', 'owner@localhost');
     await page.locator('#leadSourcePrepare').click();
     await page.waitForFunction(() => document.getElementById('leadSourceEmail').getAttribute('aria-invalid') === 'true' && document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
     const sent = posts(x, r => r.action === 'lead_connection'); assert.equal(sent.length, 1); assert.equal(sent[0].status, 400);
@@ -386,6 +401,112 @@ for (const [width, height] of WIDTHS) {
       const status = await rowStatus(page, 'thumbtack'); report.observations.push({ where: 'partner after reconnect reload ' + width, rowStatus: status });
       assert.ok(!['Disconnected', 'Stopped'].includes(status), 'Status after reload: ' + status);
     } finally { for (const [k, v] of Object.entries(saved)) if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  });
+}
+
+// ---- Rework cases (QA of 16a06f77) ----
+const leadKey = async (x, source) => (await store.list('lead_connections', x.slug + '/')).find(k => k.endsWith('/' + source));
+async function patchLead(x, source, fn) { const key = await leadKey(x, source); assert.ok(key, 'saved lead row'); await store.atomicUpdate('lead_connections', key, cur => ({ value: fn(cur) })); }
+async function withPartner(fn) { const saved = Object.fromEntries(Object.keys(partnerEnv).map(k => [k, process.env[k]])); for (const [k, v] of Object.entries(partnerEnv)) if (v === undefined) delete process.env[k]; else process.env[k] = v; try { return await fn(); } finally { for (const [k, v] of Object.entries(saved)) if (v === undefined) delete process.env[k]; else process.env[k] = v; } }
+// A disconnected native Thumbtack row whose webhook is still saved (thumbtack-connection.mjs keeps native.webhookID until
+// cleanup disables it). 'refreshing' is the state a cleanup token refresh can stay in when interrupted.
+function retainedWebhook(status) { return cur => ({ ...cur, native: { ...(cur.native || {}), status, webhookID: 'wh-qa-retained', generation: cur.native?.generation || cur.generation, replies: [], pendingNegotiations: [], disconnectRequestedAt: new Date().toISOString(), ...(status === 'refreshing' ? { priorStatus: 'disconnect_pending', refreshPending: true, refreshAttemptId: 'c'.repeat(32), refreshStartedAt: new Date(Date.now() - 3600e3).toISOString() } : {}) } }); }
+for (const [width, height] of WIDTHS) for (const ready of [false, true]) for (const nstatus of ['disconnect_pending', 'refreshing']) {
+  await check(`thumbtack disconnected with a saved webhook (${nstatus}, partner ${ready ? 'ready' : 'not ready'}): honest status, no refused write (${width})`, () => (ready ? withPartner : f => f())(async () => {
+    const x = await seed(width, ready ? production : local);
+    const first = ready ? await ownerPost(x, { action: 'start_thumbtack_connection', source: 'thumbtack', expectedGeneration: null, operationId: opId() }) : await ownerPost(x, { action: 'lead_connection', source: 'thumbtack', operation: 'prepare', expectedGeneration: null, operationId: opId(), providerBusinessId: '', integrationEmail: x.c.owner.email });
+    assert.equal(first.status, 200, JSON.stringify(first.body));
+    const g = (await dto(x)).leadConnections.thumbtack.generation;
+    const off = await ownerPost(x, { action: 'lead_connection', source: 'thumbtack', operation: 'disconnect', expectedGeneration: g, operationId: opId() }); assert.equal(off.status, 200, JSON.stringify(off.body));
+    await patchLead(x, 'thumbtack', retainedWebhook(nstatus));
+    const view = (await dto(x)).leadConnections.thumbtack;
+    // The server's own answer for this state: prepare is refused.
+    const probe = await ownerPost(x, { action: 'lead_connection', source: 'thumbtack', operation: 'prepare', expectedGeneration: view.generation, operationId: opId(), providerBusinessId: '', integrationEmail: x.c.owner.email });
+    report.observations.push({ where: `retained ${nstatus} ready=${ready} ${width}`, nativeState: view.nativeState, canAuthorize: view.canAuthorize, partnerReady: view.partnerReady, prepareProbe: [probe.status, probe.body.error] });
+    assert.equal(probe.status, 409); assert.equal(probe.body.error, 'native_disconnect_required');
+    assert.equal(view.canAuthorize, ready, 'server canAuthorize');
+    await open(x, { height }); const { page } = x;
+    assert.equal(await rowStatus(page, 'thumbtack'), 'Disconnecting');
+    await openRow(page, 'thumbtack');
+    const st = await snapshot(page), controls = await pageControls(page);
+    report.observations.push({ where: `retained ${nstatus} ready=${ready} page ${width}`, heading: st.heading, controls, text: st.text });
+    await shot(page, `retained-${nstatus}-${ready ? 'ready' : 'notready'}-${width}`);
+    assert.equal(st.heading, 'Thumbtack is disconnecting');
+    assert.ok(!controls.includes('Set up again') && !controls.includes('View disconnect status'), 'No setup action the server refuses: ' + JSON.stringify(controls));
+    assert.match(st.text, /Inbox/);
+    if (!ready) {
+      assert.deepEqual(await primaryButtons(page), ['Contact support']);
+      assert.equal(await page.locator('#connectorDisconnectSupport').getAttribute('href'), 'mailto:support@machinesandcloud.com');
+      // A direct step address and the Home "View next step" event both stay on the honest page; nothing is sent.
+      await page.evaluate(() => { location.hash = '#setup/thumbtack/permission'; }); await page.waitForTimeout(300);
+      assert.equal(await page.evaluate(() => location.hash), '#setup/thumbtack/intro', 'Step address returns to the intro');
+      assert.equal(await page.locator('#leadSourceDialog[open]').count(), 0, 'No setup dialog');
+      await page.evaluate(() => document.dispatchEvent(new CustomEvent('mc:lead-source-open', { detail: { source: 'thumbtack' } }))); await page.waitForTimeout(300);
+      if (await page.locator('#leadSourceDialog[open]').count()) {
+        const d = await snapshot(page); report.observations.push({ where: `retained ${nstatus} not ready direct dialog ${width}`, dialog: d.dialog });
+        assert.ok(!await page.locator('#leadSourcePrepare').isVisible() && !await page.locator('#selfServePrepare').isVisible().catch(() => false), 'Dialog offers a prepare the server refuses: ' + JSON.stringify(d.dialog));
+        assert.ok(!/Waiting for the first lead|checking the authorized business connection/.test(d.dialog.text) && /support/.test(d.dialog.text), 'Dialog states the disconnect honestly: ' + d.dialog.text);
+      }
+    } else {
+      assert.deepEqual(await primaryButtons(page), ['Renew permission to finish disconnecting'], 'Row action matches the dialog action');
+      await page.locator('#connectorStart').click(); await stage(page, 'permission');
+      assert.equal(await page.locator('#leadSourceAuthorize').textContent(), 'Renew permission to finish disconnecting');
+      assert.ok(!await page.locator('#leadSourcePrepare').isVisible());
+      await Promise.all([page.waitForURL(/auth\.thumbtack\.com/), page.locator('#leadSourceAuthorize').click()]);
+      const start = posts(x, r => r.action === 'start_thumbtack_connection'); assert.equal(start.length, 1); assert.equal(start[0].status, 200);
+    }
+    assert.deepEqual(posts(x).filter(r => r.status >= 400).map(r => [r.action, r.operation, r.status, r.errorBody]), [], 'No refused write');
+    assert.equal(posts(x, r => r.operation === 'prepare').length, 0, 'No prepare sent');
+  }));
+}
+for (const [width, height] of WIDTHS) {
+  await check(`focus: owner moves to "All connections" while a review request sends; focus stays there (${width})`, async () => {
+    const x = await seed(width);
+    await store.atomicUpdate('clients', x.slug, cur => ({ value: { ...cur, onboarding: { ...cur.onboarding, desiredChannels: ['web', 'voice', 'angi', 'thumbtack'] } } }));
+    await open(x, { height }); const { page } = x;
+    await openRow(page, 'voice'); await page.locator('#connectorRequestReview').waitFor();
+    x.state.hold = m => m === 'POST';
+    await page.locator('#connectorRequestReview').focus(); await page.keyboard.press('Enter');
+    for (let i = 0; i < 150 && !x.state.release; i++) await page.waitForTimeout(20);
+    assert.ok(x.state.release, 'review not held');
+    assert.equal((await focusNow(page)).id, 'connectionReviewStatus', 'Focus waits on the review status');
+    await page.locator('#connectorAllServices').focus();
+    x.state.release(); await page.locator('#connectionReviewReference').waitFor(); await page.waitForTimeout(400);
+    const after = await focusNow(page); report.observations.push({ where: 'review moved focus ' + width, after });
+    assert.equal(after.id, 'connectorAllServices', 'Focus pulled from where the owner put it: ' + JSON.stringify(after));
+  });
+  await check(`focus: Angi save holds focus on its status; an owner move during the save is kept (${width})`, async () => {
+    const x = await open(await seed(width), { height }); const { page } = x;
+    await openRow(page, 'angi'); await page.locator('#connectorStart').click(); await stage(page, 'account');
+    await page.fill('#leadSourceBusiness', '55501234');
+    x.state.hold = (m, b) => m === 'POST' && b?.operation === 'prepare';
+    await page.locator('#leadSourcePrepare').focus(); await page.keyboard.press('Enter');
+    for (let i = 0; i < 150 && !x.state.release; i++) await page.waitForTimeout(20);
+    const during = await focusNow(page); report.observations.push({ where: 'angi save during ' + width, during });
+    await shot(page, 'angi-save-running-' + width);
+    assert.equal(during.id, 'leadSourceStatus', 'Focus during the save: ' + JSON.stringify(during));
+    assert.match(await page.locator('#leadSourceStatus').textContent(), /Saving/);
+    await page.locator('#leadSourceTitle').focus();
+    x.state.release(); await stage(page, 'request'); await page.waitForTimeout(300);
+    const after = await focusNow(page); report.observations.push({ where: 'angi save moved focus ' + width, after });
+    assert.equal(after.id, 'leadSourceTitle', 'Focus pulled from where the owner put it: ' + JSON.stringify(after));
+  });
+  await check(`focus: owner moves during Check saved status; focus stays there (${width})`, async () => {
+    const x = await open(await seed(width), { height }); const { page } = x;
+    await openRow(page, 'angi'); await page.locator('#connectorStart').click(); await stage(page, 'account');
+    await page.fill('#leadSourceBusiness', '55501234');
+    x.state.lose = b => b?.operation === 'prepare';
+    await page.locator('#leadSourcePrepare').click();
+    await page.waitForFunction(() => /couldn.t confirm/.test(document.getElementById('leadSourceStatus').textContent) && document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
+    x.state.hold = m => m === 'GET';
+    await page.locator('#leadSourceCheck').focus(); await page.keyboard.press('Enter');
+    for (let i = 0; i < 150 && !x.state.release; i++) await page.waitForTimeout(20);
+    assert.equal((await focusNow(page)).id, 'leadSourceStatus');
+    await page.locator('#leadSourceTitle').focus();
+    x.state.release(); await idle(page); await page.waitForTimeout(300);
+    const after = await focusNow(page); report.observations.push({ where: 'check moved focus ' + width, after });
+    assert.equal(after.id, 'leadSourceTitle', 'Focus pulled from where the owner put it: ' + JSON.stringify(after));
+    await waitText(page, '#leadSourceStatus', /Your connection setup is saved/);
   });
 }
 
