@@ -139,12 +139,14 @@
     gate.removeAttribute('aria-busy');
     if (message) gateStatus.textContent = message;
   }
+  // A dropped or timed-out connection never shows the browser's own error text; callers word the next step.
+  function connectionError(error) { var timedOut = !!error && error.name === 'AbortError', lost = new Error(timedOut ? 'Machines & Cloud took too long to answer. Check your connection and try again.' : 'We couldn’t reach Machines & Cloud. Check your connection and try again.'); lost.name = timedOut ? 'AbortError' : 'ConnectionError'; lost.code = 'connection'; return lost; }
   async function request(path, method, body) {
     var generation = accessGeneration;
     var headers = { 'Content-Type': 'application/json' }; if (session) headers.Authorization = 'Bearer ' + session;
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
-      var response = await fetch(API_BASE + path, { method: method || 'GET', headers: headers, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal });
+      var response; try { response = await fetch(API_BASE + path, { method: method || 'GET', headers: headers, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal }); } catch (error) { throw connectionError(error); }
       if (response.status === 401) {
         var expired = new Error('Your sign-in expired. Request a new link; your saved answers are kept.'); expired.code = 'sign_in_required'; expired.status = 401;
         if (generation === accessGeneration) {
@@ -153,7 +155,7 @@
         }
         throw expired;
       }
-      var data = await response.json();
+      var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error); data = {}; }
       if (!response.ok) {
         var failure = new Error(data.message || 'We could not confirm that request. Please try again.'); failure.code = data.error; failure.status = response.status; failure.field = data.field; throw failure;
       }
@@ -231,7 +233,7 @@
       if (!result.marketingPending && Object.prototype.hasOwnProperty.call(saveBody, 'marketingConsent')) marketingSavedVersion = preferenceVersion;
       dirty = JSON.stringify(collect()) !== JSON.stringify(snapshot) || i !== step || marketingVersion !== preferenceVersion;
       draftStatus.textContent = result.marketingPending ? 'Your answers are saved. Your email preference could not be confirmed; it will retry when you save or continue.' : 'Saved. You can leave and continue later.';
-    }).catch(function (error) { if (generation !== accessGeneration) return; dirty = true; draftStatus.textContent = error.message + ' Your changes are still on this page.'; throw error; });
+    }).catch(function (error) { if (generation !== accessGeneration) return; dirty = true; draftStatus.textContent = (error.code === 'connection' ? 'Your latest changes couldn’t be saved. Check your connection.' : error.message) + ' Your changes are still on this page.'; throw error; });
     saving = pending;
     try { await pending; } finally { if (saving === pending) saving = null; }
     if (generation !== accessGeneration) return;
@@ -523,7 +525,7 @@
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
     if (next.disabled || !session || !valid(i === steps.length - 1)) return;
-    var generation = accessGeneration, submittedStep = i, backWasDisabled = back.disabled;
+    var generation = accessGeneration, submittedStep = i, backWasDisabled = back.disabled, creating = false;
     next.disabled = true; back.disabled = true;
     try {
       await saveDraft();
@@ -532,14 +534,15 @@
       if (i !== submittedStep || !valid(submittedStep === steps.length - 1)) return;
       if (i < steps.length - 1) { show(i + 1, true); dirty = true; await saveDraft(); return; }
       next.textContent = 'Creating your workspace…';
-      var fields = collect(); fields.email = form.elements.email.value;
+      var fields = collect(); fields.email = form.elements.email.value; creating = true;
       var result = await request('/api/onboard', 'POST', fields);
       if (generation !== accessGeneration) return;
       if (!result.portal) throw new Error('Your workspace could not be confirmed. Your saved answers are kept; retry to continue.');
       workspace(result.portal);
     } catch (error) {
       if (generation !== accessGeneration) return;
-      var message = error.name === 'AbortError' ? 'The request timed out. Your saved answers are kept. Retry to continue the same workspace.' : error.message;
+      // The create call is safe to repeat: the server returns the workspace already made for this email instead of a second one.
+      var message = error.code !== 'connection' ? error.message : creating ? 'We couldn’t confirm that your workspace was created. Your answers are saved, and it may already be ready. Select Create my workspace again. If it was created, you’ll get that same workspace, not a second one.' : 'We couldn’t save your answers. Check your connection, then select ' + (submittedStep === steps.length - 1 ? 'Create my workspace' : 'Save and continue') + ' again. Your answers are still on this page.';
       var hasField = error.field && revealFieldError(error.field, message);
       setErrorSummary(hasField ? 'Check the highlighted field to continue.' : message);
       if (!hasField) focusError(err);

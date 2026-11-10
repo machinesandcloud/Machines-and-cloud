@@ -25,7 +25,7 @@ const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('s
 report.sourceBefore = hashes();
 const check = (name, pass, detail) => report.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
 const { chromium } = await import(pathToFileURL(playwrightPath).href);
-const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const browser = await chromium.launch(process.env.MC_PLAYWRIGHT_EXECUTABLE ? { executablePath: process.env.MC_PLAYWRIGHT_EXECUTABLE, headless: true } : { channel: 'chrome', headless: true });
 const TEXT = 'Mon to Fri 7 to 6, Sat 8 to 2';
 const WEEK = { mon: ['07:00', '18:00'], tue: ['07:00', '18:00'], wed: ['07:00', '18:00'], thu: ['07:00', '18:00'], fri: ['07:00', '18:00'], sat: ['08:00', '14:00'], sun: null };
 const DAYS = Object.keys(WEEK);
