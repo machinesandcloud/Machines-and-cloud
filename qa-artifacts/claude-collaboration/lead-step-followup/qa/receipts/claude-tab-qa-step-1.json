@@ -1,0 +1,1539 @@
+{
+  "at": "2026-11-10T16:46:43.073Z",
+  "mode": "Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; provider env deleted; physical transport denied",
+  "sourceBefore": {
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363",
+    "desk-lead-sources.js": "8d1b0fbaddd8f1cf221cc52899a5f287b28187669773ed8882c223e45c2d0cd8",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/lead-connections.mjs": "14d6a77d9110decea5ef6e8587f9358bc669a1e8e64bf33810e301229b6ebcec",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/thumbtack-connection.mjs": "82a99be09bd74d433336b909291453b846c688bc5d6e6a8acc349f2af8c7903f",
+    "qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs": "c520e45176df35685d04f66f30840b5ff578c3b794774cfd3557264ca52994b9"
+  },
+  "served": {
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk-lead-sources.js": "8d1b0fbaddd8f1cf221cc52899a5f287b28187669773ed8882c223e45c2d0cd8",
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363"
+  },
+  "checks": [
+    {
+      "name": "angi: account, request and waiting steps keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (1440)",
+      "pass": true,
+      "ms": 1641
+    },
+    {
+      "name": "thumbtack lead notifications: chooser and pages 1-3 keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (1440)",
+      "pass": true,
+      "ms": 1774
+    },
+    {
+      "name": "thumbtack partner route: account, waiting and \"lead notifications instead\" keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (1440)",
+      "pass": true,
+      "ms": 1542
+    },
+    {
+      "name": "angi: account, request and waiting steps keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (390)",
+      "pass": true,
+      "ms": 2001
+    },
+    {
+      "name": "thumbtack lead notifications: chooser and pages 1-3 keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (390)",
+      "pass": true,
+      "ms": 1574
+    },
+    {
+      "name": "thumbtack partner route: account, waiting and \"lead notifications instead\" keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (390)",
+      "pass": true,
+      "ms": 1570
+    }
+  ],
+  "observations": [
+    {
+      "where": "angi account",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Set up Angi lead delivery",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "button#leadSourcePrepare Save and prepare request"
+      ],
+      "forward": [
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test"
+      ],
+      "backward": [
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "angi account Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideStageTitle",
+          "tag": "H4",
+          "text": "Confirm your Angi account"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideStageTitle",
+        "tag": "H4",
+        "text": "Confirm your Angi account",
+        "inGuide": true,
+        "visible": true,
+        "ring": false,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up Angi"
+        ]
+      }
+    },
+    {
+      "where": "angi request",
+      "width": 1440,
+      "start": "h3#leadSourceSetupTitle Send your Angi request",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "button#leadSourceCopy Copy email instead",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceConnectionReview Get help with this connection"
+      ],
+      "forward": [
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "button#leadSourceCopy Copy email instead",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceClose Exit setup",
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "button#leadSourceCopy Copy email instead",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceClose Exit setup",
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque"
+      ],
+      "backward": [
+        "summary#31 Show a visual guide",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceCopy Copy email instead",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "summary#112 Connection values included in your reque",
+        "summary#31 Show a visual guide",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceCopy Copy email instead",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "summary#112 Connection values included in your reque",
+        "summary#31 Show a visual guide",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "angi request Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "Set up Angi"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "View Angi setup",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:View Angi setup"
+        ]
+      }
+    },
+    {
+      "where": "angi waiting",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Angi connection",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review"
+      ],
+      "forward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review"
+      ],
+      "backward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "angi waiting Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "View Angi setup"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "Check Angi delivery",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Check Angi delivery"
+        ]
+      }
+    },
+    {
+      "where": "thumbtack chooser",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Thumbtack lead notifications",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "forward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "backward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "thumbtack chooser Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideStageTitle",
+          "tag": "H4",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideStageTitle",
+        "tag": "H4",
+        "text": "Request Thumbtack setup",
+        "inGuide": true,
+        "visible": true,
+        "ring": false,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ]
+      }
+    },
+    {
+      "where": "notifications page 1",
+      "width": 1440,
+      "start": "h3#7 Keep these three values ready",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#18 Copy",
+        "input#selfServeSecret edb950f2232953a5d175b9f1b4bba79ece70ac28",
+        "button#23 Copy",
+        "button#selfServeReveal Show",
+        "button#25 Continue to Thumbtack setup"
+      ],
+      "forward": [
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#18 Copy",
+        "input#selfServeSecret edb950f2232953a5d175b9f1b4bba79ece70ac28",
+        "button#23 Copy",
+        "button#selfServeReveal Show",
+        "button#25 Continue to Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#18 Copy",
+        "input#selfServeSecret edb950f2232953a5d175b9f1b4bba79ece70ac28",
+        "button#23 Copy",
+        "button#selfServeReveal Show",
+        "button#25 Continue to Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy"
+      ],
+      "backward": [
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#leadSourceClose Exit setup",
+        "button#25 Continue to Thumbtack setup",
+        "button#selfServeReveal Show",
+        "button#23 Copy",
+        "input#selfServeSecret edb950f2232953a5d175b9f1b4bba79ece70ac28",
+        "button#18 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#13 Copy",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#leadSourceClose Exit setup",
+        "button#25 Continue to Thumbtack setup",
+        "button#selfServeReveal Show",
+        "button#23 Copy",
+        "input#selfServeSecret edb950f2232953a5d175b9f1b4bba79ece70ac28",
+        "button#18 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#13 Copy",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "notifications page 2",
+      "width": 1440,
+      "start": "<BODY>",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values",
+        "button#18 I’ve saved it. Check notifications"
+      ],
+      "forward": [
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values",
+        "button#18 I’ve saved it. Check notifications",
+        "button#leadSourceClose Exit setup",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values",
+        "button#18 I’ve saved it. Check notifications",
+        "button#leadSourceClose Exit setup",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values"
+      ],
+      "backward": [
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#leadSourceClose Exit setup",
+        "button#18 I’ve saved it. Check notifications",
+        "button#17 Back to connection values",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#leadSourceClose Exit setup",
+        "button#18 I’ve saved it. Check notifications",
+        "button#17 Back to connection values",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "notifications page 3",
+      "width": 1440,
+      "start": "<BODY>",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup"
+      ],
+      "forward": [
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup"
+      ],
+      "backward": [
+        "button#selfServeCheck Check for a notification",
+        "button#leadSourceClose Exit setup",
+        "button#11 Review Thumbtack setup",
+        "button#selfServeCheck Check for a notification",
+        "button#leadSourceClose Exit setup",
+        "button#11 Review Thumbtack setup",
+        "button#selfServeCheck Check for a notification",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "notifications page 3 Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "Set up lead notifications",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up lead notifications"
+        ]
+      }
+    },
+    {
+      "where": "partner account",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Thumbtack setup",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup"
+      ],
+      "forward": [
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup"
+      ],
+      "backward": [
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "partner account Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideStageTitle",
+          "tag": "H4",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideStageTitle",
+        "tag": "H4",
+        "text": "Request Thumbtack setup",
+        "inGuide": true,
+        "visible": true,
+        "ring": false,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ]
+      }
+    },
+    {
+      "where": "partner waiting",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Thumbtack setup",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead"
+      ],
+      "forward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review"
+      ],
+      "backward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "partner waiting Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "View setup request",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:View setup request"
+        ]
+      }
+    },
+    {
+      "where": "partner > notifications instead",
+      "width": 1440,
+      "start": "h3#10 Lead notifications in Inbox",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "forward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "backward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "partner > notifications instead Esc",
+      "width": 1440,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "View setup request"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "View setup request",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:View setup request"
+        ]
+      }
+    },
+    {
+      "where": "angi account",
+      "width": 390,
+      "start": "h2#leadSourceTitle Set up Angi lead delivery",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "button#leadSourcePrepare Save and prepare request"
+      ],
+      "forward": [
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test"
+      ],
+      "backward": [
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "angi account Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideStageTitle",
+          "tag": "H4",
+          "text": "Confirm your Angi account"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideStageTitle",
+        "tag": "H4",
+        "text": "Confirm your Angi account",
+        "inGuide": true,
+        "visible": true,
+        "ring": false,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up Angi"
+        ]
+      }
+    },
+    {
+      "where": "angi request",
+      "width": 390,
+      "start": "h3#leadSourceSetupTitle Send your Angi request",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "button#leadSourceCopy Copy email instead",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceConnectionReview Get help with this connection"
+      ],
+      "forward": [
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "button#leadSourceCopy Copy email instead",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceClose Exit setup",
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "button#leadSourceCopy Copy email instead",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceClose Exit setup",
+        "summary#31 Show a visual guide",
+        "summary#112 Connection values included in your reque"
+      ],
+      "backward": [
+        "summary#31 Show a visual guide",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceCopy Copy email instead",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "summary#112 Connection values included in your reque",
+        "summary#31 Show a visual guide",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Get help with this connection",
+        "button#leadSourceReportSent I sent this request",
+        "button#leadSourceCopy Copy email instead",
+        "a#leadSourceProviderRequest Review email to Angi",
+        "summary#112 Connection values included in your reque",
+        "summary#31 Show a visual guide",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "angi request Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "Set up Angi"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "View Angi setup",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:View Angi setup"
+        ]
+      }
+    },
+    {
+      "where": "angi waiting",
+      "width": 390,
+      "start": "h2#leadSourceTitle Angi connection",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review"
+      ],
+      "forward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review"
+      ],
+      "backward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "angi waiting Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "View Angi setup"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "Check Angi delivery",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Check Angi delivery"
+        ]
+      }
+    },
+    {
+      "where": "thumbtack chooser",
+      "width": 390,
+      "start": "h2#leadSourceTitle Thumbtack lead notifications",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "forward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "backward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "thumbtack chooser Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideStageTitle",
+          "tag": "H4",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideStageTitle",
+        "tag": "H4",
+        "text": "Request Thumbtack setup",
+        "inGuide": true,
+        "visible": true,
+        "ring": false,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ]
+      }
+    },
+    {
+      "where": "notifications page 1",
+      "width": 390,
+      "start": "h3#7 Keep these three values ready",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#18 Copy",
+        "input#selfServeSecret debfd343e163c77811450a717013afc646ed4065",
+        "button#23 Copy",
+        "button#selfServeReveal Show",
+        "button#25 Continue to Thumbtack setup"
+      ],
+      "forward": [
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#18 Copy",
+        "input#selfServeSecret debfd343e163c77811450a717013afc646ed4065",
+        "button#23 Copy",
+        "button#selfServeReveal Show",
+        "button#25 Continue to Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#18 Copy",
+        "input#selfServeSecret debfd343e163c77811450a717013afc646ed4065",
+        "button#23 Copy",
+        "button#selfServeReveal Show",
+        "button#25 Continue to Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#13 Copy"
+      ],
+      "backward": [
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#leadSourceClose Exit setup",
+        "button#25 Continue to Thumbtack setup",
+        "button#selfServeReveal Show",
+        "button#23 Copy",
+        "input#selfServeSecret debfd343e163c77811450a717013afc646ed4065",
+        "button#18 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#13 Copy",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#leadSourceClose Exit setup",
+        "button#25 Continue to Thumbtack setup",
+        "button#selfServeReveal Show",
+        "button#23 Copy",
+        "input#selfServeSecret debfd343e163c77811450a717013afc646ed4065",
+        "button#18 Copy",
+        "input#selfServeHeader X-MC-Thumbtack-Key",
+        "button#13 Copy",
+        "input#selfServeEndpoint http://127.0.0.1:8947/api/thumbtack/self",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "notifications page 2",
+      "width": 390,
+      "start": "<BODY>",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values",
+        "button#18 I’ve saved it. Check notifications"
+      ],
+      "forward": [
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values",
+        "button#18 I’ve saved it. Check notifications",
+        "button#leadSourceClose Exit setup",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values",
+        "button#18 I’ve saved it. Check notifications",
+        "button#leadSourceClose Exit setup",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#17 Back to connection values"
+      ],
+      "backward": [
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#leadSourceClose Exit setup",
+        "button#18 I’ve saved it. Check notifications",
+        "button#17 Back to connection values",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#leadSourceClose Exit setup",
+        "button#18 I’ve saved it. Check notifications",
+        "button#17 Back to connection values",
+        "a#selfServeProvider Open Thumbtack Webhooks",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "notifications page 3",
+      "width": 390,
+      "start": "<BODY>",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup"
+      ],
+      "forward": [
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeCheck Check for a notification",
+        "button#11 Review Thumbtack setup"
+      ],
+      "backward": [
+        "button#selfServeCheck Check for a notification",
+        "button#leadSourceClose Exit setup",
+        "button#11 Review Thumbtack setup",
+        "button#selfServeCheck Check for a notification",
+        "button#leadSourceClose Exit setup",
+        "button#11 Review Thumbtack setup",
+        "button#selfServeCheck Check for a notification",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "notifications page 3 Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "Set up lead notifications",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up lead notifications"
+        ]
+      }
+    },
+    {
+      "where": "partner account",
+      "width": 390,
+      "start": "h2#leadSourceTitle Thumbtack setup",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup"
+      ],
+      "forward": [
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup"
+      ],
+      "backward": [
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "partner account Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideStageTitle",
+          "tag": "H4",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideStageTitle",
+        "tag": "H4",
+        "text": "Request Thumbtack setup",
+        "inGuide": true,
+        "visible": true,
+        "ring": false,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ]
+      }
+    },
+    {
+      "where": "partner waiting",
+      "width": 390,
+      "start": "h2#leadSourceTitle Thumbtack setup",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead"
+      ],
+      "forward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceConnectionReview Request connection review"
+      ],
+      "backward": [
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup",
+        "button#leadSourceNotificationsInstead Set up lead notifications instead",
+        "button#leadSourceConnectionReview Request connection review",
+        "button#leadSourceCheck Check saved status",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "partner waiting Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "Request Thumbtack setup"
+        },
+        "openerConnected": false,
+        "onOpener": false,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "View setup request",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:View setup request"
+        ]
+      }
+    },
+    {
+      "where": "partner > notifications instead",
+      "width": 390,
+      "start": "h3#10 Lead notifications in Inbox",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "forward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "backward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [],
+      "pass": true,
+      "failures": []
+    },
+    {
+      "where": "partner > notifications instead Esc",
+      "width": 390,
+      "focus": {
+        "opener": {
+          "id": "setupGuideContinue",
+          "tag": "BUTTON",
+          "text": "View setup request"
+        },
+        "openerConnected": true,
+        "onOpener": true,
+        "id": "setupGuideContinue",
+        "tag": "BUTTON",
+        "text": "View setup request",
+        "inGuide": true,
+        "visible": true,
+        "ring": true,
+        "pageButtons": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:View setup request"
+        ]
+      }
+    }
+  ],
+  "screenshots": [],
+  "requests": [
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "report_request_sent",
+      "source": "angi",
+      "expectedGeneration": "c0dfe4ffc8e69a30ecc8a10afc63aabb",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "report_request_sent",
+      "source": "angi",
+      "expectedGeneration": "f48b33e9a14299754851632dda16f779",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "intercepted": [],
+  "physicalNetwork": 0,
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve",
+    "/api/thumbtack/connect"
+  ],
+  "pinnedFrom": null,
+  "browser": {
+    "engine": "Google Chrome (channel chrome, Playwright temp profile)",
+    "executable": "channel:chrome",
+    "version": "156.0.8078.82"
+  },
+  "tabDiagnostic": false,
+  "sourceAfter": {
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363",
+    "desk-lead-sources.js": "8d1b0fbaddd8f1cf221cc52899a5f287b28187669773ed8882c223e45c2d0cd8",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/lead-connections.mjs": "14d6a77d9110decea5ef6e8587f9358bc669a1e8e64bf33810e301229b6ebcec",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/thumbtack-connection.mjs": "82a99be09bd74d433336b909291453b846c688bc5d6e6a8acc349f2af8c7903f",
+    "qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs": "c520e45176df35685d04f66f30840b5ff578c3b794774cfd3557264ca52994b9"
+  },
+  "sourceStable": true,
+  "passed": 6,
+  "total": 6,
+  "ms": 10841
+}

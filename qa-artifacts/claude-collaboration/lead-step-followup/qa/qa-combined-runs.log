@@ -1,0 +1,18 @@
+PASS QA probe: Thumbtack self-serve in-dialog Back/Forward under the modal hold (1440)
+PASS QA probe: Thumbtack self-serve in-dialog Back/Forward under the modal hold (390)
+4/4 in 7s -> scratchpad/claude-connector-pages-qa-step-combined-1.json
+exit 0
+PASS P1 repeated Back x6 with visit dialog open: no storm, bounded history, dialog/page/URL held, then normal Back
+PASS P2 visit dialog closed by Escape, then Back routes normally (recorded address cleared)
+PASS P3 Forward x3 with visit dialog open: no route, bounded pushes
+PASS P4 nested: request dialog open, visit dialog opened over it; Back holds both; after visit close, one Back closes only the request and stays on Inbox
+PASS P5 tour: Back while the Quick tour is open still closes the tour (guideDialog excluded from hold), no push storm
+PASS P6 real hand-off: request -> Read saved conversation (request closes, conversation opens); Back holds conversation on Inbox; after close, Back goes to Home
+PASS P7 cfgWebNext on a live website chat: after save, button shown once, not auto-focused; click routes and focuses target exactly once
+PASS Round-2 R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry
+PASS Round-2 R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)
+PASS Round-2 R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page
+PASS Round-2 R12 human-speed double Back (120ms apart) while the page is busy for 400ms: held on the opening entry
+PASS No physical transport, forbidden destinations or page errors
+{"passed":12,"failed":0,"failing":[]}
+exit 0

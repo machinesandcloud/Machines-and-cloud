@@ -1,0 +1,655 @@
+{
+  "at": "2026-11-10T16:46:48.250Z",
+  "mode": "Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; provider env deleted; physical transport denied",
+  "sourceBefore": {
+    "desk-lead-sources.js": "8d1b0fbaddd8f1cf221cc52899a5f287b28187669773ed8882c223e45c2d0cd8",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/lead-connections.mjs": "14d6a77d9110decea5ef6e8587f9358bc669a1e8e64bf33810e301229b6ebcec",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/thumbtack-connection.mjs": "82a99be09bd74d433336b909291453b846c688bc5d6e6a8acc349f2af8c7903f",
+    "qa-artifacts/claude-collaboration/lead-step-followup/qa/step-qa-probe.mjs": "31c2f1cc51fb0fcb9084c2854cce750f1ff08b7cb9c605e1729f8f1d8627f8a3"
+  },
+  "served": {
+    "desk.html": "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk.css": "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790",
+    "desk.js": "6fcc6ebabf86421e958fcf5bbf62e5e20b294f59420055aa945aa6c958761b84",
+    "desk-lead-sources.js": "ab87d366d35ca4db1772b70ca72604ccfe4184ab98a2746f0f8b08e9727b5c3e",
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363"
+  },
+  "checks": [
+    {
+      "name": "QA-A other tab disconnects and sets up again (new generation): Continue from Home must not resume Step 3 (1440)",
+      "pass": true,
+      "ms": 2002
+    },
+    {
+      "name": "QA-A2 other tab replaces the key (new generation): Continue from Home starts Step 1 with the new key (1440)",
+      "pass": true,
+      "ms": 1556
+    },
+    {
+      "name": "QA-B Back past the dialog's first entry, then Continue: no later step than the last one shown (1440)",
+      "pass": true,
+      "ms": 2495
+    },
+    {
+      "name": "QA-C replace key with a lost response, then Check: Continue from Home starts Step 1 with the current key (1440)",
+      "pass": true,
+      "ms": 2531
+    },
+    {
+      "name": "QA-D Angi visit in between: Thumbtack still resumes Step 3; Angi shows no Thumbtack step (1440)",
+      "pass": false,
+      "ms": 1740,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Step 1 of 3 · Your connection values'\n- 'Step 3 of 3 · Check notifications'\n        ^\n\n    at file:///private/tmp/mc-claude-lead-step-followup-20261110/qa-artifacts/claude-collaboration/lead-step-followup/qa/step-qa-probe.mjs:284:12\n    at async check (file:///private/tmp/mc-claude-lead-step-followup-20261110/qa-artifacts/claude-collaboration/lead-step-followup/qa/step-qa-probe.mjs:114:9)\n    at async file:///private/tmp/mc-claude-lead-step-followup-20261110/qa-artifacts/claude-collaboration/lead-step-followup/qa/step-qa-probe.mjs:276:3",
+      "state": {
+        "hash": "#setup/thumbtack/provider",
+        "view": "step",
+        "focus": "leadSourceTitle",
+        "heading": "Install in Thumbtack",
+        "text": "Thumbtack setup\n← All connections\nThumbtack lead notifications\nStep 1 of 3\nInstall in Thumbtack\n\nChoose your business and Lead details only in Thumbtack.\n\nBack\nExit setup\nSet up lead notifications",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up lead notifications"
+        ],
+        "dialog": {
+          "stage": "self-serve",
+          "busy": "false",
+          "text": "Exit setup\nThumbtack lead notifications\n\nStep 1 of 3 · Your connection values\n\nKeep these three values ready\n\nYou’ll paste them into Thumbtack on the next page. They belong only to this workspace.\n\nWebhook URL\nCopy\nAuth header name\nCopy\nAuth header value\nCopy\nShow\nContinue to Thumbtack setup",
+          "buttons": [
+            "Exit setup",
+            "Copy",
+            "Copy",
+            "Copy",
+            "Show",
+            "Continue to Thumbtack setup"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-step-qa-probe-old-port-1-failure-5.png"
+    },
+    {
+      "name": "QA-E session expired then Continue elsewhere: module stops, no stale dialog (1440)",
+      "pass": true,
+      "ms": 1162
+    }
+  ],
+  "observations": [
+    {
+      "where": "qa-a-regen-1440",
+      "stages": [
+        "Step 1 of 3 · Your connection values"
+      ],
+      "stage": "Step 1 of 3 · Your connection values",
+      "secret": "dabeca2b11a749038400ba76f1bb7e1e54570416c70a0916b80a6f7c87a2e376",
+      "endpoint": "http://127.0.0.1:8953/api/thumbtack/self-serve?c=step-1-1440&t=0b91d6b2d1f5c88f6ae84160813ed760cf84c4e25e1625c231149ce9700e1f00&g=28872f2803a9937a7e2c16f4594fe2df",
+      "heading": "Keep these three values ready",
+      "history": {
+        "mcDeskPage": "setup",
+        "mcConnectorPage": {
+          "slug": "step-1-1440",
+          "service": "thumbtack",
+          "screen": "provider"
+        },
+        "mcSelfServePage": {
+          "slug": "step-1-1440",
+          "generation": "28872f2803a9937a7e2c16f4594fe2df",
+          "page": 1
+        }
+      },
+      "serverGeneration": "28872f2803a9937a7e2c16f4594fe2df",
+      "serverSecretMatches": true
+    },
+    {
+      "where": "qa-a2-rotate-1440",
+      "stages": [
+        "Step 1 of 3 · Your connection values"
+      ],
+      "stage": "Step 1 of 3 · Your connection values",
+      "secret": "a7dce1df6b66037c08d3a73edd0ed7f94f7a1056794e8926911152dff80a86d8",
+      "endpoint": "http://127.0.0.1:8953/api/thumbtack/self-serve?c=step-2-1440&t=0648d4ea86a1c00070f5762c0d0a6b8b7e80f22e5c3219547b107198d118e92c&g=c12a63e85a5951dbb61e07ad99d16f38",
+      "heading": "Keep these three values ready",
+      "history": {
+        "mcDeskPage": "setup",
+        "mcConnectorPage": {
+          "slug": "step-2-1440",
+          "service": "thumbtack",
+          "screen": "provider"
+        },
+        "mcSelfServePage": {
+          "slug": "step-2-1440",
+          "generation": "c12a63e85a5951dbb61e07ad99d16f38",
+          "page": 1
+        }
+      },
+      "serverGeneration": "c12a63e85a5951dbb61e07ad99d16f38",
+      "serverSecretMatches": true
+    },
+    {
+      "where": "qa-b back sequence 1440",
+      "seen": [
+        {
+          "open": true,
+          "stage": "Step 2 of 3 · Save in Thumbtack",
+          "hash": "#setup/thumbtack/provider",
+          "state": {
+            "mcConnectorPage": {
+              "slug": "step-3-1440",
+              "service": "thumbtack",
+              "screen": "provider"
+            },
+            "mcSelfServePage": {
+              "slug": "step-3-1440",
+              "generation": "db4bf9887d4e3cf4e752d1e171bb6953",
+              "page": 2
+            }
+          }
+        },
+        {
+          "open": true,
+          "stage": "Step 1 of 3 · Your connection values",
+          "hash": "#setup/thumbtack/provider",
+          "state": {
+            "mcConnectorPage": {
+              "slug": "step-3-1440",
+              "service": "thumbtack",
+              "screen": "provider"
+            },
+            "mcSelfServePage": {
+              "slug": "step-3-1440",
+              "generation": "db4bf9887d4e3cf4e752d1e171bb6953",
+              "page": 1
+            }
+          }
+        },
+        {
+          "open": false,
+          "hash": "#setup/thumbtack/intro",
+          "state": {
+            "mcConnectorPage": {
+              "slug": "step-3-1440",
+              "service": "thumbtack",
+              "screen": "intro"
+            },
+            "mcSelfServePage": {
+              "slug": "step-3-1440",
+              "generation": "db4bf9887d4e3cf4e752d1e171bb6953",
+              "page": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "where": "qa-b-backpast-1440",
+      "stages": [
+        "Step 1 of 3 · Your connection values"
+      ],
+      "stage": "Step 1 of 3 · Your connection values",
+      "secret": "a00e16acdb6f1c2b0286d99351207df27166228e1412d1d46ac3486559e3981b",
+      "endpoint": "http://127.0.0.1:8953/api/thumbtack/self-serve?c=step-3-1440&t=af78b369f6a9de54a9d941c75d54ee026f07da6f4152f53d23a65bc5d4cf6b7d&g=db4bf9887d4e3cf4e752d1e171bb6953",
+      "heading": "Keep these three values ready",
+      "history": {
+        "mcDeskPage": "setup",
+        "mcConnectorPage": {
+          "slug": "step-3-1440",
+          "service": "thumbtack",
+          "screen": "provider"
+        },
+        "mcSelfServePage": {
+          "slug": "step-3-1440",
+          "generation": "db4bf9887d4e3cf4e752d1e171bb6953",
+          "page": 1
+        }
+      },
+      "serverGeneration": "db4bf9887d4e3cf4e752d1e171bb6953",
+      "serverSecretMatches": true
+    },
+    {
+      "where": "qa-c lost message",
+      "lostMsg": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+    },
+    {
+      "where": "qa-c after check",
+      "status": "Your connection setup is saved. Its current status is shown above."
+    },
+    {
+      "where": "qa-c-lostrotate-1440",
+      "stages": [
+        "Step 1 of 3 · Your connection values"
+      ],
+      "stage": "Step 1 of 3 · Your connection values",
+      "secret": "d2db2d1358db79b70511636989f61cd95999ce409ee68e884637a97208bae63c",
+      "endpoint": "http://127.0.0.1:8953/api/thumbtack/self-serve?c=step-4-1440&t=60e1b8645bfff644ee0ba86dba22ff5aa0f28fa508b622779bd3f853cb173601&g=f507bf77dced327a9faa60a372c617d0",
+      "heading": "Keep these three values ready",
+      "history": {
+        "mcDeskPage": "setup",
+        "mcConnectorPage": {
+          "slug": "step-4-1440",
+          "service": "thumbtack",
+          "screen": "provider"
+        },
+        "mcSelfServePage": {
+          "slug": "step-4-1440",
+          "generation": "f507bf77dced327a9faa60a372c617d0",
+          "page": 1
+        }
+      },
+      "serverGeneration": "f507bf77dced327a9faa60a372c617d0",
+      "serverSecretMatches": true
+    },
+    {
+      "where": "qa-d angi",
+      "stage": "Step 1 of 5 · Your Angi account"
+    },
+    {
+      "where": "qa-d-angi-then-tt-1440",
+      "stages": [
+        "Step 1 of 3 · Your connection values"
+      ],
+      "stage": "Step 1 of 3 · Your connection values",
+      "secret": "6cb46447a85e322b83541b5c8244d6585a04708f0c22ad54168fe83a72e2178f",
+      "endpoint": "http://127.0.0.1:8953/api/thumbtack/self-serve?c=step-5-1440&t=413e708508fc887ef7064d27d249134f32ed0739fa01508862e064e7314ea42b&g=86fdd6207dc4ace7a89331bce768088b",
+      "heading": "Keep these three values ready",
+      "history": {
+        "mcDeskPage": "setup",
+        "mcConnectorPage": {
+          "slug": "step-5-1440",
+          "service": "thumbtack",
+          "screen": "provider"
+        },
+        "mcSelfServePage": {
+          "slug": "step-5-1440",
+          "generation": "86fdd6207dc4ace7a89331bce768088b",
+          "page": 1
+        }
+      },
+      "serverGeneration": "86fdd6207dc4ace7a89331bce768088b",
+      "serverSecretMatches": true
+    },
+    {
+      "where": "qa-e after expiry",
+      "after": {
+        "dialogOpen": false,
+        "state": "recovery",
+        "stage": "Step 3 of 3 · Check notifications"
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-step-qa-probe-old-port-1-qa-a-regen-1440.png",
+    "scratchpad/claude-step-qa-probe-old-port-1-qa-a2-rotate-1440.png",
+    "scratchpad/claude-step-qa-probe-old-port-1-qa-b-backpast-1440.png",
+    "scratchpad/claude-step-qa-probe-old-port-1-qa-c-lostrotate-1440.png",
+    "scratchpad/claude-step-qa-probe-old-port-1-qa-d-angi-then-tt-1440.png",
+    "scratchpad/claude-step-qa-probe-old-port-1-failure-5.png"
+  ],
+  "requests": [
+    {
+      "slug": "step-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-1-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "step-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "rotate",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": "a956f0f9aa2366b6b04cebee735d06a5",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-5-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-6-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-6-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-6-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "deliveryMode": "self_serve",
+      "expectedGeneration": null,
+      "status": 200
+    },
+    {
+      "slug": "step-6-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "step-6-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "intercepted": [],
+  "physicalNetwork": 0,
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve",
+    "/api/thumbtack/connect"
+  ],
+  "overrides": {
+    "desk-lead-sources.js": {
+      "from": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/oldlead/desk-lead-sources.js",
+      "sha256": "ab87d366d35ca4db1772b70ca72604ccfe4184ab98a2746f0f8b08e9727b5c3e"
+    },
+    "desk.js": {
+      "from": "/tmp/mc-claude-desk-followup-port-20261110/desk.js",
+      "sha256": "6fcc6ebabf86421e958fcf5bbf62e5e20b294f59420055aa945aa6c958761b84"
+    },
+    "desk.html": {
+      "from": "/tmp/mc-claude-desk-followup-port-20261110/desk.html",
+      "sha256": "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113"
+    },
+    "desk.css": {
+      "from": "/tmp/mc-claude-desk-followup-port-20261110/desk.css",
+      "sha256": "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790"
+    }
+  },
+  "servedDir": "/private/tmp/mc-claude-lead-step-followup-20261110/scratchpad/claude-step-qa-probe-old-port-1-served",
+  "browser": {
+    "engine": "Google Chrome (channel chrome, Playwright temp profile)",
+    "executable": "channel:chrome",
+    "version": "156.0.8078.82"
+  },
+  "sourceAfter": {
+    "desk-lead-sources.js": "8d1b0fbaddd8f1cf221cc52899a5f287b28187669773ed8882c223e45c2d0cd8",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/lead-connections.mjs": "14d6a77d9110decea5ef6e8587f9358bc669a1e8e64bf33810e301229b6ebcec",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/thumbtack-connection.mjs": "82a99be09bd74d433336b909291453b846c688bc5d6e6a8acc349f2af8c7903f",
+    "qa-artifacts/claude-collaboration/lead-step-followup/qa/step-qa-probe.mjs": "31c2f1cc51fb0fcb9084c2854cce750f1ff08b7cb9c605e1729f8f1d8627f8a3"
+  },
+  "sourceStable": true,
+  "passed": 5,
+  "total": 6,
+  "ms": 12411
+}
