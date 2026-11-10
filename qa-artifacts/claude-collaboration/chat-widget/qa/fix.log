@@ -1,0 +1,21 @@
+PASS phone config 503 then customer retries and chats
+PASS desktop config 503 then customer retries and chats
+PASS phone config network failure is re-read when the customer opens chat
+PASS desktop config failure recovers on its own before the customer opens chat
+PASS desktop config keeps failing: retry stays available, composer closed, no delivery claim
+PASS phone closed workspace (self-service, not live under fake model) fails closed without retry
+PASS phone reply is announced in a live region
+PASS desktop reply is announced in a live region
+PASS phone lost reply is announced
+PASS phone lost reply stays honest and offers the saved-reply check
+PASS phone daily limit keeps chat closed through reopen and reconnect
+PASS desktop slow reply: Esc closes, reopen shows the one reply
+PASS desktop keyboard-only: Tab and Shift+Tab stay inside the open chat
+PASS phone open with failed config puts focus inside the panel
+PASS phone text controls are at least 16px (no iOS focus zoom)
+PASS phone keyboard open: panel, header and composer stay in the visible viewport
+PASS phone close button is at least 44x44 and closes
+PASS desktop close button is at least 44x44 and closes
+PASS desktop Enter during IME composition does not send
+PASS desktop CSS stays scoped and host styles are unchanged
+{"ok":true,"passed":20,"total":20,"embedSha":"23f9e045973cb60215df4e93020e9cdbc4d2568d58f3be803536257dc0207f5d","physical":0,"forbidden":0,"pageErrors":0,"sourceStable":true,"failures":[]}

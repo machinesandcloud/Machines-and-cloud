@@ -1,0 +1,33 @@
+FAIL phone config 503 then customer retries and chats: A retry control is offered after a failed config load
+FAIL desktop config 503 then customer retries and chats: A retry control is offered after a failed config load
+FAIL phone config network failure is re-read when the customer opens chat: page.waitForFunction: Timeout 7000ms exceeded.
+PASS desktop config failing and chat never opened: no automatic re-reads, reconnect ignored
+PASS desktop config failing, chat opened and toggled: re-reads bounded, spaced and jittered
+FAIL phone config 429 backs off (Retry-After floor 30s) instead of retrying on open or tap: page.waitForFunction: Timeout 30000ms exceeded.
+FAIL desktop persistent config 429 (Retry-After 600) never strands the customer: page.evaluate: TypeError: Cannot read properties of null (reading 'hidden')
+FAIL phone config 429 without exposed Retry-After falls back to 60s and does not strand: No re-read at the 60s default (unreadable header must not mean 600s): 1
+FAIL desktop host focus within 50ms of opening chat is not overridden: Expected values to be strictly equal:
+FAIL desktop host script blurring focus is not undone by a retry success: locator.click: Timeout 7000ms exceeded.
+FAIL desktop config keeps failing: retry stays available, composer closed, no delivery claim: Retry control visible
+PASS phone closed workspace (self-service, not live under fake model) fails closed without retry
+FAIL phone reply is announced in a live region: Reply text present in a live region that existed before it arrived; regions=[]
+FAIL desktop reply is announced in a live region: Reply text present in a live region that existed before it arrived; regions=[]
+FAIL phone lost reply is announced: Interrupted outcome announced
+PASS phone lost reply stays honest and offers the saved-reply check
+PASS phone daily limit keeps chat closed through reopen and reconnect
+PASS desktop slow reply: Esc closes, reopen shows the one reply
+PASS desktop keyboard-only: non-modal chat with sensible order, Esc returns to launcher
+PASS desktop host page stays usable while chat is open (non-modal)
+FAIL phone config retry success does not pull focus from host text into chat: locator.tap: Timeout 7000ms exceeded.
+FAIL desktop config retry success does not pull focus from host text into chat: locator.click: Timeout 7000ms exceeded.
+FAIL desktop config retry success does not move focus off a host input: locator.click: Timeout 7000ms exceeded.
+FAIL phone slow reply arriving after a host tap does not pull focus into chat: Focus pulled into the widget after the reply
+FAIL desktop Esc during IME (keyCode 229) does not close chat: Expected values to be strictly equal:
+FAIL phone open with failed config puts focus inside the panel: Focus outside the dialog: {"inside":false,"tag":"BUTTON","cls":"l","text":"Chat with us"}
+FAIL phone text controls are at least 16px (no iOS focus zoom): {"textarea":14,"followupSelect":12}
+FAIL phone keyboard open: panel, header and composer stay in the visible viewport: panel outside visible area 0..508: {"panel":{"top":174,"bottom":774},"header":{"top":175,"bottom":245},"textarea":{"top":696,"bottom":738},"send":{"top":696,"bottom":738}} for {"height":508,"offsetTop":0}
+FAIL phone close button is at least 44x44 and closes: Close target {"x":340.140625,"y":189,"width":24.859375,"height":24}
+FAIL desktop close button is at least 44x44 and closes: Close target {"x":1382.140625,"y":299,"width":24.859375,"height":24}
+FAIL desktop Enter during IME composition does not send: A composing Enter sent the message
+PASS desktop CSS stays scoped and host styles are unchanged
+{"ok":false,"passed":9,"total":32,"embedSha":"43cc96c98ff22f79ccc873b779d2414cf01682cdc3dea62d5f4d2ca21595634d","physical":0,"forbidden":0,"pageErrors":0,"sourceStable":true,"failures":["phone config 503 then customer retries and chats","desktop config 503 then customer retries and chats","phone config network failure is re-read when the customer opens chat","phone config 429 backs off (Retry-After floor 30s) instead of retrying on open or tap","desktop persistent config 429 (Retry-After 600) never strands the customer","phone config 429 without exposed Retry-After falls back to 60s and does not strand","desktop host focus within 50ms of opening chat is not overridden","desktop host script blurring focus is not undone by a retry success","desktop config keeps failing: retry stays available, composer closed, no delivery claim","phone reply is announced in a live region","desktop reply is announced in a live region","phone lost reply is announced","phone config retry success does not pull focus from host text into chat","desktop config retry success does not pull focus from host text into chat","desktop config retry success does not move focus off a host input","phone slow reply arriving after a host tap does not pull focus into chat","desktop Esc during IME (keyCode 229) does not close chat","phone open with failed config puts focus inside the panel","phone text controls are at least 16px (no iOS focus zoom)","phone keyboard open: panel, header and composer stay in the visible viewport","phone close button is at least 44x44 and closes","desktop close button is at least 44x44 and closes","desktop Enter during IME composition does not send"]}

@@ -1,0 +1,29 @@
+PASS phone config 503 then customer retries and chats
+PASS desktop config 503 then customer retries and chats
+PASS phone config network failure is re-read when the customer opens chat
+PASS desktop config failing and chat never opened: no automatic re-reads, reconnect ignored
+PASS desktop config failing, chat opened and toggled: re-reads bounded, spaced and jittered
+PASS phone config 429 backs off (Retry-After floor 30s) instead of retrying on open or tap
+PASS desktop config keeps failing: retry stays available, composer closed, no delivery claim
+PASS phone closed workspace (self-service, not live under fake model) fails closed without retry
+PASS phone reply is announced in a live region
+PASS desktop reply is announced in a live region
+PASS phone lost reply is announced
+PASS phone lost reply stays honest and offers the saved-reply check
+PASS phone daily limit keeps chat closed through reopen and reconnect
+PASS desktop slow reply: Esc closes, reopen shows the one reply
+PASS desktop keyboard-only: non-modal chat with sensible order, Esc returns to launcher
+PASS desktop host page stays usable while chat is open (non-modal)
+PASS phone config retry success does not pull focus from host text into chat
+PASS desktop config retry success does not pull focus from host text into chat
+PASS desktop config retry success does not move focus off a host input
+PASS phone slow reply arriving after a host tap does not pull focus into chat
+PASS desktop Esc during IME (keyCode 229) does not close chat
+PASS phone open with failed config puts focus inside the panel
+PASS phone text controls are at least 16px (no iOS focus zoom)
+PASS phone keyboard open: panel, header and composer stay in the visible viewport
+PASS phone close button is at least 44x44 and closes
+PASS desktop close button is at least 44x44 and closes
+PASS desktop Enter during IME composition does not send
+PASS desktop CSS stays scoped and host styles are unchanged
+{"ok":true,"passed":28,"total":28,"embedSha":"8fed05996b5b859c701909077f37974d3a6cbf1b052e89ee9ef2b0e647337f88","physical":0,"forbidden":0,"pageErrors":0,"sourceStable":true,"failures":[]}

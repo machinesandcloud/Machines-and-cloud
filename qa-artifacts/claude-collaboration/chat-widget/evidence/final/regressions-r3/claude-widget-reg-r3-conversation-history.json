@@ -1,0 +1,2939 @@
+{
+  "at": "2026-11-10T09:58:43.384Z",
+  "baseCommit": "d21783ca0795f024c39ebcb4e037ec311f487b6f",
+  "qualifications": "Synthetic tenant/status/proof fixtures; actual local handler and browser assets; memory storage replaces hosted storage. Internal worker dispatch is intercepted202. No model/provider/email/OAuth/purchase/deployment performed.",
+  "mode": "Actual owner handlers, memory storage and intercepted browser assets; no physical/model/provider requests",
+  "sourceBefore": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "embed.js": "c2377c36abb0dd0f598c47eca308cc727c62fc60272857a5aadcc954abb5344b",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "b49dc1f2cf415ce1d282303b50f89350436ed626f3fdef055174c063dc08c958",
+    "scripts/build-site.mjs": "6890806c988d78da123aeaf5d371a08e96d261c5e209a886e0432a9329f5f255",
+    "scripts/request-followthrough-ui-check.mjs": "4ee5431108b30bc08a7b1d9deb2e2ea54deb5e01b216900e4a002d66fa42a678",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "onboard.css": "f26eeced09b45e6fa21cff22e066614ba1664bddb63c2341ad725cf45583106d",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "desk-connections.js": "e5518ea2229c91f8c7c71603d88264214fe1fdf446a3dcc15268e23ba5a68a95",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/service-connections.mjs": "477c564c4ebd70cacdbec26e95242bbbb626b0e6c3c0937adca1abb58ab626b1",
+    "desk-connections.css": "7d71db802dfe27002da0034a14ef625fe67f8eb0b252c069a2b79109eeceaf41",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/desk.mjs": "028e6651689d9303673deaa69b17e22971774bc548831b15967f524605fd4f83",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a",
+    "netlify/functions/lib/config.mjs": "352e272bd48239b12d5e6144260f5febb0d0f9d202d5c5f3a348caa88ecded0b",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "checks": [
+    {
+      "name": "Saved website history ordinary Inbox paging and exact request link at 320px",
+      "pass": true
+    },
+    {
+      "name": "Saved website history ordinary Inbox paging and exact request link at 390px",
+      "pass": true
+    },
+    {
+      "name": "Saved website history ordinary Inbox paging and exact request link at 1440px",
+      "pass": true
+    },
+    {
+      "name": "Read failure retains the previous page and retries the same bounded cursor",
+      "pass": true
+    },
+    {
+      "name": "Late response after closing cannot reopen or repopulate a private conversation",
+      "pass": true
+    },
+    {
+      "name": "Revoked reader session clears dialog and private data instead of keeping stale messages",
+      "pass": true
+    },
+    {
+      "name": "Obsolete held actual401 cannot expire a valid newer conversation after Close and return",
+      "pass": true
+    },
+    {
+      "name": "Corrected request contact opens its exact current conversation, not the earlier one",
+      "pass": true
+    },
+    {
+      "name": "Retained legacy boundary and unresolved reply are visibly distinguished",
+      "pass": true
+    },
+    {
+      "name": "Cancelled owner keeps paged website history readable",
+      "pass": true
+    },
+    {
+      "name": "Installed widget preserves long-turn shapes and recovers an exact saved reply after reload without another model/tool or quota",
+      "pass": true
+    },
+    {
+      "name": "No physical/provider/model requests, forbidden browser destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7c85f7f82f827cf8454ba42319e72934592fc78bd147e3749083d7d8ab53ac8d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e524007baaac0d2e064a0bf6d11d3030d9acc7a6ee22ac701a8c3808ab23c59a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ba72fceaad14923e7812c4fac7ed82b1e8b6ef8d96175688a4d820ff57079bb3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=d312bac3a8c86e8b8a2bc4d687e0ad6d4ba1eec434b2e8efa434bc417067b195&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "674f470dab485f5c8edc36464bc5090986d50e0af2604cdeb88b1de62e02a952",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=d312bac3a8c86e8b8a2bc4d687e0ad6d4ba1eec434b2e8efa434bc417067b195&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJkMzEyYmFjM2E4Yzg2ZThiOGEyYmM0ZDY4N2UwYWQ2ZDRiYTFlZWM0MzRiMmU4ZWZhNDM0YmM0MTcwNjdiMTk1IiwidGVuYW50IjoiOWM4YTQ0M2M2Y2U0OGY3NTBlNTA5N2E1NGY4MTI2Y2Y5ZWNjYTYzNWM1YjE3YmEyMjJjNjY0Njk3NTFlY2YxYiIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.24aff270dbb3c72ea7e211f32ac87b98281ec44622fbabbbfceaad84e7c26d13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "35ea9fd5e33d04e7175cf1bf5de09cd4d0dd89bf11b236e75c2275f2a9f76f2b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=d312bac3a8c86e8b8a2bc4d687e0ad6d4ba1eec434b2e8efa434bc417067b195&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJkMzEyYmFjM2E4Yzg2ZThiOGEyYmM0ZDY4N2UwYWQ2ZDRiYTFlZWM0MzRiMmU4ZWZhNDM0YmM0MTcwNjdiMTk1IiwidGVuYW50IjoiOWM4YTQ0M2M2Y2U0OGY3NTBlNTA5N2E1NGY4MTI2Y2Y5ZWNjYTYzNWM1YjE3YmEyMjJjNjY0Njk3NTFlY2YxYiIsInVwcGVyIjo2MCwiYmVmb3JlIjoyMH0.f84d1f5e21b7d9ca08212c8a73a4ea73b243e16a056be2396e89f69e0ca8382f",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d88ae668af8aef90350b3f74477bac21bb25e009d987d31e372b1808403ed9ac",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=d312bac3a8c86e8b8a2bc4d687e0ad6d4ba1eec434b2e8efa434bc417067b195&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJkMzEyYmFjM2E4Yzg2ZThiOGEyYmM0ZDY4N2UwYWQ2ZDRiYTFlZWM0MzRiMmU4ZWZhNDM0YmM0MTcwNjdiMTk1IiwidGVuYW50IjoiOWM4YTQ0M2M2Y2U0OGY3NTBlNTA5N2E1NGY4MTI2Y2Y5ZWNjYTYzNWM1YjE3YmEyMjJjNjY0Njk3NTFlY2YxYiIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.24aff270dbb3c72ea7e211f32ac87b98281ec44622fbabbbfceaad84e7c26d13",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "35ea9fd5e33d04e7175cf1bf5de09cd4d0dd89bf11b236e75c2275f2a9f76f2b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1d224b777facd61d5ca5188b867b6e527221fb59f863ba5be57f92605dbbdb25",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-1",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&requestId=f3cb1fb335",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "50b60db96f7cf408ec97e75905f46fcc48cd78a8bcc820bf342ece04674564ac",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-1",
+      "path": "/api/client",
+      "query": "?c=account-ui-1&conversation=d312bac3a8c86e8b8a2bc4d687e0ad6d4ba1eec434b2e8efa434bc417067b195&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "674f470dab485f5c8edc36464bc5090986d50e0af2604cdeb88b1de62e02a952",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "84fcf7c7ccb3efd7d81f75ee4b8a744b53ab6caf3390f44b9761e6ed13c0399b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6eb4adccdfbcf25ae5cafeaad03b13d695e1912dda2164eea76a976cc8dcfcb7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9f70cbdc16ede13e1ab4dc2cd922f4e57417e6bcf348e867648a397ebfea7c9e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=9e1314d464d758dd3634040fc7ffc532a037cf56dc1da5e0d6f8a2a4f9e5ce24&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "807addd73c10ff066a3ac6aae5eaa6ab9eea8e136f25f6f333d8aeef7446160b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=9e1314d464d758dd3634040fc7ffc532a037cf56dc1da5e0d6f8a2a4f9e5ce24&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiI5ZTEzMTRkNDY0ZDc1OGRkMzYzNDA0MGZjN2ZmYzUzMmEwMzdjZjU2ZGMxZGE1ZTBkNmY4YTJhNGY5ZTVjZTI0IiwidGVuYW50IjoiYWEzYjRmMWQ2M2Y0OGQ3YzZjODE2MDExYTU1MzBjNWM2YzY2YWMyNDFmNjdmMDQzOTg0ZDk1OGY3YmUwNGQ0ZCIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.9b35f97ceebc5cc7fe66601d894fcd9414b8aeab07c2abf8bd78943e47bab6d6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "23cefbca71fd356d6e0f47c8ff6da8e19db119fc9a6915738556a4cbae3d85c1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=9e1314d464d758dd3634040fc7ffc532a037cf56dc1da5e0d6f8a2a4f9e5ce24&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiI5ZTEzMTRkNDY0ZDc1OGRkMzYzNDA0MGZjN2ZmYzUzMmEwMzdjZjU2ZGMxZGE1ZTBkNmY4YTJhNGY5ZTVjZTI0IiwidGVuYW50IjoiYWEzYjRmMWQ2M2Y0OGQ3YzZjODE2MDExYTU1MzBjNWM2YzY2YWMyNDFmNjdmMDQzOTg0ZDk1OGY3YmUwNGQ0ZCIsInVwcGVyIjo2MCwiYmVmb3JlIjoyMH0.23c9b7acf0610b5b2a83883b54c45c4dc15ba462aee1f635c88caadcfe833f4c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "74c2f3bb39f20638142190a218a205a57a15ea0beebcc1daa16297af4d368ca6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=9e1314d464d758dd3634040fc7ffc532a037cf56dc1da5e0d6f8a2a4f9e5ce24&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiI5ZTEzMTRkNDY0ZDc1OGRkMzYzNDA0MGZjN2ZmYzUzMmEwMzdjZjU2ZGMxZGE1ZTBkNmY4YTJhNGY5ZTVjZTI0IiwidGVuYW50IjoiYWEzYjRmMWQ2M2Y0OGQ3YzZjODE2MDExYTU1MzBjNWM2YzY2YWMyNDFmNjdmMDQzOTg0ZDk1OGY3YmUwNGQ0ZCIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.9b35f97ceebc5cc7fe66601d894fcd9414b8aeab07c2abf8bd78943e47bab6d6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "23cefbca71fd356d6e0f47c8ff6da8e19db119fc9a6915738556a4cbae3d85c1",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d9f98bc557bfb86855b88e3a8103f53771465d78bf5096ac8146c3520518dfff",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-2",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&requestId=5743a7ff0c",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "651e066985c003d47a4ae6897a627fa6eb4cca1fedef24c9d55c0fee864b45a6",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-2",
+      "path": "/api/client",
+      "query": "?c=account-ui-2&conversation=9e1314d464d758dd3634040fc7ffc532a037cf56dc1da5e0d6f8a2a4f9e5ce24&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "807addd73c10ff066a3ac6aae5eaa6ab9eea8e136f25f6f333d8aeef7446160b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "1e43e0e6fabcb574ff6f1ec17c7a7deeeb2a81185bbd825dfd70ba76c9eb9682",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5c38f1a61ff6c2c58f8a2304bcfca41413e9d45a503443cbe9f38f28db85345f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "70501d925f948d7959d817708fa5adeb997aa1e0d833baeb9ac38ba5c738bff5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&conversation=c1db7ac72c3e015f244fad3313aa54e2df239f57563cf1c6963c44465300aa33&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "46e116e3702b8dd0924a2feabadb3f43b20e5ba8d637c58a537549cbd15708d3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&conversation=c1db7ac72c3e015f244fad3313aa54e2df239f57563cf1c6963c44465300aa33&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJjMWRiN2FjNzJjM2UwMTVmMjQ0ZmFkMzMxM2FhNTRlMmRmMjM5ZjU3NTYzY2YxYzY5NjNjNDQ0NjUzMDBhYTMzIiwidGVuYW50IjoiNWI5MjhkZjUwMDNmN2ExNzNlNmMwMTA5NGM5ODhlNmY4NGY5Y2NmYjE5YjBlZTFhZWJmOWY1YWNjZjQyZjljZSIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.535f4259cb1fa89d6f6017b46851626f5c8b3fba963cc1d675268a45773b400b",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "635a89f6bdca0f1b34a8811fef39c655a4e2d6ec7d95ddaedae9ef9ab5f1f1f8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&conversation=c1db7ac72c3e015f244fad3313aa54e2df239f57563cf1c6963c44465300aa33&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJjMWRiN2FjNzJjM2UwMTVmMjQ0ZmFkMzMxM2FhNTRlMmRmMjM5ZjU3NTYzY2YxYzY5NjNjNDQ0NjUzMDBhYTMzIiwidGVuYW50IjoiNWI5MjhkZjUwMDNmN2ExNzNlNmMwMTA5NGM5ODhlNmY4NGY5Y2NmYjE5YjBlZTFhZWJmOWY1YWNjZjQyZjljZSIsInVwcGVyIjo2MCwiYmVmb3JlIjoyMH0.2b045aeaeb6dbd150898c0afc0948513dc60d4c9a63f2ad697e6f409d8d4b044",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9748005752a97610762c714d1ad610b73f1c3f76a12754602fd213709247da11",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&conversation=c1db7ac72c3e015f244fad3313aa54e2df239f57563cf1c6963c44465300aa33&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJjMWRiN2FjNzJjM2UwMTVmMjQ0ZmFkMzMxM2FhNTRlMmRmMjM5ZjU3NTYzY2YxYzY5NjNjNDQ0NjUzMDBhYTMzIiwidGVuYW50IjoiNWI5MjhkZjUwMDNmN2ExNzNlNmMwMTA5NGM5ODhlNmY4NGY5Y2NmYjE5YjBlZTFhZWJmOWY1YWNjZjQyZjljZSIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.535f4259cb1fa89d6f6017b46851626f5c8b3fba963cc1d675268a45773b400b",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "635a89f6bdca0f1b34a8811fef39c655a4e2d6ec7d95ddaedae9ef9ab5f1f1f8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "df6d4ae8ca786c41f9da50dfbc3441f9d17e756599d3f0cf525eed5a16012a2b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-3",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&requestId=3061c1f25f",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "d676a23091936866274859de44e1d4dd6e9a56a73585681a07464182ad72456f",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-3",
+      "path": "/api/client",
+      "query": "?c=account-ui-3&conversation=c1db7ac72c3e015f244fad3313aa54e2df239f57563cf1c6963c44465300aa33&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "46e116e3702b8dd0924a2feabadb3f43b20e5ba8d637c58a537549cbd15708d3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6942a90b031ad2b9a53daa12abbcd65ddb924ecb76c3991f4bc8c2a044ef8706",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f55c614cdf4078bb3742aed9f9513860c351196ba5d7d9af28354261232137fb",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2c0e4829da680db13627731032c8546e5e1d268e765011ec3409a814aeca022a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&conversation=9f30d803c1241ff1d3d61cfb88dbddc5b286e1ad6cc86690ad10e808f3a0a2f3&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "62b8397f83ad0d2ca41b190acba5dae50f62690107f05e9a845a6b0fc802a5be",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&conversation=9f30d803c1241ff1d3d61cfb88dbddc5b286e1ad6cc86690ad10e808f3a0a2f3&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiI5ZjMwZDgwM2MxMjQxZmYxZDNkNjFjZmI4OGRiZGRjNWIyODZlMWFkNmNjODY2OTBhZDEwZTgwOGYzYTBhMmYzIiwidGVuYW50IjoiYjY2YmI1ZjYwYjI4MGQxOTFmZDMyMjRlOGUzODYyYTMxMTgwY2ZlZGQwYmI4OWNiYTAzYzMxNDYyYWFlOTI1MCIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.7edfff5bbdfe09b17640cd7c1f2179c017b7a3f3df901fd6eab443ea9b59b2aa",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 503,
+      "fixture": "read-503"
+    },
+    {
+      "slug": "account-ui-4",
+      "path": "/api/client",
+      "query": "?c=account-ui-4&conversation=9f30d803c1241ff1d3d61cfb88dbddc5b286e1ad6cc86690ad10e808f3a0a2f3&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiI5ZjMwZDgwM2MxMjQxZmYxZDNkNjFjZmI4OGRiZGRjNWIyODZlMWFkNmNjODY2OTBhZDEwZTgwOGYzYTBhMmYzIiwidGVuYW50IjoiYjY2YmI1ZjYwYjI4MGQxOTFmZDMyMjRlOGUzODYyYTMxMTgwY2ZlZGQwYmI4OWNiYTAzYzMxNDYyYWFlOTI1MCIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.7edfff5bbdfe09b17640cd7c1f2179c017b7a3f3df901fd6eab443ea9b59b2aa",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "a55bda21d80b1e507d5805415151da2646dd826995c8271c62bcba9485ff1d93",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "cd54021cf95bb3eadebd38444f5924c6ac973f842b6e21cc15cd62847684268e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8f1d2ad79226497f59de0df5bca4e70eecb7e118f028d182754c3dce933ade14",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "0869bfe3b88295ffdf788139806715ff08ea3110f1dc4fb67dc11f6f7b1c2026",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-5",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&conversation=b9415d9d4f7b94be782cc0443d21afd4605250976782b1b8eb9e0e83b7b1faf1&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f217b7a39013ffecae3370ea45e1cdf2160a0a56b80dfdcd17e19dd7c7b3e05c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-5",
+      "path": "/api/client",
+      "query": "?c=account-ui-5&conversation=b9415d9d4f7b94be782cc0443d21afd4605250976782b1b8eb9e0e83b7b1faf1&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJiOTQxNWQ5ZDRmN2I5NGJlNzgyY2MwNDQzZDIxYWZkNDYwNTI1MDk3Njc4MmIxYjhlYjllMGU4M2I3YjFmYWYxIiwidGVuYW50IjoiOGUzZjVjNDVlYzE1NWI2YzhhMTI0MmQ4MDQ4Njc0OTE3MDZjNTk3NGIxYzkxYTdjMTU0ZTU1YjI0NzFmYTFhYiIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.8ed9b7f153fd9ee88af52340e73a8803891c3260581dfd63a25c4dd256924c66",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "683d32161582f38933bf9ee6a4af30c82f18e94f1fddad38811ed77888cd9459",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "7ef51ba264df7f507e6a54c4f759c7eedb82b3277a969eb80f025e7776cdfb24",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "dd3fa7351a04f2130720bce1948a6f31de8b89a0c3c9ff22ada9d8a336f9bc94",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "5ca61b991ff237aad417e82b4c81d8a2618e6d8e8453f53623a30edba24e6d4a",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-6",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&conversation=0964e5a6c51875fcb1567457d71c4e751cc81675c27c5e935c1ed0370d41fa1b&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "b88513804351e6880d8e723f1ee06431f11f54bbdd82bc33be66829786dc952d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-6",
+      "path": "/api/client",
+      "query": "?c=account-ui-6&conversation=0964e5a6c51875fcb1567457d71c4e751cc81675c27c5e935c1ed0370d41fa1b&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiIwOTY0ZTVhNmM1MTg3NWZjYjE1Njc0NTdkNzFjNGU3NTFjYzgxNjc1YzI3YzVlOTM1YzFlZDAzNzBkNDFmYTFiIiwidGVuYW50IjoiZDRmMzMxMWJkNmQxMjQyOTBlNTc1NmIwZmY1NjcyMzg4NzJhOThiNzFmZjY0YTI3N2NlYzc3YTI5MmUxZmFmYyIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.112cc77c3b85abbd55aeb2755e49921d0056ca29b0af764ba35b5bcc9ff4ecfc",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "fixture": "read-401"
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "46320441984cbde65d891a625594e0505a839602c9f5bc2043f9e4692ec67111",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "52d1368294ba27a90d608b43455139d6d7a7bf9e50e87f8677d04f0e9cd3bc9e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4f8e33cba09afc27e12a8e62feb4d2638ab84e2612778d32a2961e91374d8956",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&conversation=daa3433bd51185e30f2345054cd6d7815687068c38d0f32cec31d81ff8d1c801&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "828d7088832d2652f4a9796bdfeead7a4e1c589bb29fc460d3edadfc8f18987b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&conversation=daa3433bd51185e30f2345054cd6d7815687068c38d0f32cec31d81ff8d1c801&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJkYWEzNDMzYmQ1MTE4NWUzMGYyMzQ1MDU0Y2Q2ZDc4MTU2ODcwNjhjMzhkMGYzMmNlYzMxZDgxZmY4ZDFjODAxIiwidGVuYW50IjoiNjA1OTc2NzQ2ZGU5ZDU4ZDdiM2YyNTdiNTIzMDE0ZDU3N2ZjNTQ1ODEyYTUxNGViZDRiZjcxMzQxYjcyZTQ1NSIsInVwcGVyIjo2MCwiYmVmb3JlIjo0MH0.278a878e000a52b9dc11930c9b21a1495a71b516e9e867d642803823c1a2bcb0",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 401,
+      "responseByteSha": "9d8788f7e29d479f2b2bd7108bf0424a1abc80fcf4bcdd65dd5f84fdfb213733",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8844b153875b28d0d345ec0539ab639c1cc279e72ddf8747e27c2c60970c9852",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-7",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-7",
+      "path": "/api/client",
+      "query": "?c=account-ui-7&conversation=daa3433bd51185e30f2345054cd6d7815687068c38d0f32cec31d81ff8d1c801&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "828d7088832d2652f4a9796bdfeead7a4e1c589bb29fc460d3edadfc8f18987b",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "241832d0588dcc6094ddacd12ac84c67b968d7783c161595c5c1bbf1172e1cc5",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "92d0e8f8396c86c687d474a2c7593e7e769a67b45efdb61894a4a881e69613a8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "de6546175f9e082cf49412aa974998ef2d300423577b2b00dbd32d4971af7b93",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "37f2cc694105662606464004e40f0cdc43d6a2e65001ba80d42cd1ba200be6d7",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-8",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&requestId=ee557389b4",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8204c3a6abea3fa396826bc8860e36cfd6255f71beabb0afdd6c4b7accb2a678",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-8",
+      "path": "/api/client",
+      "query": "?c=account-ui-8&conversation=370f3f95fb163857afa11606da170cdc35293240fd7baaad7395e6fc889691cd&conversationContact=corrected",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "2669c83baba1dd86dc6340df8ae760888fe222079ad33e5a4f105ca9114514d8",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e7ddf1b5f3857f7f4b6b06fd677b237bad25bcb7cc47ff5adc137afaf556be3d",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e5cdf4c3d10042545ec8582bc71d2ec7c63e348bf5e7d94920ca51e031aca051",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "e63d2b760f829ac69db854b7ddf49316510b9a9529e3bbd39ca10fae4cf94b3c",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9&conversation=4d274b78074bb1390c962e0e705efa5a01786256dd362de62c90086cc1b8a9cf&conversationContact=old",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "8a23eebb53080458c68ee6cf520e6b2316a228b198e93aa6d180811e1ac9cad9",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "f8b03eb5b4bd24838062a85796bbad3608c87ca00ceb115bf57bc5cba8209c22",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-9",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-9",
+      "path": "/api/client",
+      "query": "?c=account-ui-9&conversation=78f912a3be9e0b942b6a296c72d6abf14e8b0183d7f9ff58c97f3f78c010c633&conversationContact=pending",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "4ffcf10336ba1c4e952b6130d4bc735ad361eef6af7317850c54f8b96b445ccd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "968a2f8cf1742bbb198e50121b3fd60e5b4848b9e4382919433a60dd42cf2274",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "69bdc149782898f2c07b2b593a3c234d350e2a6c370ee7a9dc2d074428b4eb11",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "061d369ddd620f9c0cce6823bb4b4e00e84c56401d1a672eebf58311802b9f2e",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "ad5374091cb30b4849c73848540c5ea7c32fa347f68adf7a9cb4fd37bf1e29fd",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-10",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10&conversation=c62f4fc95071fd4cba92653b543294e001c7cff3bcf3af5ce6295cbb2c059794&conversationContact=visitor",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "9eff9fdf147e2b31a362fc763c5be94d472a37b66bd0538002a6b960c33f0f40",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-10",
+      "path": "/api/client",
+      "query": "?c=account-ui-10&conversation=c62f4fc95071fd4cba92653b543294e001c7cff3bcf3af5ce6295cbb2c059794&conversationContact=visitor&before=eyJ2IjoxLCJyZWYiOiJjNjJmNGZjOTUwNzFmZDRjYmE5MjY1M2I1NDMyOTRlMDAxYzdjZmYzYmNmM2FmNWNlNjI5NWNiYjJjMDU5Nzk0IiwidGVuYW50IjoiNDVkNDdiZDIyZWNmMDYzOWJjOWUzNTA0YjA2NDZiZTc5YjFkOWMyN2M4NmUzOWM4ZWRkZmNlNGZkOTliY2Q1OCIsInVwcGVyIjozMCwiYmVmb3JlIjoxMH0.1247c15d786031358187b6a3b64f04034fc5674947c4d0b8a60890d693dfd286",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "affc54d2f233ee3ac2b9f0c24a9d1705ac4bf215f294f0293e26448e78e7bf24",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "86509a967dce185d11718ca6f46b72197eef39450ab08848a6163d0d96895aac",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/workspace-billing",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": true,
+      "status": 200,
+      "responseByteSha": "6e189cbea03bdd9a33c6b5f8b5e10b5be5821fc39e5c6db0abf031df2eb74e48",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "dad72f4339dbd79595a67d3e431a62b421161d56947ffb8117735298fadacbd3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store",
+        "vary": "Origin, Authorization"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "37de67325d38382c85ffd08055318c24",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "5bd7ffe416ff7b10a98ea779cdd96204",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "4d714dd784cbd1d8d0ff57c9bbe423fd",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "926bbc2da6124bdfdec42ff87b45916a",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "f878f6e1e47459c64ea83d6de9c767b3",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "ff10383d5066835490221ef8257efc67",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "e743f94e6dd9afa412cbc6c1babe4764",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "c53bed9a751577bef3616d00591fd611",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "b4f936384d14a41d9f2f64ed59b2bcee",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "f722249b084ff4d925cd7f50076b5e55",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 0"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 9"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "6e0ef8502f1d4954291aea9899c35dd3",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 1"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 9"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 10"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "8787fe66283ef8a06a9916b015cf567d",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 2"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 9"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 10"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 11"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "0ea76bec4f9f10dcf938a7f395d1c7c7a80a1fa8ec77870aa294a43f4dac83c9",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "450b6cf43a6bd29e4791df28f7500628",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 9"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 10"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 11"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Please save a callback at +17135550142"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "dad72f4339dbd79595a67d3e431a62b421161d56947ffb8117735298fadacbd3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store",
+        "vary": "Origin, Authorization"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "450b6cf43a6bd29e4791df28f7500628",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 3"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 9"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 10"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 11"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Please save a callback at +17135550142"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true,
+        "recoverTurn": true
+      },
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "d65f5598d0edea1be996547370bf29c8172f9ac669a9313525076f7e31aa1efd",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "vary": "Origin",
+        "x-accel-buffering": "no"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/chat",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "client": "account-ui-11",
+        "contact": "wuiahyis4mwaipkn2",
+        "turnId": "c5321c2272a7281324fa5b4a0ba7735d",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Question 4"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 5"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 6"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 7"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 8"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 9"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 10"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Question 11"
+          },
+          {
+            "role": "assistant",
+            "content": "We serve Katy."
+          },
+          {
+            "role": "user",
+            "content": "Please save a callback at +17135550142"
+          },
+          {
+            "role": "assistant",
+            "content": "Your callback request is saved. The shop will confirm next steps."
+          },
+          {
+            "role": "user",
+            "content": "A new question beyond quota"
+          }
+        ],
+        "page": "/widget-host.html",
+        "stream": true
+      },
+      "authPresent": false,
+      "status": 429,
+      "responseByteSha": "eeb2fda526af8cfbce6fe80ad93478deb4f97b880e590f26f62338c57748e6cf",
+      "responseHeaders": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "https://conversation.fixture.invalid",
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      }
+    },
+    {
+      "slug": "account-ui-11",
+      "path": "/api/client",
+      "query": "?c=account-ui-11",
+      "method": "GET",
+      "body": null,
+      "authPresent": false,
+      "status": 200,
+      "responseByteSha": "dad72f4339dbd79595a67d3e431a62b421161d56947ffb8117735298fadacbd3",
+      "responseHeaders": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "netlify-cdn-cache-control": "no-store",
+        "vary": "Origin, Authorization"
+      }
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/claude-widget-reg-r3-conversation-history-conversation-earliest-320.png",
+    "scratchpad/claude-widget-reg-r3-conversation-history-conversation-earliest-390.png",
+    "scratchpad/claude-widget-reg-r3-conversation-history-conversation-earliest-1440.png",
+    "scratchpad/claude-widget-reg-r3-conversation-history-widget-recovered.png"
+  ],
+  "sourceAfter": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "embed.js": "c2377c36abb0dd0f598c47eca308cc727c62fc60272857a5aadcc954abb5344b",
+    "netlify/functions/lib/conversation-reader.mjs": "fae144b69ef5a2aabc8163469035aa996857620a88ab16089a811dd1c1ad4674",
+    "netlify/functions/lib/request-followthrough.mjs": "b49dc1f2cf415ce1d282303b50f89350436ed626f3fdef055174c063dc08c958",
+    "scripts/build-site.mjs": "6890806c988d78da123aeaf5d371a08e96d261c5e209a886e0432a9329f5f255",
+    "scripts/request-followthrough-ui-check.mjs": "4ee5431108b30bc08a7b1d9deb2e2ea54deb5e01b216900e4a002d66fa42a678",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "onboard.css": "f26eeced09b45e6fa21cff22e066614ba1664bddb63c2341ad725cf45583106d",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "desk-connections.js": "e5518ea2229c91f8c7c71603d88264214fe1fdf446a3dcc15268e23ba5a68a95",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/service-connections.mjs": "477c564c4ebd70cacdbec26e95242bbbb626b0e6c3c0937adca1abb58ab626b1",
+    "desk-connections.css": "7d71db802dfe27002da0034a14ef625fe67f8eb0b252c069a2b79109eeceaf41",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/desk.mjs": "028e6651689d9303673deaa69b17e22971774bc548831b15967f524605fd4f83",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a",
+    "netlify/functions/lib/config.mjs": "352e272bd48239b12d5e6144260f5febb0d0f9d202d5c5f3a348caa88ecded0b",
+    "netlify/functions/lib/workspace-identity.mjs": "7ef7122fc33dcef22578bee541e855c7eac0d7a6311f11eff6b7c18ae99e20ea",
+    "netlify/functions/lib/platform-operations.mjs": "7f31fd04495a7a52d6eb0463999ef682be85b07569fe830cca817f47b87cfa15"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}
