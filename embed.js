@@ -28,15 +28,15 @@
   if (!state.contact) state.contact = 'w' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
   function persist() { try { sessionStorage.setItem(STORE, JSON.stringify({ contact: state.contact, transcript: state.transcript.slice(-20), pendingTurn:state.pendingTurn||null })); } catch (e) { /* ignore */ } }
 
-  var css = '#mcDesk{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;font-size:14px;line-height:1.45}' +
+  var css = '#mcDesk{position:fixed;right:16px;bottom:calc(16px + var(--mcd-kb,0px));z-index:2147483000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;font-size:14px;line-height:1.45}' +
     '#mcDesk *{box-sizing:border-box}' +
     '#mcDesk .l{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border:0;border-radius:999px;background:#2563EB;color:#fff;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 10px 30px rgba(37,99,235,.35)}' +
     '#mcDesk .l i{width:8px;height:8px;border-radius:50%;background:#fff;display:inline-block}' +
-    '#mcDesk .p{position:absolute;right:0;bottom:60px;width:min(370px,calc(100vw - 32px));height:min(540px,calc(100vh - 100px));display:none;flex-direction:column;background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.25);overflow:hidden}' +
+    '#mcDesk .p{position:absolute;right:0;bottom:60px;width:min(370px,calc(100vw - 32px));height:min(540px,calc(var(--mcd-vh,100vh) - 100px));display:none;flex-direction:column;background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.25);overflow:hidden}' +
     '#mcDesk.open .p{display:flex}' +
     '#mcDesk .h{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px;background:#2563EB;color:#fff}' +
     '#mcDesk .h b{display:block;font-size:15px}#mcDesk .h small{opacity:.85;font-size:11px}' +
-    '#mcDesk .x{background:none;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1}' +
+    '#mcDesk .x{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin:-10px -12px -10px 8px;padding:0;background:none;border:0;border-radius:10px;color:#fff;font-size:26px;cursor:pointer;line-height:1}' +
     '#mcDesk .m{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#f9fafb}' +
     '#mcDesk .b{max-width:86%;padding:10px 13px;border-radius:14px;white-space:pre-wrap;word-wrap:break-word}' +
     '#mcDesk .b.u{align-self:flex-end;background:#2563EB;color:#fff;border-bottom-right-radius:4px}' +
@@ -45,24 +45,27 @@
     '#mcDesk .t span{display:inline-block;width:6px;height:6px;margin-right:3px;border-radius:50%;background:#9ca3af;animation:mcdk 1.2s infinite}#mcDesk .t span:nth-child(2){animation-delay:.2s}#mcDesk .t span:nth-child(3){animation-delay:.4s}' +
     '@keyframes mcdk{0%,80%,100%{opacity:.3}40%{opacity:1}}' +
     '#mcDesk form{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e7eb;background:#fff}' +
-    '#mcDesk textarea{flex:1;resize:none;min-height:40px;max-height:110px;padding:10px;border:1px solid #d1d5db;border-radius:10px;font:inherit}' +
+    '#mcDesk textarea{flex:1;resize:none;min-height:40px;max-height:110px;padding:10px;border:1px solid #d1d5db;border-radius:10px;font:inherit;font-size:16px}' +
     '#mcDesk button.s{padding:0 16px;border:0;border-radius:10px;background:#2563EB;color:#fff;font-weight:600;cursor:pointer}' +
     '#mcDesk button.s:disabled{background:#dbe2ee;color:#69788e;cursor:not-allowed;box-shadow:none}' +
     '#mcDesk .recovery{padding:8px 12px;background:#edf4ff}#mcDesk .recover-reply{padding:8px 12px;border:1px solid #c9d7eb;border-radius:8px;background:white;color:#214ca8;cursor:pointer}'+
+    '#mcDesk .cfg{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;background:#edf4ff;border-top:1px solid #d8e4f5}#mcDesk .cfg[hidden]{display:none}#mcDesk .cfg p{flex:1 1 160px;margin:0;font-size:12px;color:#233f65}#mcDesk .cfg button{min-height:44px;padding:8px 14px;border:1px solid #c9d7eb;border-radius:8px;background:#fff;color:#214ca8;font:inherit;font-weight:600;cursor:pointer}#mcDesk .cfg button[aria-disabled=true]{opacity:.6;cursor:wait}' +
+    '#mcDesk .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}#mcDesk :focus-visible{outline:2px solid #1d4ed8;outline-offset:2px}#mcDesk .h :focus-visible{outline-color:#fff}' +
     '#mcDesk .f{margin:0;padding:0 12px 8px;font-size:10px;color:#6b7280;background:#fff}' +
     '#mcDesk .check{padding:12px 14px;background:#edf4ff;border-bottom:1px solid #d8e4f5;color:#233f65;font-size:12px}#mcDesk .check b{display:block;margin-bottom:5px}#mcDesk .check p{margin:5px 0;line-height:1.5}#mcDesk .check button,#mcDesk .check a{font:inherit;min-height:32px;padding:6px 9px;margin:5px 6px 0 0;border:1px solid #c9d7eb;border-radius:8px;background:#fff;color:#214ca8;cursor:pointer}#mcDesk .check button:disabled{opacity:.6;cursor:wait}' +
-    '#mcDesk .followup{margin:10px 0;padding:14px;background:#f3f7ff;border:1px solid #d8e4f5;border-radius:12px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}#mcDesk .followup h3{font-size:14px;margin:0 0 8px}#mcDesk .followup h4{font-size:12px;margin:14px 0 5px}#mcDesk .followup p{margin:8px 0}#mcDesk .followup a.sms,#mcDesk .followup button{display:inline-flex;align-items:center;min-height:44px;margin:5px 6px 5px 0;padding:8px 10px;border:1px solid #b7cbea;border-radius:8px;background:#fff;color:#214ca8;font:inherit;text-decoration:none;cursor:pointer}#mcDesk .followup .invitation-status{font-size:11px}#mcDesk .followup summary{cursor:pointer;color:#214ca8}#mcDesk .followup select{display:block;width:100%;min-height:40px;margin:5px 0;padding:6px;font:inherit;border:1px solid #b7cbea;border-radius:6px}'+
-    '@media(max-width:480px){#mcDesk .p{position:fixed;left:8px;right:8px;bottom:70px;width:auto;height:min(76vh,600px)}}';
+    '#mcDesk .followup{margin:10px 0;padding:14px;background:#f3f7ff;border:1px solid #d8e4f5;border-radius:12px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}#mcDesk .followup h3{font-size:14px;margin:0 0 8px}#mcDesk .followup h4{font-size:12px;margin:14px 0 5px}#mcDesk .followup p{margin:8px 0}#mcDesk .followup a.sms,#mcDesk .followup button{display:inline-flex;align-items:center;min-height:44px;margin:5px 6px 5px 0;padding:8px 10px;border:1px solid #b7cbea;border-radius:8px;background:#fff;color:#214ca8;font:inherit;text-decoration:none;cursor:pointer}#mcDesk .followup .invitation-status{font-size:11px}#mcDesk .followup summary{cursor:pointer;color:#214ca8}#mcDesk .followup select{display:block;width:100%;min-height:40px;margin:5px 0;padding:6px;font:inherit;font-size:16px;border:1px solid #b7cbea;border-radius:6px}'+
+    '@media(max-width:480px){#mcDesk .p{position:fixed;left:8px;right:8px;bottom:calc(70px + var(--mcd-kb,0px));width:auto;height:min(76vh,600px,calc(var(--mcd-vh,100vh) - 86px))}}';
   var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
   var root = document.createElement('div'); root.id = 'mcDesk';
   root.innerHTML = '<button type="button" class="l" aria-expanded="false"><i></i><span>Chat with us</span></button>' +
     '<section class="p" role="dialog" aria-label="Chat"><header class="h"><div><b>Front desk</b><small>Automated front desk</small></div><button type="button" class="x" aria-label="Close">&times;</button></header>' +
-    '<div class="m"></div><form><textarea rows="1" maxlength="1500" placeholder="Type your message" aria-label="Your message" required disabled></textarea><button type="submit" class="s" disabled>Send</button></form>' +
-    '<div class="recovery" hidden><p class="f" role="status">The previous reply is unconfirmed. Check its saved answer before sending the request again.</p><button type="button" class="recover-reply">Check previous reply</button></div><p class="f">For urgent help, use the shop’s contact details on this website.</p></section>';
+    '<div class="m"></div><div class="cfg" hidden><p>Chat didn’t load. Check your connection, then try again.</p><button type="button" class="retry-config">Try again</button></div><form><textarea rows="1" maxlength="1500" placeholder="Type your message" aria-label="Your message" required disabled></textarea><button type="submit" class="s" disabled>Send</button></form>' +
+    '<div class="recovery" hidden><p class="f" role="status">The previous reply is unconfirmed. Check its saved answer before sending the request again.</p><button type="button" class="recover-reply">Check previous reply</button></div><p class="f">For urgent help, use the shop’s contact details on this website.</p><p class="sr" role="status" aria-live="polite" aria-atomic="true"></p></section>';
   document.body.appendChild(root);
   var launcher = root.querySelector('.l'), panel = root.querySelector('.p'), list = root.querySelector('.m'), form = root.querySelector('form'), input = root.querySelector('textarea'), sendBtn = root.querySelector('.s');
-  var recovery=root.querySelector('.recovery'),recoverButton=root.querySelector('.recover-reply');
+  var recovery=root.querySelector('.recovery'),recoverButton=root.querySelector('.recover-reply'),closeButton=root.querySelector('.x'),liveRegion=root.querySelector('.sr[role="status"]');
+  var cfgRow=root.querySelector('.cfg'),cfgText=cfgRow.querySelector('p'),cfgButton=cfgRow.querySelector('button'),configState='loading',configLoading=false,retryTimer=null,retryAt=0,autoRetries=0,RETRY_DELAYS=[4000,12000,25000],lastConfigRead=0,notBefore=0,controlsTimer=null,everOpened=false,busyConfig=false,notice=null,fallbackFocus=null,focusIntent=null,lastPanelFocus=null;
   var checkBanner=null,checkMessage=null,checkStatusButton=null,checkAckButton=null,sampleButton=null,sampleDetails={service:'',area:''};
   var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?', available: false };
   var busy = false, rendered = false, configSequence = 0;
@@ -93,9 +96,25 @@
     link.className='sms';link.textContent='Open text';copy.type='button';copy.textContent='Copy instructions';copy.addEventListener('click',async function(){var text='From '+value.phone+', text '+choice.command+' to '+value.number+' to ask '+value.business+' for one '+(choice.purpose==='quote_followup'?'quote':'request')+' follow-up. Answer the separate permission question to agree.';try{await navigator.clipboard.writeText(text);status.textContent='Instructions copied. Your texting permission has not changed.';}catch(error){status.textContent='Select and copy: '+text;}});
     scope.textContent='Opening a text sends nothing. Send this request, then answer the separate permission question.';summary.textContent='How permission works';disclosure.textContent='You choose one follow-up for this exact request by replying YES with its purpose and reference to the separate text question. No promotions. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end. Service is available without texts.';[['terms','Texting terms'],['privacy','Privacy']].forEach(function(item,index){if(index)policies.appendChild(document.createTextNode(' · '));var policy=document.createElement('a');policy.href=BASE+'/policy?c='+encodeURIComponent(slug)+'&page='+item[0];policy.target='_blank';policy.rel='noopener noreferrer';policy.textContent=item[1];policies.appendChild(policy);});details.append(summary,disclosure,policies);status.className='invitation-status';status.setAttribute('role','status');decline.type='button';decline.textContent='Continue without texts';decline.addEventListener('click',function(){if(entry){entry.followupDismissed=true;persist();}card.remove();input.focus();});selected();card.append(instructions,link,copy,scope,details,decline,status);list.appendChild(card);list.scrollTop=list.scrollHeight;
   }
-  function render() { list.innerHTML = ''; add('a', cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); if(m.role==='assistant'){appointmentTexts(m.appointmentTexts);followupTexts(m.followupTexts,m);} }); rendered = true; }
+  function render() { list.innerHTML = ''; add('a', notice || cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); if(m.role==='assistant'){appointmentTexts(m.appointmentTexts);followupTexts(m.followupTexts,m);} }); rendered = true; }
 
-  function unavailable(message) { configReady=false;cfg.available = false; cfg.greeting = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true;recovery.hidden=!!setupCheck||!state.pendingTurn; if (rendered) render(); }
+  function unavailable(message) { configReady=false;cfg.available = false; notice = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true;recovery.hidden=!!setupCheck||!state.pendingTurn; if (rendered) render(); cfgControls(); }
+  // Screen-reader announcements go through one persistent polite region; streamed deltas are not announced piecemeal.
+  function announce(text){liveRegion.textContent='';if(text)setTimeout(function(){liveRegion.textContent=text;},30);}
+  // The button is only unavailable while a read is in flight. During a 429 back-off a press schedules the read for when the
+  // back-off ends, so the copy only promises an automatic retry while one is actually scheduled.
+  function cfgControls(){var waiting=Date.now()<notBefore;clearTimeout(controlsTimer);controlsTimer=null;cfgRow.hidden=configState!=='failed';cfgButton.setAttribute('aria-disabled',configLoading?'true':'false');
+    cfgText.textContent=configLoading?'Trying again…':!busyConfig?'Chat didn’t load. Check your connection, then try again.':retryTimer?'Chat is busy right now. We’ll try again automatically.':waiting?'Chat is busy right now. Try again in a few minutes.':'Chat is busy right now. Try again in a minute.';
+    if(configState==='failed'&&busyConfig&&waiting&&!retryTimer)controlsTimer=setTimeout(cfgControls,notBefore-Date.now()+50);}
+  function focusFirst(){fallbackFocus=null;if(!input.disabled){input.focus();return;}var target=!cfgRow.hidden?cfgButton:!recovery.hidden&&!recoverButton.disabled?recoverButton:closeButton;target.focus();if(target===closeButton)fallbackFocus=closeButton;}
+  // Focus is re-homed only while the customer is working in the panel (their last focus or pointer was inside it)
+  // and the control they were on disappeared or became disabled. Focus on the host page or its body is never pulled into the widget.
+  function focusGone(node){return !node||!node.isConnected||node.disabled||!!node.closest('[hidden]')||!node.getClientRects().length;}
+  function keepFocus(){if(!root.classList.contains('open')||focusIntent!=='panel')return;var active=document.activeElement;
+    if(active&&active!==document.body){if(root.contains(active)&&(active===fallbackFocus&&!input.disabled||focusGone(active)))focusFirst();return;}
+    if(focusGone(lastPanelFocus))focusFirst();}
+  document.addEventListener('focusin',function(event){focusIntent=root.contains(event.target)?'panel':'host';if(focusIntent==='panel')lastPanelFocus=event.target;},true);
+  document.addEventListener('pointerdown',function(event){focusIntent=root.contains(event.target)?'panel':'host';},{capture:true,passive:true});
   function checkNote(text){if(checkMessage)checkMessage.textContent=text;}
   function checkControls(){var available=configReady&&(!setupCheck&&!setupInvalid||checkReady&&!setupCheck.pending);recovery.hidden=!!setupCheck||!state.pendingTurn;recoverButton.disabled=busy;if(!setupCheck&&state.pendingTurn)available=false;cfg.available=!!available;input.disabled=!available;sendBtn.disabled=busy||!available;if(sampleButton)sampleButton.disabled=!available;}
   function checkPayload(action,extra){return Object.assign({action:action,client:slug,checkId:setupCheck.id,challenge:setupCheck.challenge},extra||{});}
@@ -116,24 +135,39 @@
   }
   async function refreshConfig() {
     var sequence=++configSequence,controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);
+    clearTimeout(retryTimer);retryTimer=null;lastConfigRead=Date.now();configLoading=true;cfgControls();
     try {
       var response=await fetch(BASE+'/api/client?c='+encodeURIComponent(slug),{cache:'no-store',signal:controller.signal});
-      if(!response.ok)throw new Error('unavailable');var d=await response.json();
+      if(!response.ok){var failure=new Error('unavailable');failure.closed=response.status===404;if(response.status===429)failure.retryAfter=retryAfterMs(response.headers.get('Retry-After'));throw failure;}var d=await response.json();
       if(!d||!d.name)throw new Error('unavailable');if(sequence!==configSequence)return;
       cfg.name=d.name;cfg.greeting=d.greeting||cfg.greeting;root.querySelector('.h b').textContent=cfg.name;
-      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){unavailable();return;}
-      configReady=true;checkControls();if(rendered)render();
-    }catch(error){if(sequence===configSequence)unavailable();}
-    finally{clearTimeout(timeout);}
+      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){configState='closed';unavailable();return;}
+      var recovered=configState==='failed';configState='ready';autoRetries=0;notBefore=0;busyConfig=false;notice=null;
+      configReady=true;checkControls();if(rendered)render();if(recovered&&root.classList.contains('open'))announce('Chat is ready.');
+    }catch(error){if(sequence===configSequence){configState=error&&error.closed?'closed':'failed';
+      // 429: honour Retry-After (at least 30s, at most 10 min) for every kind of read, including the customer's own retry.
+      busyConfig=!!(error&&error.retryAfter);if(busyConfig)notBefore=Date.now()+error.retryAfter;unavailable();
+      // Automatic re-reads start only after the customer has opened chat, are jittered and stop after three.
+      if(configState==='failed'){if(root.classList.contains('open'))announce(busyConfig?'Chat is busy right now.':'Chat didn’t load. You can try again.');if(everOpened&&autoRetries<RETRY_DELAYS.length){scheduleConfig(Math.max(notBefore-Date.now(),Math.round(RETRY_DELAYS[autoRetries]*(0.8+Math.random()*0.4))));autoRetries++;}}}}
+    finally{clearTimeout(timeout);if(sequence===configSequence){configLoading=false;cfgControls();keepFocus();}}
   }
+  function retryAfterMs(value){var seconds=/^\d+$/.test(value||'')?Number(value):value?(Date.parse(value)-Date.now())/1000:NaN;return Math.min(600000,Math.max(30000,isFinite(seconds)?seconds*1000:60000));}
+  function scheduleConfig(delay){var at=Date.now()+Math.max(0,delay);if(retryTimer&&retryAt<=at)return;clearTimeout(retryTimer);retryAt=at;retryTimer=setTimeout(function(){retryTimer=null;if(configState==='failed'&&!configLoading)refreshConfig();else cfgControls();},Math.max(0,delay));cfgControls();}
+  // Open and reconnect re-read at most once per 5s (and never before a 429 Retry-After); the button skips the 5s spacing only.
+  function retryConfig(reason){if(configState!=='failed'||configLoading)return;if(reason!=='button'&&!everOpened)return;var wait=Math.max(notBefore-Date.now(),reason==='button'?0:lastConfigRead+5000-Date.now());if(wait<=0)refreshConfig();else scheduleConfig(wait);}
+  cfgButton.addEventListener('click',function(){retryConfig('button');});
+  window.addEventListener('online',function(){retryConfig('online');});
   refreshConfig();
 
-  function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); if (!rendered) render(); setTimeout(function () { input.focus(); }, 50); }
-  function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); launcher.focus(); }
-  root.addEventListener('keydown',function(event){if(event.key==='Escape'&&root.classList.contains('open')){event.preventDefault();close();}});
+  function fitViewport(){var view=window.visualViewport;if(!view||!root.classList.contains('open')||Math.abs((view.scale||1)-1)>0.01){root.style.removeProperty('--mcd-kb');root.style.removeProperty('--mcd-vh');return;}root.style.setProperty('--mcd-kb',Math.max(0,Math.round(window.innerHeight-view.height-view.offsetTop))+'px');root.style.setProperty('--mcd-vh',Math.round(view.height)+'px');}
+  if(window.visualViewport){window.visualViewport.addEventListener('resize',fitViewport);window.visualViewport.addEventListener('scroll',fitViewport);}
+  function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); fitViewport(); if (!rendered) render(); everOpened=true; focusIntent='panel'; retryConfig('open'); setTimeout(function () { var active=document.activeElement; if(root.classList.contains('open')&&focusIntent==='panel'&&(!active||active===document.body||root.contains(active)))focusFirst(); }, 50); }
+  function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); fitViewport(); launcher.focus(); }
+  // Non-modal panel: Tab moves on to the host page as usual. Esc closes (not while an IME composition is open).
+  root.addEventListener('keydown',function(event){if(!root.classList.contains('open')||event.isComposing||event.keyCode===229)return;if(event.key==='Escape'){event.preventDefault();close();}});
   launcher.addEventListener('click', function () { root.classList.contains('open') ? close() : open(); });
-  root.querySelector('.x').addEventListener('click', close);
-  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+  closeButton.addEventListener('click', close);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); form.requestSubmit(); } });
   function sendMessage(recover) {
     var text = input.value.trim(); if (busy || (!recover && (!text || !cfg.available || input.disabled)) || (recover && (!state.pendingTurn?.request || setupCheck))) return;
     if(setupCheck){var bytes=new Uint8Array(16);crypto.getRandomValues(bytes);setupCheck.pending={id:Array.from(bytes).map(function(value){return value.toString(16).padStart(2,'0');}).join(''),completionRef:null,record:null};persistCheck();}
@@ -151,13 +185,13 @@
     });
     function bounded(promise) { return Promise.race([promise, deadline]); }
     function delta(t) { if (!bubble) { tp.remove(); bubble = add('a', ''); } full += t; bubble.textContent = full; list.scrollTop = list.scrollHeight; }
-    function finish(reply,events) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true;state.pendingTurn=null; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; var invitation=Array.isArray(events)&&events.find(function(event){return event.type==='booking'&&event.appointmentTexts;}),followup=Array.isArray(events)&&events.find(function(event){return event.type==='lead'&&event.followupTexts;}),entry={ role: 'assistant', content: reply, ...(invitation?{appointmentTexts:invitation.appointmentTexts}:{}),...(followup?{followupTexts:followup.followupTexts}:{}) };state.transcript.push(entry);if(invitation)appointmentTexts(invitation.appointmentTexts);if(followup)followupTexts(followup.followupTexts,entry);persist();if(setupCheck){var receipt=Array.isArray(events)&&events.find(function(event){return event.type==='website_check'&&event.checkId===setupCheck.id&&event.turnId===setupCheck.pending?.id&&/^[a-f0-9]{64}$/.test(event.completionRef||'');});if(receipt){setupCheck.pending.completionRef=receipt.completionRef;setupCheck.pending.record=receipt.record||null;persistCheck();acknowledgeCheck();}else checkNote('The answer arrived, but this check has no matching receipt. Check the saved outcome in your workspace.');} }
-    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status');if(setupCheck)checkNote('The reply was interrupted. Your request may already be saved; check its status before sending it again.'); }
+    function finish(reply,events) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true;state.pendingTurn=null; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; announce(reply); var invitation=Array.isArray(events)&&events.find(function(event){return event.type==='booking'&&event.appointmentTexts;}),followup=Array.isArray(events)&&events.find(function(event){return event.type==='lead'&&event.followupTexts;}),entry={ role: 'assistant', content: reply, ...(invitation?{appointmentTexts:invitation.appointmentTexts}:{}),...(followup?{followupTexts:followup.followupTexts}:{}) };state.transcript.push(entry);if(invitation)appointmentTexts(invitation.appointmentTexts);if(followup)followupTexts(followup.followupTexts,entry);persist();if(setupCheck){var receipt=Array.isArray(events)&&events.find(function(event){return event.type==='website_check'&&event.checkId===setupCheck.id&&event.turnId===setupCheck.pending?.id&&/^[a-f0-9]{64}$/.test(event.completionRef||'');});if(receipt){setupCheck.pending.completionRef=receipt.completionRef;setupCheck.pending.record=receipt.record||null;persistCheck();acknowledgeCheck();}else checkNote('The answer arrived, but this check has no matching receipt. Check the saved outcome in your workspace.');} }
+    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status');announce(text);if(setupCheck)checkNote('The reply was interrupted. Your request may already be saved; check its status before sending it again.'); }
     function release() {
       clearTimeout(timer);
       // A terminal packet completes the turn; do not wait indefinitely for the connection to close.
       if (reader) { try { var cancelled = reader.cancel(); if (cancelled && cancelled.catch) cancelled.catch(function () {}); } catch (e) { /* already closed */ } }
-      busy = false;checkControls();if(root.classList.contains('open')){if(!input.disabled)input.focus();else if(setupCheck&&checkStatusButton&&!checkStatusButton.disabled)checkStatusButton.focus();else if(bubble){bubble.tabIndex=-1;bubble.focus();}}
+      busy = false;checkControls();var active=document.activeElement;if(root.classList.contains('open')&&focusIntent==='panel'&&(active&&active!==document.body?root.contains(active):focusGone(lastPanelFocus)||form.contains(lastPanelFocus))){if(!input.disabled)input.focus();else if(setupCheck&&checkStatusButton&&!checkStatusButton.disabled)checkStatusButton.focus();else if(bubble){bubble.tabIndex=-1;bubble.focus();}}
     }
     var body;
     if(recover)body=Object.assign({},state.pendingTurn.request,{recoverTurn:true});
