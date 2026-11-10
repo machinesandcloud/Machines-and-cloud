@@ -1,0 +1,13 @@
+Each control is the revision-3 patched tree with one change (or an older revision); owner-notes-check.mjs must exit 1 on every one.
+negative         base vs base (no patch at all)
+mutA             unrelated prompt wording: "the only prices you may state" -> "may quote"
+mutE             QA's mutant E: neutralOwnerNotes reduced to a case- and space-sensitive strip /<\/?owner_private_notes>/g
+mutLtLoose       QA r2's mLtLoose (N7): U+2329 U+3008 U+27E8 removed from the opening-bracket map
+mutEntLoose      N1 regression: entity regex back to ";?" (no semicolon required), as in revision 2
+mutNFKC          N5 regression: NFKC + invisible-character removal put back on the output, as in revision 2
+mutNoName        N3 regression: no fence-name rewrite inside the notes
+mutRule2         N6 regression: revision-2 rule text
+mutBuildBlanket  N2 regression: revision-2 build sentence (blanket no-copy ban)
+mutT             Thumbtack left unfenced (lib/platform-ai-proposal.mjs as base)
+mutR2            revision 2 (HEAD a392d891 patch) applied to base
+mutR1            revision 1 (61e9184b patch) applied to base
