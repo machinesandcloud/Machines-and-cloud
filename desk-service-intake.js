@@ -9,7 +9,12 @@
   var slug = new URLSearchParams(location.search).get('c');
   var names = {voice:'Phone answering',sms:'Two-way texting',web:'Website chat',calendar:'Google Calendar'};
   var phases = {voice:['Call routing','Connection approval'],sms:['Business identity','Registered address','Your representative','Connection approval'],web:['Website details','Install and check'],calendar:['Your Google account','Access review','Calendar delivery']};
-  function session() { try { return sessionStorage.getItem('mc-onboarding-session-v1'); } catch (_) { return null; } }
+  // desk.js keeps the signed-in session in memory once it is read at load, so its own saves keep working when the
+  // browser later blocks storage. Use the same in-memory session here. Storage stays the identity check while it can
+  // be read: a removed or different session there stops this workbench for good. Expiry and sign-out clear it too.
+  function storedSession() { try { return sessionStorage.getItem('mc-onboarding-session-v1'); } catch (_) { return undefined; } }
+  var owner = storedSession() || null;
+  function session() { var stored=storedSession();if(stored!==undefined&&stored!==owner)owner=null;return owner; }
   function current() { return data && session() && document.body.dataset.workspaceState === 'ready'; }
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   function facts() { return data && data.serviceIntake; }
@@ -182,6 +187,6 @@
   document.addEventListener('mc:desk',function(event){data=event.detail;});
   document.addEventListener('mc:service-intake-open',function(event){var id=event.detail?.service;if(!names[id])return;document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'setup'}}));document.dispatchEvent(new CustomEvent('mc:guide-select',{detail:{service:id}}));open(id);});
   function clear(){epoch++;opening++;states={};data=null;$('serviceIntakeWorkbench')?.remove();host?.classList.remove('has-service-intake');}
-  document.addEventListener('mc:session-expired',clear);$('deskSignOut')?.addEventListener('click',clear);
+  document.addEventListener('mc:session-expired',function(){owner=null;clear();});$('deskSignOut')?.addEventListener('click',function(){owner=null;clear();});
   window.MCServiceIntake={mount:mount,open:open,isOpen:function(id){return states[id]?.open===true;},close:function(){var s=state();if(s){snapshot();s.open=false;}host?.classList.remove('has-service-intake');$('serviceIntakeWorkbench')?.remove();}};
 })();
